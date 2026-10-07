@@ -47,11 +47,14 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
       <div data-hero-ink-fade="true" className="relative overflow-visible">
         <div className="pointer-events-none absolute inset-x-[2%] inset-y-[4%] bg-[radial-gradient(ellipse_at_center,rgba(207,152,60,0.14),transparent_68%)] blur-3xl dark:bg-[radial-gradient(ellipse_at_center,rgba(207,152,60,0.11),transparent_70%)]" />
 
-        <div data-hero-lifecycle-visual="true" className="relative -mx-3 h-[220px] overflow-hidden sm:-mx-5 sm:h-[260px] xl:absolute xl:-inset-x-[4%] xl:-inset-y-[3%] xl:h-auto [mask-image:radial-gradient(ellipse_94%_88%_at_54%_48%,black_52%,transparent_100%)] xl:[mask-image:radial-gradient(ellipse_96%_90%_at_55%_48%,black_58%,transparent_100%)]">
+        <div data-hero-lifecycle-visual="true" className="relative -mx-3 h-[220px] overflow-hidden sm:-mx-5 sm:h-[260px] xl:absolute xl:bottom-[-3%] xl:left-0 xl:right-[-4%] xl:top-[-3%] xl:h-auto [mask-image:radial-gradient(ellipse_94%_88%_at_54%_48%,black_52%,transparent_100%)] xl:[mask-image:radial-gradient(ellipse_96%_90%_at_55%_48%,black_58%,transparent_100%)]">
           <Image src="/images/hero-agro-execution-v2.webp" alt="Indian agro-trade execution from crop sourcing and documentation through quality testing, packaging, warehousing, inland transport, and port delivery" fill priority sizes="(max-width: 1023px) 100vw, 62vw" className="object-cover object-center opacity-80 saturate-[0.9] contrast-[0.98] dark:opacity-58 dark:saturate-[0.72]" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/8 via-transparent to-background/60 dark:from-slate-950/12 dark:via-transparent dark:to-slate-950/72" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/42 via-transparent to-background/6 dark:from-slate-950/48 dark:via-transparent dark:to-slate-950/10" />
           <div className="absolute inset-0 opacity-30 mix-blend-multiply [background-image:radial-gradient(circle_at_35%_42%,rgba(153,102,31,0.18),transparent_34%),radial-gradient(circle_at_72%_58%,rgba(153,102,31,0.12),transparent_38%)] dark:mix-blend-screen" />
+          <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background via-background/38 to-transparent dark:from-slate-950 dark:via-slate-950/42" />
+          <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-background via-background/32 to-transparent dark:from-slate-950 dark:via-slate-950/38" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/42 to-transparent dark:from-slate-950 dark:via-slate-950/48" />
         </div>
 
         <div className="relative px-5 pb-6 sm:px-7 sm:pb-7 xl:h-[550px] xl:p-0">

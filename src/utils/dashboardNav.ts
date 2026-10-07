@@ -71,6 +71,7 @@ export const getDashboardSidebarSections = (
       "Execute",
       "Services",
       "Company & Account",
+      "Support",
     ];
 
     return groupOrder

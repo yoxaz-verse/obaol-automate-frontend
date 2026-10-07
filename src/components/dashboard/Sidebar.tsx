@@ -242,28 +242,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 })}
             </div>
 
-            {/* System Identity Footer */}
-            <div className="px-6 py-8 border-t db-border-subtle">
-                {!isCollapsed ? (
-                    <div className="flex flex-col gap-4">
-                        <div className="flex items-center justify-between">
-                           <span className="text-[8px] font-black text-default-400 uppercase tracking-widest leading-none">Workspace available</span>
-                           <div className="flex gap-1">
-                              <div className="w-1 h-3 bg-success-500/40 rounded-full" />
-                              <div className="w-1 h-3 bg-success-500/40 rounded-full" />
-                              <div className="w-1 h-3 bg-success-500 animate-pulse rounded-full" />
-                           </div>
-                        </div>
-                        <p className="text-[9px] text-default-400 font-bold uppercase tracking-[0.2em] italic opacity-60">
-                             &copy; {new Date().getFullYear()} OBAOL
-                        </p>
-                    </div>
-                ) : (
-                    <div className="flex justify-center">
-                        <div className="w-1 h-8 bg-gradient-to-b from-transparent via-obaol-500/20 to-transparent rounded-full" />
-                    </div>
-                )}
-            </div>
         </div>
     );
 };

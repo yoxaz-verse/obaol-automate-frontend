@@ -88,6 +88,13 @@ test("Customer Support is limited to Associates and Admins", () => {
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Team" }), false);
 });
 
+test("Associate sidebar routes use the requested account and support groups", () => {
+  assert.equal(getDashboardRoute("/dashboard/catalog")?.taskGroup, "Company & Account");
+  assert.equal(getDashboardRoute("/dashboard/settings")?.taskGroup, "Company & Account");
+  assert.equal(getDashboardRoute("/dashboard/guidance")?.taskGroup, "Support");
+  assert.equal(getDashboardRoute("/dashboard/customer-support")?.taskGroup, "Support");
+});
+
 test("SERVICE Associates receive both contact-based service directories", () => {
   const links = new Set(getAccessibleDashboardRoutes({
     role: "Associate",

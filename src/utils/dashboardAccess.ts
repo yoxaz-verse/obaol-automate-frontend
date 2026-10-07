@@ -24,7 +24,7 @@ export const DASHBOARD_ADMIN_GROUP_ORDER: DashboardNavGroup[] = [
 ];
 
 export type DashboardJourneyStage = "overview" | "discover" | "negotiate" | "sample" | "execute" | "service" | "organize" | "administer";
-export type DashboardTaskGroup = "Home" | "Discover" | "Buy" | "Sell" | "Execute" | "Services" | "Company & Account" | "Operations/Admin";
+export type DashboardTaskGroup = "Home" | "Discover" | "Buy" | "Sell" | "Execute" | "Services" | "Company & Account" | "Support" | "Operations/Admin";
 
 export type DashboardRouteDefinition = {
   path: string;
@@ -62,7 +62,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/rejected", label: "Access status", section: "Overview", roles: ["associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
 
   { path: "/dashboard/product", label: "My Trade Listings", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: SELLING_MODES, nav: true, searchable: true, mobilePriority: 4, primaryAction: { label: "Create trade listing", href: "/dashboard/product" } },
-  { path: "/dashboard/catalog", label: "Commodity Directory", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/catalog", label: "Commodity Directory", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, taskGroup: "Company & Account" },
   { path: "/dashboard/marketplace", label: "Trade Listings", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, mobilePriority: 2, journeyStage: "discover" },
 
   { path: "/dashboard/enquiries", label: "Enquiries", section: "Trade", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, mobilePriority: 3, journeyStage: "negotiate" },
@@ -91,7 +91,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/company", label: "My Company", section: "Organization", roles: ["associate"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
   { path: "/dashboard/companies", label: "Companies", section: "Organization", roles: ["admin", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/notifications", label: "Notifications", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
-  { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, taskGroup: "Support" },
   { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, searchable: true, activeParent: "/dashboard/settings" },
 
@@ -115,7 +115,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/function-preview", label: "Function Preview", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/essentials", label: "Essentials", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/geosphere", label: "Geo Sphere", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/customer-support", label: "Customer Support", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin", "associate"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, taskGroup: "Company & Account", description: "Contact OBAOL support or manage the support contacts available to associates.", navIcon: "support" },
+  { path: "/dashboard/customer-support", label: "Customer Support", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin", "associate"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, taskGroup: "Support", description: "Contact OBAOL support or manage the support contacts available to associates.", navIcon: "support" },
   { path: "/dashboard/rates", label: "Rates", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/bulk", label: "Bulk Operations", section: "Operations/Admin", roles: ["admin"] },
   { path: "/dashboard/news", label: "News", section: "Operations/Admin", roles: ["admin"] },
@@ -163,7 +163,7 @@ const navIconByPath: Record<string, string> = {
 
 const defaultTaskGroup = (route: DashboardRouteInput): DashboardTaskGroup => {
   if (route.path === "/dashboard") return "Home";
-  if (["/dashboard/marketplace", "/dashboard/catalog"].includes(route.path)) return "Discover";
+  if (route.path === "/dashboard/marketplace") return "Discover";
   if (["/dashboard/product", "/dashboard/inventory", "/dashboard/warehouses"].includes(route.path)) return "Sell";
   if (["/dashboard/enquiries", "/dashboard/sample-requests", "/dashboard/orders", "/dashboard/documents", "/dashboard/commercial-documents"].includes(route.path)) return "Execute";
   if (route.section === "Services") return "Services";

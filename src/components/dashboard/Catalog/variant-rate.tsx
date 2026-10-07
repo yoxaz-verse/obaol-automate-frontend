@@ -1659,7 +1659,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                           onSuccess={() => refetchData()}
                                         />
                                       )}
-                                    {(isBuyingMode ||
+                                    {(isAssociateUser ||
                                       isAdminUser) &&
                                       typeof CreateEnquiryButton !==
                                         "undefined" && (
@@ -1856,6 +1856,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         );
                         const shouldShowAssociateDetails =
                           roleLower === "admin" || isSameCompany;
+                        const canCreateMarketplaceEnquiry =
+                          item.isMarketplaceView &&
+                          (isAssociateUser || isAdminUser);
+                        const primaryMarketplaceEnquiry =
+                          canCreateMarketplaceEnquiry ? (
+                            <CreateEnquiryButton
+                              productVariant={item.productVariantId}
+                              variantRate={item}
+                            />
+                          ) : null;
 
                         const actionButtons = (
                           <div className="flex items-center gap-2">
@@ -1904,14 +1914,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       onSuccess={() => refetchData()}
                                     />
                                   )}
-                                {(isBuyingMode || isAdminUser) &&
-                                  typeof CreateEnquiryButton !==
-                                    "undefined" && (
-                                    <CreateEnquiryButton
-                                      productVariant={item.productVariantId}
-                                      variantRate={item}
-                                    />
-                                  )}
+                                {primaryMarketplaceEnquiry}
                                 {(isBuyingMode || isAdminUser) && typeof RequestSampleButton !== "undefined" && (
                                   <RequestSampleButton variantRate={item} />
                                 )}
@@ -2274,12 +2277,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                           : apiRoutesByRole[rate]
                                       }
                                     />
-                                  ) : (
+                                  ) : !canCreateMarketplaceEnquiry ? (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-default-400">
                                       {isLive ? "Live" : "Offline"}
                                     </span>
-                                  )}
+                                  ) : null}
                                 </div>
+                                {primaryMarketplaceEnquiry}
                                 <Popover placement="bottom-end" showArrow>
                                   <PopoverTrigger>
                                     <Button
@@ -2309,7 +2313,22 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                         </div>
                                       </div>
                                       <div className="flex flex-wrap items-center justify-end gap-2">
-                                        {actionButtons}
+                                        {item.isMarketplaceView ? (
+                                          <>
+                                            {!isAdminUser && isSellingMode &&
+                                              typeof AddToCatalogButton !== "undefined" && (
+                                                <AddToCatalogButton
+                                                  rowItem={item}
+                                                  isPersonalCatalogMode={isAssociateUser && !hasLinkedCompany}
+                                                  onSuccess={() => refetchData()}
+                                                />
+                                              )}
+                                            {(isBuyingMode || isAdminUser) &&
+                                              typeof RequestSampleButton !== "undefined" && (
+                                                <RequestSampleButton variantRate={item} />
+                                              )}
+                                          </>
+                                        ) : actionButtons}
                                         {canAddInventory && (
                                           <Button
                                             size="sm"
@@ -3486,7 +3505,7 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
         startContent={<LuMessageSquare size={16} />}
         onPress={beginEnquiry}
       >
-        Enquire
+        {variantRate?.isLive ? "Enquire" : "Check Current Price"}
       </Button>
       <Modal isOpen={staleWarning.isOpen} onOpenChange={staleWarning.onOpenChange} placement="center" backdrop="blur">
         <ModalContent>

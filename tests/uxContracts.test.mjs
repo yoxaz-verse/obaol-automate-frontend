@@ -260,6 +260,13 @@ test("marketplace rates are revealed explicitly and past enquiries warn buyers",
   assert.equal(access.includes('path: "/dashboard/rate-interest"'), true);
 });
 
+test("marketplace enquiry is visible to every associate and remains outside compact overflow", () => {
+  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  assert.equal(rates.includes("item.isMarketplaceView &&\n                          (isAssociateUser || isAdminUser)"), true);
+  assert.equal(rates.includes('{variantRate?.isLive ? "Enquire" : "Check Current Price"}'), true);
+  assert.equal(rates.includes("{primaryMarketplaceEnquiry}\n                                <Popover"), true);
+});
+
 test("variant rate wizard Commodity Directory CTA opens Commodity Directory", () => {
   const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
   assert.equal(wizard.includes("Go to Commodity Directory"), true);

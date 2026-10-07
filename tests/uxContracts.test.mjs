@@ -67,7 +67,7 @@ test("active homepage source does not advertise fabricated runtime telemetry", (
   for (const phrase of ["CORE_LATENCY", "AES-256", "SYS_LINK"]) assert.equal(homepage.includes(phrase), false);
 });
 
-test("homepage hero presents the ordered ten-stage execution flow", () => {
+test("homepage hero presents the complete static ten-stage execution map", () => {
   const hero = read("../src/components/home/HeroSectionServer.tsx");
   const explorer = read("../src/components/home/HeroStageExplorer.tsx");
   const homeContent = read("../src/components/home/HomeContent.tsx");
@@ -89,12 +89,15 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/hero-operations/")).join(""), "/images/hero-operations/freight.webp");
   assert.equal(hero.includes('"use client"'), false);
   assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
-  assert.equal(explorer.includes('role="tablist"'), true);
-  assert.equal(explorer.includes("setActiveIndex(index)"), true);
+  assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
+  assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
+  assert.equal(explorer.includes('aria-label="OBAOL\'s ten-stage execution flow"'), true);
+  assert.equal(explorer.includes('role="tablist"'), false);
+  assert.equal(explorer.includes("setActiveIndex"), false);
+  assert.equal(explorer.includes("setInterval"), false);
   assert.equal(explorer.includes("setTimeout"), false);
   assert.equal(hero.includes('data-natural-scroll-hero="true"'), true);
-  assert.equal(hero.includes('lg:sticky lg:top-28'), true);
-  assert.equal(explorer.includes('data-hero-panel="execution-flow"'), true);
+  assert.equal(hero.includes('lg:sticky lg:top-28'), false);
   assert.equal(homepage.includes('className="obaol-home bg-background text-foreground"'), true);
   assert.equal(homepage.includes("overflow-hidden"), false);
   assert.equal(globals.includes("overflow-x: clip !important"), true);
@@ -104,6 +107,25 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);
   }
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.webp", import.meta.url))), true);
+});
+
+test("homepage services use an eight-chapter scroll story without autoplay", () => {
+  const services = read("../src/components/home/ServiceShowcase.tsx");
+  const homeContent = read("../src/components/home/HomeContent.tsx");
+  const chapterIds = [...services.matchAll(/\{ id: "([^"]+)", title:/g)].map((match) => match[1]);
+
+  assert.deepEqual(chapterIds, [
+    "sourcing", "documentation", "procurement", "quality",
+    "packaging", "logistics", "warehouse", "freight",
+  ]);
+  assert.equal(services.includes('data-service-story="true"'), true);
+  assert.equal(services.includes("data-service-chapter={service.id}"), true);
+  assert.equal(services.includes("sticky top-28"), true);
+  assert.equal(services.includes("IntersectionObserver"), true);
+  assert.equal(services.includes("setInterval"), false);
+  assert.equal(services.includes("images.pexels.com"), false);
+  assert.equal(homeContent.indexOf("<DeferredServiceShowcase />") < homeContent.indexOf('<section id="capability-explorer"'), true);
+  assert.equal(homeContent.indexOf('<section id="capability-explorer"') < homeContent.indexOf("<PerspectiveGateway />"), true);
 });
 
 test("the OBAOL perspective gateway presents a premium three-card entry point", () => {
@@ -154,6 +176,14 @@ test("retired public commodity sections are absent from navigation and redirect 
   for (const phrase of ["Associate Trade Directory", "Associate-traded", "Associate coverage"]) {
     assert.equal((header + footer + directory).includes(phrase), false);
   }
+});
+
+test("footer careers link redirects to the OBAOL hiring portal", () => {
+  const footer = read("../src/components/home/footer.tsx");
+  const nextConfig = read("../next.config.mjs");
+  assert.equal(footer.includes('{ name: "Careers", href: "/careers" }'), true);
+  assert.equal(nextConfig.includes('source: "/careers"'), true);
+  assert.equal(nextConfig.includes('destination: "https://hiring.obaol.com/careers"'), true);
 });
 
 test("Methods uses the shared public header with separate heading styles", () => {

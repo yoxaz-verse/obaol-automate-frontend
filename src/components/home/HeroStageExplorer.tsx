@@ -1,8 +1,5 @@
-"use client";
-
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
-import { FiChevronLeft, FiChevronRight, FiPlay, FiPause, FiCheckCircle, FiShield, FiArrowUpRight } from "react-icons/fi";
+import { FiArrowDown, FiCheckCircle, FiShield } from "react-icons/fi";
 
 export type HeroStage = {
   id: string;
@@ -10,180 +7,90 @@ export type HeroStage = {
   message: string;
   src: string;
   deliverable?: string;
+  phase: "Plan" | "Verify" | "Move" | "Close";
 };
 
+const phaseStyles = {
+  Plan: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+  Verify: "border-violet-400/30 bg-violet-400/10 text-violet-200",
+  Move: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
+  Close: "border-obaol-400/30 bg-obaol-400/10 text-obaol-200",
+} as const;
+
 export default function HeroStageExplorer({ stages }: { stages: readonly HeroStage[] }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
-  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const active = stages[activeIndex];
-
-  const handleNext = () => {
-    setActiveIndex((prev) => (prev + 1) % stages.length);
-  };
-
-  const handlePrev = () => {
-    setActiveIndex((prev) => (prev - 1 + stages.length) % stages.length);
-  };
-
-  useEffect(() => {
-    if (isPlaying && !isHovered) {
-      autoPlayTimerRef.current = setInterval(() => {
-        setActiveIndex((prev) => (prev + 1) % stages.length);
-      }, 4500);
-    }
-
-    return () => {
-      if (autoPlayTimerRef.current) {
-        clearInterval(autoPlayTimerRef.current);
-      }
-    };
-  }, [isPlaying, isHovered, stages.length]);
+  const featured = stages.find((stage) => stage.id === "quality") ?? stages[0];
 
   return (
     <div
-      data-hero-panel="execution-flow"
-      aria-label="OBAOL's ten-stage execution flow"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="group relative w-full rounded-[2.25rem] border border-obaol-500/30 bg-content1/80 p-4 shadow-[0_30px_90px_-30px_rgba(207,152,60,0.35)] backdrop-blur-xl sm:p-6 transition-all duration-500 hover:border-obaol-500/50 hover:shadow-[0_35px_100px_-25px_rgba(207,152,60,0.45)]"
+      data-hero-panel="execution-map"
+      aria-labelledby="execution-map-title"
+      className="relative overflow-hidden rounded-[2rem] border border-obaol-500/25 bg-[#090a08]/95 p-4 text-white shadow-[0_30px_90px_-34px_rgba(207,152,60,0.45)] sm:p-6"
     >
-      {/* Glow highlight line */}
-      <div className="absolute inset-x-8 -top-px h-px bg-gradient-to-r from-transparent via-obaol-400 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-obaol-300 to-transparent" />
+      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-obaol-500/10 blur-3xl" />
 
-      {/* Header Bar inside card */}
-      <div className="mb-4 flex items-center justify-between px-1">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-obaol-500/15 text-obaol-600 dark:text-obaol-300 font-mono text-xs font-black">
-            {String(activeIndex + 1).padStart(2, "0")}
-          </span>
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-foreground/80">
-              {active.label}
-            </span>
-            <span className="hidden sm:inline text-xs text-foreground/40 font-mono ml-2">
-              (Stage {activeIndex + 1} of {stages.length})
-            </span>
-          </div>
+      <div className="relative flex items-start justify-between gap-5">
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-obaol-300">One connected journey</p>
+          <h2 id="execution-map-title" className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
+            From requirement to delivery.
+          </h2>
         </div>
-
-        {/* Play / Pause & Navigation Buttons */}
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-default-200/80 bg-background/80 text-foreground/70 hover:bg-obaol-500/10 hover:text-obaol-600 transition-colors"
-            title={isPlaying ? "Pause auto-rotation" : "Start auto-rotation"}
-          >
-            {isPlaying ? <FiPause size={14} /> : <FiPlay size={14} className="ml-0.5" />}
-          </button>
-          <button
-            type="button"
-            onClick={handlePrev}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-default-200/80 bg-background/80 text-foreground/70 hover:bg-obaol-500/10 hover:text-obaol-600 transition-colors"
-            title="Previous step"
-          >
-            <FiChevronLeft size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={handleNext}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-default-200/80 bg-background/80 text-foreground/70 hover:bg-obaol-500/10 hover:text-obaol-600 transition-colors"
-            title="Next step"
-          >
-            <FiChevronRight size={16} />
-          </button>
-        </div>
+        <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 sm:inline-flex">
+          10 verified stages
+        </span>
       </div>
 
-      {/* Main Image Stage Preview Window */}
-      <div className="relative aspect-[16/10] overflow-hidden rounded-[1.6rem] bg-slate-950 shadow-inner">
-        <Image
-          key={active.id}
-          src={active.src}
-          alt={active.label}
-          fill
-          priority={activeIndex === 0}
-          sizes="(max-width: 1023px) 92vw, 52vw"
-          className="object-cover transition-all duration-700 ease-out"
-        />
-
-        {/* Shading gradients */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/40 via-transparent to-transparent" />
-
-        {/* Stage Status Badge */}
-        <div className="absolute top-4 left-4 z-10 flex items-center gap-2 rounded-full border border-white/20 bg-slate-950/70 px-3.5 py-1.5 backdrop-blur-md text-white text-xs font-bold">
-          <FiShield className="text-obaol-400" size={13} />
-          <span>Verified Execution Step</span>
-        </div>
-
-        {/* Content Overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 text-white z-10 space-y-2">
-          <p className="text-[11px] font-mono font-extrabold uppercase tracking-[0.2em] text-obaol-300">
-            Step {String(activeIndex + 1).padStart(2, "0")} • {active.label}
-          </p>
-          <p className="text-lg font-bold sm:text-2xl leading-snug text-white drop-shadow-md">
-            {active.message}
-          </p>
-          {active.deliverable && (
-            <div className="inline-flex items-center gap-2 pt-1 text-xs font-semibold text-obaol-200/90">
-              <FiCheckCircle size={14} className="text-obaol-400 shrink-0" />
-              <span>Output: {active.deliverable}</span>
+      <ol className="relative mt-6 grid gap-0 sm:grid-cols-2 lg:grid-cols-5" aria-label="OBAOL's ten-stage execution flow">
+        {stages.map((stage, index) => (
+          <li
+            key={stage.id}
+            data-execution-stage={stage.id}
+            className="group relative flex min-h-[92px] items-start gap-4 border-l border-white/10 py-3 pl-5 pr-3 sm:min-h-[116px] sm:border-l-0 sm:border-t sm:px-2 sm:pb-4 sm:pt-5 lg:px-2.5"
+          >
+            <span className="absolute -left-[5px] top-5 h-2.5 w-2.5 rounded-full border-2 border-[#090a08] bg-obaol-400 shadow-[0_0_16px_rgba(207,152,60,0.7)] sm:-top-[5px] sm:left-2" />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] font-black text-obaol-300">{String(index + 1).padStart(2, "0")}</span>
+                <span className={`rounded-full border px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.12em] ${phaseStyles[stage.phase]}`}>
+                  {stage.phase}
+                </span>
+              </div>
+              <h3 className="mt-2 text-sm font-bold leading-tight text-white sm:text-[13px]">{stage.label}</h3>
+              <p className="mt-1 line-clamp-2 text-[11px] font-medium leading-relaxed text-white/48">{stage.message}</p>
             </div>
-          )}
-        </div>
+            {index < stages.length - 1 && (
+              <FiArrowDown className="absolute -bottom-2 left-[-8px] z-10 text-obaol-400 sm:hidden" size={15} aria-hidden="true" />
+            )}
+          </li>
+        ))}
+      </ol>
 
-        {/* Progress bar along bottom of image */}
-        <div className="absolute bottom-0 inset-x-0 h-1 bg-white/10">
-          <div
-            className="h-full bg-gradient-to-r from-obaol-500 to-amber-400 transition-all duration-500"
-            style={{ width: `${((activeIndex + 1) / stages.length) * 100}%` }}
+      <div className="relative mt-4 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.035] sm:grid sm:grid-cols-[0.86fr_1.14fr]">
+        <div className="relative min-h-[190px] sm:min-h-[220px]">
+          <Image
+            src={featured.src}
+            alt="Independent laboratory quality testing within the OBAOL execution flow"
+            fill
+            priority
+            sizes="(max-width: 639px) 90vw, 28vw"
+            className="object-cover"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent sm:bg-gradient-to-r sm:from-transparent sm:to-[#11120f]" />
+          <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/65 px-3 py-1.5 text-[10px] font-bold backdrop-blur-md">
+            <FiShield className="text-obaol-300" /> Verified checkpoint
+          </span>
         </div>
-      </div>
-
-      {/* Stage selector tabs */}
-      <div role="tablist" aria-label="Execution stages" className="mt-4 grid grid-cols-5 gap-1.5 sm:grid-cols-10">
-        {stages.map((stage, index) => {
-          const isActive = index === activeIndex;
-          return (
-            <button
-              key={stage.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              aria-label={`Step ${index + 1}: ${stage.label}`}
-              onClick={() => setActiveIndex(index)}
-              className={`relative flex min-h-[44px] flex-col items-center justify-center rounded-xl border font-mono text-xs font-extrabold transition-all duration-200 ${
-                isActive
-                  ? "border-obaol-500 bg-gradient-to-b from-obaol-500 to-amber-500 text-obaol-950 shadow-[0_4px_16px_rgba(207,152,60,0.4)] scale-105 z-10"
-                  : "border-default-200/80 bg-background/60 text-foreground/60 hover:border-obaol-500/50 hover:bg-obaol-500/10 hover:text-foreground"
-              }`}
-            >
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              {isActive && (
-                <span className="absolute -bottom-1 h-1 w-3 rounded-full bg-obaol-950" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Deliverable details footer strip inside card */}
-      <div className="mt-4 flex items-center justify-between rounded-xl border border-default-200/60 bg-background/50 px-4 py-2.5 text-xs text-foreground/70">
-        <div className="flex items-center gap-2 truncate">
-          <span className="font-bold text-obaol-700 dark:text-obaol-300">Target Output:</span>
-          <span className="font-medium truncate">{active.deliverable || active.message}</span>
-        </div>
-        <div className="hidden sm:flex items-center gap-1 font-bold text-obaol-600 dark:text-obaol-400 shrink-0">
-          <span>Explore Flow</span>
-          <FiArrowUpRight size={14} />
+        <div className="relative flex flex-col justify-center p-5 sm:p-7">
+          <p className="font-mono text-[9px] font-black uppercase tracking-[0.25em] text-obaol-300">Representative outcome</p>
+          <h3 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">{featured.label}</h3>
+          <p className="mt-2 text-sm font-medium leading-relaxed text-white/62">{featured.message}</p>
+          <div className="mt-4 flex items-start gap-2 text-xs font-semibold text-obaol-100">
+            <FiCheckCircle className="mt-0.5 shrink-0 text-obaol-400" size={15} />
+            <span>Output: {featured.deliverable}</span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

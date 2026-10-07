@@ -8,14 +8,17 @@ const ServiceShowcase = dynamic(() => import("@/components/home/ServiceShowcase"
   loading: () => (
     <section className="bg-background py-16 md:py-24 public-standard-section" aria-hidden="true">
       <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 xl:gap-14">
-          <div className="lg:col-span-4 space-y-5">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16">
+          <div className="space-y-5">
             <div className="h-4 w-36 rounded-full bg-content1" />
             <div className="h-16 max-w-sm rounded-2xl bg-content1" />
             <div className="h-24 max-w-md rounded-2xl bg-content1/70" />
+            <div className="mt-12 space-y-8">
+              {[0, 1, 2].map((item) => <div key={item} className="h-44 rounded-3xl border border-default-200 bg-content1/40" />)}
+            </div>
           </div>
-          <div className="lg:col-span-8">
-            <div className="min-h-[420px] rounded-[2rem] border border-obaol-500/10 bg-content1/45 md:min-h-[560px] public-surface-card" />
+          <div className="hidden lg:block">
+            <div className="min-h-[620px] rounded-[2rem] border border-obaol-500/10 bg-content1/45 public-surface-card" />
           </div>
         </div>
       </div>

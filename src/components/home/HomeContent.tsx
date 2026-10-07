@@ -35,7 +35,6 @@ export default function HomeContent() {
         <>
             <Header />
             <HeroSection />
-            <PerspectiveGateway />
             <DeferredServiceShowcase />
             <section id="capability-explorer" className="relative scroll-mt-28 py-12 md:scroll-mt-36 md:py-16 public-standard-section">
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
@@ -68,7 +67,9 @@ export default function HomeContent() {
 
                 </div>
             </section>
-            <section className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 mb-10 public-layout-container">
+            <PerspectiveGateway />
+
+            <section className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 my-10 public-layout-container">
                 <IndiaFirstNote />
             </section>
 

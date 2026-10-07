@@ -1,375 +1,119 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
-import {
-  FiCheckCircle,
-  FiPackage,
-  FiShoppingBag,
-  FiTruck,
-  FiTarget,
-  FiFileText,
-} from "react-icons/fi";
+import Image from "next/image";
+import { useEffect, useRef, useState, type ComponentType } from "react";
+import { FiCheckCircle, FiFileText, FiPackage, FiShoppingBag, FiTarget, FiTruck } from "react-icons/fi";
 import { FaShip, FaWarehouse } from "react-icons/fa6";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
-import { useInViewport } from "@/hooks/useInViewport";
-import { RevealNativeImage } from "@/components/ui/RevealImage";
 
-const services = [
-  {
-    id: "sourcing",
-    title: "Sourcing",
-    eyebrow: "Find",
-    description:
-      "Find the exact product specifications and identify the best origins that match the buyer's unique requirements.",
-    metric: "Requirement to origin",
-    image:
-      "https://images.pexels.com/photos/35855061/pexels-photo-35855061.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
-    imagePosition: "center 42%",
-    imageAlt:
-      "Agricultural specialist inspecting a crop in the field before sourcing",
-    icon: FiTarget,
-    accent: "from-purple-400 to-violet-500",
-    color: "#a78bfa",
-  },
-  {
-    id: "documentation",
-    title: "Documentation & Planning",
-    eyebrow: "Plan",
-    description:
-      "Prepare compliance documents, manage export paperwork, and systematically plan the execution logistics.",
-    metric: "Origin to readiness",
-    image:
-      "https://images.pexels.com/photos/8297652/pexels-photo-8297652.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
-    imagePosition: "center 38%",
-    imageAlt:
-      "Trade professionals reviewing shipment documents and export paperwork",
-    icon: FiFileText,
-    accent: "from-blue-400 to-indigo-500",
-    color: "#60a5fa",
-  },
-  {
-    id: "procurement",
-    title: "Procurement",
-    eyebrow: "Source",
-    description:
-      "On-ground procurement partners inspect availability, negotiate readiness, and prepare confirmed lots for execution.",
-    metric: "Supplier to stock",
-    image:
-      "https://images.pexels.com/photos/12833512/pexels-photo-12833512.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
-    imagePosition: "center 44%",
-    imageAlt:
-      "Agricultural supplier weighing a sack of produce for procurement",
-    icon: FiShoppingBag,
-    accent: "from-obaol-300 to-obaol-500",
-    color: "#CF983C",
-  },
-  {
-    id: "quality",
-    title: "Quality Testing",
-    eyebrow: "Verify",
-    description:
-      "Quality labs and verification operators test samples, validate specifications, and reduce uncertainty before shipment.",
-    metric: "Sample to approval",
-    image:
-      "https://images.pexels.com/photos/8940363/pexels-photo-8940363.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
-    imagePosition: "center 42%",
-    imageAlt:
-      "Laboratory technician testing a grain sample with food-quality equipment",
-    icon: FiCheckCircle,
-    accent: "from-emerald-400 to-teal-500",
-    color: "#34d399",
-  },
-  {
-    id: "packaging",
-    title: "Packaging",
-    eyebrow: "Pack",
-    description:
-      "Packaging teams handle bags, cartons, labeling, and export-ready preparation based on buyer and commodity needs.",
-    metric: "Lot to load-ready",
-    image:
-      "https://images.pexels.com/photos/13795516/pexels-photo-13795516.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
-    imagePosition: "center 46%",
-    imageAlt:
-      "Worker sealing a filled agricultural commodity sack for dispatch",
-    icon: FiPackage,
-    accent: "from-pink-400 to-rose-500",
-    color: "#fb7185",
-  },
-  {
-    id: "logistics",
-    title: "Logistics",
-    eyebrow: "Move",
-    description:
-      "Truck operators, dispatch teams, and route handlers coordinate pickup, inland movement, and live shipment handoffs.",
-    metric: "Pickup to port",
-    image:
-      "https://images.pexels.com/photos/29948458/pexels-photo-29948458.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
-    imagePosition: "center 40%",
-    imageAlt:
-      "Workers loading agricultural sacks onto an inland transport truck",
-    icon: FiTruck,
-    accent: "from-sky-400 to-blue-500",
-    color: "#38bdf8",
-  },
-  {
-    id: "warehouse",
-    title: "Warehouse",
-    eyebrow: "Store",
-    description:
-      "Warehouse operators manage capacity, stock visibility, staging, and release windows inside the execution flow.",
-    metric: "Stock to dispatch",
-    image: "/images/services/warehouse-india-professional.webp",
-    imagePosition: "center 42%",
-    imageAlt:
-      "Advanced Indian commercial warehouse with organized inventory, forklift operations, and professional staff",
-    icon: FaWarehouse,
-    accent: "from-amber-400 to-obaol-600",
-    color: "#f59e0b",
-  },
-  {
-    id: "freight",
-    title: "Freight Forwarding",
-    eyebrow: "Forward",
-    description:
-      "Freight forwarders coordinate customs, vessel planning, port documents, and shipment milestones through closing.",
-    metric: "Port to buyer",
-    image:
-      "https://images.pexels.com/photos/28438329/pexels-photo-28438329.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
-    imagePosition: "center 42%",
-    imageAlt:
-      "Port crane transferring shipping containers onto a cargo vessel",
-    icon: FaShip,
-    accent: "from-lime-300 to-green-500",
-    color: "#84cc16",
-  },
+export type ServiceChapter = {
+  id: string;
+  title: string;
+  role: string;
+  description: string;
+  outcome: string;
+  image: string;
+  imageAlt: string;
+  imagePosition: string;
+  icon: ComponentType<{ size?: number; className?: string }>;
+  accent: string;
+};
+
+const services: readonly ServiceChapter[] = [
+  { id: "sourcing", title: "Sourcing", role: "Origin discovery", description: "Find the exact product specifications and identify the best origins that match the buyer's unique requirements.", outcome: "Requirement matched to origin", image: "/images/services/sourcing-india.webp", imageAlt: "Agricultural specialist inspecting crops at origin", imagePosition: "center 42%", icon: FiTarget, accent: "#a78bfa" },
+  { id: "documentation", title: "Documentation & Planning", role: "Trade readiness", description: "Prepare compliance documents, manage export paperwork, and systematically plan the execution logistics.", outcome: "Trade file ready for execution", image: "/images/services/documentation-india.webp", imageAlt: "Trade professionals reviewing shipment documentation", imagePosition: "center 38%", icon: FiFileText, accent: "#60a5fa" },
+  { id: "procurement", title: "Procurement", role: "On-ground buying", description: "On-ground procurement partners inspect availability, negotiate readiness, and prepare confirmed lots for execution.", outcome: "Supply secured and purchase locked", image: "/images/services/procurement-india.webp", imageAlt: "Agricultural produce being prepared for procurement", imagePosition: "center 44%", icon: FiShoppingBag, accent: "#CF983C" },
+  { id: "quality", title: "Quality Testing", role: "Independent verification", description: "Quality labs and verification operators test samples, validate specifications, and reduce uncertainty before shipment.", outcome: "Specifications verified before shipment", image: "/images/services/quality-india.webp", imageAlt: "Laboratory technician testing an agricultural sample", imagePosition: "center 42%", icon: FiCheckCircle, accent: "#34d399" },
+  { id: "packaging", title: "Packaging", role: "Export preparation", description: "Packaging teams handle bags, cartons, labeling, and export-ready preparation based on buyer and commodity needs.", outcome: "Lots packed and load-ready", image: "/images/services/packaging-india.webp", imageAlt: "Agricultural goods being packaged for dispatch", imagePosition: "center 46%", icon: FiPackage, accent: "#fb7185" },
+  { id: "logistics", title: "Logistics", role: "Inland coordination", description: "Truck operators, dispatch teams, and route handlers coordinate pickup, inland movement, and live shipment handoffs.", outcome: "Pickup moved reliably to port", image: "/images/services/logistics-india.webp", imageAlt: "Agricultural shipment moving through inland logistics", imagePosition: "center 40%", icon: FiTruck, accent: "#38bdf8" },
+  { id: "warehouse", title: "Warehouse", role: "Stock control", description: "Warehouse operators manage capacity, stock visibility, staging, and release windows inside the execution flow.", outcome: "Inventory visible and dispatch-ready", image: "/images/services/warehouse-india-professional.webp", imageAlt: "Organized commercial warehouse with agricultural inventory", imagePosition: "center 42%", icon: FaWarehouse, accent: "#f59e0b" },
+  { id: "freight", title: "Freight Forwarding", role: "International movement", description: "Freight forwarders coordinate customs, vessel planning, port documents, and shipment milestones through closing.", outcome: "Cargo cleared and moving to buyer", image: "/images/services/freight-india.webp", imageAlt: "Cargo containers being handled at an international port", imagePosition: "center 42%", icon: FaShip, accent: "#84cc16" },
 ] as const;
 
-type Service = (typeof services)[number];
-
-function RealisticServiceVisual({
-  service,
-  shouldReduceMotion,
-}: {
-  service: Service;
-  shouldReduceMotion: boolean;
-}) {
+function Chapter({ service, index, active, showInlineMedia, onActivate }: { service: ServiceChapter; index: number; active: boolean; showInlineMedia: boolean; onActivate: () => void }) {
+  const ref = useRef<HTMLElement>(null);
   const Icon = service.icon;
 
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) onActivate();
+    }, { rootMargin: "-35% 0px -45%", threshold: 0 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [onActivate]);
+
   return (
-    <motion.div
-      key={service.id}
-      className="absolute inset-0 overflow-hidden bg-black"
-      initial={shouldReduceMotion ? false : { opacity: 0, scale: 1.04, filter: "blur(10px)" }}
-      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-      exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 1.02, filter: "blur(8px)" }}
-      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <RevealNativeImage
-        key={service.image}
-        src={service.image}
-        alt={service.imageAlt}
-        loading="lazy"
-        decoding="async"
-        className="absolute inset-0 !h-full !w-full !max-w-none object-cover"
-        style={{ objectPosition: service.imagePosition }}
-      />
-
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.96)_0%,rgba(0,0,0,0.82)_24%,rgba(0,0,0,0.42)_52%,transparent_82%),linear-gradient(to_right,rgba(0,0,0,0.35),transparent_64%)]" />
-
-      <div className="absolute right-6 top-8 hidden h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/15 bg-black/45 text-white/36 shadow-[0_0_28px_rgba(0,0,0,0.38)] backdrop-blur-sm md:flex">
-        <Icon size={58} />
-      </div>
-
-      <div className="absolute left-5 top-5 flex items-center gap-3 rounded-full border border-white/12 bg-black/55 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/64 shadow-lg shadow-black/20 backdrop-blur-sm md:left-8 md:top-8">
-        <span className="h-2 w-2 rounded-full bg-obaol-400 shadow-[0_0_12px_rgba(207,152,60,0.8)]" />
-        Indian Origin Operations
-      </div>
-
-      {service.id === "documentation" && (
-        <div className="absolute right-7 top-28 hidden max-w-[210px] rounded-2xl border border-blue-300/35 bg-black/55 p-4 text-white/72 shadow-xl shadow-black/30 backdrop-blur-sm md:block">
-          <div className="flex items-center gap-3">
-            <FiFileText size={24} className="text-blue-300" />
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">Trade File</span>
-          </div>
-          <div className="mt-4 space-y-2">
-            {["PO", "PI", "COO"].map((item) => (
-              <div key={item} className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-300" />
-                <span className="h-1.5 flex-1 rounded-full bg-white/18" />
-                <span className="font-mono text-[8px] font-bold text-white/45">{item}</span>
-              </div>
-            ))}
-          </div>
+    <article ref={ref} data-service-chapter={service.id} className={`relative ${showInlineMedia ? "" : "lg:flex lg:min-h-[62vh] lg:items-center"}`}>
+      <div className={`relative border-l pl-7 transition-colors duration-500 lg:py-16 ${active ? "border-obaol-400" : "border-default-200"}`}>
+        <span className={`absolute -left-[7px] top-1 h-3.5 w-3.5 rounded-full border-4 border-background transition-colors lg:top-[4.25rem] ${active ? "bg-obaol-400 shadow-[0_0_18px_rgba(207,152,60,0.75)]" : "bg-default-300"}`} />
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-xs font-black text-obaol-600 dark:text-obaol-300">{String(index + 1).padStart(2, "0")}</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/45">{service.role}</span>
         </div>
-      )}
-    </motion.div>
+        <h3 className="mt-3 text-3xl font-black tracking-tight text-foreground sm:text-4xl">{service.title}</h3>
+        <p className="mt-4 max-w-xl text-sm font-medium leading-relaxed text-foreground/65 sm:text-base">{service.description}</p>
+        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-default-200/80 bg-content1/70 p-4 text-sm font-bold text-foreground/80">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-black" style={{ backgroundColor: service.accent }}><Icon size={16} /></span>
+          <span className="pt-1.5">{service.outcome}</span>
+        </div>
+
+        <div className={`relative mt-7 aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-default-200 bg-black ${showInlineMedia ? "" : "lg:hidden"}`}>
+          <Image src={service.image} alt={service.imageAlt} fill sizes="(max-width: 1023px) 90vw, 1px" className="object-cover" style={{ objectPosition: service.imagePosition }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <span className="absolute bottom-4 left-4 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-white backdrop-blur-md">Indian origin operations</span>
+        </div>
+      </div>
+    </article>
   );
 }
 
-const particleSeeds = Array.from({ length: 42 }, (_, index) => ({
-  id: index,
-  left: `${(index * 29) % 100}%`,
-  top: `${(index * 47) % 100}%`,
-  size: 2 + (index % 4),
-  delay: (index % 9) * 0.18,
-  duration: 3.4 + (index % 6) * 0.36,
-}));
-
 export default function ServiceShowcase() {
-  const [sectionRef, isInView] = useInViewport<HTMLElement>({
-    rootMargin: "220px 0px",
-    initialInView: false,
-  });
-  const adaptiveMotion = useAdaptiveMotion();
-  const shouldReduceMotion = adaptiveMotion.shouldReduceMotion;
-  const allowAnimatedScene = isInView && adaptiveMotion.allowDecorativeMotion;
   const [activeIndex, setActiveIndex] = useState(0);
-  const activeService = services[activeIndex];
-
-  useEffect(() => {
-    if (!allowAnimatedScene) return;
-
-    const interval = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % services.length);
-    }, 4200);
-
-    return () => window.clearInterval(interval);
-  }, [allowAnimatedScene]);
-
-  const Icon = activeService.icon;
-
-  const supportingServices = useMemo(
-    () =>
-      services.map((service, index) => ({
-        ...service,
-        isActive: index === activeIndex,
-      })),
-    [activeIndex],
-  );
+  const adaptiveMotion = useAdaptiveMotion();
+  const active = services[activeIndex];
+  const ActiveIcon = active.icon;
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-background py-16 md:py-24 public-standard-section">
-      <div className="absolute inset-0 pointer-events-none opacity-60">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(207,152,60,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(207,152,60,0.1)_1px,transparent_1px)] bg-[size:4.5rem_4.5rem] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)] public-decoration" />
-        {allowAnimatedScene && particleSeeds.map((particle) => (
-          <motion.span
-            key={particle.id}
-            className="absolute rounded-full bg-obaol-300/70 shadow-[0_0_14px_rgba(207,152,60,0.5)]"
-            style={{
-              left: particle.left,
-              top: particle.top,
-              width: particle.size,
-              height: particle.size,
-            }}
-            animate={{
-              opacity: [0.08, 0.75, 0.08],
-              y: [-8, 10, -8],
-              scale: [0.8, 1.25, 0.8],
-            }}
-            transition={{
-              duration: particle.duration,
-              delay: particle.delay,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="container relative z-10 mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 xl:gap-14">
-          <div className="lg:col-span-4 flex flex-col justify-between gap-8">
-            <div className="space-y-5">
+    <section data-service-story="true" aria-labelledby="service-story-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-16 md:py-24 public-standard-section">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(207,152,60,0.12),transparent_28%)]" />
+      <div className="container relative z-10 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container">
+        <div className={`grid gap-12 lg:gap-16 ${adaptiveMotion.shouldReduceMotion ? "" : "lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"}`}>
+          <div>
+            <div className="mb-10 space-y-5 lg:mb-2">
               <p className={homeTitleStyles.sectionKicker}>Execution Services</p>
-              <h2 className={homeTitleStyles.sectionTitle}>
-                Every role becomes visible.
-              </h2>
-              <p className="max-w-xl text-sm md:text-base text-foreground/60 font-medium leading-relaxed">
-                A timed operations view shows the people and partners behind procurement, logistics, testing, packaging, warehousing, and freight forwarding.
-              </p>
+              <h2 id="service-story-title" className={homeTitleStyles.sectionTitle}>Every role moves the same trade forward.</h2>
+              <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/65">Follow the people and partners behind sourcing, verification, preparation, storage, and movement—connected as one execution story.</p>
             </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2">
-              {supportingServices.map((service, index) => {
-                const ServiceIcon = service.icon;
-                return (
-                  <button
-                    key={service.id}
-                    type="button"
-                    onClick={() => setActiveIndex(index)}
-                    className={`group flex min-h-[76px] flex-col justify-between rounded-2xl border px-3.5 py-3 text-left transition-all duration-500 ${
-                      service.isActive
-                        ? "border-obaol-400/70 bg-obaol-500/10 shadow-[0_0_26px_rgba(207,152,60,0.18)]"
-                        : "border-white/10 bg-white/[0.035] hover:border-white/25 hover:bg-white/[0.06]"
-                    }`}
-                    aria-pressed={service.isActive}
-                  >
-                    <div className="flex w-full items-start justify-between gap-2">
-                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${service.accent} text-black shadow-lg shadow-black/20`}>
-                        <ServiceIcon size={15} />
-                      </span>
-                      {service.isActive && (
-                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-obaol-400 shadow-[0_0_12px_rgba(207,152,60,0.8)]" />
-                      )}
-                    </div>
-                    <p className="mt-2.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/80 leading-tight">
-                      {service.title}
-                    </p>
-                  </button>
-                );
-              })}
+            <div className="space-y-12 lg:space-y-0">
+              {services.map((service, index) => (
+                <Chapter key={service.id} service={service} index={index} active={index === activeIndex} showInlineMedia={adaptiveMotion.shouldReduceMotion} onActivate={() => setActiveIndex(index)} />
+              ))}
             </div>
           </div>
 
-          <div className="lg:col-span-8">
-            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-obaol-500/15 bg-black shadow-2xl shadow-obaol-950/30 md:min-h-[620px] public-surface-card">
-              <AnimatePresence mode="wait">
-                <RealisticServiceVisual
-                  key={activeService.id}
-                  service={activeService}
-                  shouldReduceMotion={shouldReduceMotion}
-                />
+          <div className={`relative ${adaptiveMotion.shouldReduceMotion ? "hidden" : "hidden lg:block"}`}>
+            <div className="sticky top-28 h-[calc(100vh-9rem)] min-h-[540px] max-h-[760px] overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-black shadow-[0_30px_90px_-45px_rgba(207,152,60,0.5)]">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div key={active.id} className="absolute inset-0" initial={adaptiveMotion.shouldReduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={adaptiveMotion.shouldReduceMotion ? undefined : { opacity: 0 }} transition={{ duration: adaptiveMotion.shouldReduceMotion ? 0 : 0.45 }}>
+                  <Image src={active.image} alt={active.imageAlt} fill sizes="(max-width: 1023px) 1px, 52vw" className="object-cover" style={{ objectPosition: active.imagePosition }} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/15" />
+                </motion.div>
               </AnimatePresence>
-
-              <div className="absolute inset-x-5 bottom-5 md:inset-x-8 md:bottom-8">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeService.id}
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={shouldReduceMotion ? undefined : { opacity: 0, y: -14 }}
-                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                    className="max-w-2xl"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${activeService.accent} text-black shadow-xl`}>
-                        <Icon size={22} />
-                      </span>
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-white">
-                        {activeService.eyebrow} / {activeService.metric}
-                      </span>
-                    </div>
-                    <h3 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-bold leading-none tracking-[-0.02em] text-white">
-                      {activeService.title}
-                    </h3>
-                    <p className="mt-5 max-w-xl text-sm md:text-base font-medium leading-relaxed text-white/90">
-                      {activeService.description}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
+              <div className="absolute inset-x-0 top-0 flex items-center justify-between p-7">
+                <span className="rounded-full border border-white/15 bg-black/55 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/75 backdrop-blur-md">Indian origin operations</span>
+                <span className="font-mono text-xs font-black text-white/60">{String(activeIndex + 1).padStart(2, "0")} / {String(services.length).padStart(2, "0")}</span>
               </div>
-
-              <div className="absolute bottom-8 right-8 hidden w-44 gap-2 md:flex">
-                {services.map((service, index) => (
-                  <span
-                    key={service.id}
-                    className={`h-1.5 flex-1 rounded-full transition-all duration-700 ${
-                      index === activeIndex ? "bg-obaol-400" : "bg-white/20"
-                    }`}
-                  />
-                ))}
+              <div className="absolute inset-x-7 bottom-7 rounded-[1.5rem] border border-white/12 bg-black/62 p-6 text-white backdrop-blur-lg">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-black" style={{ backgroundColor: active.accent }}><ActiveIcon size={20} /></span>
+                  <div><p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/45">Active chapter</p><p className="mt-1 text-2xl font-black">{active.title}</p></div>
+                </div>
+                <p className="mt-4 text-sm font-semibold text-white/72">Outcome: {active.outcome}</p>
+                <div className="mt-5 flex gap-1.5" aria-hidden="true">{services.map((service, index) => <span key={service.id} className={`h-1 flex-1 rounded-full transition-colors ${index === activeIndex ? "bg-obaol-400" : "bg-white/20"}`} />)}</div>
               </div>
             </div>
           </div>

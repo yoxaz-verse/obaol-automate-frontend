@@ -112,6 +112,11 @@ const nextConfig = {
         destination: "/roles/associate/finance-partners",
         permanent: true,
       },
+      {
+        source: "/careers",
+        destination: "https://hiring.obaol.com/careers",
+        permanent: true,
+      },
     ];
   },
 

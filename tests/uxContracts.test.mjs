@@ -256,6 +256,20 @@ test("variant rate wizard Commodity Directory CTA opens Commodity Directory", ()
   assert.equal(wizard.includes('onClick={() => router.push("/dashboard/product")}'), false);
 });
 
+test("variant rate wizard uses searchable, dependent commodity controls", () => {
+  const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
+  assert.equal(wizard.includes("AutocompleteItem"), true);
+  assert.equal(wizard.includes("renderCommodityAutocomplete"), true);
+  assert.equal(wizard.includes('field: "category"'), true);
+  assert.equal(wizard.includes('field: "subCategory"'), true);
+  assert.equal(wizard.includes('field: "product"'), true);
+  assert.equal(wizard.includes('field: "productVariant"'), true);
+  assert.equal(wizard.includes("allowsCustomValue={false}"), true);
+  assert.equal(wizard.includes("setCommodityInput({})"), true);
+  assert.equal(wizard.includes("let isMounted = true"), true);
+  assert.equal(wizard.includes("Select subcategory first"), true);
+});
+
 test("catalog grid cards respond to their container without compressing controls", () => {
   const variantRate = read("../src/components/dashboard/Catalog/variant-rate.tsx");
   const globals = read("../src/app/globals.css");

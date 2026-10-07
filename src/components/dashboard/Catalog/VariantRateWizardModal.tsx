@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Autocomplete,
+  AutocompleteItem,
   Button,
   Input,
   Modal,
@@ -107,6 +109,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
+  const [commodityInput, setCommodityInput] = useState<Record<string, string>>({});
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoadingVariants, setIsLoadingVariants] = useState(false);
   const [associates, setAssociates] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
@@ -123,13 +129,27 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    fetchDependentOptions("category").then(setCategories);
+    let isMounted = true;
+    setIsLoadingCategories(true);
+    fetchDependentOptions("category")
+      .then((data) => {
+        if (isMounted) setCategories(data);
+      })
+      .catch(() => {
+        if (isMounted) setCategories([]);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingCategories(false);
+      });
     if (!isAssociateUser) {
       fetchDependentOptions("associate").then(setAssociates);
     }
     if (fixedVariantId) {
       setFormData((prev) => ({ ...prev, productVariant: fixedVariantId }));
     }
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen, fixedVariantId, isAssociateUser]);
 
   useEffect(() => {
@@ -149,13 +169,51 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   }, [isOpen, fixedVariantId]);
 
   useEffect(() => {
-    if (!formData.category) return;
-    fetchDependentOptions("subCategory", "category", formData.category).then(setSubCategories);
+    if (!formData.category) {
+      setSubCategories([]);
+      setIsLoadingSubCategories(false);
+      return;
+    }
+    let isMounted = true;
+    setSubCategories([]);
+    setIsLoadingSubCategories(true);
+    fetchDependentOptions("subCategory", "category", formData.category)
+      .then((data) => {
+        if (isMounted) setSubCategories(data);
+      })
+      .catch(() => {
+        if (isMounted) setSubCategories([]);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingSubCategories(false);
+      });
+    return () => {
+      isMounted = false;
+    };
   }, [formData.category]);
 
   useEffect(() => {
-    if (!formData.subCategory) return;
-    fetchDependentOptions("product", "subCategory", formData.subCategory).then(setProducts);
+    if (!formData.subCategory) {
+      setProducts([]);
+      setIsLoadingProducts(false);
+      return;
+    }
+    let isMounted = true;
+    setProducts([]);
+    setIsLoadingProducts(true);
+    fetchDependentOptions("product", "subCategory", formData.subCategory)
+      .then((data) => {
+        if (isMounted) setProducts(data);
+      })
+      .catch(() => {
+        if (isMounted) setProducts([]);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingProducts(false);
+      });
+    return () => {
+      isMounted = false;
+    };
   }, [formData.subCategory]);
 
   useEffect(() => {
@@ -166,6 +224,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     }
 
     let isMounted = true;
+    setVariants([]);
     setIsLoadingVariants(true);
 
     fetchDependentOptions("productVariant", "product", formData.product)
@@ -393,6 +452,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setSuccessData(null);
     setStep(1);
     setFormData({ locationSource: "WAREHOUSE" });
+    setCommodityInput({});
+    setCategories([]);
+    setSubCategories([]);
+    setProducts([]);
+    setVariants([]);
     setResolvedProductId(null);
     setIsLive(true);
     setSubmitPhase("idle");
@@ -406,6 +470,21 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     String(item?.value ?? item?.name ?? item?.label ?? item?.code ?? item?.title ?? "");
 
   const setValue = (key: string, value: any) => {
+    if (key === "category") {
+      setCommodityInput((prev) => ({ ...prev, subCategory: "", product: "", productVariant: "" }));
+      setSubCategories([]);
+      setProducts([]);
+      setVariants([]);
+    }
+    if (key === "subCategory") {
+      setCommodityInput((prev) => ({ ...prev, product: "", productVariant: "" }));
+      setProducts([]);
+      setVariants([]);
+    }
+    if (key === "product") {
+      setCommodityInput((prev) => ({ ...prev, productVariant: "" }));
+      setVariants([]);
+    }
     setFormData((prev) => {
       const next: Record<string, any> = { ...prev, [key]: value };
       if (key === "category") {
@@ -450,7 +529,20 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       }
       return next;
     });
-    setErrors((prev) => ({ ...prev, [key]: "" }));
+    setErrors((prev) => {
+      const next = { ...prev, [key]: "" };
+      if (key === "category") {
+        next.subCategory = "";
+        next.product = "";
+        next.productVariant = "";
+      } else if (key === "subCategory") {
+        next.product = "";
+        next.productVariant = "";
+      } else if (key === "product") {
+        next.productVariant = "";
+      }
+      return next;
+    });
   };
 
   const setProductionMethod = (method: ProductionMethod) => {
@@ -638,6 +730,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const handleAddAnother = () => {
     setSuccessData(null);
     setFormData({ locationSource: "WAREHOUSE" });
+    setCommodityInput({});
     setErrors({});
     setStep(1);
     setSubmitPhase("idle");
@@ -660,8 +753,15 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   };
 
   const itemClasses = {
-    base: "rounded-xl text-foreground data-[hover=true]:bg-default-100 data-[selectable=true]:focus:bg-default-100 data-[selected=true]:text-obaol-400 font-black uppercase text-[10px] tracking-widest h-12 transition-all border border-transparent data-[hover=true]:border-default-200",
-    title: "font-black uppercase tracking-widest text-[11px] text-foreground",
+    base: "rounded-xl text-foreground data-[hover=true]:bg-default-100 data-[selectable=true]:focus:bg-default-100 data-[selected=true]:text-obaol-500 font-semibold text-sm min-h-11 transition-all border border-transparent data-[hover=true]:border-default-200",
+    title: "font-semibold text-sm text-foreground",
+  };
+  const autocompleteField = {
+    base: "w-full",
+    label: "font-bold text-xs text-default-600 mb-1",
+    listboxWrapper: "max-h-64 text-foreground",
+    selectorButton: "text-default-500",
+    clearButton: "text-default-500",
   };
   const productionMethod = formData.productionMethod as ProductionMethod | null | undefined;
   const isConventional = productionMethod === "conventional";
@@ -670,6 +770,83 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const isIpmQuality = productionMethod === "ipm";
   const isGiTagged = Boolean(formData.isGiTagged);
   const isSubmitting = submitPhase !== "idle" || createMutation.isPending;
+
+  const renderCommodityAutocomplete = ({
+    field,
+    label,
+    options,
+    isLoading,
+    isDisabled = false,
+    placeholder,
+  }: {
+    field: "category" | "subCategory" | "product" | "productVariant";
+    label: string;
+    options: any[];
+    isLoading: boolean;
+    isDisabled?: boolean;
+    placeholder: string;
+  }) => {
+    const normalizedOptions = options.map((item) => ({
+      key: getOptionKey(item),
+      label: getOptionLabel(item),
+    }));
+    const selectedKey = formData[field] ? String(formData[field]) : null;
+    const selectedLabel = selectedKey
+      ? normalizedOptions.find((item) => item.key === selectedKey)?.label || ""
+      : "";
+
+    return (
+      <Autocomplete
+        aria-label={label}
+        label={label}
+        placeholder={placeholder}
+        variant="bordered"
+        classNames={autocompleteField}
+        items={normalizedOptions}
+        selectedKey={selectedKey}
+        inputValue={commodityInput[field] ?? selectedLabel}
+        onInputChange={(value) => {
+          setCommodityInput((prev) => ({ ...prev, [field]: value }));
+        }}
+        onSelectionChange={(key) => {
+          const value = key == null ? "" : String(key);
+          const selected = normalizedOptions.find((item) => item.key === value);
+          setCommodityInput((prev) => ({ ...prev, [field]: selected?.label || "" }));
+          setValue(field, value);
+        }}
+        allowsCustomValue={false}
+        defaultFilter={(textValue, inputValue) =>
+          String(textValue || "").toLocaleLowerCase().includes(String(inputValue || "").trim().toLocaleLowerCase())
+        }
+        isClearable
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+        isInvalid={Boolean(errors[field])}
+        errorMessage={errors[field]}
+        listboxProps={{
+          emptyContent: isLoading ? `Loading ${label.toLowerCase()}...` : `No ${label.toLowerCase()} found.`,
+          itemClasses,
+        }}
+        inputProps={{
+          classNames: {
+            input: "text-foreground font-semibold text-sm",
+            inputWrapper: "min-h-14",
+          },
+        }}
+        popoverProps={{
+          classNames: {
+            content: "bg-background border border-default-200 shadow-2xl rounded-2xl p-2",
+          },
+        }}
+      >
+        {(item) => (
+          <AutocompleteItem key={item.key} textValue={item.label} className="text-foreground">
+            {item.label}
+          </AutocompleteItem>
+        )}
+      </Autocomplete>
+    );
+  };
 
   const getStepForErrors = (keys: string[]): number => {
     const step1Keys = new Set([
@@ -847,59 +1024,54 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
             ) : (
               <motion.div key={step} {...motionVariants} className="space-y-4 sm:space-y-6">
                 {step === 1 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-4">
                     {!fixedVariantId && (
-                      <>
-                        <Select variant="bordered" label="Category" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.category ? [formData.category] : []} onSelectionChange={(keys) => setValue("category", Array.from(keys)[0])} isInvalid={!!errors.category} errorMessage={errors.category}>
-                          {categories.map((item) => (
-                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
-                              {getOptionLabel(item)}
-                            </SelectItem>
-                          ))}
-                        </Select>
-                        <Select variant="bordered" label="Sub Category" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.subCategory ? [formData.subCategory] : []} onSelectionChange={(keys) => setValue("subCategory", Array.from(keys)[0])} isDisabled={!formData.category} isInvalid={!!errors.subCategory} errorMessage={errors.subCategory}>
-                          {subCategories.map((item) => (
-                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
-                              {getOptionLabel(item)}
-                            </SelectItem>
-                          ))}
-                        </Select>
-                        <Select variant="bordered" label="Product" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.product ? [formData.product] : []} onSelectionChange={(keys) => setValue("product", Array.from(keys)[0])} isDisabled={!formData.subCategory} isInvalid={!!errors.product} errorMessage={errors.product}>
-                          {products.map((item) => (
-                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
-                              {getOptionLabel(item)}
-                            </SelectItem>
-                          ))}
-                        </Select>
-                        <Select
-                          variant="bordered"
-                          label="Product Variant"
-                          classNames={themeField}
-                          listboxProps={{
-                            itemClasses,
-                            emptyContent: isLoadingVariants ? "Loading variants..." : "No variants found.",
-                          }}
-                          selectedKeys={formData.productVariant ? [formData.productVariant] : []}
-                          onSelectionChange={(keys) => setValue("productVariant", Array.from(keys)[0])}
-                          isLoading={isLoadingVariants}
-                          isDisabled={!formData.product}
-                          isInvalid={!!errors.productVariant}
-                          errorMessage={errors.productVariant}
-                        >
-                          {variants.map((item) => (
-                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
-                              {getOptionLabel(item)}
-                            </SelectItem>
-                          ))}
-                        </Select>
-                      </>
+                      <section aria-labelledby="commodity-selection-heading" className="rounded-2xl border border-default-200 bg-content1 p-4 sm:p-5">
+                        <div className="mb-4">
+                          <h4 id="commodity-selection-heading" className="text-sm font-bold text-foreground">Commodity selection</h4>
+                          <p className="mt-1 text-xs text-default-500">Search and select each level to identify the exact product grade.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                          {renderCommodityAutocomplete({
+                            field: "category",
+                            label: "Category",
+                            options: categories,
+                            isLoading: isLoadingCategories,
+                            placeholder: "Search categories",
+                          })}
+                          {renderCommodityAutocomplete({
+                            field: "subCategory",
+                            label: "Subcategory",
+                            options: subCategories,
+                            isLoading: isLoadingSubCategories,
+                            isDisabled: !formData.category || isLoadingCategories,
+                            placeholder: formData.category ? "Search subcategories" : "Select category first",
+                          })}
+                          {renderCommodityAutocomplete({
+                            field: "product",
+                            label: "Product",
+                            options: products,
+                            isLoading: isLoadingProducts,
+                            isDisabled: !formData.subCategory || isLoadingSubCategories,
+                            placeholder: formData.subCategory ? "Search products" : "Select subcategory first",
+                          })}
+                          {renderCommodityAutocomplete({
+                            field: "productVariant",
+                            label: "Product variant",
+                            options: variants,
+                            isLoading: isLoadingVariants,
+                            isDisabled: !formData.product || isLoadingProducts,
+                            placeholder: formData.product ? "Search product variants" : "Select product first",
+                          })}
+                        </div>
+                      </section>
                     )}
                     {fixedVariantId && (
-                      <div className="md:col-span-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-obaol-500/30 bg-obaol-500/10 text-foreground dark:text-white text-sm sm:text-base">
+                      <div className="p-4 sm:p-5 rounded-2xl border border-obaol-500/30 bg-obaol-500/10 text-foreground text-sm">
                         Variant preselected for this listing.
                       </div>
                     )}
-                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-obaol-500/30 bg-obaol-500/10 px-3 sm:px-4 py-3">
+                    <div className="rounded-xl border border-obaol-500/25 bg-obaol-500/5 px-3 sm:px-4 py-3">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex items-start gap-2">
                           <FiGlobe size={16} className="text-obaol-400 mt-0.5" />
@@ -917,23 +1089,27 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         </button>
                       </div>
                     </div>
-                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-default-200 bg-content2 p-3 sm:p-4">
+                    <section aria-labelledby="classification-heading" className="rounded-2xl border border-default-200 bg-content1 p-4 sm:p-5">
+                      <div className="mb-4">
+                        <h4 id="classification-heading" className="text-sm font-bold text-foreground">Product classification</h4>
+                        <p className="mt-1 text-xs text-default-500">Set the production method and any recognized certification.</p>
+                      </div>
                       {!resolvedProductId ? (
-                        <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 text-xs text-default-500">
+                        <div className="rounded-xl bg-default-100 px-4 py-3 text-xs text-default-500">
                           Select product first to configure classification.
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          <div className="rounded-xl border border-default-200 bg-content1 p-3 sm:p-4">
+                        <div className="space-y-3">
+                          <div className="rounded-xl bg-default-100/70 p-3 sm:p-4">
                             <div className="mb-3">
-                              <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">
+                              <p className="text-xs font-bold text-foreground">
                                 Production / Farming Method
                               </p>
                               <p className="text-[11px] text-default-500 mt-1">
                                 Select the production method used for this product.
                               </p>
                             </div>
-                            <div role="radiogroup" aria-label="Production / Farming Method" className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+                            <div role="radiogroup" aria-label="Production / Farming Method" className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                               {PRODUCTION_METHODS.map((method) => {
                                 const selected = productionMethod === method.key;
                                 return (
@@ -943,13 +1119,13 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                                     role="radio"
                                     aria-checked={selected}
                                     onClick={() => setProductionMethod(method.key)}
-                                    className={`rounded-xl border px-3 sm:px-4 py-3 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 ${
+                                    className={`rounded-xl border px-3 py-2.5 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2 ${
                                       selected
                                         ? "border-obaol-500/60 bg-obaol-500/15 text-obaol-400 shadow-inner"
                                         : "border-default-200 bg-content2 text-default-400 hover:border-default-300 hover:bg-content3"
                                     }`}
                                   >
-                                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                                    <span className="flex items-center gap-2 text-xs font-semibold">
                                       <span className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center ${selected ? "border-obaol-500" : "border-default-400"}`}>
                                         {selected && <span className="h-2 w-2 rounded-full bg-obaol-500" />}
                                       </span>
@@ -964,17 +1140,13 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                             )}
                           </div>
 
-                          <div className="rounded-xl border border-default-200 bg-content1 p-3 sm:p-4">
-                            <div className="mb-3">
-                              <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">
-                                Geographical Certification / Recognition
-                              </p>
-                              <p className="text-[11px] text-default-500 mt-1">
-                                Indicate whether this product has recognized geographical certification.
-                              </p>
+                          <div className="rounded-xl bg-default-100/70 px-3 sm:px-4 py-3 flex items-center justify-between gap-4">
+                            <div>
+                              <p className="text-xs font-bold text-foreground">Geographical indication (GI)</p>
+                              <p className="mt-1 text-[11px] text-default-500">Enable this when the product has recognized geographical certification.</p>
                             </div>
-                            <div className="rounded-xl border border-default-200 bg-content2 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">GI Tag</span>
+                            <div className="flex shrink-0 items-center gap-2">
+                              <span className="text-xs font-semibold text-default-600">GI tag</span>
                               <Switch aria-label="GI Tag" isSelected={isGiTagged} onValueChange={(v) => setValue("isGiTagged", v)} color="warning" />
                             </div>
                           </div>
@@ -1123,7 +1295,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           )}
                         </div>
                       )}
-                    </div>
+                    </section>
                   </div>
                 )}
                 {step === 2 && (

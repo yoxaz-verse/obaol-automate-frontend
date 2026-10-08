@@ -180,7 +180,7 @@ export default function CommonTable({
         case "week":
           return toWeekString(cellValue);
         case "dateTime":
-          return formatDateTime(cellValue);
+          return cellValue ? formatDateTime(cellValue) : (column.emptyValue || "N/A");
         case "file": {
           if (!cellValue) return <span>No Image</span>;
           const imageURL = (item as any).fileURL || `${baseUrl}/${cellValue}`;

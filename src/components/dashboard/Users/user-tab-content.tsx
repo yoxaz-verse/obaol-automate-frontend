@@ -14,7 +14,8 @@ import {
 } from "@/utils/tableValues";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import TableFrame from "@/components/CurdTable/table-frame";
-import { formatLastSeen, getPresenceStatus } from "@/utils/presence";
+import { getPresenceStatus } from "@/utils/presence";
+import UsersExportButton from "./users-export-button";
 
 interface UserTabContentProps {
   currentTable: string;
@@ -64,6 +65,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
         search={debouncedSearch}
         additionalParams={{
           ...filters,
+          sort: "createdAt:desc",
         }}
       >
         {(data: any, _refetch, meta) => {
@@ -72,7 +74,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
           let formFields = tableConfig[currentTable];
 
           const tableData = fetchedData.map((item: any) => {
-            const { isDeleted, isActive, password, __v, ...rest } = item;
+            const { isDeleted, password, __v, ...rest } = item;
             const joinNames = (arr: any[] = []) =>
               arr.length > 0
                 ? arr.map((x) => x.name).join(", ")
@@ -85,7 +87,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 admin: item.admin ? item.admin.name : "N/A",
                 languageKnown: joinNames(item.languageKnown),
                 presenceStatus,
-                lastSeenAt: formatLastSeen(item.lastSeenAt),
               };
             } else if (currentTable === "associate") {
               const designationId =
@@ -104,7 +105,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 designation: designationName || "Unknown",
                 designationId: designationId || "",
                 presenceStatus,
-                lastSeenAt: formatLastSeen(item.lastSeenAt),
               };
             }
             // Handle other user types similarly if needed
@@ -129,6 +129,13 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                   searchValue={search}
                   onSearchChange={setSearch}
                   searchPlaceholder={`Search ${tableLabel}...`}
+                  actionElement={(
+                    <UsersExportButton
+                      currentTable={currentTable}
+                      search={debouncedSearch}
+                      filters={filters}
+                    />
+                  )}
                 />{" "}
               </div>
               <Spacer y={5} />

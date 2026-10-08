@@ -243,6 +243,7 @@ export const initialTableConfig: Record<
     placeholder?: string;
     accept?: string;
     required?: boolean;
+    emptyValue?: string;
     showWhen?: { key: string; equals: any[] };
   }[]
 > = {
@@ -284,6 +285,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Last Login",
@@ -292,6 +294,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Created At",
@@ -456,6 +459,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Last Login",
@@ -464,6 +468,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Created At",
@@ -525,6 +530,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Last Login",
@@ -533,6 +539,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Created At",
@@ -673,6 +680,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Last Login",
@@ -681,6 +689,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Password",

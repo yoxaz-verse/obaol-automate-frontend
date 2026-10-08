@@ -95,6 +95,8 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
   assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
   assert.equal(explorer.includes('data-execution-stage-band="true"'), true);
+  assert.equal(explorer.includes('data-hero-assistant-safe-zone="true"'), true);
+  assert.equal(explorer.includes('data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="mt-'), false);
   assert.equal(explorer.includes("data-execution-phase={phase.phase.toLowerCase()}"), true);
   assert.equal(explorer.includes("data-execution-stage-group={phase.phase.toLowerCase()}"), true);
   assert.equal(explorer.includes('/images/hero-agro-execution-v2.webp'), true);
@@ -119,6 +121,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(heroCta.includes("Start Selling"), false);
   assert.equal(heroCta.includes("Work in Operations"), false);
   assert.equal(hero.includes("animate-ping"), false);
+  assert.equal(hero.indexOf("</section>") < hero.indexOf("<HeroStageBand stages={HERO_STAGES} />"), true);
   assert.equal(hero.includes('data-natural-scroll-hero="true"'), true);
   assert.equal(hero.includes('lg:sticky lg:top-28'), false);
   assert.equal(homepage.includes('className="obaol-home bg-background text-foreground"'), true);

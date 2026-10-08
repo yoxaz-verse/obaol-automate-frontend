@@ -16,7 +16,8 @@ const HERO_STAGES = [
 
 export default function HeroSectionServer() {
   return (
-    <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-12 pt-16 lg:pb-16 lg:pt-20">
+    <>
+    <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-8 pt-16 lg:pb-10 lg:pt-16">
       {/* Ambient background glow & grid mesh */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-obaol-500/10 blur-[120px] dark:bg-obaol-500/14" />
@@ -28,7 +29,7 @@ export default function HeroSectionServer() {
         <div className="mx-auto grid w-full max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center xl:gap-20">
           <div className="space-y-5 lg:py-2">
             {/* Status / Kicker Pill */}
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-obaol-500/30 bg-obaol-500/10 px-4 py-1.5 backdrop-blur-md shadow-sm">
+            <div className="inline-flex items-center gap-2.5 py-1">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-obaol-500"></span>
               </span>
@@ -65,10 +66,9 @@ export default function HeroSectionServer() {
           <HeroStageExplorer />
         </div>
 
-        <div className="mx-auto w-full max-w-7xl">
-          <HeroStageBand stages={HERO_STAGES} />
-        </div>
       </div>
     </section>
+    <HeroStageBand stages={HERO_STAGES} />
+    </>
   );
 }

@@ -29,7 +29,7 @@ import { CompanyMetricCard, CompanyProfileReadiness } from "@/components/dashboa
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
-  "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk",
+  "buying", "selling", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk",
   "importing-distribution", "freight-forwarding", "inland-logistics",
 ]);
 
@@ -92,8 +92,10 @@ export default function CompanyWorkspacePage() {
   const [reasonCode, setReasonCode] = useState("INACTIVE_MEMBER");
   const [description, setDescription] = useState("");
   const [isInterestModalOpen, setIsInterestModalOpen] = useState(false);
-  const [requestedFunctionIds, setRequestedFunctionIds] = useState<string[]>([]);
-  const [requestedFunctionPriorities, setRequestedFunctionPriorities] = useState<string[]>([]);
+  const [requestedProvidedIds, setRequestedProvidedIds] = useState<string[]>([]);
+  const [requestedSoughtIds, setRequestedSoughtIds] = useState<string[]>([]);
+  const [requestedProvidedPriorities, setRequestedProvidedPriorities] = useState<string[]>([]);
+  const [requestedSoughtPriorities, setRequestedSoughtPriorities] = useState<string[]>([]);
   const [interestNote, setInterestNote] = useState("");
   const [selectedObaolCompanyId, setSelectedObaolCompanyId] = useState("");
   const [recentInterestSubmission, setRecentInterestSubmission] = useState<{
@@ -266,14 +268,16 @@ export default function CompanyWorkspacePage() {
 
   const interestRequestMutation = useMutation({
     mutationFn: async () => {
-      if (!requestedFunctionIds.length) throw new Error("Select at least one company category.");
+      if (!requestedProvidedIds.length || !requestedSoughtIds.length) throw new Error("Select at least one provided and one sought category.");
       const response = await postData(apiRoutes.organizationReports.create, {
         targetAssociateId: user?.id,
         reasonCode: "COMPANY_INTEREST_UPDATE",
         description: interestNote.trim() || "Company interest update request from My Company.",
         payload: {
-          requestedCompanyFunctionIds: requestedFunctionIds,
-          requestedCompanyFunctionPriorities: requestedFunctionPriorities,
+          requestedProvidedFunctionIds: requestedProvidedIds,
+          requestedSoughtFunctionIds: requestedSoughtIds,
+          requestedProvidedFunctionPriorities: requestedProvidedPriorities,
+          requestedSoughtFunctionPriorities: requestedSoughtPriorities,
           note: interestNote.trim(),
         },
       });
@@ -283,7 +287,7 @@ export default function CompanyWorkspacePage() {
       return response?.data?.data || null;
     },
     onSuccess: (createdReport: any) => {
-      const submittedInterests = [...requestedFunctionIds];
+      const submittedInterests = [...requestedProvidedIds, ...requestedSoughtIds];
       showToastMessage({
         type: "success",
         message:
@@ -292,15 +296,17 @@ export default function CompanyWorkspacePage() {
       });
       setRecentInterestSubmission({
         requestedInterests:
-          Array.isArray(createdReport?.payload?.requestedCompanyFunctionIds) && createdReport.payload.requestedCompanyFunctionIds.length
-            ? createdReport.payload.requestedCompanyFunctionIds.map((value: any) => String(value || ""))
+          Array.isArray(createdReport?.payload?.requestedProvidedFunctionIds) && createdReport.payload.requestedProvidedFunctionIds.length
+            ? [...createdReport.payload.requestedProvidedFunctionIds, ...(createdReport.payload.requestedSoughtFunctionIds || [])].map((value: any) => String(value || ""))
             : submittedInterests,
         createdAt: String(createdReport?.createdAt || new Date().toISOString()),
         syncing: !Boolean(createdReport?._id),
       });
       setIsInterestModalOpen(false);
-      setRequestedFunctionIds([]);
-      setRequestedFunctionPriorities([]);
+      setRequestedProvidedIds([]);
+      setRequestedSoughtIds([]);
+      setRequestedProvidedPriorities([]);
+      setRequestedSoughtPriorities([]);
       setInterestNote("");
       queryClient.invalidateQueries({ queryKey: ["company-workspace-reports"] });
     },
@@ -346,13 +352,6 @@ export default function CompanyWorkspacePage() {
     () => extractList(obaolCompanyDirectoryQuery.data),
     [obaolCompanyDirectoryQuery.data]
   );
-  const interestsFromStatus = Array.isArray(interestsQuery.data?.companyInterests)
-    ? interestsQuery.data.companyInterests.map((value: any) => String(value || ""))
-    : [];
-  const interestsFromCompany = Array.isArray((company as any)?.providedCapabilities)
-    ? (company as any).providedCapabilities.map((value: any) => String(value || "").toUpperCase())
-    : [];
-  const companyInterests = interestsFromStatus.length ? interestsFromStatus : interestsFromCompany;
   const capabilityOptions = useMemo(
     () => (Array.isArray(registerOptionsQuery.data?.companyFunctions) ? registerOptionsQuery.data.companyFunctions : [])
       .filter((item: any) => MAIN_CATEGORY_SLUGS.has(String(item?.slug || "")))
@@ -367,12 +366,25 @@ export default function CompanyWorkspacePage() {
     () => new Map(capabilityOptions.map((item: any) => [String(item?.slug || "").toLowerCase(), item])),
     [capabilityOptions]
   );
-  const approvedFunctionIds = Array.isArray(interestsQuery.data?.approvedCompanyFunctionIds)
-    ? interestsQuery.data.approvedCompanyFunctionIds.map((value: any) => String(value))
-    : companyInterests.map((slug: string) => String(capabilityBySlug.get(String(slug).toLowerCase())?._id || "")).filter(Boolean);
-  const approvedPriorityIds = Array.isArray(interestsQuery.data?.approvedCompanyFunctionPriorities)
-    ? interestsQuery.data.approvedCompanyFunctionPriorities.map((value: any) => String(value))
+  const idsFromSlugs = (values: any) => (Array.isArray(values) ? values : [])
+    .map((slug: any) => String(capabilityBySlug.get(String(slug).toLowerCase())?._id || ""))
+    .filter(Boolean);
+  const providedFunctionIds = Array.isArray(interestsQuery.data?.providedFunctionIds)
+    ? interestsQuery.data.providedFunctionIds.map(String)
+    : idsFromSlugs(interestsQuery.data?.providedCapabilities || (company as any)?.providedCapabilities);
+  const soughtFunctionIds = Array.isArray(interestsQuery.data?.soughtFunctionIds)
+    ? interestsQuery.data.soughtFunctionIds.map(String)
+    : Array.isArray(interestsQuery.data?.approvedCompanyFunctionIds)
+      ? interestsQuery.data.approvedCompanyFunctionIds.map(String)
+      : idsFromSlugs(interestsQuery.data?.soughtCapabilities || (company as any)?.soughtCapabilities);
+  const providedPriorityIds = Array.isArray(interestsQuery.data?.providedFunctionPriorities)
+    ? interestsQuery.data.providedFunctionPriorities.map(String)
     : [];
+  const soughtPriorityIds = Array.isArray(interestsQuery.data?.soughtFunctionPriorities)
+    ? interestsQuery.data.soughtFunctionPriorities.map(String)
+    : Array.isArray(interestsQuery.data?.approvedCompanyFunctionPriorities)
+      ? interestsQuery.data.approvedCompanyFunctionPriorities.map(String)
+      : [];
   const interestReports = useMemo(
     () => reports.filter((row: any) => String(row?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE"),
     [reports]
@@ -432,6 +444,10 @@ export default function CompanyWorkspacePage() {
 
 
   const pendingBannerRequestedInterests = useMemo(() => {
+    if (latestPendingLikeReport && ((latestPendingLikeReport?.payload?.requestedProvidedFunctionIds?.length || 0) > 0 || (latestPendingLikeReport?.payload?.requestedSoughtFunctionIds?.length || 0) > 0)) {
+      return [...(latestPendingLikeReport.payload.requestedProvidedFunctionIds || []), ...(latestPendingLikeReport.payload.requestedSoughtFunctionIds || [])]
+        .map((value: any) => String(value || ""));
+    }
     if (latestPendingLikeReport && Array.isArray(latestPendingLikeReport?.payload?.requestedCompanyFunctionIds)) {
       return latestPendingLikeReport.payload.requestedCompanyFunctionIds.map((value: any) => String(value || ""));
     }
@@ -459,29 +475,34 @@ export default function CompanyWorkspacePage() {
     { label: "Company story", complete: Boolean(company?.description || company?.aboutUs) },
     { label: "Brand assets", complete: Boolean(company?.logo || company?.banner) },
     { label: "Website", complete: Boolean(company?.website || previewUrl) },
-    { label: "Capabilities", complete: approvedFunctionIds.length > 0 },
+    { label: "Capabilities", complete: providedFunctionIds.length > 0 && soughtFunctionIds.length > 0 },
     { label: "Team", complete: members.length > 0 },
   ];
   const profileCompleteness = Math.round((profileChecks.filter((item) => item.complete).length / profileChecks.length) * 100);
   const openCapabilityEditor = () => {
-    setRequestedFunctionIds(approvedFunctionIds);
-    setRequestedFunctionPriorities(approvedPriorityIds.filter((id: string) => approvedFunctionIds.includes(id)).slice(0, 3));
+    setRequestedProvidedIds(providedFunctionIds);
+    setRequestedSoughtIds(soughtFunctionIds);
+    setRequestedProvidedPriorities(providedPriorityIds.filter((id: string) => providedFunctionIds.includes(id)).slice(0, 3));
+    setRequestedSoughtPriorities(soughtPriorityIds.filter((id: string) => soughtFunctionIds.includes(id)).slice(0, 3));
     setInterestNote("");
     setIsInterestModalOpen(true);
   };
-  const toggleRequestedFunction = (id: string) => {
-    setRequestedFunctionIds((current) => {
+  const toggleRequestedFunction = (kind: "provided" | "sought", id: string) => {
+    const setIds = kind === "provided" ? setRequestedProvidedIds : setRequestedSoughtIds;
+    const setPriorities = kind === "provided" ? setRequestedProvidedPriorities : setRequestedSoughtPriorities;
+    setIds((current) => {
       if (current.includes(id)) {
-        setRequestedFunctionPriorities((priorities) => priorities.filter((item) => item !== id));
+        setPriorities((priorities) => priorities.filter((item) => item !== id));
         return current.filter((item) => item !== id);
       }
       if (current.length >= 6) return current;
-      setRequestedFunctionPriorities((priorities) => priorities.length < 3 ? [...priorities, id] : priorities);
+      setPriorities((priorities) => priorities.length < 3 ? [...priorities, id] : priorities);
       return [...current, id];
     });
   };
-  const moveRequestedPriority = (id: string, direction: -1 | 1) => {
-    setRequestedFunctionPriorities((current) => {
+  const moveRequestedPriority = (kind: "provided" | "sought", id: string, direction: -1 | 1) => {
+    const setPriorities = kind === "provided" ? setRequestedProvidedPriorities : setRequestedSoughtPriorities;
+    setPriorities((current) => {
       const index = current.indexOf(id);
       const target = index + direction;
       if (index < 0 || target < 0 || target >= current.length) return current;
@@ -489,6 +510,43 @@ export default function CompanyWorkspacePage() {
       [next[index], next[target]] = [next[target], next[index]];
       return next;
     });
+  };
+  const renderApprovedProfile = (title: string, ids: string[], priorities: string[]) => (
+    <div>
+      <h3 className="mb-3 text-xs font-black uppercase tracking-widest text-default-500">{title}</h3>
+      {ids.length ? <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
+        {[...ids].sort((a, b) => {
+          const ai = priorities.indexOf(a); const bi = priorities.indexOf(b);
+          return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+        }).map((id) => {
+          const capability = capabilityById.get(id);
+          const priority = priorities.indexOf(id);
+          return <div key={`${title}-${id}`} className="rounded-xl border border-default-200 bg-default-50/50 p-3"><div className="flex items-start justify-between gap-2"><p className="text-sm font-bold">{capability?.name || "Company category"}</p>{priority >= 0 ? <Chip size="sm" color="warning" variant="flat">P{priority + 1}</Chip> : null}</div><p className="mt-1 text-xs text-default-500">{capability?.description || "Company capability"}</p></div>;
+        })}
+      </div> : <p className="text-sm text-default-500">No categories configured.</p>}
+    </div>
+  );
+  const renderRequestedProfile = (kind: "provided" | "sought") => {
+    const ids = kind === "provided" ? requestedProvidedIds : requestedSoughtIds;
+    const priorities = kind === "provided" ? requestedProvidedPriorities : requestedSoughtPriorities;
+    const setPriorities = kind === "provided" ? setRequestedProvidedPriorities : setRequestedSoughtPriorities;
+    return <section className="rounded-2xl border border-default-200 p-4">
+      <h3 className="text-xs font-black uppercase tracking-widest">What your company {kind === "provided" ? "provides" : "is seeking"}</h3>
+      <p className="mt-1 text-xs text-default-500">Select 1–6 categories and rank up to three priorities.</p>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {capabilityOptions.map((capability: any) => {
+          const id = String(capability?._id || "");
+          const selected = ids.includes(id);
+          const priority = priorities.indexOf(id);
+          const disabled = !selected && ids.length >= 6;
+          return <button key={`${kind}-${id}`} type="button" disabled={disabled} aria-pressed={selected} onClick={() => toggleRequestedFunction(kind, id)} className={`min-h-16 rounded-xl border p-2.5 text-left transition ${selected ? "border-primary-500 bg-primary-500/10" : disabled ? "cursor-not-allowed border-default-100 opacity-40" : "border-default-200 hover:border-primary-500/50"}`}>
+            <div className="flex items-center justify-between gap-2"><span className="text-xs font-bold leading-tight">{capability?.name}</span>{priority >= 0 ? <Chip size="sm" color="primary" variant="flat">P{priority + 1}</Chip> : null}</div>
+            {selected && priority < 0 && priorities.length < 3 ? <span role="button" tabIndex={0} className="mt-2 inline-block text-[11px] font-semibold text-primary-600" onClick={(event) => { event.stopPropagation(); setPriorities((current) => [...current, id]); }}>Set as priority</span> : null}
+          </button>;
+        })}
+      </div>
+      <div className="mt-4 rounded-xl bg-default-50/50 p-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Priority order (1–3)</p>{priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => <div key={`${kind}-${id}`} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><span className="text-sm font-semibold"><b className="mr-2 text-primary-600">{index + 1}</b>{capabilityById.get(id)?.name || "Selected category"}</span><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(kind, id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === priorities.length - 1} onPress={() => moveRequestedPriority(kind, id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">Your first three selections become priorities.</p>}</div>
+    </section>;
   };
   const operatorAssignedCompanies = useMemo(
     () => (Array.isArray(operatorAssignedCompaniesQuery.data) ? operatorAssignedCompaniesQuery.data : []),
@@ -812,8 +870,8 @@ export default function CompanyWorkspacePage() {
           </Button>
         </div>
         <div className="mb-3">
-          <Chip size="sm" color={companyInterests.length ? "success" : "warning"} variant="flat">
-            {companyInterests.length ? "Configured" : "Not Configured"}
+          <Chip size="sm" color={providedFunctionIds.length && soughtFunctionIds.length ? "success" : "warning"} variant="flat">
+            {providedFunctionIds.length && soughtFunctionIds.length ? "Configured" : "Not Configured"}
           </Chip>
         </div>
         <div className="mb-3 flex flex-wrap gap-2">
@@ -856,22 +914,10 @@ export default function CompanyWorkspacePage() {
             </div>
           </div>
         )}
-        {approvedFunctionIds.length ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[...approvedFunctionIds].sort((a, b) => {
-              const ai = approvedPriorityIds.indexOf(a); const bi = approvedPriorityIds.indexOf(b);
-              return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
-            }).map((id: string) => {
-              const capability = capabilityById.get(id);
-              const priority = approvedPriorityIds.indexOf(id);
-              return <div key={id} className="rounded-xl border border-default-200 bg-default-50/50 p-3"><div className="flex items-start justify-between gap-2"><p className="text-sm font-bold">{capability?.name || "Company category"}</p>{priority >= 0 ? <Chip size="sm" color="warning" variant="flat">Priority {priority + 1}</Chip> : null}</div><p className="mt-1 text-xs text-default-500">{capability?.description || "Approved company capability"}</p></div>;
-            })}
-          </div>
-        ) : (
-          <p className="text-sm text-default-500">
-            No approved capabilities available yet. Submit a change request for admin approval.
-          </p>
-        )}
+        <div className="grid gap-6 xl:grid-cols-2">
+          {renderApprovedProfile("What your company provides", providedFunctionIds, providedPriorityIds)}
+          {renderApprovedProfile("What your company is seeking", soughtFunctionIds, soughtPriorityIds)}
+        </div>
       </div>
 
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
@@ -967,7 +1013,15 @@ export default function CompanyWorkspacePage() {
                     className={`border-t border-default-200/70 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
                   >
                     <td className="px-3 py-2">
-                      <div className="flex flex-wrap gap-1">
+                      {(report?.payload?.requestedProvidedFunctionIds?.length || 0) > 0 || (report?.payload?.requestedSoughtFunctionIds?.length || 0) > 0 ? (
+                        <div className="space-y-2">
+                          {(["provided", "sought"] as const).map((kind) => {
+                            const ids = report?.payload?.[kind === "provided" ? "requestedProvidedFunctionIds" : "requestedSoughtFunctionIds"] || [];
+                            const priorities = (report?.payload?.[kind === "provided" ? "requestedProvidedFunctionPriorities" : "requestedSoughtFunctionPriorities"] || []).map(String);
+                            return <div key={`${report?._id}-${kind}`}><span className="mr-2 text-[10px] font-black uppercase text-default-400">{kind}</span><span className="inline-flex flex-wrap gap-1">{ids.map((id: string) => { const priority = priorities.indexOf(String(id)); return <Chip key={`${report?._id}-${kind}-${id}`} size="sm" color={priority >= 0 ? "warning" : "primary"} variant="flat">{capabilityById.get(String(id))?.name || "Company category"}{priority >= 0 ? ` · P${priority + 1}` : ""}</Chip>; })}</span></div>;
+                          })}
+                        </div>
+                      ) : <div className="flex flex-wrap gap-1">
                         {Array.isArray(report?.payload?.requestedCompanyFunctionIds) && report.payload.requestedCompanyFunctionIds.length > 0
                           ? report.payload.requestedCompanyFunctionIds.map((id: string) => {
                               const priority = (report?.payload?.requestedCompanyFunctionPriorities || []).map(String).indexOf(String(id));
@@ -976,7 +1030,7 @@ export default function CompanyWorkspacePage() {
                           : Array.isArray(report?.payload?.requestedInterests) && report.payload.requestedInterests.length > 0
                             ? report.payload.requestedInterests.map((interest: string) => <Chip key={`${report?._id}-${interest}`} size="sm" color="default" variant="flat">{String(interest || "").replace(/_/g, " ")}</Chip>)
                           : "-"}
-                      </div>
+                      </div>}
                     </td>
                     <td className="px-3 py-2 text-default-600">{report?.reporterAssociateId?.name || "Company member"}</td>
                     <td className="px-3 py-2">
@@ -1109,8 +1163,10 @@ export default function CompanyWorkspacePage() {
         onOpenChange={(open) => {
           if (!open) {
             setIsInterestModalOpen(false);
-            setRequestedFunctionIds([]);
-            setRequestedFunctionPriorities([]);
+            setRequestedProvidedIds([]);
+            setRequestedSoughtIds([]);
+            setRequestedProvidedPriorities([]);
+            setRequestedSoughtPriorities([]);
             setInterestNote("");
           }
         }}
@@ -1118,21 +1174,9 @@ export default function CompanyWorkspacePage() {
         isKeyboardDismissDisabled
       >
         <ModalContent className="max-w-3xl">
-          <ModalHeader className="flex flex-col items-start gap-1"><span>Change Company Capabilities</span><span className="text-xs font-normal text-default-500">Select 1–6 onboarding categories and rank up to three priorities.</span></ModalHeader>
+          <ModalHeader className="flex flex-col items-start gap-1"><span>Change Company Capabilities</span><span className="text-xs font-normal text-default-500">Maintain separate provided and sought profiles. Changes require admin approval.</span></ModalHeader>
           <ModalBody className="max-h-[70vh] overflow-y-auto">
-            {registerOptionsQuery.isLoading ? <div className="flex justify-center py-10"><Spinner /></div> : registerOptionsQuery.isError ? <div className="rounded-xl bg-danger-50 p-4 text-sm text-danger-700">Capability options could not be loaded. Try again.</div> : <div className="grid gap-2 sm:grid-cols-2">
-              {capabilityOptions.map((capability: any) => {
-                const id = String(capability?._id || "");
-                const selected = requestedFunctionIds.includes(id);
-                const priority = requestedFunctionPriorities.indexOf(id);
-                const disabled = !selected && requestedFunctionIds.length >= 6;
-                return <div key={id} role="button" tabIndex={disabled ? -1 : 0} aria-pressed={selected} onClick={() => !disabled && toggleRequestedFunction(id)} onKeyDown={(event) => { if (!disabled && (event.key === "Enter" || event.key === " ")) toggleRequestedFunction(id); }} className={`cursor-pointer rounded-xl border p-3 transition ${selected ? "border-obaol-500 bg-obaol-500/10" : disabled ? "cursor-not-allowed border-default-100 opacity-40" : "border-default-200 hover:border-obaol-500/50"}`}>
-                  <div className="flex items-start justify-between gap-3"><div className="flex gap-2"><span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${selected ? "border-obaol-500 bg-obaol-500 text-black" : "border-default-300"}`}>{selected ? <LuCheck size={12} /> : null}</span><div><p className="text-sm font-bold">{capability?.name}</p><p className="mt-1 text-xs text-default-500">{capability?.description || "Company capability"}</p></div></div>{priority >= 0 ? <Chip size="sm" color="warning" variant="flat">P{priority + 1}</Chip> : null}</div>
-                  {selected && priority < 0 && <button type="button" className="mt-2 text-xs font-semibold text-obaol-600" onClick={(event) => { event.stopPropagation(); setRequestedFunctionPriorities((current) => [...current.slice(0, 2), id]); }}>Set as priority</button>}
-                </div>;
-              })}
-            </div>}
-            <div className="rounded-xl border border-default-200 bg-default-50/50 p-4"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Priority order (1–3)</p>{requestedFunctionPriorities.length ? <div className="mt-3 space-y-2">{requestedFunctionPriorities.map((id, index) => <div key={id} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><div className="flex items-center gap-2"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-obaol-500 text-xs font-black text-black">{index + 1}</span><span className="text-sm font-semibold">{capabilityById.get(id)?.name || "Selected category"}</span></div><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === requestedFunctionPriorities.length - 1} onPress={() => moveRequestedPriority(id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">Selected categories are automatically added here until all three priority slots are filled.</p>}</div>
+            {registerOptionsQuery.isLoading ? <div className="flex justify-center py-10"><Spinner /></div> : registerOptionsQuery.isError ? <div className="rounded-xl bg-danger-50 p-4 text-sm text-danger-700">Capability options could not be loaded. Try again.</div> : <div className="space-y-4">{renderRequestedProfile("provided")}{renderRequestedProfile("sought")}</div>}
             <Textarea
               label="Note (Optional)"
               labelPlacement="outside"
@@ -1149,7 +1193,7 @@ export default function CompanyWorkspacePage() {
             <Button
               color="primary"
               isLoading={interestRequestMutation.isPending}
-              isDisabled={requestedFunctionIds.length === 0 || Boolean(latestPendingLikeReport)}
+              isDisabled={requestedProvidedIds.length === 0 || requestedSoughtIds.length === 0 || Boolean(latestPendingLikeReport)}
               onPress={() => interestRequestMutation.mutate()}
             >
               Submit Request

@@ -593,3 +593,56 @@ a {
     scroll-padding-bottom: var(--mobile-app-bottom-space);
   }
 }
+
+/* Associate onboarding uses one blue focus treatment for the complete control.
+   This intentionally overrides the dashboard-wide gold focus ring only inside
+   this form; native inputs should not draw a second, inset outline. */
+.associate-onboarding-form {
+  --associate-focus: #006fee;
+  --associate-focus-ring: rgba(0, 111, 238, 0.2);
+}
+
+.associate-onboarding-form :is(input, textarea):focus,
+.associate-onboarding-form :is(input, textarea):focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+.associate-onboarding-form :is(input, textarea)::selection {
+  background: rgba(0, 111, 238, 0.2);
+  color: inherit;
+}
+
+.associate-onboarding-form
+  :is([data-slot="input-wrapper"], [data-slot="trigger"]):not([data-invalid="true"]):is(
+    :focus-within,
+    [data-focus="true"],
+    [data-focus-visible="true"]
+  ),
+.associate-onboarding-form .associate-control-shell:not([data-invalid="true"]):focus-within {
+  border-color: var(--associate-focus) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px var(--associate-focus-ring) !important;
+}
+
+.associate-onboarding-form
+  :is([data-slot="input-wrapper"], [data-slot="trigger"])[data-invalid="true"]:is(
+    :focus-within,
+    [data-focus="true"],
+    [data-focus-visible="true"]
+  ) {
+  border-color: hsl(var(--nextui-danger)) !important;
+  box-shadow: 0 0 0 3px hsl(var(--nextui-danger) / 0.18) !important;
+}
+
+.associate-onboarding-form .associate-control-shell[data-invalid="true"]:focus-within {
+  border-color: hsl(var(--nextui-danger)) !important;
+  box-shadow: 0 0 0 3px hsl(var(--nextui-danger) / 0.18) !important;
+}
+
+.associate-onboarding-form
+  :is(button, [role="radio"], [role="checkbox"]):focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px var(--associate-focus-ring) !important;
+}

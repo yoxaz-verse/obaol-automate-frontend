@@ -83,6 +83,10 @@ export default function ReportsPage() {
   const capabilityNameById = useMemo(() => new Map(
     (capabilityOptionsQuery.data?.companyFunctions || []).map((item: any) => [String(item?._id || ""), String(item?.name || "Company category")])
   ), [capabilityOptionsQuery.data]);
+  const renderCapabilityChips = (ids: any, priorities: any, keyPrefix: string) => (Array.isArray(ids) ? ids : []).map((id: string) => {
+    const priority = (Array.isArray(priorities) ? priorities : []).map(String).indexOf(String(id));
+    return <Chip key={`${keyPrefix}-${id}`} size="sm" color={priority >= 0 ? "warning" : "primary"} variant="flat">{capabilityNameById.get(String(id)) || "Company category"}{priority >= 0 ? ` · P${priority + 1}` : ""}</Chip>;
+  });
 
   const reportsQuery = useQuery({
     queryKey: ["admin-reports", status, search, companyId, page, limit],
@@ -280,7 +284,7 @@ export default function ReportsPage() {
                     <td className="px-3 py-2">{row?.reporterCompanyId?.name || "-"}</td>
                     <td className="px-3 py-2">{row?.reporterAssociateId?.name || "-"}</td>
                     <td className="px-3 py-2">
-                      <div className="flex flex-wrap gap-1">
+                      {(row?.payload?.requestedProvidedFunctionIds?.length || 0) > 0 || (row?.payload?.requestedSoughtFunctionIds?.length || 0) > 0 ? <div className="space-y-1"><div><span className="mr-2 text-[10px] font-black uppercase text-default-400">Provided</span><span className="inline-flex flex-wrap gap-1">{renderCapabilityChips(row.payload.requestedProvidedFunctionIds, row.payload.requestedProvidedFunctionPriorities, `${row?._id}-provided`)}</span></div><div><span className="mr-2 text-[10px] font-black uppercase text-default-400">Seeking</span><span className="inline-flex flex-wrap gap-1">{renderCapabilityChips(row.payload.requestedSoughtFunctionIds, row.payload.requestedSoughtFunctionPriorities, `${row?._id}-sought`)}</span></div></div> : <div className="flex flex-wrap gap-1">
                         {Array.isArray(row?.payload?.requestedCompanyFunctionIds) && row.payload.requestedCompanyFunctionIds.length > 0 ? (
                           row.payload.requestedCompanyFunctionIds.map((id: string) => {
                             const priority = (row?.payload?.requestedCompanyFunctionPriorities || []).map(String).indexOf(String(id));
@@ -295,7 +299,7 @@ export default function ReportsPage() {
                         ) : (
                           <span className="text-default-500">-</span>
                         )}
-                      </div>
+                      </div>}
                     </td>
                     <td className="px-3 py-2">
                       <Chip size="sm" color={statusColor(row?.status) as any} variant="flat">
@@ -438,7 +442,7 @@ export default function ReportsPage() {
             {String(activeReport?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE" ? (
               <div>
                 <div className="text-sm font-medium text-default-700 mb-2">Requested Interests</div>
-                <div className="flex flex-wrap gap-2">
+                {(activeReport?.payload?.requestedProvidedFunctionIds?.length || 0) > 0 || (activeReport?.payload?.requestedSoughtFunctionIds?.length || 0) > 0 ? <div className="space-y-2"><div><p className="mb-1 text-xs font-black uppercase text-default-400">Provided</p><div className="flex flex-wrap gap-2">{renderCapabilityChips(activeReport.payload.requestedProvidedFunctionIds, activeReport.payload.requestedProvidedFunctionPriorities, "modal-provided")}</div></div><div><p className="mb-1 text-xs font-black uppercase text-default-400">Seeking</p><div className="flex flex-wrap gap-2">{renderCapabilityChips(activeReport.payload.requestedSoughtFunctionIds, activeReport.payload.requestedSoughtFunctionPriorities, "modal-sought")}</div></div></div> : <div className="flex flex-wrap gap-2">
                   {Array.isArray(activeReport?.payload?.requestedCompanyFunctionIds) && activeReport.payload.requestedCompanyFunctionIds.length > 0 ? (
                     activeReport.payload.requestedCompanyFunctionIds.map((id: string) => {
                       const priority = (activeReport?.payload?.requestedCompanyFunctionPriorities || []).map(String).indexOf(String(id));
@@ -453,7 +457,7 @@ export default function ReportsPage() {
                   ) : (
                     <span className="text-sm text-default-500">No requested interests provided.</span>
                   )}
-                </div>
+                </div>}
               </div>
             ) : null}
             {String(activeReport?.reasonCode || "").toUpperCase() === "REOPEN_INQUIRY_REQUEST" ? (

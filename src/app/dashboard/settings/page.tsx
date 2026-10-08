@@ -10,7 +10,7 @@ import AuthContext from "@/context/AuthContext";
 const settingsLinks = [
   {
     title: "My Company",
-    description: "Review and update your company profile, capabilities, verification, and service details.",
+    description: "Review your company profile and update what your company provides, what it is seeking, priorities, verification, and service details.",
     href: "/dashboard/company",
     icon: FiBriefcase,
     associateOnly: true,

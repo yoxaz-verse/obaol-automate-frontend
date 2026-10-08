@@ -17,10 +17,11 @@ import {
   Chip,
   Spinner,
 } from "@nextui-org/react";
-import { IoArchive, IoBoat, IoBusiness, IoCall, IoCar, IoCash, IoEarth, IoEye, IoEyeOff, IoFlask, IoHome, IoLink, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch, IoSwapHorizontal } from "react-icons/io5";
+import { IoArchive, IoBoat, IoBusiness, IoCall, IoCar, IoCart, IoCash, IoEarth, IoEye, IoEyeOff, IoFlask, IoHome, IoLink, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch, IoStorefront, IoSwapHorizontal } from "react-icons/io5";
 import { LuBadgeCheck, LuPackageSearch, LuSearchCheck } from "react-icons/lu";
 import { FiCheck, FiChevronDown, FiChevronLeft, FiChevronRight, FiChevronUp } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import axios from "axios";
 import { showToastMessage } from "@/utils/utils";
 import AuthLayout from "@/components/Auth/AuthLayout";
@@ -40,6 +41,8 @@ type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
 const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 const MAIN_CATEGORY_SLUGS = new Set([
+  "buying",
+  "selling",
   "sourcing",
   "packaging",
   "testing",
@@ -156,7 +159,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
   const debouncedEmail = useDebouncedValue(formData.email, 350);
   const [companySearch, setCompanySearch] = useState("");
+  const [isCompanySearchOpen, setIsCompanySearchOpen] = useState(false);
   const debouncedCompanySearch = useDebouncedValue(companySearch.trim(), 300);
+  const normalizedCompanySearch = companySearch.trim();
+  const canShowCompanySearchResults =
+    normalizedCompanySearch.length >= 3 && debouncedCompanySearch === normalizedCompanySearch;
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
   const [optionsDebug, setOptionsDebug] = useState<{
     resolvedEndpoint: string;
@@ -230,6 +237,10 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     staleTime: 60_000,
     retry: 1,
   });
+
+  useEffect(() => {
+    if (normalizedCompanySearch.length < 3) setIsCompanySearchOpen(false);
+  }, [normalizedCompanySearch]);
 
   useEffect(() => {
     if (!isOnboarding || currentStep !== 1) return;
@@ -566,6 +577,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
   const capabilityIcon = (slug: string) => {
     const icons: Record<string, React.ReactNode> = {
+      buying: <IoCart />,
+      selling: <IoStorefront />,
       sourcing: <IoSearch />,
       packaging: <IoArchive />,
       testing: <IoFlask />,
@@ -591,7 +604,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           <h4 className="text-xs font-black uppercase tracking-widest">{title}</h4>
           <span className="ml-auto text-[10px] font-bold text-default-400">{ids.length}/6 selected</span>
         </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <p className="mb-3 text-xs leading-5 text-default-500">
+          {kind === "provided"
+            ? "Choose the activities, products, or services your company offers or performs."
+            : "Choose the products, services, or partnerships your company wants to find."}
+        </p>
+        <div className="grid grid-cols-2 gap-2">
           {groupedCompanyFunctions.map((fn: any) => {
             const fnId = String(fn?._id || "");
             const selected = ids.includes(fnId);
@@ -600,9 +618,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             return (
               <button key={`${kind}-${fnId}`} type="button" disabled={disabled}
                 aria-pressed={selected} onClick={() => updateCompanyFunctionSelection(kind, fnId)}
-                className={`flex min-h-14 items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 ${selected ? "border-obaol-500 bg-obaol-500/10 text-obaol-700" : "border-default-200 bg-content1/40 hover:border-obaol-500/50"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
+                className={`flex min-h-16 items-center gap-2 rounded-xl border p-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:gap-3 sm:p-3 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-content1/40 hover:border-primary-500/50"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
                 <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
-                <span className="min-w-0 flex-1 text-xs font-bold">{fn?.name}</span>
+                <span className="min-w-0 flex-1 text-[11px] font-bold leading-tight sm:text-xs">{fn?.name}</span>
                 {priorityIndex > -1 && <span className="rounded-full bg-obaol-500/15 px-2 py-1 text-[9px] font-black">P{priorityIndex + 1}</span>}
               </button>
             );
@@ -1144,7 +1162,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         <form
           ref={formRef}
           tabIndex={-1}
-          className="w-full flex flex-col gap-5 [&_input:focus]:outline-none [&_input:focus-visible]:outline-none [&_textarea:focus]:outline-none"
+          className="associate-onboarding-form w-full flex flex-col gap-5"
           onSubmit={(e) => e.preventDefault()}
           onKeyDown={(e) => {
             if (e.key !== "Enter") return;
@@ -1287,7 +1305,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     )}
                   </div>
                   <div className="md:col-span-2">
-                    <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-obaol-500/50">
+                    <div data-invalid={Boolean(errors.phone)} className={`associate-control-shell rounded-xl border p-0.5 overflow-hidden transition-all ${errors.phone ? "border-danger" : "border-default-200"}`}>
                       <PhoneField
                         name="phone"
                         label="Primary Phone Number"
@@ -1304,7 +1322,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     {errors.phone ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phone}</p> : null}
                   </div>
                   <div className="md:col-span-2">
-                    <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-obaol-500/50">
+                    <div data-invalid={Boolean(errors.phoneSecondary)} className={`associate-control-shell rounded-xl border p-0.5 overflow-hidden transition-all ${errors.phoneSecondary ? "border-danger" : "border-default-200"}`}>
                       <PhoneField
                         name="phoneSecondary"
                         label="Secondary Phone (Optional)"
@@ -1446,12 +1464,20 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             variant="bordered"
                             items={companyOptions}
                             inputValue={companySearch}
-                            onInputChange={setCompanySearch}
+                            onInputChange={(value: string) => {
+                              setCompanySearch(value);
+                              setIsCompanySearchOpen(value.trim().length >= 3);
+                            }}
+                            isOpen={isCompanySearchOpen && canShowCompanySearchResults}
+                            onOpenChange={(open: boolean) => {
+                              setIsCompanySearchOpen(open && normalizedCompanySearch.length >= 3);
+                            }}
                             selectedKey={formData.associateCompanyId || null}
                             onSelectionChange={(key: any) => {
                               const id = String(key || "");
                               const match = companyOptions.find((item: any) => String(item?._id) === id);
                               setFormData((prev) => ({ ...prev, associateCompanyId: id, associateCompanyName: String(match?.name || "") }));
+                              setIsCompanySearchOpen(false);
                               if (errors.associateCompanyId) setErrors((prev) => ({ ...prev, associateCompanyId: "" }));
                             }}
                             placeholder="Type at least 3 letters to search"
@@ -1459,6 +1485,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             isLoading={companySearchQuery.isFetching}
                             isInvalid={!!errors.associateCompanyId}
                             errorMessage={errors.associateCompanyId}
+                            emptyContent={companySearchQuery.isError ? "Company search failed. Please retry." : "No companies found."}
                             description={companySearch.trim().length < 3 ? "Enter 3 or more characters; the full company directory is never shown." : companySearchQuery.isError ? "Company search failed. Please retry." : undefined}
                             classNames={{ base: "rounded-xl", inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500 data-[focus=true]:ring-2 data-[focus=true]:ring-obaol-500/20" }}
                           >
@@ -1498,7 +1525,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             classNames={{ inputWrapper: "h-12 border-default-200" }}
                           />
                           <div className="md:col-span-2">
-                            <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-obaol-500/50">
+                            <div data-invalid={Boolean(errors.companyPhone)} className={`associate-control-shell rounded-xl border p-0.5 overflow-hidden transition-all ${errors.companyPhone ? "border-danger" : "border-default-200"}`}>
                               <PhoneField
                                 name="companyPhone"
                                 label="Company Contact"
@@ -1785,28 +1812,34 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-default-200/60 bg-content2/40 p-4">
-                    <p className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">How This Affects Your Dashboard</p>
-                    <ul className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-default-500 font-semibold">
+                  <div className="rounded-2xl border border-primary-500/20 bg-primary-500/5 p-4">
+                    <p className="text-[11px] font-black uppercase tracking-[0.3em] text-primary-600">Build a clearer company profile</p>
+                    <p className="mt-2 text-xs leading-5 text-default-600">
+                      Tell partners what your company provides and what it is seeking. We use these choices to improve discovery, matching, and dashboard personalization.
+                    </p>
+                    <ul className="mt-3 grid grid-cols-1 gap-3 text-xs font-semibold text-default-500 md:grid-cols-2">
                       <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-obaol-500" />
-                        Shows tools and workflows based on your selected categories.
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary-500" />
+                        <span><b>Provides</b> means the activities, products, or services your company offers.</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-obaol-500" />
-                        Your top priorities appear first on the dashboard.
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary-500" />
+                        <span><b>Seeking</b> means what your company wants to buy, use, or partner on.</span>
                       </li>
                     </ul>
+                    <p className="mt-3 text-xs leading-5 text-default-500">
+                      If you are an agri-tech company, choose the real work you perform instead of a broad “Agri-tech” label. You can update these choices later in Settings → <Link href="/dashboard/company" className="font-bold text-primary-600 underline underline-offset-2">My Company</Link>.
+                    </p>
                   </div>
 
 
                   {isNewCompany ? (
-                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-4">
                       {groupedCompanyFunctions.length === 0 && (
                         <div className="py-12 text-center bg-content2/20 rounded-[2rem] border-2 border-dashed border-default-200">
                           <p className="text-sm text-default-300 font-bold">No capabilities available yet</p>
                           <p className="text-xs text-default-400 mt-2">
-                            Select a company type or company profile to load capabilities.
+                            Reload the page or try again to load company capabilities.
                           </p>
                           <button
                             type="button"
@@ -1817,58 +1850,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           </button>
                         </div>
                       )}
-                      {groupedCompanyFunctions.length > 0 && (
-                        <div>
-                          <div className="mb-3 flex items-center gap-2 text-obaol-600">
-                            <LuBadgeCheck aria-hidden className="text-lg" />
-                            <h4 className="text-xs font-black uppercase tracking-widest">What your company provides</h4>
-                            <span className="ml-auto text-[10px] font-bold text-default-400">{formData.providedFunctionIds.length}/6 selected</span>
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {groupedCompanyFunctions.map((fn: any) => {
-                            const fnId = String(fn?._id || "");
-                            const isSelected = formData.providedFunctionIds.includes(fnId);
-                            const isDisabled = !isSelected && formData.providedFunctionIds.length >= 6;
-                            const priorityIndex = formData.providedFunctionPriorities.indexOf(fnId);
-                            return (
-                              <button
-                                key={fnId}
-                                type="button"
-                                disabled={isDisabled}
-                                onClick={() => updateCompanyFunctionSelection("provided", fnId)}
-                                className={`w-full text-left rounded-xl border p-3 transition-all duration-300 ${isSelected
-                                  ? "border-obaol-500 bg-obaol-500/10 ring-1 ring-obaol-500/20"
-                                  : isDisabled
-                                    ? "border-default-100 bg-default-50/30 opacity-40 cursor-not-allowed"
-                                    : "border-default-200 bg-content2/20 hover:border-obaol-500/50 hover:bg-content2/40"
-                                  }`}
-                              >
-                                <div className="flex items-center justify-between gap-3">
-                                  <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${isSelected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>
-                                      {capabilityIcon(String(fn?.slug || ""))}
-                                    </div>
-                                    <p className={`text-xs font-bold ${isSelected ? "text-obaol-600" : "text-foreground/70"}`}>{fn?.name}</p>
-                                  </div>
-                                  {priorityIndex > -1 && (
-                                    <span className="inline-flex items-center gap-2">
-                                      <span className="rounded-full bg-obaol-500/20 text-obaol-600 text-[9px] font-black uppercase tracking-widest px-2 py-1">
-                                        Priority {priorityIndex + 1}
-                                      </span>
-                                    </span>
-                                  )}
-                                </div>
-                              </button>
-                            );
-                          })}
-                          </div>
-                        </div>
-                      )}
-                      {errors.providedFunctionIds && (
-                        <p className="text-xs text-danger-500 font-semibold mt-2 text-center">
-                          {errors.providedFunctionIds}
-                        </p>
-                      )}
+                      {groupedCompanyFunctions.length > 0 && renderCapabilitySection("provided")}
                     </div>
                   ) : (
                     <div className="rounded-[2rem] border-2 border-dashed border-default-200 bg-content2/20 p-6">
@@ -1901,49 +1883,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     </div>
                   )}
 
-                  {isNewCompany && (
-                    <div className="rounded-2xl border border-default-200/60 bg-content2/30 p-4">
-                      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Provided capability priorities (1–3)</p>
-                      {formData.providedFunctionPriorities.length ? (
-                        <div className="mt-3 space-y-2">
-                          {formData.providedFunctionPriorities.map((id, index) => (
-                            <div key={`${id}-${index}`} className="flex items-center justify-between rounded-xl border border-default-200 bg-content1/40 px-3 py-2">
-                              <div className="flex items-center gap-3">
-                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-obaol-500 text-black text-[10px] font-black">
-                                  {index + 1}
-                                </span>
-                                <span className="text-xs font-bold text-foreground/80">
-                                  {companyFunctionNameById.get(id) || "Selected category"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  type="button"
-                                  onClick={() => moveCompanyFunctionPriority("provided", id, "up")}
-                                  disabled={index === 0}
-                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                                >
-                                  <FiChevronUp className="mx-auto text-sm" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => moveCompanyFunctionPriority("provided", id, "down")}
-                                  disabled={index === formData.providedFunctionPriorities.length - 1}
-                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                                >
-                                  <FiChevronDown className="mx-auto text-sm" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="mt-3 text-xs text-default-400">
-                          Select categories above to set your top priorities.
-                        </p>
-                      )}
-                    </div>
-                  )}
                   {isNewCompany && renderCapabilitySection("sought")}
                 </motion.div>
               )}

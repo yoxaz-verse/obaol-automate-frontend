@@ -8,10 +8,12 @@ const read = (path) => readFileSync(fileURLToPath(new URL(path, import.meta.url)
 test("My Company reuses onboarding categories and priority requests", () => {
   const company = read("../src/app/dashboard/company/page.tsx");
   assert.equal(company.includes("const INTEREST_OPTIONS"), false);
-  assert.equal(company.includes("requestedCompanyFunctionIds"), true);
-  assert.equal(company.includes("requestedCompanyFunctionPriorities"), true);
+  assert.equal(company.includes("requestedProvidedFunctionIds"), true);
+  assert.equal(company.includes("requestedSoughtFunctionIds"), true);
+  assert.equal(company.includes("requestedProvidedFunctionPriorities"), true);
+  assert.equal(company.includes("requestedSoughtFunctionPriorities"), true);
   assert.equal(company.includes("Priority order (1–3)"), true);
-  assert.equal(company.includes("Select 1–6 onboarding categories"), true);
+  assert.equal(company.includes("Select 1–6 categories"), true);
 });
 
 test("My Company exposes operational overview sections", () => {

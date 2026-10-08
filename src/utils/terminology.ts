@@ -12,14 +12,6 @@ export const EXPERIENCE_TERMS = {
   execution: "Trade execution",
 } as const;
 
-export const tradeModeLabel = (mode: unknown) => {
-  const normalized = String(mode || "BOTH").toUpperCase();
-  if (normalized === "BUY") return "Buying";
-  if (normalized === "SELL") return "Selling";
-  if (normalized === "SERVICE") return "Trade services";
-  return "Buying and selling";
-};
-
 export const humanizeStatus = (status: unknown) => {
   const normalized = String(status || "UNKNOWN").trim().toUpperCase();
   const labels: Record<string, string> = {

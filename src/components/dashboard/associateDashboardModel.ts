@@ -1,7 +1,3 @@
-import type { TradeMode } from "@/utils/dashboardAccess";
-
-export type AssociateFocus = "BUY" | "SELL" | "BOTH";
-
 export type AssociateMetric = {
   key: "actions" | "buying" | "selling" | "orders" | "listings";
   label: string;
@@ -20,8 +16,8 @@ export type AssociatePrimaryAction = {
 };
 
 type AssociateDashboardModelInput = {
-  tradeMode: TradeMode;
-  focus: AssociateFocus;
+  providedCapabilities: string[];
+  soughtCapabilities: string[];
   actionRequired: number;
   buyingCount: number;
   sellingCount: number;
@@ -29,29 +25,19 @@ type AssociateDashboardModelInput = {
   liveProducts: number;
 };
 
-export const normalizeAssociateFocus = (value: unknown): AssociateFocus => {
-  const normalized = String(value || "").toUpperCase();
-  return normalized === "BUY" || normalized === "SELL" || normalized === "BOTH"
-    ? normalized
-    : "BOTH";
-};
-
-export const getAssociateFocusStorageKey = (userId: string) =>
-  `obaol:associate-dashboard-focus:${userId || "anonymous"}`;
-
 export const buildAssociateDashboardModel = ({
-  tradeMode,
-  focus,
+  providedCapabilities,
+  soughtCapabilities,
   actionRequired,
   buyingCount,
   sellingCount,
   activeOrders,
   liveProducts,
 }: AssociateDashboardModelInput) => {
-  const effectiveMode = tradeMode === "BOTH" ? focus : tradeMode;
-  const showBuying = effectiveMode === "BUY" || effectiveMode === "BOTH";
-  const showSelling = effectiveMode === "SELL" || effectiveMode === "BOTH";
-  const showFunctions = tradeMode === "SERVICE" || showSelling;
+  const capabilities = new Set([...providedCapabilities, ...soughtCapabilities]);
+  const showBuying = capabilities.has("buying") || capabilities.has("sourcing");
+  const showSelling = capabilities.has("selling");
+  const showFunctions = capabilities.size > 0;
 
   const metrics: AssociateMetric[] = [
     {
@@ -99,7 +85,7 @@ export const buildAssociateDashboardModel = ({
         href: "/dashboard/enquiries",
         tone: "warning",
       }
-    : tradeMode === "SERVICE"
+    : !showBuying && !showSelling
       ? {
           eyebrow: "Next best action",
           title: "Review your service execution work",
@@ -137,5 +123,5 @@ export const buildAssociateDashboardModel = ({
               tone: "primary",
             };
 
-  return { effectiveMode, showBuying, showSelling, showFunctions, metrics, primaryAction };
+  return { showBuying, showSelling, showFunctions, metrics, primaryAction };
 };

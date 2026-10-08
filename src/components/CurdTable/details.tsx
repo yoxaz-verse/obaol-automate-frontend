@@ -231,10 +231,10 @@ export default function DetailsModal({
         <Tooltip content="View">
           <span
             onClick={onOpen}
-            className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-primary transition-colors"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-primary-500/10 hover:bg-primary-500/20 cursor-pointer active:opacity-50 group transition-all"
           >
-            <FiEye size={18} className="text-default-400 group-hover:text-primary" />
-            <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
+            <FiEye size={20} className="text-primary-500/80 group-hover:text-primary-600 transition-colors" />
+            <div className="h-[2px]" />
           </span>
         </Tooltip>
       )}

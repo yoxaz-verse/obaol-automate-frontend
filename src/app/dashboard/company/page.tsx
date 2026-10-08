@@ -30,7 +30,7 @@ import { CompanyMetricCard, CompanyProfileReadiness } from "@/components/dashboa
 
 const MAIN_CATEGORY_SLUGS = new Set([
   "buying", "selling", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk",
-  "importing-distribution", "freight-forwarding", "inland-logistics",
+  "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics",
 ]);
 
 const REPORT_REASONS = [
@@ -319,25 +319,6 @@ export default function CompanyWorkspacePage() {
     },
   });
 
-  const tradeModeMutation = useMutation({
-    mutationFn: async (tradeMode: "BUY" | "SELL" | "BOTH" | "SERVICE") => {
-      const response = await putData("/auth/trade-mode", { tradeMode });
-      if (!response?.data?.success) throw new Error(response?.data?.message || "Failed to update trading mode.");
-      return response.data.data;
-    },
-    onSuccess: async () => {
-      await refreshUser();
-      showToastMessage({ type: "success", message: "Trading mode updated.", position: "top-right" });
-    },
-    onError: (error: any) => {
-      showToastMessage({
-        type: "error",
-        message: error?.response?.data?.message || error?.message || "Failed to update trading mode.",
-        position: "top-right",
-      });
-    },
-  });
-
 
 
   const company = companyQuery.data;
@@ -545,7 +526,7 @@ export default function CompanyWorkspacePage() {
           </button>;
         })}
       </div>
-      <div className="mt-4 rounded-xl bg-default-50/50 p-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Priority order (1–3)</p>{priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => <div key={`${kind}-${id}`} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><span className="text-sm font-semibold"><b className="mr-2 text-primary-600">{index + 1}</b>{capabilityById.get(id)?.name || "Selected category"}</span><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(kind, id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === priorities.length - 1} onPress={() => moveRequestedPriority(kind, id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">Your first three selections become priorities.</p>}</div>
+      <div className="mt-4 rounded-xl bg-default-50/50 p-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Optional priority order (up to 3)</p>{priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => <div key={`${kind}-${id}`} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><span className="text-sm font-semibold"><b className="mr-2 text-primary-600">{index + 1}</b>{capabilityById.get(id)?.name || "Selected category"}</span><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(kind, id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === priorities.length - 1} onPress={() => moveRequestedPriority(kind, id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">No priorities selected. Mark up to three choices above if you want them ranked first.</p>}</div>
     </section>;
   };
   const operatorAssignedCompanies = useMemo(
@@ -829,10 +810,6 @@ export default function CompanyWorkspacePage() {
                 {previewUrl ? <Button color="warning" variant="flat" endContent={<LuArrowUpRight />} onPress={() => window.open(previewUrl, "_blank", "noopener,noreferrer")}>{isWebsiteLive ? "View Website" : "Preview Website"}</Button> : null}
                 <Button variant="flat" onPress={() => router.push("/dashboard/settings")}>Company Settings</Button>
               </div>
-            </div>
-            <div className="flex flex-col gap-3 border-t border-default-200 pt-5 lg:flex-row lg:items-center lg:justify-between">
-              <div><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Company participation</p><p className="mt-1 text-xs text-default-500">Controls the primary workspace focus.</p></div>
-              <div className="flex flex-wrap gap-2">{(["BUY", "SELL", "BOTH", "SERVICE"] as const).map((mode) => <Button key={mode} size="sm" color={String(user?.tradeMode || "BOTH") === mode ? "warning" : "default"} variant={String(user?.tradeMode || "BOTH") === mode ? "solid" : "flat"} isLoading={tradeModeMutation.isPending && tradeModeMutation.variables === mode} onPress={() => tradeModeMutation.mutate(mode)}>{mode === "BUY" ? "Buy" : mode === "SELL" ? "Sell" : mode === "SERVICE" ? "Service Provider" : "Buy & Sell"}</Button>)}</div>
             </div>
           </div>
         )}

@@ -56,7 +56,6 @@ import AssociateSearch from "../Users/AssociateSearch";
 
 import QueryComponent from "@/components/queryComponent";
 import AuthContext from "@/context/AuthContext";
-import { normalizeTradeMode } from "@/utils/dashboardAccess";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import {
   associateRoutes,
@@ -298,9 +297,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const isAdminUser = roleLower === "admin" || isOperatorUser;
   const isAssociateUser = roleLower === "associate" || roleLower === "customer";
-  const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
-  const isBuyingMode = isAssociateUser && (tradeMode === "BUY" || tradeMode === "BOTH");
-  const isSellingMode = isAssociateUser && (tradeMode === "SELL" || tradeMode === "BOTH");
+  const isBuyingMode = isAssociateUser && [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])].includes("buying");
+  const isSellingMode = isAssociateUser && (user?.providedCapabilities || []).includes("selling");
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
   const isMarketplaceView = additionalParams?.view === "marketplace";

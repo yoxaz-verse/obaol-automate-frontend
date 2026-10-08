@@ -22,10 +22,12 @@ export interface User {
   phone?: string;
   role: string;
   associateCompanyId?: string | null;
-  companyInterestsConfigured?: boolean;
-  companyInterests?: string[];
+  companyCapabilitiesConfigured?: boolean;
+  providedCapabilities?: string[];
+  soughtCapabilities?: string[];
+  providedCapabilityPriorities?: string[];
+  soughtCapabilityPriorities?: string[];
   assignments?: string[];
-  tradeMode?: "BUY" | "SELL" | "BOTH" | "SERVICE";
   onboardingComplete?: boolean;
   registrationStatus?: string | null;
   rejectionReason?: string | null;

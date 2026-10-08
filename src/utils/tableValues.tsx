@@ -47,6 +47,20 @@ import {
 } from "@/core/api/apiRoutes";
 import { fetchDependentOptions } from "./fetchDependentOptions";
 
+const COMPANY_CAPABILITY_OPTIONS = [
+  { key: "buying", value: "Buying" },
+  { key: "selling", value: "Selling" },
+  { key: "sourcing", value: "Sourcing" },
+  { key: "packaging", value: "Packaging" },
+  { key: "testing", value: "Quality Testing & Labs" },
+  { key: "warehouse-storage", value: "Warehouse / Storage" },
+  { key: "finance-risk", value: "Finance & Insurance" },
+  { key: "importing-to-india", value: "Importing to India" },
+  { key: "exporting-from-india", value: "Exporting from India" },
+  { key: "freight-forwarding", value: "Freight Forwarding" },
+  { key: "inland-logistics", value: "Inland Logistics" },
+];
+
 // Helper function to generate columns based on the current table
 export const generateColumns = (currentTable: string, tableConfig: any, userRole?: string) => {
   const roleLower = String(userRole || "").toLowerCase();
@@ -71,6 +85,7 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
       uid: field.key,
       type: field.type,
       emptyValue: field.emptyValue,
+      values: field.values,
     }));
 
   if (currentTable === "associate") {
@@ -92,7 +107,6 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
   }
   if (currentTable === "associateCompany") {
     nonActionColumns.push({ name: "LOCATION", uid: "location" });
-    nonActionColumns.push({ name: "COMPANY TYPE", uid: "companyType" });
   } else if (currentTable === "projects") {
     // nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
     nonActionColumns.push({
@@ -244,7 +258,7 @@ export const initialTableConfig: Record<
     accept?: string;
     required?: boolean;
     emptyValue?: string;
-    showWhen?: { key: string; equals: any[] };
+    showWhen?: { key: string; equals: any };
   }[]
 > = {
   // Start of User
@@ -951,6 +965,7 @@ export const initialTableConfig: Record<
       key: "name",
       filterType: "text",
       inForm: true,
+      inEdit: true,
       inTable: true,
       required: true,
     },
@@ -960,6 +975,7 @@ export const initialTableConfig: Record<
       key: "email",
       filterType: "text",
       inForm: true,
+      inEdit: true,
       inTable: true,
       required: true,
     },
@@ -969,25 +985,41 @@ export const initialTableConfig: Record<
       filterType: "text",
       key: "phone",
       inForm: true,
+      inEdit: true,
       inTable: true,
       required: true,
     },
-    // {
-    //   label: "Location",
-    //   type: "select",
-    //   key: "location",
-    //   values: [],
-    //   inForm: true,
-    //   inTable: true,
-    //   required: true,
-    // },
     {
-      label: "Company Type",
+      label: "Phone Secondary",
+      type: "number",
+      key: "phoneSecondary",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Jurisdiction",
       type: "select",
       filterType: "select",
-      key: "companyType",
+      key: "geoType",
+      values: [
+        { key: "INDIAN", value: "Indian Hub" },
+        { key: "INTERNATIONAL", value: "International" },
+      ],
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Country",
+      type: "select",
+      filterType: "select",
+      key: "country",
       values: [],
-      dynamicValuesFn: () => fetchDependentOptions("companyType"),
+      dynamicValuesFn: () => fetchDependentOptions("country"),
+      showWhen: { key: "geoType", equals: "INTERNATIONAL" },
       inForm: true,
       inEdit: true,
       inTable: true,
@@ -1000,6 +1032,7 @@ export const initialTableConfig: Record<
       key: "state",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("state"),
+      showWhen: { key: "geoType", equals: "INDIAN" },
       inForm: true,
       inEdit: true,
       inTable: true,
@@ -1014,6 +1047,7 @@ export const initialTableConfig: Record<
       values: [],
       dynamicValuesFn: (stateId: string) =>
         fetchDependentOptions("district", "state", stateId),
+      showWhen: { key: "geoType", equals: "INDIAN" },
       inEdit: true,
       inForm: true,
       inTable: true,
@@ -1024,48 +1058,68 @@ export const initialTableConfig: Record<
       type: "select",
       filterType: "select",
       key: "division",
-      dependsOn: "district", // 👈
+      dependsOn: "district",
       dynamicValuesFn: (districtId: string) =>
         fetchDependentOptions("division", "district", districtId),
       values: [],
+      showWhen: { key: "geoType", equals: "INDIAN" },
       inEdit: true,
       inForm: true,
       inTable: true,
     },
     {
-      label: "Pin Code ",
+      label: "Pin Code",
       type: "select",
       filterType: "select",
       key: "pincodeEntry",
-      dependsOn: "division", // 👈
+      dependsOn: "division",
       dynamicValuesFn: (divisionId: string) =>
         fetchDependentOptions("pincodeEntry", "division", divisionId),
       values: [],
+      showWhen: { key: "geoType", equals: "INDIAN" },
       inEdit: true,
       inForm: true,
       inTable: true,
     },
     {
-      label: "Phone Secondary",
-      type: "number",
-      key: "phoneSecondary",
-      inEdit: true,
+      label: "GSTIN",
+      type: "text",
+      key: "gstin",
+      showWhen: { key: "geoType", equals: "INDIAN" },
       inForm: true,
+      inEdit: true,
       inTable: true,
-      required: true,
     },
     {
-      label: "Service Capabilities",
+      label: "Legal Registration Number",
+      type: "text",
+      key: "legalRegistrationNumber",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
+      label: "Registered Address",
+      type: "textarea",
+      key: "address",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
+      label: "Provided Capabilities",
       type: "multiselect",
-      key: "serviceCapabilities",
-      values: [
-        { key: "PROCUREMENT", value: "Procurement" },
-        { key: "CERTIFICATION", value: "Certification" },
-        { key: "TRANSPORTATION", value: "Transportation" },
-        { key: "SHIPPING", value: "Freight Forwarding & Shipping" },
-        { key: "PACKAGING", value: "Packaging" },
-        { key: "QUALITY_TESTING", value: "Quality Testing & Assurance" },
-      ],
+      key: "providedCapabilities",
+      values: COMPANY_CAPABILITY_OPTIONS,
+      inEdit: true,
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Seeking Capabilities",
+      type: "multiselect",
+      key: "soughtCapabilities",
+      values: COMPANY_CAPABILITY_OPTIONS,
       inEdit: true,
       inForm: true,
       inTable: true,
@@ -1076,6 +1130,19 @@ export const initialTableConfig: Record<
       key: "assignedOperator",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("operator"),
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
+      label: "Registration Status",
+      type: "select",
+      key: "registrationStatus",
+      values: [
+        { key: "PENDING_REVIEW", value: "Pending Review" },
+        { key: "APPROVED", value: "Approved" },
+        { key: "REJECTED", value: "Rejected" },
+      ],
       inForm: true,
       inEdit: true,
       inTable: true,
@@ -1106,7 +1173,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inEdit: true,
       inTable: true,
-      required: true,
+      required: false,
     },
     {
       label: "Company Name",
@@ -1142,7 +1209,7 @@ export const initialTableConfig: Record<
       inEdit: true,
       inForm: true,
       inTable: true,
-      required: true,
+      required: false,
     },
     {
       label: "Products",
@@ -1218,16 +1285,6 @@ export const initialTableConfig: Record<
       inTable: true,
       required: true,
     },
-    // {
-    //   label: "Role",
-    //   type: "text",
-    //   filterType: "text",
-    //   key: "role",
-    //   inForm: true,
-    //   inTable: true,
-    //   required: true,
-    // },
-
     {
       label: "Pain Points",
       type: "text",
@@ -1237,16 +1294,6 @@ export const initialTableConfig: Record<
       inTable: true,
       required: true,
     },
-    // {
-    //   label: "Location",
-    //   type: "select",
-    //   key: "location",
-    //   values: [],
-    //   inForm: true,
-    //   inTable: true,
-    //   required: true,
-    // },
-
     {
       label: "State",
       type: "select",
@@ -1308,6 +1355,46 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       required: true,
+    },
+    {
+      label: "Feedback",
+      type: "textarea",
+      key: "feedback",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Assigned To",
+      type: "select",
+      key: "assignedTo",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("operator"),
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
+      label: "Approved",
+      type: "boolean",
+      key: "isApproved",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Rejected",
+      type: "boolean",
+      key: "isRejected",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Resubmitted",
+      type: "boolean",
+      key: "resubmitted",
+      inForm: false,
+      inTable: true,
     },
     {
       label: "Created At",
@@ -1696,14 +1783,13 @@ export const initialTableConfig: Record<
     },
     {
       label: "Description",
-      type: "text",
+      type: "textarea",
       key: "description",
       inForm: true,
       inEdit: true,
       inTable: true,
       required: true,
     },
-
     {
       label: "Created At",
       type: "dateTime",
@@ -1711,13 +1797,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inTable: true,
     },
-    // {
-    //   label: "Active",
-    //   type: "checkbox",
-    //   key: "isActive",
-    //   inForm: false,
-    //   inTable: true,
-    // },
     {
       label: "Actions",
       type: "action",

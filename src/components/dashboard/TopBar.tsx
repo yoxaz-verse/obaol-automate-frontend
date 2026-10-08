@@ -178,16 +178,14 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const filteredOptions = getRoleFilteredSidebarOptions(
     sidebarOptions as any[],
     String(role || ""),
-    user?.tradeMode,
-    user?.companyInterests || []
+    [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
   );
   const pathname = usePathname();
   const optionMap = new Map(filteredOptions.map((o) => [o.link, o]));
   const mobileSections = getDashboardSidebarSections(
     filteredOptions as any[],
     String(role || ""),
-    user?.tradeMode,
-    user?.companyInterests || []
+    [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
   );
   const activeMobileAdminGroup = mobileSections
     .find((section) => section.label === "Operations/Admin")

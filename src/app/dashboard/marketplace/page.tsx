@@ -12,7 +12,6 @@ import MarketplaceFilterBar, {
   MarketplaceFilterState,
 } from "@/components/dashboard/Marketplace/MarketplaceFilterBar";
 import AuthContext from "@/context/AuthContext";
-import { normalizeTradeMode } from "@/utils/dashboardAccess";
 import { getData } from "@/core/api/apiHandler";
 import { variantRateRoutes } from "@/core/api/apiRoutes";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
@@ -50,8 +49,7 @@ export default function MarketplacePage() {
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const isAdminUser = roleLower === "admin" || isOperatorUser;
     const isAssociateUser = roleLower === "associate" || roleLower === "customer";
-    const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
-    const isSellingMode = isAssociateUser && (tradeMode === "SELL" || tradeMode === "BOTH");
+    const isSellingMode = isAssociateUser && (user?.providedCapabilities || []).includes("selling");
     const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
     const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
 

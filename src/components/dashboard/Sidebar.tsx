@@ -32,15 +32,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const filteredOptions = getRoleFilteredSidebarOptions(
         sidebarOptions as any[],
         String(user?.role || ""),
-        user?.tradeMode,
-        user?.companyInterests || []
+        [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
     );
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
     const sidebarSections = getDashboardSidebarSections(
         filteredOptions as any[],
         String(user?.role || ""),
-        user?.tradeMode,
-        user?.companyInterests || []
+        [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
     );
     const activeAdminGroup = sidebarSections
         .find((section) => section.label === "Operations/Admin")

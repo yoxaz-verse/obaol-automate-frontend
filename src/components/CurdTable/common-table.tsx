@@ -175,6 +175,15 @@ export default function CommonTable({
           return formatDate(cellValue);
         case "boolean":
           return cellValue ? "Yes" : "No";
+        case "multiselect": {
+          const labels = new Map(
+            (column.values || []).map((option: { key: string; value: string }) => [String(option.key), option.value])
+          );
+          const displayValue = Array.isArray(cellValue)
+            ? cellValue.map((value) => labels.get(String(value)) || String(value))
+            : cellValue;
+          return renderTruncatedText(displayValue, column.maxWidth || "max-w-[220px]", true);
+        }
         case "time":
           return formatTime(cellValue);
         case "week":

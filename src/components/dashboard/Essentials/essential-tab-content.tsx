@@ -73,6 +73,36 @@ const EssentialTabContent = ({
 
   // Define columns for the data table
   let formFields = tableConfig[essentialName];
+  const sanitizeCompanyRecord = (record: Record<string, any>) => {
+    if (!["associateCompany", "researchedCompany", "companyStage"].includes(essentialName)) {
+      const { isDeleted, isActive, password, __v, ...rest } = record;
+      return rest;
+    }
+
+    const allowedKeys = new Set(
+      (formFields || [])
+        .filter((field: any) => field.key !== "actions2")
+        .map((field: any) => field.key)
+    );
+    const sanitized: Record<string, any> = { _id: record._id };
+    allowedKeys.forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(record, key)) sanitized[key] = record[key];
+    });
+    return sanitized;
+  };
+  const formatDetailsRecord = (record: Record<string, any>) => {
+    const details = { ...record };
+    (formFields || []).forEach((field: any) => {
+      if (!Array.isArray(field.values) || !Object.prototype.hasOwnProperty.call(details, field.key)) return;
+      const labels = new Map(field.values.map((option: any) => [String(option.key), option.value]));
+      if (Array.isArray(details[field.key])) {
+        details[field.key] = details[field.key].map((value: any) => labels.get(String(value)) || value);
+      } else {
+        details[field.key] = labels.get(String(details[field.key])) || details[field.key];
+      }
+    });
+    return details;
+  };
 
   return (
     <div className="w-full max-w-full min-w-0">
@@ -81,7 +111,7 @@ const EssentialTabContent = ({
           <div className="flex items-center justify-between  gap-3">
             {!hideAdd && (
               <AddModal
-                currentTable={""}
+                currentTable={essentialName}
                 formFields={formFields}
                 apiEndpoint={apiRoutesByRole[essentialName]}
                 refetchData={refetchData}
@@ -108,12 +138,8 @@ const EssentialTabContent = ({
           >
             {(data: any, _refetch, meta) => {
               const fetchedData = Array.isArray(data) ? data : (data?.data || []);
-              // const tableData = fetchedData.map((item: any) => ({
-              //   ...item,
-              // }));
-
               const tableData = fetchedData.map((item: any) => {
-                const { isDeleted, isActive, password, __v, ...rest } = item;
+                const record = sanitizeCompanyRecord(item);
                 // Helper function to join array of objects by `name`
                 const joinNames = (arr: any[] = []) =>
                   arr.length > 0
@@ -127,7 +153,7 @@ const EssentialTabContent = ({
                   ].filter(Boolean);
 
                   return {
-                    ...rest,
+                    ...record,
                     location: locationParts.length > 0
                       ? locationParts.join(", ")
                       : "Unknown",
@@ -135,7 +161,7 @@ const EssentialTabContent = ({
                 }
                 if (essentialName === "companySubFunction") {
                   return {
-                    ...rest,
+                    ...record,
                     functionName: item.functionId?.name || "Not Defined",
                   };
                 }
@@ -147,7 +173,7 @@ const EssentialTabContent = ({
                   ].filter(Boolean);
 
                   return {
-                    ...rest,
+                    ...record,
                     location: locationParts.length > 0
                       ? locationParts.join(", ")
                       : "Unknown",
@@ -159,9 +185,7 @@ const EssentialTabContent = ({
                     companyIntent: joinNames(item.companyIntent),
                   };
                 }
-                // Handle other user types similarly if needed
-
-                return rest;
+                return record;
               });
               return (
                 tableData.length > 0 && (
@@ -180,8 +204,8 @@ const EssentialTabContent = ({
                           // Implement view modal if needed
                           <>
                             <DetailsModal
-                              currentTable={""}
-                              data={item}
+                              currentTable={essentialName}
+                              data={formatDetailsRecord(item)}
                               columns={columns}
                             />
                           </>

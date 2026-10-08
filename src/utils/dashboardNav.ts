@@ -3,10 +3,8 @@ import {
   getAccessibleDashboardRoutes,
   type DashboardSection,
   type DashboardNavGroup,
-  type TradeMode,
   type DashboardTaskGroup,
   normalizeDashboardRole,
-  normalizeTradeMode,
   isDashboardRouteActive,
 } from "@/utils/dashboardAccess";
 
@@ -34,11 +32,10 @@ export type DashboardNavSection = {
 export const getRoleFilteredSidebarOptions = (
   sidebarOptions: SidebarOption[],
   role: string,
-  tradeMode?: TradeMode | string | null,
-  companyInterests: string[] = []
+  capabilities: string[] = []
 ): SidebarOption[] => {
   const allowedLinks = new Set(
-    getAccessibleDashboardRoutes({ role, tradeMode, companyInterests }).map((route) => route.path)
+    getAccessibleDashboardRoutes({ role, capabilities }).map((route) => route.path)
   );
   return sidebarOptions.filter((option) => allowedLinks.has(option.link));
 };
@@ -46,28 +43,24 @@ export const getRoleFilteredSidebarOptions = (
 export const getDashboardSidebarSections = (
   filteredOptions: SidebarOption[],
   role: string = "admin",
-  tradeMode?: TradeMode | string | null,
-  companyInterests: string[] = []
+  capabilities: string[] = []
 ): DashboardNavSection[] => {
   const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
   const accessibleRoutes = getAccessibleDashboardRoutes({
     role,
-    tradeMode,
-    companyInterests,
+    capabilities,
   });
   const normalizedRole = normalizeDashboardRole(role);
-  const normalizedMode = normalizeTradeMode(tradeMode, role);
 
   if (normalizedRole === "associate") {
     const groupForRoute = (route: (typeof accessibleRoutes)[number]): DashboardTaskGroup => {
-      if (route.taskGroup === "Execute" && normalizedMode === "BUY") return "Buy";
       return route.taskGroup;
     };
     const groupOrder: DashboardTaskGroup[] = [
       "Home",
       "Discover",
-      ...(normalizedMode === "BUY" ? ["Buy" as const] : []),
-      ...(normalizedMode === "SELL" || normalizedMode === "BOTH" ? ["Sell" as const] : []),
+      "Buy",
+      "Sell",
       "Execute",
       "Services",
       "Company & Account",
@@ -106,26 +99,23 @@ export const getDashboardSidebarSections = (
     .filter((section) => section.links.length > 0);
 };
 
-const associateMobilePaths: Record<TradeMode, string[]> = {
-  BUY: ["/dashboard", "/dashboard/marketplace", "/dashboard/enquiries", "/dashboard/orders"],
-  SELL: ["/dashboard", "/dashboard/product", "/dashboard/enquiries", "/dashboard/orders"],
-  BOTH: ["/dashboard", "/dashboard/marketplace", "/dashboard/product", "/dashboard/enquiries"],
-  SERVICE: ["/dashboard", "/dashboard/execution-enquiries", "/dashboard/enquiries", "/dashboard/orders"],
-};
-
 export const getDashboardBottomNavigation = ({
   role,
-  tradeMode,
-  companyInterests = [],
+  capabilities = [],
 }: {
   role: unknown;
-  tradeMode?: unknown;
-  companyInterests?: string[];
+  capabilities?: string[];
 }) => {
-  const routes = getAccessibleDashboardRoutes({ role, tradeMode, companyInterests });
+  const routes = getAccessibleDashboardRoutes({ role, capabilities });
   const routeMap = new Map(routes.map((route) => [route.path, route]));
   if (normalizeDashboardRole(role) === "associate") {
-    return associateMobilePaths[normalizeTradeMode(tradeMode, role)]
+    const normalized = new Set(capabilities.map((item) => String(item).toLowerCase()));
+    const priorityPath = normalized.has("selling")
+      ? "/dashboard/product"
+      : normalized.has("buying") || normalized.has("sourcing")
+        ? "/dashboard/marketplace"
+        : "/dashboard/execution-enquiries";
+    return ["/dashboard", priorityPath, "/dashboard/enquiries", "/dashboard/orders"]
       .map((path) => routeMap.get(path))
       .filter(Boolean);
   }

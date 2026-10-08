@@ -48,7 +48,8 @@ const MAIN_CATEGORY_SLUGS = new Set([
   "testing",
   "warehouse-storage",
   "finance-risk",
-  "importing-distribution",
+  "importing-to-india",
+  "exporting-from-india",
   "freight-forwarding",
   "inland-logistics",
 ]);
@@ -148,7 +149,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     associateDivision: "",
     associatePincodeEntry: "",
     referralCode: "",
-    tradeMode: "" as "" | "BUY" | "SELL" | "BOTH" | "SERVICE",
   });
 
   const hydrateDraft = useCallback((parsed: any) => {
@@ -200,7 +200,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     setFormData((prev) => ({
       ...prev,
       email: prev.email || (isOnboarding ? "" : prefill),
-      tradeMode: (["BUY", "SELL", "BOTH", "SERVICE"].includes(intent) ? intent : prev.tradeMode) as "" | "BUY" | "SELL" | "BOTH" | "SERVICE",
     }));
   }, [isOnboarding, searchParams]);
 
@@ -536,6 +535,20 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     return map;
   }, [groupedCompanyFunctions]);
 
+  useEffect(() => {
+    const intent = String(searchParams?.get("intent") || "").toUpperCase();
+    if (!["BUY", "SELL", "BOTH"].includes(intent) || !groupedCompanyFunctions.length) return;
+    const suggestedSlugs = intent === "BUY" ? ["buying"] : intent === "SELL" ? ["selling"] : ["buying", "selling"];
+    const suggestedIds = groupedCompanyFunctions
+      .filter((fn: any) => suggestedSlugs.includes(String(fn?.slug || "")))
+      .map((fn: any) => String(fn?._id || ""))
+      .filter(Boolean);
+    if (!suggestedIds.length) return;
+    setFormData((prev) => prev.providedFunctionIds.length
+      ? prev
+      : { ...prev, providedFunctionIds: suggestedIds });
+  }, [groupedCompanyFunctions, searchParams]);
+
   const updateCompanyFunctionSelection = (kind: "provided" | "sought", functionId: string) => {
     setFormData((prev) => {
       const idsKey = kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds";
@@ -550,15 +563,25 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         nextIds = [...currentIds, functionId];
       }
 
-      let nextPriorities = currentPriorities.filter((id) => nextIds.includes(id));
-      if (!isSelected && nextPriorities.length < 3 && nextIds.includes(functionId)) {
-        nextPriorities = [...nextPriorities, functionId];
-      }
+      const nextPriorities = currentPriorities.filter((id) => nextIds.includes(id));
 
       return { ...prev, [idsKey]: nextIds, [prioritiesKey]: nextPriorities };
     });
     const errorKey = kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds";
     if (errors[errorKey]) setErrors((prev) => ({ ...prev, [errorKey]: "" }));
+  };
+
+  const toggleCompanyFunctionPriority = (kind: "provided" | "sought", functionId: string) => {
+    setFormData((prev) => {
+      const idsKey = kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds";
+      const prioritiesKey = kind === "provided" ? "providedFunctionPriorities" : "soughtFunctionPriorities";
+      if (!prev[idsKey].includes(functionId)) return prev;
+      const current = prev[prioritiesKey];
+      const next = current.includes(functionId)
+        ? current.filter((id) => id !== functionId)
+        : current.length < 3 ? [...current, functionId] : current;
+      return { ...prev, [prioritiesKey]: next };
+    });
   };
 
   const moveCompanyFunctionPriority = (kind: "provided" | "sought", functionId: string, direction: "up" | "down") => {
@@ -584,7 +607,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       testing: <IoFlask />,
       "warehouse-storage": <IoHome />,
       "finance-risk": <IoCash />,
-      "importing-distribution": <IoSwapHorizontal />,
+      "importing-to-india": <IoSwapHorizontal />,
+      "exporting-from-india": <IoEarth />,
       "freight-forwarding": <IoBoat />,
       "inland-logistics": <IoCar />,
     };
@@ -629,15 +653,21 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         {error && <p className="mt-2 text-xs font-semibold text-danger-500">{error}</p>}
         <div className="mt-4">
           <p className="text-[10px] font-black uppercase tracking-widest text-default-400">Top priorities (up to 3)</p>
-          {priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => (
-            <div key={`${kind}-priority-${id}`} className="flex items-center justify-between rounded-lg border border-default-200 bg-content1/60 px-3 py-2">
-              <span className="text-xs font-bold"><b className="mr-2 text-obaol-600">{index + 1}</b>{companyFunctionNameById.get(id)}</span>
-              <span className="flex gap-1">
+          {ids.length ? <div className="mt-2 space-y-2">{ids.map((id) => {
+            const index = priorities.indexOf(id);
+            const isPriority = index >= 0;
+            return (
+            <div key={`${kind}-priority-${id}`} className="flex items-center justify-between gap-2 rounded-lg border border-default-200 bg-content1/60 px-3 py-2">
+              <button type="button" onClick={() => toggleCompanyFunctionPriority(kind, id)} disabled={!isPriority && priorities.length >= 3} className="min-w-0 flex-1 rounded-md text-left text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-40">
+                {isPriority ? <b className="mr-2 text-primary-600">P{index + 1}</b> : <span className="mr-2 text-default-400">＋</span>}{companyFunctionNameById.get(id)}
+                <span className="ml-2 text-[10px] font-medium text-default-400">{isPriority ? "Remove priority" : "Make priority"}</span>
+              </button>
+              {isPriority && <span className="flex gap-1">
                 <button type="button" aria-label={`Move ${companyFunctionNameById.get(id)} up`} onClick={() => moveCompanyFunctionPriority(kind, id, "up")} disabled={index === 0} className="rounded-md p-1 focus-visible:ring-2 focus-visible:ring-obaol-500 disabled:opacity-30"><FiChevronUp /></button>
                 <button type="button" aria-label={`Move ${companyFunctionNameById.get(id)} down`} onClick={() => moveCompanyFunctionPriority(kind, id, "down")} disabled={index === priorities.length - 1} className="rounded-md p-1 focus-visible:ring-2 focus-visible:ring-obaol-500 disabled:opacity-30"><FiChevronDown /></button>
-              </span>
+              </span>}
             </div>
-          ))}</div> : <p className="mt-2 text-xs text-default-400">Your first three selections become priorities; reorder them here.</p>}
+          )})}</div> : <p className="mt-2 text-xs text-default-400">Select capabilities above, then optionally mark up to three as priorities.</p>}
         </div>
       </section>
     );
@@ -751,7 +781,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     const stepErrors: Record<string, string> = {};
 
     if (step === 1) {
-      if (!["BUY", "SELL", "BOTH", "SERVICE"].includes(formData.tradeMode)) stepErrors.tradeMode = "Choose how your company will participate";
       if (!formData.name.trim()) stepErrors.name = "Name is required";
       if (!formData.email.trim()) stepErrors.email = "Email is required";
       if (formData.email && !emailRegex.test(formData.email)) stepErrors.email = "Invalid email format";
@@ -992,7 +1021,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         associateDivision: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? formData.associateDivision : undefined,
         associatePincodeEntry: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? (formData.associatePincodeEntry || undefined) : undefined,
         referralCode: formData.referralCode.trim() || undefined,
-        tradeMode: formData.tradeMode,
       };
 
       if (isNewCompany) {
@@ -1112,15 +1140,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       embedded={isOnboarding}
       leftPanel={{
         headline: "Set up your company for",
-        highlight: formData.tradeMode === "BUY"
-          ? "BUY COMMODITIES"
-          : formData.tradeMode === "SELL"
-            ? "SELL COMMODITIES"
-            : formData.tradeMode === "BOTH"
-              ? "BUY AND SELL"
-              : formData.tradeMode === "SERVICE"
-                ? "PROVIDE TRADE SERVICES"
-                : "CHOOSE YOUR PARTICIPATION",
+        highlight: "BUILD A CLEARER COMPANY PROFILE",
         description: "This guided setup helps us verify your business, align it to the right trade capabilities, and prepare the dashboard around the way you actually operate.",
         guidanceSections: [
           {
@@ -1378,62 +1398,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       />
                     </div>
                   )}
-
-                  <div className="md:col-span-2 pt-3">
-                    <RadioGroup
-                      label="How will your company participate?"
-                      value={formData.tradeMode}
-                      onValueChange={(value) => setField("tradeMode", value)}
-                      isInvalid={Boolean(errors.tradeMode)}
-                      errorMessage={errors.tradeMode}
-                      description="Choose the primary workflow for your initial dashboard. You can update it later in My Company."
-                      classNames={{
-                        label: "text-[10px] font-black uppercase tracking-widest text-default-500",
-                        description: "mt-1 text-xs leading-5 text-default-500",
-                        wrapper: "mt-3 grid grid-cols-1 gap-3 md:grid-cols-2",
-                      }}
-                    >
-                      {[
-                        { value: "BUY", title: "Buy commodities", description: "Discover products and create enquiries.", icon: IoCart },
-                        { value: "SELL", title: "Sell commodities", description: "List products and respond to buyers.", icon: IoStorefront },
-                        { value: "BOTH", title: "Buy and sell", description: "Use both buying and selling workflows.", icon: IoSwapHorizontal },
-                        { value: "SERVICE", title: "Provide trade services", description: "Offer logistics, warehousing, testing, or related services.", icon: IoBoat },
-                      ].map((option) => {
-                        const Icon = option.icon;
-                        const selected = formData.tradeMode === option.value;
-                        return (
-                          <Radio
-                            key={option.value}
-                            value={option.value}
-                            aria-label={`${option.title}. ${option.description}`}
-                            classNames={{
-                              base: "group m-0 inline-flex min-h-24 w-full max-w-none cursor-pointer items-center gap-3 rounded-2xl border border-default-200 bg-content1/50 p-4 transition-all hover:border-primary-500/50 hover:bg-primary-500/[0.04] data-[selected=true]:border-primary-500 data-[selected=true]:bg-primary-500/10 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-primary-500 data-[focus-visible=true]:ring-offset-2",
-                              wrapper: "order-3 ml-auto shrink-0 border-default-300 group-data-[selected=true]:border-primary-500",
-                              control: "bg-primary-500",
-                              labelWrapper: "order-2 ml-0 min-w-0 flex-1",
-                              label: "w-full",
-                            }}
-                          >
-                            <span className="flex w-full items-center gap-3">
-                              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl transition-colors ${selected ? "bg-primary-500 text-white" : "bg-default-100 text-default-500 group-hover:bg-primary-500/10 group-hover:text-primary-600"}`}>
-                                <Icon aria-hidden />
-                              </span>
-                              <span className="min-w-0">
-                                <span className={`flex items-center gap-2 text-sm font-bold ${selected ? "text-primary-700 dark:text-primary-300" : "text-foreground"}`}>
-                                  {option.title}
-                                  {selected ? <FiCheck aria-hidden className="text-primary-600" /> : null}
-                                </span>
-                                <span className="mt-1 block text-xs leading-5 text-default-500">{option.description}</span>
-                              </span>
-                            </span>
-                          </Radio>
-                        );
-                      })}
-                    </RadioGroup>
-                    <p className="mt-3 text-xs leading-5 text-default-500">
-                      Service providers choose their specific company capabilities in step 3. Companies that also trade commodities can select Buy, Sell, or Buy and sell here and add service capabilities later.
-                    </p>
-                  </div>
 
                   <div className="md:col-span-2 pt-4">
                     <div className="p-4 rounded-2xl bg-obaol-500/5 border border-dashed border-obaol-500/30 flex flex-col gap-3">

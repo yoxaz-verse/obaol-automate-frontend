@@ -90,10 +90,15 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
     { label: "Orders", href: "/dashboard/orders", description: "Track forwarding status per order." },
     { label: "Documents", href: "/dashboard/documents", description: "Handle freight and shipping docs." },
   ],
-  "importing-distribution": [
+  "importing-to-india": [
     { label: "Imports", href: "/dashboard/imports", description: "Manage inbound import shipments." },
     { label: "Orders", href: "/dashboard/orders", description: "Align distribution with orders." },
     { label: "Execution Feed", href: "/dashboard/execution-enquiries", description: "Track customs and handoffs." },
+  ],
+  "exporting-from-india": [
+    { label: "Trade Listings", href: "/dashboard/product", description: "Publish products for international buyers." },
+    { label: "Orders", href: "/dashboard/orders", description: "Track outbound export orders." },
+    { label: "Execution Feed", href: "/dashboard/execution-enquiries", description: "Coordinate export documentation and dispatch." },
   ],
   "inland-logistics": [
     { label: "Execution Feed", href: "/dashboard/execution-enquiries", description: "Monitor dispatch and delivery." },
@@ -192,7 +197,8 @@ const KPI_LABELS: Record<string, [string, string, string]> = {
   "testing": ["Samples Pending", "In Testing", "Certificates Issued"],
   "warehouse-storage": ["Storage Used", "Inbound Moves", "Outbound Moves"],
   "finance-risk": ["Payments Due", "Payments Processing", "Payments Cleared"],
-  "importing-distribution": ["Imports Scheduled", "Customs Processing", "Delivered"],
+  "importing-to-india": ["Imports Scheduled", "Customs Processing", "Delivered"],
+  "exporting-from-india": ["Exports Scheduled", "Customs Processing", "Dispatched"],
   "freight-forwarding": ["Legs Scheduled", "In Transit", "Delivered"],
   "inland-logistics": ["Routes Planned", "En Route", "Delivered"],
 };
@@ -730,14 +736,16 @@ const FinanceRiskSection = (props: SectionProps) => (
   </FunctionSectionShell>
 );
 
-const ImportDistributionSection = (props: SectionProps) => (
-  <FunctionSectionShell {...props} accent="primary" name="Importer">
-    <KpiStrip metrics={props.metrics} labels={KPI_LABELS["importing-distribution"]} />
+const ImportDistributionSection = (props: SectionProps) => {
+  const isExport = props.slug === "exporting-from-india";
+  return (
+  <FunctionSectionShell {...props} accent="primary" name={isExport ? "Exporter from India" : "Importer to India"}>
+    <KpiStrip metrics={props.metrics} labels={KPI_LABELS[props.slug] || KPI_LABELS["importing-to-india"]} />
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <div className="rounded-[2.5rem] border border-default-200/50 bg-primary/5 backdrop-blur-md p-8 space-y-8">
         <SectionHeader title="Port Intelligence" icon={LuShip} />
         <div className="space-y-6">
-          {["Vessel Arrival", "Customs Protocol", "Last Mile Distribution"].map((label, idx) => (
+          {(isExport ? ["Cargo Readiness", "Export Customs", "International Dispatch"] : ["Vessel Arrival", "Customs Protocol", "Last Mile Distribution"]).map((label, idx) => (
             <div key={label} className="flex flex-col gap-3 group">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -768,7 +776,8 @@ const ImportDistributionSection = (props: SectionProps) => (
     </div>
     <ActionCardGrid actions={props.actions} accent="primary" />
   </FunctionSectionShell>
-);
+  );
+};
 
 const FreightForwardingSection = (props: SectionProps) => (
   <FunctionSectionShell {...props} accent="secondary">
@@ -865,7 +874,8 @@ const FunctionComponentMap: Record<string, React.FC<SectionProps>> = {
   "testing": TestingSection,
   "warehouse-storage": WarehouseSection,
   "finance-risk": FinanceRiskSection,
-  "importing-distribution": ImportDistributionSection,
+  "importing-to-india": ImportDistributionSection,
+  "exporting-from-india": ImportDistributionSection,
   "freight-forwarding": FreightForwardingSection,
   "inland-logistics": InlandLogisticsSection,
 };

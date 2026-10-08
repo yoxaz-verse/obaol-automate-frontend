@@ -19,8 +19,7 @@ export default function GlobalSearch() {
   const accessibleOptions = getRoleFilteredSidebarOptions(
     sidebarOptions as any[],
     String(user?.role || ""),
-    user?.tradeMode,
-    user?.companyInterests || []
+    [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
   );
   const filteredOptions = accessibleOptions.filter((option) =>
     option.name.toLowerCase().includes(query.toLowerCase())

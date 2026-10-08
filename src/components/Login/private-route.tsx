@@ -17,7 +17,6 @@ const PrivateRoute = ({
   const isAllowed = Boolean(user) && canAccessDashboardRoute({
     path: pathname,
     role: user?.role,
-    tradeMode: user?.tradeMode,
   });
 
   useEffect(() => {

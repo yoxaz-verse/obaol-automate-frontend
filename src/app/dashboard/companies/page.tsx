@@ -551,10 +551,10 @@ export default function CompanyProductPage() {
     selectedCompanyAssociatesQuery.data?.data?.data?.totalCount ||
     0;
   const interestPayload = selectedCompanyInterestsQuery.data?.data?.data || {};
-  const companyInterestsSource = Array.isArray(interestPayload.companyInterests)
-    ? interestPayload.companyInterests
-    : Array.isArray(selectedCompany?.providedCapabilities)
-      ? selectedCompany.providedCapabilities
+  const companyInterestsSource = Array.isArray(interestPayload.soughtCapabilities)
+    ? interestPayload.soughtCapabilities
+    : Array.isArray(selectedCompany?.soughtCapabilities)
+      ? selectedCompany.soughtCapabilities
       : [];
   const companyInterests = normalizeInterestList(companyInterestsSource);
   const companyInterestKeys = useMemo(

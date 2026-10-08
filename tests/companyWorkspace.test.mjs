@@ -12,7 +12,7 @@ test("My Company reuses onboarding categories and priority requests", () => {
   assert.equal(company.includes("requestedSoughtFunctionIds"), true);
   assert.equal(company.includes("requestedProvidedFunctionPriorities"), true);
   assert.equal(company.includes("requestedSoughtFunctionPriorities"), true);
-  assert.equal(company.includes("Priority order (1–3)"), true);
+  assert.equal(company.includes("Optional priority order (up to 3)"), true);
   assert.equal(company.includes("Select 1–6 categories"), true);
 });
 

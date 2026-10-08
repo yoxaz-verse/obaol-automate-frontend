@@ -50,8 +50,13 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
     { label: "Orders", href: "/dashboard/orders" },
     { label: "Documents", href: "/dashboard/documents" },
   ],
-  "importing-distribution": [
+  "importing-to-india": [
     { label: "Imports", href: "/dashboard/imports" },
+    { label: "Orders", href: "/dashboard/orders" },
+    { label: "Execution", href: "/dashboard/execution-enquiries" },
+  ],
+  "exporting-from-india": [
+    { label: "Trade Listings", href: "/dashboard/product" },
     { label: "Orders", href: "/dashboard/orders" },
     { label: "Execution", href: "/dashboard/execution-enquiries" },
   ],

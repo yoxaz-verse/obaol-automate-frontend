@@ -238,10 +238,10 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
         : isPendingApproval
           ? "/dashboard/pending-approval"
           : "/dashboard";
-      if (authRoleLower === "associate" && user?.associateCompanyId && user?.companyInterestsConfigured === false) {
+      if (authRoleLower === "associate" && user?.associateCompanyId && user?.companyCapabilitiesConfigured === false) {
         showToastMessage({
           type: "warning",
-          message: "Company interests are not configured. Update them from My Company for execution matching.",
+          message: "Your company profile is not configured. Add Provided and Seeking functions in My Company for better matching.",
           position: "top-right",
         });
       }
@@ -965,14 +965,16 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
             )}
             
             {showNotFoundCta && authMode === "login" && (
-              <div className="flex items-center gap-3 pl-11">
+              <div className="flex items-center gap-3 sm:pl-11">
                 <Button
                   size="sm"
                   radius="lg"
-                  className="bg-warning-500 text-black font-black uppercase text-[10px] tracking-widest px-6 h-8"
+                  aria-label={`Create ${roleKey === "associate" ? "Associate" : "Operator"} Account`}
+                  data-testid="account-not-found-signup-cta"
+                  className="h-10 w-full border border-obaol-300 bg-gradient-to-r from-obaol-400 to-obaol-600 px-6 text-[10px] font-black uppercase tracking-widest text-obaol-950 shadow-lg shadow-obaol-500/20 transition-transform hover:-translate-y-0.5 sm:w-auto"
                   onPress={handleCreateAccount}
                 >
-                  Create account
+                  Create {roleKey === "associate" ? "Associate" : "Operator"} Account
                 </Button>
               </div>
             )}
@@ -1436,13 +1438,22 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
 
         <div className="mt-1.5 flex items-center justify-center">
           {authMode === "login" ? (
-            <button
-              type="button"
-              onClick={handleCreateAccount}
-              className="text-xs font-semibold text-foreground/50 transition-colors hover:text-obaol-700 dark:hover:text-obaol-300"
-            >
-              New here? Create account
-            </button>
+            <div className="w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/[0.04] p-3 text-center dark:bg-obaol-500/[0.06]">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/55">
+                New to OBAOL?
+              </p>
+              <Button
+                type="button"
+                variant="bordered"
+                radius="lg"
+                aria-label={`Create ${roleKey === "associate" ? "Associate" : "Operator"} Account`}
+                data-testid="persistent-signup-cta"
+                onPress={handleCreateAccount}
+                className="h-11 w-full border-obaol-500/60 bg-transparent text-[11px] font-black uppercase tracking-[0.15em] text-obaol-700 transition-all hover:border-obaol-500 hover:bg-obaol-500/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 dark:text-obaol-300"
+              >
+                Create {roleKey === "associate" ? "Associate" : "Operator"} Account
+              </Button>
+            </div>
           ) : (
             <button
               type="button"

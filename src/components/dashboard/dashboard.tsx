@@ -29,9 +29,7 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
 import { DEFAULT_STALE_TIME, extractList, useDashboardData } from "@/core/data";
 import { dashboardCopy } from "@/utils/dashboardCopy";
-import { normalizeTradeMode } from "@/utils/dashboardAccess";
 import AssociateDashboard from "./AssociateDashboard";
-import { getAssociateFocusStorageKey, normalizeAssociateFocus, type AssociateFocus } from "./associateDashboardModel";
 
 const GlobalSearch = dynamic(() => import("./GlobalSearch"), { ssr: false });
 const TrendChart = dynamic(() => import("./TrendChart"), {
@@ -52,31 +50,32 @@ const Dashboard: NextPage = () => {
   const isAdmin = roleLower === "admin";
   const isAssociate = roleLower === "associate" || roleLower === "customer";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
-  const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
-  const [workspaceFocus, setWorkspaceFocus] = useState<AssociateFocus>("BOTH");
-  const effectiveTradeMode = tradeMode === "BOTH" ? workspaceFocus : tradeMode;
-  const isBuyingMode = isAssociate && (effectiveTradeMode === "BUY" || effectiveTradeMode === "BOTH");
-  const isSellingMode = isAssociate && (effectiveTradeMode === "SELL" || effectiveTradeMode === "BOTH");
+  const companyCapabilities = Array.from(new Set([...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]));
+  const hasBuyingCapability = companyCapabilities.includes("buying") || companyCapabilities.includes("sourcing");
+  const hasSellingCapability = companyCapabilities.includes("selling");
+  const profileMode = hasBuyingCapability && hasSellingCapability ? "BOTH" : hasBuyingCapability ? "BUY" : hasSellingCapability ? "SELL" : "SERVICE";
+  const isBuyingMode = isAssociate && hasBuyingCapability;
+  const isSellingMode = isAssociate && hasSellingCapability;
   const hubTitle = isAdmin
     ? "Admin Dashboard"
     : isOperatorUser
       ? "Operator Dashboard"
-      : tradeMode === "SERVICE"
+      : profileMode === "SERVICE"
         ? "Service Provider Workspace"
-      : tradeMode === "BUY"
+      : profileMode === "BUY"
         ? "Buying Workspace"
-        : tradeMode === "SELL"
+        : profileMode === "SELL"
           ? "Selling Workspace"
           : "Trading Workspace";
   const hubSubtitle = isAdmin
     ? "System overview is ready."
     : isOperatorUser
       ? "Operator overview is ready."
-      : tradeMode === "SERVICE"
+      : profileMode === "SERVICE"
         ? "Your company services and execution work are ready."
-      : tradeMode === "BUY"
+      : profileMode === "BUY"
         ? "Your buying pipeline and next actions are ready."
-        : tradeMode === "SELL"
+        : profileMode === "SELL"
           ? "Your selling pipeline and next actions are ready."
           : "Your buying and selling pipelines are ready.";
 
@@ -116,16 +115,6 @@ const Dashboard: NextPage = () => {
     const timer = window.setTimeout(() => setDebouncedAssociateLookup(associateLookup.trim()), 250);
     return () => window.clearTimeout(timer);
   }, [associateLookup]);
-
-  useEffect(() => {
-    if (!isAssociate || tradeMode !== "BOTH" || !userId) return;
-    setWorkspaceFocus(normalizeAssociateFocus(window.localStorage.getItem(getAssociateFocusStorageKey(userId))));
-  }, [isAssociate, tradeMode, userId]);
-
-  const updateWorkspaceFocus = (focus: AssociateFocus) => {
-    setWorkspaceFocus(focus);
-    if (userId) window.localStorage.setItem(getAssociateFocusStorageKey(userId), focus);
-  };
 
   const companyDirectoryQuery = useQuery({
     queryKey: ["operatorCompanyDirectory", userId],
@@ -563,10 +552,10 @@ const Dashboard: NextPage = () => {
 
   const renderAssociateDashboard = () => (
     <AssociateDashboard
-      tradeMode={tradeMode}
-      focus={workspaceFocus}
+      providedCapabilities={user?.providedCapabilities || []}
+      soughtCapabilities={user?.soughtCapabilities || []}
       associateCompanyId={associateCompanyId}
-      companyInterestsConfigured={Boolean(user?.companyInterestsConfigured)}
+      companyCapabilitiesConfigured={Boolean(user?.companyCapabilitiesConfigured)}
       metrics={associateMetrics}
       pendingActions={pendingActionsList}
       activity={activityFeed}
@@ -804,7 +793,7 @@ const Dashboard: NextPage = () => {
               <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start md:self-center">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-default-200/80 dark:border-white/10 bg-default-100/50 dark:bg-white/5 text-[10px] font-black uppercase tracking-wider text-foreground/80">
                   <span className="w-1.5 h-1.5 rounded-full bg-obaol-500" />
-                  {isAssociate ? (tradeMode === "BUY" ? "Buyer" : tradeMode === "SELL" ? "Seller" : tradeMode === "SERVICE" ? "Service Provider" : "Buyer & Seller") : isOperatorUser ? "Operator" : "Admin"}
+                  {isAssociate ? (companyCapabilities.length ? "Capability-led company" : "Company profile setup") : isOperatorUser ? "Operator" : "Admin"}
                 </div>
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-primary-500/30 bg-primary-500/10 text-[10px] font-black uppercase tracking-wider text-primary-600 dark:text-primary-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
@@ -819,21 +808,6 @@ const Dashboard: NextPage = () => {
                 <GlobalSearch />
               </div>
 
-              {isAssociate && tradeMode === "BOTH" && (
-                <div aria-label="Workspace focus" className="inline-flex items-center rounded-2xl border border-default-200/80 dark:border-white/10 bg-default-100/60 dark:bg-white/5 p-1 self-start lg:self-center shrink-0">
-                  {(["BUY", "SELL", "BOTH"] as const).map((focus) => (
-                    <button
-                      key={focus}
-                      type="button"
-                      onClick={() => updateWorkspaceFocus(focus)}
-                      aria-pressed={workspaceFocus === focus}
-                      className={`h-9 rounded-xl px-4 text-xs font-black uppercase tracking-wider transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${workspaceFocus === focus ? "bg-obaol-500 text-slate-950 font-black shadow-md shadow-obaol-500/20 scale-[1.02]" : "text-default-500 hover:text-foreground"}`}
-                    >
-                      {focus === "BUY" ? "Buying" : focus === "SELL" ? "Selling" : "All"}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </CardBody>

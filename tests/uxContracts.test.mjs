@@ -55,6 +55,9 @@ test("the public entry clearly separates Associate and Operator accounts", () =>
   for (const phrase of [
     "Registering a company?",
     "For independent people coordinating trades, not company registration.",
+    'data-testid="persistent-signup-cta"',
+    'data-testid="account-not-found-signup-cta"',
+    "Create {roleKey === \"associate\" ? \"Associate\" : \"Operator\"} Account",
   ]) assert.equal(login.includes(phrase), true);
   for (const phrase of ["I want to buy", "I want to sell", "I work in operations", "Internal Ops"]) {
     assert.equal(entry.includes(phrase), false);

@@ -18,11 +18,11 @@ const hasInterest = (values: string[], keys: string[]) => {
 
 export default function PendingEngagementActions({ user }: Props) {
   const roleLower = String(user?.role || "").toLowerCase();
-  const interests = Array.isArray(user?.companyInterests) ? user.companyInterests : [];
+  const interests = Array.from(new Set([...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]));
   const isAssociate = roleLower === "associate";
-  const canSupplier = isAssociate && hasInterest(interests, ["SUPPLIER", "PROCUREMENT"]);
-  const canLab = isAssociate && hasInterest(interests, ["QUALITY_TESTING"]);
-  const canWarehouse = isAssociate && hasInterest(interests, ["WAREHOUSING"]);
+  const canSupplier = isAssociate && hasInterest(interests, ["SELLING", "SOURCING"]);
+  const canLab = isAssociate && hasInterest(interests, ["TESTING"]);
+  const canWarehouse = isAssociate && hasInterest(interests, ["WAREHOUSE-STORAGE"]);
 
   const [supplierOpen, setSupplierOpen] = useState(false);
   const [labOpen, setLabOpen] = useState(false);

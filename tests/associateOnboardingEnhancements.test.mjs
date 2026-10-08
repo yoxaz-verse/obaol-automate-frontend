@@ -43,17 +43,14 @@ test("associate onboarding captures independent provided and sought capability p
   assert.equal(form.includes('href="/dashboard/company"'), true);
 });
 
-test("associate onboarding presents participation modes as responsive icon cards", () => {
+test("associate onboarding removes duplicate participation modes", () => {
   const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
-  for (const token of [
-    'value: "BUY"',
-    'value: "SELL"',
-    'value: "BOTH"',
-    'value: "SERVICE"',
-    "md:grid-cols-2",
-    "data-[selected=true]:border-primary-500",
-    "Choose the primary workflow for your initial dashboard",
-  ]) assert.equal(form.includes(token), true, `missing ${token}`);
+  assert.equal(form.includes("How will your company participate?"), false);
+  assert.equal(form.includes("tradeMode:"), false);
+  assert.equal(form.includes('"importing-to-india"'), true);
+  assert.equal(form.includes('"exporting-from-india"'), true);
+  assert.equal(form.includes("Make priority"), true);
+  assert.equal(form.includes("Your first three selections become priorities"), false);
 });
 
 test("My Company edits and submits split capability profiles", () => {

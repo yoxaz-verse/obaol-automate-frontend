@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import { getDashboardRoute } from "@/utils/dashboardAccess";
 import { deriveExperienceContext } from "@/utils/experienceContext";
-import { tradeModeLabel } from "@/utils/terminology";
 
 export default function DashboardContextBar() {
   const pathname = usePathname();
@@ -17,7 +16,7 @@ export default function DashboardContextBar() {
   const parentRoute = route.activeParent ? getDashboardRoute(route.activeParent) : null;
 
   const roleLabel = experience.role === "associate"
-    ? tradeModeLabel(experience.tradeMode)
+    ? "Company associate"
     : experience.role === "team" ? "Operations team" : experience.role === "operator" ? "Operator" : "Admin";
 
   return (

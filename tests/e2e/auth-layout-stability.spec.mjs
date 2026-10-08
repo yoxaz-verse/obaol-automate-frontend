@@ -56,6 +56,31 @@ test("Associate sign-in keeps its shell fixed while session and Google controls 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
+test("Associate signup CTAs are prominent and preserve the entered email", async ({ page }) => {
+  await page.route(/\/auth\/email-status(?:\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ exists: false }),
+    });
+  });
+  await page.goto("/auth/associate", { waitUntil: "domcontentloaded" });
+
+  const persistentSignup = page.getByTestId("persistent-signup-cta");
+  await expect(page.getByText("New to OBAOL?")).toBeVisible();
+  await expect(persistentSignup).toBeVisible();
+  await expect(persistentSignup).toHaveAccessibleName("Create Associate Account");
+
+  await page.getByLabel("Email Address").fill("new.associate@example.com");
+  await page.getByTestId("auth-submit").click();
+
+  const contextualSignup = page.getByTestId("account-not-found-signup-cta");
+  await expect(contextualSignup).toBeVisible();
+  await expect(contextualSignup).toHaveAccessibleName("Create Associate Account");
+  await contextualSignup.click();
+  await expect(page).toHaveURL(/\/auth\/register\?prefill=new(?:\.|%2E)associate(?:%40|@)example(?:\.|%2E)com/);
+});
+
 test("shared auth routes render without a full-screen loading replacement", async ({ page }) => {
   for (const route of ["/auth/operator", "/auth/register?intent=BUY", "/auth/operator/register", "/auth/admin", "/auth/forgot-password?role=Associate"]) {
     await page.goto(route, { waitUntil: "domcontentloaded" });

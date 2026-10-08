@@ -1,28 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildAssociateDashboardModel, getAssociateFocusStorageKey, normalizeAssociateFocus } from "../src/components/dashboard/associateDashboardModel.ts";
+import { buildAssociateDashboardModel } from "../src/components/dashboard/associateDashboardModel.ts";
 
-const base = { focus: "BOTH", actionRequired: 0, buyingCount: 4, sellingCount: 3, activeOrders: 2, liveProducts: 5 };
-
-test("associate focus validation defaults invalid persisted values to BOTH", () => {
-  assert.equal(normalizeAssociateFocus("buy"), "BUY");
-  assert.equal(normalizeAssociateFocus("SELL"), "SELL");
-  assert.equal(normalizeAssociateFocus("unexpected"), "BOTH");
-  assert.equal(getAssociateFocusStorageKey("associate-1"), "obaol:associate-dashboard-focus:associate-1");
-});
+const base = { providedCapabilities: [], soughtCapabilities: [], actionRequired: 0, buyingCount: 4, sellingCount: 3, activeOrders: 2, liveProducts: 5 };
 
 test("BUY associates receive buying metrics and marketplace next action", () => {
-  const model = buildAssociateDashboardModel({ ...base, tradeMode: "BUY" });
+  const model = buildAssociateDashboardModel({ ...base, providedCapabilities: ["buying"] });
   assert.equal(model.showBuying, true);
   assert.equal(model.showSelling, false);
-  assert.equal(model.showFunctions, false);
+  assert.equal(model.showFunctions, true);
   assert.deepEqual(model.metrics.map((metric) => metric.key), ["actions", "buying", "orders"]);
   assert.equal(model.primaryAction.href, "/dashboard/marketplace");
 });
 
 test("SELL associates receive listings and company functions", () => {
-  const model = buildAssociateDashboardModel({ ...base, tradeMode: "SELL" });
+  const model = buildAssociateDashboardModel({ ...base, providedCapabilities: ["selling"] });
   assert.equal(model.showBuying, false);
   assert.equal(model.showSelling, true);
   assert.equal(model.showFunctions, true);
@@ -30,17 +23,13 @@ test("SELL associates receive listings and company functions", () => {
   assert.equal(model.primaryAction.href, "/dashboard/product");
 });
 
-test("BOTH mode consistently applies the selected focus", () => {
-  const buying = buildAssociateDashboardModel({ ...base, tradeMode: "BOTH", focus: "BUY" });
-  const selling = buildAssociateDashboardModel({ ...base, tradeMode: "BOTH", focus: "SELL" });
-  const all = buildAssociateDashboardModel({ ...base, tradeMode: "BOTH", focus: "BOTH" });
-  assert.equal(buying.showFunctions, false);
-  assert.equal(selling.showFunctions, true);
-  assert.equal(all.showBuying && all.showSelling, true);
+test("provided and sought profiles are combined for personalization", () => {
+  const model = buildAssociateDashboardModel({ ...base, providedCapabilities: ["selling"], soughtCapabilities: ["buying"] });
+  assert.equal(model.showBuying && model.showSelling, true);
 });
 
-test("SERVICE mode prioritizes execution and company functions", () => {
-  const model = buildAssociateDashboardModel({ ...base, tradeMode: "SERVICE" });
+test("operational capabilities prioritize execution", () => {
+  const model = buildAssociateDashboardModel({ ...base, providedCapabilities: ["freight-forwarding"] });
   assert.equal(model.showBuying, false);
   assert.equal(model.showSelling, false);
   assert.equal(model.showFunctions, true);
@@ -48,8 +37,8 @@ test("SERVICE mode prioritizes execution and company functions", () => {
   assert.equal(model.primaryAction.href, "/dashboard/execution-enquiries");
 });
 
-test("outstanding actions take priority in every associate mode", () => {
-  const model = buildAssociateDashboardModel({ ...base, tradeMode: "BUY", actionRequired: 2 });
+test("outstanding actions take priority for every capability profile", () => {
+  const model = buildAssociateDashboardModel({ ...base, providedCapabilities: ["buying"], actionRequired: 2 });
   assert.equal(model.primaryAction.href, "/dashboard/enquiries");
   assert.equal(model.primaryAction.tone, "warning");
 });

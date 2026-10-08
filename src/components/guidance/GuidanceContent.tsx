@@ -20,7 +20,6 @@ import {
   LuRefreshCw,
 } from "react-icons/lu";
 import AuthContext from "@/context/AuthContext";
-import { normalizeTradeMode } from "@/utils/dashboardAccess";
 
 const associateFeatureSections = [
   {
@@ -463,14 +462,16 @@ type GuidanceContentProps = {
 export default function GuidanceContent({ roleView, showToggle = true }: GuidanceContentProps) {
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
-  const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
+  const capabilities = Array.from(new Set([...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]));
+  const hasBuying = capabilities.includes("buying") || capabilities.includes("sourcing");
+  const hasSelling = capabilities.includes("selling");
   const inferredRole: RoleView = roleLower === "operator" || roleLower === "team"
     ? "operator"
-    : tradeMode === "BUY"
+    : hasBuying && !hasSelling
       ? "buyer"
-      : tradeMode === "SELL"
+      : hasSelling && !hasBuying
         ? "seller"
-        : tradeMode === "SERVICE"
+        : !hasBuying && !hasSelling
           ? "service"
         : "both";
   const activeRole = roleView === "associate" ? inferredRole : (roleView || inferredRole);

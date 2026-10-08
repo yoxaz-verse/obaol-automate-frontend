@@ -175,6 +175,7 @@ export interface TableProps {
     maxWidth?: string;
     allowWrap?: boolean;
     align?: "start" | "center" | "end";
+    values?: { key: string; value: string }[];
   }[];
   viewModal?: (item: Record<string, unknown>) => React.ReactNode;
   deleteModal?: (item: Record<string, unknown>) => React.ReactNode;

@@ -7,8 +7,7 @@ import { Button, Card, CardBody, CardHeader, Chip, Divider, Skeleton } from "@ne
 import { LuArrowRight, LuCheck, LuClock3, LuPackage, LuShoppingBag, LuTrendingUp } from "react-icons/lu";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
 import { dashboardCopy } from "@/utils/dashboardCopy";
-import type { TradeMode } from "@/utils/dashboardAccess";
-import { buildAssociateDashboardModel, type AssociateFocus, type AssociateMetric } from "./associateDashboardModel";
+import { buildAssociateDashboardModel, type AssociateMetric } from "./associateDashboardModel";
 
 const CompanyFunctionComponent = dynamic(() => import("./CompanyFunctionComponent"), {
   loading: () => <Skeleton className="h-48 w-full rounded-2xl" />,
@@ -18,10 +17,10 @@ type PendingAction = { id?: unknown; _id?: unknown; missingStep?: string };
 type Activity = { id?: unknown; type?: string; status?: string; at?: string };
 
 type AssociateDashboardProps = {
-  tradeMode: TradeMode;
-  focus: AssociateFocus;
+  providedCapabilities: string[];
+  soughtCapabilities: string[];
   associateCompanyId: string;
-  companyInterestsConfigured: boolean;
+  companyCapabilitiesConfigured: boolean;
   metrics: Record<string, any>;
   pendingActions: PendingAction[];
   activity: Activity[];
@@ -42,10 +41,10 @@ const metricIcon = (metric: AssociateMetric) => {
 };
 
 export default function AssociateDashboard({
-  tradeMode,
-  focus,
+  providedCapabilities,
+  soughtCapabilities,
   associateCompanyId,
-  companyInterestsConfigured,
+  companyCapabilitiesConfigured,
   metrics,
   pendingActions,
   activity,
@@ -57,14 +56,14 @@ export default function AssociateDashboard({
 }: AssociateDashboardProps) {
   const router = useRouter();
   const model = useMemo(() => buildAssociateDashboardModel({
-    tradeMode,
-    focus,
+    providedCapabilities,
+    soughtCapabilities,
     actionRequired,
     buyingCount,
     sellingCount,
     activeOrders,
     liveProducts: Number(metrics.liveProducts || 0),
-  }), [tradeMode, focus, actionRequired, buyingCount, sellingCount, activeOrders, metrics.liveProducts]);
+  }), [providedCapabilities, soughtCapabilities, actionRequired, buyingCount, sellingCount, activeOrders, metrics.liveProducts]);
 
   const companyFunctionDashboard = useCompanyFunctionDashboard({
     companyId: associateCompanyId,
@@ -74,7 +73,7 @@ export default function AssociateDashboard({
 
   return (
     <div className="space-y-6">
-      {!companyInterestsConfigured && (
+      {!companyCapabilitiesConfigured && (
         <Card className="border border-obaol-500/30 bg-obaol-500/10 shadow-none">
           <CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>

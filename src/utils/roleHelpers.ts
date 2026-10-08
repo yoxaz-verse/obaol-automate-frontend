@@ -3,7 +3,6 @@ import {
   canAccessDashboardRoute,
   getDashboardRoute,
   normalizeDashboardRole,
-  type TradeMode,
 } from "@/utils/dashboardAccess";
 
 const displayRole = (role: string) => {
@@ -27,8 +26,7 @@ export const getAllowedRoles = (pathname: string): string[] =>
 
 export const isDashboardRouteAllowed = (
   pathname: string,
-  role: unknown,
-  tradeMode?: TradeMode | string | null
-) => canAccessDashboardRoute({ path: pathname, role, tradeMode });
+  role: unknown
+) => canAccessDashboardRoute({ path: pathname, role });
 
 export { getDashboardRoute, normalizeDashboardRole };

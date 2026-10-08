@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, MotionConfig, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { FiArrowRight } from "react-icons/fi";
 
@@ -38,6 +38,7 @@ interface AuthLayoutProps {
 }
 
 const FloatingPixel = ({ delay }: { delay: number }) => {
+    const reduceMotion = useReducedMotion();
     const [mounted, setMounted] = useState(false);
     const [config, setConfig] = useState({ x: "0vw", duration: 15 });
 
@@ -49,7 +50,7 @@ const FloatingPixel = ({ delay }: { delay: number }) => {
         });
     }, []);
 
-    if (!mounted) return null;
+    if (!mounted || reduceMotion) return null;
 
     return (
         <motion.div
@@ -71,19 +72,22 @@ const FloatingPixel = ({ delay }: { delay: number }) => {
 };
 
 const TypewriterEffect = ({ words }: { words: string[] }) => {
+    const reduceMotion = useReducedMotion();
     const [index, setIndex] = useState(0);
     const [subIndex, setSubIndex] = useState(0);
     const [reverse, setReverse] = useState(false);
     const [blink, setBlink] = useState(true);
 
     useEffect(() => {
+        if (reduceMotion) return;
         const timeout2 = setTimeout(() => {
             setBlink((prev) => !prev);
         }, 500);
         return () => clearTimeout(timeout2);
-    }, [blink]);
+    }, [blink, reduceMotion]);
 
     useEffect(() => {
+        if (reduceMotion) return;
         if (index === words.length) {
             setIndex(0);
             return;
@@ -101,12 +105,12 @@ const TypewriterEffect = ({ words }: { words: string[] }) => {
             setSubIndex((prev) => prev + (reverse ? -1 : 1));
         }, Math.max(reverse ? 50 : subIndex === words[index].length ? 2000 : 100, Math.random() * 50));
         return () => clearTimeout(timeout);
-    }, [subIndex, index, reverse, words]);
+    }, [subIndex, index, reverse, words, reduceMotion]);
 
     return (
         <span translate="no">
-            {`${words[index].substring(0, subIndex)}`}
-            {blink ? "|" : " "}
+            {reduceMotion ? words[0] : `${words[index].substring(0, subIndex)}`}
+            {!reduceMotion && (blink ? "|" : " ")}
         </span>
     );
 };
@@ -255,7 +259,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
     }
 
     return (
-        <div className="relative flex h-screen w-full overflow-hidden bg-obaol-50/45 text-slate-900 selection:bg-obaol-500/30 dark:bg-[#090806] dark:text-foreground">
+        <MotionConfig reducedMotion="user">
+        <div data-testid="auth-layout" className="relative flex min-h-screen min-h-[100dvh] w-full overflow-hidden bg-obaol-50/45 text-slate-900 selection:bg-obaol-500/30 dark:bg-[#090806] dark:text-foreground">
             {/* Branded background layer */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(207,152,60,0.08)_0%,_transparent_55%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(207,152,60,0.03)_0%,_transparent_50%)]" />
@@ -271,7 +276,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary-500/10 rounded-full blur-[150px] opacity-20" />
             </div>
 
-            <div className="relative z-10 w-full h-full flex flex-col lg:flex-row">
+            <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
                 {/* Left Side: Tactical Branding */}
                 <motion.div
                 className="relative hidden w-5/12 flex-col items-center justify-center overflow-hidden border-r border-obaol-200/70 bg-white/70 p-8 backdrop-blur-2xl dark:border-obaol-500/10 dark:bg-white/[0.01] lg:flex xl:p-10"
@@ -314,7 +319,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 </motion.div>
 
                 {/* Right side: account form */}
-                <div className="w-full lg:w-7/12 flex flex-col h-full bg-transparent overflow-y-auto custom-scrollbar relative">
+                <div className="relative flex min-h-screen min-h-[100dvh] w-full flex-col overflow-y-auto bg-transparent custom-scrollbar lg:w-7/12">
                     <div className="flex-grow flex items-center justify-center p-4 lg:p-8 xl:p-10 relative z-10">
                         <motion.div
                             className={`w-full ${cardMaxWidthClass} relative`}
@@ -340,6 +345,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                             <div className="relative group">
                                 <motion.div
+                                    data-testid="auth-card"
                                     className="relative overflow-hidden rounded-[2.2rem] border border-obaol-200/60 bg-white/85 p-5 backdrop-blur-3xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/85 lg:rounded-[2.5rem] lg:p-7"
                                     transition={{ duration: 0.45, ease: "easeOut" }}
                                 >
@@ -375,6 +381,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 </div>
             </div>
         </div>
+        </MotionConfig>
     );
 };
 

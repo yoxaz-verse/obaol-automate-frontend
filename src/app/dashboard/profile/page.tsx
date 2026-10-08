@@ -253,7 +253,6 @@ const roleConfigs: Record<string, any> = {
         title: "Company information",
         fields: [
           { key: "associateCompany.name", label: "Company" },
-          { key: "associateCompany.companyType.name", label: "Company type" },
           { key: "associateCompany.email", label: "Business email" },
           { key: "associateCompany.phone", label: "Business phone" },
         ],

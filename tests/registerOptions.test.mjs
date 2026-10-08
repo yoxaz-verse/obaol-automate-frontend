@@ -7,9 +7,7 @@ import {
 } from "../src/utils/registerOptions.ts";
 
 const sampleOptions = {
-  existingCompanies: [{ _id: "company-1", name: "Example Co" }],
   designations: [{ _id: "designation-1", name: "Director" }],
-  companyTypes: [{ _id: "type-1", name: "Exporter" }],
   states: [{ _id: "state-1", name: "Kerala" }],
   districts: [{ _id: "district-1", name: "Ernakulam" }],
   divisions: [{ _id: "division-1", name: "Ernakulam Division" }],
@@ -30,7 +28,8 @@ test("parses the standard registration-options envelope", () => {
     meta: { partial: false, failedKeys: [] },
   });
 
-  assert.deepEqual(parsed.companyTypes, sampleOptions.companyTypes);
+  assert.equal("companyTypes" in parsed, false);
+  assert.equal("existingCompanies" in parsed, false);
   assert.deepEqual(parsed.divisions, sampleOptions.divisions);
   assert.deepEqual(parsed.meta, { partial: false, failedKeys: [] });
 });
@@ -43,7 +42,7 @@ test("parses a nested data envelope and its metadata", () => {
     },
   });
 
-  assert.deepEqual(parsed.existingCompanies, sampleOptions.existingCompanies);
+  assert.deepEqual(parsed.companyFunctions, sampleOptions.companyFunctions);
   assert.deepEqual(parsed.meta, {
     partial: true,
     failedKeys: ["designations"],
@@ -54,14 +53,14 @@ test("parses a nested data envelope and its metadata", () => {
 test("normalizes missing and malformed option collections without discarding valid ones", () => {
   const parsed = parseRegisterOptionsResponse({
     data: {
-      companyTypes: sampleOptions.companyTypes,
+      countries: sampleOptions.countries,
       districts: null,
       divisions: "invalid",
     },
     meta: { failedKeys: ["districts", "divisions", null] },
   });
 
-  assert.deepEqual(parsed.companyTypes, sampleOptions.companyTypes);
+  assert.deepEqual(parsed.countries, sampleOptions.countries);
   assert.deepEqual(parsed.districts, []);
   assert.deepEqual(parsed.divisions, []);
   assert.deepEqual(parsed.meta, {

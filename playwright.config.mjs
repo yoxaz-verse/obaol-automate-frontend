@@ -51,6 +51,14 @@ export default defineConfig({
         viewport: { width: 1440, height: 900 },
       },
     },
+    {
+      name: "auth-layout-desktop",
+      testMatch: /auth-layout-stability\.spec\.mjs/,
+      use: {
+        ...devices["Desktop Safari"],
+        viewport: { width: 1366, height: 768 },
+      },
+    },
   ],
   webServer: startLocalServer
     ? [{

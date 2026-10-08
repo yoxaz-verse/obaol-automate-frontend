@@ -131,7 +131,6 @@ const EssentialTabContent = ({
                     location: locationParts.length > 0
                       ? locationParts.join(", ")
                       : "Unknown",
-                    companyType: item.companyType?.name || "Not Defined",
                   };
                 }
                 if (essentialName === "companySubFunction") {

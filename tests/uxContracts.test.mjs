@@ -102,7 +102,13 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes('/images/hero-agro-execution-v2.webp'), true);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-lifecycle-visual="true"'), true);
+  assert.equal(explorer.includes('data-hero-lifecycle-heading="true"'), true);
+  assert.equal(explorer.includes('data-hero-masked-image="true"'), true);
   assert.equal(explorer.includes('data-hero-ink-fade="true"'), true);
+  assert.equal(explorer.includes("maskImage:"), true);
+  assert.equal(explorer.includes("WebkitMaskImage:"), true);
+  assert.equal(explorer.includes("From origin to delivery"), true);
+  assert.equal(explorer.includes("One connected agro execution system"), false);
   assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
   assert.equal(explorer.includes('data-execution-route="stepped"'), false);
   assert.equal(explorer.includes("stages.filter("), true);

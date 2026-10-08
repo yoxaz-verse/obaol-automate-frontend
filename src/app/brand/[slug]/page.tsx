@@ -50,7 +50,7 @@ export default function BrandPage() {
 
     const products = productsData?.data?.data?.products || [];
 
-    const capabilityLabels = (Array.isArray(company?.serviceCapabilities) ? company.serviceCapabilities : [])
+    const capabilityLabels = (Array.isArray(company?.providedCapabilities) ? company.providedCapabilities : [])
         .map((cap: string) => String(cap || "").toLowerCase().replace(/_/g, " "))
         .map((cap: string) => cap.replace(/\b\w/g, (c) => c.toUpperCase()));
 

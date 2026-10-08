@@ -17,7 +17,8 @@ import {
   Chip,
   Spinner,
 } from "@nextui-org/react";
-import { IoEye, IoEyeOff, IoLockClosed, IoMail, IoPerson } from "react-icons/io5";
+import { IoArchive, IoBoat, IoBusiness, IoCall, IoCar, IoCash, IoEarth, IoEye, IoEyeOff, IoFlask, IoHome, IoLink, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch, IoSwapHorizontal } from "react-icons/io5";
+import { LuBadgeCheck, LuPackageSearch, LuSearchCheck } from "react-icons/lu";
 import { FiCheck, FiChevronDown, FiChevronLeft, FiChevronRight, FiChevronUp } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
@@ -111,6 +112,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     hasCompany: "yes",
     companyMode: "existing",
     associateCompanyId: "",
+    associateCompanyName: "",
     companyName: "",
     companyEmail: "",
     companyPhone: "",
@@ -125,13 +127,14 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     companyLegalInformation: "",
     companyGeoType: "INDIAN",
     companyCountry: "",
-    companyType: "",
     companyState: "",
     companyDistrict: "",
     companyDivision: "",
     companyPincodeEntry: "",
-    companyFunctionIds: [] as string[],
-    companyFunctionPriorities: [] as string[],
+    providedFunctionIds: [] as string[],
+    soughtFunctionIds: [] as string[],
+    providedFunctionPriorities: [] as string[],
+    soughtFunctionPriorities: [] as string[],
     contactPreference: "phone",
     contactNotes: "",
     associateAddress: "",
@@ -152,14 +155,16 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   }, []);
 
   const debouncedEmail = useDebouncedValue(formData.email, 350);
+  const [companySearch, setCompanySearch] = useState("");
+  const debouncedCompanySearch = useDebouncedValue(companySearch.trim(), 300);
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
   const [optionsDebug, setOptionsDebug] = useState<{
     resolvedEndpoint: string;
-    counts: { designations: number; existingCompanies: number; companyTypes: number; countries: number };
+    counts: { designations: number; countries: number };
     lastError: string;
   }>({
     resolvedEndpoint: "",
-    counts: { designations: 0, existingCompanies: 0, companyTypes: 0, countries: 0 },
+    counts: { designations: 0, countries: 0 },
     lastError: "",
   });
 
@@ -200,8 +205,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         resolvedEndpoint: output.resolvedEndpoint,
         counts: {
           designations: output.designations.length,
-          existingCompanies: output.existingCompanies.length,
-          companyTypes: output.companyTypes.length,
           countries: output.countries.length,
         },
         lastError: "",
@@ -211,6 +214,20 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     staleTime: 15 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
+    retry: 1,
+  });
+  const companySearchQuery = useQuery({
+    queryKey: ["register-company-search", debouncedCompanySearch],
+    queryFn: async () => {
+      const apiRoot = resolveApiRoot();
+      const response = await axios.get(`${apiRoot}/auth/register/companies`, {
+        params: { q: debouncedCompanySearch },
+        timeout: 15000,
+      });
+      return Array.isArray(response.data?.data) ? response.data.data : [];
+    },
+    enabled: debouncedCompanySearch.length >= 3,
+    staleTime: 60_000,
     retry: 1,
   });
 
@@ -316,8 +333,18 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     }
   };
 
-  const companyTypes = Array.isArray(registerOptions?.companyTypes) ? registerOptions.companyTypes : EMPTY_LIST;
-  const existingCompanies = Array.isArray(registerOptions?.existingCompanies) ? registerOptions.existingCompanies : EMPTY_LIST;
+  const existingCompanies = Array.isArray(companySearchQuery.data) ? companySearchQuery.data : EMPTY_LIST;
+  const companyOptions = useMemo(() => {
+    if (!formData.associateCompanyId || existingCompanies.some((item: any) => String(item?._id) === formData.associateCompanyId)) {
+      return existingCompanies;
+    }
+    return [{ _id: formData.associateCompanyId, name: formData.associateCompanyName || "Selected company" }, ...existingCompanies];
+  }, [existingCompanies, formData.associateCompanyId, formData.associateCompanyName]);
+  useEffect(() => {
+    if (!companySearch && formData.associateCompanyId && formData.associateCompanyName) {
+      setCompanySearch(formData.associateCompanyName);
+    }
+  }, [companySearch, formData.associateCompanyId, formData.associateCompanyName]);
   const states = Array.isArray(registerOptions?.states) ? registerOptions.states : EMPTY_LIST;
   const districts = Array.isArray(registerOptions?.districts) ? registerOptions.districts : EMPTY_LIST;
   const divisions = Array.isArray(registerOptions?.divisions) ? registerOptions.divisions : EMPTY_LIST;
@@ -328,8 +355,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const companySubFunctions = Array.isArray(registerOptions?.companySubFunctions) ? registerOptions.companySubFunctions : EMPTY_LIST;
   const failedOptionKeys = Array.isArray(registerOptions?.meta?.failedKeys) ? registerOptions.meta.failedKeys : EMPTY_LIST;
   const failedOptionLabels = failedOptionKeys.map((key: string) => ({
-    companyTypes: "company type",
-    existingCompanies: "existing company",
     designations: "designation",
     states: "state",
     districts: "district",
@@ -378,14 +403,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     }
   }, [formData.associateDivision, formData.companyDivision]);
   const selectedCompanyLabel =
-    existingCompanies.find((item: any) => String(item?._id) === String(formData.associateCompanyId))?.name || "Not selected";
-  const selectedCompanyTypeLabel =
-    companyTypes.find((item: any) => String(item?._id) === String(formData.companyType))?.name || "Not selected";
-  const selectedExistingCompany = existingCompanies.find(
+    companyOptions.find((item: any) => String(item?._id) === String(formData.associateCompanyId))?.name || formData.associateCompanyName || "Not selected";
+  const selectedExistingCompany = companyOptions.find(
     (item: any) => String(item?._id) === String(formData.associateCompanyId)
   );
-  const selectedExistingCompanyInterests = Array.isArray(selectedExistingCompany?.serviceCapabilities)
-    ? selectedExistingCompany.serviceCapabilities
+  const selectedExistingCompanyInterests = Array.isArray(selectedExistingCompany?.providedCapabilities)
+    ? selectedExistingCompany.providedCapabilities
     : [];
   const existingCompanyCapabilityLabels = selectedExistingCompanyInterests.map((cap: any) => {
     const token = String(cap || "").trim();
@@ -502,11 +525,13 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     return map;
   }, [groupedCompanyFunctions]);
 
-  const updateCompanyFunctionSelection = (functionId: string) => {
+  const updateCompanyFunctionSelection = (kind: "provided" | "sought", functionId: string) => {
     setFormData((prev) => {
-      const currentIds = Array.isArray(prev.companyFunctionIds) ? prev.companyFunctionIds : [];
-      const currentPriorities = Array.isArray(prev.companyFunctionPriorities) ? prev.companyFunctionPriorities : [];
-    const isSelected = currentIds.includes(functionId);
+      const idsKey = kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds";
+      const prioritiesKey = kind === "provided" ? "providedFunctionPriorities" : "soughtFunctionPriorities";
+      const currentIds = prev[idsKey];
+      const currentPriorities = prev[prioritiesKey];
+      const isSelected = currentIds.includes(functionId);
       let nextIds = currentIds;
       if (isSelected) {
         nextIds = currentIds.filter((id) => id !== functionId);
@@ -519,22 +544,85 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         nextPriorities = [...nextPriorities, functionId];
       }
 
-      return { ...prev, companyFunctionIds: nextIds, companyFunctionPriorities: nextPriorities };
+      return { ...prev, [idsKey]: nextIds, [prioritiesKey]: nextPriorities };
     });
-    if (errors.companyFunctionIds) setErrors((prev) => ({ ...prev, companyFunctionIds: "" }));
+    const errorKey = kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds";
+    if (errors[errorKey]) setErrors((prev) => ({ ...prev, [errorKey]: "" }));
   };
 
-  const moveCompanyFunctionPriority = (functionId: string, direction: "up" | "down") => {
+  const moveCompanyFunctionPriority = (kind: "provided" | "sought", functionId: string, direction: "up" | "down") => {
     setFormData((prev) => {
-      const current = Array.isArray(prev.companyFunctionPriorities) ? [...prev.companyFunctionPriorities] : [];
+      const prioritiesKey = kind === "provided" ? "providedFunctionPriorities" : "soughtFunctionPriorities";
+      const current = [...prev[prioritiesKey]];
       const index = current.indexOf(functionId);
       if (index === -1) return prev;
       const swapWith = direction === "up" ? index - 1 : index + 1;
       if (swapWith < 0 || swapWith >= current.length) return prev;
       const next = [...current];
       [next[index], next[swapWith]] = [next[swapWith], next[index]];
-      return { ...prev, companyFunctionPriorities: next };
+      return { ...prev, [prioritiesKey]: next };
     });
+  };
+
+  const capabilityIcon = (slug: string) => {
+    const icons: Record<string, React.ReactNode> = {
+      sourcing: <IoSearch />,
+      packaging: <IoArchive />,
+      testing: <IoFlask />,
+      "warehouse-storage": <IoHome />,
+      "finance-risk": <IoCash />,
+      "importing-distribution": <IoSwapHorizontal />,
+      "freight-forwarding": <IoBoat />,
+      "inland-logistics": <IoCar />,
+    };
+    return icons[slug] || <LuBadgeCheck />;
+  };
+
+  const renderCapabilitySection = (kind: "provided" | "sought") => {
+    const ids = kind === "provided" ? formData.providedFunctionIds : formData.soughtFunctionIds;
+    const priorities = kind === "provided" ? formData.providedFunctionPriorities : formData.soughtFunctionPriorities;
+    const error = errors[kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds"];
+    const title = kind === "provided" ? "What your company provides" : "What your company is seeking";
+    const SectionIcon = kind === "provided" ? LuBadgeCheck : LuPackageSearch;
+    return (
+      <section className="rounded-2xl border border-default-200 bg-content2/20 p-4">
+        <div className="mb-3 flex items-center gap-2 text-obaol-600">
+          <SectionIcon aria-hidden className="text-lg" />
+          <h4 className="text-xs font-black uppercase tracking-widest">{title}</h4>
+          <span className="ml-auto text-[10px] font-bold text-default-400">{ids.length}/6 selected</span>
+        </div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {groupedCompanyFunctions.map((fn: any) => {
+            const fnId = String(fn?._id || "");
+            const selected = ids.includes(fnId);
+            const disabled = !selected && ids.length >= 6;
+            const priorityIndex = priorities.indexOf(fnId);
+            return (
+              <button key={`${kind}-${fnId}`} type="button" disabled={disabled}
+                aria-pressed={selected} onClick={() => updateCompanyFunctionSelection(kind, fnId)}
+                className={`flex min-h-14 items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 ${selected ? "border-obaol-500 bg-obaol-500/10 text-obaol-700" : "border-default-200 bg-content1/40 hover:border-obaol-500/50"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
+                <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
+                <span className="min-w-0 flex-1 text-xs font-bold">{fn?.name}</span>
+                {priorityIndex > -1 && <span className="rounded-full bg-obaol-500/15 px-2 py-1 text-[9px] font-black">P{priorityIndex + 1}</span>}
+              </button>
+            );
+          })}
+        </div>
+        {error && <p className="mt-2 text-xs font-semibold text-danger-500">{error}</p>}
+        <div className="mt-4">
+          <p className="text-[10px] font-black uppercase tracking-widest text-default-400">Top priorities (up to 3)</p>
+          {priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => (
+            <div key={`${kind}-priority-${id}`} className="flex items-center justify-between rounded-lg border border-default-200 bg-content1/60 px-3 py-2">
+              <span className="text-xs font-bold"><b className="mr-2 text-obaol-600">{index + 1}</b>{companyFunctionNameById.get(id)}</span>
+              <span className="flex gap-1">
+                <button type="button" aria-label={`Move ${companyFunctionNameById.get(id)} up`} onClick={() => moveCompanyFunctionPriority(kind, id, "up")} disabled={index === 0} className="rounded-md p-1 focus-visible:ring-2 focus-visible:ring-obaol-500 disabled:opacity-30"><FiChevronUp /></button>
+                <button type="button" aria-label={`Move ${companyFunctionNameById.get(id)} down`} onClick={() => moveCompanyFunctionPriority(kind, id, "down")} disabled={index === priorities.length - 1} className="rounded-md p-1 focus-visible:ring-2 focus-visible:ring-obaol-500 disabled:opacity-30"><FiChevronDown /></button>
+              </span>
+            </div>
+          ))}</div> : <p className="mt-2 text-xs text-default-400">Your first three selections become priorities; reorder them here.</p>}
+        </div>
+      </section>
+    );
   };
 
   const validatePassword = (password: string) => {
@@ -633,8 +721,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   // Associates always represent a registered company. Individual participation uses the Operator flow.
   const isCompanyFlow = true;
   const isNewCompany = isCompanyFlow && formData.companyMode === "new";
-  const hasExistingCompanyOptions = existingCompanies.length > 0;
-  const hasCompanyTypeOptions = companyTypes.length > 0;
 
   const stepTitle = useMemo(() => {
     if (currentStep === 1) return "Associate Profile";
@@ -673,12 +759,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     }
 
     if (step === 2) {
-      if (isCompanyFlow && formData.companyMode === "existing" && !hasExistingCompanyOptions) {
-        stepErrors.associateCompanyId = "Existing company list unavailable. Retry loading options.";
-      }
-      if (isNewCompany && !hasCompanyTypeOptions) {
-        stepErrors.companyType = "Company types unavailable. Retry loading options.";
-      }
       if (isCompanyFlow && formData.companyMode === "existing" && !formData.associateCompanyId) {
         stepErrors.associateCompanyId = "Please select an existing company";
       }
@@ -690,7 +770,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           stepErrors.companyPhone = "Company phone is required";
         }
         if (!formData.companyAddress.trim()) stepErrors.companyAddress = "Company address is required";
-        if (!formData.companyType) stepErrors.companyType = "Company type is required";
         if (formData.companyGeoType === "INTERNATIONAL") {
           if (!formData.companyCountry) stepErrors.companyCountry = "Country is required";
           if (!formData.companyLegalNumber.trim()) stepErrors.companyLegalNumber = "Legal number is required";
@@ -722,11 +801,14 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
     if (step === 3) {
       if (isNewCompany) {
-        if (!Array.isArray(formData.companyFunctionIds) || formData.companyFunctionIds.length < 1) {
-          stepErrors.companyFunctionIds = "Select at least 1 main category.";
+        if (formData.providedFunctionIds.length < 1) {
+          stepErrors.providedFunctionIds = "Select at least 1 capability your company provides.";
         }
-        if (Array.isArray(formData.companyFunctionIds) && formData.companyFunctionIds.length > 6) {
-          stepErrors.companyFunctionIds = "You can select up to 6 main categories.";
+        if (formData.soughtFunctionIds.length < 1) {
+          stepErrors.soughtFunctionIds = "Select at least 1 capability your company is seeking.";
+        }
+        if (formData.providedFunctionIds.length > 6 || formData.soughtFunctionIds.length > 6) {
+          stepErrors.providedFunctionIds = "You can select up to 6 capabilities in each section.";
         }
       }
     }
@@ -919,11 +1001,17 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           legalComplianceInfo: formData.companyGeoType === "INTERNATIONAL"
             ? formData.companyLegalInformation.trim()
             : undefined,
-          functionIds: Array.from(
-            new Set((formData.companyFunctionIds || []).map((id) => String(id || "").trim()).filter(Boolean))
+          providedFunctionIds: Array.from(
+            new Set((formData.providedFunctionIds || []).map((id) => String(id || "").trim()).filter(Boolean))
           ),
-          functionPriorities: Array.from(
-            new Set((formData.companyFunctionPriorities || []).map((id) => String(id || "").trim()).filter(Boolean))
+          soughtFunctionIds: Array.from(
+            new Set((formData.soughtFunctionIds || []).map((id) => String(id || "").trim()).filter(Boolean))
+          ),
+          providedFunctionPriorities: Array.from(
+            new Set((formData.providedFunctionPriorities || []).map((id) => String(id || "").trim()).filter(Boolean))
+          ).slice(0, 3),
+          soughtFunctionPriorities: Array.from(
+            new Set((formData.soughtFunctionPriorities || []).map((id) => String(id || "").trim()).filter(Boolean))
           ).slice(0, 3),
           phone: normalizedCompanyPhone.e164,
           phoneCountryCode: normalizedCompanyPhone.countryCode,
@@ -931,7 +1019,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           phoneSecondary: normalizedCompanySecondary.e164 || normalizedCompanyPhone.e164,
           phoneSecondaryCountryCode: normalizedCompanySecondary.countryCode || normalizedCompanyPhone.countryCode,
           phoneSecondaryNational: normalizedCompanySecondary.national || normalizedCompanyPhone.national,
-          companyType: formData.companyType,
           address: formData.companyAddress.trim(),
           geoType: formData.companyGeoType,
           country: formData.companyGeoType === "INTERNATIONAL" ? formData.companyCountry : null,
@@ -1057,7 +1144,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         <form
           ref={formRef}
           tabIndex={-1}
-          className="w-full flex flex-col gap-5"
+          className="w-full flex flex-col gap-5 [&_input:focus]:outline-none [&_input:focus-visible]:outline-none [&_textarea:focus]:outline-none"
           onSubmit={(e) => e.preventDefault()}
           onKeyDown={(e) => {
             if (e.key !== "Enter") return;
@@ -1306,6 +1393,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         value={formData.referralCode}
                         onValueChange={(v) => setField("referralCode", v.toUpperCase())}
                         maxLength={6}
+                        startContent={<IoLink className="text-obaol-600" />}
                         classNames={{
                           input: "font-black tracking-[0.2em] text-center",
                           inputWrapper: "bg-background/80 h-12 border-none shadow-inner"
@@ -1337,9 +1425,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
                   {isCompanyFlow ? (
                     <>
-                      <div className="p-5 rounded-[2rem] bg-orange-500/5 border border-orange-500/10">
+                      <div className="p-5 rounded-[2rem] bg-obaol-500/5 border border-obaol-500/20">
                         <RadioGroup
-                          label={<span className="text-xs font-black uppercase tracking-widest text-orange-500">Record Status</span>}
+                          label={<span className="text-xs font-black uppercase tracking-widest text-obaol-600">Record Status</span>}
                           orientation="horizontal"
                           value={formData.companyMode}
                           onValueChange={(v) => setField("companyMode", v)}
@@ -1356,14 +1444,23 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             label="Find Company"
                             labelPlacement="outside"
                             variant="bordered"
-                            defaultItems={existingCompanies}
+                            items={companyOptions}
+                            inputValue={companySearch}
+                            onInputChange={setCompanySearch}
                             selectedKey={formData.associateCompanyId || null}
-                            onSelectionChange={(key: any) => setField("associateCompanyId", String(key || ""))}
-                            placeholder={existingCompanies.length ? "Search by name..." : "No companies found"}
+                            onSelectionChange={(key: any) => {
+                              const id = String(key || "");
+                              const match = companyOptions.find((item: any) => String(item?._id) === id);
+                              setFormData((prev) => ({ ...prev, associateCompanyId: id, associateCompanyName: String(match?.name || "") }));
+                              if (errors.associateCompanyId) setErrors((prev) => ({ ...prev, associateCompanyId: "" }));
+                            }}
+                            placeholder="Type at least 3 letters to search"
+                            startContent={<IoSearch className="text-default-400" />}
+                            isLoading={companySearchQuery.isFetching}
                             isInvalid={!!errors.associateCompanyId}
                             errorMessage={errors.associateCompanyId}
-                            isDisabled={!hasExistingCompanyOptions}
-                            classNames={{ base: "rounded-xl", inputWrapper: "h-12 border-default-200" }}
+                            description={companySearch.trim().length < 3 ? "Enter 3 or more characters; the full company directory is never shown." : companySearchQuery.isError ? "Company search failed. Please retry." : undefined}
+                            classNames={{ base: "rounded-xl", inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500 data-[focus=true]:ring-2 data-[focus=true]:ring-obaol-500/20" }}
                           >
                             {(item: any) => (
                               <AutocompleteItem key={item._id} textValue={item.name}>
@@ -1385,7 +1482,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             onValueChange={(v) => setField("companyName", v)}
                             isInvalid={!!errors.companyName}
                             errorMessage={errors.companyName}
-                            classNames={{ inputWrapper: "h-12 border-default-200" }}
+                            startContent={<IoBusiness className="text-default-400" />}
+                            classNames={{ inputWrapper: "h-12 border-default-200 group-data-[focus=true]:border-obaol-500 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-obaol-500/20" }}
                           />
                           <Input
                             label="Corporate Email"
@@ -1396,6 +1494,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             onValueChange={(v) => setField("companyEmail", v)}
                             isInvalid={!!errors.companyEmail}
                             errorMessage={errors.companyEmail}
+                            startContent={<IoMail className="text-default-400" />}
                             classNames={{ inputWrapper: "h-12 border-default-200" }}
                           />
                           <div className="md:col-span-2">
@@ -1415,28 +1514,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             </div>
                             {errors.companyPhone ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.companyPhone}</p> : null}
                           </div>
-                          <Select
-                            label="Type of Entity"
-                            labelPlacement="outside"
-                            variant="bordered"
-                            popoverProps={{ classNames: { content: "shadow-none" } }}
-                            placeholder="Select type"
-                            selectedKeys={formData.companyType ? [formData.companyType] : []}
-                            onSelectionChange={(keys) => {
-                              const selected = Array.from(keys as Set<string>)[0] || "";
-                              setField("companyType", selected);
-                            }}
-                            isInvalid={!!errors.companyType}
-                            errorMessage={errors.companyType}
-                            isDisabled={!hasCompanyTypeOptions}
-                            classNames={{ trigger: "h-12 border-default-200" }}
-                          >
-                            {companyTypes.map((item: any) => (
-                              <SelectItem key={item._id} value={item._id}>
-                                {item.name}
-                              </SelectItem>
-                            ))}
-                          </Select>
                           <div className="p-4 rounded-2xl bg-content2/30 border border-default-200 md:col-span-2">
                             <RadioGroup
                               label={<span className="text-[10px] font-black uppercase tracking-widest text-default-400">Jurisdiction</span>}
@@ -1465,17 +1542,21 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
                           {formData.companyGeoType === "INTERNATIONAL" ? (
                             <>
-                              <Input
+                              <AutocompleteAny
                                 label="Country"
                                 labelPlacement="outside"
                                 variant="bordered"
-                                value={formData.companyCountry}
-                                onValueChange={(v) => setField("companyCountry", v)}
+                                defaultItems={countries}
+                                selectedKey={formData.companyCountry || null}
+                                onSelectionChange={(key: any) => setField("companyCountry", String(key || ""))}
                                 isInvalid={!!errors.companyCountry}
                                 errorMessage={errors.companyCountry}
-                                placeholder="e.g. UAE, Singapore"
-                                classNames={{ inputWrapper: "h-12 border-default-200" }}
-                              />
+                                placeholder="Search country..."
+                                startContent={<IoEarth className="text-default-400" />}
+                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
+                              >
+                                {(item: any) => <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>}
+                              </AutocompleteAny>
                               <Input
                                 label="Tax/Legal ID"
                                 labelPlacement="outside"
@@ -1501,62 +1582,74 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 className="md:col-span-2"
                                 classNames={{ inputWrapper: "h-12 border-default-200" }}
                               />
-                              <Select
+                              <AutocompleteAny
                                 label="State"
                                 labelPlacement="outside"
                                 variant="bordered"
-                                placeholder="Select"
-                                selectedKeys={formData.companyState ? [formData.companyState] : []}
-                                onSelectionChange={(keys) => {
-                                  const selected = Array.from(keys as Set<string>)[0] || "";
-                                  setCompanyLocationField("companyState", selected);
-                                }}
+                                placeholder="Search state..."
+                                defaultItems={states}
+                                selectedKey={formData.companyState || null}
+                                onSelectionChange={(key: any) => setCompanyLocationField("companyState", String(key || ""))}
+                                startContent={<IoSearch className="text-default-400" />}
                                 isInvalid={!!errors.companyState}
                                 errorMessage={errors.companyState}
-                                classNames={{ trigger: "h-12 border-default-200" }}
+                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
                               >
                                 {states.map((item: any) => (
-                                  <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                  <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>
                                 ))}
-                              </Select>
-                              <Select
+                              </AutocompleteAny>
+                              <AutocompleteAny
                                 label="District"
                                 labelPlacement="outside"
                                 variant="bordered"
-                                placeholder="Select"
-                                selectedKeys={formData.companyDistrict ? [formData.companyDistrict] : []}
-                                onSelectionChange={(keys) => {
-                                  const selected = Array.from(keys as Set<string>)[0] || "";
-                                  setCompanyLocationField("companyDistrict", selected);
-                                }}
+                                placeholder="Search district..."
+                                defaultItems={filteredCompanyDistricts}
+                                selectedKey={formData.companyDistrict || null}
+                                onSelectionChange={(key: any) => setCompanyLocationField("companyDistrict", String(key || ""))}
+                                startContent={<IoSearch className="text-default-400" />}
                                 isInvalid={!!errors.companyDistrict}
                                 errorMessage={errors.companyDistrict}
                                 isDisabled={!formData.companyState}
-                                classNames={{ trigger: "h-12 border-default-200" }}
+                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
                               >
                                 {filteredCompanyDistricts.map((item: any) => (
-                                  <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                  <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>
                                 ))}
-                              </Select>
-                              <Select
+                              </AutocompleteAny>
+                              <AutocompleteAny
                                 label="Division"
                                 labelPlacement="outside"
                                 variant="bordered"
-                                placeholder="Select"
-                                selectedKeys={formData.companyDivision ? [formData.companyDivision] : []}
-                                onSelectionChange={(keys) => {
-                                  const selected = Array.from(keys as Set<string>)[0] || "";
-                                  setCompanyLocationField("companyDivision", selected);
-                                }}
+                                placeholder="Search division..."
+                                defaultItems={filteredCompanyDivisions}
+                                selectedKey={formData.companyDivision || null}
+                                onSelectionChange={(key: any) => setCompanyLocationField("companyDivision", String(key || ""))}
+                                startContent={<IoSearch className="text-default-400" />}
                                 isInvalid={!!errors.companyDivision}
                                 errorMessage={errors.companyDivision}
                                 isDisabled={!formData.companyDistrict}
-                                classNames={{ trigger: "h-12 border-default-200" }}
+                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
                               >
                                 {filteredCompanyDivisions.map((item: any) => (
-                                  <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                  <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>
                                 ))}
-                              </Select>
+                              </AutocompleteAny>
+                              <AutocompleteAny
+                                label="Pincode (Optional)"
+                                labelPlacement="outside"
+                                variant="bordered"
+                                placeholder="Search pincode..."
+                                defaultItems={filteredPincodes}
+                                selectedKey={formData.companyPincodeEntry || null}
+                                onSelectionChange={(key: any) => setCompanyLocationField("companyPincodeEntry", String(key || ""))}
+                                isDisabled={!formData.companyDivision}
+                                isLoading={isPincodesLoading}
+                                startContent={<IoLocation className="text-default-400" />}
+                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
+                              >
+                                {(item: any) => <AutocompleteItem key={item._id} textValue={String(item.pincode || item.name || item.code || "")}>{item.pincode || item.name || item.code}</AutocompleteItem>}
+                              </AutocompleteAny>
                             </>
                           )}
                         </div>
@@ -1725,18 +1818,24 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         </div>
                       )}
                       {groupedCompanyFunctions.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <div className="mb-3 flex items-center gap-2 text-obaol-600">
+                            <LuBadgeCheck aria-hidden className="text-lg" />
+                            <h4 className="text-xs font-black uppercase tracking-widest">What your company provides</h4>
+                            <span className="ml-auto text-[10px] font-bold text-default-400">{formData.providedFunctionIds.length}/6 selected</span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {groupedCompanyFunctions.map((fn: any) => {
                             const fnId = String(fn?._id || "");
-                            const isSelected = formData.companyFunctionIds.includes(fnId);
-    const isDisabled = !isSelected && formData.companyFunctionIds.length >= 6;
-                            const priorityIndex = formData.companyFunctionPriorities.indexOf(fnId);
+                            const isSelected = formData.providedFunctionIds.includes(fnId);
+                            const isDisabled = !isSelected && formData.providedFunctionIds.length >= 6;
+                            const priorityIndex = formData.providedFunctionPriorities.indexOf(fnId);
                             return (
                               <button
                                 key={fnId}
                                 type="button"
                                 disabled={isDisabled}
-                                onClick={() => updateCompanyFunctionSelection(fnId)}
+                                onClick={() => updateCompanyFunctionSelection("provided", fnId)}
                                 className={`w-full text-left rounded-xl border p-3 transition-all duration-300 ${isSelected
                                   ? "border-obaol-500 bg-obaol-500/10 ring-1 ring-obaol-500/20"
                                   : isDisabled
@@ -1746,8 +1845,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                               >
                                 <div className="flex items-center justify-between gap-3">
                                   <div className="flex items-center gap-3">
-                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? "border-obaol-500 bg-obaol-500" : "border-default-300"}`}>
-                                      {isSelected && <FiCheck className="text-[10px] text-white stroke-[4]" />}
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${isSelected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>
+                                      {capabilityIcon(String(fn?.slug || ""))}
                                     </div>
                                     <p className={`text-xs font-bold ${isSelected ? "text-obaol-600" : "text-foreground/70"}`}>{fn?.name}</p>
                                   </div>
@@ -1762,11 +1861,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                               </button>
                             );
                           })}
+                          </div>
                         </div>
                       )}
-                      {errors.companyFunctionIds && (
+                      {errors.providedFunctionIds && (
                         <p className="text-xs text-danger-500 font-semibold mt-2 text-center">
-                          {errors.companyFunctionIds}
+                          {errors.providedFunctionIds}
                         </p>
                       )}
                     </div>
@@ -1803,10 +1903,10 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
                   {isNewCompany && (
                     <div className="rounded-2xl border border-default-200/60 bg-content2/30 p-4">
-                      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Priority Order (1–3)</p>
-                      {formData.companyFunctionPriorities.length ? (
+                      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Provided capability priorities (1–3)</p>
+                      {formData.providedFunctionPriorities.length ? (
                         <div className="mt-3 space-y-2">
-                          {formData.companyFunctionPriorities.map((id, index) => (
+                          {formData.providedFunctionPriorities.map((id, index) => (
                             <div key={`${id}-${index}`} className="flex items-center justify-between rounded-xl border border-default-200 bg-content1/40 px-3 py-2">
                               <div className="flex items-center gap-3">
                                 <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-obaol-500 text-black text-[10px] font-black">
@@ -1819,7 +1919,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                               <div className="flex items-center gap-1">
                                 <button
                                   type="button"
-                                  onClick={() => moveCompanyFunctionPriority(id, "up")}
+                                  onClick={() => moveCompanyFunctionPriority("provided", id, "up")}
                                   disabled={index === 0}
                                   className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
                                 >
@@ -1827,8 +1927,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => moveCompanyFunctionPriority(id, "down")}
-                                  disabled={index === formData.companyFunctionPriorities.length - 1}
+                                  onClick={() => moveCompanyFunctionPriority("provided", id, "down")}
+                                  disabled={index === formData.providedFunctionPriorities.length - 1}
                                   className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
                                 >
                                   <FiChevronDown className="mx-auto text-sm" />
@@ -1844,6 +1944,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       )}
                     </div>
                   )}
+                  {isNewCompany && renderCapabilitySection("sought")}
                 </motion.div>
               )}
 
@@ -1887,16 +1988,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
           </div>
 
-          {!optionsLoading && currentStep === 2 && formData.companyMode === "existing" && existingCompanies.length === 0 && (
-            <div className="rounded-xl border border-danger-200 bg-danger-50/40 dark:bg-danger-900/15 p-3 text-xs text-danger-700 dark:text-danger-300">
-              No existing companies are available right now. Choose the new company option.
-            </div>
-          )}
-          {!optionsLoading && currentStep === 2 && isNewCompany && !hasCompanyTypeOptions && (
-            <div className="rounded-xl border border-danger-200 bg-danger-50/40 dark:bg-danger-900/15 p-3 text-xs text-danger-700 dark:text-danger-300">
-              Company type list is unavailable. Retry loading options before submitting.
-            </div>
-          )}
 
           {errors.general && (
             <div role="alert" aria-live="assertive" className="p-3 rounded-lg bg-danger-500/10 border border-danger-500/20 text-danger text-sm text-center">

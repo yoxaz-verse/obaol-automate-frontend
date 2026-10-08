@@ -349,8 +349,8 @@ export default function CompanyWorkspacePage() {
   const interestsFromStatus = Array.isArray(interestsQuery.data?.companyInterests)
     ? interestsQuery.data.companyInterests.map((value: any) => String(value || ""))
     : [];
-  const interestsFromCompany = Array.isArray((company as any)?.serviceCapabilities)
-    ? (company as any).serviceCapabilities.map((value: any) => String(value || "").toUpperCase())
+  const interestsFromCompany = Array.isArray((company as any)?.providedCapabilities)
+    ? (company as any).providedCapabilities.map((value: any) => String(value || "").toUpperCase())
     : [];
   const companyInterests = interestsFromStatus.length ? interestsFromStatus : interestsFromCompany;
   const capabilityOptions = useMemo(
@@ -453,7 +453,7 @@ export default function CompanyWorkspacePage() {
   const enquiryCount = teamPerformance.reduce((sum: number, item: any) => sum + Number(item?.performance?.enquiriesHandled || 0), 0);
   const completedOrderCount = teamPerformance.reduce((sum: number, item: any) => sum + Number(item?.performance?.ordersCompleted || 0), 0);
   const profileChecks = [
-    { label: "Company identity", complete: Boolean(company?.name && company?.companyType) },
+    { label: "Company identity", complete: Boolean(company?.name) },
     { label: "Contact details", complete: Boolean(company?.email && company?.phone) },
     { label: "Location", complete: Boolean(company?.address || company?.location?.label) },
     { label: "Company story", complete: Boolean(company?.description || company?.aboutUs) },
@@ -650,7 +650,7 @@ export default function CompanyWorkspacePage() {
                         <td className="px-3 py-2 text-default-600">{item?.email || "-"}</td>
                         <td className="px-3 py-2 text-default-600">{item?.phone || "-"}</td>
                         <td className="px-3 py-2 text-default-600">
-                          {item?.companyType?.name || item?.companyTypeName || "-"}
+                          {item?.providedCapabilities?.length ? `${item.providedCapabilities.length} capabilities` : "Not configured"}
                         </td>
                         <td className="px-3 py-2">
                           <Chip
@@ -761,7 +761,7 @@ export default function CompanyWorkspacePage() {
                     <span className="inline-flex items-center gap-1.5"><LuMail />{company?.email || "Email not added"}</span>
                     <span className="inline-flex items-center gap-1.5"><LuPhone />{company?.phone || "Phone not added"}</span>
                     <span className="inline-flex items-center gap-1.5"><LuMapPin />{company?.address || company?.location?.label || "Location not added"}</span>
-                    <span className="inline-flex items-center gap-1.5"><LuBuilding />{company?.companyType?.name || company?.companyTypeName || "Company type not added"}</span>
+                    <span className="inline-flex items-center gap-1.5"><LuBuilding />Verified company profile</span>
                     <span>Joined {formatDate(company?.createdAt)}</span>
                     <span>Supervisor: {company?.supervisor?.name || (isSupervisor ? user?.name : "Not assigned")}</span>
                   </div>

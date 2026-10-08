@@ -38,14 +38,13 @@ const EMPTY_OPERATOR_COMPANY_FORM = {
   phoneSecondary: "",
   address: "",
   geoType: "INDIAN",
-  companyType: "",
   country: "",
   state: "",
   district: "",
   division: "",
   pincodeEntry: "",
-  serviceCapabilities: [] as string[],
-  companyFunctionPriorities: [] as string[],
+  providedCapabilities: [] as string[],
+  providedCapabilityPriorities: [] as string[],
 };
 
 const EMPTY_OPERATOR_ASSOCIATE_FORM = {
@@ -119,15 +118,6 @@ export default function OnboardingModal({
   const shouldHidePathwaysUI = hidePathwaysUI || isQualityLabsAssociateAdd;
 
   // Queries for forms
-  const companyTypesQuery = useQuery({
-    queryKey: ["onboarding-company-types"],
-    queryFn: async () => {
-      const response = await getData(apiRoutes.companyType.getAll, { page: 1, limit: 100, sort: "name:asc" });
-      return extractList(response);
-    },
-    enabled: isOpen,
-  });
-
   const countriesQuery = useQuery({
     queryKey: ["onboarding-countries"],
     queryFn: async () => {
@@ -213,20 +203,19 @@ export default function OnboardingModal({
     operatorCompanyForm.name &&
     operatorCompanyForm.email &&
     operatorCompanyForm.phone &&
-    operatorCompanyForm.phoneSecondary &&
-    operatorCompanyForm.companyType
+    operatorCompanyForm.phoneSecondary
   );
 
   const selectedFunctionIds = useMemo(
-    () => (Array.isArray(operatorCompanyForm.serviceCapabilities) ? operatorCompanyForm.serviceCapabilities : []),
-    [operatorCompanyForm.serviceCapabilities]
+    () => (Array.isArray(operatorCompanyForm.providedCapabilities) ? operatorCompanyForm.providedCapabilities : []),
+    [operatorCompanyForm.providedCapabilities]
   );
   const selectedFunctionPriorities = useMemo(
     () =>
-      Array.isArray(operatorCompanyForm.companyFunctionPriorities)
-        ? operatorCompanyForm.companyFunctionPriorities
+      Array.isArray(operatorCompanyForm.providedCapabilityPriorities)
+        ? operatorCompanyForm.providedCapabilityPriorities
         : [],
-    [operatorCompanyForm.companyFunctionPriorities]
+    [operatorCompanyForm.providedCapabilityPriorities]
   );
   const isFunctionStepValid = selectedFunctionIds.length >= 1 && selectedFunctionPriorities.length >= 1;
 
@@ -289,14 +278,14 @@ export default function OnboardingModal({
     }
     if (presetCapabilitiesApplied || presetFunctionIds.length === 0) return;
     setOperatorCompanyForm((prev) => {
-      const currentCapabilities = Array.isArray(prev.serviceCapabilities) ? prev.serviceCapabilities : [];
+      const currentCapabilities = Array.isArray(prev.providedCapabilities) ? prev.providedCapabilities : [];
       const mergedCapabilities = Array.from(new Set([...currentCapabilities, ...presetFunctionIds])).slice(0, 6);
-      const currentPriorities = Array.isArray(prev.companyFunctionPriorities) ? prev.companyFunctionPriorities : [];
+      const currentPriorities = Array.isArray(prev.providedCapabilityPriorities) ? prev.providedCapabilityPriorities : [];
       const mergedPriorities = Array.from(new Set([...presetFunctionIds, ...currentPriorities])).filter((id) => mergedCapabilities.includes(id)).slice(0, 3);
       return {
         ...prev,
-        serviceCapabilities: mergedCapabilities,
-        companyFunctionPriorities: mergedPriorities,
+        providedCapabilities: mergedCapabilities,
+        providedCapabilityPriorities: mergedPriorities,
       };
     });
     setPresetCapabilitiesApplied(true);
@@ -312,8 +301,8 @@ export default function OnboardingModal({
 
   const updateCompanyFunctionSelection = (functionId: string) => {
     setOperatorCompanyForm((prev) => {
-      const currentIds = Array.isArray(prev.serviceCapabilities) ? prev.serviceCapabilities : [];
-      const currentPriorities = Array.isArray(prev.companyFunctionPriorities) ? prev.companyFunctionPriorities : [];
+      const currentIds = Array.isArray(prev.providedCapabilities) ? prev.providedCapabilities : [];
+      const currentPriorities = Array.isArray(prev.providedCapabilityPriorities) ? prev.providedCapabilityPriorities : [];
       const isSelected = currentIds.includes(functionId);
       let nextIds = currentIds;
       if (isSelected) {
@@ -329,16 +318,16 @@ export default function OnboardingModal({
 
       return {
         ...prev,
-        serviceCapabilities: nextIds,
-        companyFunctionPriorities: nextPriorities,
+        providedCapabilities: nextIds,
+        providedCapabilityPriorities: nextPriorities,
       };
     });
   };
 
   const moveCompanyFunctionPriority = (functionId: string, direction: "up" | "down") => {
     setOperatorCompanyForm((prev) => {
-      const current = Array.isArray(prev.companyFunctionPriorities)
-        ? [...prev.companyFunctionPriorities].filter((id) => prev.serviceCapabilities.includes(id))
+      const current = Array.isArray(prev.providedCapabilityPriorities)
+        ? [...prev.providedCapabilityPriorities].filter((id) => prev.providedCapabilities.includes(id))
         : [];
       const index = current.indexOf(functionId);
       if (index === -1) return prev;
@@ -346,20 +335,20 @@ export default function OnboardingModal({
       if (swapWith < 0 || swapWith >= current.length) return prev;
       const next = [...current];
       [next[index], next[swapWith]] = [next[swapWith], next[index]];
-      return { ...prev, companyFunctionPriorities: next.slice(0, 3) };
+      return { ...prev, providedCapabilityPriorities: next.slice(0, 3) };
     });
   };
 
   const combinedOnboardingMutation = useMutation({
     mutationFn: async () => {
       const sanitizedCompanyForm = { ...operatorCompanyForm };
-      const objectIdFields = ["country", "state", "district", "division", "pincodeEntry", "companyType"];
+      const objectIdFields = ["country", "state", "district", "division", "pincodeEntry"];
       objectIdFields.forEach(f => { if (sanitizedCompanyForm[f as keyof typeof sanitizedCompanyForm] === "") delete sanitizedCompanyForm[f as keyof typeof sanitizedCompanyForm]; });
 
       const resCompany = await postData(apiRoutes.associateCompany.getAll, {
         ...sanitizedCompanyForm,
-        serviceCapabilities: normalizedFunctionSlugs,
-        companyFunctionPriorities: normalizedPriorityIds,
+        providedCapabilities: normalizedFunctionSlugs,
+        providedCapabilityPriorities: normalizedPriorityIds,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
       });
       const companyId = resCompany?.data?.data?._id || resCompany?.data?.data?.id;
@@ -391,13 +380,13 @@ export default function OnboardingModal({
   const operatorCreateCompanyMutation = useMutation({
     mutationFn: async () => {
       const sanitizedCompanyForm = { ...operatorCompanyForm };
-      const objectIdFields = ["country", "state", "district", "division", "pincodeEntry", "companyType"];
+      const objectIdFields = ["country", "state", "district", "division", "pincodeEntry"];
       objectIdFields.forEach(f => { if (sanitizedCompanyForm[f as keyof typeof sanitizedCompanyForm] === "") delete sanitizedCompanyForm[f as keyof typeof sanitizedCompanyForm]; });
 
       return postData(apiRoutes.associateCompany.getAll, {
         ...sanitizedCompanyForm,
-        serviceCapabilities: normalizedFunctionSlugs,
-        companyFunctionPriorities: normalizedPriorityIds,
+        providedCapabilities: normalizedFunctionSlugs,
+        providedCapabilityPriorities: normalizedPriorityIds,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
       });
     },
@@ -440,7 +429,6 @@ export default function OnboardingModal({
     },
   });
 
-  const availableCompanyTypes = companyTypesQuery.data || [];
   const locationCountries = countriesQuery.data || [];
   const locationStates = statesQuery.data || [];
   const locationDistricts = districtsQuery.data || [];
@@ -449,8 +437,8 @@ export default function OnboardingModal({
     const rows = Array.isArray(rawAssignedCompanies) ? rawAssignedCompanies : [];
     if (!isQualityTestingAllocation) return rows;
     return rows.filter((company: any) => {
-      const caps = Array.isArray(company?.serviceCapabilities)
-        ? company.serviceCapabilities.map((value: any) => String(value || "").toUpperCase())
+      const caps = Array.isArray(company?.providedCapabilities)
+        ? company.providedCapabilities.map((value: any) => String(value || "").toUpperCase())
         : [];
       return caps.includes("QUALITY_TESTING");
     });
@@ -560,23 +548,6 @@ export default function OnboardingModal({
                            <Input label="Corporate Email" type="email" labelPlacement="outside" placeholder="Billing email protocol" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.email} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, email: value }))} isRequired classNames={{ label: "text-[10px] font-black uppercase tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
                            <Input label="Desk Phone" labelPlacement="outside" placeholder="HQ contact number" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.phone} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, phone: value }))} isRequired classNames={{ label: "text-[10px] font-black uppercase tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
                            <Input label="Backup Phone" labelPlacement="outside" placeholder="Recovery contact" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.phoneSecondary} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, phoneSecondary: value }))} isRequired classNames={{ label: "text-[10px] font-black uppercase tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
-                           <Select 
-                            label="Entity Type" 
-                            labelPlacement="outside" 
-                            placeholder="Select company type" 
-                            variant="bordered" 
-                            radius="lg" 
-                            size="lg" 
-                            selectedKeys={operatorCompanyForm.companyType ? new Set([operatorCompanyForm.companyType]) : new Set()}
-                            onSelectionChange={(keys) => setOperatorCompanyForm((current) => ({ ...current, companyType: String(Array.from(keys as Set<string>)[0] || "") }))}
-                            isLoading={companyTypesQuery.isLoading}
-                            isRequired
-                            classNames={{ label: "text-[10px] font-black uppercase tracking-[0.2em] text-default-500 ml-1 mb-2", trigger: "h-14 bg-default-100/50 border-divider shadow-inner" }}
-                          >
-                            {availableCompanyTypes.map((type: any) => (
-                               <SelectItem key={type?._id || type?.id} textValue={type?.name}>{type?.name}</SelectItem>
-                            ))}
-                          </Select>
                            <Select 
                             label="Geo Type" 
                             labelPlacement="outside" 
@@ -828,22 +799,6 @@ export default function OnboardingModal({
                        <Input label="Entity Email" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.email} onValueChange={(v) => setOperatorCompanyForm(c => ({...c, email: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }} />
                        <Input label="Desk Phone" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.phone} onValueChange={(v) => setOperatorCompanyForm(c => ({...c, phone: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }} />
                        <Input label="Backup Phone" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.phoneSecondary} onValueChange={(v) => setOperatorCompanyForm(c => ({...c, phoneSecondary: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }} />
-                       <Select 
-                        label="Entity Type" 
-                        labelPlacement="outside" 
-                        variant="bordered" 
-                        radius="lg" 
-                        size="lg" 
-                        selectedKeys={operatorCompanyForm.companyType ? new Set([operatorCompanyForm.companyType]) : new Set()}
-                        onSelectionChange={(keys) => setOperatorCompanyForm((current) => ({ ...current, companyType: String(Array.from(keys as Set<string>)[0] || "") }))}
-                        isLoading={companyTypesQuery.isLoading}
-                        isRequired
-                        classNames={{ trigger: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }}
-                       >
-                        {availableCompanyTypes.map((type: any) => (
-                           <SelectItem key={type?._id || type?.id} textValue={type?.name}>{type?.name}</SelectItem>
-                        ))}
-                       </Select>
                     </div>
                     <div className="rounded-2xl border border-divider/60 bg-content1/20 p-4 space-y-4">
                       <div className="flex items-center justify-between">

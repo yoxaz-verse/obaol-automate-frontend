@@ -83,11 +83,11 @@ export const useCompanyFunctionDashboard = ({
   const orderedFunctions = useMemo(() => {
     if (!company) return [];
 
-    const priorityIds = Array.isArray(company?.companyFunctionPriorities)
-      ? company.companyFunctionPriorities.map((id: any) => String(id))
+    const priorityIds = Array.isArray(company?.providedCapabilityPriorities)
+      ? company.providedCapabilityPriorities.map((id: any) => String(id))
       : [];
-    const capabilitySlugs = Array.isArray(company?.serviceCapabilities)
-      ? company.serviceCapabilities.map((slug: any) => String(slug || "").toLowerCase())
+    const capabilitySlugs = Array.isArray(company?.providedCapabilities)
+      ? company.providedCapabilities.map((slug: any) => String(slug || "").toLowerCase())
       : [];
 
     const byId = new Map(functions.map((fn) => [String(fn._id), fn]));
@@ -117,8 +117,8 @@ export const useCompanyFunctionDashboard = ({
 
   const enrichedFunctions = useMemo(() => {
     return orderedFunctions.map((fn) => {
-      const priorityIds = Array.isArray(company?.companyFunctionPriorities)
-        ? company.companyFunctionPriorities.map((id: any) => String(id))
+      const priorityIds = Array.isArray(company?.providedCapabilityPriorities)
+        ? company.providedCapabilityPriorities.map((id: any) => String(id))
         : [];
       const priorityIndex = priorityIds.indexOf(String(fn._id));
       const metricsRow =

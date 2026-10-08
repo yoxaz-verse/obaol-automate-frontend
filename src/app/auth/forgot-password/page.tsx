@@ -1,17 +1,14 @@
-"use client";
-
-import React, { Suspense } from "react";
 import ForgotPasswordComponent from "@/components/Login/forgot-password";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import BrandedLoader from "@/components/ui/BrandedLoader";
 
-function ForgotPasswordContent() {
-    const searchParams = useSearchParams();
-    const role = searchParams.get("role") || "Customer";
+type PageProps = { searchParams?: { role?: string | string[] } };
+
+export default function ForgotPasswordPage({ searchParams }: PageProps) {
+    const roleValue = searchParams?.role;
+    const role = (Array.isArray(roleValue) ? roleValue[0] : roleValue) || "Customer";
 
     return (
-        <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col overflow-hidden bg-background">
+        <div className="relative flex min-h-screen min-h-[100dvh] w-full flex-col items-center justify-center overflow-hidden bg-background p-0 m-0">
             {/* Background elements for "amazing" UI */}
             <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-600/5 rounded-full blur-[120px] pointer-events-none" />
@@ -27,13 +24,5 @@ function ForgotPasswordContent() {
                 <ForgotPasswordComponent role={role} />
             </div>
         </div>
-    );
-}
-
-export default function ForgotPasswordPage() {
-    return (
-        <Suspense fallback={<BrandedLoader fullScreen message="Loading password recovery" className="bg-background" />}>
-            <ForgotPasswordContent />
-        </Suspense>
     );
 }

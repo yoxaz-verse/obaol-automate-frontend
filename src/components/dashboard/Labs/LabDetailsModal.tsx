@@ -118,7 +118,6 @@ export default function LabDetailsModal({ isOpen, onOpenChange }: LabDetailsModa
     email: "",
     phone: "",
     phoneSecondary: "",
-    companyType: "",
     country: "",
     state: "",
     district: "",
@@ -133,11 +132,6 @@ export default function LabDetailsModal({ isOpen, onOpenChange }: LabDetailsModa
   const [labAcceptedItems, setLabAcceptedItems] = useState<string[]>([]);
   const [labNotes, setLabNotes] = useState("");
 
-  const companyTypesQuery = useQuery({
-    queryKey: ["lab-details-company-types"],
-    queryFn: async () => extractList(await getData(apiRoutes.companyType.getAll, { page: 1, limit: 300, sort: "name:asc" })),
-    enabled: isOpen,
-  });
   const countriesQuery = useQuery({
     queryKey: ["lab-details-countries"],
     queryFn: async () => extractList(await getData(apiRoutes.country.getAll, { page: 1, limit: 400, sort: "name:asc" })),
@@ -181,8 +175,7 @@ export default function LabDetailsModal({ isOpen, onOpenChange }: LabDetailsModa
     form.name.trim() &&
       form.email.trim() &&
       form.phone.trim() &&
-      form.phoneSecondary.trim() &&
-      form.companyType.trim()
+      form.phoneSecondary.trim()
   );
 
   const resetForm = () => {
@@ -191,7 +184,6 @@ export default function LabDetailsModal({ isOpen, onOpenChange }: LabDetailsModa
       email: "",
       phone: "",
       phoneSecondary: "",
-      companyType: "",
       country: "",
       state: "",
       district: "",
@@ -211,7 +203,7 @@ export default function LabDetailsModal({ isOpen, onOpenChange }: LabDetailsModa
     mutationFn: async () => {
       const payload: Record<string, any> = {
         ...form,
-        serviceCapabilities: ["QUALITY_TESTING"],
+        providedCapabilities: ["QUALITY_TESTING"],
         labTests,
         labCertifications,
         labSpecifications,
@@ -254,13 +246,6 @@ export default function LabDetailsModal({ isOpen, onOpenChange }: LabDetailsModa
                 <Input label="Lab Email" labelPlacement="outside" variant="bordered" radius="lg" value={form.email} onValueChange={(v) => setForm((c) => ({ ...c, email: v }))} isRequired classNames={{ inputWrapper: "bg-content1/50 border-divider shadow-inner h-12", label: "text-[9px] font-black uppercase tracking-widest ml-1 mb-2 text-default-500" }} />
                 <Input label="Primary Phone" labelPlacement="outside" variant="bordered" radius="lg" value={form.phone} onValueChange={(v) => setForm((c) => ({ ...c, phone: v }))} isRequired classNames={{ inputWrapper: "bg-content1/50 border-divider shadow-inner h-12", label: "text-[9px] font-black uppercase tracking-widest ml-1 mb-2 text-default-500" }} />
                 <Input label="Secondary Phone" labelPlacement="outside" variant="bordered" radius="lg" value={form.phoneSecondary} onValueChange={(v) => setForm((c) => ({ ...c, phoneSecondary: v }))} isRequired classNames={{ inputWrapper: "bg-content1/50 border-divider shadow-inner h-12", label: "text-[9px] font-black uppercase tracking-widest ml-1 mb-2 text-default-500" }} />
-                <Select label="Company Type" labelPlacement="outside" variant="bordered" radius="lg" selectedKeys={form.companyType ? new Set([form.companyType]) : new Set()} onSelectionChange={(keys) => setForm((c) => ({ ...c, companyType: String(Array.from(keys as Set<string>)[0] || "") }))} isRequired classNames={{ trigger: "bg-content1/50 border-divider shadow-inner h-12", label: "text-[9px] font-black uppercase tracking-widest ml-1 mb-2 text-default-500" }}>
-                  {(companyTypesQuery.data || []).map((type: any) => (
-                    <SelectItem key={String(type?._id || type?.id)} textValue={String(type?.name || "")}>
-                      {String(type?.name || "Company Type")}
-                    </SelectItem>
-                  ))}
-                </Select>
                 <Input label="Address" labelPlacement="outside" variant="bordered" radius="lg" value={form.address} onValueChange={(v) => setForm((c) => ({ ...c, address: v }))} classNames={{ inputWrapper: "bg-content1/50 border-divider shadow-inner h-12", label: "text-[9px] font-black uppercase tracking-widest ml-1 mb-2 text-default-500" }} />
                 <Select label="Country" labelPlacement="outside" variant="bordered" radius="lg" selectedKeys={form.country ? new Set([form.country]) : new Set()} onSelectionChange={(keys) => setForm((c) => ({ ...c, country: String(Array.from(keys as Set<string>)[0] || "") }))} classNames={{ trigger: "bg-content1/50 border-divider shadow-inner h-12", label: "text-[9px] font-black uppercase tracking-widest ml-1 mb-2 text-default-500" }}>
                   {(countriesQuery.data || []).map((row: any) => (

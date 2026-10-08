@@ -9,11 +9,10 @@ import {
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { FiAlertCircle, FiArrowLeft, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiMail, FiUsers } from "react-icons/fi";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
 import AuthLayout from "../Auth/AuthLayout";
-import BrandedLoader from "@/components/ui/BrandedLoader";
 import { useSoundEffect } from "@/context/SoundContext";
 import { getData, postData } from "@/core/api/apiHandler";
 import { baseUrl } from "@/core/api/axiosInstance";
@@ -25,6 +24,10 @@ import { getPasswordResetRole } from "@/utils/authRoleRoutes";
 interface ILoginProps {
   role: string;
   mode?: "login" | "signup";
+  initialQuery?: {
+    prefill?: string;
+    intent?: string;
+  };
 }
 
 type LoginCooldownState = {
@@ -34,7 +37,7 @@ type LoginCooldownState = {
   maxAttempts: number;
 };
 
-const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
+const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps) => {
   const BLOCKED_ACCOUNT_COPY = "This account is banned/blocked from OBAOL backend. Access is disabled.";
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState("");
@@ -101,7 +104,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   };
 
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { isAuthenticated, loading, login, loginWithGoogle, user, refreshUser } = useContext(AuthContext);
   const [googleReady, setGoogleReady] = useState(false);
   const [googleRenderError, setGoogleRenderError] = useState("");
@@ -117,10 +119,10 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   }, []);
 
   useEffect(() => {
-    const prefill = String(searchParams?.get("prefill") || "").trim();
+    const prefill = String(initialQuery.prefill || "").trim();
     if (!prefill) return;
     setEmail((prev) => (prev ? prev : prefill));
-  }, [authMode, searchParams]);
+  }, [initialQuery.prefill]);
 
   useEffect(() => {
     if (typeof window === "undefined" || authMode !== "login") return;
@@ -178,7 +180,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         }
         setLoginStatus("success");
         setIsRedirecting(true);
-        const tradeIntent = String(searchParams?.get("intent") || "").toUpperCase();
+        const tradeIntent = String(initialQuery.intent || "").toUpperCase();
         const onboardingQuery = new URLSearchParams({ auth: "google" });
         if (["BUY", "SELL", "BOTH", "SERVICE"].includes(tradeIntent)) onboardingQuery.set("intent", tradeIntent);
         router.push(`/dashboard/onboarding?${onboardingQuery.toString()}`);
@@ -208,7 +210,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [authMode, loginWithGoogle, rememberMe, refreshUser, roleLower, router, searchParams]);
+  }, [authMode, initialQuery.intent, loginWithGoogle, rememberMe, refreshUser, roleLower, router]);
 
   useEffect(() => {
     if (authMode === "signup") {
@@ -505,7 +507,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     const target = roleLower === "operator" || roleLower === "team"
       ? "/auth/operator/register"
       : "/auth/register";
-    const intent = String(searchParams?.get("intent") || "").toUpperCase();
+    const intent = String(initialQuery.intent || "").toUpperCase();
     const params = new URLSearchParams();
     if (intent && target === "/auth/register") params.set("intent", intent);
     const targetEmail = (notFoundEmail || email).trim();
@@ -815,10 +817,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     })
     : null;
 
-  if (isRedirecting) {
-    return <BrandedLoader fullScreen message="Signing you in" variant="compact" />;
-  }
-
   const joinCta = roleKey === "operator"
     ? {
       title: "OBAOL-approved operator?",
@@ -835,6 +833,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const passwordCooldownRemaining = Math.max(0, (passwordCooldown?.lockedUntil || 0) - nowTs);
   const isPasswordCooldownActive = authMode === "login" && passwordCooldownRemaining > 0;
   const isPreparingSession = authMode === "login" && loading;
+  const isAuthBusy = isPreparingSession || isRedirecting;
 
   return (
     <AuthLayout
@@ -870,6 +869,8 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       }
     >
       <form
+        aria-busy={isAuthBusy}
+        data-testid="auth-form"
         className="w-full flex flex-col gap-4"
         onSubmit={handleSubmit}
         onKeyDown={(e) => {
@@ -879,7 +880,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         }}
       >
         {roleIdentity && (
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 flex items-center gap-2">
+          <div className="min-h-[45px] rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg border border-white/10 bg-white/[0.04] flex items-center justify-center shrink-0">
               <roleIdentity.infoStripIcon className="text-xs text-foreground/75" />
             </div>
@@ -888,7 +889,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                 {roleIdentity.infoStripTitle}
               </p>
               <p className="text-[11px] font-semibold text-foreground/75 leading-tight">
-                {isPreparingSession ? "Preparing sign in..." : roleIdentity.infoStripMessage}
+                {isRedirecting ? "Opening your workspace..." : isPreparingSession ? "Preparing sign in..." : roleIdentity.infoStripMessage}
               </p>
             </div>
           </div>
@@ -1008,7 +1009,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             variant="bordered"
             label="Email Address"
             labelPlacement="outside"
-            isDisabled={isPreparingSession || (authMode === "signup" && otpSent)}
+            isDisabled={isAuthBusy || (authMode === "signup" && otpSent)}
             isInvalid={authMode === "signup"
               ? (otpAttempted && (!email.trim() || !isInvalidEmail))
               : (!isInvalidEmail && email.length > 0)}
@@ -1061,7 +1062,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             placeholder="Enter your password"
             variant="bordered"
             isRequired
-            isDisabled={isPreparingSession || isPasswordCooldownActive}
+            isDisabled={isAuthBusy || isPasswordCooldownActive}
             isInvalid={false}
             errorMessage={""}
             endContent={
@@ -1090,7 +1091,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                 <input
                   type="checkbox"
                   checked={rememberMe}
-                  disabled={isPreparingSession}
+                  disabled={isAuthBusy}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="peer sr-only"
                 />
@@ -1108,7 +1109,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             {(!isTwoStepLogin || loginMethod === "password") && (
               <button
                 type="button"
-                disabled={isPreparingSession}
+                disabled={isAuthBusy}
                 onClick={() => router.push(`/auth/forgot-password?role=${getPasswordResetRole(role)}`)}
                 className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 transition-all hover:scale-105 hover:text-obaol-600 disabled:pointer-events-none disabled:opacity-50 dark:text-obaol-300 dark:hover:text-obaol-200"
               >
@@ -1138,8 +1139,9 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               color="warning"
               size="lg"
               radius="lg"
-              isLoading={isLoading || isPreparingSession}
-              isDisabled={isPreparingSession || isPasswordCooldownActive}
+              data-testid="auth-submit"
+              isLoading={isLoading || isAuthBusy}
+              isDisabled={isAuthBusy || isPasswordCooldownActive}
             >
               {isTwoStepLogin && loginStep === "email"
                 ? (isLoading ? "Checking..." : "Sign In")
@@ -1151,6 +1153,8 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   ? "Sign In"
                   : isLoading
                     ? "Signing in..."
+                    : isRedirecting
+                      ? "Opening workspace..."
                     : isPreparingSession
                       ? "Preparing..."
                     : "Sign In"}
@@ -1167,7 +1171,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               className="h-12 w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/10 text-xs font-black uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300"
               startContent={<FiKey />}
               isLoading={passkeyLoginStatus === "loading"}
-              isDisabled={passkeySupport !== "supported" || isPreparingSession || passkeyLoginStatus === "loading"}
+              isDisabled={passkeySupport !== "supported" || isAuthBusy || passkeyLoginStatus === "loading"}
               onPress={handlePasskeyLogin}
             >
               Sign in with passkey
@@ -1359,9 +1363,9 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             </div>
 
             <div className="w-full flex flex-col gap-1.5">
-              <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google min-h-[74px] flex items-center justify-center">
+              <div className="flex min-h-[96px] items-center justify-center rounded-[1.5rem] border border-default-200/50 bg-gradient-to-b from-default-100/40 to-transparent p-2.5 shadow-soft group/google">
                 {googleClientId ? (
-                  <div className="w-full min-h-[54px] flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
+                  <div className="flex min-h-[74px] w-full flex-col items-center justify-center p-1 transition-[filter] duration-300 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
                     {!googleReady && !googleRenderError && (
                       <div className="h-11 w-full max-w-[340px] animate-pulse rounded-full border border-default-200 bg-default-100/70 dark:border-white/10 dark:bg-white/[0.04]" />
                     )}
@@ -1400,9 +1404,9 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             </div>
 
             <div className="w-full flex flex-col gap-1.5">
-              <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google min-h-[74px] flex items-center justify-center">
+              <div className="flex min-h-[96px] items-center justify-center rounded-[1.5rem] border border-default-200/50 bg-gradient-to-b from-default-100/40 to-transparent p-2.5 shadow-soft group/google">
                 {googleClientId ? (
-                  <div className="w-full min-h-[54px] flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
+                  <div className="flex min-h-[74px] w-full flex-col items-center justify-center p-1 transition-[filter] duration-300 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
                     {!googleReady && !googleRenderError && (
                       <div className="h-11 w-full max-w-[340px] animate-pulse rounded-full border border-default-200 bg-default-100/70 dark:border-white/10 dark:bg-white/[0.04]" />
                     )}

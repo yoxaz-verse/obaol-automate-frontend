@@ -378,7 +378,7 @@ export default function QualityLabsLocationPage() {
         labContactEmail: form.email.trim(),
         labContactPhone: form.phone.trim(),
         labContactPhoneSecondary: form.phoneSecondary.trim(),
-        serviceCapabilities: ["QUALITY_TESTING"],
+        providedCapabilities: ["QUALITY_TESTING"],
         labTests,
         labCertifications,
         labSpecifications,

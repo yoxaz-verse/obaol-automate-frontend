@@ -39,7 +39,7 @@ type AssociateCompany = {
   address?: string;
   description?: string;
   aboutUs?: string;
-  serviceCapabilities?: string[];
+  providedCapabilities?: string[];
   labTests?: string[];
   labCertifications?: string[];
   labSpecifications?: string[];

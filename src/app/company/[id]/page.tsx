@@ -61,9 +61,6 @@ const CompanyProfilePage: NextPage = () => {
                         <div className="flex-1">
                             <div className="flex gap-4 items-center mb-2">
                                 <Title title={company.name} />
-                                {company.companyType && (
-                                    <Chip color="primary" variant="flat" size="sm">{company.companyType.name}</Chip>
-                                )}
                             </div>
 
                             <div className="flex flex-wrap gap-4 text-default-500 text-sm">

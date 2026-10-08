@@ -1,11 +1,9 @@
 import LoginComponent from "@/components/Login/login-component";
-import React, { Suspense } from "react";
-import BrandedLoader from "@/components/ui/BrandedLoader";
 
-export default function OperatorRegisterPage() {
-  return (
-    <Suspense fallback={<BrandedLoader fullScreen message="Loading sign up" />}>
-      <LoginComponent role="Operator" mode="signup" />
-    </Suspense>
-  );
+type PageProps = { searchParams?: { prefill?: string | string[]; intent?: string | string[] } };
+
+const firstValue = (value?: string | string[]) => Array.isArray(value) ? value[0] : value;
+
+export default function OperatorRegisterPage({ searchParams }: PageProps) {
+  return <LoginComponent role="Operator" mode="signup" initialQuery={{ prefill: firstValue(searchParams?.prefill), intent: firstValue(searchParams?.intent) }} />;
 }

@@ -34,6 +34,10 @@ const installFailureGuards = (page) => {
 const login = async (page, account) => {
   await page.goto(account.path);
   await page.getByLabel("Email Address").fill(account.email);
+  if (await page.getByLabel("Password").count() === 0) {
+    await page.getByRole("button", { name: /^Sign In$/ }).click();
+    await expect(page.getByLabel("Password")).toBeVisible();
+  }
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: /^Sign In$/ }).click();
   await expect(page).toHaveURL(/\/dashboard(?:[/?]|$)/, { timeout: 15_000 });
@@ -89,7 +93,6 @@ test("pending associate reaches only the pending workspace", async ({ page }) =>
 test("rejected associate receives an explicit login rejection", async ({ page }) => {
   await page.goto("/auth/associate");
   await page.getByLabel("Email Address").fill("rejected@e2e.obaol.test");
-  await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: /^Sign In$/ }).click();
   await expect(page).toHaveURL(/\/auth\/associate$/);
   await expect(page.getByText(/rejected|blocked|banned|contact support|not active/i).first()).toBeVisible();

@@ -21,9 +21,7 @@ export const resolveApiRoot = () => {
 const normalizeArray = <T>(value: unknown): T[] => (Array.isArray(value) ? value : []);
 
 export type RegisterOptionsPayload = {
-  existingCompanies: any[];
   designations: any[];
-  companyTypes: any[];
   states: any[];
   districts: any[];
   divisions: any[];
@@ -66,9 +64,7 @@ export function parseRegisterOptionsResponse(responseBody: any): Omit<RegisterOp
   const meta = normalizeMeta(envelope.meta || firstData.meta);
 
   return {
-    existingCompanies: normalizeArray(payload?.existingCompanies),
     designations: normalizeArray(payload?.designations),
-    companyTypes: normalizeArray(payload?.companyTypes),
     states: normalizeArray(payload?.states),
     districts: normalizeArray(payload?.districts),
     divisions: normalizeArray(payload?.divisions),

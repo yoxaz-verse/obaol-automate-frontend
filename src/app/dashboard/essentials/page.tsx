@@ -27,7 +27,6 @@ export default function Essentials() {
   const companyTabs = [
     { key: "associateCompany", title: "Associates Company" }, // Translate Title
     { key: "researchedCompany", title: "Researched Company" }, // Translate Title
-    { key: "companyType", title: "Company Type" }, // Translate Title
     { key: "companyStage", title: "Company Stage" }, // Translate Title
   ];
 

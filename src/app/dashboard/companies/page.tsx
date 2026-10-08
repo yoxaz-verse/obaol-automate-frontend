@@ -553,8 +553,8 @@ export default function CompanyProductPage() {
   const interestPayload = selectedCompanyInterestsQuery.data?.data?.data || {};
   const companyInterestsSource = Array.isArray(interestPayload.companyInterests)
     ? interestPayload.companyInterests
-    : Array.isArray(selectedCompany?.serviceCapabilities)
-      ? selectedCompany.serviceCapabilities
+    : Array.isArray(selectedCompany?.providedCapabilities)
+      ? selectedCompany.providedCapabilities
       : [];
   const companyInterests = normalizeInterestList(companyInterestsSource);
   const companyInterestKeys = useMemo(
@@ -1087,7 +1087,7 @@ export default function CompanyProductPage() {
                                 {name}
                               </span>
                               <span className="text-[10px] font-black text-default-500 uppercase tracking-widest mt-2 bg-default-100 dark:bg-white/5 w-fit px-2 py-0.5 rounded-lg border border-divider">
-                                {dashboardCopy(toName(company?.companyType, "TYPE_PENDING"))}
+                                {company?.providedCapabilities?.length ? `${company.providedCapabilities.length} capabilities` : "Capabilities pending"}
                               </span>
                             </div>
                           </div>
@@ -1196,14 +1196,6 @@ export default function CompanyProductPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-4">
-                  {toName(selectedCompany?.companyType, "") && (
-                    <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-primary-500/10 bg-primary-500/5">
-                      <div className="w-1 h-3 bg-primary-500/30 rounded-full" />
-                      <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary-600 dark:text-primary-400">
-                        {dashboardCopy(toName(selectedCompany?.companyType, "TYPE_PENDING"))}
-                      </span>
-                    </div>
-                  )}
                   {typeof selectedCompany?.isWebsiteLive === "boolean" && (
                     <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border transition-all ${
                       selectedCompany.isWebsiteLive 

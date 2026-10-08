@@ -1386,12 +1386,49 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       onValueChange={(value) => setField("tradeMode", value)}
                       isInvalid={Boolean(errors.tradeMode)}
                       errorMessage={errors.tradeMode}
-                      classNames={{ label: "text-[10px] font-black uppercase tracking-widest text-default-500" }}
+                      description="Choose the primary workflow for your initial dashboard. You can update it later in My Company."
+                      classNames={{
+                        label: "text-[10px] font-black uppercase tracking-widest text-default-500",
+                        description: "mt-1 text-xs leading-5 text-default-500",
+                        wrapper: "mt-3 grid grid-cols-1 gap-3 md:grid-cols-2",
+                      }}
                     >
-                      <Radio value="BUY" description="Discover products and create enquiries">Buy commodities</Radio>
-                      <Radio value="SELL" description="List products and respond to buyers">Sell commodities</Radio>
-                      <Radio value="BOTH" description="Use buying and selling workflows">Buy and sell commodities</Radio>
-                      <Radio value="SERVICE" description="Provide logistics, freight, warehousing, testing, or other trade services">Provide trade services</Radio>
+                      {[
+                        { value: "BUY", title: "Buy commodities", description: "Discover products and create enquiries.", icon: IoCart },
+                        { value: "SELL", title: "Sell commodities", description: "List products and respond to buyers.", icon: IoStorefront },
+                        { value: "BOTH", title: "Buy and sell", description: "Use both buying and selling workflows.", icon: IoSwapHorizontal },
+                        { value: "SERVICE", title: "Provide trade services", description: "Offer logistics, warehousing, testing, or related services.", icon: IoBoat },
+                      ].map((option) => {
+                        const Icon = option.icon;
+                        const selected = formData.tradeMode === option.value;
+                        return (
+                          <Radio
+                            key={option.value}
+                            value={option.value}
+                            aria-label={`${option.title}. ${option.description}`}
+                            classNames={{
+                              base: "group m-0 inline-flex min-h-24 w-full max-w-none cursor-pointer items-center gap-3 rounded-2xl border border-default-200 bg-content1/50 p-4 transition-all hover:border-primary-500/50 hover:bg-primary-500/[0.04] data-[selected=true]:border-primary-500 data-[selected=true]:bg-primary-500/10 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-primary-500 data-[focus-visible=true]:ring-offset-2",
+                              wrapper: "order-3 ml-auto shrink-0 border-default-300 group-data-[selected=true]:border-primary-500",
+                              control: "bg-primary-500",
+                              labelWrapper: "order-2 ml-0 min-w-0 flex-1",
+                              label: "w-full",
+                            }}
+                          >
+                            <span className="flex w-full items-center gap-3">
+                              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl transition-colors ${selected ? "bg-primary-500 text-white" : "bg-default-100 text-default-500 group-hover:bg-primary-500/10 group-hover:text-primary-600"}`}>
+                                <Icon aria-hidden />
+                              </span>
+                              <span className="min-w-0">
+                                <span className={`flex items-center gap-2 text-sm font-bold ${selected ? "text-primary-700 dark:text-primary-300" : "text-foreground"}`}>
+                                  {option.title}
+                                  {selected ? <FiCheck aria-hidden className="text-primary-600" /> : null}
+                                </span>
+                                <span className="mt-1 block text-xs leading-5 text-default-500">{option.description}</span>
+                              </span>
+                            </span>
+                          </Radio>
+                        );
+                      })}
                     </RadioGroup>
                     <p className="mt-3 text-xs leading-5 text-default-500">
                       Service providers choose their specific company capabilities in step 3. Companies that also trade commodities can select Buy, Sell, or Buy and sell here and add service capabilities later.

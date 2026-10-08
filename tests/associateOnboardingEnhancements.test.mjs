@@ -43,6 +43,19 @@ test("associate onboarding captures independent provided and sought capability p
   assert.equal(form.includes('href="/dashboard/company"'), true);
 });
 
+test("associate onboarding presents participation modes as responsive icon cards", () => {
+  const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  for (const token of [
+    'value: "BUY"',
+    'value: "SELL"',
+    'value: "BOTH"',
+    'value: "SERVICE"',
+    "md:grid-cols-2",
+    "data-[selected=true]:border-primary-500",
+    "Choose the primary workflow for your initial dashboard",
+  ]) assert.equal(form.includes(token), true, `missing ${token}`);
+});
+
 test("My Company edits and submits split capability profiles", () => {
   const workspace = read("../src/app/dashboard/company/page.tsx");
   for (const token of [

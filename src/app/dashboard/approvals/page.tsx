@@ -333,9 +333,13 @@ export default function ApprovalsPage() {
                             {row.associateCompany?.name || "-"}
                           </div>
                         ) : tab === "companies" ? (
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/80">
-                            <LuTag size={14} className="text-default-400" />
-                            {row.gstin || "-"}
+                          <div className="flex items-start gap-1.5 text-xs font-semibold text-foreground/80">
+                            <LuTag size={14} className="mt-0.5 text-default-400" />
+                            <div className="flex flex-col gap-0.5">
+                              <span>GSTIN: {row.gstin || "-"}</span>
+                              <span>IEC: {row.iecCode || "-"}</span>
+                              <span>CIN: {row.cin || "-"}</span>
+                            </div>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-0.5">

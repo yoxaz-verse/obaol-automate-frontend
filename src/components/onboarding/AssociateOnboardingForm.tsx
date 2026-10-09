@@ -40,6 +40,8 @@ import { fetchRegisterOptions, resolveApiRoot } from "@/utils/registerOptions";
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
 const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+const IEC_REGEX = /^[A-Z0-9]{10}$/;
+const CIN_REGEX = /^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
 const MAIN_CATEGORY_SLUGS = new Set([
   "buying",
   "selling",
@@ -127,6 +129,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     companyPhoneSecondaryNational: "",
     companyAddress: "",
     companyGstin: "",
+    companyIecCode: "",
+    companyCin: "",
     companyLegalNumber: "",
     companyLegalInformation: "",
     companyGeoType: "INDIAN",
@@ -736,6 +740,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       companyDivision: value === "INDIAN" ? prev.companyDivision : "",
       companyPincodeEntry: value === "INDIAN" ? prev.companyPincodeEntry : "",
       companyGstin: value === "INDIAN" ? prev.companyGstin : "",
+      companyIecCode: value === "INDIAN" ? prev.companyIecCode : "",
+      companyCin: value === "INDIAN" ? prev.companyCin : "",
     }));
     setErrors((prev) => ({
       ...prev,
@@ -747,6 +753,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       companyDivision: "",
       companyPincodeEntry: "",
       companyGstin: "",
+      companyIecCode: "",
+      companyCin: "",
     }));
   };
 
@@ -826,6 +834,18 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             const normalizedGstin = formData.companyGstin.trim().toUpperCase();
             if (!GST_REGEX.test(normalizedGstin)) {
               stepErrors.companyGstin = "Enter a valid GST number";
+            }
+          }
+          if (formData.companyIecCode.trim()) {
+            const normalizedIecCode = formData.companyIecCode.trim().toUpperCase();
+            if (!IEC_REGEX.test(normalizedIecCode)) {
+              stepErrors.companyIecCode = "Enter a valid 10-character IEC code";
+            }
+          }
+          if (formData.companyCin.trim()) {
+            const normalizedCin = formData.companyCin.trim().toUpperCase();
+            if (!CIN_REGEX.test(normalizedCin)) {
+              stepErrors.companyCin = "Enter a valid 21-character CIN";
             }
           }
           if (!formData.companyState) stepErrors.companyState = "State is required";
@@ -1040,6 +1060,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           email: formData.companyEmail.trim(),
           gstin: formData.companyGeoType === "INDIAN" && formData.companyGstin.trim()
             ? formData.companyGstin.trim().toUpperCase()
+            : undefined,
+          iecCode: formData.companyGeoType === "INDIAN" && formData.companyIecCode.trim()
+            ? formData.companyIecCode.trim().toUpperCase()
+            : undefined,
+          cin: formData.companyGeoType === "INDIAN" && formData.companyCin.trim()
+            ? formData.companyCin.trim().toUpperCase()
             : undefined,
           legalRegistrationNumber: formData.companyGeoType === "INTERNATIONAL"
             ? formData.companyLegalNumber.trim()
@@ -1598,18 +1624,49 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             </>
                           ) : (
                             <>
-                              <Input
-                                label="GSTIN Number"
-                                labelPlacement="outside"
-                                variant="bordered"
-                                placeholder="15-digit GSTIN"
-                                value={formData.companyGstin}
-                                onValueChange={(v) => setField("companyGstin", v.toUpperCase())}
-                                isInvalid={!!errors.companyGstin}
-                                errorMessage={errors.companyGstin}
-                                className="md:col-span-2"
-                                classNames={{ inputWrapper: "h-12 border-default-200" }}
-                              />
+                              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-default-200 bg-content2/20 p-4">
+                                <div className="md:col-span-2">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-default-500">Company Verification</p>
+                                  <p className="mt-1 text-xs text-default-500">These details will be used to verify your company.</p>
+                                </div>
+                                <Input
+                                  label="GSTIN Number (Optional)"
+                                  labelPlacement="outside"
+                                  variant="bordered"
+                                  placeholder="15-character GSTIN"
+                                  value={formData.companyGstin}
+                                  onValueChange={(v) => setField("companyGstin", v.toUpperCase())}
+                                  maxLength={15}
+                                  isInvalid={!!errors.companyGstin}
+                                  errorMessage={errors.companyGstin}
+                                  classNames={{ inputWrapper: "h-12 border-default-200" }}
+                                />
+                                <Input
+                                  label="IEC Code (Optional)"
+                                  labelPlacement="outside"
+                                  variant="bordered"
+                                  placeholder="10-character IEC"
+                                  value={formData.companyIecCode}
+                                  onValueChange={(v) => setField("companyIecCode", v.toUpperCase())}
+                                  maxLength={10}
+                                  isInvalid={!!errors.companyIecCode}
+                                  errorMessage={errors.companyIecCode}
+                                  classNames={{ inputWrapper: "h-12 border-default-200" }}
+                                />
+                                <Input
+                                  label="CIN (Optional)"
+                                  labelPlacement="outside"
+                                  variant="bordered"
+                                  placeholder="21-character CIN"
+                                  value={formData.companyCin}
+                                  onValueChange={(v) => setField("companyCin", v.toUpperCase())}
+                                  maxLength={21}
+                                  isInvalid={!!errors.companyCin}
+                                  errorMessage={errors.companyCin}
+                                  className="md:col-span-2"
+                                  classNames={{ inputWrapper: "h-12 border-default-200" }}
+                                />
+                              </div>
                               <AutocompleteAny
                                 label="State"
                                 labelPlacement="outside"

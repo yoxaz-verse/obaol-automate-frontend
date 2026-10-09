@@ -70,3 +70,29 @@ test("registration bootstrap excludes company types and the full company directo
   assert.equal(options.includes("existingCompanies"), false);
   assert.equal(options.includes("companyTypes"), false);
 });
+
+test("Indian company onboarding captures optional verification identifiers", () => {
+  const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  const approvals = read("../src/app/dashboard/approvals/page.tsx");
+  const authService = read("../../obaol-automate-backend/src/services/authService.ts");
+  const companyModel = read("../../obaol-automate-backend/src/database/models/associateCompany.ts");
+
+  for (const token of [
+    "companyGstin",
+    "companyIecCode",
+    "companyCin",
+    "These details will be used to verify your company.",
+    "GSTIN Number (Optional)",
+    "IEC Code (Optional)",
+    "CIN (Optional)",
+    "maxLength={15}",
+    "maxLength={10}",
+    "maxLength={21}",
+  ]) assert.equal(form.includes(token), true, `missing ${token}`);
+
+  for (const token of ["iecCode", "cin"]) {
+    assert.equal(authService.includes(token), true, `auth payload missing ${token}`);
+    assert.equal(companyModel.includes(token), true, `company model missing ${token}`);
+    assert.equal(approvals.includes(`row.${token}`), true, `approval UI missing ${token}`);
+  }
+});

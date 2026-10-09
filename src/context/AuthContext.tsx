@@ -32,6 +32,7 @@ export interface User {
   registrationStatus?: string | null;
   rejectionReason?: string | null;
   pendingSince?: string | null;
+  isAvailable?: boolean;
   verified: {
     email: boolean;
     phone?: boolean;

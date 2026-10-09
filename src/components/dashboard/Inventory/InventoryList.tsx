@@ -690,6 +690,9 @@ const InventoryList: React.FC = () => {
                                 }
                                 closeRateModal();
                                 refetch?.();
+                                await queryClient.invalidateQueries({
+                                    queryKey: ["inventory-suggested-rates", effectiveCompanyId, user?.id],
+                                });
                             } catch (error: any) {
                                 showToastMessage({
                                     type: "error",
@@ -711,6 +714,9 @@ const InventoryList: React.FC = () => {
                                     position: "top-right",
                                 });
                                 refetch?.();
+                                await queryClient.invalidateQueries({
+                                    queryKey: ["inventory-suggested-rates", effectiveCompanyId, user?.id],
+                                });
                             } catch (error: any) {
                                 showToastMessage({
                                     type: "error",
@@ -882,6 +888,19 @@ const InventoryList: React.FC = () => {
                                                 totalPages={meta?.totalPages || 1}
                                                 rowsPerPage={limit}
                                                 onPageChange={(nextPage) => setPage(nextPage)}
+                                                getRowClassName={(item: any) => {
+                                                    const pvId = item.productVariantId;
+                                                    const compId = item.associateCompanyId || "";
+                                                    const matchedRate = rateMap.get(`${pvId}::${compId}`);
+                                                    const hasRate = Boolean(
+                                                        item.linkedVariantRateId ||
+                                                        item.linkedVariantRate ||
+                                                        matchedRate?._id
+                                                    );
+                                                    return hasRate
+                                                        ? ""
+                                                        : "!border-warning-300/60 !bg-warning-50/70 dark:!border-warning-500/30 dark:!bg-warning-500/[0.08] [&>td]:!bg-warning-50/70 dark:[&>td]:!bg-warning-500/[0.08]";
+                                                }}
                                                 emptyContent={(
                                                     (() => {
                                                         const isFiltered = Boolean(debouncedSearch || (filtersKey && filtersKey !== "{}"));
@@ -1032,7 +1051,7 @@ const InventoryList: React.FC = () => {
                                                             {/* Status Chip with live pulse */}
                                                             <Chip
                                                                 size="sm"
-                                                                variant="flat"
+                                                                variant={isPublished ? "flat" : "solid"}
                                                                 color={isPublished ? (isLive ? "success" : "warning") : "default"}
                                                                 startContent={
                                                                     isPublished && isLive ? (
@@ -1042,8 +1061,11 @@ const InventoryList: React.FC = () => {
                                                                         </span>
                                                                     ) : null
                                                                 }
+                                                                className={!isPublished
+                                                                    ? "!bg-warning-500 !text-warning-950 font-black shadow-sm ring-1 ring-warning-600/30"
+                                                                    : undefined}
                                                             >
-                                                                {isPublished ? (isLive ? "Live" : "Paused") : "No Rate"}
+                                                                {isPublished ? (isLive ? "Live" : "Paused") : "Rate missing"}
                                                             </Chip>
 
                                                             {!isPublished ? (

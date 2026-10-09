@@ -181,6 +181,7 @@ export interface TableProps {
   deleteModal?: (item: Record<string, unknown>) => React.ReactNode;
   editModal?: (item: Record<string, unknown>) => React.ReactNode;
   otherModal?: (item: Record<string, unknown>) => React.ReactNode;
+  getRowClassName?: (item: Record<string, unknown>) => string;
   isLoading?: boolean;
   page?: number;
   totalPages?: number;

@@ -237,7 +237,9 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
         ? "/dashboard/onboarding"
         : isPendingApproval
           ? "/dashboard/pending-approval"
-          : "/dashboard";
+          : authRoleLower === "customersupport"
+            ? "/dashboard/customer-support"
+            : "/dashboard";
       if (authRoleLower === "associate" && user?.associateCompanyId && user?.companyCapabilitiesConfigured === false) {
         showToastMessage({
           type: "warning",
@@ -1437,7 +1439,11 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
         )}
 
         <div className="mt-1.5 flex items-center justify-center">
-          {authMode === "login" ? (
+          {authMode === "login" && roleLower === "customersupport" ? (
+            <div className="w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/[0.04] p-3 text-center text-xs font-semibold text-foreground/60">
+              Customer Support accounts are created and managed by an OBAOL administrator.
+            </div>
+          ) : authMode === "login" ? (
             <div className="w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/[0.04] p-3 text-center dark:bg-obaol-500/[0.06]">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/55">
                 New to OBAOL?

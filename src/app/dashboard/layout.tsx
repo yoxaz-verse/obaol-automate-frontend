@@ -204,7 +204,7 @@ function DashboardLayoutContent({
                 paddingBottom: "var(--mobile-app-bottom-space)"
               }}
             >
-              <div data-dashboard-content className="max-w-[var(--db-content-width)] mx-auto w-full p-2 md:p-6 min-w-0">
+              <div data-dashboard-content className="max-w-[var(--db-content-width)] mx-auto w-full px-3 pb-4 pt-1 md:p-6 min-w-0">
                 <DashboardContextBar />
                 {children}
               </div>

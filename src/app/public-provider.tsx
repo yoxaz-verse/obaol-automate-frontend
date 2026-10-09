@@ -4,6 +4,8 @@ import { NextUIProvider } from "@nextui-org/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { SoundProvider } from "@/context/SoundContext";
 import SoundInitializer from "@/components/ui/SoundInitializer";
+import { PwaInstallProvider } from "@/context/PwaInstallContext";
+import PwaRuntime from "@/components/pwa/PwaRuntime";
 
 export function PublicProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -13,10 +15,13 @@ export function PublicProviders({ children }: { children: React.ReactNode }) {
         defaultTheme="light"
         enableSystem={false}
       >
-        <SoundProvider>
-          <SoundInitializer />
-          {children}
-        </SoundProvider>
+        <PwaInstallProvider>
+          <SoundProvider>
+            <SoundInitializer />
+            <PwaRuntime />
+            {children}
+          </SoundProvider>
+        </PwaInstallProvider>
       </NextThemesProvider>
     </NextUIProvider>
   );

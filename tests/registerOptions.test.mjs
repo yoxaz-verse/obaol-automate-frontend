@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   parseRegisterOptionsResponse,
   REGISTER_OPTIONS_TIMEOUT_MS,
+  COMPANY_FUNCTION_TAXONOMY_COUNT,
+  COMPANY_FUNCTION_TAXONOMY_VERSION,
 } from "../src/utils/registerOptions.ts";
 
 const sampleOptions = {
@@ -19,6 +21,21 @@ const sampleOptions = {
 
 test("registration options allow slow production responses", () => {
   assert.equal(REGISTER_OPTIONS_TIMEOUT_MS, 30_000);
+  assert.equal(COMPANY_FUNCTION_TAXONOMY_VERSION, 2);
+  assert.equal(COMPANY_FUNCTION_TAXONOMY_COUNT, 11);
+});
+
+test("parses company-function taxonomy metadata", () => {
+  const parsed = parseRegisterOptionsResponse({
+    success: true,
+    data: sampleOptions,
+    meta: {
+      partial: false,
+      failedKeys: [],
+      companyFunctionTaxonomy: { version: 2, expectedCount: 11, returnedCount: 11 },
+    },
+  });
+  assert.deepEqual(parsed.meta.companyFunctionTaxonomy, { version: 2, expectedCount: 11, returnedCount: 11 });
 });
 
 test("parses the standard registration-options envelope", () => {

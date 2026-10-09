@@ -55,7 +55,7 @@ const COMPANY_CAPABILITY_OPTIONS = [
   { key: "testing", value: "Quality Testing & Labs" },
   { key: "warehouse-storage", value: "Warehouse / Storage" },
   { key: "finance-risk", value: "Finance & Insurance" },
-  { key: "importing-to-india", value: "Importing to India" },
+  { key: "importing-to-india", value: "Importing into India" },
   { key: "exporting-from-india", value: "Exporting from India" },
   { key: "freight-forwarding", value: "Freight Forwarding" },
   { key: "inland-logistics", value: "Inland Logistics" },

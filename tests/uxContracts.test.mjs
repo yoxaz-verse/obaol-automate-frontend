@@ -29,7 +29,7 @@ test("mobile app shell primitives are present", () => {
   assert.equal(globals.includes("100dvh"), true);
   assert.equal(dashboardLayout.includes("h-[100dvh] max-h-[100dvh]"), true);
   assert.equal(dashboardLayout.includes("var(--mobile-app-bottom-space)"), true);
-  assert.equal(bottomNav.includes("env(safe-area-inset-bottom)"), true);
+  assert.equal(bottomNav.includes("var(--safe-bottom)"), true);
   assert.equal(table.includes("sm:hidden"), true);
   assert.equal(table.includes("mobileActionColumns"), true);
 });

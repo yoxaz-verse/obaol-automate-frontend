@@ -2,6 +2,8 @@ import axios from "axios";
 
 const DEFAULT_API_ROOT = "/api/v1/web";
 export const REGISTER_OPTIONS_TIMEOUT_MS = 30000;
+export const COMPANY_FUNCTION_TAXONOMY_VERSION = 2;
+export const COMPANY_FUNCTION_TAXONOMY_COUNT = 11;
 
 const normalizeApiRoot = (value: string) =>
   String(value || "")
@@ -35,6 +37,11 @@ export type RegisterOptionsMeta = {
   partial: boolean;
   failedKeys: string[];
   error?: string;
+  companyFunctionTaxonomy?: {
+    version: number;
+    expectedCount: number;
+    returnedCount: number;
+  };
 };
 
 export type RegisterOptionsResult = RegisterOptionsPayload & {
@@ -48,11 +55,21 @@ const normalizeMeta = (value: unknown): RegisterOptionsMeta => {
     .map((key) => String(key || "").trim())
     .filter(Boolean);
   const error = typeof meta.error === "string" && meta.error.trim() ? meta.error.trim() : undefined;
+  const taxonomy = meta.companyFunctionTaxonomy && typeof meta.companyFunctionTaxonomy === "object"
+    ? meta.companyFunctionTaxonomy as Record<string, unknown>
+    : null;
 
   return {
     partial: Boolean(meta.partial) || failedKeys.length > 0,
     failedKeys,
     ...(error ? { error } : {}),
+    ...(taxonomy ? {
+      companyFunctionTaxonomy: {
+        version: Number(taxonomy.version || 0),
+        expectedCount: Number(taxonomy.expectedCount || 0),
+        returnedCount: Number(taxonomy.returnedCount || 0),
+      },
+    } : {}),
   };
 };
 
@@ -85,6 +102,16 @@ export async function fetchRegisterOptions(): Promise<RegisterOptionsResult> {
   });
 
   const parsed = parseRegisterOptionsResponse(response.data);
+  const taxonomy = parsed.meta.companyFunctionTaxonomy;
+  if (
+    !taxonomy ||
+    taxonomy.version !== COMPANY_FUNCTION_TAXONOMY_VERSION ||
+    taxonomy.expectedCount !== COMPANY_FUNCTION_TAXONOMY_COUNT ||
+    taxonomy.returnedCount !== COMPANY_FUNCTION_TAXONOMY_COUNT ||
+    parsed.companyFunctions.length !== COMPANY_FUNCTION_TAXONOMY_COUNT
+  ) {
+    throw new Error("The company capability list is being updated. Please retry shortly.");
+  }
 
   return {
     resolvedEndpoint: endpoint,

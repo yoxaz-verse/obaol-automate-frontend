@@ -72,11 +72,25 @@ test("Associate capabilities personalize without gating navigation", () => {
   }
 });
 
-test("Customer Support is limited to Associates and Admins", () => {
+test("Customer Support is available to every dashboard role", () => {
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Associate" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Admin" }), true);
-  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Operator" }), false);
-  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Team" }), false);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Operator" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Team" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "CustomerSupport" }), true);
+});
+
+test("Customer Support agents receive only their support workspace and account routes", () => {
+  const links = new Set(getAccessibleDashboardRoutes({ role: "CustomerSupport" }).map((route) => route.path));
+  assert.deepEqual([...links], [
+    "/dashboard",
+    "/dashboard/notifications",
+    "/dashboard/settings",
+    "/dashboard/customer-support",
+  ]);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/profile", role: "CustomerSupport" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/orders", role: "CustomerSupport" }), false);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/users", role: "CustomerSupport" }), false);
 });
 
 test("Associate sidebar routes use the requested account and support groups", () => {
@@ -177,11 +191,12 @@ test("Operations/Admin groups omit inaccessible and empty groups", () => {
   for (const role of ["Operator", "Team"]) {
     const routes = getAccessibleDashboardRoutes({ role });
     const groups = getDashboardAdminGroups(routes);
-    assert.deepEqual(groups.map((group) => group.label), ["Team & Users"]);
+    assert.deepEqual(groups.map((group) => group.label), ["Team & Users", "Platform Setup"]);
     assert.deepEqual(groups[0].links, [
       "/dashboard/operator/hierarchy",
       "/dashboard/operator/team",
       "/dashboard/operator/earnings",
     ]);
+    assert.deepEqual(groups[1].links, ["/dashboard/customer-support"]);
   }
 });

@@ -2,10 +2,12 @@
 
 import { useContext } from "react";
 import Link from "next/link";
-import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiSettings, FiUser } from "react-icons/fi";
+import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiDownload, FiSettings, FiUser } from "react-icons/fi";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
 import AuthContext from "@/context/AuthContext";
+import { InstallAppButton } from "@/components/pwa/PwaRuntime";
+import { usePwaInstall } from "@/context/PwaInstallContext";
 
 const settingsLinks = [
   {
@@ -40,6 +42,7 @@ const settingsLinks = [
 
 export default function SettingsPage() {
   const { user } = useContext(AuthContext);
+  const { isStandalone } = usePwaInstall();
   const isAssociate = String(user?.role || "").toLowerCase() === "associate";
   const visibleSettingsLinks = settingsLinks.filter((item) => !item.associateOnly || isAssociate);
 
@@ -62,7 +65,15 @@ export default function SettingsPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 p-5 sm:p-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 p-4 sm:p-6 lg:grid-cols-2">
+          <section className="flex min-h-40 flex-col rounded-2xl border db-border-subtle db-inset p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-300"><FiDownload size={22} /></div>
+              {isStandalone && <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300">Installed</span>}
+            </div>
+            <div className="mt-5"><h2 className="text-lg font-semibold">Install OBAOL</h2><p className="mt-2 text-sm leading-6 db-muted">Add OBAOL to your Home Screen for a full-screen, app-like workspace.</p></div>
+            <div className="mt-4"><InstallAppButton /></div>
+          </section>
           {visibleSettingsLinks.map((item) => {
             const Icon = item.icon;
             return (

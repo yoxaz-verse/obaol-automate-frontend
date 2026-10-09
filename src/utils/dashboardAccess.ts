@@ -1,4 +1,4 @@
-export type DashboardRole = "admin" | "associate" | "operator" | "team";
+export type DashboardRole = "admin" | "associate" | "operator" | "team" | "customer-support";
 export type DashboardSection =
   | "Overview"
   | "Trade"
@@ -49,7 +49,7 @@ export type DashboardRouteDefinition = {
 type DashboardRouteInput = Omit<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId" | "navIcon" | "taskGroup"> & Partial<Pick<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId" | "navIcon" | "taskGroup">>;
 
 const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
-  { path: "/dashboard", label: "Dashboard", section: "Overview", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, mobilePriority: 1 },
+  { path: "/dashboard", label: "Dashboard", section: "Overview", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true, mobilePriority: 1 },
   { path: "/dashboard/onboarding", label: "Onboarding", section: "Overview", roles: ["associate", "operator", "team"] },
   { path: "/dashboard/pending-approval", label: "Pending approval", section: "Overview", roles: ["associate", "operator", "team"] },
   { path: "/dashboard/rejected", label: "Access status", section: "Overview", roles: ["associate", "operator", "team"] },
@@ -83,10 +83,10 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/warehouses/location", label: "Warehouse location", section: "Organization", roles: ["admin", "associate", "operator", "team"] },
   { path: "/dashboard/company", label: "My Company", section: "Organization", roles: ["associate"], nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
   { path: "/dashboard/companies", label: "Companies", section: "Organization", roles: ["admin", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/notifications", label: "Notifications", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
+  { path: "/dashboard/notifications", label: "Notifications", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
   { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Support" },
-  { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team"], searchable: true, activeParent: "/dashboard/settings" },
+  { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true },
+  { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], searchable: true, activeParent: "/dashboard/settings" },
 
   { path: "/dashboard/operator/hierarchy", label: "Hierarchy", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/operator/team", label: "Team", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
@@ -109,7 +109,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/function-preview", label: "Function Preview", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/essentials", label: "Essentials", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/geosphere", label: "Geo Sphere", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/customer-support", label: "Customer Support", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin", "associate"], nav: true, searchable: true, taskGroup: "Support", description: "Contact OBAOL support or manage the support contacts available to associates.", navIcon: "support" },
+  { path: "/dashboard/customer-support", label: "Customer Support", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true, taskGroup: "Support", description: "Start, answer, and manage OBAOL support conversations.", navIcon: "support", mobilePriority: 2 },
   { path: "/dashboard/rates", label: "Rates", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/bulk", label: "Bulk Operations", section: "Operations/Admin", roles: ["admin"] },
   { path: "/dashboard/news", label: "News", section: "Operations/Admin", roles: ["admin"] },
@@ -184,6 +184,7 @@ export const DASHBOARD_ROUTE_MANIFEST: DashboardRouteDefinition[] = DASHBOARD_RO
 export const normalizeDashboardRole = (role: unknown): DashboardRole | null => {
   const normalized = String(role || "").trim().toLowerCase();
   if (normalized === "customer") return "associate";
+  if (normalized === "customersupport" || normalized === "customer_support" || normalized === "customer-support") return "customer-support";
   if (["admin", "associate", "operator", "team"].includes(normalized)) {
     return normalized as DashboardRole;
   }

@@ -739,7 +739,7 @@ const FinanceRiskSection = (props: SectionProps) => (
 const ImportDistributionSection = (props: SectionProps) => {
   const isExport = props.slug === "exporting-from-india";
   return (
-  <FunctionSectionShell {...props} accent="primary" name={isExport ? "Exporter from India" : "Importer to India"}>
+  <FunctionSectionShell {...props} accent="primary" name={isExport ? "Exporter from India" : "Importer into India"}>
     <KpiStrip metrics={props.metrics} labels={KPI_LABELS[props.slug] || KPI_LABELS["importing-to-india"]} />
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <div className="rounded-[2.5rem] border border-default-200/50 bg-primary/5 backdrop-blur-md p-8 space-y-8">

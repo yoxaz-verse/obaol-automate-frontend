@@ -38,7 +38,7 @@ test("associate onboarding captures independent provided and sought capability p
   assert.equal(form.includes("Type of Entity"), false);
   assert.equal(form.includes('buying: <IoCart />'), true);
   assert.equal(form.includes('selling: <IoStorefront />'), true);
-  assert.equal(form.includes('className="grid grid-cols-2 gap-2"'), true);
+  assert.equal(form.includes('className="grid grid-cols-1 gap-2 sm:grid-cols-2"'), true);
   assert.equal(form.includes("Build a clearer company profile"), true);
   assert.equal(form.includes('href="/dashboard/company"'), true);
 });
@@ -49,8 +49,21 @@ test("associate onboarding removes duplicate participation modes", () => {
   assert.equal(form.includes("tradeMode:"), false);
   assert.equal(form.includes('"importing-to-india"'), true);
   assert.equal(form.includes('"exporting-from-india"'), true);
-  assert.equal(form.includes("Make priority"), true);
-  assert.equal(form.includes("Your first three selections become priorities"), false);
+  assert.equal(form.includes("IoArrowDownCircleOutline"), true);
+  assert.equal(form.includes("IoArrowUpCircleOutline"), true);
+  assert.equal(form.includes('grid grid-cols-1 gap-2 sm:grid-cols-2'), true);
+  assert.equal(form.includes("Make priority"), false);
+  assert.equal(form.includes("Remove priority"), false);
+  assert.equal(form.includes("Your first three selections become priorities automatically"), true);
+});
+
+test("capability priorities preserve ranking and automatically fill the first three slots", async () => {
+  const { reconcileCompanyFunctionPriorities } = await import("../src/utils/companyFunctionPriorities.ts");
+  assert.deepEqual(reconcileCompanyFunctionPriorities(["a"], []), ["a"]);
+  assert.deepEqual(reconcileCompanyFunctionPriorities(["a", "b", "c", "d"], []), ["a", "b", "c"]);
+  assert.deepEqual(reconcileCompanyFunctionPriorities(["a", "b", "c", "d"], ["c", "a", "b"]), ["c", "a", "b"]);
+  assert.deepEqual(reconcileCompanyFunctionPriorities(["a", "c", "d"], ["a", "b", "c"]), ["a", "c", "d"]);
+  assert.deepEqual(reconcileCompanyFunctionPriorities(["a", "c", "d", "b"], ["a", "c", "d"]), ["a", "c", "d"]);
 });
 
 test("My Company edits and submits split capability profiles", () => {
@@ -69,6 +82,12 @@ test("registration bootstrap excludes company types and the full company directo
   const options = read("../src/utils/registerOptions.ts");
   assert.equal(options.includes("existingCompanies"), false);
   assert.equal(options.includes("companyTypes"), false);
+});
+
+test("registration options reject an incomplete company-function taxonomy", () => {
+  const service = read("../../obaol-automate-backend/src/services/authService.ts");
+  assert.equal(service.includes("COMPANY_FUNCTION_TAXONOMY_INCOMPLETE"), true);
+  assert.equal(service.includes("missingCompanyFunctionSlugs"), true);
 });
 
 test("Indian company onboarding captures optional verification identifiers", () => {

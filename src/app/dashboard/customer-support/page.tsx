@@ -27,6 +27,7 @@ import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { SupportContact, supportContactLinks } from "@/core/api/supportContacts";
 import { showToastMessage } from "@/utils/utils";
+import SupportWorkspace from "@/components/dashboard/SupportWorkspace";
 
 type ContactForm = { label: string; phoneNumber: string; isActive: boolean; sortOrder: number };
 const emptyForm: ContactForm = { label: "", phoneNumber: "+91", isActive: true, sortOrder: 0 };
@@ -108,6 +109,8 @@ export default function CustomerSupportPage() {
     <section className="mx-2 md:mx-6 space-y-8 pb-12">
       <Title title="Customer Support" visuallyHidden />
 
+      <SupportWorkspace />
+
       {/* Hero Header Banner with Brand Design */}
       <div className="relative overflow-hidden rounded-3xl border border-obaol-500/20 bg-gradient-to-r from-obaol-500/10 via-content1/90 to-background p-6 md:p-8 backdrop-blur-xl shadow-lg">
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-obaol-500/10 blur-3xl pointer-events-none" />
@@ -116,8 +119,8 @@ export default function CustomerSupportPage() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3 max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-obaol-400/30 bg-obaol-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              Direct Support Desk • Dedicated Managers
+              <span className="h-2 w-2 rounded-full bg-default-400" />
+              Fallback Contact Directory
             </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-foreground">
@@ -127,14 +130,14 @@ export default function CustomerSupportPage() {
             <p className="text-sm md:text-base text-default-500 leading-relaxed font-medium">
               {isAdmin
                 ? "Manage the official customer support contacts available to all trade associates and operators."
-                : "Connect directly with OBAOL trade execution specialists for order verification, logistics coordination, sample requests, and workspace support."}
+                : "Use these managed phone and WhatsApp contacts when live chat is offline or you need an alternate support channel."}
             </p>
 
             {/* SLA Meta Bar */}
             <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-default-500 font-semibold">
               <div className="flex items-center gap-1.5 rounded-lg bg-background/60 px-3 py-1.5 border border-default-200/50">
                 <FiClock className="text-obaol-500" />
-                <span>Response Time: &lt; 15 Mins</span>
+                <span>Phone &amp; WhatsApp fallback</span>
               </div>
               <div className="flex items-center gap-1.5 rounded-lg bg-background/60 px-3 py-1.5 border border-default-200/50">
                 <FiShield className="text-emerald-500" />
@@ -447,4 +450,3 @@ export default function CustomerSupportPage() {
     </section>
   );
 }
-

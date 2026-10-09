@@ -106,6 +106,17 @@ test("manifest is installable and honest about dashboard PWA defaults", async ({
   expect(manifest.theme_color).toBe("#cf983c");
   expect(Array.isArray(manifest.icons)).toBeTruthy();
   expect(manifest.icons.length).toBeGreaterThanOrEqual(2);
+  expect(manifest.icons.some((icon) => icon.sizes === "512x512")).toBeTruthy();
+  expect(manifest.icons.some((icon) => icon.purpose === "maskable")).toBeTruthy();
+  expect(manifest.shortcuts.map((shortcut) => shortcut.url)).toEqual(expect.arrayContaining([
+    "/dashboard",
+    "/dashboard/marketplace",
+    "/dashboard/enquiries",
+  ]));
+
+  const worker = await request.get("/sw.js");
+  expect(worker.ok()).toBeTruthy();
+  expect(await worker.text()).toContain('url.pathname.startsWith("/api/")');
 });
 
 for (const route of dashboardRoutes) {

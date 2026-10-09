@@ -27,11 +27,10 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
     <nav
       data-bottomnav
       aria-label="Primary workspace navigation"
-      className="fixed bottom-3 left-3 right-3 z-[100] h-[4.5rem] db-shell backdrop-blur-2xl border db-border-subtle rounded-2xl md:hidden overflow-hidden"
-      style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed bottom-0 left-0 right-0 z-[100] h-[calc(var(--mobile-bottom-nav-height)+var(--safe-bottom))] overflow-hidden border-t db-shell db-border-subtle backdrop-blur-2xl safe-pb md:hidden"
     >
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-obaol-500/20 to-transparent" />
-      <div className="grid h-full grid-cols-5 px-1 max-w-lg mx-auto">
+      <div className="grid h-[var(--mobile-bottom-nav-height)] grid-cols-5 px-1 max-w-lg mx-auto">
         {routes.map((route) => {
           if (!route) return null;
           const option = optionsByPath.get(route.path);

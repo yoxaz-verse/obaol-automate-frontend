@@ -51,7 +51,7 @@
 .obaol-public .public-button--primary:hover { background: #dfac54; }
 .obaol-public .public-button--secondary { background: var(--public-surface); border-color: var(--public-border); color: var(--public-text); }
 .obaol-public .public-button--secondary:hover { border-color: var(--public-accent); background: var(--public-inset); }
-.obaol-public :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--public-accent); outline-offset: 4px; }
+.obaol-public :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--app-focus); outline-offset: 3px; }
 .obaol-public :is(button:disabled, [aria-disabled="true"]) { opacity: .5; pointer-events: none; }
 .obaol-public button { min-height: 44px; }
 .obaol-public .public-perspective { position: relative; isolation: isolate; overflow: hidden; border-top: 1px solid var(--public-border); background: var(--public-bg); }
@@ -61,7 +61,7 @@
 .obaol-public .public-perspective .public-section-heading { position: relative; padding: 24px 28px; margin: -24px -28px 0; border-radius: 16px; background: color-mix(in srgb, var(--public-bg) 88%, transparent); }
 @media (max-width: 639px) { .obaol-public .public-perspective-art { opacity: .11; } .obaol-public .public-perspective .public-section-heading { margin: -12px -16px 0; padding: 12px 16px; } }
 .obaol-public .public-reading { max-width: 78ch; margin-inline: auto; }
-.obaol-public .public-content-wrapper { padding-top: clamp(128px, 12vw, 160px); padding-bottom: clamp(64px, 8vw, 96px); }
+.obaol-public .public-content-wrapper { padding-top: clamp(96px, 7vw, 112px); padding-bottom: clamp(64px, 8vw, 96px); }
 .obaol-public .public-content-wrapper .public-content-wrapper { padding-block: 0; }
 .obaol-public .public-content-wrapper .public-hero { padding-top: 0; }
 .obaol-public .public-content-wrapper .prose { color: var(--public-muted); }
@@ -129,8 +129,27 @@
   padding-bottom: var(--public-section-space) !important;
 }
 @media (max-width: 639px) {
-  .obaol-public { --public-section-space: 40px; }
-  .obaol-public .public-content-wrapper { padding-top: 120px; padding-bottom: 48px; }
-  .obaol-public .public-hero { padding-top: 88px; }
-  .obaol-public .public-card { padding: 20px; }
+  .obaol-public {
+    --public-section-space: 32px;
+    --public-card-radius: 18px;
+    --public-hero-title: clamp(2rem, 10.5vw, 2.75rem);
+    --public-section-title: clamp(1.55rem, 7.5vw, 2rem);
+    min-height: 100dvh;
+  }
+  .obaol-public .public-container, .obaol-public .public-layout-container { padding-inline: 16px; }
+  .obaol-public .public-content-wrapper { padding-top: calc(5.25rem + var(--safe-top)); padding-bottom: max(40px, var(--safe-bottom)); }
+  .obaol-public .public-hero { padding-top: calc(5rem + var(--safe-top)); padding-bottom: 32px; }
+  .obaol-public .public-hero-description { margin-top: 14px; font-size: 1rem; line-height: 1.65; }
+  .obaol-public .public-card { padding: 18px; box-shadow: 0 10px 30px -24px rgba(15, 23, 42, .3); }
+  .obaol-public .public-header-shell { height: 3.5rem !important; border-radius: 16px; padding-inline: 12px !important; }
+  .obaol-public header { padding-block: 8px !important; }
+  .obaol-public header img { max-width: 78px; }
+  .obaol-public header a[href="/auth"], .obaol-public header a[href="/dashboard"] { min-height: 42px; padding-inline: 12px; font-size: 12px; }
+  .obaol-public footer { padding-block: 36px calc(24px + var(--safe-bottom)); }
+  .obaol-public :is(.grid, [class*="grid-cols-"]) { min-width: 0; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .obaol-public .public-content-wrapper {
+    padding-top: calc(6rem + var(--safe-top));
+  }
 }

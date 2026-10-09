@@ -901,7 +901,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-4 pt-6">
+        <div data-onboarding-actions className="mobile-sticky-actions flex flex-col-reverse sm:flex-row gap-3 pt-3 sm:pt-6">
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-1/3">
             <Button
               type="button"

@@ -14,6 +14,9 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
   use: {
     baseURL,
+    // Route mocks must see API requests. Service workers are covered through
+    // their static contract tests and otherwise bypass Playwright routing.
+    serviceWorkers: "block",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",

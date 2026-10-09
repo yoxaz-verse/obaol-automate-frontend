@@ -13,7 +13,7 @@ import { useSoundEffect } from "@/context/SoundContext";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
-import { notificationRoutes } from "@/core/api/apiRoutes";
+import { notificationRoutes, supportChatRoutes } from "@/core/api/apiRoutes";
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -59,6 +59,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         refetchOnWindowFocus: false,
     });
     const unreadSummary = unreadSummaryData || {};
+    const { data: supportAvailability } = useQuery({
+        queryKey: ["support", "availability", "sidebar"],
+        queryFn: async () => (await getData(supportChatRoutes.availability, {}, { cacheMode: "bypass" }))?.data?.data || {},
+        enabled: Boolean(user?.id),
+        refetchInterval: 10 * 1000,
+        staleTime: 5 * 1000,
+    });
+    const isSupportStaff = ["admin", "customersupport", "customer-support"].includes(String(user?.role || "").toLowerCase());
     const dotMap: Record<string, number> = {
         "/dashboard/notifications": Number(unreadSummary.notifications || 0),
         "/dashboard/approvals": Number(unreadSummary.approvals || 0),
@@ -66,6 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         "/dashboard/orders": Number(unreadSummary.orders || 0),
         "/dashboard/inventory": Number(unreadSummary.inventory || 0),
         "/dashboard/execution-enquiries": Number(unreadSummary.execution || 0) + Number(unreadSummary.bidding || 0),
+        "/dashboard/customer-support": isSupportStaff ? Number(supportAvailability?.waitingCount || 0) : Number(unreadSummary.support || 0),
     };
 
     const handleOptionClick = (e: React.MouseEvent, optionLink: string) => {
@@ -98,6 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         const isActive = !isComingSoon && isDashboardRouteActive(pathname, opt.link);
         const badgeCount = Number(dotMap[opt.link] || 0);
         const isDisabled = isOnboardingLocked || isComingSoon;
+        const showSupportOnline = opt.link === "/dashboard/customer-support" && Boolean(supportAvailability?.online);
 
         return (
             <button
@@ -135,8 +145,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                         {badgeCount > 99 ? "99+" : badgeCount}
                     </span>
                 )}
+                {!isCollapsed && !isComingSoon && badgeCount === 0 && showSupportOnline && (
+                    <span className="ml-auto h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" title="Customer support online" />
+                )}
                 {isCollapsed && !isComingSoon && badgeCount > 0 && (
                     <span className="absolute right-2 top-2 w-2 h-2 rounded-full bg-danger-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                )}
+                {isCollapsed && !isComingSoon && badgeCount === 0 && showSupportOnline && (
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
                 )}
                 {isCollapsed && isComingSoon && (
                     <span aria-hidden="true" className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-obaol-500" />

@@ -17,7 +17,7 @@ import {
   Chip,
   Spinner,
 } from "@nextui-org/react";
-import { IoArchive, IoBoat, IoBusiness, IoCall, IoCar, IoCart, IoCash, IoEarth, IoEye, IoEyeOff, IoFlask, IoHome, IoLink, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch, IoStorefront, IoSwapHorizontal } from "react-icons/io5";
+import { IoArchive, IoArrowDownCircleOutline, IoArrowUpCircleOutline, IoBoat, IoBusiness, IoCall, IoCar, IoCart, IoCash, IoEarth, IoEye, IoEyeOff, IoFlask, IoHome, IoLink, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch, IoStorefront } from "react-icons/io5";
 import { LuBadgeCheck, LuPackageSearch, LuSearchCheck } from "react-icons/lu";
 import { FiCheck, FiChevronDown, FiChevronLeft, FiChevronRight, FiChevronUp } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -35,7 +35,8 @@ import { getData, postData } from "@/core/api/apiHandler";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
 import { useOnboardingDraftPersistence } from "@/hooks/useOnboardingDraftPersistence";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { fetchRegisterOptions, resolveApiRoot } from "@/utils/registerOptions";
+import { COMPANY_FUNCTION_TAXONOMY_VERSION, fetchRegisterOptions, resolveApiRoot } from "@/utils/registerOptions";
+import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPriorities";
 
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
@@ -156,7 +157,18 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   });
 
   const hydrateDraft = useCallback((parsed: any) => {
-    if (parsed?.formData) setFormData((prev) => ({ ...prev, ...parsed.formData }));
+    if (parsed?.formData) setFormData((prev) => {
+      const hydrated = { ...prev, ...parsed.formData };
+      hydrated.providedFunctionPriorities = reconcileCompanyFunctionPriorities(
+        hydrated.providedFunctionIds,
+        hydrated.providedFunctionPriorities
+      );
+      hydrated.soughtFunctionPriorities = reconcileCompanyFunctionPriorities(
+        hydrated.soughtFunctionIds,
+        hydrated.soughtFunctionPriorities
+      );
+      return hydrated;
+    });
     if (parsed?.currentStep) setCurrentStep(parsed.currentStep);
     if (parsed?.completedStep) setCompletedStep(parsed.completedStep);
   }, []);
@@ -208,7 +220,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   }, [isOnboarding, searchParams]);
 
   const { data: registerOptions, isLoading: optionsLoading, isError: optionsError, refetch: refetchOptions } = useQuery({
-    queryKey: ["register-options"],
+    queryKey: ["register-options", COMPANY_FUNCTION_TAXONOMY_VERSION],
     queryFn: async () => {
       const output = await fetchRegisterOptions();
       setOptionsDebug({
@@ -248,7 +260,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   useEffect(() => {
     if (!isOnboarding || currentStep !== 1) return;
     queryClient.prefetchQuery({
-      queryKey: ["register-options"],
+      queryKey: ["register-options", COMPANY_FUNCTION_TAXONOMY_VERSION],
       queryFn: fetchRegisterOptions,
       staleTime: 15 * 60 * 1000,
     });
@@ -550,7 +562,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     if (!suggestedIds.length) return;
     setFormData((prev) => prev.providedFunctionIds.length
       ? prev
-      : { ...prev, providedFunctionIds: suggestedIds });
+      : {
+          ...prev,
+          providedFunctionIds: suggestedIds,
+          providedFunctionPriorities: reconcileCompanyFunctionPriorities(suggestedIds, []),
+        });
   }, [groupedCompanyFunctions, searchParams]);
 
   const updateCompanyFunctionSelection = (kind: "provided" | "sought", functionId: string) => {
@@ -567,25 +583,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         nextIds = [...currentIds, functionId];
       }
 
-      const nextPriorities = currentPriorities.filter((id) => nextIds.includes(id));
+      const nextPriorities = reconcileCompanyFunctionPriorities(nextIds, currentPriorities);
 
       return { ...prev, [idsKey]: nextIds, [prioritiesKey]: nextPriorities };
     });
     const errorKey = kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds";
     if (errors[errorKey]) setErrors((prev) => ({ ...prev, [errorKey]: "" }));
-  };
-
-  const toggleCompanyFunctionPriority = (kind: "provided" | "sought", functionId: string) => {
-    setFormData((prev) => {
-      const idsKey = kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds";
-      const prioritiesKey = kind === "provided" ? "providedFunctionPriorities" : "soughtFunctionPriorities";
-      if (!prev[idsKey].includes(functionId)) return prev;
-      const current = prev[prioritiesKey];
-      const next = current.includes(functionId)
-        ? current.filter((id) => id !== functionId)
-        : current.length < 3 ? [...current, functionId] : current;
-      return { ...prev, [prioritiesKey]: next };
-    });
   };
 
   const moveCompanyFunctionPriority = (kind: "provided" | "sought", functionId: string, direction: "up" | "down") => {
@@ -611,8 +614,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       testing: <IoFlask />,
       "warehouse-storage": <IoHome />,
       "finance-risk": <IoCash />,
-      "importing-to-india": <IoSwapHorizontal />,
-      "exporting-from-india": <IoEarth />,
+      "importing-to-india": <IoArrowDownCircleOutline />,
+      "exporting-from-india": <IoArrowUpCircleOutline />,
       "freight-forwarding": <IoBoat />,
       "inland-logistics": <IoCar />,
     };
@@ -637,7 +640,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             ? "Choose the activities, products, or services your company offers or performs."
             : "Choose the products, services, or partnerships your company wants to find."}
         </p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {groupedCompanyFunctions.map((fn: any) => {
             const fnId = String(fn?._id || "");
             const selected = ids.includes(fnId);
@@ -646,9 +649,14 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             return (
               <button key={`${kind}-${fnId}`} type="button" disabled={disabled}
                 aria-pressed={selected} onClick={() => updateCompanyFunctionSelection(kind, fnId)}
-                className={`flex min-h-16 items-center gap-2 rounded-xl border p-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:gap-3 sm:p-3 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-content1/40 hover:border-primary-500/50"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
-                <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
-                <span className="min-w-0 flex-1 text-[11px] font-bold leading-tight sm:text-xs">{fn?.name}</span>
+                className={`flex min-h-14 touch-manipulation items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:min-h-16 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-content1/40 hover:border-primary-500/50"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-bold leading-tight">{fn?.name}</span>
+                  {["importing-to-india", "exporting-from-india"].includes(String(fn?.slug || "")) && fn?.description ? (
+                    <span className="mt-1 block text-[10px] font-medium leading-4 text-default-500">{fn.description}</span>
+                  ) : null}
+                </span>
                 {priorityIndex > -1 && <span className="rounded-full bg-obaol-500/15 px-2 py-1 text-[9px] font-black">P{priorityIndex + 1}</span>}
               </button>
             );
@@ -656,22 +664,18 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         </div>
         {error && <p className="mt-2 text-xs font-semibold text-danger-500">{error}</p>}
         <div className="mt-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-default-400">Top priorities (up to 3)</p>
-          {ids.length ? <div className="mt-2 space-y-2">{ids.map((id) => {
-            const index = priorities.indexOf(id);
-            const isPriority = index >= 0;
+          <p className="text-[10px] font-black uppercase tracking-widest text-default-400">Top priorities</p>
+          <p className="mt-1 text-[11px] text-default-500">Your first three selections become priorities automatically. Reorder them if needed.</p>
+          {priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => {
             return (
             <div key={`${kind}-priority-${id}`} className="flex items-center justify-between gap-2 rounded-lg border border-default-200 bg-content1/60 px-3 py-2">
-              <button type="button" onClick={() => toggleCompanyFunctionPriority(kind, id)} disabled={!isPriority && priorities.length >= 3} className="min-w-0 flex-1 rounded-md text-left text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-40">
-                {isPriority ? <b className="mr-2 text-primary-600">P{index + 1}</b> : <span className="mr-2 text-default-400">＋</span>}{companyFunctionNameById.get(id)}
-                <span className="ml-2 text-[10px] font-medium text-default-400">{isPriority ? "Remove priority" : "Make priority"}</span>
-              </button>
-              {isPriority && <span className="flex gap-1">
+              <span className="min-w-0 flex-1 text-xs font-bold"><b className="mr-2 text-primary-600">P{index + 1}</b>{companyFunctionNameById.get(id)}</span>
+              <span className="flex gap-1">
                 <button type="button" aria-label={`Move ${companyFunctionNameById.get(id)} up`} onClick={() => moveCompanyFunctionPriority(kind, id, "up")} disabled={index === 0} className="rounded-md p-1 focus-visible:ring-2 focus-visible:ring-obaol-500 disabled:opacity-30"><FiChevronUp /></button>
                 <button type="button" aria-label={`Move ${companyFunctionNameById.get(id)} down`} onClick={() => moveCompanyFunctionPriority(kind, id, "down")} disabled={index === priorities.length - 1} className="rounded-md p-1 focus-visible:ring-2 focus-visible:ring-obaol-500 disabled:opacity-30"><FiChevronDown /></button>
-              </span>}
+              </span>
             </div>
-          )})}</div> : <p className="mt-2 text-xs text-default-400">Select capabilities above, then optionally mark up to three as priorities.</p>}
+          )})}</div> : <p className="mt-2 text-xs text-default-400">Select a capability above to create your priority order.</p>}
         </div>
       </section>
     );
@@ -1992,7 +1996,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-8">
+          <div data-onboarding-actions className="mobile-sticky-actions flex flex-col-reverse sm:flex-row gap-3 pt-3 sm:pt-8">
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-1/3">
               <Button
                 type="button"

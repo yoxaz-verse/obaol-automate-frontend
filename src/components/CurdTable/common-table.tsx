@@ -78,6 +78,7 @@ export default function CommonTable({
   deleteModal,
   editModal,
   otherModal,
+  getRowClassName,
   isLoading = false,
   emptyContent,
   page: serverPage,
@@ -302,7 +303,7 @@ export default function CommonTable({
             {items.map((item: any, index: number) => (
               <article
                 key={getRowKey(item, index)}
-                className="w-full min-w-0 rounded-2xl border border-default-200/70 bg-content1/85 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03]"
+                className={`w-full min-w-0 rounded-2xl border border-default-200/70 bg-content1/85 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03] ${getRowClassName?.(item) || ""}`}
               >
                 {primaryMobileColumn && (
                   <div className="mb-3 border-b border-default-200/70 pb-3 dark:border-white/10">
@@ -412,7 +413,10 @@ export default function CommonTable({
 
               <TableBody items={items}>
                 {(item: any) => (
-                  <TableRow key={getRowKey(item, 0)} className="text-foreground">
+                  <TableRow
+                    key={getRowKey(item, 0)}
+                    className={`text-foreground ${getRowClassName?.(item) || ""}`}
+                  >
                     {(columnKey) => (
                       <TableCell
                         className={

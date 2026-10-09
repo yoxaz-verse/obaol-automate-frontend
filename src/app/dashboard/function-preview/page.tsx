@@ -148,7 +148,7 @@ export default function FunctionPreviewPage() {
                             wrapper: "before:border-primary shrink-0",
                         }}
                       >
-                        {String(fn.slug || "").toLowerCase() === "importing-to-india" ? "Importer to India" : String(fn.slug || "").toLowerCase() === "exporting-from-india" ? "Exporter from India" : fn.name}
+                        {String(fn.slug || "").toLowerCase() === "importing-to-india" ? "Importer into India" : String(fn.slug || "").toLowerCase() === "exporting-from-india" ? "Exporter from India" : fn.name}
                       </Checkbox>
                       {selected.includes(String(fn._id)) && (
                         <div className="flex gap-1.5 ml-2">

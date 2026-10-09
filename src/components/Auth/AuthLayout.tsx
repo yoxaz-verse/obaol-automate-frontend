@@ -230,7 +230,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
 const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel, roleIdentity }) => {
     if (embedded) {
         return (
-            <div className="w-full text-foreground">
+            <div data-auth-embedded className="w-full text-foreground">
                 {topContent && <div className="mb-4">{topContent}</div>}
                 <div className={leftPanel ? "grid w-full items-start gap-5 lg:grid-cols-[minmax(280px,0.75fr)_minmax(0,1.35fr)] xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.4fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
                     {leftPanel && (
@@ -238,7 +238,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact />
                         </div>
                     )}
-                    <div className={`rounded-[2.5rem] border border-divider bg-content1/80 p-5 backdrop-blur-3xl sm:p-8 ${leftPanel ? "order-1 min-w-0 lg:order-2" : ""}`}>
+                    <div data-auth-form-card className={`rounded-[2.5rem] border border-divider bg-content1/80 p-5 backdrop-blur-3xl sm:p-8 ${leftPanel ? "order-1 min-w-0 lg:order-2" : ""}`}>
                         <div className="mb-8 items-center flex flex-col text-center">
                             <h2 className="mb-2 text-3xl font-bold tracking-tight text-foreground">
                                 {title}

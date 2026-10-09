@@ -10,6 +10,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 import { useSoundEffect } from "@/context/SoundContext";
 import { primaryPublicLinks, publicNavigation } from "@/data/publicNavigation";
+import { InstallAppButton } from "@/components/pwa/PwaRuntime";
 
 const groupIcons = { platform: FiGrid, roles: FiUsers, trade: FiShoppingBag, resources: FiBookOpen, trust: FiShield };
 
@@ -125,6 +126,7 @@ export default function Header() {
               </button>
             </nav>
             <div className="flex shrink-0 items-center gap-2 xl:gap-3">
+              <div className="hidden md:block"><InstallAppButton /></div>
               <div className="hidden xl:block"><ThemeSwitcher /></div>
               <div className="hidden sm:flex">{soundButton}</div>
               {!signedIn && (
@@ -168,6 +170,7 @@ export default function Header() {
                 })}
               </nav>
               <div className="mt-2 flex flex-wrap items-center justify-center gap-3 border-t border-foreground/10 pt-4 lg:hidden">
+                <InstallAppButton />
                 {!signedIn && <Link href="/auth?view=signin" onClick={() => closeMenu(true)} className="min-h-11 rounded-xl border border-foreground/10 px-4 py-3 text-sm font-semibold">Sign In</Link>}
                 <Link href={signedIn ? "/dashboard" : "/auth"} onClick={() => closeMenu(true)} className="min-h-11 rounded-xl bg-obaol-500 px-4 py-3 text-sm font-bold text-obaol-950">{signedIn ? "Open workspace" : "Get Started"}</Link>
                 {soundButton}

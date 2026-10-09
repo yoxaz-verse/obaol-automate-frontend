@@ -55,7 +55,7 @@ function playTone(opts: ToneOptions, startDelay = 0): void {
     oscillator.stop(startAt + duration);
 }
 
-export type SoundType = "nav" | "tab" | "click" | "success" | "danger" | "toggle" | "modal" | "cash" | "language";
+export type SoundType = "nav" | "tab" | "click" | "success" | "danger" | "toggle" | "modal" | "cash" | "language" | "notification";
 
 /**
  * Plays a specific UI sound effect.
@@ -64,6 +64,10 @@ export type SoundType = "nav" | "tab" | "click" | "success" | "danger" | "toggle
 export function playSound(type: SoundType): void {
     try {
         switch (type) {
+            case "notification":
+                playTone({ frequency: 523, type: "sine", duration: 0.16, gain: 0.045, endFrequency: 659 });
+                playTone({ frequency: 784, type: "triangle", duration: 0.12, gain: 0.022 }, 0.08);
+                break;
             // Route movement — grounded, low, and operational.
             case "nav":
                 playTone({ frequency: 196, type: "sine", duration: 0.14, gain: 0.055, endFrequency: 224 });

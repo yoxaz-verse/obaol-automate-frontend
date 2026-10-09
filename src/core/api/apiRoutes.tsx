@@ -6,6 +6,7 @@ const BASE_PATHS = {
   ADMIN: "/admins",
   OPERATOR: "/operators",
   INVENTORY_MANAGER: "/inventory-managers",
+  CUSTOMER_SUPPORT_AGENT: "/customer-support-agents",
   PROJECT_MANAGER: "/project-managers",
   SERVICE_COMPANY: "/service-companies",
   ACTIVITY: "/activities",
@@ -330,6 +331,26 @@ export const supportContactRoutes = {
   update: (id: string) => `/support-contacts/${id}`,
 };
 
+export const customerSupportAgentRoutes = {
+  list: BASE_PATHS.CUSTOMER_SUPPORT_AGENT,
+  create: BASE_PATHS.CUSTOMER_SUPPORT_AGENT,
+  update: (id: string) => `${BASE_PATHS.CUSTOMER_SUPPORT_AGENT}/${id}`,
+  remove: (id: string) => `${BASE_PATHS.CUSTOMER_SUPPORT_AGENT}/${id}`,
+};
+
+export const supportChatRoutes = {
+  availability: "/support/availability",
+  onlineAgents: "/support/agents/online",
+  setAvailability: "/support/agents/me/availability",
+  conversations: "/support/conversations",
+  conversation: (id: string) => `/support/conversations/${id}`,
+  claim: (id: string) => `/support/conversations/${id}/claim`,
+  reassign: (id: string) => `/support/conversations/${id}/reassign`,
+  resolve: (id: string) => `/support/conversations/${id}/resolve`,
+  reopen: (id: string) => `/support/conversations/${id}/reopen`,
+  messages: (id: string) => `/support/conversations/${id}/messages`,
+};
+
 export const catalogRoutes = {
   add: "/catalog/add",
   update: "/catalog", // + /:id
@@ -369,6 +390,8 @@ export const apiRoutes = {
   notifications: notificationRoutes,
   presence: presenceRoutes,
   supportContacts: supportContactRoutes,
+  customerSupportAgents: customerSupportAgentRoutes,
+  supportChat: supportChatRoutes,
   brand: brandPublicRoutes,
   account: accountRoutes,
   user: userRoutes,

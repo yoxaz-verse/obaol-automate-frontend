@@ -79,6 +79,7 @@ const AddForm: React.FC<AddFormProps> = ({
   currentTable,
   formFields,
   apiEndpoint,
+  refetchData,
   additionalVariable,
   onSuccess,
   grid = 2,
@@ -164,6 +165,7 @@ const AddForm: React.FC<AddFormProps> = ({
       closeModal();
       setSuccess(true); // 👈 trigger success state
       setLoading(false);
+      refetchData?.();
       // Auto-close after 2s
       onSuccess?.(result.data); // 👈 Notify parent with result data
       setTimeout(() => {

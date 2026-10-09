@@ -1,12 +1,19 @@
 "use client";
 import Dashboard from "@/components/dashboard/dashboard";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import AuthContext from "@/context/AuthContext";
 
 function Page() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [showApprovedMessage, setShowApprovedMessage] = useState(false);
+  const { user } = useContext(AuthContext);
+
+  useEffect(() => {
+    const role = String(user?.role || "").toLowerCase().replace(/[\s_-]+/g, "");
+    if (role === "customersupport") router.replace("/dashboard/customer-support");
+  }, [router, user?.role]);
 
   useEffect(() => {
     const approval = String(searchParams?.get("approval") || "").toLowerCase();

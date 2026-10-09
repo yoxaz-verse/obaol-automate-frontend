@@ -24,8 +24,9 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractList } from "@/core/data/queryUtils";
 import { showToastMessage } from "@/utils/utils";
 import OnboardingModal from "@/components/dashboard/Company/OnboardingModal";
-import { fetchRegisterOptions } from "@/utils/registerOptions";
+import { COMPANY_FUNCTION_TAXONOMY_VERSION, fetchRegisterOptions } from "@/utils/registerOptions";
 import { CompanyMetricCard, CompanyProfileReadiness } from "@/components/dashboard/Company/CompanyOverviewCards";
+import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPriorities";
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
@@ -154,7 +155,7 @@ export default function CompanyWorkspacePage() {
   });
 
   const registerOptionsQuery = useQuery({
-    queryKey: ["company-workspace-capability-options"],
+    queryKey: ["company-workspace-capability-options", COMPANY_FUNCTION_TAXONOMY_VERSION],
     queryFn: fetchRegisterOptions,
     enabled: isAssociate,
     staleTime: 5 * 60 * 1000,
@@ -463,8 +464,8 @@ export default function CompanyWorkspacePage() {
   const openCapabilityEditor = () => {
     setRequestedProvidedIds(providedFunctionIds);
     setRequestedSoughtIds(soughtFunctionIds);
-    setRequestedProvidedPriorities(providedPriorityIds.filter((id: string) => providedFunctionIds.includes(id)).slice(0, 3));
-    setRequestedSoughtPriorities(soughtPriorityIds.filter((id: string) => soughtFunctionIds.includes(id)).slice(0, 3));
+    setRequestedProvidedPriorities(reconcileCompanyFunctionPriorities(providedFunctionIds, providedPriorityIds));
+    setRequestedSoughtPriorities(reconcileCompanyFunctionPriorities(soughtFunctionIds, soughtPriorityIds));
     setInterestNote("");
     setIsInterestModalOpen(true);
   };
@@ -473,12 +474,14 @@ export default function CompanyWorkspacePage() {
     const setPriorities = kind === "provided" ? setRequestedProvidedPriorities : setRequestedSoughtPriorities;
     setIds((current) => {
       if (current.includes(id)) {
-        setPriorities((priorities) => priorities.filter((item) => item !== id));
-        return current.filter((item) => item !== id);
+        const next = current.filter((item) => item !== id);
+        setPriorities((priorities) => reconcileCompanyFunctionPriorities(next, priorities));
+        return next;
       }
       if (current.length >= 6) return current;
-      setPriorities((priorities) => priorities.length < 3 ? [...priorities, id] : priorities);
-      return [...current, id];
+      const next = [...current, id];
+      setPriorities((priorities) => reconcileCompanyFunctionPriorities(next, priorities));
+      return next;
     });
   };
   const moveRequestedPriority = (kind: "provided" | "sought", id: string, direction: -1 | 1) => {
@@ -495,7 +498,7 @@ export default function CompanyWorkspacePage() {
   const renderApprovedProfile = (title: string, ids: string[], priorities: string[]) => (
     <div>
       <h3 className="mb-3 text-xs font-black uppercase tracking-widest text-default-500">{title}</h3>
-      {ids.length ? <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
+      {ids.length ? <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {[...ids].sort((a, b) => {
           const ai = priorities.indexOf(a); const bi = priorities.indexOf(b);
           return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
@@ -510,23 +513,22 @@ export default function CompanyWorkspacePage() {
   const renderRequestedProfile = (kind: "provided" | "sought") => {
     const ids = kind === "provided" ? requestedProvidedIds : requestedSoughtIds;
     const priorities = kind === "provided" ? requestedProvidedPriorities : requestedSoughtPriorities;
-    const setPriorities = kind === "provided" ? setRequestedProvidedPriorities : setRequestedSoughtPriorities;
     return <section className="rounded-2xl border border-default-200 p-4">
       <h3 className="text-xs font-black uppercase tracking-widest">What your company {kind === "provided" ? "provides" : "is seeking"}</h3>
-      <p className="mt-1 text-xs text-default-500">Select 1–6 categories and rank up to three priorities.</p>
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <p className="mt-1 text-xs text-default-500">Select 1–6 categories. Your first three selections become priorities automatically.</p>
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {capabilityOptions.map((capability: any) => {
           const id = String(capability?._id || "");
           const selected = ids.includes(id);
           const priority = priorities.indexOf(id);
           const disabled = !selected && ids.length >= 6;
-          return <button key={`${kind}-${id}`} type="button" disabled={disabled} aria-pressed={selected} onClick={() => toggleRequestedFunction(kind, id)} className={`min-h-16 rounded-xl border p-2.5 text-left transition ${selected ? "border-primary-500 bg-primary-500/10" : disabled ? "cursor-not-allowed border-default-100 opacity-40" : "border-default-200 hover:border-primary-500/50"}`}>
+          return <button key={`${kind}-${id}`} type="button" disabled={disabled} aria-pressed={selected} onClick={() => toggleRequestedFunction(kind, id)} className={`min-h-14 touch-manipulation rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:min-h-16 ${selected ? "border-primary-500 bg-primary-500/10" : disabled ? "cursor-not-allowed border-default-100 opacity-40" : "border-default-200 hover:border-primary-500/50"}`}>
             <div className="flex items-center justify-between gap-2"><span className="text-xs font-bold leading-tight">{capability?.name}</span>{priority >= 0 ? <Chip size="sm" color="primary" variant="flat">P{priority + 1}</Chip> : null}</div>
-            {selected && priority < 0 && priorities.length < 3 ? <span role="button" tabIndex={0} className="mt-2 inline-block text-[11px] font-semibold text-primary-600" onClick={(event) => { event.stopPropagation(); setPriorities((current) => [...current, id]); }}>Set as priority</span> : null}
+            {["importing-to-india", "exporting-from-india"].includes(String(capability?.slug || "")) && capability?.description ? <p className="mt-1 text-[10px] leading-4 text-default-500">{capability.description}</p> : null}
           </button>;
         })}
       </div>
-      <div className="mt-4 rounded-xl bg-default-50/50 p-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Optional priority order (up to 3)</p>{priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => <div key={`${kind}-${id}`} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><span className="text-sm font-semibold"><b className="mr-2 text-primary-600">{index + 1}</b>{capabilityById.get(id)?.name || "Selected category"}</span><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(kind, id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === priorities.length - 1} onPress={() => moveRequestedPriority(kind, id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">No priorities selected. Mark up to three choices above if you want them ranked first.</p>}</div>
+      <div className="mt-4 rounded-xl bg-default-50/50 p-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Top priorities</p>{priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => <div key={`${kind}-${id}`} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><span className="text-sm font-semibold"><b className="mr-2 text-primary-600">P{index + 1}</b>{capabilityById.get(id)?.name || "Selected category"}</span><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(kind, id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === priorities.length - 1} onPress={() => moveRequestedPriority(kind, id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">Select a category to create the priority order.</p>}</div>
     </section>;
   };
   const operatorAssignedCompanies = useMemo(

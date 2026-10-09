@@ -3,15 +3,17 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Tabs, Tab } from "@nextui-org/react";
+import CustomerSupportAgents from "@/components/dashboard/Users/customer-support-agents";
 
 const UserTabContent = dynamic(() => import("@/components/dashboard/Users/user-tab-content"), {
   loading: () => <div className="min-h-[360px] rounded-2xl border border-default-200 bg-content1/70" />,
 });
 
 export default function Page() {
-  const [currentTable, setCurrentTable] = useState("manager"); // Default role set to 'manager'
+  const [currentTable, setCurrentTable] = useState("customerSupport");
 
   const tables = [
+    { key: "customerSupport", title: "Customer Support" },
     { key: "inventoryManager", title: "Inventory Managers" }, // Translate Title
     { key: "associate", title: "Associates" }, // Translate Title
     { key: "admin", title: "Admins" }, // Translate Title
@@ -32,7 +34,7 @@ export default function Page() {
             {tables.map((table) => (
               <Tab key={table.key} title={table.title}>
                 {/* Render UserTabContent for the current table */}
-                <UserTabContent currentTable={table.key} />
+                {table.key === "customerSupport" ? <CustomerSupportAgents /> : <UserTabContent currentTable={table.key} />}
               </Tab>
             ))}
           </Tabs>

@@ -50,9 +50,11 @@ const Dashboard: NextPage = () => {
   const isAdmin = roleLower === "admin";
   const isAssociate = roleLower === "associate" || roleLower === "customer";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
-  const companyCapabilities = Array.from(new Set([...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]));
-  const hasBuyingCapability = companyCapabilities.includes("buying") || companyCapabilities.includes("sourcing");
-  const hasSellingCapability = companyCapabilities.includes("selling");
+  const providedCapabilities = user?.providedCapabilities || [];
+  const soughtCapabilities = user?.soughtCapabilities || [];
+  const companyCapabilities = Array.from(new Set([...providedCapabilities, ...soughtCapabilities]));
+  const hasBuyingCapability = providedCapabilities.includes("buyer") || soughtCapabilities.includes("seller") || companyCapabilities.includes("sourcing");
+  const hasSellingCapability = providedCapabilities.includes("seller") || soughtCapabilities.includes("buyer");
   const profileMode = hasBuyingCapability && hasSellingCapability ? "BOTH" : hasBuyingCapability ? "BUY" : hasSellingCapability ? "SELL" : "SERVICE";
   const isBuyingMode = isAssociate && hasBuyingCapability;
   const isSellingMode = isAssociate && hasSellingCapability;

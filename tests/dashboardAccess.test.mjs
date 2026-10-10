@@ -63,7 +63,7 @@ test("non-Associate roles retain standalone notification navigation", () => {
 });
 
 test("Associate capabilities personalize without gating navigation", () => {
-  for (const capabilities of [["buying"], ["selling"], ["importing-to-india"], []]) {
+  for (const capabilities of [["buyer"], ["seller"], ["importing-to-india"], []]) {
     const links = new Set(getAccessibleDashboardRoutes({ role: "Associate", capabilities }).map((route) => route.path));
     assert.equal(links.has("/dashboard/marketplace"), true);
     assert.equal(links.has("/dashboard/product"), true);

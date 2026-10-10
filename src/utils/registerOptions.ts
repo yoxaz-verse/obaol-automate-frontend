@@ -2,7 +2,7 @@ import axios from "axios";
 
 const DEFAULT_API_ROOT = "/api/v1/web";
 export const REGISTER_OPTIONS_TIMEOUT_MS = 30000;
-export const COMPANY_FUNCTION_TAXONOMY_VERSION = 2;
+export const COMPANY_FUNCTION_TAXONOMY_VERSION = 3;
 export const COMPANY_FUNCTION_TAXONOMY_COUNT = 11;
 
 const normalizeApiRoot = (value: string) =>

@@ -48,8 +48,8 @@ import {
 import { fetchDependentOptions } from "./fetchDependentOptions";
 
 const COMPANY_CAPABILITY_OPTIONS = [
-  { key: "buying", value: "Buying" },
-  { key: "selling", value: "Selling" },
+  { key: "buyer", value: "Buyer" },
+  { key: "seller", value: "Seller" },
   { key: "sourcing", value: "Sourcing" },
   { key: "packaging", value: "Packaging" },
   { key: "testing", value: "Quality Testing & Labs" },

@@ -15,7 +15,8 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
   const optionsByPath = new Map(sidebarOptions.map((option) => [option.link, option]));
   const routes = getDashboardBottomNavigation({
     role: user?.role,
-    capabilities: [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
+    providedCapabilities: user?.providedCapabilities || [],
+    soughtCapabilities: user?.soughtCapabilities || [],
   });
 
   const openMore = () => {

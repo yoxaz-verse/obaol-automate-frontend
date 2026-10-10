@@ -100,10 +100,10 @@ test("rejected associate receives an explicit login rejection", async ({ page })
 
 test("BOTH associate focus persists across reloads", async ({ page }) => {
   await login(page, accounts[2]);
-  await page.getByRole("button", { name: "Selling", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Selling", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: /Seller/ }).click();
+  await expect(page.getByRole("button", { name: /Seller/ })).toHaveAttribute("aria-pressed", "true");
   await page.reload();
-  await expect(page.getByRole("button", { name: "Selling", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: /Seller/ })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByText("Live listings", { exact: true })).toBeVisible();
 });
 

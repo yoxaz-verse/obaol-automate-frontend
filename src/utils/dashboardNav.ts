@@ -102,17 +102,24 @@ export const getDashboardSidebarSections = (
 export const getDashboardBottomNavigation = ({
   role,
   capabilities = [],
+  providedCapabilities = [],
+  soughtCapabilities = [],
 }: {
   role: unknown;
   capabilities?: string[];
+  providedCapabilities?: string[];
+  soughtCapabilities?: string[];
 }) => {
-  const routes = getAccessibleDashboardRoutes({ role, capabilities });
+  const combinedCapabilities = Array.from(new Set([...capabilities, ...providedCapabilities, ...soughtCapabilities]));
+  const routes = getAccessibleDashboardRoutes({ role, capabilities: combinedCapabilities });
   const routeMap = new Map(routes.map((route) => [route.path, route]));
   if (normalizeDashboardRole(role) === "associate") {
-    const normalized = new Set(capabilities.map((item) => String(item).toLowerCase()));
-    const priorityPath = normalized.has("selling")
+    const provided = new Set(providedCapabilities.map((item) => String(item).toLowerCase()));
+    const sought = new Set(soughtCapabilities.map((item) => String(item).toLowerCase()));
+    const normalized = new Set(combinedCapabilities.map((item) => String(item).toLowerCase()));
+    const priorityPath = provided.has("seller") || sought.has("buyer")
       ? "/dashboard/product"
-      : normalized.has("buying") || normalized.has("sourcing")
+      : provided.has("buyer") || sought.has("seller") || normalized.has("sourcing")
         ? "/dashboard/marketplace"
         : "/dashboard/execution-enquiries";
     return ["/dashboard", priorityPath, "/dashboard/enquiries", "/dashboard/orders"]

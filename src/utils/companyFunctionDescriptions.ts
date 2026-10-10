@@ -3,13 +3,13 @@ export type CompanyFunctionPerspective = "provided" | "sought";
 type PerspectiveCopy = Record<CompanyFunctionPerspective, string>;
 
 export const COMPANY_FUNCTION_PERSPECTIVE_COPY: Record<string, PerspectiveCopy> = {
-  buying: {
+  buyer: {
     provided: "We purchase commodities or products from suppliers.",
-    sought: "We want to find products and suppliers to buy from.",
+    sought: "We want to connect with buyers for our products.",
   },
-  selling: {
+  seller: {
     provided: "We sell or supply commodities and products.",
-    sought: "We want sales channels, buyers, or selling support.",
+    sought: "We want to connect with sellers or suppliers.",
   },
   sourcing: {
     provided: "We source suitable products and suppliers for businesses.",

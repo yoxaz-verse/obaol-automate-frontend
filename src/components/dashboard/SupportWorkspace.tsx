@@ -10,6 +10,7 @@ import { supportChatRoutes } from "@/core/api/apiRoutes";
 import { useSoundEffect } from "@/context/SoundContext";
 import { formatLastSeen, isOnline } from "@/utils/presence";
 import { showToastMessage } from "@/utils/utils";
+import { normalizeApiError } from "@/core/api/apiErrors";
 
 type Status = "WAITING" | "ACTIVE" | "RESOLVED";
 type Agent = { _id: string; name: string; email: string; phone?: string; lastSeenAt?: string; isAvailable: boolean; activeChatCount: number; capacity: number; canAccept: boolean };
@@ -22,7 +23,6 @@ type Conversation = {
 type Message = { _id: string; senderId: string; senderRole: string; body: string; createdAt: string };
 
 const roleKey = (value: unknown) => String(value || "").toLowerCase().replace(/[\s_-]+/g, "");
-const extractError = (error: any) => error?.response?.data?.message || error?.message || "Something went wrong.";
 
 export default function SupportWorkspace() {
   const { user, refreshUser } = useContext(AuthContext);
@@ -86,7 +86,7 @@ export default function SupportWorkspace() {
   const action = (fn: () => Promise<any>, success: string) => ({
     mutationFn: fn,
     onSuccess: async (response: any) => { if (response?.data?.data?._id) setSelectedId(response.data.data._id); await refresh(); showToastMessage({ type: "success" as const, message: success }); },
-    onError: (error: any) => showToastMessage({ type: "error", message: extractError(error) }),
+    onError: (error: any) => showToastMessage({ type: "error", message: normalizeApiError(error).message }),
   });
   const createConversation = useMutation(action(
     () => postData(supportChatRoutes.conversations, { subject, message: openingMessage }), "Your request is in the support queue."
@@ -98,12 +98,12 @@ export default function SupportWorkspace() {
   const send = useMutation({
     mutationFn: () => postData(supportChatRoutes.messages(selectedConversationId), { body: message }),
     onSuccess: async () => { setMessage(""); await refresh(); },
-    onError: (error: any) => showToastMessage({ type: "error", message: extractError(error) }),
+    onError: (error: any) => showToastMessage({ type: "error", message: normalizeApiError(error).message }),
   });
   const toggleAvailability = useMutation({
     mutationFn: (isAvailable: boolean) => patchData(supportChatRoutes.setAvailability, { isAvailable }),
     onSuccess: async () => { await refreshUser(); await refresh(); },
-    onError: (error: any) => showToastMessage({ type: "error", message: extractError(error) }),
+    onError: (error: any) => showToastMessage({ type: "error", message: normalizeApiError(error).message }),
   });
 
   const waiting = rows.filter((row) => row.status === "WAITING");

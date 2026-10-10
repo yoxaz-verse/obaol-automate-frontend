@@ -34,6 +34,7 @@ import { Key } from "@react-types/shared";
 import PhoneField from "../form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
 import { uploadFormFile } from "@/utils/uploadFormFile";
+import { normalizeApiError } from "@/core/api/apiErrors";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -222,7 +223,7 @@ export default function EditModal({
       setOpen(false);
     },
     onError: (err: any) => {
-      const msg = err.response?.data?.message || "Update failed";
+      const msg = normalizeApiError(err, "Update failed").message;
       if (msg.includes("locked or in cooldown") && unlockAt) {
         toast.warning(
           `Locked until ${unlockAt.toLocaleString("en-GB", {

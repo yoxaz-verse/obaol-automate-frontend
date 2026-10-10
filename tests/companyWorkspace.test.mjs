@@ -22,6 +22,9 @@ test("My Company reuses onboarding categories and priority requests", () => {
 
 test("capability descriptions use perspective copy with safe fallbacks", async () => {
   const { getCompanyFunctionPerspectiveDescription } = await import("../src/utils/companyFunctionDescriptions.ts");
+  assert.equal(getCompanyFunctionPerspectiveDescription("buyer", "provided"), "We purchase commodities or products from suppliers.");
+  assert.equal(getCompanyFunctionPerspectiveDescription("buyer", "sought"), "We want to connect with buyers for our products.");
+  assert.equal(getCompanyFunctionPerspectiveDescription("seller", "sought"), "We want to connect with sellers or suppliers.");
   assert.equal(getCompanyFunctionPerspectiveDescription("packaging", "provided"), "We provide packaging, labeling, or packing services.");
   assert.equal(getCompanyFunctionPerspectiveDescription("packaging", "sought"), "We need packaging, labeling, or packing support.");
   assert.equal(getCompanyFunctionPerspectiveDescription("future-function", "provided", "API description"), "API description");

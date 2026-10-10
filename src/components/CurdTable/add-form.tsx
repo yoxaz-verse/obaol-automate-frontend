@@ -32,6 +32,7 @@ import { toTitleCase } from "../titles";
 import PhoneField from "../form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
 import { uploadFormFile } from "@/utils/uploadFormFile";
+import { normalizeApiError } from "@/core/api/apiErrors";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -174,9 +175,10 @@ const AddForm: React.FC<AddFormProps> = ({
       }, 2000);
     },
     onError: (error: any) => {
+      const normalized = normalizeApiError(error, "An error occurred");
       showToastMessage({
         type: "error",
-        message: error.response?.data?.message || "An error occurred",
+        message: normalized.message,
         position: "top-right",
       });
       setLoading(false);

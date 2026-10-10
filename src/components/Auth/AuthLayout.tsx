@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, MotionConfig, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { FiArrowRight } from "react-icons/fi";
+import { FiArrowRight, FiCheckCircle, FiChevronDown } from "react-icons/fi";
 
 type LeftPanelContent = {
     headline: string;
@@ -35,6 +35,7 @@ interface AuthLayoutProps {
         highlightClassName: string;
         audienceLabels?: string[];
     };
+    onboarding?: boolean;
 }
 
 const FloatingPixel = ({ delay }: { delay: number }) => {
@@ -116,7 +117,7 @@ const TypewriterEffect = ({ words }: { words: string[] }) => {
 };
 
 const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { leftPanel: LeftPanelContent; roleIdentity?: AuthLayoutProps["roleIdentity"]; compact?: boolean }) => (
-    <div className={`${compact ? "space-y-5" : "space-y-7"} text-center lg:text-left`}>
+    <div className={`${compact ? "space-y-4" : "space-y-7"} text-center lg:text-left`}>
         <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
@@ -151,21 +152,24 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
             )}
 
             {!!leftPanel.guidanceSections?.length && (
-                <div className="grid gap-3">
+                <div className={`grid ${compact ? "gap-2" : "gap-3"}`}>
                     {leftPanel.guidanceSections.map((section) => (
-                        <div key={section.title} className={`rounded-lg border border-obaol-200/70 bg-white/75 p-3 text-left dark:border-white/10 dark:bg-white/[0.04] ${compact ? "" : "shadow-sm"}`}>
-                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-obaol-700 dark:text-obaol-300">
+                        <div key={section.title} className={`text-left ${compact ? "flex gap-2.5 rounded-xl bg-slate-50/80 p-3 dark:bg-white/[0.04]" : "rounded-lg border border-obaol-200/70 bg-white/75 p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.04]"}`}>
+                            {compact && <FiCheckCircle className="mt-0.5 shrink-0 text-obaol-600" aria-hidden />}
+                            <div>
+                            <p className={`${compact ? "text-xs tracking-normal" : "text-[10px] uppercase tracking-[0.22em]"} font-bold text-slate-800 dark:text-foreground`}>
                                 {section.title}
                             </p>
-                            <p className="mt-1 text-xs font-medium leading-relaxed text-slate-600 dark:text-foreground/60">
+                            <p className={`${compact ? "mt-0.5 text-sm leading-5" : "mt-1 text-xs leading-relaxed"} font-normal text-slate-600 dark:text-foreground/60`}>
                                 {section.body}
                             </p>
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
 
-            {!!leftPanel.points?.length && (
+            {!compact && !!leftPanel.points?.length && (
                 <div className="grid gap-2 pt-1">
                     {leftPanel.points.map((point, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-foreground/50 uppercase tracking-widest group/point">
@@ -176,7 +180,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
                 </div>
             )}
 
-            {!!leftPanel.tags?.length && (
+            {!compact && !!leftPanel.tags?.length && (
                 <div className="flex flex-wrap gap-1.5 justify-center lg:justify-start">
                     {leftPanel.tags.map((tag, idx) => (
                         <span
@@ -227,24 +231,40 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
     </div>
 );
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel, roleIdentity }) => {
+const MobileOnboardingGuidance = ({ leftPanel }: { leftPanel: LeftPanelContent }) => (
+    <details className="onboarding-mobile-guidance lg:hidden">
+        <summary>
+            <span>Why we ask this</span>
+            <FiChevronDown aria-hidden />
+        </summary>
+        {leftPanel.description && <p>{leftPanel.description}</p>}
+        {!!leftPanel.guidanceSections?.length && (
+            <ul>
+                {leftPanel.guidanceSections.map((section) => <li key={section.title}><b>{section.title}:</b> {section.body}</li>)}
+            </ul>
+        )}
+    </details>
+);
+
+const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel, roleIdentity, onboarding = false }) => {
     if (embedded) {
         return (
             <div data-auth-embedded className="w-full text-foreground">
                 {topContent && <div className="mb-4">{topContent}</div>}
-                <div className={leftPanel ? "grid w-full items-start gap-5 lg:grid-cols-[minmax(280px,0.75fr)_minmax(0,1.35fr)] xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.4fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
+                <div className={leftPanel ? "grid w-full items-start gap-5 lg:grid-cols-[minmax(270px,0.68fr)_minmax(0,1.5fr)] xl:grid-cols-[minmax(300px,0.72fr)_minmax(0,1.55fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
                     {leftPanel && (
-                        <div className="order-2 rounded-[1.5rem] border border-obaol-200/60 bg-white/80 p-5 backdrop-blur-2xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/80 lg:sticky lg:top-4 lg:order-1">
+                        <div className="order-2 hidden rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#0E0D0A] lg:sticky lg:top-4 lg:order-1 lg:block">
                             <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact />
                         </div>
                     )}
-                    <div data-auth-form-card className={`rounded-[2.5rem] border border-divider bg-content1/80 p-5 backdrop-blur-3xl sm:p-8 ${leftPanel ? "order-1 min-w-0 lg:order-2" : ""}`}>
-                        <div className="mb-8 items-center flex flex-col text-center">
-                            <h2 className="mb-2 text-3xl font-bold tracking-tight text-foreground">
+                    <div data-auth-form-card className={`rounded-2xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-content1 sm:p-7 ${leftPanel ? "order-1 min-w-0 lg:order-2" : ""}`}>
+                        {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
+                        <div className="mb-6 flex flex-col text-left sm:mb-7">
+                            <h2 className="mb-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-foreground sm:text-3xl">
                                 {title}
                             </h2>
                             {subtitle && (
-                                <p className="text-foreground/50 text-[10px] uppercase font-black tracking-[0.3em]">
+                                <p className="text-sm font-medium text-slate-500 dark:text-foreground/60">
                                     {subtitle}
                                 </p>
                             )}
@@ -299,7 +319,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                         </Link>
 
                         {leftPanel ? (
-                            <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} />
+                            <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact={onboarding} />
                         ) : (
                             <div className="space-y-8">
                                 <p className="mb-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-slate-900 dark:text-foreground xl:text-7xl">
@@ -346,19 +366,20 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             <div className="relative group">
                                 <motion.div
                                     data-testid="auth-card"
-                                    className="relative overflow-hidden rounded-[2.2rem] border border-obaol-200/60 bg-white/85 p-5 backdrop-blur-3xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/85 lg:rounded-[2.5rem] lg:p-7"
+                                    className={`relative overflow-hidden border bg-white/95 p-5 dark:bg-[#0E0D0A]/95 lg:p-7 ${onboarding ? "rounded-2xl border-slate-200 dark:border-white/10" : "rounded-[2.2rem] border-obaol-200/60 dark:border-obaol-500/10 lg:rounded-[2.5rem]"}`}
                                     transition={{ duration: 0.45, ease: "easeOut" }}
                                 >
                                     {/* Glass Accents */}
                                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                                     <div className="absolute right-0 top-0 -mr-20 -mt-20 h-40 w-40 rounded-full bg-obaol-500/10 opacity-0 blur-[80px] transition-opacity duration-1000 group-hover:opacity-100" />
 
-                                    <div className="mb-4 relative">
+                                    {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
+                                    <div className="mb-5 relative">
                                         <h1 className="text-2xl font-bold leading-none tracking-tight text-slate-900 dark:text-foreground lg:text-3xl">
                                             {title}
                                         </h1>
                                         {subtitle && (
-                                            <p className="text-slate-500 dark:text-default-400 text-[10px] font-bold uppercase tracking-[0.18em] mt-2 opacity-60">
+                                            <p className={`${onboarding ? "text-sm font-medium normal-case tracking-normal opacity-100" : "text-[10px] font-bold uppercase tracking-[0.18em] opacity-60"} mt-2 text-slate-500 dark:text-default-400`}>
                                                 {subtitle}
                                             </p>
                                         )}

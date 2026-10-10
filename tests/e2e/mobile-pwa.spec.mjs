@@ -16,7 +16,7 @@ const mockUser = {
   name: "Mobile PWA Tester",
   role: "Associate",
   providedCapabilities: ["warehouse-storage", "inland-logistics", "testing"],
-  soughtCapabilities: ["buying"],
+  soughtCapabilities: ["seller"],
   onboardingComplete: true,
   registrationStatus: "APPROVED",
   verified: { email: true, phone: true, gst: true },

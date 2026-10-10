@@ -25,6 +25,14 @@ test("associate onboarding scopes a single blue focus treatment to its fields", 
   assert.equal(styles.includes('[data-slot="input-wrapper"]'), true);
 });
 
+test("associate onboarding shows password requirements before submission", () => {
+  const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  assert.equal(form.includes('aria-label="Password requirements"'), true);
+  assert.equal(form.includes("ASSOCIATE_PASSWORD_REQUIREMENTS.map"), true);
+  assert.equal(form.includes("isRepeatedDigitPhone(primaryPhone.national)"), true);
+  assert.equal(form.includes("isRepeatedDigitPhone(companyPrimaryPhone.national)"), true);
+});
+
 test("associate onboarding requires legal consent before leaving the profile step", () => {
   const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
   for (const token of [
@@ -86,17 +94,17 @@ test("associate onboarding captures independent provided and sought capability p
     "soughtFunctionPriorities",
   ]) assert.equal(form.includes(token), true, `missing ${token}`);
   assert.equal(form.includes("Type of Entity"), false);
-  assert.equal(form.includes('buying: <IoCart />'), true);
-  assert.equal(form.includes('selling: <IoStorefront />'), true);
-  assert.equal(form.includes('className="grid grid-cols-2 gap-2"'), true);
+  assert.equal(form.includes('buyer: <IoCart />'), true);
+  assert.equal(form.includes('seller: <IoStorefront />'), true);
+  assert.equal(form.includes('className="grid grid-cols-1 gap-2.5 sm:grid-cols-2"'), true);
   assert.equal(form.includes("Build a clearer company profile"), true);
   assert.equal(form.includes('href="/dashboard/company"'), true);
   assert.equal(form.includes("getCompanyFunctionPerspectiveDescription(fn?.slug, kind, fn?.description)"), true);
-  for (const slug of ["buying", "selling", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk", "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics"]) {
+  for (const slug of ["buyer", "seller", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk", "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics"]) {
     assert.equal(descriptions.includes(`${slug}:`) || descriptions.includes(`${JSON.stringify(slug)}:`), true, `missing perspective copy for ${slug}`);
   }
   assert.equal(descriptions.includes('provided: "We purchase commodities or products from suppliers."'), true);
-  assert.equal(descriptions.includes('sought: "We want to find products and suppliers to buy from."'), true);
+  assert.equal(descriptions.includes('sought: "We want to connect with buyers for our products."'), true);
 });
 
 test("associate onboarding removes duplicate participation modes", () => {
@@ -107,10 +115,28 @@ test("associate onboarding removes duplicate participation modes", () => {
   assert.equal(form.includes('"exporting-from-india"'), true);
   assert.equal(form.includes("IoArrowDownCircleOutline"), true);
   assert.equal(form.includes("IoArrowUpCircleOutline"), true);
-  assert.equal(form.includes('grid grid-cols-2 gap-2'), true);
+  assert.equal(form.includes('grid grid-cols-1 gap-2.5 sm:grid-cols-2'), true);
   assert.equal(form.includes("Make priority"), false);
   assert.equal(form.includes("Remove priority"), false);
   assert.equal(form.includes("Your first three selections become priorities automatically"), true);
+});
+
+test("Associate and Operator onboarding share readable progress and compact referral controls", () => {
+  const associate = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  const operator = read("../src/components/onboarding/OperatorOnboardingForm.tsx");
+  const shared = read("../src/components/onboarding/OnboardingUI.tsx");
+  const styles = read("../src/app/globals.css");
+  for (const source of [associate, operator]) {
+    assert.equal(source.includes("<OnboardingProgress"), true);
+    assert.equal(source.includes("<ReferralCodeField"), true);
+    assert.equal(source.includes("onboarding-form"), true);
+    assert.equal(source.includes("onboarding"), true);
+  }
+  assert.equal(shared.includes("Step {currentStep} of {labels.length}"), true);
+  assert.equal(shared.includes("maxLength={6}"), true);
+  assert.equal(styles.includes(".onboarding-referral__field { width: 13rem"), true);
+  assert.equal(styles.includes(".onboarding-referral__field { width: 100%"), true);
+  assert.equal(styles.includes("font-size: 1rem !important"), true);
 });
 
 test("capability priorities preserve ranking and automatically fill the first three slots", async () => {

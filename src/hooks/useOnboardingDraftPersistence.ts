@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 type DraftPayload<T> = {
+  draftVersion: number;
   formData: T;
   currentStep: number;
   completedStep: number;
@@ -18,6 +19,7 @@ type UseOnboardingDraftPersistenceParams<T> = {
   completedStep: number;
   onLoad: (payload: Partial<DraftPayload<T>>) => void;
   debounceMs?: number;
+  draftVersion?: number;
 };
 
 export function useOnboardingDraftPersistence<T>({
@@ -29,6 +31,7 @@ export function useOnboardingDraftPersistence<T>({
   completedStep,
   onLoad,
   debounceMs = 400,
+  draftVersion = 1,
 }: UseOnboardingDraftPersistenceParams<T>) {
   const loadedRef = useRef(false);
   const draftKey = `onboarding_draft_${roleKey}_${userId || "anonymous"}`;
@@ -59,6 +62,7 @@ export function useOnboardingDraftPersistence<T>({
 
     const timer = setTimeout(() => {
       const payload: DraftPayload<T> = {
+        draftVersion,
         formData,
         currentStep,
         completedStep,
@@ -78,5 +82,5 @@ export function useOnboardingDraftPersistence<T>({
     }, debounceMs);
 
     return () => clearTimeout(timer);
-  }, [enabled, userId, draftKey, formData, currentStep, completedStep, roleKey, debounceMs]);
+  }, [enabled, userId, draftKey, formData, currentStep, completedStep, roleKey, debounceMs, draftVersion]);
 }

@@ -17,7 +17,7 @@ import {
   Chip,
   Spinner,
 } from "@nextui-org/react";
-import { IoArchive, IoArrowDownCircleOutline, IoArrowUpCircleOutline, IoBoat, IoBusiness, IoCall, IoCar, IoCart, IoCash, IoEarth, IoEye, IoEyeOff, IoFlask, IoHome, IoLink, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch, IoStorefront } from "react-icons/io5";
+import { IoArchive, IoArrowDownCircleOutline, IoArrowUpCircleOutline, IoBoat, IoBusiness, IoCall, IoCar, IoCart, IoCash, IoEarth, IoEye, IoEyeOff, IoFlask, IoHome, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch, IoStorefront } from "react-icons/io5";
 import { LuBadgeCheck, LuPackageSearch, LuSearchCheck } from "react-icons/lu";
 import { FiCheck, FiChevronDown, FiChevronLeft, FiChevronRight, FiChevronUp } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -38,6 +38,12 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { COMPANY_FUNCTION_TAXONOMY_VERSION, fetchRegisterOptions, resolveApiRoot } from "@/utils/registerOptions";
 import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPriorities";
 import { getCompanyFunctionPerspectiveDescription } from "@/utils/companyFunctionDescriptions";
+import {
+  ASSOCIATE_PASSWORD_REQUIREMENTS,
+  getMissingAssociatePasswordRequirements,
+  isRepeatedDigitPhone,
+} from "@/utils/associateOnboardingValidation";
+import { OnboardingProgress, ReferralCodeField } from "@/components/onboarding/OnboardingUI";
 
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
@@ -45,8 +51,8 @@ const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 const IEC_REGEX = /^[A-Z0-9]{10}$/;
 const CIN_REGEX = /^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
 const MAIN_CATEGORY_SLUGS = new Set([
-  "buying",
-  "selling",
+  "buyer",
+  "seller",
   "sourcing",
   "packaging",
   "testing",
@@ -89,6 +95,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const DRAFT_KEY = `onboarding_draft_associate_${user?.id || "anonymous"}`;
   const [currentStep, setCurrentStep] = useState<StepKey>(1);
   const [completedStep, setCompletedStep] = useState<number>(0);
+  const [legacyDraftNeedsRoleSwap, setLegacyDraftNeedsRoleSwap] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -159,6 +166,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   });
 
   const hydrateDraft = useCallback((parsed: any) => {
+    if (Number(parsed?.draftVersion || 1) < COMPANY_FUNCTION_TAXONOMY_VERSION) {
+      setLegacyDraftNeedsRoleSwap(true);
+    }
     if (parsed?.formData) setFormData((prev) => {
       const hydrated = { ...prev, ...parsed.formData };
       hydrated.providedFunctionPriorities = reconcileCompanyFunctionPriorities(
@@ -201,6 +211,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     currentStep,
     completedStep,
     onLoad: hydrateDraft,
+    draftVersion: COMPANY_FUNCTION_TAXONOMY_VERSION,
   });
 
   React.useEffect(() => {
@@ -554,9 +565,26 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   }, [groupedCompanyFunctions]);
 
   useEffect(() => {
+    if (!legacyDraftNeedsRoleSwap || !groupedCompanyFunctions.length) return;
+    const buyerId = String(groupedCompanyFunctions.find((fn: any) => fn?.slug === "buyer")?._id || "");
+    const sellerId = String(groupedCompanyFunctions.find((fn: any) => fn?.slug === "seller")?._id || "");
+    if (!buyerId || !sellerId) return;
+    const swapSoughtRoleId = (id: string) => id === buyerId ? sellerId : id === sellerId ? buyerId : id;
+    setFormData((prev) => {
+      const soughtFunctionIds = Array.from(new Set(prev.soughtFunctionIds.map(swapSoughtRoleId)));
+      const soughtFunctionPriorities = reconcileCompanyFunctionPriorities(
+        soughtFunctionIds,
+        prev.soughtFunctionPriorities.map(swapSoughtRoleId)
+      );
+      return { ...prev, soughtFunctionIds, soughtFunctionPriorities };
+    });
+    setLegacyDraftNeedsRoleSwap(false);
+  }, [groupedCompanyFunctions, legacyDraftNeedsRoleSwap]);
+
+  useEffect(() => {
     const intent = String(searchParams?.get("intent") || "").toUpperCase();
     if (!["BUY", "SELL", "BOTH"].includes(intent) || !groupedCompanyFunctions.length) return;
-    const suggestedSlugs = intent === "BUY" ? ["buying"] : intent === "SELL" ? ["selling"] : ["buying", "selling"];
+    const suggestedSlugs = intent === "BUY" ? ["buyer"] : intent === "SELL" ? ["seller"] : ["buyer", "seller"];
     const suggestedIds = groupedCompanyFunctions
       .filter((fn: any) => suggestedSlugs.includes(String(fn?.slug || "")))
       .map((fn: any) => String(fn?._id || ""))
@@ -609,8 +637,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
   const capabilityIcon = (slug: string) => {
     const icons: Record<string, React.ReactNode> = {
-      buying: <IoCart />,
-      selling: <IoStorefront />,
+      buyer: <IoCart />,
+      seller: <IoStorefront />,
       sourcing: <IoSearch />,
       packaging: <IoArchive />,
       testing: <IoFlask />,
@@ -631,20 +659,20 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     const title = kind === "provided" ? "What your company provides" : "What your company is seeking";
     const SectionIcon = kind === "provided" ? LuBadgeCheck : LuPackageSearch;
     return (
-      <section className="rounded-2xl border border-default-200 bg-content2/20 p-4">
+      <section className="onboarding-section-card">
         <div className="mb-3 flex items-center gap-2 text-obaol-600">
           <SectionIcon aria-hidden className="text-lg" />
-          <h4 className="text-xs font-black uppercase tracking-widest">
+          <h4 className="text-base font-bold tracking-tight">
             {title}<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
           </h4>
-          <span className="ml-auto text-[10px] font-bold text-default-400">{ids.length}/6 selected</span>
+          <span className="ml-auto text-xs font-semibold text-default-500">{ids.length}/6 selected</span>
         </div>
-        <p className="mb-3 text-xs leading-5 text-default-500">
+        <p className="mb-4 text-sm leading-6 text-default-600">
           {kind === "provided"
             ? "Choose the activities, products, or services your company offers or performs."
             : "Choose the products, services, or partnerships your company wants to find."}
         </p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {groupedCompanyFunctions.map((fn: any) => {
             const fnId = String(fn?._id || "");
             const selected = ids.includes(fnId);
@@ -653,23 +681,23 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             return (
               <button key={`${kind}-${fnId}`} type="button" disabled={disabled}
                 aria-pressed={selected} onClick={() => updateCompanyFunctionSelection(kind, fnId)}
-                className={`flex min-h-16 touch-manipulation items-center gap-2 rounded-xl border p-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:gap-3 sm:p-3 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-content1/40 hover:border-primary-500/50"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
+                className={`flex min-h-[76px] touch-manipulation items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-white hover:border-primary-500/50 dark:bg-content1"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-bold leading-tight">{fn?.name}</span>
-                  <span className="mt-1 block line-clamp-2 text-[10px] font-medium leading-4 text-default-500">
+                  <span className="block text-sm font-bold leading-5">{fn?.name}</span>
+                  <span className="mt-0.5 block line-clamp-2 text-xs font-normal leading-[1.125rem] text-default-500">
                     {getCompanyFunctionPerspectiveDescription(fn?.slug, kind, fn?.description)}
                   </span>
                 </span>
-                {priorityIndex > -1 && <span className="rounded-full bg-obaol-500/15 px-2 py-1 text-[9px] font-black">P{priorityIndex + 1}</span>}
+                {priorityIndex > -1 && <span className="rounded-full bg-obaol-500/15 px-2 py-1 text-xs font-bold">P{priorityIndex + 1}</span>}
               </button>
             );
           })}
         </div>
         {error && <p className="mt-2 text-xs font-semibold text-danger-500">{error}</p>}
         <div className="mt-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-default-400">Top priorities</p>
-          <p className="mt-1 text-[11px] text-default-500">Your first three selections become priorities automatically. Reorder them if needed.</p>
+          <p className="text-sm font-bold text-foreground">Top priorities</p>
+          <p className="mt-1 text-xs leading-5 text-default-500">Your first three selections become priorities automatically. Reorder them if needed.</p>
           {priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => {
             return (
             <div key={`${kind}-priority-${id}`} className="flex items-center justify-between gap-2 rounded-lg border border-default-200 bg-content1/60 px-3 py-2">
@@ -686,11 +714,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   };
 
   const validatePassword = (password: string) => {
-    const missing: string[] = [];
-    if (password.length < 8) missing.push("8+ chars");
-    if (!/[A-Z]/.test(password)) missing.push("1 uppercase");
-    if (!/[0-9]/.test(password)) missing.push("1 number");
-    return missing;
+    return getMissingAssociatePasswordRequirements(password);
   };
 
   const passwordStrength = validatePassword(formData.password);
@@ -800,24 +824,28 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       if (!formData.name.trim()) stepErrors.name = "Name is required";
       if (!formData.email.trim()) stepErrors.email = "Email is required";
       if (formData.email && !emailRegex.test(formData.email)) stepErrors.email = "Invalid email format";
-      if (!parsePhoneValue({ raw: formData.phone, countryCode: formData.phoneCountryCode, national: formData.phoneNational }).e164) {
+      const primaryPhone = parsePhoneValue({ raw: formData.phone, countryCode: formData.phoneCountryCode, national: formData.phoneNational });
+      if (!primaryPhone.e164) {
         stepErrors.phone = "Phone is required";
+      } else if (isRepeatedDigitPhone(primaryPhone.national)) {
+        stepErrors.phone = "Enter a valid phone number; repeated digits are not allowed.";
       }
-      if (
-        (formData.phoneSecondary || formData.phoneSecondaryNational) &&
-        !parsePhoneValue({
+      const hasSecondaryPhone = Boolean(formData.phoneSecondary || formData.phoneSecondaryNational);
+      const secondaryPhone = parsePhoneValue({
           raw: formData.phoneSecondary,
           countryCode: formData.phoneSecondaryCountryCode,
           national: formData.phoneSecondaryNational,
           fallbackCountryCode: formData.phoneCountryCode,
-        }).e164
-      ) {
+        });
+      if (hasSecondaryPhone && !secondaryPhone.e164) {
         stepErrors.phoneSecondary = "Enter a valid secondary phone number";
+      } else if (hasSecondaryPhone && isRepeatedDigitPhone(secondaryPhone.national)) {
+        stepErrors.phoneSecondary = "Enter a valid phone number; repeated digits are not allowed.";
       }
       if (requiresPassword) {
-        if (passwordStrength.length > 0) stepErrors.password = `Requirements: ${passwordStrength.join(", ")}`;
+        if (passwordStrength.length > 0) stepErrors.password = `Missing: ${passwordStrength.join(", ")}`;
         if (!formData.confirmPassword.trim()) stepErrors.confirmPassword = "Please confirm password";
-        if (formData.password !== formData.confirmPassword) stepErrors.confirmPassword = "Passwords do not match";
+        else if (formData.password !== formData.confirmPassword) stepErrors.confirmPassword = "Passwords do not match";
       }
       if (!hasAcceptedLegalTerms) {
         stepErrors.legalConsent = "You must agree to the Terms & Conditions and Privacy Policy to continue.";
@@ -832,8 +860,21 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         if (!formData.companyName.trim()) stepErrors.companyName = "Company name is required";
         if (!formData.companyEmail.trim()) stepErrors.companyEmail = "Company email is required";
         if (formData.companyEmail && !emailRegex.test(formData.companyEmail)) stepErrors.companyEmail = "Invalid company email";
-        if (!parsePhoneValue({ raw: formData.companyPhone, countryCode: formData.companyPhoneCountryCode, national: formData.companyPhoneNational }).e164) {
+        const companyPrimaryPhone = parsePhoneValue({ raw: formData.companyPhone, countryCode: formData.companyPhoneCountryCode, national: formData.companyPhoneNational });
+        if (!companyPrimaryPhone.e164) {
           stepErrors.companyPhone = "Company phone is required";
+        } else if (isRepeatedDigitPhone(companyPrimaryPhone.national)) {
+          stepErrors.companyPhone = "Enter a valid phone number; repeated digits are not allowed.";
+        }
+        const hasCompanySecondaryPhone = Boolean(formData.companyPhoneSecondary || formData.companyPhoneSecondaryNational);
+        const companySecondaryPhone = parsePhoneValue({
+          raw: formData.companyPhoneSecondary,
+          countryCode: formData.companyPhoneSecondaryCountryCode,
+          national: formData.companyPhoneSecondaryNational,
+          fallbackCountryCode: formData.companyPhoneCountryCode,
+        });
+        if (hasCompanySecondaryPhone && isRepeatedDigitPhone(companySecondaryPhone.national)) {
+          stepErrors.companyPhoneSecondary = "Enter a valid phone number; repeated digits are not allowed.";
         }
         if (!formData.companyAddress.trim()) stepErrors.companyAddress = "Company address is required";
         if (formData.companyGeoType === "INTERNATIONAL") {
@@ -1175,6 +1216,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       subtitle={stepTitle}
       cardMaxWidthClass={isOnboarding ? "max-w-full" : "max-w-[620px]"}
       embedded={isOnboarding}
+      onboarding
       leftPanel={{
         headline: "Set up your company for",
         highlight: "BUILD A CLEARER COMPANY PROFILE",
@@ -1219,7 +1261,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         <form
           ref={formRef}
           tabIndex={-1}
-          className="associate-onboarding-form w-full flex flex-col gap-5"
+          className="onboarding-form associate-onboarding-form w-full flex flex-col gap-5"
           onSubmit={(e) => e.preventDefault()}
           onKeyDown={(e) => {
             if (e.key !== "Enter") return;
@@ -1275,41 +1317,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
               )}
             </>
           )}
-          <div className="mb-10">
-            <div className="flex items-center justify-between relative px-2 mb-6">
-              <div className="absolute top-1/2 left-0 w-full h-[2.5px] bg-default-100/50 -translate-y-1/2 z-0 rounded-full" />
-              <motion.div
-                className="absolute top-1/2 left-0 h-[2.5px] bg-obaol-500 -translate-y-1/2 z-0 rounded-full"
-                initial={{ width: "0%" }}
-                animate={{ width: `${((currentStep - 1) / 3) * 100}%` }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-              />
-              {[1, 2, 3, 4].map((s) => (
-                <div
-                  key={s}
-                  className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 shadow-sm border-2 ${s < currentStep
-                    ? "bg-obaol-500 border-obaol-500 text-white"
-                    : s === currentStep
-                      ? "bg-background border-obaol-500 text-obaol-500 scale-110 shadow-obaol-500/20"
-                      : "bg-background border-default-200 text-default-400"
-                    }`}
-                >
-                  {s < currentStep ? <FiCheck className="text-sm stroke-[3]" /> : s}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between px-1">
-              {["Profile", "Company", "Capability", "Verify"].map((label, idx) => (
-                <span
-                  key={label}
-                  className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${idx + 1 <= currentStep ? "text-obaol-500" : "text-default-400"
-                    }`}
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
+          <OnboardingProgress currentStep={currentStep} labels={["Profile", "Company", "Capabilities", "Review"]} />
 
           <div className="grid grid-cols-1 gap-4 items-start">
             <AnimatePresence mode="wait">
@@ -1400,25 +1408,38 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   </div>
                   {requiresPassword && (
                     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        label="Password"
-                        isRequired
-                        labelPlacement="outside"
-                        placeholder="Create a secure password"
-                        variant="bordered"
-                        value={formData.password}
-                        onValueChange={(v) => setField("password", v)}
-                        isInvalid={!!errors.password}
-                        errorMessage={errors.password}
-                        startContent={<IoLockClosed className="text-default-400" />}
-                        classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
-                        endContent={
-                          <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="focus:outline-none p-2">
-                            {showPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
-                          </button>
-                        }
-                      />
+                      <div>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          label="Password"
+                          isRequired
+                          labelPlacement="outside"
+                          placeholder="Create a secure password"
+                          variant="bordered"
+                          value={formData.password}
+                          onValueChange={(v) => setField("password", v)}
+                          isInvalid={!!errors.password}
+                          errorMessage={errors.password}
+                          startContent={<IoLockClosed className="text-default-400" />}
+                          classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
+                          endContent={
+                            <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((prev) => !prev)} className="focus:outline-none p-2">
+                              {showPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
+                            </button>
+                          }
+                        />
+                        <ul aria-label="Password requirements" className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+                          {ASSOCIATE_PASSWORD_REQUIREMENTS.map((requirement) => {
+                            const isMet = requirement.test(formData.password);
+                            return (
+                              <li key={requirement.key} className={`flex items-center gap-1.5 text-[11px] font-semibold ${isMet ? "text-success-600" : "text-default-500"}`}>
+                                <FiCheck aria-hidden className={isMet ? "opacity-100" : "opacity-30"} />
+                                {requirement.label}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
                         label="Confirm Password"
@@ -1433,7 +1454,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         startContent={<IoLockClosed className="text-default-400" />}
                         classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
                         endContent={
-                          <button type="button" onClick={() => setShowConfirmPassword((prev) => !prev)} className="focus:outline-none p-2">
+                          <button type="button" aria-label={showConfirmPassword ? "Hide confirmed password" : "Show confirmed password"} onClick={() => setShowConfirmPassword((prev) => !prev)} className="focus:outline-none p-2">
                             {showConfirmPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
                           </button>
                         }
@@ -1441,29 +1462,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     </div>
                   )}
 
-                  <div className="md:col-span-2 pt-4">
-                    <div className="p-4 rounded-2xl bg-obaol-500/5 border border-dashed border-obaol-500/30 flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-4 bg-obaol-500 rounded-full" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-obaol-600">Operator Referral (Optional)</span>
-                      </div>
-                      <Input
-                        type="text"
-                        placeholder="Enter 6-digit Referral Code"
-                        variant="flat"
-                        value={formData.referralCode}
-                        onValueChange={(v) => setField("referralCode", v.toUpperCase())}
-                        maxLength={6}
-                        startContent={<IoLink className="text-obaol-600" />}
-                        classNames={{
-                          input: "font-black tracking-[0.2em] text-center",
-                          inputWrapper: "bg-background/80 h-12 border-none shadow-inner"
-                        }}
-                      />
-                      <p className="text-[9px] font-bold text-default-400 uppercase tracking-tighter italic opacity-70">
-                        Enter a valid operator code to automatically link your profile for faster verification.
-                      </p>
-                    </div>
+                  <div className="md:col-span-2 pt-2">
+                    <ReferralCodeField value={formData.referralCode} onChange={(value) => setField("referralCode", value)} label="Operator referral code" />
                   </div>
 
                   <div className="md:col-span-2">
@@ -1949,11 +1949,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   transition={{ duration: 0.3 }}
                   className="flex flex-col gap-6"
                 >
-                  <div className="p-5 rounded-2xl bg-obaol-500/10 border-2 border-obaol-500/50 text-center">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-obaol-500">
+                  <div className="onboarding-intro-card">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-foreground">
                       Select 1 to 6 main categories
                     </h3>
-                    <p className="mt-2 text-xs font-semibold tracking-wide text-obaol-500/80 normal-case">
+                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-default-500">
                       Your choices customize the platform you see after onboarding. Pick up to 3 priorities.
                     </p>
                   </div>

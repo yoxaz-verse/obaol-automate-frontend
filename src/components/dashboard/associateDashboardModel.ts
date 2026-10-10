@@ -34,9 +34,11 @@ export const buildAssociateDashboardModel = ({
   activeOrders,
   liveProducts,
 }: AssociateDashboardModelInput) => {
-  const capabilities = new Set([...providedCapabilities, ...soughtCapabilities]);
-  const showBuying = capabilities.has("buying") || capabilities.has("sourcing");
-  const showSelling = capabilities.has("selling");
+  const provided = new Set(providedCapabilities);
+  const sought = new Set(soughtCapabilities);
+  const capabilities = new Set([...provided, ...sought]);
+  const showBuying = provided.has("buyer") || sought.has("seller") || capabilities.has("sourcing");
+  const showSelling = provided.has("seller") || sought.has("buyer");
   const showFunctions = capabilities.size > 0;
 
   const metrics: AssociateMetric[] = [

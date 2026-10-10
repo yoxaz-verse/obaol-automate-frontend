@@ -49,7 +49,7 @@ export default function MarketplacePage() {
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const isAdminUser = roleLower === "admin" || isOperatorUser;
     const isAssociateUser = roleLower === "associate" || roleLower === "customer";
-    const isSellingMode = isAssociateUser && (user?.providedCapabilities || []).includes("selling");
+    const isSellingMode = isAssociateUser && (user?.providedCapabilities || []).includes("seller");
     const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
     const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
 

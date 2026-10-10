@@ -23,6 +23,7 @@ import { accountRoutes } from "@/core/api/apiRoutes";
 import { getData, postData } from "@/core/api/apiHandler";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiUser, FiMail, FiLock, FiMapPin, FiGlobe, FiChevronRight, FiChevronLeft, FiCheck } from "react-icons/fi";
+import { OnboardingProgress, ReferralCodeField } from "@/components/onboarding/OnboardingUI";
 
 const EMPTY_LIST: any[] = [];
 const normalizeOnboardingError = (error: any) => {
@@ -455,6 +456,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       subtitle={stepLabels[currentStep - 1]}
       cardMaxWidthClass={isOnboarding ? "max-w-full" : "max-w-[560px]"}
       embedded={isOnboarding}
+      onboarding
       leftPanel={{
         headline: "Prepare your access to the",
         highlight: "OPERATOR PORTAL",
@@ -490,27 +492,9 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
         knowMoreLink: "/roles/operator"
       }}
     >
-      <div className="mb-8">
-        <div className="flex items-center justify-between relative px-2">
-          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-default-100 -translate-y-1/2 z-0" />
-          <motion.div
-            className="absolute top-1/2 left-0 h-[2px] bg-obaol-500 -translate-y-1/2 z-0"
-            initial={{ width: "0%" }}
-            animate={{ width: `${((currentStep - 1) / 2) * 100}%` }}
-          />
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${s <= currentStep ? "bg-obaol-500 text-white" : "bg-content2 text-default-400"
-                }`}
-            >
-              {s < currentStep ? <FiCheck /> : s}
-            </div>
-          ))}
-        </div>
-      </div>
+      <OnboardingProgress currentStep={currentStep} labels={stepLabels} />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="onboarding-form operator-onboarding-form space-y-6">
         {!isOnboarding && (
           <div className="flex flex-col items-center gap-3">
             {googleClientId && !googleSignUp ? (
@@ -690,14 +674,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                   />
                 </>
               )}
-              <Input
-                label="Referral Code"
-                placeholder="If any (Optional)"
-                variant="bordered"
-                value={form.referralCode}
-                onValueChange={(v) => setForm({ ...form, referralCode: v.toUpperCase() })}
-                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
-              />
+              <ReferralCodeField value={form.referralCode} onChange={(value) => setForm({ ...form, referralCode: value })} />
             </motion.div>
           )}
 

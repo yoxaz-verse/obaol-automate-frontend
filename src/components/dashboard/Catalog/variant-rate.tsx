@@ -297,8 +297,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const isAdminUser = roleLower === "admin" || isOperatorUser;
   const isAssociateUser = roleLower === "associate" || roleLower === "customer";
-  const isBuyingMode = isAssociateUser && [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])].includes("buying");
-  const isSellingMode = isAssociateUser && (user?.providedCapabilities || []).includes("selling");
+  const isBuyingMode = isAssociateUser && ((user?.providedCapabilities || []).includes("buyer") || (user?.soughtCapabilities || []).includes("seller"));
+  const isSellingMode = isAssociateUser && ((user?.providedCapabilities || []).includes("seller") || (user?.soughtCapabilities || []).includes("buyer"));
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
   const isMarketplaceView = additionalParams?.view === "marketplace";

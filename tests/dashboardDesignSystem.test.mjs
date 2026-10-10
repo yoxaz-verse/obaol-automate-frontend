@@ -27,3 +27,15 @@ test("profile uses human-facing workspace components and empty values", () => {
   assert.doesNotMatch(profile, /NODE_NUL|Market Identity Matrix|Geographic Footprint|Tactical Personnel Data/);
   assert.match(ui, /emptyValue = "Not provided"/);
 });
+
+test("password and security is separate from profile", () => {
+  const profile = read("src/app/dashboard/profile/page.tsx");
+  const security = read("src/app/dashboard/security/page.tsx");
+  const settings = read("src/app/dashboard/settings/page.tsx");
+  assert.doesNotMatch(profile, /<PasskeySecurityPanel\s*\/>/);
+  assert.match(security, /title="Password & Security"/);
+  assert.match(security, /Change password/);
+  assert.match(security, /Active devices/);
+  assert.match(security, /Add passkey/);
+  assert.match(settings, /href: "\/dashboard\/security"/);
+});

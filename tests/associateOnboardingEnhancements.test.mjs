@@ -94,8 +94,8 @@ test("associate onboarding captures independent provided and sought capability p
     "soughtFunctionPriorities",
   ]) assert.equal(form.includes(token), true, `missing ${token}`);
   assert.equal(form.includes("Type of Entity"), false);
-  assert.equal(form.includes('buyer: <IoCart />'), true);
-  assert.equal(form.includes('seller: <IoStorefront />'), true);
+  assert.equal(form.includes('buyer: <LuShoppingBag />'), true);
+  assert.equal(form.includes('seller: <LuStore />'), true);
   assert.equal(form.includes('className="grid grid-cols-1 gap-2.5 sm:grid-cols-2"'), true);
   assert.equal(form.includes("Build a clearer company profile"), true);
   assert.equal(form.includes('href="/dashboard/company"'), true);
@@ -113,8 +113,8 @@ test("associate onboarding removes duplicate participation modes", () => {
   assert.equal(form.includes("tradeMode:"), false);
   assert.equal(form.includes('"importing-to-india"'), true);
   assert.equal(form.includes('"exporting-from-india"'), true);
-  assert.equal(form.includes("IoArrowDownCircleOutline"), true);
-  assert.equal(form.includes("IoArrowUpCircleOutline"), true);
+  assert.equal(form.includes("TbPackageImport"), true);
+  assert.equal(form.includes("TbPackageExport"), true);
   assert.equal(form.includes('grid grid-cols-1 gap-2.5 sm:grid-cols-2'), true);
   assert.equal(form.includes("Make priority"), false);
   assert.equal(form.includes("Remove priority"), false);
@@ -137,6 +137,29 @@ test("Associate and Operator onboarding share readable progress and compact refe
   assert.equal(styles.includes(".onboarding-referral__field { width: 13rem"), true);
   assert.equal(styles.includes(".onboarding-referral__field { width: 100%"), true);
   assert.equal(styles.includes("font-size: 1rem !important"), true);
+});
+
+test("authenticated onboarding locks the session login email without disabling it", () => {
+  const associate = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  const operator = read("../src/components/onboarding/OperatorOnboardingForm.tsx");
+  const shared = read("../src/components/onboarding/OnboardingUI.tsx");
+  const styles = read("../src/app/globals.css");
+
+  for (const source of [associate, operator]) {
+    assert.equal(source.includes("const isLoginEmailLocked = isOnboarding || googleSignUp"), true);
+    assert.equal(source.includes("isReadOnly={isLoginEmailLocked}"), true);
+    assert.equal(source.includes("isDisabled={isLoginEmailLocked}"), false);
+    assert.equal(source.includes("email: user.email || prev.email || \"\""), true);
+    assert.equal(source.includes("<LoginEmailIndicator />"), true);
+    assert.equal(source.includes("description={isLoginEmailLocked ? LOGIN_EMAIL_HELP : undefined}"), true);
+  }
+
+  assert.equal(associate.includes("hydrated.email = user.email"), true);
+  assert.equal(operator.includes("...(user?.email ? { email: user.email } : {})"), true);
+  assert.equal(shared.includes("This email is linked to your account and cannot be changed during onboarding."), true);
+  assert.equal(shared.includes("Login email"), true);
+  assert.equal(styles.includes(".onboarding-form .onboarding-locked-field"), true);
+  assert.equal(styles.includes("caret-color: transparent"), true);
 });
 
 test("capability priorities preserve ranking and automatically fill the first three slots", async () => {

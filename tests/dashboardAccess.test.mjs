@@ -36,7 +36,7 @@ test("detail routes keep their parent navigation item active", () => {
   assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard"), false);
 });
 
-test("settings owns company, notification, profile, and shortcut navigation", () => {
+test("settings owns company, notification, profile, security, and shortcut navigation", () => {
   const links = new Set(
     getAccessibleDashboardRoutes({ role: "Associate" }).map((route) => route.path)
   );
@@ -44,14 +44,17 @@ test("settings owns company, notification, profile, and shortcut navigation", ()
   assert.equal(links.has("/dashboard/company"), false);
   assert.equal(links.has("/dashboard/notifications"), false);
   assert.equal(links.has("/dashboard/profile"), false);
+  assert.equal(links.has("/dashboard/security"), false);
   assert.equal(links.has("/dashboard/shortcuts"), false);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/company", role: "Associate" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/notifications", role: "Associate" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/profile", role: "Associate" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/security", role: "Associate" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/shortcuts", role: "Associate" }), true);
   assert.equal(isDashboardRouteActive("/dashboard/company", "/dashboard/settings"), true);
   assert.equal(isDashboardRouteActive("/dashboard/notifications", "/dashboard/settings"), true);
   assert.equal(isDashboardRouteActive("/dashboard/profile", "/dashboard/settings"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/security", "/dashboard/settings"), true);
   assert.equal(isDashboardRouteActive("/dashboard/shortcuts", "/dashboard/settings"), true);
 });
 
@@ -89,6 +92,7 @@ test("Customer Support agents receive only their support workspace and account r
     "/dashboard/customer-support",
   ]);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/profile", role: "CustomerSupport" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/security", role: "CustomerSupport" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/orders", role: "CustomerSupport" }), false);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/users", role: "CustomerSupport" }), false);
 });

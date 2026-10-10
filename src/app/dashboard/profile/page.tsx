@@ -490,7 +490,7 @@ export default function ProfilePage() {
     <DashboardPage className="py-3 sm:py-5">
       <PageHeader
         title="Profile"
-        description="Manage your account, company information, verification, and sign-in security."
+        description="Manage your personal account details, company information, and verification."
         breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Settings", href: "/dashboard/settings" }, { label: "Profile" }]}
       />
       <QueryComponent
@@ -571,7 +571,6 @@ export default function ProfilePage() {
                     </div>
                   </DashboardPanel>
 
-                  <PasskeySecurityPanel />
                 </div>
 
                 {/* Profile details */}

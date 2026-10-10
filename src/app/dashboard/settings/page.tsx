@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import Link from "next/link";
-import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiDownload, FiSettings, FiUser } from "react-icons/fi";
+import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiDownload, FiLock, FiSettings, FiUser } from "react-icons/fi";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
 import AuthContext from "@/context/AuthContext";
@@ -26,9 +26,16 @@ const settingsLinks = [
   },
   {
     title: "Profile",
-    description: "Manage your personal account details and sign-in security.",
+    description: "Manage your personal account details and verification.",
     href: "/dashboard/profile",
     icon: FiUser,
+    associateOnly: false,
+  },
+  {
+    title: "Password & Security",
+    description: "Change your password, manage passkeys, and review signed-in devices.",
+    href: "/dashboard/security",
+    icon: FiLock,
     associateOnly: false,
   },
   {

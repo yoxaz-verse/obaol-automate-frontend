@@ -2,7 +2,19 @@
 
 import React from "react";
 import { Input } from "@nextui-org/react";
-import { FiCheck, FiLink } from "react-icons/fi";
+import { FiCheck, FiLink, FiLock } from "react-icons/fi";
+
+export const LOGIN_EMAIL_HELP =
+  "This email is linked to your account and cannot be changed during onboarding.";
+
+export function LoginEmailIndicator() {
+  return (
+    <span className="onboarding-login-email-indicator" aria-label="Login email, locked">
+      <FiLock aria-hidden />
+      <span>Login email</span>
+    </span>
+  );
+}
 
 export function OnboardingProgress({
   currentStep,

@@ -778,6 +778,43 @@ a {
   box-shadow: 0 0 0 3px var(--onboarding-focus-ring) !important;
 }
 
+.onboarding-form .onboarding-locked-field [data-slot="input-wrapper"] {
+  border-color: #d8e0ea !important;
+  background: #f1f5f9 !important;
+  box-shadow: none !important;
+  cursor: default;
+}
+
+.onboarding-form .onboarding-locked-field [data-slot="input-wrapper"]:is(:focus-within, [data-focus="true"], [data-focus-visible="true"]) {
+  border-color: #d8e0ea !important;
+  box-shadow: none !important;
+}
+
+.onboarding-form .onboarding-locked-field input[readonly] {
+  cursor: text;
+  caret-color: transparent;
+}
+
+.onboarding-login-email-indicator {
+  display: inline-flex;
+  min-height: 1.75rem;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: .3rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  padding: .25rem .55rem;
+  color: #475569;
+  font-size: .6875rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.onboarding-login-email-indicator svg { width: .75rem; height: .75rem; }
+.dark .onboarding-form .onboarding-locked-field [data-slot="input-wrapper"] { border-color: #475569 !important; background: #1e293b !important; }
+.dark .onboarding-login-email-indicator { background: #334155; color: #e2e8f0; }
+
 .onboarding-progress {
   margin-bottom: 1.75rem;
   color: #64748b;

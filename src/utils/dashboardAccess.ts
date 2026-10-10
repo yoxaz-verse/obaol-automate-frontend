@@ -87,6 +87,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Support" },
   { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true },
   { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], searchable: true, activeParent: "/dashboard/settings" },
+  { path: "/dashboard/security", label: "Password & Security", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], searchable: true, activeParent: "/dashboard/settings" },
 
   { path: "/dashboard/operator/hierarchy", label: "Hierarchy", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/operator/team", label: "Team", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },

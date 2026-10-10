@@ -17,8 +17,20 @@ import {
   Chip,
   Spinner,
 } from "@nextui-org/react";
-import { IoArchive, IoArrowDownCircleOutline, IoArrowUpCircleOutline, IoBoat, IoBusiness, IoCall, IoCar, IoCart, IoCash, IoEarth, IoEye, IoEyeOff, IoFlask, IoHome, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch, IoStorefront } from "react-icons/io5";
-import { LuBadgeCheck, LuPackageSearch, LuSearchCheck } from "react-icons/lu";
+import { IoBusiness, IoCall, IoEarth, IoEye, IoEyeOff, IoLocation, IoLockClosed, IoMail, IoPerson, IoSearch } from "react-icons/io5";
+import {
+  LuBadgeCheck,
+  LuBoxes,
+  LuMicroscope,
+  LuPackageSearch,
+  LuSearchCheck,
+  LuShip,
+  LuShoppingBag,
+  LuStore,
+  LuTruck,
+  LuWarehouse,
+} from "react-icons/lu";
+import { TbPackageExport, TbPackageImport, TbShieldDollar } from "react-icons/tb";
 import { FiCheck, FiChevronDown, FiChevronLeft, FiChevronRight, FiChevronUp } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -43,7 +55,12 @@ import {
   getMissingAssociatePasswordRequirements,
   isRepeatedDigitPhone,
 } from "@/utils/associateOnboardingValidation";
-import { OnboardingProgress, ReferralCodeField } from "@/components/onboarding/OnboardingUI";
+import {
+  LOGIN_EMAIL_HELP,
+  LoginEmailIndicator,
+  OnboardingProgress,
+  ReferralCodeField,
+} from "@/components/onboarding/OnboardingUI";
 
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
@@ -171,6 +188,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     }
     if (parsed?.formData) setFormData((prev) => {
       const hydrated = { ...prev, ...parsed.formData };
+      if (isOnboarding && user?.email) {
+        hydrated.email = user.email;
+      }
       hydrated.providedFunctionPriorities = reconcileCompanyFunctionPriorities(
         hydrated.providedFunctionIds,
         hydrated.providedFunctionPriorities
@@ -183,7 +203,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     });
     if (parsed?.currentStep) setCurrentStep(parsed.currentStep);
     if (parsed?.completedStep) setCompletedStep(parsed.completedStep);
-  }, []);
+  }, [isOnboarding, user?.email]);
 
   const debouncedEmail = useDebouncedValue(formData.email, 350);
   const [companySearch, setCompanySearch] = useState("");
@@ -219,9 +239,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     setFormData((prev) => ({
       ...prev,
       name: prev.name || user.name || "",
-      email: prev.email || user.email || "",
+      email: user.email || prev.email || "",
     }));
   }, [isOnboarding, user]);
+
+  const isLoginEmailLocked = isOnboarding || googleSignUp;
 
   React.useEffect(() => {
     const prefill = String(searchParams?.get("prefill") || "").trim();
@@ -637,17 +659,17 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
   const capabilityIcon = (slug: string) => {
     const icons: Record<string, React.ReactNode> = {
-      buyer: <IoCart />,
-      seller: <IoStorefront />,
-      sourcing: <IoSearch />,
-      packaging: <IoArchive />,
-      testing: <IoFlask />,
-      "warehouse-storage": <IoHome />,
-      "finance-risk": <IoCash />,
-      "importing-to-india": <IoArrowDownCircleOutline />,
-      "exporting-from-india": <IoArrowUpCircleOutline />,
-      "freight-forwarding": <IoBoat />,
-      "inland-logistics": <IoCar />,
+      buyer: <LuShoppingBag />,
+      seller: <LuStore />,
+      sourcing: <LuPackageSearch />,
+      packaging: <LuBoxes />,
+      testing: <LuMicroscope />,
+      "warehouse-storage": <LuWarehouse />,
+      "finance-risk": <TbShieldDollar />,
+      "importing-to-india": <TbPackageImport />,
+      "exporting-from-india": <TbPackageExport />,
+      "freight-forwarding": <LuShip />,
+      "inland-logistics": <LuTruck />,
     };
     return icons[slug] || <LuBadgeCheck />;
   };
@@ -656,7 +678,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     const ids = kind === "provided" ? formData.providedFunctionIds : formData.soughtFunctionIds;
     const priorities = kind === "provided" ? formData.providedFunctionPriorities : formData.soughtFunctionPriorities;
     const error = errors[kind === "provided" ? "providedFunctionIds" : "soughtFunctionIds"];
-    const title = kind === "provided" ? "What your company provides" : "What your company is seeking";
+    const title = kind === "provided" ? "What your company provides" : "What your company is seeking through OBAOL";
     const SectionIcon = kind === "provided" ? LuBadgeCheck : LuPackageSearch;
     return (
       <section className="onboarding-section-card">
@@ -682,7 +704,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
               <button key={`${kind}-${fnId}`} type="button" disabled={disabled}
                 aria-pressed={selected} onClick={() => updateCompanyFunctionSelection(kind, fnId)}
                 className={`flex min-h-[76px] touch-manipulation items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-white hover:border-primary-500/50 dark:bg-content1"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
-                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-bold leading-5">{fn?.name}</span>
                   <span className="mt-0.5 block line-clamp-2 text-xs font-normal leading-[1.125rem] text-default-500">
@@ -1359,11 +1381,17 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         setEmailCheckStatus("idle");
                         setEmailCheckMessage("");
                       }}
-                      isReadOnly={googleSignUp}
+                      isReadOnly={isLoginEmailLocked}
                       isInvalid={!!errors.email}
                       errorMessage={errors.email}
                       startContent={<IoMail className="text-default-400" />}
-                      classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
+                      endContent={isLoginEmailLocked ? <LoginEmailIndicator /> : undefined}
+                      description={isLoginEmailLocked ? LOGIN_EMAIL_HELP : undefined}
+                      className={isLoginEmailLocked ? "onboarding-locked-field" : undefined}
+                      classNames={{
+                        inputWrapper: "rounded-xl border-default-200 h-12",
+                        description: "text-xs leading-5 text-default-500",
+                      }}
                     />
                     {errors.email && (
                       <span className="text-xs font-semibold text-danger-500 pl-1">

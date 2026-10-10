@@ -23,7 +23,12 @@ import { accountRoutes } from "@/core/api/apiRoutes";
 import { getData, postData } from "@/core/api/apiHandler";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiUser, FiMail, FiLock, FiMapPin, FiGlobe, FiChevronRight, FiChevronLeft, FiCheck } from "react-icons/fi";
-import { OnboardingProgress, ReferralCodeField } from "@/components/onboarding/OnboardingUI";
+import {
+  LOGIN_EMAIL_HELP,
+  LoginEmailIndicator,
+  OnboardingProgress,
+  ReferralCodeField,
+} from "@/components/onboarding/OnboardingUI";
 
 const EMPTY_LIST: any[] = [];
 const normalizeOnboardingError = (error: any) => {
@@ -116,7 +121,13 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
         return;
       }
       const parsed = JSON.parse(raw);
-      if (parsed?.form) setForm((prev) => ({ ...prev, ...parsed.form }));
+      if (parsed?.form) {
+        setForm((prev) => ({
+          ...prev,
+          ...parsed.form,
+          ...(user?.email ? { email: user.email } : {}),
+        }));
+      }
       if (parsed?.currentStep) setCurrentStep(parsed.currentStep);
       if (parsed?.completedStep) setCompletedStep(parsed.completedStep);
     } catch {
@@ -124,7 +135,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     } finally {
       draftLoadedRef.current = true;
     }
-  }, [DRAFT_KEY, isOnboarding, user?.id]);
+  }, [DRAFT_KEY, isOnboarding, user?.email, user?.id]);
 
   useEffect(() => {
     if (!isOnboarding) return;
@@ -163,9 +174,11 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     setForm((prev) => ({
       ...prev,
       name: prev.name || user.name || "",
-      email: prev.email || user.email || "",
+      email: user.email || prev.email || "",
     }));
   }, [isOnboarding, user]);
+
+  const isLoginEmailLocked = isOnboarding || googleSignUp;
 
   useEffect(() => {
     if (isOnboarding) return;
@@ -566,9 +579,15 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                       setFieldErrors((prev) => ({ ...prev, email: "" }));
                     }
                   }}
-                  isReadOnly={googleSignUp}
+                  isReadOnly={isLoginEmailLocked}
                   startContent={<FiMail className="text-default-400" />}
-                  classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                  endContent={isLoginEmailLocked ? <LoginEmailIndicator /> : undefined}
+                  description={isLoginEmailLocked ? LOGIN_EMAIL_HELP : undefined}
+                  className={isLoginEmailLocked ? "onboarding-locked-field" : undefined}
+                  classNames={{
+                    inputWrapper: "rounded-xl border-default-200",
+                    description: "text-xs leading-5 text-default-500",
+                  }}
                   isRequired
                   isInvalid={!!fieldErrors.email}
                   errorMessage={fieldErrors.email}

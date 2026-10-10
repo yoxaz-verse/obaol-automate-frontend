@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./public-ui.css";
+import "react-toastify/dist/ReactToastify.css";
 import PublicPageScope from "@/components/public/PublicPageScope";
 import type { Metadata } from "next";
 import { PublicProviders } from "./public-provider";

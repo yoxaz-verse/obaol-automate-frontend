@@ -27,6 +27,7 @@ import OnboardingModal from "@/components/dashboard/Company/OnboardingModal";
 import { COMPANY_FUNCTION_TAXONOMY_VERSION, fetchRegisterOptions } from "@/utils/registerOptions";
 import { CompanyMetricCard, CompanyProfileReadiness } from "@/components/dashboard/Company/CompanyOverviewCards";
 import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPriorities";
+import { getCompanyFunctionPerspectiveDescription } from "@/utils/companyFunctionDescriptions";
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
@@ -516,15 +517,17 @@ export default function CompanyWorkspacePage() {
     return <section className="rounded-2xl border border-default-200 p-4">
       <h3 className="text-xs font-black uppercase tracking-widest">What your company {kind === "provided" ? "provides" : "is seeking"}</h3>
       <p className="mt-1 text-xs text-default-500">Select 1–6 categories. Your first three selections become priorities automatically.</p>
-      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         {capabilityOptions.map((capability: any) => {
           const id = String(capability?._id || "");
           const selected = ids.includes(id);
           const priority = priorities.indexOf(id);
           const disabled = !selected && ids.length >= 6;
-          return <button key={`${kind}-${id}`} type="button" disabled={disabled} aria-pressed={selected} onClick={() => toggleRequestedFunction(kind, id)} className={`min-h-14 touch-manipulation rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:min-h-16 ${selected ? "border-primary-500 bg-primary-500/10" : disabled ? "cursor-not-allowed border-default-100 opacity-40" : "border-default-200 hover:border-primary-500/50"}`}>
+          return <button key={`${kind}-${id}`} type="button" disabled={disabled} aria-pressed={selected} onClick={() => toggleRequestedFunction(kind, id)} className={`min-h-16 touch-manipulation rounded-xl border p-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:p-3 ${selected ? "border-primary-500 bg-primary-500/10" : disabled ? "cursor-not-allowed border-default-100 opacity-40" : "border-default-200 hover:border-primary-500/50"}`}>
             <div className="flex items-center justify-between gap-2"><span className="text-xs font-bold leading-tight">{capability?.name}</span>{priority >= 0 ? <Chip size="sm" color="primary" variant="flat">P{priority + 1}</Chip> : null}</div>
-            {["importing-to-india", "exporting-from-india"].includes(String(capability?.slug || "")) && capability?.description ? <p className="mt-1 text-[10px] leading-4 text-default-500">{capability.description}</p> : null}
+            <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-default-500">
+              {getCompanyFunctionPerspectiveDescription(capability?.slug, kind, capability?.description)}
+            </p>
           </button>;
         })}
       </div>

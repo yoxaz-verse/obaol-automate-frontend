@@ -37,6 +37,7 @@ import { useOnboardingDraftPersistence } from "@/hooks/useOnboardingDraftPersist
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { COMPANY_FUNCTION_TAXONOMY_VERSION, fetchRegisterOptions, resolveApiRoot } from "@/utils/registerOptions";
 import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPriorities";
+import { getCompanyFunctionPerspectiveDescription } from "@/utils/companyFunctionDescriptions";
 
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
@@ -92,6 +93,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [hasAcceptedLegalTerms, setHasAcceptedLegalTerms] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const submitInFlightRef = useRef(false);
   const [googleSignUp, setGoogleSignUp] = useState(false);
@@ -632,7 +634,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       <section className="rounded-2xl border border-default-200 bg-content2/20 p-4">
         <div className="mb-3 flex items-center gap-2 text-obaol-600">
           <SectionIcon aria-hidden className="text-lg" />
-          <h4 className="text-xs font-black uppercase tracking-widest">{title}</h4>
+          <h4 className="text-xs font-black uppercase tracking-widest">
+            {title}<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+          </h4>
           <span className="ml-auto text-[10px] font-bold text-default-400">{ids.length}/6 selected</span>
         </div>
         <p className="mb-3 text-xs leading-5 text-default-500">
@@ -640,7 +644,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             ? "Choose the activities, products, or services your company offers or performs."
             : "Choose the products, services, or partnerships your company wants to find."}
         </p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2">
           {groupedCompanyFunctions.map((fn: any) => {
             const fnId = String(fn?._id || "");
             const selected = ids.includes(fnId);
@@ -649,13 +653,13 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             return (
               <button key={`${kind}-${fnId}`} type="button" disabled={disabled}
                 aria-pressed={selected} onClick={() => updateCompanyFunctionSelection(kind, fnId)}
-                className={`flex min-h-14 touch-manipulation items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:min-h-16 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-content1/40 hover:border-primary-500/50"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
+                className={`flex min-h-16 touch-manipulation items-center gap-2 rounded-xl border p-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:gap-3 sm:p-3 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-content1/40 hover:border-primary-500/50"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-xs font-bold leading-tight">{fn?.name}</span>
-                  {["importing-to-india", "exporting-from-india"].includes(String(fn?.slug || "")) && fn?.description ? (
-                    <span className="mt-1 block text-[10px] font-medium leading-4 text-default-500">{fn.description}</span>
-                  ) : null}
+                  <span className="mt-1 block line-clamp-2 text-[10px] font-medium leading-4 text-default-500">
+                    {getCompanyFunctionPerspectiveDescription(fn?.slug, kind, fn?.description)}
+                  </span>
                 </span>
                 {priorityIndex > -1 && <span className="rounded-full bg-obaol-500/15 px-2 py-1 text-[9px] font-black">P{priorityIndex + 1}</span>}
               </button>
@@ -814,6 +818,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         if (passwordStrength.length > 0) stepErrors.password = `Requirements: ${passwordStrength.join(", ")}`;
         if (!formData.confirmPassword.trim()) stepErrors.confirmPassword = "Please confirm password";
         if (formData.password !== formData.confirmPassword) stepErrors.confirmPassword = "Passwords do not match";
+      }
+      if (!hasAcceptedLegalTerms) {
+        stepErrors.legalConsent = "You must agree to the Terms & Conditions and Privacy Policy to continue.";
       }
     }
 
@@ -1318,6 +1325,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   <Input
                     type="text"
                     label="Full Name"
+                    isRequired
                     labelPlacement="outside"
                     placeholder="John Doe"
                     variant="bordered"
@@ -1333,6 +1341,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     <Input
                       type="email"
                       label="Email Address"
+                      isRequired
                       labelPlacement="outside"
                       placeholder="name@company.com"
                       variant="bordered"
@@ -1359,6 +1368,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       <PhoneField
                         name="phone"
                         label="Primary Phone Number"
+                        isRequired
                         value={formData.phone}
                         countryCodeValue={formData.phoneCountryCode}
                         nationalValue={formData.phoneNational}
@@ -1393,6 +1403,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       <Input
                         type={showPassword ? "text" : "password"}
                         label="Password"
+                        isRequired
                         labelPlacement="outside"
                         placeholder="Create a secure password"
                         variant="bordered"
@@ -1411,6 +1422,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
                         label="Confirm Password"
+                        isRequired
                         labelPlacement="outside"
                         placeholder="Repeat your password"
                         variant="bordered"
@@ -1453,6 +1465,50 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       </p>
                     </div>
                   </div>
+
+                  <div className="md:col-span-2">
+                    <div className={`rounded-xl border p-4 transition-colors ${errors.legalConsent ? "border-danger-500 bg-danger-500/5" : "border-default-200 bg-content1/40"}`}>
+                      <Checkbox
+                        isSelected={hasAcceptedLegalTerms}
+                        isRequired
+                        onValueChange={(isSelected) => {
+                          setHasAcceptedLegalTerms(isSelected);
+                          if (isSelected && errors.legalConsent) {
+                            setErrors((prev) => ({ ...prev, legalConsent: "" }));
+                          }
+                        }}
+                        isInvalid={Boolean(errors.legalConsent)}
+                        aria-describedby={errors.legalConsent ? "associate-legal-consent-error" : undefined}
+                        classNames={{ label: "text-sm leading-6 text-foreground/80" }}
+                      >
+                        I agree to the{" "}
+                        <Link
+                          href="/terms-and-conditions"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(event) => event.stopPropagation()}
+                          className="font-semibold text-obaol-600 underline underline-offset-2"
+                        >
+                          Terms &amp; Conditions
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          href="/privacy-policy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(event) => event.stopPropagation()}
+                          className="font-semibold text-obaol-600 underline underline-offset-2"
+                        >
+                          Privacy Policy
+                        </Link><span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+                      </Checkbox>
+                      {errors.legalConsent ? (
+                        <p id="associate-legal-consent-error" className="mt-2 pl-7 text-xs font-semibold text-danger-500">
+                          {errors.legalConsent}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
                 </motion.div>
               )}
 
@@ -1491,6 +1547,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         <div className="space-y-4">
                           <AutocompleteAny
                             label="Find Company"
+                            isRequired
                             labelPlacement="outside"
                             variant="bordered"
                             items={companyOptions}
@@ -1533,6 +1590,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <Input
                             label="Legal Company Name"
+                            isRequired
                             labelPlacement="outside"
                             variant="bordered"
                             placeholder="Enter legal name"
@@ -1545,6 +1603,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           />
                           <Input
                             label="Corporate Email"
+                            isRequired
                             labelPlacement="outside"
                             variant="bordered"
                             placeholder="corp@company.com"
@@ -1560,6 +1619,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                               <PhoneField
                                 name="companyPhone"
                                 label="Company Contact"
+                                isRequired
                                 value={formData.companyPhone}
                                 countryCodeValue={formData.companyPhoneCountryCode}
                                 nationalValue={formData.companyPhoneNational}
@@ -1587,6 +1647,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
                           <Textarea
                             label="Registered Office Address"
+                            isRequired
                             labelPlacement="outside"
                             variant="bordered"
                             placeholder="Complete physical address"
@@ -1602,6 +1663,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             <>
                               <AutocompleteAny
                                 label="Country"
+                                isRequired
                                 labelPlacement="outside"
                                 variant="bordered"
                                 defaultItems={countries}
@@ -1617,6 +1679,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                               </AutocompleteAny>
                               <Input
                                 label="Tax/Legal ID"
+                                isRequired
                                 labelPlacement="outside"
                                 variant="bordered"
                                 value={formData.companyLegalNumber}
@@ -1624,6 +1687,19 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 isInvalid={!!errors.companyLegalNumber}
                                 errorMessage={errors.companyLegalNumber}
                                 classNames={{ inputWrapper: "h-12 border-default-200" }}
+                              />
+                              <Textarea
+                                label="Legal Information"
+                                isRequired
+                                labelPlacement="outside"
+                                variant="bordered"
+                                placeholder="Provide registration or legal entity details"
+                                value={formData.companyLegalInformation}
+                                onValueChange={(v) => setField("companyLegalInformation", v)}
+                                isInvalid={!!errors.companyLegalInformation}
+                                errorMessage={errors.companyLegalInformation}
+                                className="md:col-span-2"
+                                classNames={{ inputWrapper: "border-default-200" }}
                               />
                             </>
                           ) : (
@@ -1673,6 +1749,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                               </div>
                               <AutocompleteAny
                                 label="State"
+                                isRequired
                                 labelPlacement="outside"
                                 variant="bordered"
                                 placeholder="Search state..."
@@ -1690,6 +1767,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                               </AutocompleteAny>
                               <AutocompleteAny
                                 label="District"
+                                isRequired
                                 labelPlacement="outside"
                                 variant="bordered"
                                 placeholder="Search district..."
@@ -1708,6 +1786,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                               </AutocompleteAny>
                               <AutocompleteAny
                                 label="Division"
+                                isRequired={filteredCompanyDivisions.length > 0}
                                 labelPlacement="outside"
                                 variant="bordered"
                                 placeholder="Search division..."
@@ -1760,6 +1839,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       </div>
                       <Textarea
                         label="Home Address"
+                        isRequired
                         labelPlacement="outside"
                         variant="bordered"
                         placeholder="Residential or office address"
@@ -1774,6 +1854,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         <>
                           <Select
                             label="State"
+                            isRequired
                             labelPlacement="outside"
                             variant="bordered"
                             placeholder="Select"
@@ -1792,6 +1873,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           </Select>
                           <Select
                             label="District"
+                            isRequired
                             labelPlacement="outside"
                             variant="bordered"
                             placeholder="Select"
@@ -1811,6 +1893,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           </Select>
                           <Select
                             label="Division"
+                            isRequired
                             labelPlacement="outside"
                             variant="bordered"
                             placeholder="Select"
@@ -1833,6 +1916,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         <>
                           <Select
                             label="Country"
+                            isRequired
                             labelPlacement="outside"
                             variant="bordered"
                             placeholder="Select"

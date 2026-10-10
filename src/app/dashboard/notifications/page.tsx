@@ -25,8 +25,6 @@ import { apiRoutes, notificationRoutes } from "@/core/api/apiRoutes";
 import AuthContext from "@/context/AuthContext";
 import { extractList } from "@/core/data/queryUtils";
 import { showToastMessage } from "@/utils/utils";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 dayjs.extend(relativeTime);
 
@@ -495,7 +493,6 @@ const NotificationsPage = () => {
             </div>
         </div>
       </motion.div>
-      <ToastContainer position="bottom-right" theme="dark" />
     </div>
   );
 };

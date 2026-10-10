@@ -81,6 +81,37 @@ test("Associate signup CTAs are prominent and preserve the entered email", async
   await expect(page).toHaveURL(/\/auth\/register\?prefill=new(?:\.|%2E)associate(?:%40|@)example(?:\.|%2E)com/);
 });
 
+test("existing-account redirects show only the trusted sign-in notice", async ({ page }) => {
+  await page.goto("/auth/associate?reason=account-exists&prefill=existing%40example.com", { waitUntil: "domcontentloaded" });
+
+  await expect(page.getByText("Your account already exists. Please sign in.")).toBeVisible();
+  await expect(page.getByLabel("Email Address")).toHaveValue("existing@example.com");
+  await page.getByLabel("Dismiss account notice").click();
+  await expect(page.getByText("Your account already exists. Please sign in.")).toHaveCount(0);
+
+  await page.goto("/auth/operator?reason=untrusted-message&prefill=operator%40example.com", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText("Your account already exists. Please sign in.")).toHaveCount(0);
+  await expect(page.getByLabel("Email Address")).toHaveValue("operator@example.com");
+});
+
+test("signup redirects an existing email to its matching role with context", async ({ page }) => {
+  await page.route(/\/auth\/onboarding\/start$/, async (route) => {
+    await route.fulfill({
+      status: 409,
+      contentType: "application/json",
+      body: JSON.stringify({ success: false, message: "Account already exists — sign in.", role: "Operator" }),
+    });
+  });
+  await page.goto("/auth/register", { waitUntil: "domcontentloaded" });
+
+  await page.getByLabel("Email Address").fill("existing.operator@example.com");
+  await page.getByRole("button", { name: "Send OTP" }).click();
+
+  await expect(page).toHaveURL(/\/auth\/operator\?.*reason=account-exists.*prefill=existing(?:\.|%2E)operator(?:%40|@)example(?:\.|%2E)com/);
+  await expect(page.getByText("Your account already exists. Please sign in.")).toBeVisible();
+  await expect(page.getByLabel("Email Address")).toHaveValue("existing.operator@example.com");
+});
+
 test("shared auth routes render without a full-screen loading replacement", async ({ page }) => {
   for (const route of ["/auth/operator", "/auth/register?intent=BUY", "/auth/operator/register", "/auth/admin", "/auth/forgot-password?role=Associate"]) {
     await page.goto(route, { waitUntil: "domcontentloaded" });

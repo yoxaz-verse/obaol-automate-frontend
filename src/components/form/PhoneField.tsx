@@ -11,6 +11,7 @@ type PhoneFieldProps = {
   countryCodeValue?: any;
   nationalValue?: any;
   disabled?: boolean;
+  isRequired?: boolean;
   className?: string;
   isInvalid?: boolean;
   errorMessage?: string;
@@ -24,6 +25,7 @@ export default function PhoneField({
   countryCodeValue,
   nationalValue,
   disabled,
+  isRequired,
   className,
   isInvalid,
   errorMessage,
@@ -49,7 +51,12 @@ export default function PhoneField({
 
   return (
     <div className={`w-full ${className || ""}`}>
-      {label && <div className="mb-1.5 px-2 text-[10px] font-black uppercase tracking-widest text-default-400">{label}</div>}
+      {label && (
+        <div className="mb-1.5 px-2 text-[10px] font-black uppercase tracking-widest text-default-400">
+          {label}
+          {isRequired ? <span aria-hidden="true" className="ml-0.5 text-danger">*</span> : null}
+        </div>
+      )}
       <div className="flex w-full flex-row gap-0 items-center overflow-hidden">
         <AutocompleteAny
           aria-label={`${label} country code`}
@@ -100,6 +107,7 @@ export default function PhoneField({
             type="tel"
             variant="flat"
             isDisabled={disabled}
+            isRequired={isRequired}
             isInvalid={isInvalid}
             placeholder="Phone number"
             autoComplete="tel-national"

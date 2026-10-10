@@ -6,6 +6,7 @@ import { SoundProvider } from "@/context/SoundContext";
 import SoundInitializer from "@/components/ui/SoundInitializer";
 import { PwaInstallProvider } from "@/context/PwaInstallContext";
 import PwaRuntime from "@/components/pwa/PwaRuntime";
+import { ToastContainer } from "react-toastify";
 
 export function PublicProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +21,7 @@ export function PublicProviders({ children }: { children: React.ReactNode }) {
             <SoundInitializer />
             <PwaRuntime />
             {children}
+            <ToastContainer position="top-right" newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover limit={4} />
           </SoundProvider>
         </PwaInstallProvider>
       </NextThemesProvider>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { IconType } from "react-icons";
-import { FiArrowRight, FiBriefcase, FiGlobe } from "react-icons/fi";
+import { FiAlertCircle, FiArrowRight, FiBriefcase, FiGlobe } from "react-icons/fi";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 const roleOptions = [
@@ -53,7 +53,8 @@ function IconBadge({ icon: Icon }: { icon: IconType }) {
   );
 }
 
-export default function AuthEntry({ signInView = false, prefill }: { signInView?: boolean; prefill?: string }) {
+export default function AuthEntry({ signInView = false, prefill, reason }: { signInView?: boolean; prefill?: string; reason?: string }) {
+  const showExistingAccountNotice = signInView && reason === "account-exists";
   return (
     <main className="relative min-h-[100dvh] bg-[#f6f3ed] px-4 py-4 text-obaol-950 dark:bg-[#060504] dark:text-white sm:px-6 sm:py-6">
       <AmbientBackground />
@@ -92,6 +93,13 @@ export default function AuthEntry({ signInView = false, prefill }: { signInView?
             </p>
           </div>
 
+          {showExistingAccountNotice && (
+            <div role="status" className="mb-4 flex items-center gap-3 rounded-xl border border-warning-500/25 bg-warning-500/10 p-4 text-sm font-bold text-warning-700 dark:text-warning-400">
+              <FiAlertCircle aria-hidden="true" className="shrink-0 text-lg" />
+              <p>Your account already exists. Please choose the correct role and sign in.</p>
+            </div>
+          )}
+
           <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
             {roleOptions.map((option) => (
               <article
@@ -121,7 +129,13 @@ export default function AuthEntry({ signInView = false, prefill }: { signInView?
                     Register as {option.role}
                   </Link>
                   <Link
-                    href={prefill ? `${option.signInHref}?prefill=${encodeURIComponent(prefill)}` : option.signInHref}
+                    href={(() => {
+                      const params = new URLSearchParams();
+                      if (prefill) params.set("prefill", prefill);
+                      if (showExistingAccountNotice) params.set("reason", "account-exists");
+                      const query = params.toString();
+                      return query ? `${option.signInHref}?${query}` : option.signInHref;
+                    })()}
                     className="inline-flex min-h-11 min-w-0 items-center justify-center rounded-lg border border-obaol-950/20 px-2 py-2 text-center text-xs font-bold text-obaol-950 transition hover:border-obaol-500/50 hover:bg-obaol-500/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 dark:border-white/25 dark:text-white dark:hover:bg-white/10 sm:text-sm"
                   >
                     Sign in as {option.role}

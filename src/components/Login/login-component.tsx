@@ -8,7 +8,7 @@ import {
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { FiAlertCircle, FiArrowLeft, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiMail, FiUsers } from "react-icons/fi";
+import { FiAlertCircle, FiArrowLeft, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiMail, FiUsers, FiX } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
@@ -27,6 +27,7 @@ interface ILoginProps {
   initialQuery?: {
     prefill?: string;
     intent?: string;
+    reason?: string;
   };
 }
 
@@ -125,6 +126,25 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
   }, [initialQuery.prefill]);
 
   useEffect(() => {
+    if (authMode !== "login" || initialQuery.reason !== "account-exists") return;
+    setErrorMessage("Your account already exists. Please sign in.");
+  }, [authMode, initialQuery.reason]);
+
+  const redirectExistingAccountToSignIn = useCallback((existingRole?: string, existingEmail?: string) => {
+    const normalizedRole = String(existingRole || role).toLowerCase();
+    const target = normalizedRole === "operator"
+      ? "/auth/operator"
+      : normalizedRole === "associate"
+        ? "/auth/associate"
+        : "/auth?view=signin";
+    const params = new URLSearchParams({ reason: "account-exists" });
+    const prefill = String(existingEmail || email).trim();
+    if (prefill) params.set("prefill", prefill);
+    const separator = target.includes("?") ? "&" : "?";
+    router.push(`${target}${separator}${params.toString()}`);
+  }, [email, role, router]);
+
+  useEffect(() => {
     if (typeof window === "undefined" || authMode !== "login") return;
     const checkPasskeySupport = async () => {
       if (!("PublicKeyCredential" in window) || !navigator.credentials) {
@@ -162,10 +182,11 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
   }, [passwordCooldown]);
 
   const handleGoogleCredential = useCallback(async (resp: { credential?: string }) => {
+    const roleValue = roleLower === "team" ? "Operator" : roleLower === "operator" ? "Operator" : "Associate";
     try {
       if (!resp?.credential) throw new Error("Google credential not returned.");
       setIsLoading(true);
-      const roleValue = roleLower === "team" ? "Operator" : roleLower === "operator" ? "Operator" : "Associate";
+      setErrorMessage("");
       if (authMode === "signup") {
         setSignupMethod("google");
         setErrorMessage("");
@@ -194,6 +215,10 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
         setIsRedirecting(true);
       }
     } catch (error: any) {
+      if (authMode === "signup" && Number(error?.response?.status || 0) === 409) {
+        redirectExistingAccountToSignIn(error?.response?.data?.role || roleValue);
+        return;
+      }
       const rawMessage = error?.response?.data?.message || error?.message || "Google login failed.";
       const status = error?.response?.status ? ` (HTTP ${error.response.status})` : "";
       const isNetwork = error?.message === "Network Error" || error?.code === "ERR_NETWORK";
@@ -210,7 +235,7 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
     } finally {
       setIsLoading(false);
     }
-  }, [authMode, initialQuery.intent, loginWithGoogle, rememberMe, refreshUser, roleLower, router]);
+  }, [authMode, initialQuery.intent, loginWithGoogle, rememberMe, redirectExistingAccountToSignIn, refreshUser, roleLower, router]);
 
   useEffect(() => {
     if (authMode === "signup") {
@@ -602,14 +627,7 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
         } catch (startError: any) {
           const status = Number(startError?.response?.status || 0);
           if (status === 409) {
-            const existingRole = String(startError?.response?.data?.role || "").toLowerCase();
-            const target = existingRole === "operator"
-              ? "/auth/operator"
-              : existingRole === "associate"
-                ? "/auth/associate"
-                : "/auth?view=signin";
-            const separator = target.includes("?") ? "&" : "?";
-            router.push(`${target}${separator}prefill=${encodeURIComponent(email.trim())}`);
+            redirectExistingAccountToSignIn(startError?.response?.data?.role, email);
             return;
           } else {
             throw startError;
@@ -939,7 +957,9 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
                    {errorMessage.toLowerCase().includes("already exist") ? "Notice" : "Error"}
                 </span>
                 <p className="text-sm font-bold leading-relaxed">
-                  {errorMessage.replace(/sign in\.?$/i, "")}
+                  {initialQuery.reason === "account-exists" && authMode === "login"
+                    ? errorMessage
+                    : errorMessage.replace(/sign in\.?$/i, "")}
                 </p>
                 {isPasswordCooldownActive && (
                   <p className="text-xs font-semibold leading-relaxed opacity-80">
@@ -947,9 +967,19 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
                   </p>
                 )}
               </div>
+              {initialQuery.reason === "account-exists" && authMode === "login" && (
+                <button
+                  type="button"
+                  aria-label="Dismiss account notice"
+                  className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition hover:bg-warning-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning-500"
+                  onClick={() => setErrorMessage("")}
+                >
+                  <FiX aria-hidden="true" />
+                </button>
+              )}
             </div>
 
-            {errorMessage.toLowerCase().includes("already exist") && (
+            {errorMessage.toLowerCase().includes("already exist") && !(initialQuery.reason === "account-exists" && authMode === "login") && (
               <div className="flex items-center gap-3 pl-11">
                 <Button
                   size="sm"

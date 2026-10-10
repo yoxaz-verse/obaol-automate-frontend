@@ -25,8 +25,58 @@ test("associate onboarding scopes a single blue focus treatment to its fields", 
   assert.equal(styles.includes('[data-slot="input-wrapper"]'), true);
 });
 
+test("associate onboarding requires legal consent before leaving the profile step", () => {
+  const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  for (const token of [
+    "hasAcceptedLegalTerms",
+    "if (!hasAcceptedLegalTerms)",
+    "stepErrors.legalConsent",
+    "I agree to the",
+    'href="/terms-and-conditions"',
+    'href="/privacy-policy"',
+    'target="_blank"',
+  ]) assert.equal(form.includes(token), true, `missing ${token}`);
+
+  assert.equal(form.includes("formData.hasAcceptedLegalTerms"), false);
+  assert.equal(form.includes("payload.hasAcceptedLegalTerms"), false);
+});
+
+test("associate onboarding marks validated fields as required and leaves optional fields optional", () => {
+  const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  const phoneField = read("../src/components/form/PhoneField.tsx");
+
+  for (const requiredField of [
+    'label="Full Name"\n                    isRequired',
+    'label="Email Address"\n                      isRequired',
+    'label="Find Company"\n                            isRequired',
+    'label="Legal Company Name"\n                            isRequired',
+    'label="Corporate Email"\n                            isRequired',
+    'label="Registered Office Address"\n                            isRequired',
+    'label="Tax/Legal ID"\n                                isRequired',
+    'label="Legal Information"\n                                isRequired',
+    'label="Home Address"\n                        isRequired',
+    'isRequired={filteredCompanyDivisions.length > 0}',
+    'What your company provides',
+    'What your company is seeking',
+  ]) assert.equal(form.includes(requiredField), true, `missing required marker for ${requiredField}`);
+
+  assert.equal(phoneField.includes("isRequired?: boolean"), true);
+  assert.equal(phoneField.includes("isRequired={isRequired}"), true);
+  for (const optionalLabel of [
+    "Secondary Phone (Optional)",
+    "GSTIN Number (Optional)",
+    "IEC Code (Optional)",
+    "CIN (Optional)",
+    "Pincode (Optional)",
+    "Verification Notes",
+  ]) {
+    assert.equal(form.includes(`label=\"${optionalLabel}\"\n                            isRequired`), false, `${optionalLabel} must remain optional`);
+  }
+});
+
 test("associate onboarding captures independent provided and sought capability profiles", () => {
   const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  const descriptions = read("../src/utils/companyFunctionDescriptions.ts");
   for (const token of [
     "What your company provides",
     "What your company is seeking",
@@ -38,9 +88,15 @@ test("associate onboarding captures independent provided and sought capability p
   assert.equal(form.includes("Type of Entity"), false);
   assert.equal(form.includes('buying: <IoCart />'), true);
   assert.equal(form.includes('selling: <IoStorefront />'), true);
-  assert.equal(form.includes('className="grid grid-cols-1 gap-2 sm:grid-cols-2"'), true);
+  assert.equal(form.includes('className="grid grid-cols-2 gap-2"'), true);
   assert.equal(form.includes("Build a clearer company profile"), true);
   assert.equal(form.includes('href="/dashboard/company"'), true);
+  assert.equal(form.includes("getCompanyFunctionPerspectiveDescription(fn?.slug, kind, fn?.description)"), true);
+  for (const slug of ["buying", "selling", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk", "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics"]) {
+    assert.equal(descriptions.includes(`${slug}:`) || descriptions.includes(`${JSON.stringify(slug)}:`), true, `missing perspective copy for ${slug}`);
+  }
+  assert.equal(descriptions.includes('provided: "We purchase commodities or products from suppliers."'), true);
+  assert.equal(descriptions.includes('sought: "We want to find products and suppliers to buy from."'), true);
 });
 
 test("associate onboarding removes duplicate participation modes", () => {
@@ -51,7 +107,7 @@ test("associate onboarding removes duplicate participation modes", () => {
   assert.equal(form.includes('"exporting-from-india"'), true);
   assert.equal(form.includes("IoArrowDownCircleOutline"), true);
   assert.equal(form.includes("IoArrowUpCircleOutline"), true);
-  assert.equal(form.includes('grid grid-cols-1 gap-2 sm:grid-cols-2'), true);
+  assert.equal(form.includes('grid grid-cols-2 gap-2'), true);
   assert.equal(form.includes("Make priority"), false);
   assert.equal(form.includes("Remove priority"), false);
   assert.equal(form.includes("Your first three selections become priorities automatically"), true);

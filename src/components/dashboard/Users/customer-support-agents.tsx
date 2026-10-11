@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch } from "@nextui-org/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FiEdit2, FiHeadphones, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiExternalLink, FiHeadphones, FiPlus, FiTrash2 } from "react-icons/fi";
 import { deleteData, getData, patchData, postData } from "@/core/api/apiHandler";
 import { customerSupportAgentRoutes } from "@/core/api/apiRoutes";
 import { formatLastSeen, isOnline } from "@/utils/presence";
@@ -90,7 +90,20 @@ export default function CustomerSupportAgents() {
     <section className="space-y-5 py-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div><h2 className="text-xl font-black">Customer Support Agents</h2><p className="text-sm text-default-500">Create staff accounts and control access to the live support workspace.</p></div>
-        <Button color="warning" startContent={<FiPlus />} className="font-bold" onPress={() => { setEditing(null); setForm(emptyForm); setFormErrors({}); setRequestError(""); setOpen(true); }}>Add support agent</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            as="a"
+            href="/auth/customer-support"
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="bordered"
+            startContent={<FiExternalLink />}
+            className="font-bold"
+          >
+            Support agent login
+          </Button>
+          <Button color="warning" startContent={<FiPlus />} className="font-bold" onPress={() => { setEditing(null); setForm(emptyForm); setFormErrors({}); setRequestError(""); setOpen(true); }}>Add support agent</Button>
+        </div>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         {agents.map((agent) => {

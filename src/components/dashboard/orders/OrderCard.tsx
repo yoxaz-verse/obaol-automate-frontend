@@ -41,14 +41,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
         data.enquiry?.variantName ||
         data.variantName ||
         "Variant";
-    const classificationProduct =
-        data?.enquiry?.variantRateId?.productVariant?.product ||
-        data?.enquiry?.productVariant?.product ||
-        data?.enquiry?.productId ||
-        data?.productVariant?.product ||
-        data?.product ||
-        null;
-    const classificationBadges = getClassificationBadges(classificationProduct);
+    const classificationRate = data?.enquiry?.variantRateId || data?.variantRateId || null;
+    const classificationBadges = getClassificationBadges(classificationRate);
 
     // Entity Logic
     const buyerName = data.enquiry?.buyerAssociateId?.name || data.enquiry?.buyerName || data.externalBuyer?.name || "Buyer";

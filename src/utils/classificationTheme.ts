@@ -227,16 +227,16 @@ export const getClassificationOptions = (): { key: ClassificationKey; label: str
     icon: THEME_MAP[item.key].icon,
   }));
 
-export const getClassificationBadges = (product: any): { key: ClassificationKey; label: string }[] => {
+export const getClassificationBadges = (rateRow: any): { key: ClassificationKey; label: string }[] => {
   const badges: { key: ClassificationKey; label: string }[] = [];
-  // New writes enforce exactly one farming method, but older products may
+  // New rate writes enforce exactly one farming method, but migrated records may
   // still have overlapping flags. Prefer the most specific method so an IPM
   // listing is not presented as Natural as well.
-  if (product?.isIpmQuality) badges.push({ key: "ipm", label: "IPM" });
-  else if (product?.isOrganic) badges.push({ key: "organic", label: "Organic" });
-  else if (product?.isNatural) badges.push({ key: "natural", label: "Natural" });
+  if (rateRow?.isIpmQuality) badges.push({ key: "ipm", label: "IPM" });
+  else if (rateRow?.isOrganic) badges.push({ key: "organic", label: "Organic" });
+  else if (rateRow?.isNatural) badges.push({ key: "natural", label: "Natural" });
   else badges.push({ key: "conventional", label: "Conventional" });
-  if (product?.isGiTagged) badges.push({ key: "gi-tag", label: "GI Tag" });
+  if (rateRow?.isGiTagged) badges.push({ key: "gi-tag", label: "GI Tag" });
   return badges;
 };
 

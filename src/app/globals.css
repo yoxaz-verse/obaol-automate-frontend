@@ -654,6 +654,10 @@ a {
   .catalog-card-compact-actions {
     display: flex;
   }
+
+  .catalog-card-status-row {
+    min-height: 2.75rem;
+  }
 }
 
 @media (max-width: 639px) {

@@ -9,7 +9,6 @@ import UserDeleteModal from "@/components/CurdTable/delete";
 import EditModal from "@/components/CurdTable/edit-model";
 import AuthContext from "@/context/AuthContext";
 import { FiPackage, FiLayers, FiInfo, FiCheckCircle, FiGrid, FiDatabase } from "react-icons/fi";
-import { classificationBadgeClass, classificationIcon, getClassificationBadges } from "@/utils/classificationTheme";
 
 interface IProductList {
   product: any;
@@ -29,16 +28,14 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
     setIsDeleted(true);
   };
 
-  const classificationBadges = getClassificationBadges(product);
-
   return product ? (
     <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* ─── Product Tactical Header ─────────────────────────────────────────── */}
-      <div className={`flex flex-col md:flex-row justify-between items-start gap-8 border-b pb-12 mb-12 relative rounded-3xl p-6 ${themeShellClass || "bg-transparent"} ${themeBorderClass || "border-foreground/5"}`}>
+      <div className={`flex flex-col md:flex-row justify-between items-start gap-4 border-b pb-5 mb-5 relative rounded-2xl p-3 sm:p-4 ${themeShellClass || "bg-transparent"} ${themeBorderClass || "border-foreground/5"}`}>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/20 shadow-lg shadow-obaol-500/5">
-              <FiPackage size={24} />
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/20">
+              <FiPackage size={20} />
             </div>
             <div className="flex flex-col text-left">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-obaol-500 opacity-80">Product Record</span>
@@ -49,23 +46,12 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
             </div>
           </div>
 
-          <h2 className="text-5xl font-black tracking-tighter text-foreground mb-4 leading-[0.9] uppercase hyphens-auto text-left">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mb-3 leading-tight uppercase break-words text-left">
             {product.name}
           </h2>
-          <div className="mb-4 flex flex-wrap gap-2">
-            {classificationBadges.map((badge) => (
-              <span
-                key={badge.key}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}
-              >
-                {React.createElement(classificationIcon(badge.key), { size: 11 })}
-                {badge.label}
-              </span>
-            ))}
-          </div>
 
           {product.description && (
-            <div className="relative pl-6 border-l-2 border-obaol-500/20 py-1 text-left">
+            <div className="relative pl-3 border-l-2 border-obaol-500/20 py-0.5 text-left">
               <p className="text-default-500 text-sm max-w-3xl leading-relaxed font-medium">
                 {product.description}
               </p>
@@ -114,7 +100,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
             : (productVariantData?.data || []);
 
           return (
-            <div className="space-y-10">
+            <div className="space-y-5">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4 text-left">
                   <div className="w-1 h-8 bg-obaol-500 rounded-full" />
@@ -143,13 +129,13 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                   {/* @ts-ignore */}
                   <Accordion
                     key={product._id}
-                    className="px-0 gap-6"
+                    className="px-0 gap-3"
                     variant="splitted"
                     itemClasses={{
-                      base: "group/item py-0 mb-6 bg-foreground/[0.02] dark:bg-foreground/[0.01] border border-foreground/[0.06] rounded-[2.5rem] transition-all duration-300 hover:bg-foreground/[0.04] !shadow-none data-[open=true]:bg-foreground/[0.03] data-[open=true]:border-obaol-500/20 data-[open=true]:rounded-[3rem] data-[open=true]:shadow-2xl data-[open=true]:shadow-obaol-500/5",
-                      title: "font-black text-lg tracking-wide text-foreground/90 py-5",
-                      trigger: "px-8 py-6 rounded-[2.5rem]",
-                      content: "px-8 pb-8 pt-2",
+                      base: "group/item py-0 mb-3 bg-foreground/[0.02] dark:bg-foreground/[0.01] border border-foreground/[0.06] rounded-2xl transition-all duration-300 hover:bg-foreground/[0.04] !shadow-none data-[open=true]:bg-foreground/[0.03] data-[open=true]:border-obaol-500/20",
+                      title: "font-black text-base tracking-wide text-foreground/90 py-2",
+                      trigger: "px-3 sm:px-4 py-3 rounded-2xl min-h-12",
+                      content: "px-3 sm:px-4 pb-4 pt-1",
                       indicator: "text-default-400 group-data-[open=true]/item:rotate-180",
                     }}
                   >
@@ -166,7 +152,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                           title={
                             <div className="flex items-center justify-between w-full">
                               <div className="flex flex-col">
-                                <span className="text-2xl font-black uppercase tracking-tight">{variant.name}</span>
+                                <span className="text-base sm:text-lg font-black uppercase tracking-tight break-words">{variant.name}</span>
                                 {isAdded && <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest mt-0.5">Active in my catalog</span>}
                               </div>
                               {isAdded && (
@@ -182,16 +168,16 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                           }
                         >
                           {variant.description && (
-                            <div className="mb-10 ml-0 relative text-left">
-                              <p className="text-default-500 text-base leading-relaxed max-w-3xl font-medium">
+                            <div className="mb-5 ml-0 relative text-left">
+                              <p className="text-default-500 text-sm leading-relaxed max-w-3xl font-medium">
                                 {variant.description}
                               </p>
                             </div>
                           )}
 
-                          <div className="space-y-12">
+                          <div className="space-y-6">
                             {user?.role === "Associate" ? (
-                              <div className="space-y-12">
+                              <div className="space-y-6">
                                 {isAdded && (
                                   <div className="animate-in fade-in slide-in-from-top-2 duration-500">
                                     <div className="flex items-center gap-4 mb-8 text-left">
@@ -201,7 +187,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                                         <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-obaol-500">Proprietary Assets</h4>
                                       </div>
                                     </div>
-                                    <div className="bg-content1/40 border border-divider/50 rounded-[2.5rem] p-8 backdrop-blur-md shadow-inner text-left">
+                                    <div className="bg-content1/40 border border-divider/50 rounded-2xl p-2 sm:p-4 backdrop-blur-md shadow-inner text-left overflow-hidden">
                                       <VariantRate
                                         productVariant={variant}
                                         rate="catalogItem"
@@ -222,7 +208,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                                       <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Global Liquidity</h4>
                                     </div>
                                   </div>
-                                  <div className="bg-foreground/[0.01] border border-divider/20 rounded-[2.5rem] p-8 backdrop-blur-sm text-left">
+                                  <div className="bg-foreground/[0.01] border border-divider/20 rounded-2xl p-2 sm:p-4 backdrop-blur-sm text-left overflow-hidden">
                                     <VariantRate
                                       productVariant={variant}
                                       rate="variantRate"
@@ -240,7 +226,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                                     <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-obaol-500">Unified Rate Ledger</h4>
                                   </div>
                                 </div>
-                                <div className="bg-foreground/[0.01] border border-divider/50 rounded-[3rem] p-8 shadow-inner overflow-hidden text-left">
+                                <div className="bg-foreground/[0.01] border border-divider/50 rounded-2xl p-2 sm:p-4 shadow-inner overflow-hidden text-left">
                                   <VariantRate
                                     productVariant={variant}
                                     rate="variantRate"

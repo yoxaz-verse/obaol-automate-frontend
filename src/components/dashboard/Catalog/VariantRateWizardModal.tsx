@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Autocomplete,
@@ -19,15 +19,13 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowRight, FiCheckCircle, FiGlobe, FiMapPin, FiPackage, FiTruck, FiZap } from "react-icons/fi";
 import { getData, postData } from "@/core/api/apiHandler";
-import { patchData } from "@/core/api/apiHandler";
 import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
-import { associateCompanyRoutes, associateRoutes, productRoutes, productVariantRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
+import { associateCompanyRoutes, associateRoutes, productVariantRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
 import {
   applyProductionMethod,
-  resolveProductionMethod,
   type ProductionMethod,
 } from "@/utils/productClassification";
 
@@ -40,6 +38,10 @@ type WizardProps = {
   productVariantValue?: any | null;
   user?: any;
 };
+
+type CommodityField = "category" | "subCategory" | "product" | "productVariant";
+type CommodityLoadErrors = Partial<Record<CommodityField, string>>;
+type CommodityRetries = Record<CommodityField, number>;
 
 const stepMeta = [
   { key: 1, title: "Product & Grade", subtitle: "Define the cargo you’re listing", icon: FiPackage },
@@ -90,7 +92,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [isLive, setIsLive] = useState(true);
-  const [submitPhase, setSubmitPhase] = useState<"idle" | "saving-product" | "launching-rate">("idle");
+  const [submitPhase, setSubmitPhase] = useState<"idle" | "launching-rate">("idle");
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successData, setSuccessData] = useState<any>(null);
@@ -114,6 +116,19 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoadingVariants, setIsLoadingVariants] = useState(false);
+  const [commodityLoadErrors, setCommodityLoadErrors] = useState<CommodityLoadErrors>({});
+  const [commodityRetries, setCommodityRetries] = useState<CommodityRetries>({
+    category: 0,
+    subCategory: 0,
+    product: 0,
+    productVariant: 0,
+  });
+  const requestVersions = useRef<CommodityRetries>({
+    category: 0,
+    subCategory: 0,
+    product: 0,
+    productVariant: 0,
+  });
   const [associates, setAssociates] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null);
@@ -129,17 +144,38 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    let isMounted = true;
+    setErrors({});
+    setSuccessData(null);
+    setStep(1);
+    setFormData({ locationSource: "WAREHOUSE" });
+    setCommodityInput({});
+    setCategories([]);
+    setSubCategories([]);
+    setProducts([]);
+    setVariants([]);
+    setCommodityLoadErrors({});
+    setResolvedProductId(null);
+    setIsLive(true);
+    setSubmitPhase("idle");
+  }, [isOpen]);
+
+  useEffect(() => {
+    const requestVersion = ++requestVersions.current.category;
+    if (!isOpen) return;
+    setCommodityLoadErrors((prev) => ({ ...prev, category: undefined }));
     setIsLoadingCategories(true);
-    fetchDependentOptions("category")
+    fetchDependentOptions("category", undefined, undefined, { throwOnError: true })
       .then((data) => {
-        if (isMounted) setCategories(data);
+        if (requestVersions.current.category === requestVersion) setCategories(data);
       })
       .catch(() => {
-        if (isMounted) setCategories([]);
+        if (requestVersions.current.category === requestVersion) {
+          setCategories([]);
+          setCommodityLoadErrors((prev) => ({ ...prev, category: "Could not load categories." }));
+        }
       })
       .finally(() => {
-        if (isMounted) setIsLoadingCategories(false);
+        if (requestVersions.current.category === requestVersion) setIsLoadingCategories(false);
       });
     if (!isAssociateUser) {
       fetchDependentOptions("associate").then(setAssociates);
@@ -147,10 +183,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     if (fixedVariantId) {
       setFormData((prev) => ({ ...prev, productVariant: fixedVariantId }));
     }
-    return () => {
-      isMounted = false;
-    };
-  }, [isOpen, fixedVariantId, isAssociateUser]);
+  }, [isOpen, fixedVariantId, isAssociateUser, commodityRetries.category]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -169,85 +202,88 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   }, [isOpen, fixedVariantId]);
 
   useEffect(() => {
+    const requestVersion = ++requestVersions.current.subCategory;
     if (!formData.category) {
       setSubCategories([]);
+      setCommodityLoadErrors((prev) => ({ ...prev, subCategory: undefined }));
       setIsLoadingSubCategories(false);
       return;
     }
-    let isMounted = true;
     setSubCategories([]);
+    setCommodityLoadErrors((prev) => ({ ...prev, subCategory: undefined }));
     setIsLoadingSubCategories(true);
-    fetchDependentOptions("subCategory", "category", formData.category)
+    fetchDependentOptions("subCategory", "category", formData.category, { throwOnError: true })
       .then((data) => {
-        if (isMounted) setSubCategories(data);
+        if (requestVersions.current.subCategory === requestVersion) setSubCategories(data);
       })
       .catch(() => {
-        if (isMounted) setSubCategories([]);
+        if (requestVersions.current.subCategory === requestVersion) {
+          setSubCategories([]);
+          setCommodityLoadErrors((prev) => ({ ...prev, subCategory: "Could not load subcategories." }));
+        }
       })
       .finally(() => {
-        if (isMounted) setIsLoadingSubCategories(false);
+        if (requestVersions.current.subCategory === requestVersion) setIsLoadingSubCategories(false);
       });
-    return () => {
-      isMounted = false;
-    };
-  }, [formData.category]);
+  }, [formData.category, commodityRetries.subCategory]);
 
   useEffect(() => {
+    const requestVersion = ++requestVersions.current.product;
     if (!formData.subCategory) {
       setProducts([]);
+      setCommodityLoadErrors((prev) => ({ ...prev, product: undefined }));
       setIsLoadingProducts(false);
       return;
     }
-    let isMounted = true;
     setProducts([]);
+    setCommodityLoadErrors((prev) => ({ ...prev, product: undefined }));
     setIsLoadingProducts(true);
-    fetchDependentOptions("product", "subCategory", formData.subCategory)
+    fetchDependentOptions("product", "subCategory", formData.subCategory, { throwOnError: true })
       .then((data) => {
-        if (isMounted) setProducts(data);
+        if (requestVersions.current.product === requestVersion) setProducts(data);
       })
       .catch(() => {
-        if (isMounted) setProducts([]);
+        if (requestVersions.current.product === requestVersion) {
+          setProducts([]);
+          setCommodityLoadErrors((prev) => ({ ...prev, product: "Could not load products." }));
+        }
       })
       .finally(() => {
-        if (isMounted) setIsLoadingProducts(false);
+        if (requestVersions.current.product === requestVersion) setIsLoadingProducts(false);
       });
-    return () => {
-      isMounted = false;
-    };
-  }, [formData.subCategory]);
+  }, [formData.subCategory, commodityRetries.product]);
 
   useEffect(() => {
+    const requestVersion = ++requestVersions.current.productVariant;
     if (!formData.product) {
       setVariants([]);
+      setCommodityLoadErrors((prev) => ({ ...prev, productVariant: undefined }));
       setIsLoadingVariants(false);
       return;
     }
 
-    let isMounted = true;
     setVariants([]);
+    setCommodityLoadErrors((prev) => ({ ...prev, productVariant: undefined }));
     setIsLoadingVariants(true);
 
-    fetchDependentOptions("productVariant", "product", formData.product)
+    fetchDependentOptions("productVariant", "product", formData.product, { throwOnError: true })
       .then((data) => {
-        if (isMounted) {
+        if (requestVersions.current.productVariant === requestVersion) {
           setVariants(data);
         }
       })
       .catch(() => {
-        if (isMounted) {
+        if (requestVersions.current.productVariant === requestVersion) {
           setVariants([]);
+          setCommodityLoadErrors((prev) => ({ ...prev, productVariant: "Could not load product variants." }));
         }
       })
       .finally(() => {
-        if (isMounted) {
+        if (requestVersions.current.productVariant === requestVersion) {
           setIsLoadingVariants(false);
         }
       });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [formData.product]);
+  }, [formData.product, commodityRetries.productVariant]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -255,109 +291,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     const nextProduct = String(formData.product || "").trim();
     setResolvedProductId(nextProduct || null);
   }, [isOpen, fixedVariantId, formData.product]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    if (!resolvedProductId) {
-      setFormData((prev) => ({
-        ...prev,
-        productionMethod: "conventional",
-        isConventional: true,
-        isNatural: false,
-        isOrganic: false,
-        isIpmQuality: false,
-        isOrganicCertified: false,
-        organicCertificationBody: "",
-        organicCertificationBodyOther: "",
-        organicCertificateNumber: "",
-        organicCertificateValidFrom: "",
-        organicCertificateValidTo: "",
-        organicCertifiedQuantity: "",
-        organicCertifiedQuantityUnit: "KG",
-        organicCertificationScope: "NPOP",
-        organicCertificateDocumentUrl: "",
-        isGiTagged: false,
-        giName: "",
-        giCertificateNumber: "",
-        giDocumentUrl: "",
-      }));
-      return;
-    }
-    const loadClassification = async () => {
-      try {
-        const res = await getData(`${productRoutes.getAll}/${resolvedProductId}`);
-        const row = res?.data?.data || {};
-        const resolvedMethod = resolveProductionMethod(row);
-        setFormData((prev) => ({
-          ...prev,
-          productionMethod: resolvedMethod.method,
-          isConventional: Boolean(row?.isConventional) || (!row?.isNatural && !row?.isOrganic && !row?.isIpmQuality),
-          isNatural: Boolean(row?.isNatural),
-          isOrganic: Boolean(row?.isOrganic),
-          isIpmQuality: Boolean(row?.isIpmQuality),
-          isOrganicCertified: Boolean(row?.isOrganicCertified),
-          organicCertificationBody: String(row?.organicCertificationBody || ""),
-          organicCertificationBodyOther: String(row?.organicCertificationBodyOther || ""),
-          organicCertificateNumber: String(row?.organicCertificateNumber || ""),
-          organicCertificateValidFrom: row?.organicCertificateValidFrom
-            ? String(new Date(row.organicCertificateValidFrom).toISOString().slice(0, 10))
-            : "",
-          organicCertificateValidTo: row?.organicCertificateValidTo
-            ? String(new Date(row.organicCertificateValidTo).toISOString().slice(0, 10))
-            : "",
-          organicCertifiedQuantity: row?.organicCertifiedQuantity ?? "",
-          organicCertifiedQuantityUnit: String(row?.organicCertifiedQuantityUnit || "KG"),
-          organicCertificationScope: String(row?.organicCertificationScope || "NPOP"),
-          organicCertificateDocumentUrl: String(row?.organicCertificateDocumentUrl || ""),
-          isGiTagged: Boolean(row?.isGiTagged),
-          giName: String(row?.giName || ""),
-          giCertificateNumber: String(row?.giCertificateNumber || ""),
-          giDocumentUrl: String(row?.giDocumentUrl || ""),
-        }));
-        setErrors((prev) => ({
-          ...prev,
-          organicCertificationBody: "",
-          organicCertificationBodyOther: "",
-          organicCertificateNumber: "",
-          organicCertificateValidFrom: "",
-          organicCertificateValidTo: "",
-          organicCertifiedQuantity: "",
-          organicCertifiedQuantityUnit: "KG",
-          organicCertificationScope: "NPOP",
-          organicCertificateDocumentUrl: "",
-          giName: "",
-          giCertificateNumber: "",
-          classification: resolvedMethod.hasConflict
-            ? "Multiple farming methods are saved for this product. Select one method to resolve the conflict."
-            : "",
-        }));
-      } catch {
-        setFormData((prev) => ({
-          ...prev,
-          productionMethod: "conventional",
-          isConventional: true,
-          isNatural: false,
-          isOrganic: false,
-          isIpmQuality: false,
-          isOrganicCertified: false,
-          organicCertificationBody: "",
-          organicCertificationBodyOther: "",
-          organicCertificateNumber: "",
-          organicCertificateValidFrom: "",
-          organicCertificateValidTo: "",
-          organicCertifiedQuantity: "",
-          organicCertifiedQuantityUnit: "KG",
-          organicCertificationScope: "NPOP",
-          organicCertificateDocumentUrl: "",
-          isGiTagged: false,
-          giName: "",
-          giCertificateNumber: "",
-          giDocumentUrl: "",
-        }));
-      }
-    };
-    loadClassification();
-  }, [isOpen, resolvedProductId]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -446,22 +379,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     }
   }, [isOpen, formData.locationSource, warehouses.length]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    setErrors({});
-    setSuccessData(null);
-    setStep(1);
-    setFormData({ locationSource: "WAREHOUSE" });
-    setCommodityInput({});
-    setCategories([]);
-    setSubCategories([]);
-    setProducts([]);
-    setVariants([]);
-    setResolvedProductId(null);
-    setIsLive(true);
-    setSubmitPhase("idle");
-  }, [isOpen]);
-
   const stepLabel = useMemo(() => stepMeta.find((item) => item.key === step), [step]);
 
   const getOptionKey = (item: any) =>
@@ -471,17 +388,23 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const setValue = (key: string, value: any) => {
     if (key === "category") {
+      requestVersions.current.subCategory += 1;
+      requestVersions.current.product += 1;
+      requestVersions.current.productVariant += 1;
       setCommodityInput((prev) => ({ ...prev, subCategory: "", product: "", productVariant: "" }));
       setSubCategories([]);
       setProducts([]);
       setVariants([]);
     }
     if (key === "subCategory") {
+      requestVersions.current.product += 1;
+      requestVersions.current.productVariant += 1;
       setCommodityInput((prev) => ({ ...prev, product: "", productVariant: "" }));
       setProducts([]);
       setVariants([]);
     }
     if (key === "product") {
+      requestVersions.current.productVariant += 1;
       setCommodityInput((prev) => ({ ...prev, productVariant: "" }));
       setVariants([]);
     }
@@ -637,16 +560,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      if (!resolvedProductId) {
-        throw new Error("Select a product to define classification.");
-      }
       const classificationPayload = normalizeClassificationPayload();
-      if (process.env.NODE_ENV !== "production") {
-        console.info("[LaunchListing] phase=saving-product", { productId: resolvedProductId, classificationPayload });
-      }
-      setSubmitPhase("saving-product");
-      await patchData(`${productRoutes.getAll}/${resolvedProductId}`, classificationPayload, {});
-
       const payload: any = {
         rate: Number(formData.rate || 0),
         unit: formData.unit,
@@ -660,6 +574,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           ? String(formData.officeAddress || "").trim()
           : undefined,
         isLive,
+        ...classificationPayload,
         ...(additionalVariable || {}),
       };
       if (process.env.NODE_ENV !== "production") {
@@ -705,9 +620,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       }
       showToastMessage({
         type: "error",
-        message: submitPhase === "saving-product"
-          ? message || "Failed while saving product certification."
-          : message || "Failed while launching listing.",
+        message: message || "Failed while launching listing.",
         position: "top-right",
       });
       setSubmitPhase("idle");
@@ -759,7 +672,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const autocompleteField = {
     base: "w-full",
     label: "font-bold text-xs text-default-600 mb-1",
-    listboxWrapper: "max-h-64 text-foreground",
+    listboxWrapper: "max-h-[min(16rem,40vh)] overflow-y-auto overscroll-contain text-foreground",
     selectorButton: "text-default-500",
     clearButton: "text-default-500",
   };
@@ -779,7 +692,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     isDisabled = false,
     placeholder,
   }: {
-    field: "category" | "subCategory" | "product" | "productVariant";
+    field: CommodityField;
     label: string;
     options: any[];
     isLoading: boolean;
@@ -794,6 +707,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     const selectedLabel = selectedKey
       ? normalizedOptions.find((item) => item.key === selectedKey)?.label || ""
       : "";
+    const loadError = commodityLoadErrors[field];
+    const retryLoad = () => {
+      setCommodityRetries((prev) => ({ ...prev, [field]: prev[field] + 1 }));
+    };
 
     return (
       <Autocomplete
@@ -814,6 +731,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           setCommodityInput((prev) => ({ ...prev, [field]: selected?.label || "" }));
           setValue(field, value);
         }}
+        onOpenChange={(open) => {
+          if (!open && selectedKey) {
+            setCommodityInput((prev) => ({ ...prev, [field]: selectedLabel }));
+          }
+        }}
         allowsCustomValue={false}
         defaultFilter={(textValue, inputValue) =>
           String(textValue || "").toLocaleLowerCase().includes(String(inputValue || "").trim().toLocaleLowerCase())
@@ -824,7 +746,16 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         isInvalid={Boolean(errors[field])}
         errorMessage={errors[field]}
         listboxProps={{
-          emptyContent: isLoading ? `Loading ${label.toLowerCase()}...` : `No ${label.toLowerCase()} found.`,
+          emptyContent: isLoading ? (
+            `Loading ${label.toLowerCase()}...`
+          ) : loadError ? (
+            <div className="flex flex-col items-center gap-2 py-2 text-center">
+              <span className="text-xs text-danger-500">{loadError}</span>
+              <Button size="sm" variant="flat" color="warning" onPress={retryLoad}>Retry</Button>
+            </div>
+          ) : (
+            `No ${label.toLowerCase()} found.`
+          ),
           itemClasses,
         }}
         inputProps={{
@@ -834,8 +765,12 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           },
         }}
         popoverProps={{
+          placement: "bottom-start",
+          shouldFlip: true,
+          offset: 6,
           classNames: {
-            content: "bg-background border border-default-200 shadow-2xl rounded-2xl p-2",
+            base: "z-[100] max-w-[calc(100vw-2rem)]",
+            content: "w-[var(--trigger-width)] max-w-[calc(100vw-2rem)] bg-background border border-default-200 shadow-2xl rounded-2xl p-2",
           },
         }}
       >
@@ -1488,7 +1423,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
               className="w-full sm:w-auto font-bold"
             >
               {isSubmitting
-                ? (submitPhase === "saving-product" ? "Saving product certification..." : "Launching listing...")
+                ? "Launching listing..."
                 : step < 4
                   ? "Continue"
                   : "Launch Listing"}

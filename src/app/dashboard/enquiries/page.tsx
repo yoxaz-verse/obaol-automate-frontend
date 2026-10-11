@@ -234,7 +234,7 @@ export default function EnquiryPage() {
               isSelling,
               specification: item.specifications || "No Spec",
               product: item.productId?.name || "N/A",
-              classificationProduct: item.productId || item.productVariant?.product || item.variantRateId?.productVariant?.product || null,
+              classificationProduct: item.variantRateId || null,
               counterparty: counterpartyStr,
               counterpartyLabel: counterpartyLabelStr,
               associateCompany: companyStr,

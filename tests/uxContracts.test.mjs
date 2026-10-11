@@ -313,8 +313,26 @@ test("variant rate wizard uses searchable, dependent commodity controls", () => 
   assert.equal(wizard.includes('field: "productVariant"'), true);
   assert.equal(wizard.includes("allowsCustomValue={false}"), true);
   assert.equal(wizard.includes("setCommodityInput({})"), true);
-  assert.equal(wizard.includes("let isMounted = true"), true);
+  assert.equal(wizard.includes("requestVersions.current"), true);
+  assert.equal(wizard.includes("Could not load products."), true);
+  assert.equal(wizard.includes(">Retry</Button>"), true);
+  assert.equal(wizard.includes("max-h-[min(16rem,40vh)]"), true);
   assert.equal(wizard.includes("Select subcategory first"), true);
+});
+
+test("variant rate classification is written atomically and hierarchy remains neutral", () => {
+  const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
+  const catalog = read("../src/app/dashboard/catalog/page.tsx");
+  const categoryGrid = read("../src/components/dashboard/Catalog/category-grid.tsx");
+  const productList = read("../src/components/dashboard/Catalog/product-list.tsx");
+
+  assert.equal(wizard.includes("...classificationPayload"), true);
+  assert.equal(wizard.includes("patchData"), false);
+  assert.equal(wizard.includes("saving-product"), false);
+  assert.equal(catalog.includes("Catalog Classification Tabs"), false);
+  assert.equal(categoryGrid.includes("isConventional"), false);
+  assert.equal(productList.includes("classificationBadges"), false);
+  assert.equal(categoryGrid.includes("grid-cols-1 sm:grid-cols-2"), true);
 });
 
 test("catalog grid cards respond to their container without compressing controls", () => {
@@ -323,8 +341,12 @@ test("catalog grid cards respond to their container without compressing controls
 
   assert.equal(variantRate.includes('viewMode === "grid"\n                          ? "catalog-responsive-grid"'), true);
   assert.equal(variantRate.includes("catalog-card-compact-actions"), true);
+  assert.equal(variantRate.includes("catalog-card-status-row"), true);
+  assert.equal(variantRate.includes("Listing status"), true);
+  assert.equal(variantRate.includes('layout="inline"'), true);
   assert.equal(variantRate.includes("More options for"), true);
   assert.equal(globals.includes("repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr))"), true);
   assert.equal(globals.includes("@container catalog-card (max-width: 15rem)"), true);
   assert.equal(globals.includes(".catalog-card-standard-actions"), true);
+  assert.equal(globals.includes(".catalog-card-status-row"), true);
 });

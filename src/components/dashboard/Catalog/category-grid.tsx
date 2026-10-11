@@ -8,11 +8,6 @@ interface Item {
     _id: string;
     name: string;
     description?: string;
-    isConventional?: boolean;
-    isNatural?: boolean;
-    isOrganic?: boolean;
-    isIpmQuality?: boolean;
-    isGiTagged?: boolean;
 }
 
 interface CategoryGridProps {
@@ -38,16 +33,6 @@ export default function CategoryGrid({
     cardThemeClass,
     cardBorderClass,
 }: CategoryGridProps) {
-    const getClassification = (item: Item) => {
-        const labels: string[] = [];
-        const hasPrimary = Boolean(item.isNatural || item.isOrganic || item.isIpmQuality);
-        if (!hasPrimary && type === "product") labels.push("Conventional");
-        if (item.isNatural) labels.push("Natural");
-        if (item.isOrganic) labels.push("Organic");
-        if (item.isIpmQuality) labels.push("IPM");
-        if (item.isGiTagged) labels.push("GI Tag");
-        return labels;
-    };
     const Icon = type === "product" ? FiPackage : FiFolder;
     const colorClass = "text-obaol-600";
     const bgClass = "bg-obaol-500/10";
@@ -91,7 +76,7 @@ export default function CategoryGrid({
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
-                className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 w-full"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 w-full"
             >
                 {items.map((item) => {
                     const count = counts ? counts[item._id] || 0 : 0;
@@ -104,7 +89,7 @@ export default function CategoryGrid({
                             className={`group border backdrop-blur-md hover:border-obaol-500/30 transition-all shadow-lg hover:shadow-obaol-500/5 rounded-xl sm:rounded-2xl cursor-pointer relative ${cardThemeClass || "bg-gradient-to-br from-white/[0.03] to-transparent"} ${cardBorderClass || "border-foreground/10"}`}
                             onClick={() => onSelect(item)}
                         >
-                            <div className="p-3 sm:p-4 lg:p-5 flex flex-col items-start gap-2.5 sm:gap-3">
+                            <div className="p-3 sm:p-4 flex flex-col items-start gap-2.5">
                                 <div className="flex justify-between items-start w-full">
                                     <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl ${bgClass} ${colorClass} group-hover:scale-105 transition-transform`}>
                                         <Icon size={22} />
@@ -141,22 +126,10 @@ export default function CategoryGrid({
                                         <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground line-clamp-2 leading-tight">{item.name}</h3>
                                         <FiArrowRight className="shrink-0 mt-0.5 text-default-300 group-hover:text-obaol-500 group-hover:translate-x-1 transition-all" size={16} />
                                     </div>
-                                    {type === "product" && (
-                                        <div className="mb-1.5 flex flex-wrap gap-1">
-                                            {getClassification(item).map((label) => (
-                                                <span
-                                                    key={`${item._id}-${label}`}
-                                                    className="px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider border border-obaol-500/20 bg-obaol-500/10 text-obaol-500"
-                                                >
-                                                    {label}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
                                     {item.description ? (
-                                        <p className="text-[11px] sm:text-xs text-default-400 line-clamp-2 min-h-[2.1rem] leading-snug italic">{item.description}</p>
+                                        <p className="text-[11px] sm:text-xs text-default-400 line-clamp-2 leading-snug italic">{item.description}</p>
                                     ) : (
-                                        <div className="min-h-[2.1rem]" />
+                                        null
                                     )}
                                 </div>
 

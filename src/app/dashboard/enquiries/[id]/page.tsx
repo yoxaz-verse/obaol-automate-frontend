@@ -300,12 +300,8 @@ export default function EnquiryDetailsPage() {
     });
     const productNameLabel = getProductDisplayName(enquiry);
     const variantNameLabel = getVariantDisplayName(enquiry, liveRate);
-    const classificationProductObj =
-        enquiry?.productId ||
-        enquiry?.productVariant?.product ||
-        enquiry?.variantRateId?.productVariant?.product ||
-        null;
-    const classificationBadges = getClassificationBadges(classificationProductObj);
+    const classificationRateObj = liveRate || enquiry?.variantRateId || null;
+    const classificationBadges = getClassificationBadges(classificationRateObj);
     const classificationTheme = resolveActiveClassificationTheme(classificationBadges.map((item) => item.key));
     const { data: incotermResponse } = useQuery({
         queryKey: ["incoterms"],

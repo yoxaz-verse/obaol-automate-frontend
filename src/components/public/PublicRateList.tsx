@@ -79,15 +79,15 @@ const extractRowsAndMeta = (payload: any): { rows: any[]; meta: Meta } => {
   return { rows: [], meta: {} };
 };
 
-const getClassifications = (product: any): string[] => {
-  if (!product) return ["Conventional"];
+const getClassifications = (rateRow: any): string[] => {
+  if (!rateRow) return ["Conventional"];
   const labels: string[] = [];
-  const hasPrimary = Boolean(product.isNatural || product.isOrganic || product.isIpmQuality);
+  const hasPrimary = Boolean(rateRow.isNatural || rateRow.isOrganic || rateRow.isIpmQuality);
   if (!hasPrimary) labels.push("Conventional");
-  if (product.isNatural) labels.push("Natural");
-  if (product.isOrganic) labels.push("Organic");
-  if (product.isIpmQuality) labels.push("IPM");
-  if (product.isGiTagged) labels.push("GI Tag");
+  if (rateRow.isNatural) labels.push("Natural");
+  if (rateRow.isOrganic) labels.push("Organic");
+  if (rateRow.isIpmQuality) labels.push("IPM");
+  if (rateRow.isGiTagged) labels.push("GI Tag");
   return labels;
 };
 
@@ -130,7 +130,7 @@ const normalizeRate = (row: any, rate: PublicRateKind): NormalizedRate => {
     quantity: quantity !== undefined && quantity !== null && quantity !== "" ? `${quantity} ${unit}` : "On request",
     price,
     currency: row?.currency || baseRate?.currency || "USD",
-    classifications: getClassifications(product),
+    classifications: getClassifications(baseRate),
     isLive: Boolean(row?.isLive ?? baseRate?.isLive),
     updatedAt: row?.lastLiveDate || row?.updatedAt || baseRate?.updatedAt || row?.createdAt || "",
   };

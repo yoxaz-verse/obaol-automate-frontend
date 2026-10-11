@@ -1,6 +1,7 @@
 // src/utils/fetchDependentOptions.ts
 import { queryClient } from "@/app/provider";
 import { getData } from "@/core/api/apiHandler";
+import { buildDependentOptionParams, extractDependentOptionRows } from "@/utils/dependentOptionContract";
 import {
   adminRoutes,
   associateCompanyRoutes,
@@ -38,50 +39,41 @@ const getOptions = async (
   fieldKey: string,
   parentKey?: string,
   parentValue?: string | string[],
-  context?: { mode?: "associateForm" | "default"; scope?: string }
+  context?: {
+    mode?: "associateForm" | "default";
+    scope?: string;
+    throwOnError?: boolean;
+  }
 ): Promise<{ key: string; value: string }[]> => {
   const lowerKey = fieldKey.toLowerCase();
-
-  const extractArray = (raw: any): any[] => {
-    if (Array.isArray(raw)) return raw;
-    if (raw?.data && Array.isArray(raw.data)) return raw.data;
-    if (raw?.data?.data && Array.isArray(raw.data.data)) return raw.data.data;
-    if (raw?.data?.data?.data && Array.isArray(raw.data.data.data)) return raw.data.data.data;
-    return [];
-  };
+  const extractArray = extractDependentOptionRows;
 
   const query = async () => {
-    let params: any = { limit: "2000" };
-    if (parentKey && parentValue) {
-      // If parentValue is an array (multi-select), usually the backend generic CRUD 
-      // handles it if passed as multiple params or special format. 
-      // For now, let's pass it as is, and let the API handler/axios deal with it.
-      params[parentKey] = parentValue;
-    }
+    let params: any = buildDependentOptionParams(parentKey, parentValue);
 
     if (lowerKey.includes("admin")) {
       const res = await getData(adminRoutes.getAll, params);
-      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+      return extractDependentOptionRows(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "operator") {
       const res = await getData(operatorRoutes.getAll, params);
-      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+      return extractDependentOptionRows(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "category") {
       const res = await getData(categoryRoutes.getAll, params);
-      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+      return extractDependentOptionRows(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "product") {
       const res = await getData(productRoutes.getAll, params);
-      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+      return extractDependentOptionRows(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "productvariant") {
       const res = await getData(productVariantRoutes.getAll, params);
-      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+      return extractDependentOptionRows(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "subcategory") {
@@ -91,7 +83,7 @@ const getOptions = async (
         ...(parentVal && { category: parentVal }) 
       };
       const res = await getData(subCategoryRoutes.getAll, subParams);
-      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+      return extractDependentOptionRows(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "inventorymanager") {
@@ -230,7 +222,13 @@ const getOptions = async (
 
   // cache key includes dependencies
   // JSON.stringify handled arrays in cache key
-  const queryKey = [fieldKey, parentKey, JSON.stringify(parentValue), context?.mode || "default"];
+  const queryKey = [
+    fieldKey,
+    parentKey,
+    JSON.stringify(parentValue),
+    context?.mode || "default",
+    context?.scope || "",
+  ];
 
   // fetch or return cached data
   return queryClient.fetchQuery({
@@ -240,6 +238,7 @@ const getOptions = async (
         return await query();
       } catch (err) {
         console.error(`Failed to fetch options for ${fieldKey}:`, err);
+        if (context?.throwOnError) throw err;
         return [];
       }
     },

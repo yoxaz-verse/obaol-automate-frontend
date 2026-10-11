@@ -931,14 +931,8 @@ export default function OrderDetailsPage() {
             return bTime - aTime;
         })[0];
     };
-    const classificationProductObj =
-        (order as any)?.enquiry?.variantRateId?.productVariant?.product ||
-        (order as any)?.enquiry?.productVariant?.product ||
-        (order as any)?.enquiry?.productId ||
-        (order as any)?.productVariant?.product ||
-        (order as any)?.product ||
-        null;
-    const classificationBadges = getClassificationBadges(classificationProductObj);
+    const classificationRateObj = (order as any)?.enquiry?.variantRateId || (order as any)?.variantRateId || null;
+    const classificationBadges = getClassificationBadges(classificationRateObj);
     const classificationTheme = resolveActiveClassificationTheme(classificationBadges.map((item) => item.key));
     const transactionBuyerId = String((linkedEnquiry as any)?.buyerAssociateId?._id || (linkedEnquiry as any)?.buyerAssociateId || "");
     const transactionSellerId = String((linkedEnquiry as any)?.sellerAssociateId?._id || (linkedEnquiry as any)?.sellerAssociateId || "");

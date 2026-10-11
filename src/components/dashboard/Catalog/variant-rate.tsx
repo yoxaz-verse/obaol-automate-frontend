@@ -147,17 +147,17 @@ const toDisplayText = (value: any, fallback = "N/A"): string => {
   }
   return fallback;
 };
-const extractClassifications = (product: any): string[] => {
-  if (!product) return ["Conventional"];
+const extractClassifications = (rateRow: any): string[] => {
+  if (!rateRow) return ["Conventional"];
   const labels: string[] = [];
   const hasPrimary = Boolean(
-    product.isNatural || product.isOrganic || product.isIpmQuality,
+    rateRow.isNatural || rateRow.isOrganic || rateRow.isIpmQuality,
   );
   if (!hasPrimary) labels.push("Conventional");
-  if (product.isNatural) labels.push("Natural");
-  if (product.isOrganic) labels.push("Organic");
-  if (product.isIpmQuality) labels.push("IPM");
-  if (product.isGiTagged) labels.push("GI Tag");
+  if (rateRow.isNatural) labels.push("Natural");
+  if (rateRow.isOrganic) labels.push("Organic");
+  if (rateRow.isIpmQuality) labels.push("IPM");
+  if (rateRow.isGiTagged) labels.push("GI Tag");
   return labels;
 };
 const classificationTone = (label: string): string => {
@@ -859,9 +859,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const productVariantLabel = String(
                 item.productVariant?.name || item.productVariantName || "Standard",
               );
-              const productClassifications = extractClassifications(
-                item.productVariant?.product,
-              );
+              const productClassifications = extractClassifications(item);
               const classificationText = productClassifications.join(" ");
 
               return {
@@ -1048,7 +1046,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 productVariantId: item.productVariantId?._id,
                 classification: (
                   <div className="flex flex-wrap gap-1">
-                    {extractClassifications(item.productVariantId?.product).map(
+                    {extractClassifications(item.baseRateId).map(
                       (label) => (
                         <span
                           key={`${item._id}-${label}`}
@@ -1060,9 +1058,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     )}
                   </div>
                 ),
-                classificationText: extractClassifications(
-                  item.productVariantId?.product,
-                ).join(" "),
+                classificationText: extractClassifications(item.baseRateId).join(" "),
                 rawBasePrice: supplierRate + adminCommission,
                 rawCommission: mediatorMarkup,
                 customTitle: item.customTitle,
@@ -1120,9 +1116,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 productVariantId: item.variantRate?.productVariant?._id,
                 classification: (
                   <div className="flex flex-wrap gap-1">
-                    {extractClassifications(
-                      item.variantRate?.productVariant?.product,
-                    ).map((label) => (
+                    {extractClassifications(item.variantRate).map((label) => (
                       <span
                         key={`${item._id}-${label}`}
                         className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${classificationTone(label)}`}
@@ -1132,9 +1126,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     ))}
                   </div>
                 ),
-                classificationText: extractClassifications(
-                  item.variantRate?.productVariant?.product,
-                ).join(" "),
+                classificationText: extractClassifications(item.variantRate).join(" "),
                 rawBasePrice: basePriceForUser,
                 rawCommission: associateMargin,
                 variantRateId: item.variantRate?._id,
@@ -2259,23 +2251,44 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               className="p-2 sm:p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-white dark:from-amber-950/20 dark:via-content2/50 dark:to-content1/40 border-t border-amber-100/80 dark:border-white/10 flex flex-col gap-2 mt-auto"
                               onClick={(event) => event.stopPropagation()}
                             >
+                              {canManageRow(item) && (
+                                <div className="catalog-card-status-row flex w-full items-center justify-between gap-3 rounded-xl border border-amber-200/70 bg-white/70 px-3 py-2 dark:border-white/10 dark:bg-content1/50">
+                                  <span className="text-[9px] font-black uppercase tracking-widest text-default-500">
+                                    Listing status
+                                  </span>
+                                  <LiveToggle
+                                    variantRate={item}
+                                    refetchData={refetchData}
+                                    apiEndpoint={
+                                      rate === "catalogItem"
+                                        ? apiRoutes.catalog.update
+                                        : apiRoutesByRole[rate]
+                                    }
+                                    layout="inline"
+                                  />
+                                </div>
+                              )}
                               <div className="catalog-card-standard-actions flex justify-between items-center w-full gap-2 overflow-x-auto pb-1 hide-scrollbar">
                                 {actionButtons}
-                                {secondaryActions}
+                                {canAddInventory && (
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    color="warning"
+                                    className="h-8 shrink-0 font-bold"
+                                    onPress={() => {
+                                      setSelectedInventoryRate(item);
+                                      setInventoryQty("");
+                                      setInventoryModalOpen(true);
+                                    }}
+                                  >
+                                    + Inventory
+                                  </Button>
+                                )}
                               </div>
                               <div className="catalog-card-compact-actions hidden items-center justify-between gap-2">
                                 <div className="min-w-0">
-                                  {canManageRow(item) ? (
-                                    <LiveToggle
-                                      variantRate={item}
-                                      refetchData={refetchData}
-                                      apiEndpoint={
-                                        rate === "catalogItem"
-                                          ? apiRoutes.catalog.update
-                                          : apiRoutesByRole[rate]
-                                      }
-                                    />
-                                  ) : !canCreateMarketplaceEnquiry ? (
+                                  {!canManageRow(item) && !canCreateMarketplaceEnquiry ? (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-default-400">
                                       {isLive ? "Live" : "Offline"}
                                     </span>
@@ -2627,12 +2640,14 @@ interface LiveToggleProps {
   variantRate: any;
   refetchData?: () => void;
   apiEndpoint?: string;
+  layout?: "stacked" | "inline";
 }
 
 const LiveToggle: React.FC<LiveToggleProps> = ({
   variantRate,
   refetchData,
   apiEndpoint: propApiEndpoint,
+  layout = "stacked",
 }) => {
   const [isSelected, setIsSelected] = useState<boolean>(variantRate.isLive);
   const [loading, setLoading] = useState<boolean>(false);
@@ -2672,7 +2687,22 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-1 min-w-[60px]">
+    <div
+      className={
+        layout === "inline"
+          ? "flex min-w-0 items-center gap-3"
+          : "flex min-w-[60px] flex-col items-center gap-1"
+      }
+    >
+      {layout === "inline" && (
+        <p
+          className={`m-0 text-[10px] font-black uppercase tracking-widest ${
+            isSelected ? "text-success-600" : "text-danger-500"
+          }`}
+        >
+          {isSelected ? "Live" : "Not live"}
+        </p>
+      )}
       {/* @ts-ignore */}
       <Switch
         {...({
@@ -2681,15 +2711,20 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
           isSelected: isSelected,
           isDisabled: loading,
           onChange: handleToggle,
+          "aria-label": isSelected
+            ? "Mark listing as not live"
+            : "Mark listing as live",
         } as any)}
       />
-      <p
-        className={`text-[10px] font-bold m-0 p-0 leading-none ${
-          isSelected ? "text-success-500" : "text-danger-500"
-        }`}
-      >
-        {isSelected ? "LIVE" : "NOT LIVE"}
-      </p>
+      {layout === "stacked" && (
+        <p
+          className={`text-[10px] font-bold m-0 p-0 leading-none ${
+            isSelected ? "text-success-500" : "text-danger-500"
+          }`}
+        >
+          {isSelected ? "LIVE" : "NOT LIVE"}
+        </p>
+      )}
     </div>
   );
 };

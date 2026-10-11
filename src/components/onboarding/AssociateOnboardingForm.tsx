@@ -80,6 +80,12 @@ const MAIN_CATEGORY_SLUGS = new Set([
   "freight-forwarding",
   "inland-logistics",
 ]);
+const radioThemeClasses = {
+  base: "group relative m-0 flex cursor-pointer items-center justify-start rounded-xl border border-default-200/80 bg-white/90 dark:bg-content1/90 px-4 py-3 transition-all hover:border-obaol-500/50 hover:bg-obaol-500/[0.03] data-[selected=true]:border-obaol-500 data-[selected=true]:bg-obaol-500/10 dark:data-[selected=true]:bg-obaol-500/15 data-[selected=true]:shadow-sm data-[selected=true]:shadow-obaol-500/10",
+  wrapper: "border-default-300 dark:border-default-500 group-hover:border-obaol-500/60 group-data-[selected=true]:!border-obaol-500 group-data-[selected=true]:!ring-2 group-data-[selected=true]:!ring-obaol-500/25",
+  control: "!bg-obaol-500 group-data-[selected=true]:!bg-obaol-500",
+  label: "text-sm font-semibold tracking-normal text-foreground/90 group-data-[selected=true]:text-foreground group-data-[selected=true]:font-bold",
+};
 const normalizeOnboardingError = (error: any) => {
   const status = Number(error?.response?.status || 0);
   const raw = String(error?.response?.data?.message || error?.message || "Registration failed.");
@@ -1558,16 +1564,27 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
                   {isCompanyFlow ? (
                     <>
-                      <div className="p-5 rounded-[2rem] bg-obaol-500/5 border border-obaol-500/20">
+                      <div className="p-4.5 rounded-2xl bg-obaol-500/[0.04] border border-obaol-500/20">
                         <RadioGroup
-                          label={<span className="text-xs font-black uppercase tracking-widest text-obaol-600">Record Status</span>}
+                          label={<span className="text-[10px] font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">Record Status</span>}
                           orientation="horizontal"
+                          color="warning"
                           value={formData.companyMode}
                           onValueChange={(v) => setField("companyMode", v)}
-                          classNames={{ wrapper: "gap-6" }}
+                          classNames={{ wrapper: "gap-3 flex-wrap" }}
                         >
-                          <Radio value="existing" classNames={{ label: "text-sm font-bold" }}>Existing on OBAOL</Radio>
-                          <Radio value="new" classNames={{ label: "text-sm font-bold" }}>Register New Company</Radio>
+                          <Radio value="existing" color="warning" classNames={radioThemeClasses}>
+                            <div className="flex items-center gap-2">
+                              <IoBusiness className="text-base text-obaol-600 dark:text-obaol-400" />
+                              <span>Existing on OBAOL</span>
+                            </div>
+                          </Radio>
+                          <Radio value="new" color="warning" classNames={radioThemeClasses}>
+                            <div className="flex items-center gap-2">
+                              <LuStore className="text-base text-obaol-600 dark:text-obaol-400" />
+                              <span>Register New Company</span>
+                            </div>
+                          </Radio>
                         </RadioGroup>
                       </div>
 
@@ -1660,16 +1677,27 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             </div>
                             {errors.companyPhone ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.companyPhone}</p> : null}
                           </div>
-                          <div className="p-4 rounded-2xl bg-content2/30 border border-default-200 md:col-span-2">
+                          <div className="p-4.5 rounded-2xl bg-obaol-500/[0.04] border border-obaol-500/20 md:col-span-2">
                             <RadioGroup
-                              label={<span className="text-[10px] font-black uppercase tracking-widest text-default-400">Jurisdiction</span>}
+                              label={<span className="text-[10px] font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">Jurisdiction</span>}
                               orientation="horizontal"
+                              color="warning"
                               value={formData.companyGeoType}
                               onValueChange={(v) => setCompanyGeoType(v as "INDIAN" | "INTERNATIONAL")}
-                              classNames={{ wrapper: "gap-8" }}
+                              classNames={{ wrapper: "gap-3 flex-wrap" }}
                             >
-                              <Radio value="INDIAN" classNames={{ label: "text-sm font-bold" }}>Indian Hub</Radio>
-                              <Radio value="INTERNATIONAL" classNames={{ label: "text-sm font-bold" }}>International</Radio>
+                              <Radio value="INDIAN" color="warning" classNames={radioThemeClasses}>
+                                <div className="flex items-center gap-2">
+                                  <IoLocation className="text-base text-obaol-600 dark:text-obaol-400" />
+                                  <span>Indian Hub</span>
+                                </div>
+                              </Radio>
+                              <Radio value="INTERNATIONAL" color="warning" classNames={radioThemeClasses}>
+                                <div className="flex items-center gap-2">
+                                  <IoEarth className="text-base text-obaol-600 dark:text-obaol-400" />
+                                  <span>International</span>
+                                </div>
+                              </Radio>
                             </RadioGroup>
                           </div>
 
@@ -1853,16 +1881,27 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     </>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-2xl bg-content2/30 border border-default-200 md:col-span-2">
+                      <div className="p-4.5 rounded-2xl bg-obaol-500/[0.04] border border-obaol-500/20 md:col-span-2">
                         <RadioGroup
-                          label={<span className="text-[10px] font-black uppercase tracking-widest text-default-400">Geography</span>}
+                          label={<span className="text-[10px] font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">Geography</span>}
                           orientation="horizontal"
+                          color="warning"
                           value={formData.associateGeoType}
                           onValueChange={(v) => setAssociateGeoType(v as "INDIAN" | "INTERNATIONAL")}
-                          classNames={{ wrapper: "gap-8" }}
+                          classNames={{ wrapper: "gap-3 flex-wrap" }}
                         >
-                          <Radio value="INDIAN" classNames={{ label: "text-sm font-bold" }}>India</Radio>
-                          <Radio value="INTERNATIONAL" classNames={{ label: "text-sm font-bold" }}>International</Radio>
+                          <Radio value="INDIAN" color="warning" classNames={radioThemeClasses}>
+                            <div className="flex items-center gap-2">
+                              <IoLocation className="text-base text-obaol-600 dark:text-obaol-400" />
+                              <span>India</span>
+                            </div>
+                          </Radio>
+                          <Radio value="INTERNATIONAL" color="warning" classNames={radioThemeClasses}>
+                            <div className="flex items-center gap-2">
+                              <IoEarth className="text-base text-obaol-600 dark:text-obaol-400" />
+                              <span>International</span>
+                            </div>
+                          </Radio>
                         </RadioGroup>
                       </div>
                       <Textarea
@@ -2070,16 +2109,27 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   transition={{ duration: 0.3 }}
                   className="flex flex-col gap-6"
                 >
-                  <div className="p-5 rounded-[2.5rem] bg-success-500/5 border border-success-500/10">
+                  <div className="p-4.5 rounded-2xl bg-obaol-500/[0.04] border border-obaol-500/20">
                     <RadioGroup
-                      label={<span className="text-[10px] font-black uppercase tracking-widest text-success-500">Contact Preference</span>}
+                      label={<span className="text-[10px] font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">Contact Preference</span>}
                       orientation="horizontal"
+                      color="warning"
                       value={formData.contactPreference}
                       onValueChange={(v) => setField("contactPreference", v)}
-                      classNames={{ wrapper: "gap-8" }}
+                      classNames={{ wrapper: "gap-3 flex-wrap" }}
                     >
-                      <Radio value="phone" classNames={{ label: "text-sm font-bold" }}>Phone</Radio>
-                      <Radio value="email" classNames={{ label: "text-sm font-bold" }}>Email</Radio>
+                      <Radio value="phone" color="warning" classNames={radioThemeClasses}>
+                        <div className="flex items-center gap-2">
+                          <IoCall className="text-base text-obaol-600 dark:text-obaol-400" />
+                          <span>Phone</span>
+                        </div>
+                      </Radio>
+                      <Radio value="email" color="warning" classNames={radioThemeClasses}>
+                        <div className="flex items-center gap-2">
+                          <IoMail className="text-base text-obaol-600 dark:text-obaol-400" />
+                          <span>Email</span>
+                        </div>
+                      </Radio>
                     </RadioGroup>
                   </div>
 

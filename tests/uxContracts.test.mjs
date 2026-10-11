@@ -115,6 +115,10 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
   assert.equal(explorer.includes('data-execution-route="stepped"'), false);
   assert.equal(explorer.includes("stages.filter("), true);
+  assert.equal(explorer.includes('data-execution-stage-grid="true"'), true);
+  assert.equal(explorer.includes("grid-cols-1"), true);
+  assert.equal(explorer.includes("md:grid-cols-2"), true);
+  assert.equal(explorer.includes("xl:grid-cols-[3fr_3fr_3fr_1.2fr]"), true);
   assert.equal(explorer.includes("Indian agro-trade lifecycle from crop sourcing and documentation through quality verification, packaging, warehousing, and delivery"), true);
   assert.equal(explorer.includes("animate-ping"), false);
   assert.equal(explorer.includes("group-hover:scale"), false);
@@ -145,15 +149,17 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-v2.webp", import.meta.url))), true);
 });
 
-test("homepage services use an eight-chapter scroll story without autoplay", () => {
+test("homepage services use a nine-chapter multi-entity scroll story without autoplay", () => {
   const services = read("../src/components/home/ServiceShowcase.tsx");
   const homeContent = read("../src/components/home/HomeContent.tsx");
+  const hero = read("../src/components/home/HeroSectionServer.tsx");
+  const homepage = read("../src/app/page.tsx");
   const chapterIds = [...services.matchAll(/\{ id: "([^"]+)", title:/g)].map((match) => match[1]);
-  const imagePaths = [...services.matchAll(/image: "([^"]+-trade-v2\.webp)"/g)].map((match) => match[1]);
+  const imagePaths = [...services.matchAll(/image: "([^"]+\.webp)"/g)].map((match) => match[1]);
   const imageAlts = [...services.matchAll(/imageAlt: "([^"]+)"/g)].map((match) => match[1]);
 
   assert.deepEqual(chapterIds, [
-    "sourcing", "documentation", "procurement", "quality",
+    "discovery", "sourcing", "documentation", "procurement", "quality",
     "packaging", "logistics", "warehouse", "freight",
   ]);
   assert.equal(services.includes('data-service-story="true"'), true);
@@ -170,11 +176,23 @@ test("homepage services use an eight-chapter scroll story without autoplay", () 
   assert.equal(services.includes("onActivate"), false);
   assert.equal(services.includes("setInterval"), false);
   assert.equal(services.includes("images.pexels.com"), false);
-  assert.equal(imagePaths.length, 8);
-  assert.equal(new Set(imagePaths).size, 8);
-  assert.equal(imagePaths.every((imagePath) => imagePath.startsWith("/images/services/")), true);
-  assert.equal(imageAlts.length, 8);
+  assert.equal(imagePaths.length, 9);
+  assert.equal(new Set(imagePaths).size, 9);
+  assert.equal(imagePaths.filter((imagePath) => imagePath.startsWith("/images/services/")).length, 8);
+  assert.equal(imagePaths[0], "/images/execution-flow/01-discovery.webp");
+  assert.equal(imageAlts.length, 9);
   assert.equal(imageAlts.every((alt) => alt.length >= 60), true);
+  for (const phrase of [
+    "Buyer and supplier matching", "Sourcing partners", "Documentation specialists",
+    "Procurement partners", "Independent labs", "Packaging providers", "Transport partners",
+    "Warehouse operators", "Freight forwarders",
+  ]) assert.equal(services.includes(phrase), true);
+  assert.equal(services.includes("Different specialists. One connected trade."), true);
+  assert.equal(services.includes("OBAOL connects the handoffs, records, and progress—it does not replace them."), true);
+  assert.equal(hero.includes("OBAOL connects buyers, suppliers, and specialist service partners."), true);
+  assert.equal(homeContent.includes("OBAOL is the technology and coordination platform"), true);
+  assert.equal(homeContent.includes("Independent trade participants do the specialist work."), true);
+  assert.equal(homepage.includes("OBAOL connects verified buyers, suppliers, and specialist service partners"), true);
   for (const imagePath of imagePaths) {
     const assetUrl = new URL(`../public${imagePath}`, import.meta.url);
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);

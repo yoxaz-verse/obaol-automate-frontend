@@ -82,7 +82,7 @@ export function HeroStageBand({ stages }: { stages: readonly HeroStage[] }) {
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">10 verified stages</p>
           </div>
 
-          <div aria-label="All ten execution stages grouped by phase" className="grid gap-x-10 gap-y-7 sm:grid-cols-2 xl:grid-cols-[3fr_3fr_3fr_1.2fr]">
+          <div data-execution-stage-grid="true" aria-label="All ten execution stages grouped by phase" className="grid grid-cols-1 gap-x-10 gap-y-7 md:grid-cols-2 xl:grid-cols-[3fr_3fr_3fr_1.2fr]">
             {phaseGroups.map((phase) => {
               const phaseStages = stages.filter((stage) => stage.phase === phase.phase);
               return (

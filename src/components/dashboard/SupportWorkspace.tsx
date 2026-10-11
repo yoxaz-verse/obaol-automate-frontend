@@ -3,7 +3,7 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Chip, Input, Select, SelectItem, Switch, Textarea } from "@nextui-org/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FiCheckCircle, FiClock, FiHeadphones, FiMessageCircle, FiRefreshCw, FiSend, FiUserCheck, FiUsers } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiHeadphones, FiMessageCircle, FiRefreshCw, FiSend, FiStar, FiUserCheck, FiUsers } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { supportChatRoutes } from "@/core/api/apiRoutes";
@@ -19,8 +19,11 @@ type Conversation = {
   requester?: { id: string; name: string; email: string; phone?: string; role: string; company?: string; lastSeenAt?: string; priorConversations?: Array<{ _id: string; subject: string; status: Status }> };
   assignedAgent?: Agent | string | null; lastMessageAt?: string; lastMessagePreview?: string;
   createdAt: string; resolvedAt?: string; reopenUntil?: string;
+  rating?: { score: number; comment?: string; createdAt: string } | null;
 };
 type Message = { _id: string; senderId: string; senderRole: string; body: string; createdAt: string };
+type RatingRow = { _id: string; score: number; comment?: string; createdAt: string; ratedAgentId?: Agent; conversationId?: { _id: string; subject: string }; requester?: { id: string; name: string; email: string; role: string } };
+type RatingReport = { summary: { averageScore: number; totalRatings: number; distribution: Record<string, number> }; ratings: RatingRow[]; agents?: Agent[] };
 
 const roleKey = (value: unknown) => String(value || "").toLowerCase().replace(/[\s_-]+/g, "");
 
@@ -37,6 +40,12 @@ export default function SupportWorkspace() {
   const [openingMessage, setOpeningMessage] = useState("");
   const [message, setMessage] = useState("");
   const [reassignTo, setReassignTo] = useState("");
+  const [ratingScore, setRatingScore] = useState(0);
+  const [ratingComment, setRatingComment] = useState("");
+  const [ratingError, setRatingError] = useState("");
+  const [ratingsPage, setRatingsPage] = useState(1);
+  const [ratingAgentFilter, setRatingAgentFilter] = useState("");
+  const [ratingScoreFilter, setRatingScoreFilter] = useState("");
   const previousWaiting = useRef(-1);
 
   const availability = useQuery({
@@ -67,6 +76,20 @@ export default function SupportWorkspace() {
     refetchInterval: 3_000,
   });
   const messageRows = useMemo<Message[]>(() => Array.isArray(messages.data) ? messages.data : [], [messages.data]);
+  const ratings = useQuery({
+    queryKey: ["support", "ratings", isAdmin ? "admin" : "mine", ratingsPage, ratingAgentFilter, ratingScoreFilter],
+    queryFn: async () => {
+      const response = await getData(isAdmin ? supportChatRoutes.ratings : supportChatRoutes.ratingsMine, {
+        page: ratingsPage,
+        limit: 10,
+        ...(isAdmin && ratingAgentFilter ? { agentId: ratingAgentFilter } : {}),
+        ...(isAdmin && ratingScoreFilter ? { score: ratingScoreFilter } : {}),
+      }, { cacheMode: "bypass" });
+      return { report: response.data?.data as RatingReport, meta: response.data?.meta as { page: number; pages: number; total: number } };
+    },
+    enabled: isStaff,
+    refetchInterval: 30_000,
+  });
 
   useEffect(() => {
     if (!isStaff) return;
@@ -75,11 +98,18 @@ export default function SupportWorkspace() {
     previousWaiting.current = waiting;
   }, [isStaff, play, rows]);
 
+  useEffect(() => {
+    setRatingScore(0);
+    setRatingComment("");
+    setRatingError("");
+  }, [selectedConversationId]);
+
   const refresh = async () => {
     await Promise.all([
       client.invalidateQueries({ queryKey: ["support", "availability"] }),
       client.invalidateQueries({ queryKey: ["support", "conversations"] }),
       client.invalidateQueries({ queryKey: ["support", "agents"] }),
+      client.invalidateQueries({ queryKey: ["support", "ratings"] }),
       selectedConversationId ? client.invalidateQueries({ queryKey: ["support", "messages", selectedConversationId] }) : Promise.resolve(),
     ]);
   };
@@ -104,6 +134,11 @@ export default function SupportWorkspace() {
     mutationFn: (isAvailable: boolean) => patchData(supportChatRoutes.setAvailability, { isAvailable }),
     onSuccess: async () => { await refreshUser(); await refresh(); },
     onError: (error: any) => showToastMessage({ type: "error", message: normalizeApiError(error).message }),
+  });
+  const submitRating = useMutation({
+    mutationFn: () => postData(supportChatRoutes.rating(selectedConversationId), { score: ratingScore, comment: ratingComment.trim() }),
+    onSuccess: async () => { setRatingError(""); await refresh(); showToastMessage({ type: "success", message: "Thank you for rating your support experience." }); },
+    onError: (error: any) => { const normalized = normalizeApiError(error, "Could not submit your rating."); setRatingError(normalized.message); showToastMessage({ type: "error", message: normalized.message }); },
   });
 
   const waiting = rows.filter((row) => row.status === "WAITING");
@@ -144,10 +179,15 @@ export default function SupportWorkspace() {
               {isAdmin && selected.status !== "RESOLVED" && <div className="mt-3 flex max-w-md gap-2"><Select size="sm" label="Assign agent" selectedKeys={reassignTo ? [reassignTo] : []} onSelectionChange={(keys) => setReassignTo(String(Array.from(keys)[0] || ""))}>{roster.map((agent) => <SelectItem key={agent._id} textValue={agent.name}>{agent.name} ({agent.activeChatCount}/{agent.capacity})</SelectItem>)}</Select><Button size="sm" className="mt-2" isDisabled={!reassignTo} isLoading={reassign.isPending} onPress={() => reassign.mutate()}>Assign</Button></div>}
             </header>
             <div className="flex-1 space-y-3 overflow-y-auto py-5" aria-live="polite">{messageRows.map((item) => { const mine = String(item.senderId) === String(user?.id); return <div key={item._id} className={`flex ${mine ? "justify-end" : "justify-start"}`}><div className={`max-w-[85%] rounded-2xl px-4 py-3 ${mine ? "bg-obaol-500 text-obaol-950" : "bg-default-100"}`}><p className="whitespace-pre-wrap break-words text-sm">{item.body}</p><p className="mt-1 text-[10px] opacity-60">{new Date(item.createdAt).toLocaleString()}</p></div></div>; })}{messages.isLoading && <p className="text-center text-sm text-default-400">Loading messages…</p>}</div>
-            <div className="border-t border-default-200 pt-4">{canSend ? <div className="flex items-end gap-2"><Textarea aria-label="Support message" placeholder="Write a message…" minRows={1} maxRows={5} value={message} onValueChange={setMessage} classNames={{ inputWrapper: "focus-within:!border-obaol-500 focus-within:!ring-0 focus-within:!shadow-none group-data-[focus=true]:!border-obaol-500 group-data-[focus=true]:!ring-0", input: "focus:!outline-none focus:!ring-0" }} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && message.trim()) { event.preventDefault(); send.mutate(); } }} /><Button isIconOnly color="warning" aria-label="Send message" isLoading={send.isPending} isDisabled={!message.trim()} onPress={() => send.mutate()}><FiSend /></Button></div> : <p className="rounded-xl bg-default-100 p-3 text-center text-sm text-default-500">{selected.status === "RESOLVED" ? "This conversation is resolved." : selected.status === "WAITING" && isStaff ? "Claim or assign this conversation before replying." : "This conversation is assigned to another agent."}</p>}</div>
+            <div className="border-t border-default-200 pt-4">{canSend ? <div className="flex items-end gap-2"><Textarea aria-label="Support message" placeholder="Write a message…" minRows={1} maxRows={5} value={message} onValueChange={setMessage} classNames={{ inputWrapper: "focus-within:!border-obaol-500 focus-within:!ring-0 focus-within:!shadow-none group-data-[focus=true]:!border-obaol-500 group-data-[focus=true]:!ring-0", input: "focus:!outline-none focus:!ring-0" }} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && message.trim()) { event.preventDefault(); send.mutate(); } }} /><Button isIconOnly color="warning" aria-label="Send message" isLoading={send.isPending} isDisabled={!message.trim()} onPress={() => send.mutate()}><FiSend /></Button></div> : selected.status === "RESOLVED" && !isStaff && assignedId ? <div className="rounded-2xl bg-default-100 p-4">{selected.rating ? <div className="text-center"><div className="flex justify-center gap-1 text-warning">{[1, 2, 3, 4, 5].map((value) => <FiStar key={value} className={value <= selected.rating!.score ? "fill-current" : "text-default-300"} />)}</div><p className="mt-2 font-bold">Thank you for your feedback</p><p className="text-xs text-default-500">Your rating has been submitted.</p></div> : <div><h3 className="font-bold">Rate your support experience</h3><p className="mt-1 text-xs text-default-500">How helpful was the support agent?</p>{ratingError && <div role="alert" className="mt-3 rounded-xl border border-danger-200 bg-danger-50 p-2 text-sm text-danger-700">{ratingError}</div>}<div className="mt-3 flex gap-2" role="radiogroup" aria-label="Support agent rating">{[1, 2, 3, 4, 5].map((value) => <button key={value} type="button" role="radio" aria-checked={ratingScore === value} aria-label={`${value} star${value === 1 ? "" : "s"}`} className={`rounded-lg p-1 text-2xl transition focus:outline-none focus:ring-2 focus:ring-obaol-500 ${value <= ratingScore ? "text-warning" : "text-default-300"}`} onClick={() => { setRatingScore(value); setRatingError(""); }}><FiStar className={value <= ratingScore ? "fill-current" : ""} /></button>)}</div><Textarea className="mt-3" label="Comment (optional)" maxLength={1000} minRows={2} value={ratingComment} onValueChange={(value) => { setRatingComment(value); setRatingError(""); }} /><div className="mt-3 flex justify-end"><Button color="warning" className="font-bold" isDisabled={!ratingScore || submitRating.isPending} isLoading={submitRating.isPending} onPress={() => submitRating.mutate()}>Submit rating</Button></div></div>}</div> : <p className="rounded-xl bg-default-100 p-3 text-center text-sm text-default-500">{selected.status === "RESOLVED" ? "This conversation is resolved." : selected.status === "WAITING" && isStaff ? "Claim or assign this conversation before replying." : "This conversation is assigned to another agent."}</p>}</div>
           </> : <div className="flex flex-1 flex-col items-center justify-center text-center text-default-400"><FiMessageCircle size={38} /><p className="mt-3 font-bold">Select a conversation</p></div>}
         </div>
       </div>
+
+      {isStaff && <section className="rounded-3xl border border-default-200 bg-content1 p-5" aria-labelledby="support-ratings-heading">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h2 id="support-ratings-heading" className="font-black">Support ratings</h2><p className="text-xs text-default-500">{isAdmin ? "Review feedback across the support team." : "Your feedback is anonymized."}</p></div>{isAdmin && <div className="flex w-full gap-2 sm:w-auto"><Select aria-label="Filter ratings by agent" size="sm" className="min-w-44" placeholder="All agents" selectedKeys={ratingAgentFilter ? [ratingAgentFilter] : []} onSelectionChange={(keys) => { setRatingAgentFilter(String(Array.from(keys)[0] || "")); setRatingsPage(1); }}>{(ratings.data?.report?.agents || []).map((agent) => <SelectItem key={agent._id}>{agent.name}</SelectItem>)}</Select><Select aria-label="Filter ratings by score" size="sm" className="w-32" placeholder="All scores" selectedKeys={ratingScoreFilter ? [ratingScoreFilter] : []} onSelectionChange={(keys) => { setRatingScoreFilter(String(Array.from(keys)[0] || "")); setRatingsPage(1); }}>{[5, 4, 3, 2, 1].map((score) => <SelectItem key={String(score)}>{score} stars</SelectItem>)}</Select></div>}</div>
+        {ratings.isError ? <div role="alert" className="mt-4 rounded-xl border border-danger-200 bg-danger-50 p-3 text-sm text-danger-700">{normalizeApiError(ratings.error, "Could not load support ratings.").message}</div> : <><div className="mt-4 grid gap-3 sm:grid-cols-2"><div className="rounded-2xl bg-default-100 p-4"><p className="text-xs font-bold uppercase tracking-wider text-default-400">Average rating</p><p className="mt-1 text-3xl font-black">{ratings.data?.report?.summary?.averageScore?.toFixed(2) || "0.00"} <span className="text-base text-warning">★</span></p></div><div className="rounded-2xl bg-default-100 p-4"><p className="text-xs font-bold uppercase tracking-wider text-default-400">Total ratings</p><p className="mt-1 text-3xl font-black">{ratings.data?.report?.summary?.totalRatings || 0}</p></div></div><div className="mt-4 grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]"><div className="space-y-2">{[5, 4, 3, 2, 1].map((score) => { const count = ratings.data?.report?.summary?.distribution?.[String(score)] || 0; const total = ratings.data?.report?.summary?.totalRatings || 0; return <div key={score} className="flex items-center gap-2 text-xs"><span className="w-8">{score} ★</span><div className="h-2 flex-1 overflow-hidden rounded-full bg-default-200"><div className="h-full bg-warning" style={{ width: `${total ? (count / total) * 100 : 0}%` }} /></div><span className="w-6 text-right text-default-500">{count}</span></div>; })}</div><div className="space-y-2">{ratings.isLoading ? <p className="py-6 text-center text-sm text-default-400">Loading ratings…</p> : (ratings.data?.report?.ratings || []).map((item) => <article key={item._id} className="rounded-2xl border border-default-200 p-3"><div className="flex flex-wrap items-center justify-between gap-2"><div className="flex gap-1 text-warning">{[1, 2, 3, 4, 5].map((value) => <FiStar key={value} className={value <= item.score ? "fill-current" : "text-default-300"} />)}</div><span className="text-xs text-default-400">{new Date(item.createdAt).toLocaleDateString()}</span></div>{item.comment && <p className="mt-2 text-sm text-default-600">{item.comment}</p>}{isAdmin && <p className="mt-2 text-xs text-default-400">{item.requester?.name || "Unknown requester"} · {item.requester?.email || item.requester?.role}{item.ratedAgentId?.name ? ` · Agent: ${item.ratedAgentId.name}` : ""}{item.conversationId?.subject ? ` · ${item.conversationId.subject}` : ""}</p>}</article>)}{!ratings.isLoading && !(ratings.data?.report?.ratings || []).length && <p className="py-6 text-center text-sm text-default-400">No ratings yet.</p>}</div></div><div className="mt-4 flex justify-end gap-2"><Button size="sm" variant="flat" isDisabled={(ratings.data?.meta?.page || 1) <= 1} onPress={() => setRatingsPage((value) => Math.max(1, value - 1))}>Previous</Button><Button size="sm" variant="flat" isDisabled={(ratings.data?.meta?.page || 1) >= (ratings.data?.meta?.pages || 1)} onPress={() => setRatingsPage((value) => value + 1)}>Next</Button></div></>}
+      </section>}
 
       {isStaff && roster.length > 0 && <div className="rounded-3xl border border-default-200 bg-content1 p-5"><h2 className="font-black">Online support team</h2><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{roster.map((agent) => <div key={agent._id} className="flex items-center justify-between rounded-2xl border border-default-200 p-3"><div><p className="text-sm font-bold">{agent.name}</p><p className="text-xs text-default-500">{agent.email}</p></div><Chip size="sm" color={agent.canAccept ? "success" : agent.isAvailable ? "warning" : "default"} variant="dot">{agent.isAvailable ? `${agent.activeChatCount}/${agent.capacity}` : "Unavailable"}</Chip></div>)}</div></div>}
     </section>

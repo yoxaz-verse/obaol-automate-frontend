@@ -48,15 +48,15 @@ export default function HomeContent() {
                                     What We Do
                                 </h2>
                                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
-                                    OBAOL is an agro trade execution platform. Its Commodity Catalog and Trade Listings help participants discover commodity coverage before enquiries, verification, logistics, and orders move through one connected workflow.
+                                    OBAOL is the technology and coordination platform where buyers, suppliers, and specialist service partners execute one trade together. Its Commodity Catalog and Trade Listings help participants discover the right products and counterparties before work begins.
                                 </p>
                             </div>
                             <div className="lg:col-span-7 space-y-4 lg:pt-14">
                                 <p className="text-sm md:text-base text-foreground/60 font-medium leading-relaxed">
-                                    Build products, run enquiries, move orders, and manage documents with execution panels for each function. Importer Service and Warehouse Rent Management are built in, so logistics and storage stay connected end‑to‑end.
+                                    Each verified entity handles its own role through dedicated execution panels: sourcing partners source, labs verify, packers prepare, warehouses store, and transport and freight partners move the cargo.
                                 </p>
                                 <p className="text-sm md:text-base text-foreground/60 font-medium leading-relaxed">
-                                    All of this runs in one agro execution system. Built for India-first operations, supporting global trade from India to international markets seamlessly.
+                                    OBAOL connects their enquiries, documents, handoffs, and progress in one India-first agro execution system supporting global trade.
                                 </p>
                             </div>
                         </div>
@@ -83,7 +83,7 @@ export default function HomeContent() {
                             Built for <span className={homeTitleStyles.sectionTitleAccent}>Serious Trade.</span>
                         </h2>
                         <p className="text-base md:text-xl text-default-500 font-medium leading-relaxed">
-                            OBAOL moves trades from conversation to closure with verified counterparties and execution support across every milestone.
+                            Independent trade participants do the specialist work. OBAOL gives them the shared technology, verified network, and workflow needed to move from conversation to closure.
                         </p>
                     </div>
 
@@ -91,19 +91,19 @@ export default function HomeContent() {
                         {[
                             {
                                 title: "Verified Network",
-                                desc: "Every supplier, buyer, and operator undergoes a rigorous multi-stage verification process to ensure trade reputability.",
+                                desc: "Buyers, suppliers, and specialist service partners participate as distinct verified entities with clear responsibilities.",
                                 icon: <FaShieldHalved size={22} />,
                                 color: "text-blue-500"
                             },
                             {
                                 title: "Unified Execution",
-                                desc: "Integrated procurement, documentation, and logistics in one cohesive system. No more fragmented email chains.",
+                                desc: "OBAOL connects procurement, documentation, verification, storage, and movement without replacing the partners performing them.",
                                 icon: <FaTruckFront size={22} />,
                                 color: "text-obaol-700 dark:text-obaol-300"
                             },
                             {
                                 title: "Global Compliance",
-                                desc: "Built to handle cross-border trade complexities, from domestic logistics to international customs standards.",
+                                desc: "Documentation specialists, laboratories, and freight partners coordinate cross-border requirements through one visible workflow.",
                                 icon: <FaEarthAsia size={22} />,
                                 color: "text-emerald-500"
                             }

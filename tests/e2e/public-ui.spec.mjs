@@ -7,6 +7,22 @@ for (const theme of ["light", "dark"]) {
       await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto("/");
+      const stageBand = page.locator('[data-execution-stage-band="true"]');
+      const stageGrid = stageBand.locator('[data-execution-stage-grid="true"]');
+      await stageBand.scrollIntoViewIfNeeded();
+      await expect(stageGrid.locator('[data-execution-stage-group]')).toHaveCount(4);
+      await expect(stageGrid.locator('[data-execution-stage="discovery"]')).toBeVisible();
+      const stageColumns = await stageGrid.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").length);
+      expect(stageColumns).toBe(width === 375 ? 1 : width === 768 ? 2 : 4);
+      const stageBox = await stageGrid.boundingBox();
+      expect(stageBox.x).toBeGreaterThanOrEqual(0);
+      expect(stageBox.x + stageBox.width).toBeLessThanOrEqual(width + 1);
+
+      const serviceStory = page.locator('[data-service-story="true"]');
+      await serviceStory.scrollIntoViewIfNeeded();
+      await expect(serviceStory.getByRole("heading", { name: "Different specialists. One connected trade." })).toBeVisible();
+      await expect(serviceStory.getByText("OBAOL connects the handoffs, records, and progress—it does not replace them.", { exact: false })).toBeVisible();
+      await expect(serviceStory.locator('[data-service-chapter="discovery"]')).toBeVisible();
       // The execution workspace is code-split. Scroll its stable server-rendered
       // boundary before asserting the interactive client content.
       await page.locator("#execution-workspace").scrollIntoViewIfNeeded();
@@ -57,7 +73,7 @@ test("service scroll story keeps every chapter synchronized in both directions",
   const panel = story.locator("[data-active-service]");
   await expect(panel).toBeVisible();
 
-  const chapterIds = ["sourcing", "documentation", "procurement", "quality", "packaging", "logistics", "warehouse", "freight"];
+  const chapterIds = ["discovery", "sourcing", "documentation", "procurement", "quality", "packaging", "logistics", "warehouse", "freight"];
   const assertChapter = async (id) => {
     await story.locator(`[data-service-chapter="${id}"]`).evaluate((element) => element.scrollIntoView({ block: "center" }));
     await expect(panel).toHaveAttribute("data-active-service", id);

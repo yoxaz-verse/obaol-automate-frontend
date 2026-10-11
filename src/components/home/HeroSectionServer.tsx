@@ -56,8 +56,8 @@ export default function HeroSectionServer() {
 
             {/* Subheading */}
             <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">
-              Plan procurement, manage logistics, run verification, and move orders in one connected agro execution system.
-              <span className="font-bold text-foreground block sm:inline mt-1 sm:mt-0"> Built for real B2B agro trade operations.</span>
+              OBAOL connects buyers, suppliers, and specialist service partners. Each verified participant handles their part while the workflow, handoffs, and visibility stay in one system.
+              <span className="mt-1 block font-bold text-foreground sm:mt-0"> Technology for real B2B agro trade operations.</span>
             </p>
 
             <HeroCTA />

@@ -44,3 +44,25 @@ test("customer support exposes normalized call and WhatsApp actions", () => {
   assert.equal(links.includes("tel:${e164}"), true);
   assert.equal(links.includes("https://wa.me/"), true);
 });
+
+test("notifications use the compact inbox and role-aware composer", () => {
+  const page = read("../src/app/dashboard/notifications/page.tsx");
+  assert.equal(page.includes("Telemetry Inbox"), false);
+  assert.equal(page.includes("Cluster Density"), false);
+  assert.equal(page.includes("Send a notification"), true);
+  assert.equal(page.includes("notification-support-participants"), true);
+  assert.equal(page.includes('role="alert"'), true);
+  assert.equal(page.includes("notificationCategoryRoutes"), true);
+});
+
+test("resolved support conversations expose accessible ratings and private staff reporting", () => {
+  const workspace = read("../src/components/dashboard/SupportWorkspace.tsx");
+  const routes = read("../src/core/api/apiRoutes.tsx");
+  assert.equal(workspace.includes('role="radiogroup"'), true);
+  assert.equal(workspace.includes('role="radio"'), true);
+  assert.equal(workspace.includes("Rate your support experience"), true);
+  assert.equal(workspace.includes("Your feedback is anonymized."), true);
+  assert.equal(workspace.includes("Support ratings"), true);
+  assert.equal(routes.includes('ratingsMine: "/support/ratings/me"'), true);
+  assert.equal(routes.includes("/rating`"), true);
+});

@@ -319,6 +319,14 @@ export const notificationRoutes = {
   readOne: (id: string) => `/notifications/${id}/read`,
   readAll: "/notifications/read-all",
   broadcast: "/notifications/broadcast",
+  supportParticipants: "/notifications/support-participants",
+};
+
+export const notificationCategoryRoutes = {
+  list: "/notification-categories",
+  create: "/notification-categories",
+  update: (id: string) => `/notification-categories/${id}`,
+  archive: (id: string) => `/notification-categories/${id}`,
 };
 
 export const presenceRoutes = {
@@ -348,6 +356,9 @@ export const supportChatRoutes = {
   reassign: (id: string) => `/support/conversations/${id}/reassign`,
   resolve: (id: string) => `/support/conversations/${id}/resolve`,
   reopen: (id: string) => `/support/conversations/${id}/reopen`,
+  rating: (id: string) => `/support/conversations/${id}/rating`,
+  ratingsMine: "/support/ratings/me",
+  ratings: "/support/ratings",
   messages: (id: string) => `/support/conversations/${id}/messages`,
 };
 

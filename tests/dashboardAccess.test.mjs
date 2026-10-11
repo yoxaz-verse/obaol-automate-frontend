@@ -36,7 +36,7 @@ test("detail routes keep their parent navigation item active", () => {
   assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard"), false);
 });
 
-test("settings owns company, notification, profile, security, and shortcut navigation", () => {
+test("settings owns account subpages while notifications stays independently active", () => {
   const links = new Set(
     getAccessibleDashboardRoutes({ role: "Associate" }).map((route) => route.path)
   );
@@ -52,7 +52,8 @@ test("settings owns company, notification, profile, security, and shortcut navig
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/security", role: "Associate" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/shortcuts", role: "Associate" }), true);
   assert.equal(isDashboardRouteActive("/dashboard/company", "/dashboard/settings"), true);
-  assert.equal(isDashboardRouteActive("/dashboard/notifications", "/dashboard/settings"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/notifications", "/dashboard/settings"), false);
+  assert.equal(isDashboardRouteActive("/dashboard/notifications", "/dashboard/notifications"), true);
   assert.equal(isDashboardRouteActive("/dashboard/profile", "/dashboard/settings"), true);
   assert.equal(isDashboardRouteActive("/dashboard/security", "/dashboard/settings"), true);
   assert.equal(isDashboardRouteActive("/dashboard/shortcuts", "/dashboard/settings"), true);

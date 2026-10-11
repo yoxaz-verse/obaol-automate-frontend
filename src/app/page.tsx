@@ -4,7 +4,7 @@ import { buildMetadata, buildWebPageJsonLd, buildWebSiteJsonLd } from "@/utils/s
 export const metadata = buildMetadata({
   title: "OBAOL Supreme | B2B Agro Execution System",
   description:
-    "Starting in India, OBAOL is a verified B2B agro execution system. Plan procurement, run verification, manage logistics, and move orders in one connected system.",
+    "OBAOL connects verified buyers, suppliers, and specialist service partners in one B2B agro trade execution and coordination system.",
   keywords: [
     "agro commodities",
     "commodity trading",
@@ -21,7 +21,7 @@ const webSiteJsonLd = buildWebSiteJsonLd();
 const webPageJsonLd = buildWebPageJsonLd({
   title: "OBAOL Supreme | B2B Agro Execution System",
   description:
-    "Verified B2B agro execution system for procurement, verification, logistics, and order execution.",
+    "Technology connecting verified buyers, suppliers, and specialist partners across discovery, procurement, verification, logistics, and delivery.",
   path: "/",
 });
 

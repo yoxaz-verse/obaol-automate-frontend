@@ -50,12 +50,14 @@ export default function CommissionStructurePage() {
     const corePoolTotal = netProfit * 0.30;
     const procurement = netProfit * 0.10;
     const handler = netProfit * 0.10;
+    const associateReferral = netProfit * 0.10;
     
     return {
       totalCommissionPool,
       corePoolTotal,
       procurement,
       handler,
+      associateReferral,
       closer: corePoolTotal * 0.40,
       owner: corePoolTotal * 0.30,
       l1: corePoolTotal * 0.12,
@@ -136,13 +138,13 @@ export default function CommissionStructurePage() {
                       <h2 className="text-2xl font-black tracking-tighter uppercase leading-none text-foreground">Commission Pool</h2>
                     </div>
                     <p className="text-base text-foreground/70 leading-relaxed font-medium mb-10">
-                      When a trade is fully completed and profit is confirmed, 50% of that profit becomes the total commission pool.
+                      When a trade is fully completed and profit is confirmed, 50% funds the operator, procurement, and handler structure. A separate 10% of OBAOL profit may fund eligible one-level associate referrals.
                     </p>
                     <div className="relative p-8 rounded-[2rem] bg-gradient-to-br from-obaol-500 to-orange-700 text-white overflow-hidden group">
                       <div className="relative z-10 flex items-end gap-2">
                         <span className="text-5xl md:text-6xl font-black tracking-tighter leading-none">50%</span>
                         <div className="flex flex-col mb-1">
-                          <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Commission Pool</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Operator Reward Pool</span>
                           <span className="text-[10px] font-bold uppercase tracking-widest italic opacity-70 leading-none">Of Trade Profit</span>
                         </div>
                       </div>
@@ -191,7 +193,7 @@ export default function CommissionStructurePage() {
                   
                   {[
                     { label: "Trade Execution", desc: "Trade completes and net profit is confirmed by system.", icon: LuTarget },
-                    { label: "Pool Creation", desc: "50% of profit becomes the active commission pool.", icon: LuTrendingUp },
+                    { label: "Pool Creation", desc: "50% funds existing operator rewards; eligible associate referrals use a separate 10% of OBAOL profit.", icon: LuTrendingUp },
                     { label: "Primary Split", desc: "Pool splits into Core, Procurement, and Handler.", icon: LuLayers },
                     { label: "Core Allocation", desc: "Core splits into DC, Portfolio Owner, L1, L2, L3+.", icon: LuNetwork }
                   ].map((step, i) => (
@@ -337,7 +339,7 @@ export default function CommissionStructurePage() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
                             <div className="p-8 rounded-[1.5rem] bg-gradient-to-br from-obaol-500 to-orange-700 text-white flex flex-col items-center justify-center">
                                 <span className="text-[11px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Total Pool (50%)</span>
                                 <span className="text-3xl font-black tracking-tighter italic leading-none">{displayRate(shares.totalCommissionPool)}</span>
@@ -354,6 +356,11 @@ export default function CommissionStructurePage() {
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mt-3 text-center">
                                   Rating-based: buyer 1–5 + seller 1–5. Each star = 1% (max 10%).
                                 </span>
+                            </Card>
+                            <Card shadow="none" className="p-8 rounded-[1.5rem] bg-success-500/5 border border-success-500/20 flex flex-col items-center justify-center">
+                                <span className="text-[11px] font-black uppercase text-success-600 tracking-widest mb-2 text-center">Associate Referral (10%)</span>
+                                <span className="text-2xl font-black text-foreground italic">{displayRate(shares.associateReferral)}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mt-3 text-center">One pool, split across unique eligible referrers</span>
                             </Card>
                         </div>
                     </div>

@@ -1970,6 +1970,15 @@ export const initialTableConfig: Record<
       required: true,
     },
     {
+      label: "Associate Referral %",
+      type: "number",
+      key: "associateReferralPercent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
       label: "Closer %",
       type: "number",
       key: "closerPercent",

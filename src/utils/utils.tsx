@@ -13,7 +13,7 @@ import { LiaMapMarkedAltSolid } from "react-icons/lia";
 import { GoOrganization } from "react-icons/go";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
-import { LuWarehouse, LuShip } from "react-icons/lu";
+import { LuWarehouse, LuShip, LuShare2 } from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
 import { TbBuildingWarehouse } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
@@ -118,6 +118,11 @@ export const sidebarOptions = [
     name: "My Company",
     icon: <GoOrganization />,
     link: "/dashboard/company",
+  },
+  {
+    name: "Referrals & Earnings",
+    icon: <LuShare2 />,
+    link: "/dashboard/referrals",
   },
   {
     name: "Company",

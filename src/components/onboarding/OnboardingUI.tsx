@@ -68,7 +68,7 @@ export function ReferralCodeField({
           <span id="onboarding-referral-label">{label}</span>
           <span className="onboarding-optional-badge">Optional</span>
         </div>
-        <p>Have a six-character operator code? Add it to link your profile for faster verification.</p>
+        <p>Use an eight-character operator or associate-company code. Company referrals unlock one-level trade rewards after activation.</p>
       </div>
       <Input
         aria-label={`${label} (optional)`}
@@ -76,11 +76,11 @@ export function ReferralCodeField({
         inputMode="text"
         autoCapitalize="characters"
         autoComplete="off"
-        placeholder="ABC123"
+        placeholder="ABCD1234"
         variant="bordered"
         value={value}
-        onValueChange={(next) => onChange(next.toUpperCase().replace(/\s/g, "").slice(0, 6))}
-        maxLength={6}
+        onValueChange={(next) => onChange(next.toUpperCase().replace(/\s/g, "").slice(0, 8))}
+        maxLength={8}
         startContent={<FiLink aria-hidden className="text-default-400" />}
         className="onboarding-referral__field"
         classNames={{

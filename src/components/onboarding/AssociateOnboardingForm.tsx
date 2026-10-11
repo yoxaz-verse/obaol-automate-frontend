@@ -112,6 +112,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
+  const referralParam = String(searchParams?.get("ref") || "").trim().toUpperCase();
   const AutocompleteAny = Autocomplete as any;
   const { user, refreshUser } = useContext(AuthContext);
   const isOnboarding = mode === "onboarding";
@@ -187,6 +188,10 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     associatePincodeEntry: "",
     referralCode: "",
   });
+  useEffect(() => {
+    if (!referralParam) return;
+    setFormData((prev) => prev.referralCode ? prev : { ...prev, referralCode: referralParam.slice(0, 8) });
+  }, [referralParam]);
 
   const hydrateDraft = useCallback((parsed: any) => {
     if (Number(parsed?.draftVersion || 1) < COMPANY_FUNCTION_TAXONOMY_VERSION) {
@@ -1497,7 +1502,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   )}
 
                   <div className="md:col-span-2 pt-2">
-                    <ReferralCodeField value={formData.referralCode} onChange={(value) => setField("referralCode", value)} label="Operator referral code" />
+                    <ReferralCodeField value={formData.referralCode} onChange={(value) => setField("referralCode", value)} label="Referral code" />
                   </div>
 
                   <div className="md:col-span-2">

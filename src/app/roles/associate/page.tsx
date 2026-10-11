@@ -92,6 +92,20 @@ export default function AssociateRolePage() {
             </div>
           </section>
 
+          <section aria-labelledby="associate-referrals" className="public-standard-section border-y border-default-200/60 bg-success-500/[0.035]">
+            <div className="container mx-auto max-w-6xl px-4 public-layout-container">
+              <div className="public-surface-card rounded-[2rem] border border-success-500/25 bg-background p-8 md:p-10">
+                <p className="text-xs font-black uppercase tracking-widest text-success-600">One-level company referrals</p>
+                <h2 id="associate-referrals" className="mt-3 text-3xl font-black md:text-4xl">Help another company become active on OBAOL.</h2>
+                <p className="mt-5 max-w-3xl leading-7 text-foreground/65">Approved associate companies receive a referral code. When a directly referred company is approved, publishes live supply or participates in a real inquiry, and later completes a trade, its referrer shares in 10% of OBAOL&apos;s realized profit for that trade. There are no multi-level associate rewards.</p>
+                <div className="mt-6 grid gap-3 md:grid-cols-3">
+                  {["Register with the company code", "Activate through a live listing or real inquiry", "Earn only on later completed trades"].map((item, index) => <div key={item} className="rounded-2xl bg-success-500/5 p-4 text-sm font-semibold"><span className="mr-2 text-success-600">0{index + 1}</span>{item}</div>)}
+                </div>
+                <Link href="/commission-structure" className="public-button public-button--secondary mt-7">See commission rules <FiArrowRight /></Link>
+              </div>
+            </div>
+          </section>
+
           <section id="directory" aria-labelledby="directory-heading" className="public-standard-section">
             <div className="container mx-auto max-w-7xl px-4 public-layout-container">
               <div className="mb-14 max-w-3xl">

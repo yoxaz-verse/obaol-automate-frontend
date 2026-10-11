@@ -564,6 +564,10 @@ export const apiRoutes = {
   catalog: catalogRoutes,
   operatorHierarchy: operatorHierarchyRoutes,
   commissions: commissionRoutes,
+  associateReferrals: {
+    dashboard: "/associate-referrals/me",
+    companyDashboard: (companyId: string) => `/associate-referrals/company/${companyId}`,
+  },
   organizationReports: organizationReportRoutes,
   inventory: inventoryRoutes,
   warehouses: {

@@ -82,6 +82,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/warehouses", label: "Warehouses", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/warehouses/location", label: "Warehouse location", section: "Organization", roles: ["admin", "associate", "operator", "team"] },
   { path: "/dashboard/company", label: "My Company", section: "Organization", roles: ["associate"], nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
+  { path: "/dashboard/referrals", label: "Referrals & Earnings", section: "Organization", roles: ["associate"], nav: true, searchable: true, journeyStage: "organize" },
   { path: "/dashboard/companies", label: "Companies", section: "Organization", roles: ["admin", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/notifications", label: "Notifications", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
   { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Support" },

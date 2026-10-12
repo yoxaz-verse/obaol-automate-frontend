@@ -9,14 +9,18 @@ for (const theme of ["light", "dark"]) {
       await page.goto("/");
       const stageBand = page.locator('[data-execution-stage-band="true"]');
       const stageGrid = stageBand.locator('[data-execution-stage-grid="true"]');
-      await stageBand.scrollIntoViewIfNeeded();
-      await expect(stageGrid.locator('[data-execution-stage-group]')).toHaveCount(4);
-      await expect(stageGrid.locator('[data-execution-stage="discovery"]')).toBeVisible();
-      const stageColumns = await stageGrid.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").length);
-      expect(stageColumns).toBe(width === 375 ? 1 : width === 768 ? 2 : 4);
-      const stageBox = await stageGrid.boundingBox();
-      expect(stageBox.x).toBeGreaterThanOrEqual(0);
-      expect(stageBox.x + stageBox.width).toBeLessThanOrEqual(width + 1);
+      if (width < 768) {
+        await expect(stageBand).toBeHidden();
+      } else {
+        await stageBand.scrollIntoViewIfNeeded();
+        await expect(stageGrid.locator('[data-execution-stage-group]')).toHaveCount(4);
+        await expect(stageGrid.locator('[data-execution-stage="discovery"]')).toBeVisible();
+        const stageColumns = await stageGrid.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").length);
+        expect(stageColumns).toBe(width === 768 ? 2 : 4);
+        const stageBox = await stageGrid.boundingBox();
+        expect(stageBox.x).toBeGreaterThanOrEqual(0);
+        expect(stageBox.x + stageBox.width).toBeLessThanOrEqual(width + 1);
+      }
 
       const serviceStory = page.locator('[data-service-story="true"]');
       await serviceStory.scrollIntoViewIfNeeded();

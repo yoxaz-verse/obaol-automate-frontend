@@ -71,7 +71,7 @@ export default function HeroStageExplorer() {
 
 export function HeroStageBand({ stages }: { stages: readonly HeroStage[] }) {
   return (
-    <section data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="border-y border-default-200/70 bg-default-50/55 py-7 dark:bg-default-50/[0.025] lg:py-8">
+    <section data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="hidden border-y border-default-200/70 bg-default-50/55 py-7 dark:bg-default-50/[0.025] md:block lg:py-8">
       <div className="public-layout-container container mx-auto px-6 sm:px-12">
         <div className="mx-auto w-full max-w-7xl">
           <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

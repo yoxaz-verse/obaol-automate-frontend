@@ -53,6 +53,33 @@ test("outstanding actions take priority for every capability profile", () => {
   assert.equal(model.primaryAction.tone, "warning");
 });
 
+test("perspective isolates provided and sought workflows", () => {
+  const provided = buildAssociateDashboardModel({
+    ...base,
+    providedCapabilities: ["seller"],
+    soughtCapabilities: ["seller"],
+    perspective: "provided",
+  });
+  const sought = buildAssociateDashboardModel({
+    ...base,
+    providedCapabilities: ["seller"],
+    soughtCapabilities: ["seller"],
+    perspective: "sought",
+  });
+  assert.equal(provided.showSelling, true);
+  assert.equal(provided.showBuying, false);
+  assert.equal(sought.showBuying, true);
+  assert.equal(sought.showSelling, false);
+  assert.equal(provided.primaryAction.href, "/dashboard/product");
+  assert.equal(sought.primaryAction.href, "/dashboard/marketplace");
+});
+
+test("service-only perspective prioritizes execution", () => {
+  const model = buildAssociateDashboardModel({ ...base, providedCapabilities: ["testing"], perspective: "provided" });
+  assert.deepEqual(model.metrics.map((metric) => metric.key), ["actions", "orders"]);
+  assert.equal(model.primaryAction.href, "/dashboard/execution-enquiries");
+});
+
 test("company-function requests are gated and fabricated updates are absent", () => {
   const hook = readFileSync("src/core/data/useCompanyFunctionDashboard.ts", "utf8");
   const panel = readFileSync("src/components/dashboard/AssociateDashboard.tsx", "utf8");
@@ -60,4 +87,6 @@ test("company-function requests are gated and fabricated updates are absent", ()
   assert.equal((hook.match(/enabled: canLoad/g) || []).length, 3);
   assert.doesNotMatch(panel, /Trade listing update released successfully|New logistics route opened/);
   assert.match(panel, /disabled=\{!canOpen\}/);
+  assert.match(panel, /aria-label="Dashboard perspective"/);
+  assert.match(panel, /Configure missing profile/);
 });

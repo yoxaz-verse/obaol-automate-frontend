@@ -23,6 +23,7 @@ type AssociateDashboardModelInput = {
   sellingCount: number;
   activeOrders: number;
   liveProducts: number;
+  perspective?: "provided" | "sought";
 };
 
 export const buildAssociateDashboardModel = ({
@@ -33,13 +34,23 @@ export const buildAssociateDashboardModel = ({
   sellingCount,
   activeOrders,
   liveProducts,
+  perspective,
 }: AssociateDashboardModelInput) => {
   const provided = new Set(providedCapabilities);
   const sought = new Set(soughtCapabilities);
   const capabilities = new Set([...provided, ...sought]);
-  const showBuying = provided.has("buyer") || sought.has("seller") || capabilities.has("sourcing");
-  const showSelling = provided.has("seller") || sought.has("buyer");
-  const showFunctions = capabilities.size > 0;
+  const activeCapabilities = perspective === "provided" ? provided : perspective === "sought" ? sought : capabilities;
+  const showBuying = perspective === "provided"
+    ? provided.has("buyer") || provided.has("sourcing")
+    : perspective === "sought"
+      ? sought.has("seller")
+      : provided.has("buyer") || sought.has("seller") || capabilities.has("sourcing");
+  const showSelling = perspective === "provided"
+    ? provided.has("seller")
+    : perspective === "sought"
+      ? sought.has("buyer")
+      : provided.has("seller") || sought.has("buyer");
+  const showFunctions = activeCapabilities.size > 0;
 
   const metrics: AssociateMetric[] = [
     {

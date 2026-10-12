@@ -38,6 +38,14 @@ test("buyer and seller have distinct role-specific primary actions", () => {
   assert.equal(seller?.actions.find(({ primary }) => primary)?.href, "/dashboard/product");
 });
 
+test("sought trade capabilities use the counterparty workflow", () => {
+  const seekingSeller = getPreviewDefinition("seller", "sought");
+  const seekingBuyer = getPreviewDefinition("buyer", "sought");
+  assert.equal(seekingSeller?.actions.find(({ primary }) => primary)?.href, "/dashboard/marketplace");
+  assert.equal(seekingBuyer?.actions.find(({ primary }) => primary)?.href, "/dashboard/product");
+  assert.doesNotMatch(seekingSeller?.actions.find(({ primary }) => primary)?.label || "", /start selling/i);
+});
+
 test("all preview actions point to registered dashboard screens", () => {
   for (const definition of COMPANY_FUNCTION_PREVIEW_DEFINITIONS) {
     for (const action of definition.actions) {

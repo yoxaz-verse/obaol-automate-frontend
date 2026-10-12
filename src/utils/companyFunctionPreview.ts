@@ -75,9 +75,21 @@ export const normalizePreviewFunctionSlug = (value: unknown) => {
   return LEGACY_SLUGS[slug] || slug;
 };
 
-export const getPreviewDefinition = (slug: unknown) => {
+export const getPreviewDefinition = (slug: unknown, perspective: "provided" | "sought" = "provided") => {
   const normalized = normalizePreviewFunctionSlug(slug);
-  return COMPANY_FUNCTION_PREVIEW_DEFINITIONS.find((definition) => definition.slug === normalized);
+  const definition = COMPANY_FUNCTION_PREVIEW_DEFINITIONS.find((item) => item.slug === normalized);
+  if (!definition || perspective === "provided") return definition;
+  const actionSlug = normalized === "seller" ? "buyer" : normalized === "buyer" ? "seller" : normalized;
+  const actionDefinition = COMPANY_FUNCTION_PREVIEW_DEFINITIONS.find((item) => item.slug === actionSlug);
+  return {
+    ...definition,
+    description: normalized === "seller"
+      ? "Find sellers and products your company is looking for on OBAOL."
+      : normalized === "buyer"
+        ? "Reach buyers your company wants to serve and manage selling activity."
+        : `Find and coordinate ${definition.name.toLowerCase()} support through existing OBAOL workflows.`,
+    actions: actionDefinition?.actions || definition.actions,
+  };
 };
 
 export const filterCanonicalPreviewFunctions = <T extends { slug?: unknown }>(rows: T[]): T[] => {

@@ -15,16 +15,18 @@ const emptyCompletedQuery = {
 export const useDashboardData = ({
   userId,
   roleLower,
+  perspective,
 }: {
   userId: string;
   roleLower: string;
   isAdmin: boolean;
   isAssociate: boolean;
   isOperatorUser: boolean;
+  perspective?: "provided" | "sought";
 }) => {
   const dashboardSummaryQuery = useQuery({
-    queryKey: normalizeQueryKey("dashboard-summary", { roleLower, userId }),
-    queryFn: () => getData(apiRoutes.analytics.dashboardSummary, {}),
+    queryKey: normalizeQueryKey("dashboard-summary", { roleLower, userId, perspective }),
+    queryFn: () => getData(apiRoutes.analytics.dashboardSummary, perspective ? { perspective } : {}),
     enabled: !!userId,
     staleTime: DASHBOARD_STALE_TIME,
     refetchOnWindowFocus: false,

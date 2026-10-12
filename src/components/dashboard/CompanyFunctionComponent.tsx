@@ -14,10 +14,11 @@ type Props = {
   recentOrders?: unknown[];
   previewMode?: boolean;
   placeholderRecommended?: boolean;
+  perspective?: "provided" | "sought";
 };
 
-export default function CompanyFunctionComponent({ slug, priorityRank }: Props) {
-  const definition = getPreviewDefinition(slug);
+export default function CompanyFunctionComponent({ slug, priorityRank, perspective = "provided" }: Props) {
+  const definition = getPreviewDefinition(slug, perspective);
   if (!definition) return null;
 
   return (

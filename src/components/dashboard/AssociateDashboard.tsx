@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, CardBody, CardHeader, Chip, Divider, Skeleton } from "@nextui-org/react";
+import { Button, Card, CardBody, CardHeader, Divider, Skeleton } from "@nextui-org/react";
 import { LuArrowRight, LuCheck, LuClock3, LuPackage, LuShoppingBag, LuTrendingUp } from "react-icons/lu";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
 import { dashboardCopy } from "@/utils/dashboardCopy";
@@ -29,6 +29,9 @@ type AssociateDashboardProps = {
   buyingCount: number;
   sellingCount: number;
   isLoading: boolean;
+  perspective: "provided" | "sought";
+  onPerspectiveChange: (perspective: "provided" | "sought") => void;
+  welcomeName: string;
 };
 
 const objectIdPattern = /^[a-f0-9]{24}$/i;
@@ -53,6 +56,9 @@ export default function AssociateDashboard({
   buyingCount,
   sellingCount,
   isLoading,
+  perspective,
+  onPerspectiveChange,
+  welcomeName,
 }: AssociateDashboardProps) {
   const router = useRouter();
   const model = useMemo(() => buildAssociateDashboardModel({
@@ -63,16 +69,65 @@ export default function AssociateDashboard({
     sellingCount,
     activeOrders,
     liveProducts: Number(metrics.liveProducts || 0),
-  }), [providedCapabilities, soughtCapabilities, actionRequired, buyingCount, sellingCount, activeOrders, metrics.liveProducts]);
+    perspective,
+  }), [providedCapabilities, soughtCapabilities, actionRequired, buyingCount, sellingCount, activeOrders, metrics.liveProducts, perspective]);
+
+  const hasProvided = providedCapabilities.length > 0;
+  const hasSought = soughtCapabilities.length > 0;
+  const activeCapabilities = perspective === "provided" ? providedCapabilities : soughtCapabilities;
 
   const companyFunctionDashboard = useCompanyFunctionDashboard({
     companyId: associateCompanyId,
     isAdmin: false,
+    perspective,
     enabled: model.showFunctions && Boolean(associateCompanyId),
   });
 
   return (
     <div className="space-y-6">
+      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200/90 bg-content1 p-5 shadow-sm dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="min-w-0">
+          <p className="text-sm text-default-500">Welcome, <span className="font-semibold text-foreground">{welcomeName}</span></p>
+          <h1 className="mt-1 text-2xl font-black tracking-tight text-foreground">
+            {perspective === "provided" ? "What your company provides" : "What your company is seeking"}
+          </h1>
+          <p className="mt-1 text-sm text-default-500">
+            {activeCapabilities.length
+              ? `${activeCapabilities.length} configured ${activeCapabilities.length === 1 ? "capability" : "capabilities"} shape this view.`
+              : "Configure this profile to personalize your dashboard."}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+          <div role="tablist" aria-label="Dashboard perspective" className="inline-flex rounded-xl border border-default-200 bg-default-100 p-1">
+            <Button
+              role="tab"
+              aria-selected={perspective === "sought"}
+              isDisabled={!hasSought}
+              size="sm"
+              variant={perspective === "sought" ? "solid" : "light"}
+              color={perspective === "sought" ? "primary" : "default"}
+              className="min-w-28 font-semibold"
+              onPress={() => onPerspectiveChange("sought")}
+            >
+              Seeking
+            </Button>
+            <Button
+              role="tab"
+              aria-selected={perspective === "provided"}
+              isDisabled={!hasProvided}
+              size="sm"
+              variant={perspective === "provided" ? "solid" : "light"}
+              color={perspective === "provided" ? "primary" : "default"}
+              className="min-w-28 font-semibold"
+              onPress={() => onPerspectiveChange("provided")}
+            >
+              Providing
+            </Button>
+          </div>
+          {(!hasProvided || !hasSought) && <Button size="sm" variant="light" className="justify-end font-semibold text-primary" onPress={() => router.push("/dashboard/company")}>Configure missing profile</Button>}
+        </div>
+      </section>
+
       {!companyCapabilitiesConfigured && (
         <Card className="border border-obaol-500/30 bg-obaol-500/10 shadow-none">
           <CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -124,7 +179,7 @@ export default function AssociateDashboard({
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
         <Card className="border border-slate-200/90 bg-content1 shadow-sm dark:border-white/10 xl:col-span-3">
           <CardHeader className="flex items-center justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
-            <div><h2 className="text-base font-bold text-foreground">Pending enquiries</h2><p className="mt-1 text-sm text-default-500">Items waiting for an associate-side step.</p></div>
+            <div><h2 className="text-base font-bold text-foreground">Pending enquiries</h2><p className="mt-1 text-sm text-default-500">Items waiting for your next step in this {perspective === "provided" ? "providing" : "seeking"} view.</p></div>
             <Button size="sm" variant="light" className="min-h-10 font-semibold" onPress={() => router.push("/dashboard/enquiries")}>View all</Button>
           </CardHeader>
           <Divider className="mt-4" />
@@ -145,7 +200,7 @@ export default function AssociateDashboard({
         </Card>
 
         <Card className="border border-slate-200/90 bg-content1 shadow-sm dark:border-white/10 xl:col-span-2">
-          <CardHeader className="px-5 pt-5 sm:px-6 sm:pt-6"><div><h2 className="text-base font-bold text-foreground">Recent activity</h2><p className="mt-1 text-sm text-default-500">Your latest enquiries and orders.</p></div></CardHeader>
+          <CardHeader className="px-5 pt-5 sm:px-6 sm:pt-6"><div><h2 className="text-base font-bold text-foreground">Recent activity</h2><p className="mt-1 text-sm text-default-500">Latest enquiries and orders for this perspective.</p></div></CardHeader>
           <Divider className="mt-4" />
           <CardBody className="space-y-1 p-4">
             {isLoading ? Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-14 w-full rounded-xl" />) : activity.length === 0 ? (
@@ -168,7 +223,7 @@ export default function AssociateDashboard({
 
       {model.showFunctions && (
         <section aria-labelledby="company-functions-title" className="space-y-4">
-          <div><h2 id="company-functions-title" className="text-lg font-black tracking-tight text-foreground">Company functions</h2><p className="mt-1 text-sm text-default-500">Execution panels based on your company priorities and capabilities.</p></div>
+          <div><h2 id="company-functions-title" className="text-lg font-black tracking-tight text-foreground">{perspective === "provided" ? "Capabilities you provide" : "Capabilities you are seeking"}</h2><p className="mt-1 text-sm text-default-500">Actions based on this profile and its priority order.</p></div>
           {!associateCompanyId ? (
             <Card className="border border-warning-500/25 bg-warning-500/10 shadow-none"><CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-medium text-foreground">Link a company to load service and selling functions.</p><Button color="warning" variant="flat" onPress={() => router.push("/dashboard/company")}>Open company</Button></CardBody></Card>
           ) : companyFunctionDashboard.isLoading ? (
@@ -177,7 +232,7 @@ export default function AssociateDashboard({
             <Card className="border border-danger-500/25 bg-danger-500/10 shadow-none"><CardBody className="text-sm text-danger">Company functions could not be loaded. Try refreshing this page.</CardBody></Card>
           ) : companyFunctionDashboard.orderedFunctions.length === 0 ? (
             <Card className="border db-border-subtle shadow-none"><CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-default-500">No company functions are configured yet.</p><Button variant="flat" onPress={() => router.push("/dashboard/company")}>Configure company</Button></CardBody></Card>
-          ) : companyFunctionDashboard.orderedFunctions.map((fn: any) => <CompanyFunctionComponent key={fn._id} name={fn.name} slug={fn.slug} priorityRank={fn.priorityRank} metrics={fn.metrics} recentExecutionInquiries={fn.recentExecutionInquiries} recentOrders={fn.recentOrders} />)}
+          ) : companyFunctionDashboard.orderedFunctions.map((fn: any) => <CompanyFunctionComponent key={fn._id} name={fn.name} slug={fn.slug} priorityRank={fn.priorityRank} metrics={fn.metrics} recentExecutionInquiries={fn.recentExecutionInquiries} recentOrders={fn.recentOrders} perspective={perspective} />)}
         </section>
       )}
     </div>

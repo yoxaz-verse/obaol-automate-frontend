@@ -52,6 +52,14 @@ const Dashboard: NextPage = () => {
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const providedCapabilities = user?.providedCapabilities || [];
   const soughtCapabilities = user?.soughtCapabilities || [];
+  const perspectiveStorageKey = `obaol:associate-dashboard-perspective:${userId || "anonymous"}`;
+  const [associatePerspective, setAssociatePerspective] = useState<"provided" | "sought">(() => {
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem(`obaol:associate-dashboard-perspective:${userId || "anonymous"}`);
+      if (stored === "provided" || stored === "sought") return stored;
+    }
+    return providedCapabilities.length ? "provided" : "sought";
+  });
   const companyCapabilities = Array.from(new Set([...providedCapabilities, ...soughtCapabilities]));
   const hasBuyingCapability = providedCapabilities.includes("buyer") || soughtCapabilities.includes("seller") || companyCapabilities.includes("sourcing");
   const hasSellingCapability = providedCapabilities.includes("seller") || soughtCapabilities.includes("buyer");
@@ -106,7 +114,34 @@ const Dashboard: NextPage = () => {
     isAdmin,
     isAssociate,
     isOperatorUser,
+    perspective: isAssociate ? associatePerspective : undefined,
   });
+
+  useEffect(() => {
+    if (!isAssociate) return;
+    const hasProvided = providedCapabilities.length > 0;
+    const hasSought = soughtCapabilities.length > 0;
+    const stored = window.localStorage.getItem(perspectiveStorageKey);
+    const preferred = stored === "provided" || stored === "sought" ? stored : associatePerspective;
+    const next = preferred === "provided" && hasProvided
+      ? "provided"
+      : preferred === "sought" && hasSought
+        ? "sought"
+        : hasProvided
+          ? "provided"
+          : "sought";
+    if (next !== associatePerspective) {
+      setAssociatePerspective(next);
+      window.localStorage.setItem(perspectiveStorageKey, next);
+    }
+  }, [associatePerspective, isAssociate, perspectiveStorageKey, providedCapabilities.length, soughtCapabilities.length]);
+
+  const changeAssociatePerspective = (next: "provided" | "sought") => {
+    const available = next === "provided" ? providedCapabilities.length > 0 : soughtCapabilities.length > 0;
+    if (!available) return;
+    setAssociatePerspective(next);
+    window.localStorage.setItem(perspectiveStorageKey, next);
+  };
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedCompanyLookup(companyLookup.trim()), 250);
@@ -566,6 +601,9 @@ const Dashboard: NextPage = () => {
       buyingCount={Number(associateMetrics.totalInquiries || associateBuyingCount) || 0}
       sellingCount={associateSellingCount}
       isLoading={dashboardSummaryQuery.isLoading}
+      perspective={associatePerspective}
+      onPerspectiveChange={changeAssociatePerspective}
+      welcomeName={String(welcomeName || user?.email || "Associate")}
     />
   );
 
@@ -773,7 +811,7 @@ const Dashboard: NextPage = () => {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-8">
-      <Card className={`border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm overflow-hidden ${isAssociate ? "rounded-2xl" : "rounded-[2.5rem]"}`}>
+      {!isAssociate && <Card className="border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm overflow-hidden rounded-[2.5rem]">
         <CardBody className={isAssociate ? "p-5 sm:p-6" : "p-8"}>
           <div className="flex flex-col gap-6">
             {/* Top Row: Workspace Status & Role Badges */}
@@ -813,7 +851,7 @@ const Dashboard: NextPage = () => {
             </div>
           </div>
         </CardBody>
-      </Card>
+      </Card>}
 
       {executiveLoading && !isAssociate ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

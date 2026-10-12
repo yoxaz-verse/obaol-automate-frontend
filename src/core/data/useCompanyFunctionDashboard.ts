@@ -40,10 +40,12 @@ const emptyMetrics: FunctionMetrics = {
 export const useCompanyFunctionDashboard = ({
   companyId,
   isAdmin,
+  perspective = "provided",
   enabled = true,
 }: {
   companyId?: string;
   isAdmin: boolean;
+  perspective?: "provided" | "sought";
   enabled?: boolean;
 }) => {
   const canLoad = enabled && Boolean(companyId);
@@ -83,11 +85,13 @@ export const useCompanyFunctionDashboard = ({
   const orderedFunctions = useMemo(() => {
     if (!company) return [];
 
-    const priorityIds = Array.isArray(company?.providedCapabilityPriorities)
-      ? company.providedCapabilityPriorities.map((id: any) => String(id))
+    const priorityKey = perspective === "sought" ? "soughtCapabilityPriorities" : "providedCapabilityPriorities";
+    const capabilityKey = perspective === "sought" ? "soughtCapabilities" : "providedCapabilities";
+    const priorityIds = Array.isArray(company?.[priorityKey])
+      ? company[priorityKey].map((id: any) => String(id))
       : [];
-    const capabilitySlugs = Array.isArray(company?.providedCapabilities)
-      ? company.providedCapabilities.map((slug: any) => String(slug || "").toLowerCase())
+    const capabilitySlugs = Array.isArray(company?.[capabilityKey])
+      ? company[capabilityKey].map((slug: any) => String(slug || "").toLowerCase())
       : [];
 
     const byId = new Map(functions.map((fn) => [String(fn._id), fn]));
@@ -104,7 +108,7 @@ export const useCompanyFunctionDashboard = ({
       .sort((a, b) => Number(a.orderIndex || 0) - Number(b.orderIndex || 0));
 
     return [...prioritized, ...remaining];
-  }, [company, functions]);
+  }, [company, functions, perspective]);
 
   const metricsById = useMemo(() => {
     const map = new Map<string, FunctionMetricsRow>();
@@ -117,8 +121,9 @@ export const useCompanyFunctionDashboard = ({
 
   const enrichedFunctions = useMemo(() => {
     return orderedFunctions.map((fn) => {
-      const priorityIds = Array.isArray(company?.providedCapabilityPriorities)
-        ? company.providedCapabilityPriorities.map((id: any) => String(id))
+      const priorityKey = perspective === "sought" ? "soughtCapabilityPriorities" : "providedCapabilityPriorities";
+      const priorityIds = Array.isArray(company?.[priorityKey])
+        ? company[priorityKey].map((id: any) => String(id))
         : [];
       const priorityIndex = priorityIds.indexOf(String(fn._id));
       const metricsRow =
@@ -132,7 +137,7 @@ export const useCompanyFunctionDashboard = ({
         recentOrders: metricsRow?.recentOrders || [],
       };
     });
-  }, [company, orderedFunctions, metricsById]);
+  }, [company, orderedFunctions, metricsById, perspective]);
 
   return {
     company,

@@ -98,6 +98,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
   assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
   assert.equal(explorer.includes('data-execution-stage-band="true"'), true);
+  assert.equal(explorer.includes('className="hidden border-y border-default-200/70 bg-default-50/55 py-7 dark:bg-default-50/[0.025] md:block lg:py-8"'), true);
   assert.equal(explorer.includes('data-hero-assistant-safe-zone="true"'), true);
   assert.equal(explorer.includes('data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="mt-'), false);
   assert.equal(explorer.includes("data-execution-phase={phase.phase.toLowerCase()}"), true);

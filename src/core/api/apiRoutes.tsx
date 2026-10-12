@@ -239,6 +239,7 @@ export const variantRateRoutes = addCustomRoutes(
     count: `${BASE_PATHS.VARIANT_RATE}/associateCompany`,
     marketplaceStats: `${BASE_PATHS.VARIANT_RATE}/marketplace-stats`,
     reveal: (id: string) => `${BASE_PATHS.VARIANT_RATE}/${id}/reveal`,
+    renew: (id: string) => `${BASE_PATHS.VARIANT_RATE}/${id}/renew`,
     rateInterestAnalytics: `${BASE_PATHS.VARIANT_RATE}/rate-interest/analytics`,
   }
 );

@@ -47,6 +47,7 @@ import {
   FiMenu,
   FiMoreHorizontal,
   FiSearch,
+  FiRefreshCw,
 } from "react-icons/fi";
 import { LuMessageSquare, LuBox } from "react-icons/lu";
 import { motion } from "framer-motion";
@@ -1406,6 +1407,20 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     start trading.
                   </p>
                 </div>
+              ) : finalTableData.length === 0 &&
+                isMarketplaceView &&
+                additionalParams?.isLive === false ? (
+                <div className="flex flex-col items-center justify-center rounded-[2rem] border border-white/5 bg-content1/30 px-6 py-20 text-center shadow-inner backdrop-blur-md">
+                  <div className="mb-6 rounded-[2rem] border border-divider bg-content2 p-6 text-default-400 shadow-xl">
+                    <FiRefreshCw size={46} strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-xl font-black uppercase tracking-tight text-foreground">
+                    No Recent Past Listings
+                  </h3>
+                  <p className="mt-2 max-w-[390px] text-sm leading-relaxed text-default-500">
+                    Past listings remain visible here for 20 days after they are unpublished. Owners can renew a listing to make it live again for another 20 days.
+                  </p>
+                </div>
               ) : finalTableData.length === 0 ? (
                 <div className="relative w-full flex flex-col items-center justify-center py-16 sm:py-20 px-6 text-center bg-gradient-to-b from-content1/80 via-content1/40 to-content1/10 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 dark:border-white/5 shadow-2xl overflow-hidden my-2 group">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-obaol-500/10 dark:bg-obaol-500/15 blur-3xl rounded-full pointer-events-none scale-125 transition-all duration-700 group-hover:scale-150" />
@@ -2679,12 +2694,55 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
     },
   });
 
+  const renewMutation = useMutation({
+    mutationFn: async () => postData(variantRateRoutes.renew(variantRate._id), {}),
+    onSuccess: () => {
+      setIsSelected(true);
+      setLoading(false);
+      queryClient.invalidateQueries();
+      showToastMessage({
+        type: "success",
+        message: "Listing renewed and live for another 20 days.",
+        position: "top-right",
+      });
+      refetchData?.();
+    },
+    onError: (error: any) => {
+      setLoading(false);
+      showToastMessage({
+        type: "error",
+        message: error?.response?.data?.message || "Unable to renew this listing.",
+        position: "top-right",
+      });
+    },
+  });
+
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStatus = e.target.checked;
     setIsSelected(newStatus);
     setLoading(true);
     updateMutation.mutate(newStatus);
   };
+
+  const isVariantRate = apiEndpoint.includes("variant-rates");
+  if (!isSelected && isVariantRate) {
+    return (
+      <Button
+        size="sm"
+        color="warning"
+        variant="flat"
+        isLoading={loading || renewMutation.isPending}
+        startContent={<FiRefreshCw size={14} />}
+        className="h-8 font-black uppercase tracking-wider"
+        onPress={() => {
+          setLoading(true);
+          renewMutation.mutate();
+        }}
+      >
+        Renew
+      </Button>
+    );
+  }
 
   return (
     <div

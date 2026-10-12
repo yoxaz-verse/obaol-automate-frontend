@@ -45,6 +45,19 @@ test("customer support exposes normalized call and WhatsApp actions", () => {
   assert.equal(links.includes("https://wa.me/"), true);
 });
 
+test("warehouse navigation is capability gated and available cards expose phone contact", () => {
+  const privateRoute = read("../src/components/Login/private-route.tsx");
+  const warehousePage = read("../src/app/dashboard/warehouses/page.tsx");
+  const sidebar = read("../src/components/dashboard/Sidebar.tsx");
+
+  assert.equal(privateRoute.includes("hasWarehouseWorkspaceAccess"), true);
+  assert.equal(privateRoute.includes("Warehouse workspace"), true);
+  assert.equal(sidebar.includes("capabilities"), true);
+  assert.equal(warehousePage.includes("normalizeDialPhone"), true);
+  assert.equal(warehousePage.includes("Contact unavailable"), true);
+  assert.equal(warehousePage.includes("tel:${normalizeDialPhone(phone)}"), true);
+});
+
 test("notifications use the compact inbox and role-aware composer", () => {
   const page = read("../src/app/dashboard/notifications/page.tsx");
   assert.equal(page.includes("Telemetry Inbox"), false);

@@ -34,6 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         String(user?.role || ""),
         [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
     );
+    const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
     const sidebarSections = getDashboardSidebarSections(
         filteredOptions as any[],
@@ -80,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const handleOptionClick = (e: React.MouseEvent, optionLink: string) => {
         e.preventDefault();
         if (isOnboardingLocked) return;
-        if (isComingSoonDashboardNavigation(optionLink, user?.role)) return;
+        if (isComingSoonDashboardNavigation(optionLink, user?.role, capabilities)) return;
         if (pathname === optionLink) return;
 
         play("nav");
@@ -103,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     }, [activeAdminGroupLabel]);
 
     const renderOption = (opt: (typeof filteredOptions)[number], nested = false) => {
-        const isComingSoon = isComingSoonDashboardNavigation(opt.link, user?.role);
+        const isComingSoon = isComingSoonDashboardNavigation(opt.link, user?.role, capabilities);
         const isActive = !isComingSoon && isDashboardRouteActive(pathname, opt.link);
         const badgeCount = Number(dotMap[opt.link] || 0);
         const isDisabled = isOnboardingLocked || isComingSoon;

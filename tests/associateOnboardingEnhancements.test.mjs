@@ -97,7 +97,7 @@ test("associate onboarding captures independent provided and sought capability p
   assert.equal(form.includes('buyer: <LuShoppingBag />'), true);
   assert.equal(form.includes('seller: <LuStore />'), true);
   assert.equal(form.includes('className="grid grid-cols-1 gap-2.5 sm:grid-cols-2"'), true);
-  assert.equal(form.includes("Build a clearer company profile"), true);
+  assert.equal(form.includes("Select 1–6 in each section"), true);
   assert.equal(form.includes('href="/dashboard/company"'), true);
   assert.equal(form.includes("getCompanyFunctionPerspectiveDescription(fn?.slug, kind, fn?.description)"), true);
   for (const slug of ["buyer", "seller", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk", "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics"]) {
@@ -118,7 +118,7 @@ test("associate onboarding removes duplicate participation modes", () => {
   assert.equal(form.includes('grid grid-cols-1 gap-2.5 sm:grid-cols-2'), true);
   assert.equal(form.includes("Make priority"), false);
   assert.equal(form.includes("Remove priority"), false);
-  assert.equal(form.includes("Your first three selections become priorities automatically"), true);
+  assert.equal(form.includes("Your first three choices become priorities"), true);
 });
 
 test("Associate and Operator onboarding share readable progress and compact referral controls", () => {
@@ -133,10 +133,34 @@ test("Associate and Operator onboarding share readable progress and compact refe
     assert.equal(source.includes("onboarding"), true);
   }
   assert.equal(shared.includes("Step {currentStep} of {labels.length}"), true);
-  assert.equal(shared.includes("maxLength={6}"), true);
+  assert.equal(shared.includes("maxLength={8}"), true);
   assert.equal(styles.includes(".onboarding-referral__field { width: 13rem"), true);
   assert.equal(styles.includes(".onboarding-referral__field { width: 100%"), true);
   assert.equal(styles.includes("font-size: 1rem !important"), true);
+  assert.equal(styles.includes("--onboarding-control-height: 2.75rem"), true);
+  assert.equal(styles.includes("--onboarding-control-height: 3rem"), true);
+});
+
+test("onboarding uses concise step purposes and optional contextual guidance", () => {
+  const associate = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  const operator = read("../src/components/onboarding/OperatorOnboardingForm.tsx");
+  const layout = read("../src/components/Auth/AuthLayout.tsx");
+  const dashboardPage = read("../src/app/dashboard/onboarding/page.tsx");
+
+  for (const purpose of [
+    "Confirm your contact details so we can verify your account.",
+    "Link an existing company or register the business you represent.",
+    "Tell us what your company provides and seeks to improve discovery and personalization.",
+    "Check the information below before sending it for verification.",
+  ]) assert.equal(associate.includes(purpose), true, `missing Associate purpose: ${purpose}`);
+
+  assert.equal(operator.includes("Secure your account and add a referral code if you have one."), true);
+  assert.equal(operator.includes("Add your operating location so OBAOL can prepare the right workspace."), true);
+  assert.equal(layout.includes('<details className="onboarding-mobile-guidance">'), true);
+  assert.equal(layout.includes("!compact && !!leftPanel.guidanceSections?.length"), true);
+  assert.equal(dashboardPage.includes("Complete your OBAOL setup"), false);
+  assert.equal(associate.includes("Why this process matters"), false);
+  assert.equal(operator.includes("Why this process matters"), false);
 });
 
 test("authenticated onboarding locks the session login email without disabling it", () => {

@@ -14,6 +14,7 @@ import { ACTION_ROUTES, loadShortcuts, ShortcutAction } from "@/utils/shortcutCo
 import dynamic from "next/dynamic";
 import { AuthenticatedProviders } from "@/app/authenticated-provider";
 import { canAccessDashboardRoute } from "@/utils/dashboardAccess";
+import { isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import DashboardContextBar from "@/components/dashboard/DashboardContextBar";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
@@ -160,7 +161,8 @@ function DashboardLayoutContent({
 
       const [action] = match;
       const route = ACTION_ROUTES[action];
-      if (!route || !canAccessDashboardRoute({ path: route, role: user?.role })) return;
+      const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
+      if (!route || !canAccessDashboardRoute({ path: route, role: user?.role }) || isComingSoonDashboardNavigation(route, user?.role, capabilities)) return;
 
       event.preventDefault();
       router.push(route);
@@ -168,7 +170,7 @@ function DashboardLayoutContent({
 
     window.addEventListener("keydown", handler, { capture: true });
     return () => window.removeEventListener("keydown", handler, { capture: true } as any);
-  }, [router, user?.role]);
+  }, [router, user?.providedCapabilities, user?.role, user?.soughtCapabilities]);
 
   if (!isMounted || loading) {
     return (

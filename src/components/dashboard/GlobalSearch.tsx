@@ -6,7 +6,7 @@ import { LuSearch, LuArrowRight, LuLayers } from "react-icons/lu";
 import { useRouter } from "next/navigation";
 import { sidebarOptions } from "@/utils/utils";
 import AuthContext from "@/context/AuthContext";
-import { getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
+import { getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 
 export default function GlobalSearch() {
   const [query, setQuery] = useState("");
@@ -15,6 +15,7 @@ export default function GlobalSearch() {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useContext(AuthContext);
+  const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
 
   const accessibleOptions = getRoleFilteredSidebarOptions(
     sidebarOptions as any[],
@@ -86,7 +87,9 @@ export default function GlobalSearch() {
                  <button
                    key={option.link}
                    onClick={() => handleSelect(option.link)}
-                   className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-primary/5 group transition-all text-left outline-none focus:bg-primary/5"
+                   disabled={isComingSoonDashboardNavigation(option.link, user?.role, capabilities)}
+                   aria-label={isComingSoonDashboardNavigation(option.link, user?.role, capabilities) ? `${option.name}, coming soon` : option.name}
+                   className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-primary/5 group transition-all text-left outline-none focus:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-55"
                  >
                    <div className="flex flex-col">
                      <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
@@ -96,7 +99,11 @@ export default function GlobalSearch() {
                        Redirection: {option.link.replace("/dashboard/", "").replace("-", " ")}
                      </span>
                    </div>
-                   <LuArrowRight size={14} className="text-default-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
+                   {isComingSoonDashboardNavigation(option.link, user?.role, capabilities) ? (
+                     <span className="rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-obaol-700 dark:text-obaol-300">Coming soon</span>
+                   ) : (
+                     <LuArrowRight size={14} className="text-default-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
+                   )}
                  </button>
                ))}
             </div>

@@ -7,7 +7,7 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { LuWarehouse, LuPencil, LuPlus } from "react-icons/lu";
 import { BsBoxes } from "react-icons/bs";
-import { FiTrendingUp, FiTrendingDown, FiAlertCircle, FiLoader, FiX, FiActivity } from "react-icons/fi";
+import { FiTrendingUp, FiTrendingDown, FiAlertCircle, FiLoader, FiX, FiActivity, FiPhoneCall } from "react-icons/fi";
 import { TbContainer, TbArrowsUpDown } from "react-icons/tb";
 import { MdOutlineAssignment } from "react-icons/md";
 import {
@@ -59,6 +59,7 @@ const EMPTY_WAREHOUSE = {
     location: null as Warehouse["location"],
 };
 const EMPTY_MOVEMENT = { warehouseId: "", quantity: 0, note: "" };
+const normalizeDialPhone = (value: string) => String(value || "").trim().replace(/[\s()-]/g, "");
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string | number; color: string }) {
@@ -241,6 +242,15 @@ export default function WarehousesPage() {
         setShowEditWarehouse(true);
     };
 
+    const contactWarehouse = (wh: Warehouse) => {
+        const phone = String(wh.contactPhone || "").trim();
+        if (!phone) {
+            showToastMessage({ type: "warning", message: "Contact number is not available for this warehouse yet." });
+            return;
+        }
+        window.location.href = `tel:${normalizeDialPhone(phone)}`;
+    };
+
     // ── Render ─────────────────────────────────────────────────────────────────
     return (
         <div className="flex flex-col w-full gap-5">
@@ -366,6 +376,19 @@ export default function WarehousesPage() {
                                                             ))}
                                                         </div>
                                                     )}
+                                                    <div className="pt-2">
+                                                        <Button
+                                                            color="warning"
+                                                            size="sm"
+                                                            fullWidth
+                                                            isDisabled={!String(wh.contactPhone || "").trim()}
+                                                            onPress={() => contactWarehouse(wh)}
+                                                            startContent={<FiPhoneCall size={14} />}
+                                                            className="font-bold"
+                                                        >
+                                                            {wh.contactPhone ? "Contact" : "Contact unavailable"}
+                                                        </Button>
+                                                    </div>
                                                 </CardBody>
                                             </Card>
                                         ))}

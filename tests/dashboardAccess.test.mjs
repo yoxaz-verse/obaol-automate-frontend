@@ -9,7 +9,9 @@ import {
   getAccessibleDashboardRoutes,
   getDashboardAdminGroups,
   getDashboardRoute,
+  hasWarehouseWorkspaceAccess,
   isDashboardRouteActive,
+  isWarehouseDashboardPath,
   normalizeDashboardRole,
 } from "../src/utils/dashboardAccess.ts";
 
@@ -120,7 +122,7 @@ test("Team receives Operator routes without Admin routes", () => {
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/approvals", role: "team" }), false);
 });
 
-test("Warehouse Booking stays visible regardless of priority interests", () => {
+test("Warehouse routes stay visible while capability controls their coming-soon state", () => {
   const interestedLinks = new Set(getAccessibleDashboardRoutes({
     role: "Associate",
         capabilities: ["warehouse-storage"],
@@ -143,6 +145,17 @@ test("Warehouse Booking stays visible regardless of priority interests", () => {
   assert.equal(operatorWithoutInterest.has("/dashboard/warehouse-rent"), true);
   assert.equal(adminWithoutInterest.has("/dashboard/warehouse-rent"), true);
   assert.equal(uninterestedLinks.has("/dashboard/quality-labs"), true);
+  assert.equal(getDashboardRoute("/dashboard/warehouses")?.section, "Warehouse");
+  assert.equal(getDashboardRoute("/dashboard/warehouse-rent")?.taskGroup, "Warehouse");
+
+  assert.equal(hasWarehouseWorkspaceAccess("Associate", ["warehouse-storage"]), true);
+  assert.equal(hasWarehouseWorkspaceAccess("Associate", ["testing"]), false);
+  assert.equal(hasWarehouseWorkspaceAccess("Admin", []), true);
+  assert.equal(hasWarehouseWorkspaceAccess("Operator", []), true);
+  assert.equal(hasWarehouseWorkspaceAccess("Team", []), true);
+  assert.equal(isWarehouseDashboardPath("/dashboard/warehouses"), true);
+  assert.equal(isWarehouseDashboardPath("/dashboard/warehouse-rent"), true);
+  assert.equal(isWarehouseDashboardPath("/dashboard/warehouses/location"), true);
 });
 
 test("every dashboard page has an explicit access policy", () => {

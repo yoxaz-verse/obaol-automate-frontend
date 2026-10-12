@@ -68,7 +68,7 @@ export function ReferralCodeField({
           <span id="onboarding-referral-label">{label}</span>
           <span className="onboarding-optional-badge">Optional</span>
         </div>
-        <p>Use an eight-character operator or associate-company code. Company referrals unlock one-level trade rewards after activation.</p>
+        <p>Enter the eight-character referral code shared with you, if you have one.</p>
       </div>
       <Input
         aria-label={`${label} (optional)`}
@@ -85,7 +85,7 @@ export function ReferralCodeField({
         className="onboarding-referral__field"
         classNames={{
           input: "text-base font-semibold uppercase tracking-[0.16em]",
-          inputWrapper: "h-[50px] rounded-xl border-default-200 bg-white shadow-none dark:bg-content1",
+          inputWrapper: "rounded-xl border-default-200 bg-white shadow-none dark:bg-content1",
         }}
       />
     </section>

@@ -714,7 +714,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             return (
               <button key={`${kind}-${fnId}`} type="button" disabled={disabled}
                 aria-pressed={selected} onClick={() => updateCompanyFunctionSelection(kind, fnId)}
-                className={`flex min-h-[76px] touch-manipulation items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-white hover:border-primary-500/50 dark:bg-content1"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
+                className={`flex min-h-[72px] touch-manipulation items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${selected ? "border-primary-500 bg-primary-500/10 text-primary-700" : "border-default-200 bg-white hover:border-primary-500/50 dark:bg-content1"} ${disabled ? "cursor-not-allowed opacity-40" : ""}`}>
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg ${selected ? "bg-obaol-500 text-white" : "bg-default-100 text-default-500"}`}>{capabilityIcon(String(fn?.slug || ""))}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-bold leading-5">{fn?.name}</span>
@@ -730,7 +730,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         {error && <p className="mt-2 text-xs font-semibold text-danger-500">{error}</p>}
         <div className="mt-4">
           <p className="text-sm font-bold text-foreground">Top priorities</p>
-          <p className="mt-1 text-xs leading-5 text-default-500">Your first three selections become priorities automatically. Reorder them if needed.</p>
           {priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => {
             return (
             <div key={`${kind}-priority-${id}`} className="flex items-center justify-between gap-2 rounded-lg border border-default-200 bg-content1/60 px-3 py-2">
@@ -740,7 +739,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                 <button type="button" aria-label={`Move ${companyFunctionNameById.get(id)} down`} onClick={() => moveCompanyFunctionPriority(kind, id, "down")} disabled={index === priorities.length - 1} className="rounded-md p-1 focus-visible:ring-2 focus-visible:ring-obaol-500 disabled:opacity-30"><FiChevronDown /></button>
               </span>
             </div>
-          )})}</div> : <p className="mt-2 text-xs text-default-400">Select a capability above to create your priority order.</p>}
+          )})}</div> : <p className="mt-1 text-xs text-default-400">Priorities appear after you select a capability.</p>}
         </div>
       </section>
     );
@@ -844,10 +843,17 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const isNewCompany = isCompanyFlow && formData.companyMode === "new";
 
   const stepTitle = useMemo(() => {
-    if (currentStep === 1) return "Associate Profile";
-    if (currentStep === 2) return "Company Setup";
-    if (currentStep === 3) return "Select Company Capabilities";
-    return "Verification & Submit";
+    if (currentStep === 1) return "Your profile";
+    if (currentStep === 2) return "Your company";
+    if (currentStep === 3) return "Company capabilities";
+    return "Review and submit";
+  }, [currentStep]);
+
+  const stepPurpose = useMemo(() => {
+    if (currentStep === 1) return "Confirm your contact details so we can verify your account.";
+    if (currentStep === 2) return "Link an existing company or register the business you represent.";
+    if (currentStep === 3) return "Tell us what your company provides and seeks to improve discovery and personalization.";
+    return "Check the information below before sending it for verification.";
   }, [currentStep]);
 
   const getStepErrors = (step: StepKey) => {
@@ -1245,42 +1251,24 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
   return (
     <AuthLayout
-      title={`${isOnboarding ? "Associate Onboarding" : "Associate Registration"} • Step ${currentStep}/4`}
-      subtitle={stepTitle}
-      cardMaxWidthClass={isOnboarding ? "max-w-full" : "max-w-[620px]"}
+      title={stepTitle}
+      subtitle={stepPurpose}
+      cardMaxWidthClass={isOnboarding ? "max-w-[1120px]" : "max-w-[720px]"}
       embedded={isOnboarding}
       onboarding
       leftPanel={{
-        headline: "Set up your company for",
-        highlight: "BUILD A CLEARER COMPANY PROFILE",
-        description: "This guided setup helps us verify your business, align it to the right trade capabilities, and prepare the dashboard around the way you actually operate.",
+        headline: "Associate",
+        highlight: "COMPANY SETUP",
+        description: "Verify your account and connect it to the company you represent.",
         guidanceSections: [
           {
-            title: "Why this process matters",
-            body: "Verified identity, contact, and company details reduce approval back-and-forth and help us keep trade access controlled."
+            title: "Account verification",
+            body: "Accurate contact and company details help us review your account without unnecessary follow-up."
           },
           {
-            title: "What this helps us prepare",
-            body: "Your company mode, location, and capability choices tell OBAOL which workflows, documents, and execution roles to unlock first."
-          },
-          {
-            title: "After approval you can",
-            body: "Enter the dashboard with a cleaner profile, role-aware navigation, and the right starting point for buying, selling, or trade services."
+            title: "Company profile",
+            body: "Your capability choices improve company discovery, matching, and dashboard recommendations."
           }
-        ],
-        points: [
-          "Company verification",
-          "Capability alignment",
-          "Faster review readiness",
-          "Dashboard unlock"
-        ],
-        tags: [
-          "Buyers",
-          "Sellers",
-          "Service Partners",
-          "Exporters",
-          "Warehouses",
-          "Logistics"
         ],
         footer: "Progress saved automatically",
         knowMoreLink: "/roles/associate"
@@ -1376,7 +1364,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     isInvalid={!!errors.name}
                     errorMessage={errors.name}
                     startContent={<IoPerson className="text-default-400" />}
-                    classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
+                    classNames={{ inputWrapper: "rounded-xl border-default-200" }}
                   />
                   <div className="flex flex-col gap-2">
                     <Input
@@ -1400,7 +1388,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       description={isLoginEmailLocked ? LOGIN_EMAIL_HELP : undefined}
                       className={isLoginEmailLocked ? "onboarding-locked-field" : undefined}
                       classNames={{
-                        inputWrapper: "rounded-xl border-default-200 h-12",
+                        inputWrapper: "rounded-xl border-default-200",
                         description: "text-xs leading-5 text-default-500",
                       }}
                     />
@@ -1460,7 +1448,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           isInvalid={!!errors.password}
                           errorMessage={errors.password}
                           startContent={<IoLockClosed className="text-default-400" />}
-                          classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
+                          classNames={{ inputWrapper: "rounded-xl border-default-200" }}
                           endContent={
                             <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((prev) => !prev)} className="focus:outline-none p-2">
                               {showPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
@@ -1491,7 +1479,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         isInvalid={!!errors.confirmPassword}
                         errorMessage={errors.confirmPassword}
                         startContent={<IoLockClosed className="text-default-400" />}
-                        classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
+                        classNames={{ inputWrapper: "rounded-xl border-default-200" }}
                         endContent={
                           <button type="button" aria-label={showConfirmPassword ? "Hide confirmed password" : "Show confirmed password"} onClick={() => setShowConfirmPassword((prev) => !prev)} className="focus:outline-none p-2">
                             {showConfirmPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
@@ -1625,7 +1613,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             errorMessage={errors.associateCompanyId}
                             emptyContent={companySearchQuery.isError ? "Company search failed. Please retry." : "No companies found."}
                             description={companySearch.trim().length < 3 ? "Enter 3 or more characters; the full company directory is never shown." : companySearchQuery.isError ? "Company search failed. Please retry." : undefined}
-                            classNames={{ base: "rounded-xl", inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500 data-[focus=true]:ring-2 data-[focus=true]:ring-obaol-500/20" }}
+                            classNames={{ base: "rounded-xl", inputWrapper: "border-default-200 data-[focus=true]:border-obaol-500 data-[focus=true]:ring-2 data-[focus=true]:ring-obaol-500/20" }}
                           >
                             {(item: any) => (
                               <AutocompleteItem key={item._id} textValue={item.name}>
@@ -1649,7 +1637,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             isInvalid={!!errors.companyName}
                             errorMessage={errors.companyName}
                             startContent={<IoBusiness className="text-default-400" />}
-                            classNames={{ inputWrapper: "h-12 border-default-200 group-data-[focus=true]:border-obaol-500 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-obaol-500/20" }}
+                            classNames={{ inputWrapper: "border-default-200 group-data-[focus=true]:border-obaol-500 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-obaol-500/20" }}
                           />
                           <Input
                             label="Corporate Email"
@@ -1662,7 +1650,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             isInvalid={!!errors.companyEmail}
                             errorMessage={errors.companyEmail}
                             startContent={<IoMail className="text-default-400" />}
-                            classNames={{ inputWrapper: "h-12 border-default-200" }}
+                            classNames={{ inputWrapper: "border-default-200" }}
                           />
                           <div className="md:col-span-2">
                             <div data-invalid={Boolean(errors.companyPhone)} className={`associate-control-shell rounded-xl border p-0.5 overflow-hidden transition-all ${errors.companyPhone ? "border-danger" : "border-default-200"}`}>
@@ -1734,7 +1722,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 errorMessage={errors.companyCountry}
                                 placeholder="Search country..."
                                 startContent={<IoEarth className="text-default-400" />}
-                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
+                                classNames={{ inputWrapper: "border-default-200 data-[focus=true]:border-obaol-500" }}
                               >
                                 {(item: any) => <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>}
                               </AutocompleteAny>
@@ -1747,7 +1735,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 onValueChange={(v) => setField("companyLegalNumber", v)}
                                 isInvalid={!!errors.companyLegalNumber}
                                 errorMessage={errors.companyLegalNumber}
-                                classNames={{ inputWrapper: "h-12 border-default-200" }}
+                                classNames={{ inputWrapper: "border-default-200" }}
                               />
                               <Textarea
                                 label="Legal Information"
@@ -1780,7 +1768,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                   maxLength={15}
                                   isInvalid={!!errors.companyGstin}
                                   errorMessage={errors.companyGstin}
-                                  classNames={{ inputWrapper: "h-12 border-default-200" }}
+                                  classNames={{ inputWrapper: "border-default-200" }}
                                 />
                                 <Input
                                   label="IEC Code (Optional)"
@@ -1792,7 +1780,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                   maxLength={10}
                                   isInvalid={!!errors.companyIecCode}
                                   errorMessage={errors.companyIecCode}
-                                  classNames={{ inputWrapper: "h-12 border-default-200" }}
+                                  classNames={{ inputWrapper: "border-default-200" }}
                                 />
                                 <Input
                                   label="CIN (Optional)"
@@ -1805,7 +1793,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                   isInvalid={!!errors.companyCin}
                                   errorMessage={errors.companyCin}
                                   className="md:col-span-2"
-                                  classNames={{ inputWrapper: "h-12 border-default-200" }}
+                                  classNames={{ inputWrapper: "border-default-200" }}
                                 />
                               </div>
                               <AutocompleteAny
@@ -1820,7 +1808,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 startContent={<IoSearch className="text-default-400" />}
                                 isInvalid={!!errors.companyState}
                                 errorMessage={errors.companyState}
-                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
+                                classNames={{ inputWrapper: "border-default-200 data-[focus=true]:border-obaol-500" }}
                               >
                                 {states.map((item: any) => (
                                   <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>
@@ -1839,7 +1827,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 isInvalid={!!errors.companyDistrict}
                                 errorMessage={errors.companyDistrict}
                                 isDisabled={!formData.companyState}
-                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
+                                classNames={{ inputWrapper: "border-default-200 data-[focus=true]:border-obaol-500" }}
                               >
                                 {filteredCompanyDistricts.map((item: any) => (
                                   <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>
@@ -1858,7 +1846,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 isInvalid={!!errors.companyDivision}
                                 errorMessage={errors.companyDivision}
                                 isDisabled={!formData.companyDistrict}
-                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
+                                classNames={{ inputWrapper: "border-default-200 data-[focus=true]:border-obaol-500" }}
                               >
                                 {filteredCompanyDivisions.map((item: any) => (
                                   <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>
@@ -1875,7 +1863,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 isDisabled={!formData.companyDivision}
                                 isLoading={isPincodesLoading}
                                 startContent={<IoLocation className="text-default-400" />}
-                                classNames={{ inputWrapper: "h-12 border-default-200 data-[focus=true]:border-obaol-500" }}
+                                classNames={{ inputWrapper: "border-default-200 data-[focus=true]:border-obaol-500" }}
                               >
                                 {(item: any) => <AutocompleteItem key={item._id} textValue={String(item.pincode || item.name || item.code || "")}>{item.pincode || item.name || item.code}</AutocompleteItem>}
                               </AutocompleteAny>
@@ -1937,7 +1925,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             }}
                             isInvalid={!!errors.associateState}
                             errorMessage={errors.associateState}
-                            classNames={{ trigger: "h-12 border-default-200" }}
+                            classNames={{ trigger: "border-default-200" }}
                           >
                             {states.map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
@@ -1957,7 +1945,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             isInvalid={!!errors.associateDistrict}
                             errorMessage={errors.associateDistrict}
                             isDisabled={!formData.associateState}
-                            classNames={{ trigger: "h-12 border-default-200" }}
+                            classNames={{ trigger: "border-default-200" }}
                           >
                             {filteredAssociateDistricts.map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
@@ -1977,7 +1965,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             isInvalid={!!errors.associateDivision}
                             errorMessage={errors.associateDivision}
                             isDisabled={!formData.associateDistrict}
-                            classNames={{ trigger: "h-12 border-default-200" }}
+                            classNames={{ trigger: "border-default-200" }}
                           >
                             {filteredAssociateDivisions.map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
@@ -1999,7 +1987,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             }}
                             isInvalid={!!errors.associateCountry}
                             errorMessage={errors.associateCountry}
-                            classNames={{ trigger: "h-12 border-default-200" }}
+                            classNames={{ trigger: "border-default-200" }}
                           >
                             {countries.map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
@@ -2021,33 +2009,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   transition={{ duration: 0.3 }}
                   className="flex flex-col gap-6"
                 >
-                  <div className="onboarding-intro-card">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-foreground">
-                      Select 1 to 6 main categories
-                    </h3>
-                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-default-500">
-                      Your choices customize the platform you see after onboarding. Pick up to 3 priorities.
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-primary-500/20 bg-primary-500/5 p-4">
-                    <p className="text-[11px] font-black uppercase tracking-[0.3em] text-primary-600">Build a clearer company profile</p>
-                    <p className="mt-2 text-xs leading-5 text-default-600">
-                      Tell partners what your company provides and what it is seeking. We use these choices to improve discovery, matching, and dashboard personalization.
-                    </p>
-                    <ul className="mt-3 grid grid-cols-1 gap-3 text-xs font-semibold text-default-500 md:grid-cols-2">
-                      <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary-500" />
-                        <span><b>Provides</b> means the activities, products, or services your company offers.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary-500" />
-                        <span><b>Seeking</b> means what your company wants to buy, use, or partner on.</span>
-                      </li>
-                    </ul>
-                    <p className="mt-3 text-xs leading-5 text-default-500">
-                      If you are an agri-tech company, choose the real work you perform instead of a broad “Agri-tech” label. You can update these choices later in Settings → <Link href="/dashboard/company" className="font-bold text-primary-600 underline underline-offset-2">My Company</Link>.
-                    </p>
+                  <div className="onboarding-capability-note">
+                    Select 1–6 in each section. Your first three choices become priorities, and you can edit them later in Settings → <Link href="/dashboard/company">My Company</Link>.
                   </div>
 
 
@@ -2147,8 +2110,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     onValueChange={(v) => setField("contactNotes", v)}
                     classNames={{ inputWrapper: "border-default-200" }}
                   />
-                  <div className="p-6 rounded-[2.5rem] bg-obaol-500/5 border border-obaol-500/20 text-sm text-obaol-600 leading-relaxed font-bold text-center italic shadow-inner">
-                    &quot;Authorized access only. Your details will be reviewed within 24-48 hours. A verification call may be initiated to finalize onboarding.&quot;
+                  <div className="onboarding-review-notice">
+                    We may contact you if any verification detail needs clarification.
                   </div>
                 </motion.div>
               )}
@@ -2168,7 +2131,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
               <Button
                 type="button"
                 variant="flat"
-                className="w-full h-12 rounded-xl font-bold bg-default-100/50 hover:bg-default-200/80 transition-all border border-default-200"
+                className="w-full rounded-xl font-bold bg-default-100/50 hover:bg-default-200/80 transition-all border border-default-200"
                 isDisabled={currentStep === 1 || isLoading || isSubmittingSuccess}
                 onPress={handleBack}
                 startContent={<FiChevronLeft />}
@@ -2180,7 +2143,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
               <Button
                 color="warning"
-                className={`w-full h-12 rounded-xl font-black shadow-none transition-all duration-500
+                className={`w-full rounded-xl font-black shadow-none transition-all duration-500
                   ${isSubmittingSuccess
                     ? "bg-gradient-to-r from-success-500 to-green-600"
                     : "bg-gradient-to-r from-obaol-500 to-amber-600 hover:shadow-none"

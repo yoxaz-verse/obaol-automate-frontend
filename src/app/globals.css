@@ -733,6 +733,7 @@ a {
 .onboarding-form {
   --onboarding-focus: #006fee;
   --onboarding-focus-ring: rgba(0, 111, 238, 0.18);
+  --onboarding-control-height: 2.75rem;
   color: #0f172a;
 }
 
@@ -746,11 +747,45 @@ a {
   color: #334155 !important;
 }
 
+.onboarding-form [data-onboarding-phone-label] {
+  padding-inline: .25rem;
+  font-size: .875rem !important;
+  line-height: 1.25rem !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: #334155 !important;
+}
+
 .dark .onboarding-form [data-slot="label"] { color: #e2e8f0 !important; }
 
 .onboarding-form :is(input, textarea) {
-  font-size: 1rem !important;
-  line-height: 1.5rem !important;
+  font-size: .9375rem !important;
+  line-height: 1.375rem !important;
+}
+
+.onboarding-form [data-slot="input-wrapper"]:has(input),
+.onboarding-form [data-slot="trigger"] {
+  min-height: var(--onboarding-control-height) !important;
+  height: var(--onboarding-control-height) !important;
+  border-radius: .75rem !important;
+}
+
+.onboarding-form [data-slot="input-wrapper"]:has(textarea) {
+  height: auto !important;
+  min-height: 5.5rem !important;
+}
+
+.onboarding-form [data-onboarding-actions] button {
+  min-height: var(--onboarding-control-height) !important;
+  height: var(--onboarding-control-height) !important;
+  border-radius: .75rem !important;
+}
+
+.onboarding-form [data-slot="description"],
+.onboarding-form [data-slot="error-message"] {
+  font-size: .8125rem !important;
+  line-height: 1.125rem !important;
 }
 
 .onboarding-form :is(.text-\[9px\], .text-\[10px\], .text-\[11px\]) {
@@ -943,9 +978,9 @@ a {
 
 .onboarding-section-card {
   border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  background: rgba(248, 250, 252, .72);
-  padding: 1rem;
+  border-radius: .875rem;
+  background: rgba(248, 250, 252, .55);
+  padding: .875rem;
 }
 
 .dark .onboarding-section-card { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.025); }
@@ -967,9 +1002,9 @@ a {
   justify-content: space-between;
   gap: 1rem;
   border: 1px solid #e2e8f0;
-  border-radius: .875rem;
+  border-radius: .75rem;
   background: #f8fafc;
-  padding: 1rem;
+  padding: .75rem;
 }
 
 .dark .onboarding-referral { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.025); }
@@ -996,7 +1031,25 @@ a {
 .onboarding-mobile-guidance > p, .onboarding-mobile-guidance > ul { margin: 0; padding: 0 .75rem .75rem; font-size: .8125rem; line-height: 1.3rem; }
 .onboarding-mobile-guidance ul { display: grid; gap: .5rem; padding-left: 1.75rem; }
 
+.onboarding-capability-note,
+.onboarding-review-notice {
+  border: 1px solid #dbe5f0;
+  border-radius: .75rem;
+  background: #f8fafc;
+  padding: .75rem .875rem;
+  color: #475569;
+  font-size: .8125rem;
+  line-height: 1.25rem;
+}
+
+.onboarding-capability-note a { color: #006fee; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.dark .onboarding-capability-note, .dark .onboarding-review-notice { border-color: #334155; background: #0f172a; color: #cbd5e1; }
+
+[data-auth-embedded] [data-auth-form-card] { max-width: 54rem; width: 100%; }
+
 @media (max-width: 639px) {
+  .onboarding-form { --onboarding-control-height: 3rem; }
+  .onboarding-form :is(input, textarea) { font-size: 1rem !important; line-height: 1.5rem !important; }
   .onboarding-progress { margin-bottom: 1.25rem; }
   .onboarding-progress__summary { display: flex; align-items: center; justify-content: space-between; margin-bottom: .65rem; font-size: .8125rem; }
   .onboarding-progress__summary strong { color: #0f172a; font-size: .875rem; }

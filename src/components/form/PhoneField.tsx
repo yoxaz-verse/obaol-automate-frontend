@@ -52,7 +52,7 @@ export default function PhoneField({
   return (
     <div className={`w-full ${className || ""}`}>
       {label && (
-        <div className="mb-1.5 px-2 text-[10px] font-black uppercase tracking-widest text-default-400">
+        <div data-onboarding-phone-label className="mb-1.5 px-2 text-[10px] font-black uppercase tracking-widest text-default-400">
           {label}
           {isRequired ? <span aria-hidden="true" className="ml-0.5 text-danger">*</span> : null}
         </div>

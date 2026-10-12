@@ -1,0 +1,53 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  CANONICAL_COMPANY_FUNCTION_SLUGS,
+  COMPANY_FUNCTION_PREVIEW_DEFINITIONS,
+  filterCanonicalPreviewFunctions,
+  getPreviewDefinition,
+} from "../src/utils/companyFunctionPreview.ts";
+import { getDashboardRoute } from "../src/utils/dashboardAccess.ts";
+
+test("preview contains the complete canonical taxonomy once", () => {
+  assert.equal(COMPANY_FUNCTION_PREVIEW_DEFINITIONS.length, 11);
+  assert.deepEqual(
+    COMPANY_FUNCTION_PREVIEW_DEFINITIONS.map(({ slug }) => slug),
+    CANONICAL_COMPANY_FUNCTION_SLUGS
+  );
+  assert.equal(new Set(CANONICAL_COMPANY_FUNCTION_SLUGS).size, 11);
+});
+
+test("legacy buying and selling rows do not duplicate canonical buyer and seller", () => {
+  const rows = [
+    { _id: "legacy-buy", slug: "buying" },
+    { _id: "seller", slug: "seller" },
+    { _id: "legacy-sell", slug: "selling" },
+    { _id: "buyer", slug: "buyer" },
+    { _id: "unknown", slug: "unimplemented-function" },
+  ];
+  const filtered = filterCanonicalPreviewFunctions(rows);
+  assert.deepEqual(filtered.map(({ slug }) => slug), ["buyer", "seller"]);
+  assert.deepEqual(filtered.map(({ _id }) => _id), ["buyer", "seller"]);
+});
+
+test("buyer and seller have distinct role-specific primary actions", () => {
+  const buyer = getPreviewDefinition("buyer");
+  const seller = getPreviewDefinition("seller");
+  assert.equal(buyer?.actions.find(({ primary }) => primary)?.href, "/dashboard/marketplace");
+  assert.equal(seller?.actions.find(({ primary }) => primary)?.label, "Start selling");
+  assert.equal(seller?.actions.find(({ primary }) => primary)?.href, "/dashboard/product");
+});
+
+test("all preview actions point to registered dashboard screens", () => {
+  for (const definition of COMPANY_FUNCTION_PREVIEW_DEFINITIONS) {
+    for (const action of definition.actions) {
+      assert.ok(getDashboardRoute(action.href), `${definition.slug}: ${action.href} must be registered`);
+    }
+  }
+});
+
+test("labs and imports expose their implemented workspaces", () => {
+  assert.ok(getPreviewDefinition("testing")?.actions.some(({ href }) => href === "/dashboard/quality-labs"));
+  assert.ok(getPreviewDefinition("testing")?.actions.some(({ href }) => href === "/dashboard/sample-requests"));
+  assert.ok(getPreviewDefinition("importing-to-india")?.actions.some(({ href }) => href === "/dashboard/imports"));
+});

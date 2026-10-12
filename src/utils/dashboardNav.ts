@@ -6,7 +6,11 @@ import {
   type DashboardTaskGroup,
   normalizeDashboardRole,
   isDashboardRouteActive,
+  hasWarehouseWorkspaceAccess,
+  isWarehouseDashboardPath,
 } from "@/utils/dashboardAccess";
+
+export { hasWarehouseWorkspaceAccess, isWarehouseDashboardPath } from "@/utils/dashboardAccess";
 
 type SidebarOption = {
   name: string;
@@ -17,11 +21,16 @@ type SidebarOption = {
 const COMING_SOON_NAV_PATHS = new Set([
   "/dashboard/documents",
   "/dashboard/external-orders",
-  "/dashboard/warehouse-rent",
 ]);
 
-export const isComingSoonDashboardNavigation = (path: string, role: unknown) =>
-  normalizeDashboardRole(role) !== "admin" && COMING_SOON_NAV_PATHS.has(path);
+export const isComingSoonDashboardNavigation = (
+  path: string,
+  role: unknown,
+  capabilities: string[] = []
+) => {
+  if (isWarehouseDashboardPath(path)) return !hasWarehouseWorkspaceAccess(role, capabilities);
+  return normalizeDashboardRole(role) !== "admin" && COMING_SOON_NAV_PATHS.has(path);
+};
 
 export type DashboardNavSection = {
   label: DashboardSection | DashboardTaskGroup;
@@ -63,6 +72,7 @@ export const getDashboardSidebarSections = (
       "Sell",
       "Execute",
       "Services",
+      "Warehouse",
       "Company & Account",
       "Support",
     ];
@@ -81,6 +91,7 @@ export const getDashboardSidebarSections = (
     "Trade",
     "Products",
     "Services",
+    "Warehouse",
     "Organization",
     "Operations/Admin",
   ];

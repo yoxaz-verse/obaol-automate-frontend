@@ -151,7 +151,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
                 </p>
             )}
 
-            {!!leftPanel.guidanceSections?.length && (
+            {!compact && !!leftPanel.guidanceSections?.length && (
                 <div className={`grid ${compact ? "gap-2" : "gap-3"}`}>
                     {leftPanel.guidanceSections.map((section) => (
                         <div key={section.title} className={`text-left ${compact ? "flex gap-2.5 rounded-xl bg-slate-50/80 p-3 dark:bg-white/[0.04]" : "rounded-lg border border-obaol-200/70 bg-white/75 p-3 shadow-sm dark:border-white/10 dark:bg-white/[0.04]"}`}>
@@ -193,7 +193,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
                 </div>
             )}
 
-            {!!roleIdentity?.audienceLabels?.length && (
+            {!compact && !!roleIdentity?.audienceLabels?.length && (
                 <div className="pt-1 space-y-2.5">
                     <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500 dark:text-default-400">
                         Primary Users
@@ -232,7 +232,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
 );
 
 const MobileOnboardingGuidance = ({ leftPanel }: { leftPanel: LeftPanelContent }) => (
-    <details className="onboarding-mobile-guidance lg:hidden">
+    <details className="onboarding-mobile-guidance">
         <summary>
             <span>Why we ask this</span>
             <FiChevronDown aria-hidden />
@@ -251,13 +251,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
         return (
             <div data-auth-embedded className="w-full text-foreground">
                 {topContent && <div className="mb-4">{topContent}</div>}
-                <div className={leftPanel ? "grid w-full items-start gap-5 lg:grid-cols-[minmax(270px,0.68fr)_minmax(0,1.5fr)] xl:grid-cols-[minmax(300px,0.72fr)_minmax(0,1.55fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
+                <div className={leftPanel ? "mx-auto grid w-full max-w-[1120px] items-start gap-4 lg:grid-cols-[240px_minmax(0,1fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
                     {leftPanel && (
-                        <div className="order-2 hidden rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#0E0D0A] lg:sticky lg:top-4 lg:order-1 lg:block">
+                        <div className="order-2 hidden rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#0E0D0A] lg:sticky lg:top-4 lg:order-1 lg:block">
                             <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact />
                         </div>
                     )}
-                    <div data-auth-form-card className={`rounded-2xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-content1 sm:p-7 ${leftPanel ? "order-1 min-w-0 lg:order-2" : ""}`}>
+                    <div data-auth-form-card className={`min-w-0 rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-content1 sm:p-6 ${leftPanel ? "order-1 lg:order-2" : ""}`}>
                         {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
                         <div className="mb-6 flex flex-col text-left sm:mb-7">
                             <h2 className="mb-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-foreground sm:text-3xl">

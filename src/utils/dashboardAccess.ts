@@ -4,6 +4,7 @@ export type DashboardSection =
   | "Trade"
   | "Products"
   | "Services"
+  | "Warehouse"
   | "Organization"
   | "Operations/Admin";
 
@@ -23,7 +24,7 @@ export const DASHBOARD_ADMIN_GROUP_ORDER: DashboardNavGroup[] = [
 ];
 
 export type DashboardJourneyStage = "overview" | "discover" | "negotiate" | "sample" | "execute" | "service" | "organize" | "administer";
-export type DashboardTaskGroup = "Home" | "Discover" | "Buy" | "Sell" | "Execute" | "Services" | "Company & Account" | "Support" | "Operations/Admin";
+export type DashboardTaskGroup = "Home" | "Discover" | "Buy" | "Sell" | "Execute" | "Services" | "Warehouse" | "Company & Account" | "Support" | "Operations/Admin";
 
 export type DashboardRouteDefinition = {
   path: string;
@@ -74,13 +75,13 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/external-orders", label: "External Orders", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/external-orders/new", label: "New external order", section: "Services", roles: ["admin", "associate", "operator", "team"] },
   { path: "/dashboard/execution-enquiries", label: "Execution Panel", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
+  { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Warehouse" },
   { path: "/dashboard/quality-labs", label: "Quality Labs", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/quality-labs/location", label: "Quality lab location", section: "Services", roles: ["admin", "associate", "operator", "team"] },
 
   { path: "/dashboard/inventory", label: "Inventory", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/warehouses", label: "Warehouses", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/warehouses/location", label: "Warehouse location", section: "Organization", roles: ["admin", "associate", "operator", "team"] },
+  { path: "/dashboard/warehouses", label: "Warehouses", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Warehouse" },
+  { path: "/dashboard/warehouses/location", label: "Warehouse location", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], taskGroup: "Warehouse" },
   { path: "/dashboard/company", label: "My Company", section: "Organization", roles: ["associate"], nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
   { path: "/dashboard/referrals", label: "Referrals & Earnings", section: "Organization", roles: ["associate"], nav: true, searchable: true, journeyStage: "organize" },
   { path: "/dashboard/companies", label: "Companies", section: "Organization", roles: ["admin", "operator", "team"], nav: true, searchable: true },
@@ -126,6 +127,7 @@ const journeyStageBySection: Record<DashboardSection, DashboardJourneyStage> = {
   Trade: "execute",
   Products: "discover",
   Services: "service",
+  Warehouse: "service",
   Organization: "organize",
   "Operations/Admin": "administer",
 };
@@ -191,6 +193,20 @@ export const normalizeDashboardRole = (role: unknown): DashboardRole | null => {
     return normalized as DashboardRole;
   }
   return null;
+};
+
+export const WAREHOUSE_CAPABILITY = "warehouse-storage";
+
+export const isWarehouseDashboardPath = (path: string) =>
+  path === "/dashboard/warehouses" ||
+  path.startsWith("/dashboard/warehouses/") ||
+  path === "/dashboard/warehouse-rent";
+
+export const hasWarehouseWorkspaceAccess = (role: unknown, capabilities: string[] = []) => {
+  const normalizedRole = normalizeDashboardRole(role);
+  if (["admin", "operator", "team"].includes(String(normalizedRole || ""))) return true;
+  if (normalizedRole !== "associate") return false;
+  return capabilities.some((capability) => String(capability || "").trim().toLowerCase() === WAREHOUSE_CAPABILITY);
 };
 
 const normalizePath = (path: string) => {

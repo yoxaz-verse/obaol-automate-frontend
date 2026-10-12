@@ -462,44 +462,32 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
 
 
   const stepLabels = ["Profile", "Security", "Operational"];
+  const stepPurposes = [
+    "Confirm your contact details so we can verify your account.",
+    "Secure your account and add a referral code if you have one.",
+    "Add your operating location so OBAOL can prepare the right workspace.",
+  ];
 
   return (
     <AuthLayout
-      title={`${isOnboarding ? "Operator Onboarding" : "Operator Registration"}`}
-      subtitle={stepLabels[currentStep - 1]}
-      cardMaxWidthClass={isOnboarding ? "max-w-full" : "max-w-[560px]"}
+      title={stepLabels[currentStep - 1]}
+      subtitle={stepPurposes[currentStep - 1]}
+      cardMaxWidthClass={isOnboarding ? "max-w-[980px]" : "max-w-[640px]"}
       embedded={isOnboarding}
       onboarding
       leftPanel={{
-        headline: "Prepare your access to the",
-        highlight: "OPERATOR PORTAL",
-        description: "This setup confirms who you are, how you can be reached, and where your operational work should be mapped before the dashboard opens.",
+        headline: "Operator",
+        highlight: "ACCOUNT SETUP",
+        description: "Verify your identity and operating location before entering the workspace.",
         guidanceSections: [
           {
-            title: "Why this process matters",
-            body: "Identity and contact checks protect operational tools from unverified access and help reviewers confirm your profile quickly."
+            title: "Identity verification",
+            body: "Accurate contact details help protect operational tools and speed up review."
           },
           {
-            title: "What this helps us prepare",
-            body: "Your location and operating details help OBAOL route work, permissions, and support context to the right operator workspace."
-          },
-          {
-            title: "After approval you can",
-            body: "Move into the dashboard with secure access, cleaner assignments, and the right starting context for day-to-day execution."
+            title: "Workspace setup",
+            body: "Your location helps OBAOL prepare assignments and support context."
           }
-        ],
-        points: [
-          "Identity confirmation",
-          "Operational assignment",
-          "Secure workspace access",
-          "Review readiness"
-        ],
-        tags: [
-          "Individuals",
-          "Portfolio Managers",
-          "Digital Traders",
-          "Business Developers",
-          "Internal Operations"
         ],
         footer: "Progress saved automatically",
         knowMoreLink: "/roles/operator"
@@ -903,7 +891,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
               type="button"
               variant="flat"
               onPress={handleBack}
-              className="w-full h-12 rounded-xl font-bold bg-default-100/50 hover:bg-default-200/80 transition-all border border-default-200"
+              className="w-full rounded-xl font-bold bg-default-100/50 hover:bg-default-200/80 transition-all border border-default-200"
               isDisabled={currentStep === 1 || isLoading || isSubmittingSuccess}
               startContent={<FiChevronLeft />}
             >
@@ -914,7 +902,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
             <Button
               color="warning"
-              className={`w-full h-12 rounded-xl font-black shadow-none transition-all duration-500
+              className={`w-full rounded-xl font-black shadow-none transition-all duration-500
                 ${isSubmittingSuccess
                   ? "bg-gradient-to-r from-success-500 to-green-600"
                   : "bg-gradient-to-r from-obaol-500 to-amber-600 hover:shadow-none"

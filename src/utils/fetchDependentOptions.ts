@@ -43,6 +43,8 @@ const getOptions = async (
     mode?: "associateForm" | "default";
     scope?: string;
     throwOnError?: boolean;
+    forceRefresh?: boolean;
+    timeoutMs?: number;
   }
 ): Promise<{ key: string; value: string }[]> => {
   const lowerKey = fieldKey.toLowerCase();
@@ -230,19 +232,35 @@ const getOptions = async (
     context?.scope || "",
   ];
 
+  if (context?.forceRefresh) {
+    queryClient.removeQueries({ queryKey, exact: true });
+  }
+
   // fetch or return cached data
   return queryClient.fetchQuery({
     queryKey,
+    staleTime: context?.forceRefresh ? 0 : 30_000,
     queryFn: async () => {
       try {
-        return await query();
+        const timeoutMs = Math.max(1_000, context?.timeoutMs ?? 15_000);
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+        const timeout = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(
+            () => reject(new Error(`Timed out loading ${fieldKey} options.`)),
+            timeoutMs,
+          );
+        });
+        try {
+          return await Promise.race([query(), timeout]);
+        } finally {
+          if (timeoutId) clearTimeout(timeoutId);
+        }
       } catch (err) {
         console.error(`Failed to fetch options for ${fieldKey}:`, err);
         if (context?.throwOnError) throw err;
         return [];
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 

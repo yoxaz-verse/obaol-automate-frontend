@@ -337,6 +337,11 @@ test("variant rate wizard uses searchable, dependent commodity controls", () => 
   assert.equal(wizard.includes(">Retry</Button>"), true);
   assert.equal(wizard.includes("max-h-[min(16rem,40vh)]"), true);
   assert.equal(wizard.includes("Select subcategory first"), true);
+  assert.equal(wizard.includes('status: "idle" | "loading" | "success" | "empty" | "error"'), true);
+  assert.equal(wizard.includes("forceRefresh: commodityRetries.subCategory > 0"), true);
+  assert.equal(wizard.includes("This subcategory is not associated with the selected category."), true);
+  assert.equal(wizard.includes("Open Commodity Directory"), true);
+  assert.equal(wizard.includes("isCurrentStepIncomplete"), true);
 });
 
 test("variant rate classification is written atomically and hierarchy remains neutral", () => {

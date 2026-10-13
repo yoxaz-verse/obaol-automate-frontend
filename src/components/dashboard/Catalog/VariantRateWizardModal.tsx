@@ -40,8 +40,19 @@ type WizardProps = {
 };
 
 type CommodityField = "category" | "subCategory" | "product" | "productVariant";
-type CommodityLoadErrors = Partial<Record<CommodityField, string>>;
 type CommodityRetries = Record<CommodityField, number>;
+type CommodityLoadState = {
+  status: "idle" | "loading" | "success" | "empty" | "error";
+  message?: string;
+};
+type CommodityLoadStates = Record<CommodityField, CommodityLoadState>;
+
+const INITIAL_COMMODITY_LOAD_STATES: CommodityLoadStates = {
+  category: { status: "idle" },
+  subCategory: { status: "idle" },
+  product: { status: "idle" },
+  productVariant: { status: "idle" },
+};
 
 const stepMeta = [
   { key: 1, title: "Product & Grade", subtitle: "Define the cargo you’re listing", icon: FiPackage },
@@ -112,11 +123,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [products, setProducts] = useState<any[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
   const [commodityInput, setCommodityInput] = useState<Record<string, string>>({});
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
-  const [isLoadingVariants, setIsLoadingVariants] = useState(false);
-  const [commodityLoadErrors, setCommodityLoadErrors] = useState<CommodityLoadErrors>({});
+  const [commodityLoadStates, setCommodityLoadStates] = useState<CommodityLoadStates>(INITIAL_COMMODITY_LOAD_STATES);
   const [commodityRetries, setCommodityRetries] = useState<CommodityRetries>({
     category: 0,
     subCategory: 0,
@@ -153,7 +160,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setSubCategories([]);
     setProducts([]);
     setVariants([]);
-    setCommodityLoadErrors({});
+    setCommodityLoadStates(INITIAL_COMMODITY_LOAD_STATES);
     setResolvedProductId(null);
     setIsLive(true);
     setSubmitPhase("idle");
@@ -162,20 +169,23 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   useEffect(() => {
     const requestVersion = ++requestVersions.current.category;
     if (!isOpen) return;
-    setCommodityLoadErrors((prev) => ({ ...prev, category: undefined }));
-    setIsLoadingCategories(true);
-    fetchDependentOptions("category", undefined, undefined, { throwOnError: true })
+    setCommodityLoadStates((prev) => ({ ...prev, category: { status: "loading" } }));
+    fetchDependentOptions("category", undefined, undefined, {
+      throwOnError: true,
+      timeoutMs: 15_000,
+      forceRefresh: commodityRetries.category > 0,
+    })
       .then((data) => {
-        if (requestVersions.current.category === requestVersion) setCategories(data);
+        if (requestVersions.current.category === requestVersion) {
+          setCategories(data);
+          setCommodityLoadStates((prev) => ({ ...prev, category: { status: data.length ? "success" : "empty" } }));
+        }
       })
       .catch(() => {
         if (requestVersions.current.category === requestVersion) {
           setCategories([]);
-          setCommodityLoadErrors((prev) => ({ ...prev, category: "Could not load categories." }));
+          setCommodityLoadStates((prev) => ({ ...prev, category: { status: "error", message: "Could not load categories." } }));
         }
-      })
-      .finally(() => {
-        if (requestVersions.current.category === requestVersion) setIsLoadingCategories(false);
       });
     if (!isAssociateUser) {
       fetchDependentOptions("associate").then(setAssociates);
@@ -205,25 +215,27 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     const requestVersion = ++requestVersions.current.subCategory;
     if (!formData.category) {
       setSubCategories([]);
-      setCommodityLoadErrors((prev) => ({ ...prev, subCategory: undefined }));
-      setIsLoadingSubCategories(false);
+      setCommodityLoadStates((prev) => ({ ...prev, subCategory: { status: "idle" } }));
       return;
     }
     setSubCategories([]);
-    setCommodityLoadErrors((prev) => ({ ...prev, subCategory: undefined }));
-    setIsLoadingSubCategories(true);
-    fetchDependentOptions("subCategory", "category", formData.category, { throwOnError: true })
+    setCommodityLoadStates((prev) => ({ ...prev, subCategory: { status: "loading" } }));
+    fetchDependentOptions("subCategory", "category", formData.category, {
+      throwOnError: true,
+      timeoutMs: 15_000,
+      forceRefresh: commodityRetries.subCategory > 0,
+    })
       .then((data) => {
-        if (requestVersions.current.subCategory === requestVersion) setSubCategories(data);
+        if (requestVersions.current.subCategory === requestVersion) {
+          setSubCategories(data);
+          setCommodityLoadStates((prev) => ({ ...prev, subCategory: { status: data.length ? "success" : "empty" } }));
+        }
       })
       .catch(() => {
         if (requestVersions.current.subCategory === requestVersion) {
           setSubCategories([]);
-          setCommodityLoadErrors((prev) => ({ ...prev, subCategory: "Could not load subcategories." }));
+          setCommodityLoadStates((prev) => ({ ...prev, subCategory: { status: "error", message: "Could not load subcategories." } }));
         }
-      })
-      .finally(() => {
-        if (requestVersions.current.subCategory === requestVersion) setIsLoadingSubCategories(false);
       });
   }, [formData.category, commodityRetries.subCategory]);
 
@@ -231,25 +243,27 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     const requestVersion = ++requestVersions.current.product;
     if (!formData.subCategory) {
       setProducts([]);
-      setCommodityLoadErrors((prev) => ({ ...prev, product: undefined }));
-      setIsLoadingProducts(false);
+      setCommodityLoadStates((prev) => ({ ...prev, product: { status: "idle" } }));
       return;
     }
     setProducts([]);
-    setCommodityLoadErrors((prev) => ({ ...prev, product: undefined }));
-    setIsLoadingProducts(true);
-    fetchDependentOptions("product", "subCategory", formData.subCategory, { throwOnError: true })
+    setCommodityLoadStates((prev) => ({ ...prev, product: { status: "loading" } }));
+    fetchDependentOptions("product", "subCategory", formData.subCategory, {
+      throwOnError: true,
+      timeoutMs: 15_000,
+      forceRefresh: commodityRetries.product > 0,
+    })
       .then((data) => {
-        if (requestVersions.current.product === requestVersion) setProducts(data);
+        if (requestVersions.current.product === requestVersion) {
+          setProducts(data);
+          setCommodityLoadStates((prev) => ({ ...prev, product: { status: data.length ? "success" : "empty" } }));
+        }
       })
       .catch(() => {
         if (requestVersions.current.product === requestVersion) {
           setProducts([]);
-          setCommodityLoadErrors((prev) => ({ ...prev, product: "Could not load products." }));
+          setCommodityLoadStates((prev) => ({ ...prev, product: { status: "error", message: "Could not load products." } }));
         }
-      })
-      .finally(() => {
-        if (requestVersions.current.product === requestVersion) setIsLoadingProducts(false);
       });
   }, [formData.subCategory, commodityRetries.product]);
 
@@ -257,30 +271,28 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     const requestVersion = ++requestVersions.current.productVariant;
     if (!formData.product) {
       setVariants([]);
-      setCommodityLoadErrors((prev) => ({ ...prev, productVariant: undefined }));
-      setIsLoadingVariants(false);
+      setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: "idle" } }));
       return;
     }
 
     setVariants([]);
-    setCommodityLoadErrors((prev) => ({ ...prev, productVariant: undefined }));
-    setIsLoadingVariants(true);
+    setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: "loading" } }));
 
-    fetchDependentOptions("productVariant", "product", formData.product, { throwOnError: true })
+    fetchDependentOptions("productVariant", "product", formData.product, {
+      throwOnError: true,
+      timeoutMs: 15_000,
+      forceRefresh: commodityRetries.productVariant > 0,
+    })
       .then((data) => {
         if (requestVersions.current.productVariant === requestVersion) {
           setVariants(data);
+          setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: data.length ? "success" : "empty" } }));
         }
       })
       .catch(() => {
         if (requestVersions.current.productVariant === requestVersion) {
           setVariants([]);
-          setCommodityLoadErrors((prev) => ({ ...prev, productVariant: "Could not load product variants." }));
-        }
-      })
-      .finally(() => {
-        if (requestVersions.current.productVariant === requestVersion) {
-          setIsLoadingVariants(false);
+          setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: "error", message: "Could not load product variants." } }));
         }
       });
   }, [formData.product, commodityRetries.productVariant]);
@@ -395,6 +407,12 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       setSubCategories([]);
       setProducts([]);
       setVariants([]);
+      setCommodityLoadStates((prev) => ({
+        ...prev,
+        subCategory: { status: "idle" },
+        product: { status: "idle" },
+        productVariant: { status: "idle" },
+      }));
     }
     if (key === "subCategory") {
       requestVersions.current.product += 1;
@@ -402,11 +420,17 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       setCommodityInput((prev) => ({ ...prev, product: "", productVariant: "" }));
       setProducts([]);
       setVariants([]);
+      setCommodityLoadStates((prev) => ({
+        ...prev,
+        product: { status: "idle" },
+        productVariant: { status: "idle" },
+      }));
     }
     if (key === "product") {
       requestVersions.current.productVariant += 1;
       setCommodityInput((prev) => ({ ...prev, productVariant: "" }));
       setVariants([]);
+      setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: "idle" } }));
     }
     setFormData((prev) => {
       const next: Record<string, any> = { ...prev, [key]: value };
@@ -495,6 +519,18 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       if (!formData.subCategory) nextErrors.subCategory = "Select a sub category.";
       if (!formData.product) nextErrors.product = "Select a product.";
       if (!formData.productVariant) nextErrors.productVariant = "Select a product variant.";
+      if (formData.category && !categories.some((item) => getOptionKey(item) === String(formData.category))) {
+        nextErrors.category = "Select a valid category.";
+      }
+      if (formData.subCategory && !subCategories.some((item) => getOptionKey(item) === String(formData.subCategory))) {
+        nextErrors.subCategory = "This subcategory is not associated with the selected category.";
+      }
+      if (formData.product && !products.some((item) => getOptionKey(item) === String(formData.product))) {
+        nextErrors.product = "This product is not associated with the selected subcategory.";
+      }
+      if (formData.productVariant && !variants.some((item) => getOptionKey(item) === String(formData.productVariant))) {
+        nextErrors.productVariant = "This variant is not associated with the selected product.";
+      }
     }
     if (step === 1 && !formData.productionMethod) {
       nextErrors.classification = "Select one production / farming method.";
@@ -644,6 +680,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setSuccessData(null);
     setFormData({ locationSource: "WAREHOUSE" });
     setCommodityInput({});
+    setCommodityLoadStates(INITIAL_COMMODITY_LOAD_STATES);
     setErrors({});
     setStep(1);
     setSubmitPhase("idle");
@@ -683,19 +720,27 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const isIpmQuality = productionMethod === "ipm";
   const isGiTagged = Boolean(formData.isGiTagged);
   const isSubmitting = submitPhase !== "idle" || createMutation.isPending;
+  const isCommodityLoading = Object.values(commodityLoadStates).some((state) => state.status === "loading");
+  const isCurrentStepIncomplete = step === 1
+    ? (!fixedVariantId && (!formData.category || !formData.subCategory || !formData.product || !formData.productVariant)) || !productionMethod || isCommodityLoading
+    : step === 2
+      ? !formData.rate || !formData.unit || (!isAssociateUser && !formData.associate)
+      : step === 3
+        ? !formData.locationSource
+          || (formData.locationSource === "WAREHOUSE" && !formData.warehouseId)
+          || (formData.locationSource === "OFFICE_ADDRESS" && !String(formData.officeAddress || "").trim())
+        : false;
 
   const renderCommodityAutocomplete = ({
     field,
     label,
     options,
-    isLoading,
     isDisabled = false,
     placeholder,
   }: {
     field: CommodityField;
     label: string;
     options: any[];
-    isLoading: boolean;
     isDisabled?: boolean;
     placeholder: string;
   }) => {
@@ -707,9 +752,22 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     const selectedLabel = selectedKey
       ? normalizedOptions.find((item) => item.key === selectedKey)?.label || ""
       : "";
-    const loadError = commodityLoadErrors[field];
+    const loadState = commodityLoadStates[field];
+    const isLoading = loadState.status === "loading";
     const retryLoad = () => {
       setCommodityRetries((prev) => ({ ...prev, [field]: prev[field] + 1 }));
+    };
+    const emptyLabel = field === "subCategory" && formData.category
+      ? `No subcategories are associated with ${getOptionLabel(categories.find((item) => getOptionKey(item) === String(formData.category))) || "this category"}.`
+      : field === "product" && formData.subCategory
+        ? "No products are associated with this subcategory."
+        : field === "productVariant" && formData.product
+          ? "No variants are associated with this product."
+          : `No ${label.toLowerCase()} found.`;
+    const nextField: Partial<Record<CommodityField, CommodityField>> = {
+      category: "subCategory",
+      subCategory: "product",
+      product: "productVariant",
     };
 
     return (
@@ -720,6 +778,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         variant="bordered"
         classNames={autocompleteField}
         items={normalizedOptions}
+        data-commodity-field={field}
         selectedKey={selectedKey}
         inputValue={commodityInput[field] ?? selectedLabel}
         onInputChange={(value) => {
@@ -730,6 +789,12 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           const selected = normalizedOptions.find((item) => item.key === value);
           setCommodityInput((prev) => ({ ...prev, [field]: selected?.label || "" }));
           setValue(field, value);
+          const next = nextField[field];
+          if (value && next) {
+            window.setTimeout(() => {
+              document.querySelector<HTMLInputElement>(`[data-commodity-field="${next}"] input`)?.focus();
+            }, 0);
+          }
         }}
         onOpenChange={(open) => {
           if (!open && selectedKey) {
@@ -747,14 +812,23 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         errorMessage={errors[field]}
         listboxProps={{
           emptyContent: isLoading ? (
-            `Loading ${label.toLowerCase()}...`
-          ) : loadError ? (
-            <div className="flex flex-col items-center gap-2 py-2 text-center">
-              <span className="text-xs text-danger-500">{loadError}</span>
+            <div className="flex min-h-20 items-center justify-center text-sm text-default-500" role="status" aria-live="polite">
+              Loading {label.toLowerCase()}…
+            </div>
+          ) : loadState.status === "error" ? (
+            <div className="flex min-h-24 flex-col items-center justify-center gap-2 py-3 text-center" role="alert">
+              <span className="text-xs text-danger-500">{loadState.message}</span>
               <Button size="sm" variant="flat" color="warning" onPress={retryLoad}>Retry</Button>
             </div>
           ) : (
-            `No ${label.toLowerCase()} found.`
+            <div className="flex min-h-24 flex-col items-center justify-center gap-2 px-3 py-3 text-center">
+              <span className="text-xs text-default-500">{emptyLabel}</span>
+              {field !== "category" && (
+                <Button size="sm" variant="flat" color="warning" onPress={goToGlobalCatalog}>
+                  Open Commodity Directory
+                </Button>
+              )}
+            </div>
           ),
           itemClasses,
         }}
@@ -770,7 +844,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           offset: 6,
           classNames: {
             base: "z-[100] max-w-[calc(100vw-2rem)]",
-            content: "w-[var(--trigger-width)] max-w-[calc(100vw-2rem)] bg-background border border-default-200 shadow-2xl rounded-2xl p-2",
+            content: "min-w-[var(--trigger-width)] w-[var(--trigger-width)] max-w-[calc(100vw-2rem)] bg-background border border-default-200 shadow-2xl rounded-2xl p-2",
           },
         }}
       >
@@ -807,6 +881,18 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       if (!formData.subCategory) nextErrors.subCategory = "Select a sub category.";
       if (!formData.product) nextErrors.product = "Select a product.";
       if (!formData.productVariant) nextErrors.productVariant = "Select a product variant.";
+      if (formData.category && !categories.some((item) => getOptionKey(item) === String(formData.category))) {
+        nextErrors.category = "Select a valid category.";
+      }
+      if (formData.subCategory && !subCategories.some((item) => getOptionKey(item) === String(formData.subCategory))) {
+        nextErrors.subCategory = "This subcategory is not associated with the selected category.";
+      }
+      if (formData.product && !products.some((item) => getOptionKey(item) === String(formData.product))) {
+        nextErrors.product = "This product is not associated with the selected subcategory.";
+      }
+      if (formData.productVariant && !variants.some((item) => getOptionKey(item) === String(formData.productVariant))) {
+        nextErrors.productVariant = "This variant is not associated with the selected product.";
+      }
     }
     if (!productionMethod) nextErrors.classification = "Select one production / farming method.";
     if (isGiTagged) {
@@ -971,31 +1057,27 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                             field: "category",
                             label: "Category",
                             options: categories,
-                            isLoading: isLoadingCategories,
                             placeholder: "Search categories",
                           })}
                           {renderCommodityAutocomplete({
                             field: "subCategory",
                             label: "Subcategory",
                             options: subCategories,
-                            isLoading: isLoadingSubCategories,
-                            isDisabled: !formData.category || isLoadingCategories,
+                            isDisabled: !formData.category,
                             placeholder: formData.category ? "Search subcategories" : "Select category first",
                           })}
                           {renderCommodityAutocomplete({
                             field: "product",
                             label: "Product",
                             options: products,
-                            isLoading: isLoadingProducts,
-                            isDisabled: !formData.subCategory || isLoadingSubCategories,
+                            isDisabled: !formData.subCategory,
                             placeholder: formData.subCategory ? "Search products" : "Select subcategory first",
                           })}
                           {renderCommodityAutocomplete({
                             field: "productVariant",
                             label: "Product variant",
                             options: variants,
-                            isLoading: isLoadingVariants,
-                            isDisabled: !formData.product || isLoadingProducts,
+                            isDisabled: !formData.product,
                             placeholder: formData.product ? "Search product variants" : "Select product first",
                           })}
                         </div>
@@ -1419,7 +1501,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
               endContent={<FiArrowRight />}
               onPress={step < 4 ? handleNext : handleSubmit}
               isLoading={isSubmitting}
-              isDisabled={isSubmitting}
+              isDisabled={isSubmitting || (step < 4 && isCurrentStepIncomplete)}
               className="w-full sm:w-auto font-bold"
             >
               {isSubmitting

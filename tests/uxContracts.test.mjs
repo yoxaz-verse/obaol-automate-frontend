@@ -324,23 +324,24 @@ test("variant rate wizard Commodity Directory CTA opens Commodity Directory", ()
 
 test("variant rate wizard uses searchable, dependent commodity controls", () => {
   const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
-  assert.equal(wizard.includes("AutocompleteItem"), true);
+  assert.equal(wizard.includes("CommodityPicker"), true);
+  assert.equal(wizard.includes("ResizeObserver"), true);
+  assert.equal(wizard.includes("fetchCatalogHierarchyOptions"), true);
   assert.equal(wizard.includes("renderCommodityAutocomplete"), true);
   assert.equal(wizard.includes('field: "category"'), true);
   assert.equal(wizard.includes('field: "subCategory"'), true);
   assert.equal(wizard.includes('field: "product"'), true);
   assert.equal(wizard.includes('field: "productVariant"'), true);
-  assert.equal(wizard.includes("allowsCustomValue={false}"), true);
-  assert.equal(wizard.includes("setCommodityInput({})"), true);
+  assert.equal(wizard.includes('style={menuWidth ? { width: `${menuWidth}px` } : undefined}'), true);
   assert.equal(wizard.includes("requestVersions.current"), true);
   assert.equal(wizard.includes("Could not load products."), true);
   assert.equal(wizard.includes(">Retry</Button>"), true);
-  assert.equal(wizard.includes("max-h-[min(16rem,40vh)]"), true);
+  assert.equal(wizard.includes("max-h-[min(18rem,40vh)]"), true);
   assert.equal(wizard.includes("Select subcategory first"), true);
   assert.equal(wizard.includes('status: "idle" | "loading" | "success" | "empty" | "error"'), true);
-  assert.equal(wizard.includes("forceRefresh: commodityRetries.subCategory > 0"), true);
+  assert.equal(wizard.includes('new AbortController()'), true);
   assert.equal(wizard.includes("This subcategory is not associated with the selected category."), true);
-  assert.equal(wizard.includes("Open Commodity Directory"), true);
+  assert.equal(wizard.includes(">Refresh</Button>"), true);
   assert.equal(wizard.includes("isCurrentStepIncomplete"), true);
 });
 

@@ -3,24 +3,28 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Autocomplete,
-  AutocompleteItem,
   Button,
   Input,
+  Listbox,
+  ListboxItem,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectItem,
   Switch,
 } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiArrowRight, FiCheckCircle, FiGlobe, FiMapPin, FiPackage, FiTruck, FiZap } from "react-icons/fi";
+import { FiArrowRight, FiCheckCircle, FiChevronDown, FiGlobe, FiMapPin, FiPackage, FiRefreshCw, FiSearch, FiTruck, FiX, FiZap } from "react-icons/fi";
 import { getData, postData } from "@/core/api/apiHandler";
 import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
+import { fetchCatalogHierarchyOptions, type CatalogHierarchyOption } from "@/utils/catalogHierarchy";
 import { showToastMessage } from "@/utils/utils";
 import { associateCompanyRoutes, associateRoutes, productVariantRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
@@ -52,6 +56,141 @@ const INITIAL_COMMODITY_LOAD_STATES: CommodityLoadStates = {
   subCategory: { status: "idle" },
   product: { status: "idle" },
   productVariant: { status: "idle" },
+};
+
+type CommodityPickerProps = {
+  field: CommodityField;
+  label: string;
+  placeholder: string;
+  options: CatalogHierarchyOption[];
+  selectedKey: string;
+  disabled?: boolean;
+  loading?: boolean;
+  invalid?: boolean;
+  errorMessage?: string;
+  emptyContent: React.ReactNode;
+  onSelect: (key: string) => void;
+};
+
+const CommodityPicker = ({
+  field,
+  label,
+  placeholder,
+  options,
+  selectedKey,
+  disabled,
+  loading,
+  invalid,
+  errorMessage,
+  emptyContent,
+  onSelect,
+}: CommodityPickerProps) => {
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [menuWidth, setMenuWidth] = useState<number>();
+  const selected = options.find((option) => option.id === selectedKey);
+  const filtered = options.filter((option) => option.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+
+  useEffect(() => {
+    const updateWidth = () => setMenuWidth(triggerRef.current?.getBoundingClientRect().width);
+    updateWidth();
+    if (!triggerRef.current || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(triggerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) setQuery("");
+  }, [isOpen]);
+
+  return (
+    <div ref={triggerRef} data-commodity-field={field} className="relative w-full">
+      <Popover isOpen={isOpen} onOpenChange={setIsOpen} placement="bottom-start" offset={6} shouldFlip>
+        <PopoverTrigger>
+          <Button
+            variant="bordered"
+            isDisabled={disabled}
+            aria-label={`${label}: ${selected?.name || placeholder}`}
+            className={`h-14 w-full justify-between rounded-xl border bg-content1 px-4 text-left shadow-sm ${invalid ? "border-danger" : "border-default-200"}`}
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block text-xs font-medium text-default-500">{label}</span>
+              <span className={`block truncate text-sm font-semibold ${selected ? "text-foreground" : "text-default-400"}`}>
+                {selected?.name || placeholder}
+              </span>
+            </span>
+            <FiChevronDown className={`shrink-0 text-default-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          style={menuWidth ? { width: `${menuWidth}px` } : undefined}
+          className="z-[120] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-default-200 bg-background p-0 shadow-2xl"
+        >
+          <div data-picker-options={field} className="w-full p-2">
+            <Input
+              autoFocus
+              aria-label={`Search ${label.toLowerCase()}`}
+              placeholder={`Search ${label.toLowerCase()}`}
+              value={query}
+              onValueChange={setQuery}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setIsOpen(false);
+                if (event.key === "Enter" && filtered[0]) {
+                  event.preventDefault();
+                  onSelect(filtered[0].id);
+                  setIsOpen(false);
+                }
+                if (event.key === "ArrowDown") {
+                  event.preventDefault();
+                  document.querySelector<HTMLElement>(`[data-picker-options="${field}"] [role="option"]`)?.focus();
+                }
+              }}
+              startContent={<FiSearch className="text-default-400" />}
+              size="sm"
+              variant="bordered"
+              classNames={{ inputWrapper: "bg-content1" }}
+            />
+            <div className="mt-2 max-h-[min(18rem,40vh)] overflow-y-auto overscroll-contain">
+              {loading ? (
+                <div className="flex min-h-24 items-center justify-center text-sm text-default-500" role="status" aria-live="polite">
+                  Loading {label.toLowerCase()}…
+                </div>
+              ) : filtered.length ? (
+                <Listbox
+                  aria-label={`${label} options`}
+                  selectionMode="single"
+                  selectedKeys={selectedKey ? new Set([selectedKey]) : new Set()}
+                  onAction={(key) => {
+                    onSelect(String(key));
+                    setIsOpen(false);
+                  }}
+                  itemClasses={{ base: "min-h-11 rounded-lg px-3 text-sm data-[hover=true]:bg-default-100" }}
+                >
+                  {filtered.map((option) => <ListboxItem key={option.id}>{option.name}</ListboxItem>)}
+                </Listbox>
+              ) : emptyContent}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+      {selectedKey && !disabled && (
+        <button
+          type="button"
+          aria-label={`Clear ${label.toLowerCase()}`}
+          className="absolute right-9 top-1/2 z-10 -translate-y-1/2 rounded-full p-1 text-default-400 hover:bg-default-100 hover:text-foreground"
+          onClick={(event) => {
+            event.stopPropagation();
+            onSelect("");
+          }}
+        >
+          <FiX size={14} />
+        </button>
+      )}
+      {errorMessage && <p className="mt-1 px-1 text-xs text-danger">{errorMessage}</p>}
+    </div>
+  );
 };
 
 const stepMeta = [
@@ -118,11 +257,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const fixedVariantId = productVariantValue?._id || productVariantValue;
 
-  const [categories, setCategories] = useState<any[]>([]);
-  const [subCategories, setSubCategories] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-  const [variants, setVariants] = useState<any[]>([]);
-  const [commodityInput, setCommodityInput] = useState<Record<string, string>>({});
+  const [categories, setCategories] = useState<CatalogHierarchyOption[]>([]);
+  const [subCategories, setSubCategories] = useState<CatalogHierarchyOption[]>([]);
+  const [products, setProducts] = useState<CatalogHierarchyOption[]>([]);
+  const [variants, setVariants] = useState<CatalogHierarchyOption[]>([]);
   const [commodityLoadStates, setCommodityLoadStates] = useState<CommodityLoadStates>(INITIAL_COMMODITY_LOAD_STATES);
   const [commodityRetries, setCommodityRetries] = useState<CommodityRetries>({
     category: 0,
@@ -155,7 +293,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setSuccessData(null);
     setStep(1);
     setFormData({ locationSource: "WAREHOUSE" });
-    setCommodityInput({});
     setCategories([]);
     setSubCategories([]);
     setProducts([]);
@@ -169,12 +306,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   useEffect(() => {
     const requestVersion = ++requestVersions.current.category;
     if (!isOpen) return;
+    const controller = new AbortController();
     setCommodityLoadStates((prev) => ({ ...prev, category: { status: "loading" } }));
-    fetchDependentOptions("category", undefined, undefined, {
-      throwOnError: true,
-      timeoutMs: 15_000,
-      forceRefresh: commodityRetries.category > 0,
-    })
+    fetchCatalogHierarchyOptions(undefined, controller.signal)
       .then((data) => {
         if (requestVersions.current.category === requestVersion) {
           setCategories(data);
@@ -182,7 +316,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         }
       })
       .catch(() => {
-        if (requestVersions.current.category === requestVersion) {
+        if (!controller.signal.aborted && requestVersions.current.category === requestVersion) {
           setCategories([]);
           setCommodityLoadStates((prev) => ({ ...prev, category: { status: "error", message: "Could not load categories." } }));
         }
@@ -193,6 +327,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     if (fixedVariantId) {
       setFormData((prev) => ({ ...prev, productVariant: fixedVariantId }));
     }
+    return () => controller.abort();
   }, [isOpen, fixedVariantId, isAssociateUser, commodityRetries.category]);
 
   useEffect(() => {
@@ -218,25 +353,23 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       setCommodityLoadStates((prev) => ({ ...prev, subCategory: { status: "idle" } }));
       return;
     }
+    const controller = new AbortController();
     setSubCategories([]);
     setCommodityLoadStates((prev) => ({ ...prev, subCategory: { status: "loading" } }));
-    fetchDependentOptions("subCategory", "category", formData.category, {
-      throwOnError: true,
-      timeoutMs: 15_000,
-      forceRefresh: commodityRetries.subCategory > 0,
-    })
+    fetchCatalogHierarchyOptions({ key: "category", id: String(formData.category) }, controller.signal)
       .then((data) => {
-        if (requestVersions.current.subCategory === requestVersion) {
+        if (!controller.signal.aborted && requestVersions.current.subCategory === requestVersion) {
           setSubCategories(data);
           setCommodityLoadStates((prev) => ({ ...prev, subCategory: { status: data.length ? "success" : "empty" } }));
         }
       })
       .catch(() => {
-        if (requestVersions.current.subCategory === requestVersion) {
+        if (!controller.signal.aborted && requestVersions.current.subCategory === requestVersion) {
           setSubCategories([]);
           setCommodityLoadStates((prev) => ({ ...prev, subCategory: { status: "error", message: "Could not load subcategories." } }));
         }
       });
+    return () => controller.abort();
   }, [formData.category, commodityRetries.subCategory]);
 
   useEffect(() => {
@@ -246,25 +379,23 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       setCommodityLoadStates((prev) => ({ ...prev, product: { status: "idle" } }));
       return;
     }
+    const controller = new AbortController();
     setProducts([]);
     setCommodityLoadStates((prev) => ({ ...prev, product: { status: "loading" } }));
-    fetchDependentOptions("product", "subCategory", formData.subCategory, {
-      throwOnError: true,
-      timeoutMs: 15_000,
-      forceRefresh: commodityRetries.product > 0,
-    })
+    fetchCatalogHierarchyOptions({ key: "subCategory", id: String(formData.subCategory) }, controller.signal)
       .then((data) => {
-        if (requestVersions.current.product === requestVersion) {
+        if (!controller.signal.aborted && requestVersions.current.product === requestVersion) {
           setProducts(data);
           setCommodityLoadStates((prev) => ({ ...prev, product: { status: data.length ? "success" : "empty" } }));
         }
       })
       .catch(() => {
-        if (requestVersions.current.product === requestVersion) {
+        if (!controller.signal.aborted && requestVersions.current.product === requestVersion) {
           setProducts([]);
           setCommodityLoadStates((prev) => ({ ...prev, product: { status: "error", message: "Could not load products." } }));
         }
       });
+    return () => controller.abort();
   }, [formData.subCategory, commodityRetries.product]);
 
   useEffect(() => {
@@ -275,26 +406,24 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       return;
     }
 
+    const controller = new AbortController();
     setVariants([]);
     setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: "loading" } }));
 
-    fetchDependentOptions("productVariant", "product", formData.product, {
-      throwOnError: true,
-      timeoutMs: 15_000,
-      forceRefresh: commodityRetries.productVariant > 0,
-    })
+    fetchCatalogHierarchyOptions({ key: "product", id: String(formData.product) }, controller.signal)
       .then((data) => {
-        if (requestVersions.current.productVariant === requestVersion) {
+        if (!controller.signal.aborted && requestVersions.current.productVariant === requestVersion) {
           setVariants(data);
           setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: data.length ? "success" : "empty" } }));
         }
       })
       .catch(() => {
-        if (requestVersions.current.productVariant === requestVersion) {
+        if (!controller.signal.aborted && requestVersions.current.productVariant === requestVersion) {
           setVariants([]);
           setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: "error", message: "Could not load product variants." } }));
         }
       });
+    return () => controller.abort();
   }, [formData.product, commodityRetries.productVariant]);
 
   useEffect(() => {
@@ -403,7 +532,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       requestVersions.current.subCategory += 1;
       requestVersions.current.product += 1;
       requestVersions.current.productVariant += 1;
-      setCommodityInput((prev) => ({ ...prev, subCategory: "", product: "", productVariant: "" }));
       setSubCategories([]);
       setProducts([]);
       setVariants([]);
@@ -417,7 +545,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     if (key === "subCategory") {
       requestVersions.current.product += 1;
       requestVersions.current.productVariant += 1;
-      setCommodityInput((prev) => ({ ...prev, product: "", productVariant: "" }));
       setProducts([]);
       setVariants([]);
       setCommodityLoadStates((prev) => ({
@@ -428,7 +555,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     }
     if (key === "product") {
       requestVersions.current.productVariant += 1;
-      setCommodityInput((prev) => ({ ...prev, productVariant: "" }));
       setVariants([]);
       setCommodityLoadStates((prev) => ({ ...prev, productVariant: { status: "idle" } }));
     }
@@ -596,6 +722,20 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      if (!fixedVariantId) {
+        const freshSubCategories = await fetchCatalogHierarchyOptions({ key: "category", id: String(formData.category) });
+        if (!freshSubCategories.some((option) => option.id === String(formData.subCategory))) {
+          throw new Error("The selected subcategory is no longer associated with this category.");
+        }
+        const freshProducts = await fetchCatalogHierarchyOptions({ key: "subCategory", id: String(formData.subCategory) });
+        if (!freshProducts.some((option) => option.id === String(formData.product))) {
+          throw new Error("The selected product is no longer associated with this subcategory.");
+        }
+        const freshVariants = await fetchCatalogHierarchyOptions({ key: "product", id: String(formData.product) });
+        if (!freshVariants.some((option) => option.id === String(formData.productVariant))) {
+          throw new Error("The selected variant is no longer associated with this product.");
+        }
+      }
       const classificationPayload = normalizeClassificationPayload();
       const payload: any = {
         rate: Number(formData.rate || 0),
@@ -679,7 +819,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const handleAddAnother = () => {
     setSuccessData(null);
     setFormData({ locationSource: "WAREHOUSE" });
-    setCommodityInput({});
     setCommodityLoadStates(INITIAL_COMMODITY_LOAD_STATES);
     setErrors({});
     setStep(1);
@@ -705,13 +844,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const itemClasses = {
     base: "rounded-xl text-foreground data-[hover=true]:bg-default-100 data-[selectable=true]:focus:bg-default-100 data-[selected=true]:text-obaol-500 font-semibold text-sm min-h-11 transition-all border border-transparent data-[hover=true]:border-default-200",
     title: "font-semibold text-sm text-foreground",
-  };
-  const autocompleteField = {
-    base: "w-full",
-    label: "font-bold text-xs text-default-600 mb-1",
-    listboxWrapper: "max-h-[min(16rem,40vh)] overflow-y-auto overscroll-contain text-foreground",
-    selectorButton: "text-default-500",
-    clearButton: "text-default-500",
   };
   const productionMethod = formData.productionMethod as ProductionMethod | null | undefined;
   const isConventional = productionMethod === "conventional";
@@ -740,18 +872,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   }: {
     field: CommodityField;
     label: string;
-    options: any[];
+    options: CatalogHierarchyOption[];
     isDisabled?: boolean;
     placeholder: string;
   }) => {
-    const normalizedOptions = options.map((item) => ({
-      key: getOptionKey(item),
-      label: getOptionLabel(item),
-    }));
-    const selectedKey = formData[field] ? String(formData[field]) : null;
-    const selectedLabel = selectedKey
-      ? normalizedOptions.find((item) => item.key === selectedKey)?.label || ""
-      : "";
+    const selectedKey = formData[field] ? String(formData[field]) : "";
     const loadState = commodityLoadStates[field];
     const isLoading = loadState.status === "loading";
     const retryLoad = () => {
@@ -771,89 +896,46 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     };
 
     return (
-      <Autocomplete
-        aria-label={label}
+      <CommodityPicker
+        field={field}
         label={label}
         placeholder={placeholder}
-        variant="bordered"
-        classNames={autocompleteField}
-        items={normalizedOptions}
-        data-commodity-field={field}
+        options={options}
         selectedKey={selectedKey}
-        inputValue={commodityInput[field] ?? selectedLabel}
-        onInputChange={(value) => {
-          setCommodityInput((prev) => ({ ...prev, [field]: value }));
-        }}
-        onSelectionChange={(key) => {
-          const value = key == null ? "" : String(key);
-          const selected = normalizedOptions.find((item) => item.key === value);
-          setCommodityInput((prev) => ({ ...prev, [field]: selected?.label || "" }));
+        disabled={isDisabled}
+        loading={isLoading}
+        invalid={Boolean(errors[field])}
+        errorMessage={errors[field]}
+        onSelect={(value) => {
           setValue(field, value);
           const next = nextField[field];
           if (value && next) {
             window.setTimeout(() => {
-              document.querySelector<HTMLInputElement>(`[data-commodity-field="${next}"] input`)?.focus();
+              document.querySelector<HTMLButtonElement>(`[data-commodity-field="${next}"] button`)?.focus();
             }, 0);
           }
         }}
-        onOpenChange={(open) => {
-          if (!open && selectedKey) {
-            setCommodityInput((prev) => ({ ...prev, [field]: selectedLabel }));
-          }
-        }}
-        allowsCustomValue={false}
-        defaultFilter={(textValue, inputValue) =>
-          String(textValue || "").toLocaleLowerCase().includes(String(inputValue || "").trim().toLocaleLowerCase())
-        }
-        isClearable
-        isLoading={isLoading}
-        isDisabled={isDisabled}
-        isInvalid={Boolean(errors[field])}
-        errorMessage={errors[field]}
-        listboxProps={{
-          emptyContent: isLoading ? (
+        emptyContent={
+          isLoading ? (
             <div className="flex min-h-20 items-center justify-center text-sm text-default-500" role="status" aria-live="polite">
               Loading {label.toLowerCase()}…
             </div>
           ) : loadState.status === "error" ? (
             <div className="flex min-h-24 flex-col items-center justify-center gap-2 py-3 text-center" role="alert">
               <span className="text-xs text-danger-500">{loadState.message}</span>
-              <Button size="sm" variant="flat" color="warning" onPress={retryLoad}>Retry</Button>
+              <Button size="sm" variant="flat" color="warning" startContent={<FiRefreshCw />} onPress={retryLoad}>Retry</Button>
             </div>
           ) : (
             <div className="flex min-h-24 flex-col items-center justify-center gap-2 px-3 py-3 text-center">
               <span className="text-xs text-default-500">{emptyLabel}</span>
-              {field !== "category" && (
-                <Button size="sm" variant="flat" color="warning" onPress={goToGlobalCatalog}>
-                  Open Commodity Directory
-                </Button>
-              )}
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button size="sm" variant="flat" startContent={<FiRefreshCw />} onPress={retryLoad}>Refresh</Button>
+                {field !== "category" && <Button size="sm" variant="flat" color="warning" onPress={goToGlobalCatalog}>Commodity Directory</Button>}
+              </div>
             </div>
-          ),
-          itemClasses,
-        }}
-        inputProps={{
-          classNames: {
-            input: "text-foreground font-semibold text-sm",
-            inputWrapper: "min-h-14",
-          },
-        }}
-        popoverProps={{
-          placement: "bottom-start",
-          shouldFlip: true,
-          offset: 6,
-          classNames: {
-            base: "z-[100] max-w-[calc(100vw-2rem)]",
-            content: "min-w-[var(--trigger-width)] w-[var(--trigger-width)] max-w-[calc(100vw-2rem)] bg-background border border-default-200 shadow-2xl rounded-2xl p-2",
-          },
-        }}
-      >
-        {(item) => (
-          <AutocompleteItem key={item.key} textValue={item.label} className="text-foreground">
-            {item.label}
-          </AutocompleteItem>
-        )}
-      </Autocomplete>
+          )
+        }
+      />
     );
   };
 
@@ -979,6 +1061,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     if (msg.includes("office address is required")) mapped.officeAddress = "Enter office address.";
     if (msg.includes("selected associate is not linked to a company")) mapped.associate = "Selected associate is not linked to a company.";
     if (msg.includes("select a location source")) mapped.locationSource = "Select a location source.";
+    if (msg.includes("subcategory is no longer associated")) mapped.subCategory = "Select a subcategory associated with this category.";
+    if (msg.includes("product is no longer associated")) mapped.product = "Select a product associated with this subcategory.";
+    if (msg.includes("variant is no longer associated")) mapped.productVariant = "Select a variant associated with this product.";
     return mapped;
   };
 

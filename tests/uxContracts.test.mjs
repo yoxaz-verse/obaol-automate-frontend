@@ -293,9 +293,11 @@ test("marketplace rates are revealed explicitly and past enquiries warn buyers",
   assert.equal(access.includes('path: "/dashboard/rate-interest"'), true);
 });
 
-test("marketplace enquiry is visible to every associate and remains outside compact overflow", () => {
+test("marketplace enquiry is available for foreign listings while owners manage their own", () => {
   const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
-  assert.equal(rates.includes("item.isMarketplaceView &&\n                          (isAssociateUser || isAdminUser)"), true);
+  assert.equal(rates.includes("item.isMarketplaceView &&\n                          !item.isOwnedByViewer &&\n                          (isAssociateUser || isAdminUser)"), true);
+  assert.equal(rates.includes("Manage listing"), true);
+  assert.equal(rates.includes("isAssociateUser && !item?.isOwnedByViewer"), true);
   assert.equal(rates.includes('{variantRate?.isLive ? "Enquire" : "Check Current Price"}'), true);
   assert.equal(rates.includes("{primaryMarketplaceEnquiry}\n                                <Popover"), true);
 });

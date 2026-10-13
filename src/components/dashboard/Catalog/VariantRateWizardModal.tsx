@@ -24,7 +24,7 @@ import { FiArrowRight, FiCheckCircle, FiChevronDown, FiGlobe, FiMapPin, FiPackag
 import { getData, postData } from "@/core/api/apiHandler";
 import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
-import { fetchCatalogHierarchyOptions, type CatalogHierarchyOption } from "@/utils/catalogHierarchy";
+import { fetchCatalogHierarchyOptions, normalizeCatalogSearch, type CatalogHierarchyOption } from "@/utils/catalogHierarchy";
 import { showToastMessage } from "@/utils/utils";
 import { associateCompanyRoutes, associateRoutes, productVariantRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
@@ -90,7 +90,13 @@ const CommodityPicker = ({
   const [query, setQuery] = useState("");
   const [menuWidth, setMenuWidth] = useState<number>();
   const selected = options.find((option) => option.id === selectedKey);
-  const filtered = options.filter((option) => option.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const filtered = options.filter((option) => normalizeCatalogSearch(option.name).includes(normalizeCatalogSearch(query)));
+  const levelLabel: Record<CatalogHierarchyOption["level"], string> = {
+    category: "Category",
+    subCategory: "Subcategory",
+    product: "Product",
+    productVariant: "Variant",
+  };
 
   useEffect(() => {
     const updateWidth = () => setMenuWidth(triggerRef.current?.getBoundingClientRect().width);
@@ -166,9 +172,20 @@ const CommodityPicker = ({
                     onSelect(String(key));
                     setIsOpen(false);
                   }}
-                  itemClasses={{ base: "min-h-11 rounded-lg px-3 text-sm data-[hover=true]:bg-default-100" }}
+                  itemClasses={{
+                    base: "min-h-[3.25rem] w-full rounded-xl border border-transparent px-3 py-2 text-sm data-[hover=true]:border-default-200 data-[hover=true]:bg-default-100 data-[selected=true]:border-primary/30 data-[selected=true]:bg-primary/10",
+                  }}
                 >
-                  {filtered.map((option) => <ListboxItem key={option.id}>{option.name}</ListboxItem>)}
+                  {filtered.map((option) => (
+                    <ListboxItem key={option.id} textValue={option.name}>
+                      <span className="block min-w-0">
+                        <span className="block truncate font-semibold text-foreground">{option.name}</span>
+                        <span className="block truncate text-[11px] text-default-400">
+                          {levelLabel[option.level]}{option.parentName ? ` under ${option.parentName}` : ""}
+                        </span>
+                      </span>
+                    </ListboxItem>
+                  ))}
                 </Listbox>
               ) : emptyContent}
             </div>

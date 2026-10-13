@@ -6,6 +6,7 @@ import type { RequestParams } from "./types";
 type GetDataOptions = {
   cacheMode?: "default" | "bypass";
   signal?: AbortSignal;
+  timeoutMs?: number;
 };
 
 // GET request to the API
@@ -20,6 +21,7 @@ export const getData = async (
     const response = await instance.get(url, {
       params,
       signal: options.signal,
+      timeout: options.timeoutMs,
       headers: useBypassCache
         ? {
           "Cache-Control": "no-cache, no-store, must-revalidate",

@@ -424,7 +424,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const marketplacePrice = (item: any, compact = false) => {
     const id = String(item?._id || "");
-    const isGated = isMarketplaceView && isAssociateUser;
+    const isGated =
+      isMarketplaceView && isAssociateUser && !item?.isOwnedByViewer;
     const price = isGated ? revealedPrices[id] : item.rawBasePrice;
     if (isGated && price === undefined) {
       return (
@@ -880,12 +881,19 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ),
                 associate: (
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-bold text-foreground uppercase tracking-tight line-clamp-1">
-                      {toDisplayText(
-                        item.associateCompany?.name,
-                        isOwner ? "My Company" : "OBAOL",
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-foreground uppercase tracking-tight line-clamp-1">
+                        {toDisplayText(
+                          item.associateCompany?.name,
+                          isOwner ? "My Company" : "OBAOL",
+                        )}
+                      </span>
+                      {isMarketplace && isOwner && (
+                        <span className="rounded-full border border-obaol-500/30 bg-obaol-500/10 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-obaol-500">
+                          Your listing
+                        </span>
                       )}
-                    </span>
+                    </div>
                     <span className="text-[9px] text-default-400 uppercase tracking-widest">
                       ID:{" "}
                       {String(
@@ -990,6 +998,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 rawBasePrice: totalRate,
                 rawCommission: 0,
                 isMarketplaceView: isMarketplace,
+                isOwnedByViewer: isOwner,
                 isOwnerView: isOwner && !isMarketplace,
                 isAdded: addedRateIds.has(item._id),
                 lastLiveDate: (
@@ -1651,6 +1660,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       useBody={true}
                                     />
                                   </>
+                                ) : item.isMarketplaceView && item.isOwnedByViewer ? (
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    color="warning"
+                                    className="h-8 font-bold"
+                                    onPress={() => router.push("/dashboard/product")}
+                                    endContent={<FiArrowRight size={14} />}
+                                  >
+                                    Manage listing
+                                  </Button>
                                 ) : item.isMarketplaceView ? (
                                   <>
                                     {!isAdminUser && isSellingMode &&
@@ -1863,6 +1883,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           roleLower === "admin" || isSameCompany;
                         const canCreateMarketplaceEnquiry =
                           item.isMarketplaceView &&
+                          !item.isOwnedByViewer &&
                           (isAssociateUser || isAdminUser);
                         const primaryMarketplaceEnquiry =
                           canCreateMarketplaceEnquiry ? (
@@ -1907,6 +1928,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   useBody={true}
                                 />
                               </>
+                            ) : item.isMarketplaceView && item.isOwnedByViewer ? (
+                              <Button
+                                size="sm"
+                                variant="flat"
+                                color="warning"
+                                className="h-8 shrink-0 font-bold"
+                                onPress={() => router.push("/dashboard/product")}
+                                endContent={<FiArrowRight size={14} />}
+                              >
+                                Manage listing
+                              </Button>
                             ) : item.isMarketplaceView ? (
                               <>
                                 {!isAdminUser && isSellingMode &&
@@ -2339,7 +2371,18 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                         </div>
                                       </div>
                                       <div className="flex flex-wrap items-center justify-end gap-2">
-                                        {item.isMarketplaceView ? (
+                                        {item.isMarketplaceView && item.isOwnedByViewer ? (
+                                          <Button
+                                            size="sm"
+                                            variant="flat"
+                                            color="warning"
+                                            className="h-8 font-bold"
+                                            onPress={() => router.push("/dashboard/product")}
+                                            endContent={<FiArrowRight size={14} />}
+                                          >
+                                            Manage listing
+                                          </Button>
+                                        ) : item.isMarketplaceView ? (
                                           <>
                                             {!isAdminUser && isSellingMode &&
                                               typeof AddToCatalogButton !== "undefined" && (

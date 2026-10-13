@@ -1,10 +1,8 @@
 import { getData } from "@/core/api/apiHandler";
+import type { CatalogHierarchyOption } from "./catalogHierarchyContract";
 
-export type CatalogHierarchyOption = {
-  id: string;
-  name: string;
-  parentId: string | null;
-};
+export type { CatalogHierarchyOption } from "./catalogHierarchyContract";
+export { normalizeCatalogSearch } from "./catalogHierarchyContract";
 
 export type CatalogHierarchyParent =
   | { key: "category"; id: string }
@@ -20,14 +18,21 @@ export const fetchCatalogHierarchyOptions = async (
   const response = await getData("/catalog/hierarchy-options", params, {
     cacheMode: "bypass",
     signal,
+    timeoutMs: 15000,
   });
   const rows = response?.data?.data;
   if (!Array.isArray(rows)) throw new Error("Catalog hierarchy returned an invalid response.");
   return rows
     .map((row: any) => ({
       id: String(row?.id || "").trim(),
-      name: String(row?.name || "").trim(),
+      name: String(row?.name || "").normalize("NFKC").trim(),
+      level: row?.level,
       parentId: row?.parentId == null ? null : String(row.parentId),
+      parentName: row?.parentName == null ? null : String(row.parentName).normalize("NFKC").trim(),
     }))
-    .filter((row) => row.id && row.name);
+    .filter((row): row is CatalogHierarchyOption => Boolean(
+      row.id
+      && row.name
+      && ["category", "subCategory", "product", "productVariant"].includes(row.level),
+    ));
 };

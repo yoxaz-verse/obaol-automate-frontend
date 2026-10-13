@@ -44,6 +44,9 @@ const shouldUpgradeInsecureRequests = () => {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Keep the dev compiler isolated from production builds. Running `next build`
+  // alongside `next dev` must not replace the dev server's webpack runtime.
+  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   experimental: {
     optimizeCss: true,
   },

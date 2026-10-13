@@ -100,6 +100,7 @@ const DynamicFilter = dynamic(
 
 const round2 = (value: number) =>
   Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
+const LISTING_DELETE_WINDOW_MS = 60 * 60 * 1000;
 const isValidObjectId = (value: any) =>
   /^[a-f0-9]{24}$/i.test(String(value || "").trim());
 const resolveAdminCommission = (
@@ -330,6 +331,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [inventorySubmitting, setInventorySubmitting] = useState(false);
   const [selectedInventoryRate, setSelectedInventoryRate] = useState<any>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [listingPolicyNow, setListingPolicyNow] = useState(() => Date.now());
   const [inventoryStatusReady, setInventoryStatusReady] = useState(false);
   const [publicDisplayMeta, setPublicDisplayMeta] = useState<
     QueryComponentMeta | undefined
@@ -358,6 +360,26 @@ const VariantRate: React.FC<VariantRateProps> = ({
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setListingPolicyNow(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const canDeleteTradeListing = (item: any) => {
+    if (roleLower === "admin") return true;
+    const createdAt = new Date(item?.createdAt).getTime();
+    return (
+      Number.isFinite(createdAt) &&
+      listingPolicyNow < createdAt + LISTING_DELETE_WINDOW_MS
+    );
+  };
+
+  const lockedListingMessage = (
+    <span className="max-w-40 text-right text-[9px] font-bold uppercase tracking-wider text-default-400">
+      Listing locked — only status can be changed
+    </span>
+  );
 
   useEffect(() => {
     setPage(1);
@@ -1628,38 +1650,36 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             const actionButtons = (
                               <div className="flex items-center gap-2">
                                 {canManageRow(item) ? (
-                                  <>
-                                    <EditModal
-                                      _id={item._id}
-                                      initialData={{
-                                        ...item,
-                                        quantity: item.quantityRaw,
-                                      }}
-                                      currentTable={rate}
-                                      formFields={tableConfig[rate]}
-                                      apiEndpoint={
-                                        rate === "catalogItem"
-                                          ? apiRoutes.catalog.update
-                                          : `${apiRoutesByRole[rate]}`
-                                      }
-                                      refetchData={refetchData}
-                                    />
-                                    <DeleteModal
-                                      _id={item._id}
-                                      name={
-                                        item.name ||
-                                        item.customTitle ||
-                                        item.productVariant
-                                      }
-                                      deleteApiEndpoint={
-                                        rate === "catalogItem"
-                                          ? apiRoutes.catalog.remove
-                                          : apiRoutesByRole[rate]
-                                      }
-                                      refetchData={refetchData}
-                                      useBody={true}
-                                    />
-                                  </>
+                                  rate === "variantRate" ? (
+                                    canDeleteTradeListing(item) ? (
+                                      <DeleteModal
+                                        _id={item._id}
+                                        name={item.name || item.customTitle || item.productVariant}
+                                        deleteApiEndpoint={apiRoutesByRole[rate]}
+                                        refetchData={refetchData}
+                                        useBody={true}
+                                        description={roleLower === "admin" ? undefined : "Listings can only be deleted during the first hour after creation. This action cannot be undone."}
+                                      />
+                                    ) : lockedListingMessage
+                                  ) : (
+                                    <>
+                                      <EditModal
+                                        _id={item._id}
+                                        initialData={{ ...item, quantity: item.quantityRaw }}
+                                        currentTable={rate}
+                                        formFields={tableConfig[rate]}
+                                        apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
+                                        refetchData={refetchData}
+                                      />
+                                      <DeleteModal
+                                        _id={item._id}
+                                        name={item.name || item.customTitle || item.productVariant}
+                                        deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
+                                        refetchData={refetchData}
+                                        useBody={true}
+                                      />
+                                    </>
+                                  )
                                 ) : item.isMarketplaceView && item.isOwnedByViewer ? (
                                   <Button
                                     size="sm"
@@ -1896,38 +1916,36 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         const actionButtons = (
                           <div className="flex items-center gap-2">
                             {canManageRow(item) ? (
-                              <>
-                                <EditModal
-                                  _id={item._id}
-                                  initialData={{
-                                    ...item,
-                                    quantity: item.quantityRaw,
-                                  }}
-                                  currentTable={rate}
-                                  formFields={tableConfig[rate]}
-                                  apiEndpoint={
-                                    rate === "catalogItem"
-                                      ? apiRoutes.catalog.update
-                                      : `${apiRoutesByRole[rate]}`
-                                  }
-                                  refetchData={refetchData}
-                                />
-                                <DeleteModal
-                                  _id={item._id}
-                                  name={
-                                    item.name ||
-                                    item.customTitle ||
-                                    item.productVariant
-                                  }
-                                  deleteApiEndpoint={
-                                    rate === "catalogItem"
-                                      ? apiRoutes.catalog.remove
-                                      : apiRoutesByRole[rate]
-                                  }
-                                  refetchData={refetchData}
-                                  useBody={true}
-                                />
-                              </>
+                              rate === "variantRate" ? (
+                                canDeleteTradeListing(item) ? (
+                                  <DeleteModal
+                                    _id={item._id}
+                                    name={item.name || item.customTitle || item.productVariant}
+                                    deleteApiEndpoint={apiRoutesByRole[rate]}
+                                    refetchData={refetchData}
+                                    useBody={true}
+                                    description={roleLower === "admin" ? undefined : "Listings can only be deleted during the first hour after creation. This action cannot be undone."}
+                                  />
+                                ) : lockedListingMessage
+                              ) : (
+                                <>
+                                  <EditModal
+                                    _id={item._id}
+                                    initialData={{ ...item, quantity: item.quantityRaw }}
+                                    currentTable={rate}
+                                    formFields={tableConfig[rate]}
+                                    apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
+                                    refetchData={refetchData}
+                                  />
+                                  <DeleteModal
+                                    _id={item._id}
+                                    name={item.name || item.customTitle || item.productVariant}
+                                    deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
+                                    refetchData={refetchData}
+                                    useBody={true}
+                                  />
+                                </>
+                              )
                             ) : item.isMarketplaceView && item.isOwnedByViewer ? (
                               <Button
                                 size="sm"

@@ -26,10 +26,11 @@ export default function DeleteModal({
   useBody = false,
   triggerText,
   triggerColor = "danger",
+  description,
   refetchData,
   isOpen: controlledOpen,
   onClose: controlledClose,
-}: DeleteModalProps & { triggerText?: string; triggerColor?: any; refetchData?: () => void }) {
+}: DeleteModalProps & { triggerText?: string; triggerColor?: any; description?: string; refetchData?: () => void }) {
   const { isOpen: disclosureOpen, onOpen, onOpenChange: disclosureOnOpenChange } = useDisclosure();
   const isControlled = controlledOpen !== undefined;
   const isOpen = isControlled ? controlledOpen : disclosureOpen;
@@ -119,7 +120,7 @@ export default function DeleteModal({
                   Are you absolutely sure you want to delete <span className="text-foreground font-bold">{name}</span>?
                 </p>
                 <p className="text-[11px] text-danger-400 mt-1 uppercase tracking-wider font-semibold">
-                  This action cannot be undone.
+                  {description || "This action cannot be undone."}
                 </p>
               </ModalBody>
               <ModalFooter className="flex flex-col-reverse sm:flex-row gap-2">

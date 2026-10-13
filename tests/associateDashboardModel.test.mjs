@@ -89,4 +89,8 @@ test("company-function requests are gated and fabricated updates are absent", ()
   assert.match(panel, /disabled=\{!canOpen\}/);
   assert.match(panel, /aria-label="Dashboard perspective"/);
   assert.match(panel, /Configure missing profile/);
+  assert.ok(panel.indexOf('id="capability-summary-title"') < panel.indexOf('aria-label="Associate overview"'));
+  assert.match(panel, /bg-blue-600 text-white hover:bg-blue-700/);
+  assert.match(panel, /bg-emerald-600 text-white hover:bg-emerald-700/);
+  assert.match(panel, /companyFunctionDashboard\.orderedFunctions\.map/);
 });

@@ -1,6 +1,12 @@
 export type CompanyFunctionAction = { label: string; href: string; description: string; primary?: boolean };
 export type CompanyFunctionPreviewDefinition = { slug: string; name: string; description: string; actions: CompanyFunctionAction[] };
 
+export type CompanyFunctionRoleContext = {
+  perspectiveLabel: "Seeking" | "Providing";
+  roleLabel: string;
+  explanation: string;
+};
+
 export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinition[] = [
   { slug: "buyer", name: "Buyer", description: "Find products available on OBAOL and manage the steps from enquiry to order.", actions: [
     { label: "Browse live trade listings", href: "/dashboard/marketplace", description: "See products that are currently listed on the marketplace.", primary: true },
@@ -89,6 +95,35 @@ export const getPreviewDefinition = (slug: unknown, perspective: "provided" | "s
         ? "Reach buyers your company wants to serve and manage selling activity."
         : `Find and coordinate ${definition.name.toLowerCase()} support through existing OBAOL workflows.`,
     actions: actionDefinition?.actions || definition.actions,
+  };
+};
+
+export const getCompanyFunctionRoleContext = (
+  slug: unknown,
+  perspective: "provided" | "sought" = "provided",
+): CompanyFunctionRoleContext => {
+  const normalized = normalizePreviewFunctionSlug(slug);
+  const perspectiveLabel = perspective === "sought" ? "Seeking" : "Providing";
+
+  if (normalized === "buyer") {
+    return perspective === "sought"
+      ? { perspectiveLabel, roleLabel: "Seller workspace", explanation: "You are selling to buyers your company wants to reach." }
+      : { perspectiveLabel, roleLabel: "Buyer workspace", explanation: "You are buying products and managing enquiries through to orders." };
+  }
+
+  if (normalized === "seller") {
+    return perspective === "sought"
+      ? { perspectiveLabel, roleLabel: "Buyer workspace", explanation: "You are finding sellers and products for your company to buy." }
+      : { perspectiveLabel, roleLabel: "Seller workspace", explanation: "You are listing products and managing buyer interest through to orders." };
+  }
+
+  const definition = getPreviewDefinition(normalized, perspective);
+  return {
+    perspectiveLabel,
+    roleLabel: perspective === "sought" ? "Partner workspace" : "Service workspace",
+    explanation: perspective === "sought"
+      ? `You are finding and coordinating ${definition?.name.toLowerCase() || "this capability"} support.`
+      : `You are providing and managing ${definition?.name.toLowerCase() || "this capability"} services.`,
   };
 };
 

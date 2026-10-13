@@ -4,6 +4,7 @@ import {
   CANONICAL_COMPANY_FUNCTION_SLUGS,
   COMPANY_FUNCTION_PREVIEW_DEFINITIONS,
   filterCanonicalPreviewFunctions,
+  getCompanyFunctionRoleContext,
   getPreviewDefinition,
 } from "../src/utils/companyFunctionPreview.ts";
 import { getDashboardRoute } from "../src/utils/dashboardAccess.ts";
@@ -44,6 +45,20 @@ test("sought trade capabilities use the counterparty workflow", () => {
   assert.equal(seekingSeller?.actions.find(({ primary }) => primary)?.href, "/dashboard/marketplace");
   assert.equal(seekingBuyer?.actions.find(({ primary }) => primary)?.href, "/dashboard/product");
   assert.doesNotMatch(seekingSeller?.actions.find(({ primary }) => primary)?.label || "", /start selling/i);
+});
+
+test("buyer and seller capability context explains the user's actual trade role", () => {
+  assert.deepEqual(getCompanyFunctionRoleContext("buyer", "sought"), {
+    perspectiveLabel: "Seeking",
+    roleLabel: "Seller workspace",
+    explanation: "You are selling to buyers your company wants to reach.",
+  });
+  assert.deepEqual(getCompanyFunctionRoleContext("seller", "sought"), {
+    perspectiveLabel: "Seeking",
+    roleLabel: "Buyer workspace",
+    explanation: "You are finding sellers and products for your company to buy.",
+  });
+  assert.equal(getCompanyFunctionRoleContext("seller", "provided").roleLabel, "Seller workspace");
 });
 
 test("all preview actions point to registered dashboard screens", () => {

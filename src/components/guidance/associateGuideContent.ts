@@ -103,13 +103,13 @@ export const associateGuideTopics: AssociateGuideTopic[] = [
   },
   {
     id: "publish-listing", category: "journey", title: "Publish and maintain a trade listing",
-    summary: "Add an accurate product offer and keep its variant, price, and visibility current.",
+    summary: "Add an accurate product offer, verify it promptly, and manage its marketplace visibility.",
     audience: ["seller"], keywords: ["publish", "product", "rate", "price", "variant", "sell"], route: "/dashboard/product", pageName: "My Trade Listings", approval: "APPROVED",
     prerequisites: ["Approved seller capability", "Product specification, commercial terms, and availability"],
-    steps: ["Open My Trade Listings and choose Create trade listing.", "Select the correct product and variant rather than creating a near-duplicate.", "Enter the requested pricing, quantity, location, and commercial details.", "Review visibility and listing state before saving.", "Open the saved listing to confirm the public-facing details, then update or deactivate it when availability changes."],
+    steps: ["Open My Trade Listings and choose Create trade listing.", "Select the correct product and variant rather than creating a near-duplicate.", "Enter the requested pricing, quantity, location, and commercial details.", "Review every detail before saving because published listing information and pricing cannot be edited.", "Open the saved listing immediately to confirm it. A mistaken listing can be deleted and recreated only during its first hour; afterward only its Live or Offline status can change."],
     outcome: "A complete listing is saved under the correct company and can be discovered in the intended marketplace state.",
-    troubleshooting: ["If a product or variant is missing, confirm the classification before requesting a new catalog entry.", "If the listing remains draft, check approval status and required fields.", "Deactivate stale availability instead of leaving outdated terms live."],
-    related: ["product-reference", "inventory-reference", "respond-enquiry"], screenshot: image("product-listing", "Annotated My Trade Listings page showing create action, listing state, and edit controls", "Create a complete listing and keep its commercial state current."),
+    troubleshooting: ["If a product or variant is missing, confirm the classification before requesting a new catalog entry.", "If you find an error during the first hour, delete the listing and create a corrected one.", "After one hour the listing is locked; take it Offline when its price, terms, or availability are no longer current."],
+    related: ["product-reference", "inventory-reference", "respond-enquiry"], screenshot: image("product-listing", "Annotated My Trade Listings page showing create action, listing state, and locked-listing controls", "Create a complete listing, verify it during the first hour, and manage its Live or Offline state afterward."),
   },
   {
     id: "raise-enquiry", category: "journey", title: "Raise a buying enquiry",

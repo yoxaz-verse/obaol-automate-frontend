@@ -357,6 +357,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null);
   const [resolvedProductId, setResolvedProductId] = useState<string | null>(null);
+  const [resolvedVariant, setResolvedVariant] = useState<any>(null);
   const [companyAddress, setCompanyAddress] = useState<string>("");
 
   const rateValue = Number(formData.rate || 0);
@@ -371,13 +372,14 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setErrors({});
     setSuccessData(null);
     setStep(1);
-    setFormData({ locationSource: "WAREHOUSE" });
+    setFormData({ locationSource: "WAREHOUSE", unit: "KG" });
     setCategories([]);
     setSubCategories([]);
     setProducts([]);
     setVariants([]);
     setCommodityLoadStates(INITIAL_COMMODITY_LOAD_STATES);
     setResolvedProductId(null);
+    setResolvedVariant(null);
     setIsLive(true);
     setSubmitPhase("idle");
   }, [isOpen]);
@@ -418,8 +420,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         const row = res?.data?.data || null;
         const productId = String(row?.product?._id || row?.product || "").trim();
         setResolvedProductId(productId || null);
+        setResolvedVariant(row);
       } catch {
         setResolvedProductId(null);
+        setResolvedVariant(null);
       }
     };
     resolveFromVariant();
@@ -605,6 +609,22 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     String(item?.key ?? item?._id ?? item?.id ?? item?.value ?? "");
   const getOptionLabel = (item: any) =>
     String(item?.value ?? item?.name ?? item?.label ?? item?.code ?? item?.title ?? "");
+
+  const selectedProductName = getOptionLabel(
+    products.find((item) => getOptionKey(item) === String(formData.product))
+      || resolvedVariant?.product
+      || productVariantValue?.product,
+  ).trim();
+  const selectedVariantName = getOptionLabel(
+    variants.find((item) => getOptionKey(item) === String(formData.productVariant))
+      || resolvedVariant
+      || productVariantValue,
+  ).trim();
+  const listingProductName = selectedProductName && selectedVariantName
+    ? normalizeCatalogSearch(selectedVariantName).includes(normalizeCatalogSearch(selectedProductName))
+      ? selectedVariantName
+      : `${selectedProductName} ${selectedVariantName}`
+    : selectedVariantName || selectedProductName || "Selected product";
 
   const setValue = (key: string, value: any) => {
     if (key === "category") {
@@ -897,7 +917,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const handleAddAnother = () => {
     setSuccessData(null);
-    setFormData({ locationSource: "WAREHOUSE" });
+    setFormData({ locationSource: "WAREHOUSE", unit: "KG" });
     setCommodityLoadStates(INITIAL_COMMODITY_LOAD_STATES);
     setErrors({});
     setStep(1);
@@ -1484,7 +1504,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 )}
                 {step === 2 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    <Input variant="bordered" label="Price (per KG)" type="number" classNames={themeField} value={formData.rate || ""} onChange={(e) => setValue("rate", e.target.value)} isInvalid={!!errors.rate} errorMessage={errors.rate} />
+                    <Input variant="bordered" label={`Price (per ${formData.unit || "KG"})`} type="number" classNames={themeField} value={formData.rate || ""} onChange={(e) => setValue("rate", e.target.value)} isInvalid={!!errors.rate} errorMessage={errors.rate} />
                     <Select variant="bordered" label="Unit" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.unit ? [formData.unit] : []} onSelectionChange={(keys) => setValue("unit", Array.from(keys)[0])} isInvalid={!!errors.unit} errorMessage={errors.unit}>
                       <SelectItem key="KG" className="font-black">KG</SelectItem>
                       <SelectItem key="MT" className="font-black">Metric Ton (MT)</SelectItem>
@@ -1577,7 +1597,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 {step === 4 && (
                   <div className="grid grid-cols-1 gap-4">
                     <div className="rounded-xl sm:rounded-2xl border border-default-200 bg-content2 p-4 sm:p-5 text-sm text-foreground">
-                      Review your trade mission before launch.
+                      <div className="border-b border-default-200 pb-4">
+                        <div className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-default-400">Product</div>
+                        <h4 className="mt-1 text-xl sm:text-2xl font-black text-foreground capitalize">{listingProductName}</h4>
+                        <p className="mt-1 text-xs sm:text-sm text-default-500">Review your trade mission before launch.</p>
+                      </div>
                       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <div className="text-xs uppercase text-default-400">Rate</div>

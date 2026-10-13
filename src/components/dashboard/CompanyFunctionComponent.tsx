@@ -44,12 +44,11 @@ export default function CompanyFunctionComponent({ slug, priorityRank, perspecti
             >
               <div>
                 {action.primary ? <span className="mb-2 block text-xs font-semibold text-primary">Recommended first step</span> : null}
-                <span className="font-semibold text-foreground">{action.label}</span>
+                <span className="inline-flex items-center gap-2 font-semibold text-foreground">
+                  {action.label}<LuArrowRight className="text-primary transition-transform group-hover:translate-x-1" size={15} />
+                </span>
                 <p className="mt-2 text-sm leading-5 text-default-500">{action.description}</p>
               </div>
-              <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary">
-                Open <LuArrowRight className="transition-transform group-hover:translate-x-1" size={15} />
-              </span>
             </Link>
           ))}
         </div>

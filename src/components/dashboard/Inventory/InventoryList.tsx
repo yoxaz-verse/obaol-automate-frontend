@@ -20,7 +20,7 @@ import {
     Tabs,
     Tab,
 } from "@nextui-org/react";
-import { FiSend, FiEdit2, FiEyeOff, FiMessageSquare, FiInfo } from "react-icons/fi";
+import { FiSend, FiEyeOff, FiMessageSquare, FiInfo } from "react-icons/fi";
 import { LuMessageSquare, LuBoxes, LuPackageCheck, LuTags, LuWarehouse, LuSearch, LuX } from "react-icons/lu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -57,7 +57,6 @@ const InventoryList: React.FC = () => {
     const limit = 25;
     const [rateModalOpen, setRateModalOpen] = useState(false);
     const [selectedInventory, setSelectedInventory] = useState<any>(null);
-    const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
     const [rateValue, setRateValue] = useState("");
     const [rateLive, setRateLive] = useState(true);
     const [submittingRate, setSubmittingRate] = useState(false);
@@ -365,17 +364,23 @@ const InventoryList: React.FC = () => {
 
     const openRateModal = (item: any, rate: any | null) => {
         const linkedRate = rate || item?.linkedVariantRate || null;
+        if (linkedRate) {
+            showToastMessage({
+                type: "info",
+                message: "Published listings are locked. Only their live status can be changed.",
+                position: "top-right",
+            });
+            return;
+        }
         setSelectedInventory(item);
-        setSelectedRateId(linkedRate?._id || linkedRate || null);
-        setRateValue(linkedRate?.rate ? String(linkedRate.rate) : "");
-        setRateLive(linkedRate?.isLive !== false);
+        setRateValue("");
+        setRateLive(true);
         setRateModalOpen(true);
     };
 
     const closeRateModal = () => {
         setRateModalOpen(false);
         setSelectedInventory(null);
-        setSelectedRateId(null);
         setRateValue("");
         setRateLive(true);
         setSubmittingRate(false);
@@ -647,47 +652,29 @@ const InventoryList: React.FC = () => {
 
                             setSubmittingRate(true);
                             try {
-                                const linkedRateId =
-                                    selectedRateId ||
-                                    selectedInventory?.linkedVariantRate?._id ||
-                                    selectedInventory?.linkedVariantRateId ||
-                                    selectedInventory?.linkedVariantRate;
-
-                                if (linkedRateId) {
-                                    await patchData(`${variantRateRoutes.getAll}/${linkedRateId}`, {
-                                        rate: rateNumber,
-                                        isLive: rateLive,
-                                    });
-                                    showToastMessage({
-                                        type: "success",
-                                        message: "Rate updated successfully.",
-                                        position: "top-right",
-                                    });
-                                } else {
-                                    const createPayload: Record<string, any> = {
-                                        rate: rateNumber,
-                                        isLive: rateLive,
-                                        sourceInventory: selectedInventory._id,
-                                        productVariant: selectedInventory.productVariantId,
-                                        quantity: selectedInventory.quantity,
-                                        unit: "MT",
-                                        state: selectedInventory.stateId,
-                                        district: selectedInventory.districtId,
-                                        division: selectedInventory.divisionId,
-                                        pincodeEntry: selectedInventory.pincodeEntryId,
-                                        associate: selectedInventory.associateId,
-                                    };
-                                    if (selectedInventory.associateCompanyId) {
-                                        createPayload.associateCompany = selectedInventory.associateCompanyId;
-                                    }
-
-                                    await postData(variantRateRoutes.getAll, createPayload);
-                                    showToastMessage({
-                                        type: "success",
-                                        message: "Rate published successfully.",
-                                        position: "top-right",
-                                    });
+                                const createPayload: Record<string, any> = {
+                                    rate: rateNumber,
+                                    isLive: rateLive,
+                                    sourceInventory: selectedInventory._id,
+                                    productVariant: selectedInventory.productVariantId,
+                                    quantity: selectedInventory.quantity,
+                                    unit: "MT",
+                                    state: selectedInventory.stateId,
+                                    district: selectedInventory.districtId,
+                                    division: selectedInventory.divisionId,
+                                    pincodeEntry: selectedInventory.pincodeEntryId,
+                                    associate: selectedInventory.associateId,
+                                };
+                                if (selectedInventory.associateCompanyId) {
+                                    createPayload.associateCompany = selectedInventory.associateCompanyId;
                                 }
+
+                                await postData(variantRateRoutes.getAll, createPayload);
+                                showToastMessage({
+                                    type: "success",
+                                    message: "Rate published successfully.",
+                                    position: "top-right",
+                                });
                                 closeRateModal();
                                 refetch?.();
                                 await queryClient.invalidateQueries({
@@ -1083,18 +1070,9 @@ const InventoryList: React.FC = () => {
                                                                 </Tooltip>
                                                             ) : (
                                                                 <div className="flex items-center gap-1">
-                                                                    <Tooltip content="Edit rate" placement="top" size="sm">
-                                                                        <Button
-                                                                            isIconOnly
-                                                                            size="sm"
-                                                                            color="warning"
-                                                                            variant="flat"
-                                                                            onPress={() => openRateModal(item, linkedRate)}
-                                                                            className="h-7 w-7 min-w-0"
-                                                                        >
-                                                                            <FiEdit2 size={12} />
-                                                                        </Button>
-                                                                    </Tooltip>
+                                                                    <span className="mr-1 text-[9px] font-bold uppercase tracking-wider text-default-400">
+                                                                        Price locked
+                                                                    </span>
                                                                     <Tooltip
                                                                         content={isLive ? "Unpublish trade listing" : "Already paused"}
                                                                         placement="top"
@@ -1407,7 +1385,7 @@ const InventoryList: React.FC = () => {
                                 >
                                     <ModalContent>
                                         <ModalHeader className="flex flex-col gap-1">
-                                            {selectedInventory?.linkedVariantRate ? "Update Published Rate" : "Publish Rate from Inventory"}
+                                            Publish Rate from Inventory
                                         </ModalHeader>
                                         <ModalBody>
                                             <div className="flex flex-col gap-3">
@@ -1435,7 +1413,7 @@ const InventoryList: React.FC = () => {
                                                 Cancel
                                             </Button>
                                             <Button color="warning" onPress={handleRateSubmit} isLoading={submittingRate}>
-                                                {selectedInventory?.linkedVariantRate ? "Update Rate" : "Publish Rate"}
+                                                Publish Rate
                                             </Button>
                                         </ModalFooter>
                                     </ModalContent>

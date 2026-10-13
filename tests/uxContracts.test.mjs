@@ -324,6 +324,18 @@ test("variant rate wizard Commodity Directory CTA opens Commodity Directory", ()
   assert.equal(wizard.includes('onClick={() => router.push("/dashboard/product")}'), false);
 });
 
+test("published variant rates are status-only and expose a one-hour delete window", () => {
+  const listing = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const inventory = read("../src/components/dashboard/Inventory/InventoryList.tsx");
+
+  assert.match(listing, /LISTING_DELETE_WINDOW_MS = 60 \* 60 \* 1000/);
+  assert.match(listing, /Listing locked — only status can be changed/);
+  assert.doesNotMatch(listing, /rate === "variantRate"[\s\S]{0,500}<EditModal/);
+  assert.match(inventory, /Price locked/);
+  assert.doesNotMatch(inventory, /Update Published Rate/);
+  assert.doesNotMatch(inventory, /Rate updated successfully/);
+});
+
 test("variant rate wizard uses searchable, dependent commodity controls", () => {
   const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
   assert.equal(wizard.includes("CommodityPicker"), true);

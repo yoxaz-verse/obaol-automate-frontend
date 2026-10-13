@@ -7,6 +7,7 @@ import { Button, Card, CardBody, CardHeader, Divider, Skeleton } from "@nextui-o
 import { LuArrowRight, LuCheck, LuClock3, LuPackage, LuShoppingBag, LuTrendingUp } from "react-icons/lu";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
 import { dashboardCopy } from "@/utils/dashboardCopy";
+import { getCompanyFunctionRoleContext, getPreviewDefinition } from "@/utils/companyFunctionPreview";
 import { buildAssociateDashboardModel, type AssociateMetric } from "./associateDashboardModel";
 
 const CompanyFunctionComponent = dynamic(() => import("./CompanyFunctionComponent"), {
@@ -82,6 +83,14 @@ export default function AssociateDashboard({
     perspective,
     enabled: model.showFunctions && Boolean(associateCompanyId),
   });
+  const isSeeking = perspective === "sought";
+  const perspectiveAccent = isSeeking
+    ? "border-blue-500/30 bg-blue-500/5 dark:border-blue-400/25"
+    : "border-emerald-500/30 bg-emerald-500/5 dark:border-emerald-400/25";
+  const perspectiveText = isSeeking ? "text-blue-600 dark:text-blue-300" : "text-emerald-600 dark:text-emerald-300";
+  const perspectiveButton = isSeeking
+    ? "bg-blue-600 text-white hover:bg-blue-700"
+    : "bg-emerald-600 text-white hover:bg-emerald-700";
 
   return (
     <div className="space-y-6">
@@ -104,9 +113,8 @@ export default function AssociateDashboard({
               aria-selected={perspective === "sought"}
               isDisabled={!hasSought}
               size="sm"
-              variant={perspective === "sought" ? "solid" : "light"}
-              color={perspective === "sought" ? "primary" : "default"}
-              className="min-w-28 font-semibold"
+              variant="light"
+              className={`min-w-28 font-semibold ${perspective === "sought" ? "bg-blue-600 text-white hover:bg-blue-700" : ""}`}
               onPress={() => onPerspectiveChange("sought")}
             >
               Seeking
@@ -116,9 +124,8 @@ export default function AssociateDashboard({
               aria-selected={perspective === "provided"}
               isDisabled={!hasProvided}
               size="sm"
-              variant={perspective === "provided" ? "solid" : "light"}
-              color={perspective === "provided" ? "primary" : "default"}
-              className="min-w-28 font-semibold"
+              variant="light"
+              className={`min-w-28 font-semibold ${perspective === "provided" ? "bg-emerald-600 text-white hover:bg-emerald-700" : ""}`}
               onPress={() => onPerspectiveChange("provided")}
             >
               Providing
@@ -127,6 +134,59 @@ export default function AssociateDashboard({
           {(!hasProvided || !hasSought) && <Button size="sm" variant="light" className="justify-end font-semibold text-primary" onPress={() => router.push("/dashboard/company")}>Configure missing profile</Button>}
         </div>
       </section>
+
+      {model.showFunctions && (
+        <section aria-labelledby="capability-summary-title" className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 id="capability-summary-title" className="text-lg font-black tracking-tight text-foreground">Your capabilities</h2>
+              <p className="mt-1 text-sm text-default-500">Your highest-priority roles and the next useful actions.</p>
+            </div>
+            <span className={`text-xs font-bold uppercase tracking-widest ${perspectiveText}`}>{isSeeking ? "Seeking" : "Providing"} view</span>
+          </div>
+          {!associateCompanyId ? (
+            <Card className="border border-warning-500/25 bg-warning-500/10 shadow-none"><CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-medium text-foreground">Link a company to load your prioritized capabilities.</p><Button color="warning" variant="flat" onPress={() => router.push("/dashboard/company")}>Open company</Button></CardBody></Card>
+          ) : companyFunctionDashboard.isLoading ? (
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{Array.from({ length: Math.min(Math.max(activeCapabilities.length, 1), 2) }).map((_, index) => <Skeleton key={index} className="h-44 rounded-2xl" />)}</div>
+          ) : companyFunctionDashboard.isError ? (
+            <Card className="border border-danger-500/25 bg-danger-500/10 shadow-none"><CardBody className="text-sm text-danger">Your capabilities could not be loaded. Try refreshing this page.</CardBody></Card>
+          ) : companyFunctionDashboard.orderedFunctions.length === 0 ? (
+            <Card className="border border-default-200 shadow-none"><CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-default-500">No capabilities are configured for this view.</p><Button variant="flat" onPress={() => router.push("/dashboard/company")}>Configure company</Button></CardBody></Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              {companyFunctionDashboard.orderedFunctions.map((fn: any) => {
+                const definition = getPreviewDefinition(fn.slug, perspective);
+                if (!definition) return null;
+                const context = getCompanyFunctionRoleContext(fn.slug, perspective);
+                const visibleActions = definition.actions.slice(0, 3);
+                const primaryAction = visibleActions.find((action) => action.primary) || visibleActions[0];
+                const secondaryActions = visibleActions.filter((action) => action !== primaryAction).slice(0, 2);
+                return (
+                  <Card key={`summary-${fn._id}`} className={`border shadow-sm ${perspectiveAccent}`}>
+                    <CardBody className="flex h-full flex-col gap-4 p-5 sm:p-6">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-xl font-black text-foreground">{definition.name}</h3>
+                            {fn.priorityRank ? <span className="rounded-full bg-content2 px-2.5 py-1 text-xs font-semibold text-default-600">Priority {fn.priorityRank}</span> : null}
+                            <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${isSeeking ? "bg-blue-500/15 text-blue-700 dark:text-blue-300" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"}`}>{context.perspectiveLabel}</span>
+                          </div>
+                          <p className={`mt-2 text-sm font-semibold ${perspectiveText}`}>{context.roleLabel}</p>
+                          <p className="mt-1 text-sm leading-6 text-default-600">{context.explanation}</p>
+                        </div>
+                      </div>
+                      <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                        {primaryAction ? <Button className={`min-h-10 font-bold ${perspectiveButton}`} endContent={<LuArrowRight />} onPress={() => router.push(primaryAction.href)}>{primaryAction.label}</Button> : null}
+                        {secondaryActions.map((action) => <Button key={`${fn._id}-${action.href}-${action.label}`} variant="light" className={`min-h-10 justify-start font-semibold ${perspectiveText}`} endContent={<LuArrowRight />} onPress={() => router.push(action.href)}>{action.label}</Button>)}
+                      </div>
+                    </CardBody>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
 
       {!companyCapabilitiesConfigured && (
         <Card className="border border-obaol-500/30 bg-obaol-500/10 shadow-none">

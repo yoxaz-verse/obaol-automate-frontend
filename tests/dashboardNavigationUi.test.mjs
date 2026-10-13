@@ -45,13 +45,16 @@ test("customer support exposes normalized call and WhatsApp actions", () => {
   assert.equal(links.includes("https://wa.me/"), true);
 });
 
-test("warehouse navigation is capability gated and available cards expose phone contact", () => {
+test("warehouse navigation is live for all associates and available cards expose phone contact", () => {
   const privateRoute = read("../src/components/Login/private-route.tsx");
   const warehousePage = read("../src/app/dashboard/warehouses/page.tsx");
+  const comingSoonGate = read("../src/components/dashboard/RoleGatedComingSoon.tsx");
   const sidebar = read("../src/components/dashboard/Sidebar.tsx");
 
-  assert.equal(privateRoute.includes("hasWarehouseWorkspaceAccess"), true);
-  assert.equal(privateRoute.includes("Warehouse workspace"), true);
+  assert.equal(privateRoute.includes("hasWarehouseWorkspaceAccess"), false);
+  assert.equal(privateRoute.includes("Warehouse workspace"), false);
+  assert.equal(comingSoonGate.includes('feature === "warehouse-booking"'), true);
+  assert.equal(comingSoonGate.includes('["associate", "customer"].includes(normalizedRole)'), true);
   assert.equal(sidebar.includes("capabilities"), true);
   assert.equal(warehousePage.includes("normalizeDialPhone"), true);
   assert.equal(warehousePage.includes("Contact unavailable"), true);

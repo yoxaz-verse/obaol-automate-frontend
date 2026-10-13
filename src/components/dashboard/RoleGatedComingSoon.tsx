@@ -100,8 +100,10 @@ export default function RoleGatedComingSoon({
 
   if (loading) return <GateLoadingState />;
 
-  const isAdmin = String(user?.role || "").trim().toLowerCase() === "admin";
-  if (isAdmin) return <>{children}</>;
+  const normalizedRole = String(user?.role || "").trim().toLowerCase();
+  const hasLiveAccess = normalizedRole === "admin" ||
+    (feature === "warehouse-booking" && ["associate", "customer"].includes(normalizedRole));
+  if (hasLiveAccess) return <>{children}</>;
 
   return <ComingSoonState feature={feature} />;
 }

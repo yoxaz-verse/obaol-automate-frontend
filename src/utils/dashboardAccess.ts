@@ -204,9 +204,7 @@ export const isWarehouseDashboardPath = (path: string) =>
 
 export const hasWarehouseWorkspaceAccess = (role: unknown, capabilities: string[] = []) => {
   const normalizedRole = normalizeDashboardRole(role);
-  if (["admin", "operator", "team"].includes(String(normalizedRole || ""))) return true;
-  if (normalizedRole !== "associate") return false;
-  return capabilities.some((capability) => String(capability || "").trim().toLowerCase() === WAREHOUSE_CAPABILITY);
+  return ["admin", "associate", "operator", "team"].includes(String(normalizedRole || ""));
 };
 
 const normalizePath = (path: string) => {

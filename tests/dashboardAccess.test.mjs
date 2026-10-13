@@ -122,7 +122,7 @@ test("Team receives Operator routes without Admin routes", () => {
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/approvals", role: "team" }), false);
 });
 
-test("Warehouse routes stay visible while capability controls their coming-soon state", () => {
+test("Warehouse routes are live for associates regardless of capabilities", () => {
   const interestedLinks = new Set(getAccessibleDashboardRoutes({
     role: "Associate",
         capabilities: ["warehouse-storage"],
@@ -149,13 +149,17 @@ test("Warehouse routes stay visible while capability controls their coming-soon 
   assert.equal(getDashboardRoute("/dashboard/warehouse-rent")?.taskGroup, "Warehouse");
 
   assert.equal(hasWarehouseWorkspaceAccess("Associate", ["warehouse-storage"]), true);
-  assert.equal(hasWarehouseWorkspaceAccess("Associate", ["testing"]), false);
+  assert.equal(hasWarehouseWorkspaceAccess("Associate", ["testing"]), true);
+  assert.equal(hasWarehouseWorkspaceAccess("Associate", []), true);
   assert.equal(hasWarehouseWorkspaceAccess("Admin", []), true);
   assert.equal(hasWarehouseWorkspaceAccess("Operator", []), true);
   assert.equal(hasWarehouseWorkspaceAccess("Team", []), true);
   assert.equal(isWarehouseDashboardPath("/dashboard/warehouses"), true);
   assert.equal(isWarehouseDashboardPath("/dashboard/warehouse-rent"), true);
   assert.equal(isWarehouseDashboardPath("/dashboard/warehouses/location"), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/warehouse-rent", role: "Associate" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/warehouses", role: "Associate" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/warehouses/location", role: "Associate" }), true);
 });
 
 test("every dashboard page has an explicit access policy", () => {

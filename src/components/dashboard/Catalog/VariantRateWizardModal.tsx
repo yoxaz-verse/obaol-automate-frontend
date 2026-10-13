@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -85,7 +85,7 @@ const CommodityPicker = ({
   emptyContent,
   onSelect,
 }: CommodityPickerProps) => {
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [menuWidth, setMenuWidth] = useState<number>();
@@ -98,28 +98,53 @@ const CommodityPicker = ({
     productVariant: "Variant",
   };
 
-  useEffect(() => {
-    const updateWidth = () => setMenuWidth(triggerRef.current?.getBoundingClientRect().width);
-    updateWidth();
-    if (!triggerRef.current || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(updateWidth);
-    observer.observe(triggerRef.current);
-    return () => observer.disconnect();
+  const updateMenuWidth = useCallback(() => {
+    const trigger = fieldRef.current?.querySelector<HTMLButtonElement>("[data-commodity-trigger]");
+    setMenuWidth(trigger?.getBoundingClientRect().width);
   }, []);
+
+  useEffect(() => {
+    const trigger = fieldRef.current?.querySelector<HTMLButtonElement>("[data-commodity-trigger]");
+    updateMenuWidth();
+    if (!trigger || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(updateMenuWidth);
+    observer.observe(trigger);
+    window.addEventListener("resize", updateMenuWidth);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateMenuWidth);
+    };
+  }, [updateMenuWidth]);
 
   useEffect(() => {
     if (!isOpen) setQuery("");
   }, [isOpen]);
 
   return (
-    <div ref={triggerRef} data-commodity-field={field} className="relative w-full">
-      <Popover isOpen={isOpen} onOpenChange={setIsOpen} placement="bottom-start" offset={6} shouldFlip>
+    <div ref={fieldRef} data-commodity-field={field} className="relative w-full">
+      <Popover
+        isOpen={isOpen}
+        onOpenChange={(nextOpen) => {
+          if (nextOpen) updateMenuWidth();
+          setIsOpen(nextOpen);
+        }}
+        placement="bottom-start"
+        offset={6}
+        shouldFlip
+        style={menuWidth ? { width: `${menuWidth}px`, maxWidth: "calc(100vw - 2rem)" } : undefined}
+        classNames={{
+          base: "!w-full max-w-[calc(100vw-2rem)]",
+          content: "!w-full",
+        }}
+        motionProps={{ className: "w-full" }}
+      >
         <PopoverTrigger>
           <Button
+            data-commodity-trigger={field}
             variant="bordered"
             isDisabled={disabled}
             aria-label={`${label}: ${selected?.name || placeholder}`}
-            className={`h-14 w-full justify-between rounded-xl border bg-content1 px-4 text-left shadow-sm ${invalid ? "border-danger" : "border-default-200"}`}
+            className={`h-14 w-full justify-between rounded-xl border bg-content1 px-4 text-left shadow-sm aria-expanded:!scale-100 ${invalid ? "border-danger" : "border-default-200"}`}
           >
             <span className="min-w-0 flex-1">
               <span className="block text-xs font-medium text-default-500">{label}</span>
@@ -131,34 +156,36 @@ const CommodityPicker = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          style={menuWidth ? { width: `${menuWidth}px` } : undefined}
-          className="z-[120] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-default-200 bg-background p-0 shadow-2xl"
+          data-commodity-menu={field}
+          className="z-[120] w-full overflow-hidden rounded-xl border border-default-200 bg-background p-0 shadow-2xl"
         >
-          <div data-picker-options={field} className="w-full p-2">
-            <Input
-              autoFocus
-              aria-label={`Search ${label.toLowerCase()}`}
-              placeholder={`Search ${label.toLowerCase()}`}
-              value={query}
-              onValueChange={setQuery}
-              onKeyDown={(event) => {
-                if (event.key === "Escape") setIsOpen(false);
-                if (event.key === "Enter" && filtered[0]) {
-                  event.preventDefault();
-                  onSelect(filtered[0].id);
-                  setIsOpen(false);
-                }
-                if (event.key === "ArrowDown") {
-                  event.preventDefault();
-                  document.querySelector<HTMLElement>(`[data-picker-options="${field}"] [role="option"]`)?.focus();
-                }
-              }}
-              startContent={<FiSearch className="text-default-400" />}
-              size="sm"
-              variant="bordered"
-              classNames={{ inputWrapper: "bg-content1" }}
-            />
-            <div className="mt-2 max-h-[min(18rem,40vh)] overflow-y-auto overscroll-contain">
+          <div data-picker-options={field} className="w-full overflow-hidden">
+            <div className="sticky top-0 z-10 border-b border-default-100 bg-background/95 p-2 backdrop-blur-md">
+              <Input
+                autoFocus
+                aria-label={`Search ${label.toLowerCase()}`}
+                placeholder={`Search ${label.toLowerCase()}`}
+                value={query}
+                onValueChange={setQuery}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") setIsOpen(false);
+                  if (event.key === "Enter" && filtered[0]) {
+                    event.preventDefault();
+                    onSelect(filtered[0].id);
+                    setIsOpen(false);
+                  }
+                  if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    document.querySelector<HTMLElement>(`[data-picker-options="${field}"] [role="option"]`)?.focus();
+                  }
+                }}
+                startContent={<FiSearch className="text-default-400" />}
+                size="sm"
+                variant="bordered"
+                classNames={{ inputWrapper: "bg-content1" }}
+              />
+            </div>
+            <div className="max-h-[min(16rem,40vh)] overflow-y-auto overscroll-contain p-1.5">
               {loading ? (
                 <div className="flex min-h-24 items-center justify-center text-sm text-default-500" role="status" aria-live="polite">
                   Loading {label.toLowerCase()}…
@@ -173,7 +200,7 @@ const CommodityPicker = ({
                     setIsOpen(false);
                   }}
                   itemClasses={{
-                    base: "min-h-[3.25rem] w-full rounded-xl border border-transparent px-3 py-2 text-sm data-[hover=true]:border-default-200 data-[hover=true]:bg-default-100 data-[selected=true]:border-primary/30 data-[selected=true]:bg-primary/10",
+                    base: "min-h-11 w-full rounded-lg border border-transparent px-3 py-2 text-sm outline-none data-[focus-visible=true]:border-primary data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-primary/30 data-[hover=true]:border-default-200 data-[hover=true]:bg-default-100 data-[selected=true]:border-primary/30 data-[selected=true]:bg-primary/10",
                   }}
                 >
                   {filtered.map((option) => (

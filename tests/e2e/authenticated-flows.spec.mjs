@@ -67,6 +67,41 @@ const navigateThroughVisibleUi = async (page, account) => {
   await expect(page).toHaveURL(new RegExp(`${account.allowed.replaceAll("/", "\\/")}$`));
 };
 
+test("product wizard commodity menu matches its field width", async ({ page }) => {
+  await page.route("**/verify-token", async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    if (body?.user) {
+      body.user.providedCapabilities = ["seller"];
+      body.user.soughtCapabilities = ["buyer"];
+    }
+    await route.fulfill({ response, json: body });
+  });
+  await login(page, { path: "/auth/associate", email: "seller@e2e.obaol.test" });
+  await page.goto("/dashboard/product");
+  await expect(page).toHaveURL(/\/dashboard\/product$/);
+
+  await page.getByRole("button", { name: /List (?:Your First Product|your product)/i }).first().click();
+
+  const trigger = page.locator('[data-commodity-trigger="category"]').last();
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+  const menu = page.locator('[data-commodity-menu="category"]').last();
+  await expect(menu).toBeVisible();
+  await expect(menu.getByLabel("Search category")).toBeVisible();
+
+  await expect.poll(async () => {
+    const triggerBox = await trigger.boundingBox();
+    const menuBox = await menu.boundingBox();
+    return Math.abs((triggerBox?.width || 0) - (menuBox?.width || 0));
+  }).toBeLessThanOrEqual(2);
+  await expect.poll(async () => {
+    const triggerBox = await trigger.boundingBox();
+    const menuBox = await menu.boundingBox();
+    return Math.abs((triggerBox?.x || 0) - (menuBox?.x || 0));
+  }).toBeLessThanOrEqual(2);
+});
+
 for (const account of accounts) {
   test(`${account.name} authenticates and receives scoped navigation`, async ({ page }) => {
     await login(page, account);

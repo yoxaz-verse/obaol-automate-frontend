@@ -236,6 +236,10 @@ test("Indian company onboarding captures optional verification identifiers", () 
     "maxLength={15}",
     "maxLength={10}",
     "maxLength={21}",
+    "Verify GSTIN",
+    "Use verified details",
+    "gstVerificationProof",
+    "isReadOnly={isGstinApplied}",
   ]) assert.equal(form.includes(token), true, `missing ${token}`);
 
   for (const token of ["iecCode", "cin"]) {

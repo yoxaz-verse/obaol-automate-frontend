@@ -1,7 +1,8 @@
 // pages/users.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { Tabs, Tab } from "@nextui-org/react";
 import CustomerSupportAgents from "@/components/dashboard/Users/customer-support-agents";
 
@@ -9,17 +10,25 @@ const UserTabContent = dynamic(() => import("@/components/dashboard/Users/user-t
   loading: () => <div className="min-h-[360px] rounded-2xl border border-default-200 bg-content1/70" />,
 });
 
+const USER_TABLES = [
+  { key: "customerSupport", title: "Customer Support" },
+  { key: "inventoryManager", title: "Inventory Managers" }, // Translate Title
+  { key: "associate", title: "Associates" }, // Translate Title
+  { key: "admin", title: "Admins" }, // Translate Title
+  { key: "operator", title: "Operator" }, // Translate Title
+  // { key: "worker", title: "Staff" },// Translate Title
+];
+
 export default function Page() {
+  const searchParams = useSearchParams();
   const [currentTable, setCurrentTable] = useState("customerSupport");
 
-  const tables = [
-    { key: "customerSupport", title: "Customer Support" },
-    { key: "inventoryManager", title: "Inventory Managers" }, // Translate Title
-    { key: "associate", title: "Associates" }, // Translate Title
-    { key: "admin", title: "Admins" }, // Translate Title
-    { key: "operator", title: "Operator" }, // Translate Title
-    // { key: "worker", title: "Staff" },// Translate Title
-  ];
+  useEffect(() => {
+    const requestedTab = searchParams.get("tab");
+    if (requestedTab && USER_TABLES.some((table) => table.key === requestedTab)) {
+      setCurrentTable(requestedTab);
+    }
+  }, [searchParams]);
 
   return (
     <div className="flex items-center justify-center w-full min-w-0 max-w-full">
@@ -31,7 +40,7 @@ export default function Page() {
             selectedKey={currentTable}
             onSelectionChange={(key) => setCurrentTable(key as string)}
           >
-            {tables.map((table) => (
+            {USER_TABLES.map((table) => (
               <Tab key={table.key} title={table.title}>
                 {/* Render UserTabContent for the current table */}
                 {table.key === "customerSupport" ? <CustomerSupportAgents /> : <UserTabContent currentTable={table.key} />}

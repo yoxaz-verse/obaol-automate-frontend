@@ -67,6 +67,11 @@ const EMPTY_LIST: any[] = [];
 const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 const IEC_REGEX = /^[A-Z0-9]{10}$/;
 const CIN_REGEX = /^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
+type GstinVerificationResult = {
+  gstin: string; legalName: string; tradeName: string; registrationStatus: string;
+  registrationDate: string; constitution: string; taxpayerType: string; registeredAddress: string;
+  stateCode: string; centreJurisdiction: string; stateJurisdiction: string; businessActivities: string[];
+};
 const MAIN_CATEGORY_SLUGS = new Set([
   "buyer",
   "seller",
@@ -137,6 +142,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "available" | "exists" | "error">("idle");
   const [emailCheckMessage, setEmailCheckMessage] = useState("");
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [gstinLookup, setGstinLookup] = useState<GstinVerificationResult | null>(null);
+  const [gstinVerificationProof, setGstinVerificationProof] = useState("");
+  const [isVerifyingGstin, setIsVerifyingGstin] = useState(false);
+  const [gstinLookupError, setGstinLookupError] = useState("");
+  const [isGstinApplied, setIsGstinApplied] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -807,6 +817,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       companyIecCode: value === "INDIAN" ? prev.companyIecCode : "",
       companyCin: value === "INDIAN" ? prev.companyCin : "",
     }));
+    if (value !== "INDIAN") {
+      setGstinLookup(null); setGstinVerificationProof(""); setGstinLookupError(""); setIsGstinApplied(false);
+    }
     setErrors((prev) => ({
       ...prev,
       companyCountry: "",
@@ -820,6 +833,38 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       companyIecCode: "",
       companyCin: "",
     }));
+  };
+
+  const changeGstin = (value: string) => {
+    setField("companyGstin", value.toUpperCase().replace(/\s+/g, ""));
+    setGstinLookup(null);
+    setGstinVerificationProof("");
+    setGstinLookupError("");
+    setIsGstinApplied(false);
+  };
+
+  const verifyGstin = async () => {
+    const gstin = formData.companyGstin.trim().toUpperCase();
+    if (!GST_REGEX.test(gstin)) {
+      setGstinLookupError("Enter a valid 15-character GSTIN.");
+      return;
+    }
+    setIsVerifyingGstin(true); setGstinLookupError(""); setGstinLookup(null); setGstinVerificationProof(""); setIsGstinApplied(false);
+    try {
+      const response = await postData("/auth/register/gstin/lookup", { gstin });
+      setGstinLookup(response.data?.result || null);
+      setGstinVerificationProof(String(response.data?.verificationProof || ""));
+      if (!response.data?.active) setGstinLookupError(`This GST registration is ${String(response.data?.result?.registrationStatus || "not active").toLowerCase()} and cannot be verified.`);
+    } catch (error: any) {
+      setGstinLookupError(String(error?.response?.data?.message || "GST verification failed. Please retry."));
+    } finally { setIsVerifyingGstin(false); }
+  };
+
+  const applyVerifiedGstin = () => {
+    if (!gstinLookup || !gstinVerificationProof) return;
+    setFormData((prev) => ({ ...prev, companyName: gstinLookup.legalName, companyAddress: gstinLookup.registeredAddress }));
+    setErrors((prev) => ({ ...prev, companyName: "", companyAddress: "", companyGstin: "" }));
+    setIsGstinApplied(true);
   };
 
   const setAssociateLocationField = (field: "associateState" | "associateDistrict" | "associateDivision" | "associatePincodeEntry", value: string) => {
@@ -1148,6 +1193,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         });
         payload.company = {
           name: formData.companyName.trim(),
+          gstVerificationProof: isGstinApplied ? gstinVerificationProof : undefined,
           email: formData.companyEmail.trim(),
           gstin: formData.companyGeoType === "INDIAN" && formData.companyGstin.trim()
             ? formData.companyGstin.trim().toUpperCase()
@@ -1634,6 +1680,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             placeholder="Enter legal name"
                             value={formData.companyName}
                             onValueChange={(v) => setField("companyName", v)}
+                            isReadOnly={isGstinApplied}
+                            description={isGstinApplied ? "Verified from GST registration" : undefined}
                             isInvalid={!!errors.companyName}
                             errorMessage={errors.companyName}
                             startContent={<IoBusiness className="text-default-400" />}
@@ -1702,6 +1750,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             placeholder="Complete physical address"
                             value={formData.companyAddress}
                             onValueChange={(v) => setField("companyAddress", v)}
+                            isReadOnly={isGstinApplied}
+                            description={isGstinApplied ? "Verified registered office address" : undefined}
                             isInvalid={!!errors.companyAddress}
                             errorMessage={errors.companyAddress}
                             className="md:col-span-2"
@@ -1764,12 +1814,37 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                   variant="bordered"
                                   placeholder="15-character GSTIN"
                                   value={formData.companyGstin}
-                                  onValueChange={(v) => setField("companyGstin", v.toUpperCase())}
+                                  onValueChange={changeGstin}
                                   maxLength={15}
                                   isInvalid={!!errors.companyGstin}
                                   errorMessage={errors.companyGstin}
                                   classNames={{ inputWrapper: "border-default-200" }}
+                                  endContent={isGstinApplied ? <LuBadgeCheck className="text-success-600" aria-label="Verified GSTIN" /> : null}
                                 />
+                                <Button
+                                  type="button"
+                                  color="primary"
+                                  variant="flat"
+                                  isLoading={isVerifyingGstin}
+                                  isDisabled={!GST_REGEX.test(formData.companyGstin) || isGstinApplied}
+                                  onPress={verifyGstin}
+                                >
+                                  {isGstinApplied ? "GSTIN verified" : "Verify GSTIN"}
+                                </Button>
+                                {gstinLookupError && <p role="alert" className="md:col-span-2 text-xs font-semibold text-danger-500">{gstinLookupError}</p>}
+                                {gstinLookup && !isGstinApplied && (
+                                  <div className="md:col-span-2 rounded-xl border border-success-300 bg-success-50/60 p-4 text-sm dark:bg-success-900/10">
+                                    <div className="flex flex-wrap items-start justify-between gap-3">
+                                      <div>
+                                        <p className="font-bold text-foreground">{gstinLookup.legalName}</p>
+                                        {gstinLookup.tradeName && <p className="text-xs text-default-600">Trade name: {gstinLookup.tradeName}</p>}
+                                        <p className="mt-2 text-xs text-default-600">{gstinLookup.registeredAddress}</p>
+                                        <p className="mt-2 text-xs font-semibold">Status: {gstinLookup.registrationStatus}{gstinLookup.constitution ? ` · ${gstinLookup.constitution}` : ""}</p>
+                                      </div>
+                                      {gstinVerificationProof && <Button type="button" color="success" size="sm" onPress={applyVerifiedGstin}>Use verified details</Button>}
+                                    </div>
+                                  </div>
+                                )}
                                 <Input
                                   label="IEC Code (Optional)"
                                   labelPlacement="outside"

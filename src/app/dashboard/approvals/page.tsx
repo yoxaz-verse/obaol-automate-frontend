@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Chip, Input, Select, SelectItem, Spinner, Tab, Tabs, Textarea } from "@nextui-org/react";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
-import { LuSearch, LuClipboardCheck, LuUserCheck, LuBuilding2, LuUserCog, LuCheck, LuX, LuChevronLeft, LuChevronRight, LuCalendar, LuMail, LuPhone, LuTag } from "react-icons/lu";
+import { LuSearch, LuClipboardCheck, LuUserCheck, LuBuilding2, LuUserCog, LuCheck, LuX, LuChevronLeft, LuChevronRight, LuCalendar, LuMail, LuPhone, LuTag, LuArrowUpRight } from "react-icons/lu";
 import Title from "@/components/titles";
 
 type StatusFilter = "PENDING_REVIEW" | "APPROVED" | "REJECTED";
@@ -135,11 +136,35 @@ export default function ApprovalsPage() {
 
   return (
     <div className="w-full min-w-0 max-w-full p-6 md:p-10 space-y-8">
-      <div className="flex flex-col gap-2">
-        <Title title="ApprovalsHub" visuallyHidden />
-        <p className="text-[12px] font-bold text-default-400 uppercase tracking-[0.3em] opacity-70">
-          Onboarding Verification & Entity Authorization Protocol
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <Title title="ApprovalsHub" visuallyHidden />
+          <p className="text-[12px] font-bold text-default-400 uppercase tracking-[0.3em] opacity-70">
+            Onboarding Verification & Entity Authorization Protocol
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            as={Link}
+            href="/dashboard/users?tab=associate"
+            variant="flat"
+            className="h-10 rounded-xl bg-foreground/5 px-4 text-[10px] font-bold uppercase tracking-widest"
+            startContent={<LuUserCheck size={16} />}
+            endContent={<LuArrowUpRight size={14} />}
+          >
+            View all associates
+          </Button>
+          <Button
+            as={Link}
+            href="/dashboard/companies"
+            variant="flat"
+            className="h-10 rounded-xl bg-foreground/5 px-4 text-[10px] font-bold uppercase tracking-widest"
+            startContent={<LuBuilding2 size={16} />}
+            endContent={<LuArrowUpRight size={14} />}
+          >
+            View all companies
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-6">

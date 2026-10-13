@@ -20,6 +20,8 @@ import {
   LuRefreshCw,
 } from "react-icons/lu";
 import AuthContext from "@/context/AuthContext";
+import AssociateGuidebook from "./AssociateGuidebook";
+import { inferAssociateGuideProfile } from "./associateGuideContent";
 
 const associateFeatureSections = [
   {
@@ -500,6 +502,15 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
         : activeRole === "service"
           ? "Service Provider Associate"
         : "Buying & Selling Associate";
+
+  if (!isOperator) {
+    return (
+      <AssociateGuidebook
+        profile={inferAssociateGuideProfile(provided, sought)}
+        registrationStatus={user?.registrationStatus}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen px-6 py-12 md:px-12 lg:px-20 bg-background text-foreground transition-colors duration-500">

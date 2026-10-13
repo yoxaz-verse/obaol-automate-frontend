@@ -20,7 +20,7 @@ import {
   Switch,
 } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiArrowRight, FiCheckCircle, FiChevronDown, FiGlobe, FiMapPin, FiPackage, FiRefreshCw, FiSearch, FiTruck, FiX, FiZap } from "react-icons/fi";
+import { FiArrowRight, FiCheck, FiCheckCircle, FiChevronDown, FiGlobe, FiMapPin, FiPackage, FiRefreshCw, FiSearch, FiTruck, FiX, FiZap } from "react-icons/fi";
 import { getData, postData } from "@/core/api/apiHandler";
 import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
@@ -100,7 +100,10 @@ const CommodityPicker = ({
 
   const updateMenuWidth = useCallback(() => {
     const trigger = fieldRef.current?.querySelector<HTMLButtonElement>("[data-commodity-trigger]");
-    setMenuWidth(trigger?.getBoundingClientRect().width);
+    const width = trigger?.getBoundingClientRect().width || fieldRef.current?.getBoundingClientRect().width;
+    if (width && width > 0) {
+      setMenuWidth(Math.round(width));
+    }
   }, []);
 
   useEffect(() => {
@@ -109,6 +112,9 @@ const CommodityPicker = ({
     if (!trigger || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(updateMenuWidth);
     observer.observe(trigger);
+    if (fieldRef.current) {
+      observer.observe(fieldRef.current);
+    }
     window.addEventListener("resize", updateMenuWidth);
     return () => {
       observer.disconnect();
@@ -143,23 +149,39 @@ const CommodityPicker = ({
             data-commodity-trigger={field}
             variant="bordered"
             isDisabled={disabled}
+            onMouseDown={() => updateMenuWidth()}
+            onFocus={() => updateMenuWidth()}
             aria-label={`${label}: ${selected?.name || placeholder}`}
-            className={`h-14 w-full justify-between rounded-xl border bg-content1 px-4 text-left shadow-sm aria-expanded:!scale-100 ${invalid ? "border-danger" : "border-default-200"}`}
+            className={`h-14 w-full justify-between rounded-xl border bg-content1 px-4 text-left shadow-sm aria-expanded:!scale-100 transition-all ${
+              invalid
+                ? "border-danger"
+                : isOpen
+                  ? "border-obaol-500/80 ring-2 ring-obaol-500/20"
+                  : "border-default-200 hover:border-default-300 dark:hover:border-default-600"
+            }`}
           >
             <span className="min-w-0 flex-1">
-              <span className="block text-xs font-medium text-default-500">{label}</span>
-              <span className={`block truncate text-sm font-semibold ${selected ? "text-foreground" : "text-default-400"}`}>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-default-400 dark:text-default-500">
+                {label}
+              </span>
+              <span className={`block truncate text-sm ${selected ? "font-semibold text-foreground" : "font-normal text-default-400"}`}>
                 {selected?.name || placeholder}
               </span>
             </span>
-            <FiChevronDown className={`shrink-0 text-default-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+            <FiChevronDown
+              className={`shrink-0 text-default-400 transition-transform duration-200 ${isOpen ? "rotate-180 text-obaol-500" : ""}`}
+            />
           </Button>
         </PopoverTrigger>
         <PopoverContent
           data-commodity-menu={field}
           className="z-[120] w-full overflow-hidden rounded-xl border border-default-200 bg-background p-0 shadow-2xl"
         >
-          <div data-picker-options={field} className="w-full overflow-hidden">
+          <div
+            data-picker-options={field}
+            style={menuWidth ? { width: `${menuWidth}px`, minWidth: `${menuWidth}px` } : undefined}
+            className="w-full min-w-[280px] overflow-hidden"
+          >
             <div className="sticky top-0 z-10 border-b border-default-100 bg-background/95 p-2 backdrop-blur-md">
               <Input
                 autoFocus
@@ -185,7 +207,10 @@ const CommodityPicker = ({
                 startContent={<FiSearch className="text-default-400" />}
                 size="sm"
                 variant="bordered"
-                classNames={{ inputWrapper: "bg-content1" }}
+                classNames={{
+                  inputWrapper: "bg-content1 border-default-200 focus-within:!border-obaol-500 focus-within:!ring-1 focus-within:!ring-obaol-500/30",
+                  input: "text-xs",
+                }}
               />
             </div>
             <div className="max-h-[min(16rem,40vh)] overflow-y-auto overscroll-contain p-1.5">
@@ -203,16 +228,23 @@ const CommodityPicker = ({
                     setIsOpen(false);
                   }}
                   itemClasses={{
-                    base: "min-h-11 w-full rounded-lg border border-transparent px-3 py-2 text-sm outline-none data-[focus-visible=true]:border-primary data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-primary/30 data-[hover=true]:border-default-200 data-[hover=true]:bg-default-100 data-[selected=true]:border-primary/30 data-[selected=true]:bg-primary/10",
+                    base: "min-h-11 w-full rounded-lg border border-transparent px-3 py-2 text-sm outline-none transition-colors data-[focus-visible=true]:border-primary data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-primary/30 data-[hover=true]:border-default-200 data-[hover=true]:bg-default-100 data-[selected=true]:border-primary/30 data-[selected=true]:bg-primary/10",
                   }}
                 >
                   {filtered.map((option) => (
                     <ListboxItem key={option.id} textValue={option.name}>
-                      <span className="block min-w-0">
-                        <span className="block truncate font-semibold text-foreground">{option.name}</span>
-                        <span className="block truncate text-[11px] text-default-400">
-                          {levelLabel[option.level]}{option.parentName ? ` under ${option.parentName}` : ""}
+                      <span className="flex items-center justify-between w-full min-w-0 gap-2">
+                        <span className="block min-w-0 flex-1">
+                          <span className={`block truncate ${option.id === selectedKey ? "font-semibold text-obaol-600 dark:text-obaol-400" : "font-medium text-foreground"}`}>
+                            {option.name}
+                          </span>
+                          <span className="block truncate text-[11px] text-default-400">
+                            {levelLabel[option.level]}{option.parentName ? ` under ${option.parentName}` : ""}
+                          </span>
                         </span>
+                        {option.id === selectedKey && (
+                          <FiCheck className="shrink-0 text-obaol-500" size={16} />
+                        )}
                       </span>
                     </ListboxItem>
                   ))}
@@ -226,7 +258,7 @@ const CommodityPicker = ({
         <button
           type="button"
           aria-label={`Clear ${label.toLowerCase()}`}
-          className="absolute right-9 top-1/2 z-10 -translate-y-1/2 rounded-full p-1 text-default-400 hover:bg-default-100 hover:text-foreground"
+          className="absolute right-9 top-1/2 z-10 -translate-y-1/2 rounded-full p-1 text-default-400 hover:bg-default-100 hover:text-foreground transition-colors"
           onClick={(event) => {
             event.stopPropagation();
             onSelect("");

@@ -176,7 +176,10 @@ const CommodityPicker = ({
                   }
                   if (event.key === "ArrowDown") {
                     event.preventDefault();
-                    document.querySelector<HTMLElement>(`[data-picker-options="${field}"] [role="option"]`)?.focus();
+                    const firstVisibleOption = Array.from(
+                      document.querySelectorAll<HTMLElement>(`[data-picker-options="${field}"] [role="option"]`),
+                    ).find((option) => option.getClientRects().length > 0);
+                    firstVisibleOption?.focus();
                   }
                 }}
                 startContent={<FiSearch className="text-default-400" />}
@@ -955,7 +958,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           const next = nextField[field];
           if (value && next) {
             window.setTimeout(() => {
-              document.querySelector<HTMLButtonElement>(`[data-commodity-field="${next}"] button`)?.focus();
+              const nextVisibleTrigger = Array.from(
+                document.querySelectorAll<HTMLButtonElement>(`[data-commodity-trigger="${next}"]`),
+              ).find((trigger) => !trigger.disabled && trigger.getClientRects().length > 0);
+              nextVisibleTrigger?.focus();
             }, 0);
           }
         }}

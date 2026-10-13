@@ -68,6 +68,9 @@ const navigateThroughVisibleUi = async (page, account) => {
 };
 
 test("product wizard commodity menu matches its field width", async ({ page }) => {
+  if ((page.viewportSize()?.width || 0) >= 768) {
+    await page.setViewportSize({ width: 1650, height: 956 });
+  }
   await page.route("**/verify-token", async (route) => {
     const response = await route.fetch();
     const body = await response.json();
@@ -76,6 +79,23 @@ test("product wizard commodity menu matches its field width", async ({ page }) =
       body.user.soughtCapabilities = ["buyer"];
     }
     await route.fulfill({ response, json: body });
+  });
+  const categories = [
+    { id: "category-agri", name: "Agri", level: "category", parentId: null, parentName: null },
+    ...Array.from({ length: 24 }, (_, index) => ({
+      id: `category-${index}`,
+      name: `Commodity category ${String(index + 1).padStart(2, "0")}`,
+      level: "category",
+      parentId: null,
+      parentName: null,
+    })),
+  ];
+  await page.route("**/catalog/hierarchy-options**", async (route) => {
+    const url = new URL(route.request().url());
+    const data = url.searchParams.has("category")
+      ? [{ id: "subcategory-grains", name: "Grains", level: "subCategory", parentId: "category-agri", parentName: "Agri" }]
+      : categories;
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data }) });
   });
   await login(page, { path: "/auth/associate", email: "seller@e2e.obaol.test" });
   await page.goto("/dashboard/product");
@@ -88,7 +108,8 @@ test("product wizard commodity menu matches its field width", async ({ page }) =
   await trigger.click();
   const menu = page.locator('[data-commodity-menu="category"]').last();
   await expect(menu).toBeVisible();
-  await expect(menu.getByLabel("Search category")).toBeVisible();
+  const search = menu.getByLabel("Search category");
+  await expect(search).toBeVisible();
 
   await expect.poll(async () => {
     const triggerBox = await trigger.boundingBox();
@@ -100,6 +121,28 @@ test("product wizard commodity menu matches its field width", async ({ page }) =
     const menuBox = await menu.boundingBox();
     return Math.abs((triggerBox?.x || 0) - (menuBox?.x || 0));
   }).toBeLessThanOrEqual(2);
+
+  const scrollPanel = menu.locator('[data-picker-options="category"] > div').nth(1);
+  await expect.poll(async () => scrollPanel.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
+  const searchHeader = menu.locator('[data-picker-options="category"] > div').first();
+  await expect.poll(async () => searchHeader.evaluate((element) => getComputedStyle(element).position)).toBe("sticky");
+
+  const firstOption = menu.locator('[role="option"]').first();
+  await expect(firstOption).toContainText("Agri");
+  await firstOption.hover();
+  await expect(firstOption).toHaveAttribute("data-hover", "true");
+  await search.press("ArrowDown");
+  await expect(firstOption).toBeFocused();
+  await firstOption.press("Enter");
+  await expect(trigger).toContainText("Agri");
+
+  const subcategoryTrigger = page.locator('[data-commodity-trigger="subCategory"]').last();
+  await expect(subcategoryTrigger).toBeFocused();
+  await subcategoryTrigger.click();
+  const subcategoryMenu = page.locator('[data-commodity-menu="subCategory"]').last();
+  await expect(subcategoryMenu).toBeVisible();
+  await subcategoryMenu.getByLabel("Search subcategory").press("Escape");
+  await expect(subcategoryMenu).toBeHidden();
 });
 
 for (const account of accounts) {

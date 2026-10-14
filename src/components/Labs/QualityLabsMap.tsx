@@ -14,6 +14,8 @@ export type QualityLabMapItem = {
   contactPhone?: string;
   contactPhoneSecondary?: string;
   certificatesSummary?: string;
+  capabilityStatus?: string;
+  source?: string;
   location?: {
     latitude?: number;
     longitude?: number;
@@ -51,6 +53,20 @@ function MapAutoCenter({ point }: { point: SearchPoint | null }) {
   return null;
 }
 
+function FitLabBounds({ labs, point }: { labs: QualityLabMapItem[]; point: SearchPoint | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (point) return;
+    const positions = labs.flatMap((lab) => {
+      const latitude = Number(lab.location?.latitude), longitude = Number(lab.location?.longitude);
+      return Number.isFinite(latitude) && Number.isFinite(longitude) ? [[latitude, longitude] as [number, number]] : [];
+    });
+    if (positions.length === 1) map.setView(positions[0], 9);
+    else if (positions.length > 1) map.fitBounds(positions, { padding: [36, 36], maxZoom: 10 });
+  }, [labs, map, point]);
+  return null;
+}
+
 export default function QualityLabsMap({ labs, searchPoint, center, zoom, onContact }: Props) {
   const mapRef = useRef<L.Map | null>(null);
   const markerIcon = useMemo(() => mkDotIcon(), []);
@@ -83,6 +99,7 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom, onCont
         style={{ height: "100%", width: "100%" }}
       >
         <MapAutoCenter point={searchPoint} />
+        <FitLabBounds labs={safeLabs} point={searchPoint} />
         <TileLayer
           url={tileUrl}
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -98,6 +115,10 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom, onCont
                 {lab.contactPhone ? <div className="text-[11px] font-semibold text-slate-700">{lab.contactPhone}</div> : null}
                 {lab.contactPhoneSecondary ? <div className="text-[10px] text-slate-500">Alt: {lab.contactPhoneSecondary}</div> : null}
                 {lab.certificatesSummary ? <div className="text-[10px] text-slate-500 line-clamp-3">{lab.certificatesSummary}</div> : null}
+                <div className="flex flex-wrap gap-1">
+                  {lab.capabilityStatus === "LEGACY_REQUIRES_MAPPING" ? <span className="rounded-full bg-amber-100 px-2 py-1 text-[9px] font-bold text-amber-800">Requires mapping</span> : <span className="rounded-full bg-emerald-100 px-2 py-1 text-[9px] font-bold text-emerald-800">Structured</span>}
+                  {lab.source ? <span className="rounded-full bg-slate-100 px-2 py-1 text-[9px] text-slate-700">{lab.source.replaceAll("_", " ")}</span> : null}
+                </div>
                 <Button
                   color="success"
                   variant="solid"

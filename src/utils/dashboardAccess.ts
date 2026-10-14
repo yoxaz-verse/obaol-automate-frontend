@@ -77,7 +77,8 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/execution-enquiries", label: "Execution Panel", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Warehouse" },
   { path: "/dashboard/quality-labs", label: "Quality Labs", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/quality-labs/location", label: "Quality lab location", section: "Services", roles: ["admin", "associate", "operator", "team"] },
+  { path: "/dashboard/quality-labs/:id", label: "Quality lab profile", section: "Services", roles: ["admin", "associate", "operator", "team"] },
+  { path: "/dashboard/quality-labs/location", label: "Quality lab location", section: "Services", roles: ["admin", "associate"] },
 
   { path: "/dashboard/inventory", label: "Inventory", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/warehouses", label: "Warehouses", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Warehouse" },

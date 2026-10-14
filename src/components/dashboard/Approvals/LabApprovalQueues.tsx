@@ -1,0 +1,27 @@
+"use client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, Card, CardBody, Chip, Textarea } from "@nextui-org/react";
+import { useState } from "react";
+import { FiCheck, FiExternalLink, FiX } from "react-icons/fi";
+import { LuFlaskConical } from "react-icons/lu";
+import { getData, patchData } from "@/core/api/apiHandler";
+import { apiRoutes } from "@/core/api/apiRoutes";
+import { showToastMessage } from "@/utils/utils";
+import type { LabProfile } from "@/types/labProfile";
+import { optionName } from "@/types/labProfile";
+
+export default function LabApprovalQueues() {
+  const client = useQueryClient();
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const labsQuery = useQuery({ queryKey: ["lab-approvals"], queryFn: async () => (await getData(apiRoutes.labProfiles.approvals, { status: "PENDING_REVIEW" })).data.data as LabProfile[] });
+  const taxonomyQuery = useQuery({ queryKey: ["lab-taxonomy-requests"], queryFn: async () => (await getData(apiRoutes.labProfiles.taxonomyAdmin, { status: "REQUESTED" })).data.data as any[] });
+  const review = useMutation({ mutationFn: ({ id, action, note }: any) => patchData(`${apiRoutes.labProfiles.approvals}/${id}`, { action, notes: note }), onSuccess: () => { client.invalidateQueries({ queryKey: ["lab-approvals"] }); showToastMessage({ type: "success", message: "Lab review updated." }); } });
+  const reviewTaxonomy = useMutation({ mutationFn: ({ id, action }: any) => patchData(`${apiRoutes.labProfiles.taxonomyAdmin}/${id}`, { action }), onSuccess: () => client.invalidateQueries({ queryKey: ["lab-taxonomy-requests"] }) });
+  const labs = labsQuery.data || [];
+  const requests = taxonomyQuery.data || [];
+  if (!labs.length && !requests.length) return null;
+  return <div className="space-y-4"><div className="flex items-center gap-2"><LuFlaskConical className="text-success-500" /><h2 className="text-lg font-black">Lab capability approvals</h2><Chip size="sm" color="warning">{labs.length + requests.length} pending</Chip></div>
+    {requests.length ? <Card className="border border-warning-500/20"><CardBody className="gap-3"><b>Requested filter options</b>{requests.map((item) => <div key={item._id} className="flex items-center justify-between rounded-xl bg-default-100 p-3"><span><Chip size="sm">{item.kind}</Chip> <b>{item.name}</b></span><span className="flex gap-1"><Button isIconOnly size="sm" color="success" onPress={() => reviewTaxonomy.mutate({ id: item._id, action: "APPROVE" })}><FiCheck /></Button><Button isIconOnly size="sm" color="danger" variant="flat" onPress={() => reviewTaxonomy.mutate({ id: item._id, action: "REJECT" })}><FiX /></Button></span></div>)}</CardBody></Card> : null}
+    {labs.map((lab) => { const draft = lab.draft!; const old = lab.published; return <Card key={lab._id} className="border border-warning-500/20"><CardBody className="gap-4 p-5"><div className="flex justify-between"><div><h3 className="text-lg font-black">{draft.displayName}</h3><p className="text-sm text-default-500">{lab.companyId?.name} · {old ? "Revision" : "New profile"}</p></div><Chip color="warning">Pending review</Chip></div><div className="grid gap-3 md:grid-cols-3"><div className="rounded-xl bg-default-100 p-3"><small>Product templates</small><b className="block text-xl">{draft.productCapabilityTemplates.length}</b>{old ? <small>Previously {old.productCapabilityTemplates.length}</small> : null}</div><div className="rounded-xl bg-default-100 p-3"><small>Export countries</small><b className="block text-xl">{draft.countryAssignments.length}</b>{old ? <small>Previously {old.countryAssignments.length}</small> : null}</div><div className="rounded-xl bg-default-100 p-3"><small>Credentials</small><b className="block text-xl">{draft.credentials.length}</b></div></div><div className="space-y-2">{draft.credentials.map((credential) => <div key={credential.credentialNumber} className="flex flex-wrap items-center justify-between rounded-xl border border-default-200 p-3"><span><b>{optionName(credential.accreditationId)}</b> · {credential.issuer} · {credential.credentialNumber}</span><Button as="a" href={credential.documentUrl} target="_blank" size="sm" variant="flat" endContent={<FiExternalLink />}>Evidence</Button></div>)}</div><Textarea label="Review notes / rejection reason" value={notes[lab._id] || ""} onValueChange={(value) => setNotes((current) => ({ ...current, [lab._id]: value }))} /><div className="flex justify-end gap-2"><Button color="danger" variant="flat" onPress={() => review.mutate({ id: lab._id, action: "REJECT", note: notes[lab._id] })}>Reject</Button><Button color="success" onPress={() => review.mutate({ id: lab._id, action: "APPROVE", note: notes[lab._id] })}>Verify and publish</Button></div></CardBody></Card>; })}
+  </div>;
+}

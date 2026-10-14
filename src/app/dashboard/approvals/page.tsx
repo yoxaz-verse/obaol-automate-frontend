@@ -10,6 +10,7 @@ import { showToastMessage } from "@/utils/utils";
 import { LuSearch, LuClipboardCheck, LuUserCheck, LuBuilding2, LuUserCog, LuCheck, LuX, LuChevronLeft, LuChevronRight, LuCalendar, LuMail, LuPhone, LuTag, LuArrowUpRight } from "react-icons/lu";
 import Title from "@/components/titles";
 import CatalogApprovalQueues from "@/components/dashboard/Approvals/CatalogApprovalQueues";
+import LabApprovalQueues from "@/components/dashboard/Approvals/LabApprovalQueues";
 
 type StatusFilter = "PENDING_REVIEW" | "APPROVED" | "REJECTED";
 
@@ -138,6 +139,7 @@ export default function ApprovalsPage() {
   return (
     <div className="w-full min-w-0 max-w-full p-6 md:p-10 space-y-8">
       <CatalogApprovalQueues />
+      <LabApprovalQueues />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <Title title="ApprovalsHub" visuallyHidden />

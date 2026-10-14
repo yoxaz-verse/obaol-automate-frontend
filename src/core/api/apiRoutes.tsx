@@ -221,6 +221,16 @@ export const associateCompanyRoutes = addCustomRoutes(createCRUDRoutes(
 ), {
   labsDirectory: `${BASE_PATHS.ASSOCIATE_COMPANY}/labs-directory`,
 });
+export const labProfileRoutes = {
+  taxonomy: "/lab-profiles/taxonomy",
+  taxonomyRequests: "/lab-profiles/taxonomy/requests",
+  taxonomyAdmin: "/lab-profiles/taxonomy/admin",
+  directory: "/lab-profiles/directory",
+  detail: (id: string) => `/lab-profiles/directory/${id}`,
+  draft: "/lab-profiles/draft",
+  submit: "/lab-profiles/submit",
+  approvals: "/lab-profiles/approvals",
+};
 export const companyTypeRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_TYPE);
 export const designationRoutes = createCRUDRoutes(BASE_PATHS.DESIGNATION);
 export const enquiryProcessStatusRoutes = createCRUDRoutes(
@@ -435,6 +445,7 @@ export const apiRoutes = {
   statusHistory: statusHistoryRoutes,
   associate: associateRoutes,
   associateCompany: associateCompanyRoutes,
+  labProfiles: labProfileRoutes,
   category: categoryRoutes,
   subCategory: subCategoryRoutes,
   product: productRoutes,

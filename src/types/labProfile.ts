@@ -1,0 +1,71 @@
+export type LabOption = { _id: string; kind?: string; name: string; unit?: string; method?: string; parentIds?: string[] };
+export type CountryOption = { _id: string; name: string };
+export type LabCredential = {
+  _id?: string;
+  accreditationId: string | LabOption;
+  issuer: string;
+  credentialNumber: string;
+  validFrom: string;
+  validTo: string;
+  documentUrl: string;
+  verificationStatus?: "PENDING" | "VERIFIED" | "REJECTED";
+  reviewNotes?: string;
+};
+export type LabOffering = {
+  _id?: string;
+  commodityId: string | LabOption;
+  qualityClassifications: string[];
+  testId: string | LabOption;
+  parameterIds: Array<string | LabOption>;
+  destinationCountryIds: Array<string | CountryOption>;
+  credentialIds: string[];
+  method?: string;
+  turnaroundDays?: number | null;
+  sampleRequirements?: string;
+  notes?: string;
+};
+export type LabProductCapabilityTemplate = {
+  _id: string;
+  name: string;
+  commodityId: string | LabOption;
+  qualityClassifications: string[];
+  testIds: Array<string | LabOption>;
+  parameterIds: Array<string | LabOption>;
+  credentialIds: string[];
+  method?: string;
+  turnaroundDays?: number | null;
+  sampleRequirements?: string;
+  notes?: string;
+};
+export type LabCountryAssignment = {
+  _id?: string;
+  countryId: string | CountryOption;
+  productTemplateIds: string[];
+};
+export type LabSnapshot = {
+  displayName: string;
+  contactEmail: string;
+  contactPhone: string;
+  contactPhoneSecondary?: string;
+  address: string;
+  physicalCountryId: string | CountryOption;
+  state?: string;
+  city?: string;
+  location?: { latitude?: number; longitude?: number; label?: string };
+  summary?: string;
+  credentials: LabCredential[];
+  productCapabilityTemplates: LabProductCapabilityTemplate[];
+  countryAssignments: LabCountryAssignment[];
+  offerings?: LabOffering[];
+  legacyCapabilities?: { tests?: string[]; certifications?: string[]; specifications?: string[]; acceptedItems?: string[]; requiresMapping?: boolean };
+};
+export type LabProfile = {
+  _id: string;
+  companyId?: { _id: string; name: string; externalListingSource?: string };
+  status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED";
+  reviewNotes?: string;
+  draft?: LabSnapshot;
+  published?: LabSnapshot;
+};
+export const optionId = (value: string | { _id?: string } | null | undefined) => typeof value === "string" ? value : String(value?._id || "");
+export const optionName = (value: string | { name?: string } | null | undefined) => typeof value === "string" ? value : String(value?.name || "");

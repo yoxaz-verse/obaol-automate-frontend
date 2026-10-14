@@ -24,6 +24,8 @@ test("lab controls are searchable, multi-selectable and accessible", async () =>
   assert.match(source, /role="listbox"/);
   assert.match(source, /aria-multiselectable/);
   assert.match(source, /aria-label=\{label\}/);
+  assert.match(source, /getBoundingClientRect\(\)\.width/);
+  assert.match(source, /width: menuWidth/);
 });
 
 test("wizard uses searchable fields and direct taxonomy creation", async () => {

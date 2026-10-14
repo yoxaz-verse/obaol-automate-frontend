@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Checkbox, Chip, Input, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
 import { FiChevronDown, FiSearch } from "react-icons/fi";
 
@@ -24,22 +24,33 @@ type Props = {
 export default function SearchableSelect({ label, options, value, onChange, multiple = true, required, helperText, placeholder = "Search options", allowSelectAll = true, disabled, emptyActionLabel, onEmptyAction }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [menuWidth, setMenuWidth] = useState<number>();
   const filtered = useMemo(() => options.filter((option) => `${option.label} ${option.description || ""}`.toLowerCase().includes(search.trim().toLowerCase())), [options, search]);
   const selected = options.filter((option) => value.includes(option.key));
   const toggle = (key: string) => {
     if (!multiple) { onChange([key]); setOpen(false); return; }
     onChange(value.includes(key) ? value.filter((item) => item !== key) : [...value, key]);
   };
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const syncWidth = () => setMenuWidth(container.getBoundingClientRect().width);
+    syncWidth();
+    const observer = new ResizeObserver(syncWidth);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
-  return <div className="space-y-1.5">
+  return <div ref={containerRef} className="w-full min-w-0 space-y-1.5">
     <label className="block text-xs font-semibold text-default-700">{label}{required ? <span className="ml-1 text-danger">*</span> : null}</label>
-    <Popover isOpen={open} onOpenChange={setOpen} placement="bottom-start" classNames={{ content: "w-[var(--trigger-width)] p-0" }}>
+    <Popover isOpen={open} onOpenChange={(nextOpen) => { if (nextOpen && containerRef.current) setMenuWidth(containerRef.current.getBoundingClientRect().width); setOpen(nextOpen); }} placement="bottom-start" classNames={{ content: "p-0" }}>
       <PopoverTrigger>
         <Button aria-label={label} isDisabled={disabled} variant="bordered" className="h-12 w-full justify-between border-default-300 bg-content1 px-3 font-normal" endContent={<FiChevronDown className="text-default-400" />}>
           <span className={selected.length ? "truncate text-foreground" : "truncate text-default-400"}>{selected.length ? (multiple && selected.length > 1 ? `${selected.length} selected` : selected[0].label) : `Select ${label.toLowerCase()}`}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent style={{ width: menuWidth ? `${menuWidth}px` : undefined, maxWidth: "calc(100vw - 24px)" }}>
         <div className="w-full p-2">
           <Input aria-label={`Search ${label}`} autoFocus value={search} onValueChange={setSearch} placeholder={placeholder} startContent={<FiSearch />} size="sm" variant="bordered" />
           {multiple && allowSelectAll && options.length ? <div className="mt-2 flex items-center justify-between border-b border-default-200 pb-2"><Button size="sm" variant="light" onPress={() => onChange(options.map((option) => option.key))}>Select all</Button><Button size="sm" variant="light" onPress={() => onChange([])}>Clear</Button></div> : null}

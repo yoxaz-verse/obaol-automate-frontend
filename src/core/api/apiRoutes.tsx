@@ -310,6 +310,15 @@ export const approvalRoutes = {
   companyAction: "/approvals/companies",
   operatorsList: "/approvals/operators",
   operatorAction: "/approvals/operators",
+  catalogList: (entityType: string) => `/approvals/catalog/${entityType}`,
+  catalogAction: (entityType: string, id: string) => `/approvals/catalog/${entityType}/${id}`,
+};
+
+export const catalogModerationRoutes = {
+  mine: "/catalog-moderation/mine",
+  create: (entityType: string) => `/catalog-moderation/${entityType}`,
+  update: (entityType: string, id: string) => `/catalog-moderation/${entityType}/${id}`,
+  submit: (entityType: string, id: string) => `/catalog-moderation/${entityType}/${id}/submit`,
 };
 
 export const notificationRoutes = {
@@ -399,6 +408,7 @@ export const organizationReportRoutes = {
 export const apiRoutes = {
   analytics: dashboardRoutes,
   approvals: approvalRoutes,
+  catalogModeration: catalogModerationRoutes,
   notifications: notificationRoutes,
   presence: presenceRoutes,
   supportContacts: supportContactRoutes,

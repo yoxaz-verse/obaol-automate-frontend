@@ -6,6 +6,8 @@ export type CatalogHierarchyOption = {
   level: CatalogHierarchyLevel;
   parentId: string | null;
   parentName: string | null;
+  approvalStatus: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
+  reviewNotes: string;
 };
 
 export const normalizeCatalogSearch = (value: unknown) =>

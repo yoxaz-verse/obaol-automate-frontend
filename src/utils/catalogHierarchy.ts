@@ -29,6 +29,8 @@ export const fetchCatalogHierarchyOptions = async (
       level: row?.level,
       parentId: row?.parentId == null ? null : String(row.parentId),
       parentName: row?.parentName == null ? null : String(row.parentName).normalize("NFKC").trim(),
+      approvalStatus: row?.approvalStatus || "APPROVED",
+      reviewNotes: String(row?.reviewNotes || ""),
     }))
     .filter((row): row is CatalogHierarchyOption => Boolean(
       row.id

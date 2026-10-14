@@ -26,11 +26,14 @@ test("lab controls are searchable, multi-selectable and accessible", async () =>
   assert.match(source, /aria-label=\{label\}/);
 });
 
-test("wizard uses searchable fields and a taxonomy request modal", async () => {
+test("wizard uses searchable fields and direct taxonomy creation", async () => {
   const source = await readFile(wizardPath, "utf8");
   assert.match(source, /SearchableSelect label="Physical country"/);
   assert.match(source, /SearchableSelect label="Target countries"/);
-  assert.match(source, /Request a new \{requestModal\.kind\.toLowerCase\(\)\}/);
+  assert.match(source, /Add \{requestModal\.kind\.toLowerCase\(\)\}/);
+  assert.match(source, /Add and select/);
+  assert.match(source, /Country product coverage/);
+  assert.doesNotMatch(source, /Request missing option/);
   assert.doesNotMatch(source, /window\.prompt/);
   assert.match(source, /sticky bottom-3/);
 });

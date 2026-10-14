@@ -223,6 +223,7 @@ export const associateCompanyRoutes = addCustomRoutes(createCRUDRoutes(
 });
 export const labProfileRoutes = {
   taxonomy: "/lab-profiles/taxonomy",
+  taxonomyCreate: "/lab-profiles/taxonomy",
   taxonomyRequests: "/lab-profiles/taxonomy/requests",
   taxonomyAdmin: "/lab-profiles/taxonomy/admin",
   directory: "/lab-profiles/directory",

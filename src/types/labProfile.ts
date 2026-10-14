@@ -5,8 +5,8 @@ export type LabCredential = {
   accreditationId: string | LabOption;
   issuer: string;
   credentialNumber: string;
-  validFrom: string;
-  validTo: string;
+  validFrom: string | null;
+  validTo: string | null;
   documentUrl: string;
   verificationStatus?: "PENDING" | "VERIFIED" | "REJECTED";
   reviewNotes?: string;

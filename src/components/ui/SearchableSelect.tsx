@@ -17,9 +17,11 @@ type Props = {
   placeholder?: string;
   allowSelectAll?: boolean;
   disabled?: boolean;
+  emptyActionLabel?: string;
+  onEmptyAction?: () => void;
 };
 
-export default function SearchableSelect({ label, options, value, onChange, multiple = true, required, helperText, placeholder = "Search options", allowSelectAll = true, disabled }: Props) {
+export default function SearchableSelect({ label, options, value, onChange, multiple = true, required, helperText, placeholder = "Search options", allowSelectAll = true, disabled, emptyActionLabel, onEmptyAction }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const filtered = useMemo(() => options.filter((option) => `${option.label} ${option.description || ""}`.toLowerCase().includes(search.trim().toLowerCase())), [options, search]);
@@ -45,7 +47,7 @@ export default function SearchableSelect({ label, options, value, onChange, mult
             {filtered.length ? filtered.map((option) => <button key={option.key} type="button" role="option" aria-selected={value.includes(option.key)} onClick={() => toggle(option.key)} className="flex w-full items-start gap-3 rounded-lg px-2 py-2 text-left hover:bg-default-100 focus:bg-default-100 focus:outline-none">
               {multiple ? <Checkbox isSelected={value.includes(option.key)} isReadOnly className="pointer-events-none" aria-label={option.label} /> : <span className={`mt-1 h-3 w-3 rounded-full border ${value.includes(option.key) ? "border-success-500 bg-success-500" : "border-default-400"}`} />}
               <span><span className="block text-sm font-medium">{option.label}</span>{option.description ? <span className="block text-xs text-default-500">{option.description}</span> : null}</span>
-            </button>) : <div className="px-3 py-8 text-center text-sm text-default-500">No matching options</div>}
+            </button>) : <div className="px-3 py-6 text-center text-sm text-default-500"><p>No matching options</p>{onEmptyAction ? <Button className="mt-3" size="sm" color="success" variant="flat" onPress={() => { setOpen(false); onEmptyAction(); }}>{emptyActionLabel || "Add option"}</Button> : null}</div>}
           </div>
         </div>
       </PopoverContent>

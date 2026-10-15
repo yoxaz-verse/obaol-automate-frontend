@@ -102,8 +102,8 @@ const DynamicFilter = dynamic(
 const round2 = (value: number) =>
   Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
 const LISTING_DELETE_WINDOW_MS = 60 * 60 * 1000;
-const LISTING_FRESHNESS_DAYS = 20;
-const DAY_MS = 24 * 60 * 60 * 1000;
+const LISTING_LIVE_DURATION_HOURS = 24;
+const HOUR_MS = 60 * 60 * 1000;
 const isValidObjectId = (value: any) =>
   /^[a-f0-9]{24}$/i.test(String(value || "").trim());
 const resolveAdminCommission = (
@@ -894,21 +894,21 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const lifecycleTimestamp = new Date(
                 item.lastLiveDate || item.updatedAt || item.createdAt,
               ).getTime();
-              const daysSinceLastLive = Number.isFinite(lifecycleTimestamp)
-                ? Math.floor((listingPolicyNow - lifecycleTimestamp) / DAY_MS)
+              const hoursSinceLastLive = Number.isFinite(lifecycleTimestamp)
+                ? Math.floor((listingPolicyNow - lifecycleTimestamp) / HOUR_MS)
                 : 0;
               const effectiveIsLive =
                 typeof item.__effectiveIsLive === "boolean"
                   ? item.__effectiveIsLive
                   : Boolean(item.isLive);
               const isExpired =
-                !effectiveIsLive && daysSinceLastLive >= LISTING_FRESHNESS_DAYS;
+                !effectiveIsLive && hoursSinceLastLive >= LISTING_LIVE_DURATION_HOURS;
               return {
                 ...rest,
                 isLive: effectiveIsLive,
                 isExpired,
                 expiryAgeText: isExpired
-                  ? `${daysSinceLastLive} days since last live`
+                  ? `${hoursSinceLastLive} hours since last live`
                   : "",
                 liveStatus: (
                   <div className="flex flex-col items-end gap-0.5">
@@ -924,7 +924,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     </div>
                     {isExpired && (
                       <span className="text-[8px] font-bold text-danger-400 whitespace-nowrap">
-                        {daysSinceLastLive} days since last live
+                        {hoursSinceLastLive} hours since last live
                       </span>
                     )}
                   </div>
@@ -1478,7 +1478,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     No Recent Past Listings
                   </h3>
                   <p className="mt-2 max-w-[390px] text-sm leading-relaxed text-default-500">
-                    Past listings remain visible here for 20 days after they are unpublished. Owners can renew a listing to make it live again for another 20 days.
+                    Past listings remain visible here for 20 days after they are unpublished. Owners can renew a listing to make it live again for another 24 hours.
                   </p>
                 </div>
               ) : finalTableData.length === 0 ? (
@@ -2791,7 +2791,7 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
       queryClient.invalidateQueries();
       showToastMessage({
         type: "success",
-        message: "Listing renewed and live for another 20 days.",
+        message: "Listing renewed and live for another 24 hours.",
         position: "top-right",
       });
       refetchData?.();

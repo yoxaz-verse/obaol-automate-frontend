@@ -34,7 +34,7 @@ export default function HeroSectionServer() {
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-obaol-500"></span>
               </span>
               <span className="text-[11px] font-extrabold uppercase tracking-[0.25em] text-obaol-700 dark:text-obaol-300 sm:text-xs">
-                The Agro Execution System
+                Open Agro Execution Platform
               </span>
             </div>
 
@@ -56,8 +56,8 @@ export default function HeroSectionServer() {
 
             {/* Subheading */}
             <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">
-              OBAOL connects buyers, suppliers, and specialist service partners. Each verified participant handles their part while the workflow, handoffs, and visibility stay in one system.
-              <span className="mt-1 block font-bold text-foreground sm:mt-0"> Technology for real B2B agro trade operations.</span>
+              Open registration—buyers, suppliers, and specialist service partners can join without an invitation.
+              <span className="mt-1 block font-bold text-foreground sm:mt-0"> Participant and company verification still applies to keep execution trusted.</span>
             </p>
 
             <HeroCTA />

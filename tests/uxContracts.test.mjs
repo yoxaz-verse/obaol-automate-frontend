@@ -70,6 +70,25 @@ test("active homepage source does not advertise fabricated runtime telemetry", (
   for (const phrase of ["CORE_LATENCY", "AES-256", "SYS_LINK"]) assert.equal(homepage.includes(phrase), false);
 });
 
+test("homepage communicates open registration without weakening verification", () => {
+  const hero = read("../src/components/home/HeroSectionServer.tsx");
+  const heroCta = read("../src/components/home/HeroCTA.tsx");
+  const header = read("../src/components/home/header.tsx");
+  const homepage = read("../src/app/page.tsx");
+
+  for (const phrase of [
+    "Open Agro Execution Platform",
+    "Open registration—buyers, suppliers, and specialist service partners can join without an invitation.",
+    "Participant and company verification still applies to keep execution trusted.",
+  ]) assert.equal(hero.includes(phrase), true);
+  assert.equal(heroCta.includes('isAuthenticated ? "Open Workspace" : "Join the Open Platform"'), true);
+  assert.equal(heroCta.includes('const href = !loading && isAuthenticated ? "/dashboard" : "/auth"'), true);
+  assert.equal(header.includes('signedIn ? "Open workspace" : "Join Platform"'), true);
+  assert.equal(header.includes('href={signedIn ? "/dashboard" : "/auth"}'), true);
+  assert.equal(homepage.includes("open-registration B2B agro execution platform"), true);
+  assert.equal(homepage.includes("An open-registration platform"), true);
+});
+
 test("homepage hero presents the complete static ten-stage execution map", () => {
   const hero = read("../src/components/home/HeroSectionServer.tsx");
   const explorer = read("../src/components/home/HeroStageExplorer.tsx");
@@ -210,10 +229,10 @@ test("homepage services use a nine-chapter multi-entity scroll story without aut
   ]) assert.equal(services.includes(phrase), true);
   assert.equal(services.includes("Different specialists. One connected trade."), true);
   assert.equal(services.includes("OBAOL connects the handoffs, records, and progress—it does not replace them."), true);
-  assert.equal(hero.includes("OBAOL connects buyers, suppliers, and specialist service partners."), true);
+  assert.equal(hero.includes("Open registration—buyers, suppliers, and specialist service partners can join without an invitation."), true);
   assert.equal(homeContent.includes("OBAOL is the technology and coordination platform"), true);
   assert.equal(homeContent.includes("Independent trade participants do the specialist work."), true);
-  assert.equal(homepage.includes("OBAOL connects verified buyers, suppliers, and specialist service partners"), true);
+  assert.equal(homepage.includes("open-registration B2B agro execution platform"), true);
   for (const imagePath of imagePaths) {
     const assetUrl = new URL(`../public${imagePath}`, import.meta.url);
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);

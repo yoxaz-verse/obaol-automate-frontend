@@ -135,7 +135,7 @@ export default function Header() {
                 </Link>
               )}
               <Link href={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-obaol-500 to-amber-500 px-4 py-2.5 text-sm font-extrabold text-obaol-950 shadow-[0_4px_16px_rgba(207,152,60,0.35)] transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_6px_22px_rgba(207,152,60,0.5)] active:scale-[0.97]">
-                {signedIn ? "Open workspace" : "Get Started"}
+                {signedIn ? "Open workspace" : "Join Platform"}
               </Link>
               <button ref={mobileTrigger} type="button" onClick={() => setOpen((value) => !value)}
                 className="lg:hidden touch-target inline-flex items-center justify-center rounded-lg border border-foreground/10 bg-foreground/[0.04]"

@@ -1,27 +1,67 @@
 {
-  "generatedAt": "2026-10-03T04:53:05.312Z",
-  "totalBytes": 52849304,
-  "referencedBytes": 3268152,
-  "unreferencedBytes": 49581152,
+  "generatedAt": "2026-10-15T18:02:06.217Z",
+  "totalBytes": 59013743,
+  "referencedBytes": 5807043,
+  "unreferencedBytes": 53206700,
   "largestReferenced": [
-    {
-      "path": "/images/roles/associate/hero_bg.png",
-      "bytes": 843833,
-      "referenced": true
-    },
     {
       "path": "/images/india_map.webp",
       "bytes": 510084,
       "referenced": true
     },
     {
-      "path": "/images/services/warehouse-india-professional.webp",
-      "bytes": 295710,
+      "path": "/images/hero-agro-execution-sketch.webp",
+      "bytes": 436552,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/freight-trade-sketch.webp",
+      "bytes": 381256,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/logistics-trade-sketch.webp",
+      "bytes": 376924,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/warehouse-trade-sketch.webp",
+      "bytes": 353178,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/sourcing-trade-sketch.webp",
+      "bytes": 325112,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/packaging-trade-sketch.webp",
+      "bytes": 303342,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/documentation-trade-sketch.webp",
+      "bytes": 302172,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/procurement-trade-sketch.webp",
+      "bytes": 293692,
       "referenced": true
     },
     {
       "path": "/images/Jacob-Alwin-New.jpg",
       "bytes": 283979,
+      "referenced": true
+    },
+    {
+      "path": "/images/execution-flow/01-discovery-sketch.webp",
+      "bytes": 272544,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/quality-trade-sketch.webp",
+      "bytes": 272534,
       "referenced": true
     },
     {
@@ -32,6 +72,11 @@
     {
       "path": "/images/execution-flow/07-packaging.webp",
       "bytes": 145920,
+      "referenced": true
+    },
+    {
+      "path": "/images/hero-operations/port-operations-stock.webp",
+      "bytes": 142392,
       "referenced": true
     },
     {
@@ -60,6 +105,11 @@
       "referenced": true
     },
     {
+      "path": "/images/recognitions/gem.svg",
+      "bytes": 102133,
+      "referenced": true
+    },
+    {
       "path": "/images/execution-flow/04-documentation.webp",
       "bytes": 93440,
       "referenced": true
@@ -77,31 +127,6 @@
     {
       "path": "/images/order-execution-tracking.webp",
       "bytes": 65344,
-      "referenced": true
-    },
-    {
-      "path": "/images/execution-flow/01-discovery.webp",
-      "bytes": 57692,
-      "referenced": true
-    },
-    {
-      "path": "/logo.png",
-      "bytes": 26197,
-      "referenced": true
-    },
-    {
-      "path": "/marker-shadow.png",
-      "bytes": 9445,
-      "referenced": true
-    },
-    {
-      "path": "/marker-icon.png",
-      "bytes": 6147,
-      "referenced": true
-    },
-    {
-      "path": "/apple-touch-icon.png",
-      "bytes": 5117,
       "referenced": true
     }
   ],
@@ -197,6 +222,11 @@
       "referenced": false
     },
     {
+      "path": "/images/roles/associate/hero_bg.png",
+      "bytes": 843833,
+      "referenced": false
+    },
+    {
       "path": "/images/documentation.png",
       "bytes": 802504,
       "referenced": false
@@ -204,6 +234,11 @@
     {
       "path": "/images/services/packaging-india.webp",
       "bytes": 772744,
+      "referenced": false
+    },
+    {
+      "path": "/images/recognitions/msme-official.png",
+      "bytes": 682038,
       "referenced": false
     },
     {
@@ -227,6 +262,16 @@
       "referenced": false
     },
     {
+      "path": "/images/hero-agro-execution-v2.webp",
+      "bytes": 304584,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/warehouse-india-professional.webp",
+      "bytes": 295710,
+      "referenced": false
+    },
+    {
       "path": "/images/services/quality-india.webp",
       "bytes": 263154,
       "referenced": false
@@ -237,13 +282,43 @@
       "referenced": false
     },
     {
+      "path": "/images/services/warehouse-trade-v2.webp",
+      "bytes": 235882,
+      "referenced": false
+    },
+    {
       "path": "/images/hero-collage/freight.webp",
       "bytes": 220932,
       "referenced": false
     },
     {
+      "path": "/images/services/freight-trade-v2.webp",
+      "bytes": 217046,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/logistics-trade-v2.webp",
+      "bytes": 186780,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/procurement-trade-v2.webp",
+      "bytes": 176882,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/sourcing-trade-v2.webp",
+      "bytes": 171048,
+      "referenced": false
+    },
+    {
       "path": "/images/hero-collage/procurement.webp",
       "bytes": 170484,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/packaging-trade-v2.webp",
+      "bytes": 170204,
       "referenced": false
     },
     {
@@ -267,13 +342,18 @@
       "referenced": false
     },
     {
-      "path": "/images/hero-operations/port-operations-stock.webp",
-      "bytes": 142392,
+      "path": "/images/hero-operations/coordination-alt.webp",
+      "bytes": 134918,
       "referenced": false
     },
     {
-      "path": "/images/hero-operations/coordination-alt.webp",
-      "bytes": 134918,
+      "path": "/images/services/documentation-trade-v2.webp",
+      "bytes": 125550,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/quality-trade-v2.webp",
+      "bytes": 123114,
       "referenced": false
     },
     {
@@ -299,61 +379,6 @@
     {
       "path": "/images/Jacob-Alwin-Obaol.webp",
       "bytes": 114962,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/logistics.webp",
-      "bytes": 111380,
-      "referenced": false
-    },
-    {
-      "path": "/images/roles/operator/hero_bg.png",
-      "bytes": 110011,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/documentation-alt.webp",
-      "bytes": 106952,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-collage/quality.webp",
-      "bytes": 102696,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/procurement.webp",
-      "bytes": 100900,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/procurement-market.webp",
-      "bytes": 95318,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-collage/warehouse.webp",
-      "bytes": 91950,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/label-inspection-stock.webp",
-      "bytes": 89722,
-      "referenced": false
-    },
-    {
-      "path": "/obaol.gif",
-      "bytes": 75328,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/packaging.webp",
-      "bytes": 71476,
-      "referenced": false
-    },
-    {
-      "path": "/images/jacob_alwin_arcane.png",
-      "bytes": 71058,
       "referenced": false
     }
   ]

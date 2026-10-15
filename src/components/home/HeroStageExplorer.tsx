@@ -42,8 +42,8 @@ export default function HeroStageExplorer() {
           <div data-hero-lifecycle-visual="true" data-hero-masked-image="true" style={lifecycleMask} className="relative aspect-[16/9] overflow-hidden">
             <div className="absolute -inset-[3%]">
               <Image
-                src="/images/hero-agro-execution-v2.webp"
-                alt="Indian agro-trade lifecycle from crop sourcing and documentation through quality verification, packaging, warehousing, and delivery"
+                src="/images/hero-agro-execution-sketch.webp"
+                alt="Ink-and-watercolor illustration of the Indian agro-trade lifecycle from crop sourcing and documentation through quality verification, packaging, warehousing, and delivery"
                 fill
                 priority
                 sizes="(max-width: 1023px) 100vw, 58vw"

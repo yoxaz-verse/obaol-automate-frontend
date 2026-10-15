@@ -1,10 +1,29 @@
 # Service Showcase Image Sources
 
-The active `*-trade-v2.webp` homepage images are purpose-built project imagery generated with OpenAI's built-in image generation workflow on 2026-10-07. They depict a coherent sequence of professional Indian agro-trade operations and do not use third-party stock photography.
+## Active sketch-art set
+
+The homepage uses ten OpenAI-generated ink-and-watercolor illustrations created on 2026-10-15 as high-fidelity style transformations of the existing operational imagery. The original scenes remain in the repository as recoverable source assets.
+
+The treatment uses navy-black ink linework, translucent watercolor washes, warm earth tones, muted agricultural greens, restrained OBAOL gold, and subtle paper texture. Each transformation preserves the original people, work activity, safety equipment, framing, and overlay-safe negative space. Generated outputs contain no intentional readable text, brands, trademarks, or watermarks.
+
+- `hero-agro-execution-sketch.webp` — complete landscape execution lifecycle
+- `execution-flow/01-discovery-sketch.webp` — digital trade discovery
+- `services/sourcing-trade-sketch.webp` — commercial crop-lot inspection
+- `services/documentation-trade-sketch.webp` — documentation and shipment planning
+- `services/procurement-trade-sketch.webp` — commodity-lot procurement verification
+- `services/quality-trade-sketch.webp` — laboratory quality testing
+- `services/packaging-trade-sketch.webp` — hygienic packing and pallet preparation
+- `services/logistics-trade-sketch.webp` — dispatch and inland movement
+- `services/warehouse-trade-sketch.webp` — inventory scanning and warehouse handling
+- `services/freight-trade-sketch.webp` — port and freight coordination
+
+## Original generated source set
+
+The `*-trade-v2.webp` source images were purpose-built project imagery generated with OpenAI's built-in image generation workflow on 2026-10-07. They depict a coherent sequence of professional Indian agro-trade operations and do not use third-party stock photography.
 
 Each source image was generated at a 4:5 portrait ratio, visually reviewed for operational credibility and safe working practices, then converted locally to WebP at 1120 × 1400. The compositions reserve clear areas for the service story's top status badge and bottom outcome panel.
 
-## Active generated set
+## Generated source files
 
 - `sourcing-trade-v2.webp` — commercial crop-lot inspection and tablet specification capture
 - `documentation-trade-v2.webp` — purchase-order, compliance, and shipment planning in a modern operations office

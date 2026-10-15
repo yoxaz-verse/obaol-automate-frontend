@@ -72,6 +72,7 @@ import {
   initialTableConfig,
 } from "@/utils/tableValues";
 import { useCurrency } from "@/context/CurrencyContext";
+import { resolveMarketplaceSort } from "@/utils/marketplaceSort";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
 import {
@@ -306,6 +307,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
   const isMarketplaceView = additionalParams?.view === "marketplace";
+  const marketplaceSort = resolveMarketplaceSort(additionalParams?.isLive);
   const canManageRow = (item: any) => {
     if (!item) return false;
     if (roleLower === "admin") return true;
@@ -531,7 +533,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               {
                 ...(effectiveFilters || {}),
                 ...(additionalParams || {}),
-                ...(isMarketplaceView && { sort: "lastLiveDate:asc" }),
+                ...(isMarketplaceView && { sort: marketplaceSort }),
                 ...(displayOnly && { selected: "true" }),
                 ...(productVariantId && { productVariant: productVariantId }),
               },
@@ -543,7 +545,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ...(serverSearch && { search: serverSearch }),
                 ...(effectiveFilters || {}),
                 ...(additionalParams || {}),
-                ...(isMarketplaceView && { sort: "lastLiveDate:asc" }),
+                ...(isMarketplaceView && { sort: marketplaceSort }),
                 ...(displayOnly && { selected: "true" }),
                 ...(productVariantId && { productVariant: productVariantId }),
               }),
@@ -578,6 +580,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
     effectiveFilters,
     additionalParams,
     isMarketplaceView,
+    marketplaceSort,
   ]);
 
   const { data: inventoryResponse } = useQuery({
@@ -682,7 +685,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
       additionalParams={{
         ...(effectiveFilters || {}),
         ...(additionalParams || {}),
-        ...(isMarketplaceView && { sort: "lastLiveDate:asc" }),
+        ...(isMarketplaceView && { sort: marketplaceSort }),
         ...(displayOnly && { selected: "true" }),
         // ...(!user?.id && { isLive: "true" }),
         ...(productVariantValue && { productVariant: productVariantValue._id }),

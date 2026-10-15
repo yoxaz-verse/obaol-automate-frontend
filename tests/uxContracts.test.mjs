@@ -171,7 +171,13 @@ test("homepage services use a nine-chapter multi-entity scroll story without aut
   assert.equal(services.includes("requestAnimationFrame"), true);
   assert.equal(services.includes("window.innerHeight * 0.45"), true);
   assert.equal(services.includes("lg:min-h-[72svh]"), true);
-  assert.equal(services.includes("duration-200"), true);
+  assert.equal(services.includes('className="relative hidden lg:block"'), true);
+  assert.equal(services.includes("lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"), true);
+  assert.equal(services.includes('bg-black lg:hidden'), true);
+  assert.equal(services.includes("if (adaptiveMotion.isMobile) return"), true);
+  assert.equal(services.includes("if (adaptiveMotion.shouldReduceMotion) return"), false);
+  assert.equal(services.includes('adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[450ms]"'), true);
+  assert.equal(services.includes('adaptiveMotion.shouldReduceMotion ? "hidden"'), false);
   assert.equal(services.includes("AnimatePresence"), false);
   assert.equal(services.includes('mode="wait"'), false);
   assert.equal(services.includes("onActivate"), false);

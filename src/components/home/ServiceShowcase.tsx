@@ -32,11 +32,11 @@ const services: readonly ServiceChapter[] = [
   { id: "freight", title: "Freight Forwarding", role: "Freight forwarders", description: "Freight forwarders coordinate customs, vessel planning, port documents, and shipment milestones through closing.", outcome: "Cargo cleared and moving to buyer", image: "/images/services/freight-trade-art-v2.webp", imageAlt: "Expressive ink-and-watercolor artwork of freight professionals coordinating container and vessel operations at an international terminal", imagePosition: "center 42%", icon: FaShip, accent: "#84cc16" },
 ] as const;
 
-function Chapter({ service, index, active, showInlineMedia, chapterRef }: { service: ServiceChapter; index: number; active: boolean; showInlineMedia: boolean; chapterRef: RefCallback<HTMLElement> }) {
+function Chapter({ service, index, active, chapterRef }: { service: ServiceChapter; index: number; active: boolean; chapterRef: RefCallback<HTMLElement> }) {
   const Icon = service.icon;
 
   return (
-    <article ref={chapterRef} data-service-chapter={service.id} className={`relative ${showInlineMedia ? "" : "lg:flex lg:min-h-[72svh] lg:items-center"}`}>
+    <article ref={chapterRef} data-service-chapter={service.id} className="relative lg:flex lg:min-h-[72svh] lg:items-center">
       <div className={`relative border-l pl-7 transition-colors duration-500 lg:py-16 ${active ? "border-obaol-400" : "border-default-200"}`}>
         <span className={`absolute -left-[7px] top-1 h-3.5 w-3.5 rounded-full border-4 border-background transition-colors lg:top-[4.25rem] ${active ? "bg-obaol-400 shadow-[0_0_18px_rgba(207,152,60,0.75)]" : "bg-default-300"}`} />
         <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ function Chapter({ service, index, active, showInlineMedia, chapterRef }: { serv
           <span className="pt-1.5">{service.outcome}</span>
         </div>
 
-        <div className={`relative mt-7 aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-default-200 bg-black ${showInlineMedia ? "" : "lg:hidden"}`}>
+        <div className="relative mt-7 aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-default-200 bg-black lg:hidden">
           <Image src={service.image} alt={service.imageAlt} fill sizes="(max-width: 1023px) 90vw, 1px" className="object-cover" style={{ objectPosition: service.imagePosition }} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <span className="absolute bottom-4 left-4 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-white backdrop-blur-md">Indian origin operations</span>
@@ -75,7 +75,7 @@ export default function ServiceShowcase() {
   const ActiveIcon = active.icon;
 
   useEffect(() => {
-    if (adaptiveMotion.shouldReduceMotion) return;
+    if (adaptiveMotion.isMobile) return;
 
     const section = sectionRef.current;
     if (!section) return;
@@ -141,13 +141,13 @@ export default function ServiceShowcase() {
       sectionObserver.disconnect();
       stopTracking();
     };
-  }, [adaptiveMotion.shouldReduceMotion]);
+  }, [adaptiveMotion.isMobile]);
 
   return (
     <section ref={sectionRef} data-service-story="true" aria-labelledby="service-story-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-16 md:py-24 public-standard-section">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(207,152,60,0.12),transparent_28%)]" />
       <div className="container relative z-10 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container">
-        <div className={`grid gap-12 lg:gap-16 ${adaptiveMotion.shouldReduceMotion ? "" : "lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"}`}>
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16">
           <div>
             <div className="mb-10 space-y-5 lg:mb-2">
               <p className={homeTitleStyles.sectionKicker}>Connected Execution Network</p>
@@ -156,17 +156,17 @@ export default function ServiceShowcase() {
             </div>
             <div className="space-y-12 lg:space-y-0">
               {services.map((service, index) => (
-                <Chapter key={service.id} service={service} index={index} active={index === activeIndex} showInlineMedia={adaptiveMotion.shouldReduceMotion} chapterRef={chapterRefSetters[index]} />
+                <Chapter key={service.id} service={service} index={index} active={index === activeIndex} chapterRef={chapterRefSetters[index]} />
               ))}
             </div>
           </div>
 
-          <div className={`relative ${adaptiveMotion.shouldReduceMotion ? "hidden" : "hidden lg:block"}`}>
+          <div className="relative hidden lg:block">
             <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-9rem)] min-h-[520px] max-h-[760px] overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-black shadow-[0_30px_90px_-45px_rgba(207,152,60,0.5)]">
               {services.map((service, index) => {
                 const isActive = index === activeIndex;
                 return (
-                <div key={service.id} aria-hidden={!isActive} className={`absolute inset-0 transition-opacity ease-out ${adaptiveMotion.shouldReduceMotion ? "duration-0" : "duration-200"} ${isActive ? "z-[1] opacity-100" : "z-0 opacity-0"}`}>
+                <div key={service.id} aria-hidden={!isActive} className={`absolute inset-0 transition-opacity ease-out ${adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[450ms]"} ${isActive ? "z-[1] opacity-100" : "z-0 opacity-0"}`}>
                   <Image src={service.image} alt={isActive ? service.imageAlt : ""} aria-hidden={!isActive} fill priority={index === 0} sizes="(max-width: 1023px) 1px, 52vw" className="object-cover" style={{ objectPosition: service.imagePosition }} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/15" />
                 </div>

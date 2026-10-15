@@ -33,7 +33,7 @@ export default function HeroStageExplorer() {
         <div className="relative">
           <div className="pointer-events-none absolute inset-[10%] rounded-full bg-obaol-400/10 blur-3xl dark:bg-obaol-400/[0.08]" />
           <div data-hero-lifecycle-visual="true" data-hero-masked-image="true" data-ink-artwork-mask="true" style={inkArtworkMaskStyle} className="relative aspect-[16/9] overflow-hidden">
-            <div className="absolute -inset-[5%]">
+            <div className="absolute -inset-[2%]">
               <Image
                 src="/images/hero-agro-execution-art-v2.webp"
                 alt="Expressive ink-and-watercolor artwork of the Indian agro-trade lifecycle from crop sourcing and documentation through quality verification, packaging, warehousing, and delivery"

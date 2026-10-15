@@ -100,7 +100,8 @@ test("Customer Support agents receive only their support workspace and account r
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/users", role: "CustomerSupport" }), false);
 });
 
-test("Associate sidebar routes use the requested account and support groups", () => {
+test("Associate sidebar routes use the requested buying, account, and support groups", () => {
+  assert.equal(getDashboardRoute("/dashboard/marketplace")?.taskGroup, "Buy");
   assert.equal(getDashboardRoute("/dashboard/catalog")?.taskGroup, "Company & Account");
   assert.equal(getDashboardRoute("/dashboard/settings")?.taskGroup, "Company & Account");
   assert.equal(getDashboardRoute("/dashboard/guidance")?.taskGroup, "Support");

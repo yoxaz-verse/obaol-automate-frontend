@@ -115,8 +115,11 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes("inkArtworkMaskStyle"), true);
   assert.equal(inkMaskStyle.includes("maskImage: inkMask"), true);
   assert.equal(inkMaskStyle.includes("WebkitMaskImage: inkMask"), true);
+  assert.equal(inkMaskStyle.includes("spaciousInkArtworkMaskStyle"), true);
   assert.equal(inkMaskAsset.includes('filter id="ink-edge"'), true);
   assert.equal(inkMaskAsset.includes("feTurbulence"), true);
+  assert.equal(inkMaskAsset.includes('style="background:transparent"'), true);
+  assert.equal(inkMaskAsset.includes("<circle"), false);
   assert.equal(explorer.includes("From origin to delivery"), true);
   assert.equal(explorer.includes("One connected agro execution system"), false);
   assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
@@ -180,9 +183,10 @@ test("homepage services use a nine-chapter multi-entity scroll story without aut
   assert.equal(services.includes('className="relative hidden lg:block"'), true);
   assert.equal(services.includes("lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"), true);
   assert.equal(services.includes('data-service-artwork-layer="true"'), true);
-  assert.equal(services.includes('data-ink-artwork-mask="true"'), true);
-  assert.equal(services.includes("inkArtworkMaskStyle"), true);
-  assert.equal(services.includes("max-h-[680px]"), true);
+  assert.equal(services.includes('data-ink-artwork-mask="spacious"'), true);
+  assert.equal(services.includes("spaciousInkArtworkMaskStyle"), true);
+  assert.equal(services.includes("absolute inset-[4%]"), true);
+  assert.equal(services.includes("max-h-[650px]"), true);
   assert.equal(services.includes("rounded-[2rem] border border-obaol-500/20 bg-black"), false);
   assert.equal(services.includes("if (adaptiveMotion.isMobile) return"), true);
   assert.equal(services.includes("if (adaptiveMotion.shouldReduceMotion) return"), false);

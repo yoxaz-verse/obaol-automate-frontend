@@ -7,11 +7,18 @@ const wizardPath = new URL("../src/app/dashboard/quality-labs/location/page.tsx"
 const searchablePath = new URL("../src/components/ui/SearchableSelect.tsx", import.meta.url);
 const mapPath = new URL("../src/components/Labs/QualityLabsMap.tsx", import.meta.url);
 
-test("lab directory renders the map and cards together with distinct empty states", async () => {
+test("lab directory toggles between map and card views with distinct empty states", async () => {
   const source = await readFile(directoryPath, "utf8");
   assert.match(source, /payload\.markers/);
+  assert.match(source, /useState<"map" \| "cards">\("map"\)/);
+  assert.match(source, />Map view<\/Button>/);
+  assert.match(source, />Card view<\/Button>/);
+  assert.match(source, /aria-pressed=\{viewMode === "map"\}/);
+  assert.match(source, /aria-pressed=\{viewMode === "cards"\}/);
+  assert.match(source, /viewMode === "map" \? <>/);
   assert.match(source, /<QualityLabsMap/);
   assert.match(source, /labs\.map/);
+  assert.match(source, /viewMode === "cards" \? "success" : "default"/);
   assert.match(source, /No labs match these filters/);
   assert.match(source, /No published labs are available yet/);
   assert.match(source, /Map location not supplied/);

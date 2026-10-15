@@ -67,7 +67,6 @@ export const getDashboardSidebarSections = (
     };
     const groupOrder: DashboardTaskGroup[] = [
       "Home",
-      "Discover",
       "Buy",
       "Sell",
       "Execute",

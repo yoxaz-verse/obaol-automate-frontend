@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentType, type RefCallb
 import { FiCheckCircle, FiFileText, FiPackage, FiSearch, FiShoppingBag, FiTarget, FiTruck } from "react-icons/fi";
 import { FaShip, FaWarehouse } from "react-icons/fa6";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
-import { inkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
+import { spaciousInkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 export type ServiceChapter = {
@@ -52,7 +52,7 @@ function Chapter({ service, index, active, chapterRef }: { service: ServiceChapt
         </div>
 
         <div className="relative mt-7 aspect-[4/3] lg:hidden">
-          <div data-ink-artwork-mask="true" style={inkArtworkMaskStyle} className="absolute inset-0 overflow-hidden">
+          <div data-ink-artwork-mask="spacious" style={spaciousInkArtworkMaskStyle} className="absolute inset-[3%] overflow-hidden">
             <Image src={service.image} alt={service.imageAlt} fill sizes="(max-width: 1023px) 90vw, 1px" className="object-cover" style={{ objectPosition: service.imagePosition }} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
           </div>
@@ -165,22 +165,22 @@ export default function ServiceShowcase() {
           </div>
 
           <div className="relative hidden lg:block">
-            <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-12rem)] min-h-[500px] max-h-[680px]">
+            <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-12rem)] min-h-[480px] max-h-[650px]">
               <div className="pointer-events-none absolute inset-[8%] rounded-full bg-obaol-400/10 blur-3xl dark:bg-obaol-400/[0.08]" />
               {services.map((service, index) => {
                 const isActive = index === activeIndex;
                 return (
-                <div key={service.id} data-service-artwork-layer="true" data-ink-artwork-mask="true" aria-hidden={!isActive} style={inkArtworkMaskStyle} className={`absolute inset-0 overflow-hidden transition-[opacity,filter] ease-out ${adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[550ms]"} ${isActive ? "z-[1] opacity-100 blur-0 saturate-100" : "z-0 opacity-0 blur-[2px] saturate-[0.92]"}`}>
+                <div key={service.id} data-service-artwork-layer="true" data-ink-artwork-mask="spacious" aria-hidden={!isActive} style={spaciousInkArtworkMaskStyle} className={`absolute inset-[4%] overflow-hidden transition-[opacity,filter] ease-out ${adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[550ms]"} ${isActive ? "z-[1] opacity-100 blur-0 saturate-100" : "z-0 opacity-0 blur-[2px] saturate-[0.92]"}`}>
                   <Image src={service.image} alt={isActive ? service.imageAlt : ""} aria-hidden={!isActive} fill priority={index === 0} sizes="(max-width: 1023px) 1px, 52vw" className="object-cover" style={{ objectPosition: service.imagePosition }} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/15" />
                 </div>
                 );
               })}
-              <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-9 py-8">
+              <div className="absolute inset-x-[4%] top-[3%] z-10 flex items-center justify-between px-9 py-8">
                 <span className="rounded-full border border-white/15 bg-black/55 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/75 backdrop-blur-md">Indian origin operations</span>
                 <span className="font-mono text-xs font-black text-white/60">{String(activeIndex + 1).padStart(2, "0")} / {String(services.length).padStart(2, "0")}</span>
               </div>
-              <div className="absolute inset-x-10 bottom-5 z-10 rounded-[1.5rem] border border-white/12 bg-black/62 p-5 text-white shadow-[0_18px_48px_-28px_rgba(0,0,0,0.9)] backdrop-blur-lg">
+              <div className="absolute inset-x-12 bottom-7 z-10 rounded-[1.5rem] border border-white/12 bg-black/62 p-5 text-white shadow-[0_18px_48px_-28px_rgba(0,0,0,0.9)] backdrop-blur-lg">
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-black" style={{ backgroundColor: active.accent }}><ActiveIcon size={20} /></span>
                   <div><p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/45">Active chapter</p><p className="mt-1 text-2xl font-black">{active.title}</p></div>

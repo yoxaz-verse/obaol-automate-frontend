@@ -1,23 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="none" style="background:transparent">
   <defs>
-    <filter id="ink-edge" x="-12%" y="-16%" width="124%" height="132%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.009 0.024" numOctaves="4" seed="23" result="paper" />
-      <feDisplacementMap in="SourceGraphic" in2="paper" scale="34" xChannelSelector="R" yChannelSelector="B" result="rough" />
-      <feGaussianBlur in="rough" stdDeviation="4.5" />
-    </filter>
-    <filter id="soft-drop" x="-100%" y="-100%" width="300%" height="300%">
-      <feGaussianBlur stdDeviation="5" />
+    <filter id="ink-edge" x="-10%" y="-14%" width="120%" height="128%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.011 0.029" numOctaves="5" seed="23" result="paper" />
+      <feDisplacementMap in="SourceGraphic" in2="paper" scale="46" xChannelSelector="R" yChannelSelector="B" result="rough" />
+      <feGaussianBlur in="rough" stdDeviation="7" />
     </filter>
   </defs>
-  <rect x="48" y="42" width="1104" height="716" rx="62" fill="white" filter="url(#ink-edge)" />
-  <g fill="white" opacity="0.62" filter="url(#soft-drop)">
-    <circle cx="38" cy="188" r="13" />
-    <circle cx="68" cy="92" r="8" />
-    <circle cx="29" cy="596" r="9" />
-    <circle cx="92" cy="765" r="12" />
-    <circle cx="1148" cy="101" r="11" />
-    <circle cx="1180" cy="273" r="8" />
-    <circle cx="1165" cy="622" r="15" />
-    <circle cx="1089" cy="770" r="8" />
-  </g>
+  <rect x="76" y="62" width="1048" height="676" rx="70" fill="white" filter="url(#ink-edge)" />
 </svg>

@@ -24,7 +24,7 @@ export const DASHBOARD_ADMIN_GROUP_ORDER: DashboardNavGroup[] = [
 ];
 
 export type DashboardJourneyStage = "overview" | "discover" | "negotiate" | "sample" | "execute" | "service" | "organize" | "administer";
-export type DashboardTaskGroup = "Home" | "Discover" | "Buy" | "Sell" | "Execute" | "Services" | "Warehouse" | "Company & Account" | "Support" | "Operations/Admin";
+export type DashboardTaskGroup = "Home" | "Buy" | "Sell" | "Execute" | "Services" | "Warehouse" | "Company & Account" | "Support" | "Operations/Admin";
 
 export type DashboardRouteDefinition = {
   path: string;
@@ -162,7 +162,7 @@ const navIconByPath: Record<string, string> = {
 
 const defaultTaskGroup = (route: DashboardRouteInput): DashboardTaskGroup => {
   if (route.path === "/dashboard") return "Home";
-  if (route.path === "/dashboard/marketplace") return "Discover";
+  if (route.path === "/dashboard/marketplace") return "Buy";
   if (["/dashboard/product", "/dashboard/inventory", "/dashboard/warehouses"].includes(route.path)) return "Sell";
   if (["/dashboard/enquiries", "/dashboard/sample-requests", "/dashboard/orders", "/dashboard/documents", "/dashboard/commercial-documents"].includes(route.path)) return "Execute";
   if (route.section === "Services") return "Services";

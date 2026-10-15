@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-15T18:02:06.217Z",
-  "totalBytes": 59013743,
-  "referencedBytes": 5807043,
-  "unreferencedBytes": 53206700,
+  "generatedAt": "2026-10-15T19:48:50.341Z",
+  "totalBytes": 63275363,
+  "referencedBytes": 6750837,
+  "unreferencedBytes": 56524526,
   "largestReferenced": [
     {
       "path": "/images/india_map.webp",
@@ -10,58 +10,58 @@
       "referenced": true
     },
     {
-      "path": "/images/hero-agro-execution-sketch.webp",
-      "bytes": 436552,
+      "path": "/images/hero-agro-execution-art-v2.webp",
+      "bytes": 479988,
       "referenced": true
     },
     {
-      "path": "/images/services/freight-trade-sketch.webp",
-      "bytes": 381256,
+      "path": "/images/services/logistics-trade-art-v2.webp",
+      "bytes": 452236,
       "referenced": true
     },
     {
-      "path": "/images/services/logistics-trade-sketch.webp",
-      "bytes": 376924,
+      "path": "/images/services/warehouse-trade-art-v2.webp",
+      "bytes": 438468,
       "referenced": true
     },
     {
-      "path": "/images/services/warehouse-trade-sketch.webp",
-      "bytes": 353178,
+      "path": "/images/services/freight-trade-art-v2.webp",
+      "bytes": 437190,
       "referenced": true
     },
     {
-      "path": "/images/services/sourcing-trade-sketch.webp",
-      "bytes": 325112,
+      "path": "/images/services/procurement-trade-art-v2.webp",
+      "bytes": 427456,
       "referenced": true
     },
     {
-      "path": "/images/services/packaging-trade-sketch.webp",
-      "bytes": 303342,
+      "path": "/images/services/documentation-trade-art-v2.webp",
+      "bytes": 424366,
       "referenced": true
     },
     {
-      "path": "/images/services/documentation-trade-sketch.webp",
-      "bytes": 302172,
+      "path": "/images/services/packaging-trade-art-v2.webp",
+      "bytes": 422822,
       "referenced": true
     },
     {
-      "path": "/images/services/procurement-trade-sketch.webp",
-      "bytes": 293692,
+      "path": "/images/services/sourcing-trade-art-v2.webp",
+      "bytes": 417628,
+      "referenced": true
+    },
+    {
+      "path": "/images/services/quality-trade-art-v2.webp",
+      "bytes": 403788,
+      "referenced": true
+    },
+    {
+      "path": "/images/execution-flow/01-discovery-art-v2.webp",
+      "bytes": 357158,
       "referenced": true
     },
     {
       "path": "/images/Jacob-Alwin-New.jpg",
       "bytes": 283979,
-      "referenced": true
-    },
-    {
-      "path": "/images/execution-flow/01-discovery-sketch.webp",
-      "bytes": 272544,
-      "referenced": true
-    },
-    {
-      "path": "/images/services/quality-trade-sketch.webp",
-      "bytes": 272534,
       "referenced": true
     },
     {
@@ -257,8 +257,33 @@
       "referenced": false
     },
     {
+      "path": "/images/hero-agro-execution-sketch.webp",
+      "bytes": 436552,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/freight-trade-sketch.webp",
+      "bytes": 381256,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/logistics-trade-sketch.webp",
+      "bytes": 376924,
+      "referenced": false
+    },
+    {
       "path": "/images/services/documentation-india.webp",
       "bytes": 358378,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/warehouse-trade-sketch.webp",
+      "bytes": 353178,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/sourcing-trade-sketch.webp",
+      "bytes": 325112,
       "referenced": false
     },
     {
@@ -267,8 +292,33 @@
       "referenced": false
     },
     {
+      "path": "/images/services/packaging-trade-sketch.webp",
+      "bytes": 303342,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/documentation-trade-sketch.webp",
+      "bytes": 302172,
+      "referenced": false
+    },
+    {
       "path": "/images/services/warehouse-india-professional.webp",
       "bytes": 295710,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/procurement-trade-sketch.webp",
+      "bytes": 293692,
+      "referenced": false
+    },
+    {
+      "path": "/images/execution-flow/01-discovery-sketch.webp",
+      "bytes": 272544,
+      "referenced": false
+    },
+    {
+      "path": "/images/services/quality-trade-sketch.webp",
+      "bytes": 272534,
       "referenced": false
     },
     {
@@ -329,56 +379,6 @@
     {
       "path": "/images/hero-collage/sourcing.webp",
       "bytes": 151806,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/procurement-goods.webp",
-      "bytes": 148926,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/pallet-loading-stock.webp",
-      "bytes": 147100,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/coordination-alt.webp",
-      "bytes": 134918,
-      "referenced": false
-    },
-    {
-      "path": "/images/services/documentation-trade-v2.webp",
-      "bytes": 125550,
-      "referenced": false
-    },
-    {
-      "path": "/images/services/quality-trade-v2.webp",
-      "bytes": 123114,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/coordination.webp",
-      "bytes": 116240,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/warehouse.webp",
-      "bytes": 115762,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/coordination-stock.webp",
-      "bytes": 115636,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-operations/packaging-alt.webp",
-      "bytes": 115222,
-      "referenced": false
-    },
-    {
-      "path": "/images/Jacob-Alwin-Obaol.webp",
-      "bytes": 114962,
       "referenced": false
     }
   ]

@@ -103,7 +103,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes('data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="mt-'), false);
   assert.equal(explorer.includes("data-execution-phase={phase.phase.toLowerCase()}"), true);
   assert.equal(explorer.includes("data-execution-stage-group={phase.phase.toLowerCase()}"), true);
-  assert.equal(explorer.includes('/images/hero-agro-execution-sketch.webp'), true);
+  assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), true);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-lifecycle-visual="true"'), true);
   assert.equal(explorer.includes('data-hero-lifecycle-heading="true"'), true);
@@ -120,7 +120,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes("grid-cols-1"), true);
   assert.equal(explorer.includes("md:grid-cols-2"), true);
   assert.equal(explorer.includes("xl:grid-cols-[3fr_3fr_3fr_1.2fr]"), true);
-  assert.equal(explorer.includes("Ink-and-watercolor illustration of the Indian agro-trade lifecycle from crop sourcing and documentation through quality verification, packaging, warehousing, and delivery"), true);
+  assert.equal(explorer.includes("Expressive ink-and-watercolor artwork of the Indian agro-trade lifecycle from crop sourcing and documentation through quality verification, packaging, warehousing, and delivery"), true);
   assert.equal(explorer.includes("animate-ping"), false);
   assert.equal(explorer.includes("group-hover:scale"), false);
   assert.equal(explorer.includes("<svg"), false);
@@ -147,7 +147,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);
   }
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.webp", import.meta.url))), true);
-  assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-sketch.webp", import.meta.url))), true);
+  assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-art-v2.webp", import.meta.url))), true);
 });
 
 test("homepage services use a nine-chapter multi-entity scroll story without autoplay", () => {
@@ -180,7 +180,7 @@ test("homepage services use a nine-chapter multi-entity scroll story without aut
   assert.equal(imagePaths.length, 9);
   assert.equal(new Set(imagePaths).size, 9);
   assert.equal(imagePaths.filter((imagePath) => imagePath.startsWith("/images/services/")).length, 8);
-  assert.equal(imagePaths[0], "/images/execution-flow/01-discovery-sketch.webp");
+  assert.equal(imagePaths[0], "/images/execution-flow/01-discovery-art-v2.webp");
   assert.equal(imageAlts.length, 9);
   assert.equal(imageAlts.every((alt) => alt.length >= 60), true);
   for (const phrase of [

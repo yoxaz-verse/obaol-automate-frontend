@@ -1,6 +1,12 @@
 # Service Showcase Image Sources
 
-## Active sketch-art set
+## Active expressive art set
+
+The active `*-art-v2.webp` files were created on 2026-10-16 as a more expressive second art pass. They use gestural brush-ink, broken contours, layered transparent watercolor, pigment blooms, dry-brush marks, selective splatter, generous ivory paper, and deliberately unfinished edges. Focal people and tools remain clear while background operations are rendered more atmospherically.
+
+The earlier `*-sketch.webp` files remain alongside the original generated sources as a rollback option.
+
+## First sketch-art set
 
 The homepage uses ten OpenAI-generated ink-and-watercolor illustrations created on 2026-10-15 as high-fidelity style transformations of the existing operational imagery. The original scenes remain in the repository as recoverable source assets.
 

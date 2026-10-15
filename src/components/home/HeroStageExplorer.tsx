@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { CSSProperties } from "react";
+import { inkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
 
 export type HeroStage = {
   id: string;
@@ -17,13 +17,6 @@ const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"
   { name: "Close", range: "10", phase: "Close" },
 ];
 
-const lifecycleMask = {
-  maskImage:
-    "radial-gradient(ellipse 62% 54% at 52% 50%, #000 45%, rgba(0,0,0,0.94) 60%, rgba(0,0,0,0.46) 78%, transparent 100%)",
-  WebkitMaskImage:
-    "radial-gradient(ellipse 62% 54% at 52% 50%, #000 45%, rgba(0,0,0,0.94) 60%, rgba(0,0,0,0.46) 78%, transparent 100%)",
-} satisfies CSSProperties;
-
 export default function HeroStageExplorer() {
   return (
     <div data-hero-panel="execution-map" className="relative min-w-0">
@@ -39,8 +32,8 @@ export default function HeroStageExplorer() {
 
         <div className="relative">
           <div className="pointer-events-none absolute inset-[10%] rounded-full bg-obaol-400/10 blur-3xl dark:bg-obaol-400/[0.08]" />
-          <div data-hero-lifecycle-visual="true" data-hero-masked-image="true" style={lifecycleMask} className="relative aspect-[16/9] overflow-hidden">
-            <div className="absolute -inset-[3%]">
+          <div data-hero-lifecycle-visual="true" data-hero-masked-image="true" data-ink-artwork-mask="true" style={inkArtworkMaskStyle} className="relative aspect-[16/9] overflow-hidden">
+            <div className="absolute -inset-[5%]">
               <Image
                 src="/images/hero-agro-execution-art-v2.webp"
                 alt="Expressive ink-and-watercolor artwork of the Indian agro-trade lifecycle from crop sourcing and documentation through quality verification, packaging, warehousing, and delivery"

@@ -1429,12 +1429,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     </div>
                   </div>
                   <h3 className="text-xl font-black text-foreground tracking-tight uppercase">
-                    No Live Products Found
+                    No Live Trade Listings Available
                   </h3>
                   <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
-                    Be the first to list your products in the live market.
-                    Redirect to your personal catalog to set live rates for the
-                    network.
+                    There are currently no shared live listings matching this
+                    view. You can publish a listing from My Trade Listings.
                   </p>
                   <Button
                     color="primary"
@@ -1444,7 +1443,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     onPress={() => router.push("/dashboard/product")}
                     startContent={<FiPlusCircle size={20} strokeWidth={2.5} />}
                   >
-                    Add Products to Market
+                    Create Trade Listing
                   </Button>
                 </div>
               ) : finalTableData.length === 0 &&

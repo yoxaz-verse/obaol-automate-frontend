@@ -900,9 +900,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   : Boolean(item.isLive);
               const isExpired =
                 !effectiveIsLive && daysSinceLastLive >= LISTING_FRESHNESS_DAYS;
-              const isMarketplaceBlocked =
-                isAdminUser && effectiveIsLive && item.marketplaceVisible === false;
-
               return {
                 ...rest,
                 isLive: effectiveIsLive,
@@ -914,20 +911,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   <div className="flex flex-col items-end gap-0.5">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-1.5 h-1.5 rounded-full ${isMarketplaceBlocked ? "bg-warning-500" : effectiveIsLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : isExpired ? "bg-danger-500" : "bg-danger-500/40"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${effectiveIsLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : isExpired ? "bg-danger-500" : "bg-danger-500/40"}`}
                       />
                       <span
-                        className={`text-[10px] font-black uppercase tracking-widest ${isMarketplaceBlocked ? "text-warning-500" : effectiveIsLive ? "text-success-400" : isExpired ? "text-danger-500" : "text-default-400"}`}
-                        title={isMarketplaceBlocked ? item.marketplaceBlockReason : undefined}
+                        className={`text-[10px] font-black uppercase tracking-widest ${effectiveIsLive ? "text-success-400" : isExpired ? "text-danger-500" : "text-default-400"}`}
                       >
-                        {isMarketplaceBlocked ? "LIVE — BLOCKED" : effectiveIsLive ? "LIVE — VISIBLE" : isExpired ? "EXPIRED" : "OFFLINE"}
+                        {effectiveIsLive ? "LIVE" : isExpired ? "EXPIRED" : "OFFLINE"}
                       </span>
                     </div>
-                    {isMarketplaceBlocked && (
-                      <span className="max-w-[220px] text-right text-[8px] font-bold text-warning-600">
-                        {item.marketplaceBlockReason || "Blocked from marketplace"}
-                      </span>
-                    )}
                     {isExpired && (
                       <span className="text-[8px] font-bold text-danger-400 whitespace-nowrap">
                         {daysSinceLastLive} days since last live
@@ -2785,14 +2776,8 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
         refetchData();
       }
     },
-    onError: (error: any) => {
-      setIsSelected(Boolean(variantRate.isLive));
+    onError: () => {
       setLoading(false);
-      showToastMessage({
-        type: "error",
-        message: error?.response?.data?.message || "Unable to change listing status.",
-        position: "top-right",
-      });
     },
   });
 
@@ -2857,15 +2842,10 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
       {layout === "inline" && (
         <p
           className={`m-0 text-[10px] font-black uppercase tracking-widest ${
-            isSelected && variantRate.marketplaceVisible === false
-              ? "text-warning-600"
-              : isSelected ? "text-success-600" : "text-danger-500"
+            isSelected ? "text-success-600" : "text-danger-500"
           }`}
-          title={variantRate.marketplaceBlockReason || undefined}
         >
-          {isSelected && variantRate.marketplaceVisible === false
-            ? "Live — blocked from marketplace"
-            : isSelected ? "Live — visible in marketplace" : "Not live"}
+          {isSelected ? "Live" : "Not live"}
         </p>
       )}
       {/* @ts-ignore */}
@@ -2884,15 +2864,10 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
       {layout === "stacked" && (
         <p
           className={`text-[10px] font-bold m-0 p-0 leading-none ${
-            isSelected && variantRate.marketplaceVisible === false
-              ? "text-warning-500"
-              : isSelected ? "text-success-500" : "text-danger-500"
+            isSelected ? "text-success-500" : "text-danger-500"
           }`}
-          title={variantRate.marketplaceBlockReason || undefined}
         >
-          {isSelected && variantRate.marketplaceVisible === false
-            ? "LIVE — BLOCKED"
-            : isSelected ? "LIVE — VISIBLE" : "NOT LIVE"}
+          {isSelected ? "LIVE" : "NOT LIVE"}
         </p>
       )}
     </div>

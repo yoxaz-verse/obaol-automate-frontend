@@ -90,11 +90,25 @@ test("product wizard commodity menu matches its field width", async ({ page }) =
       parentName: null,
     })),
   ];
+  const products = [
+    { id: "product-cardamom", name: "Black Cardamom", level: "product", parentId: "subcategory-grains", parentName: "Grains" },
+    { id: "product-pepper", name: "Black Pepper", level: "product", parentId: "subcategory-grains", parentName: "Grains" },
+  ];
+  const variantRequests = [];
   await page.route("**/catalog/hierarchy-options**", async (route) => {
     const url = new URL(route.request().url());
-    const data = url.searchParams.has("category")
-      ? [{ id: "subcategory-grains", name: "Grains", level: "subCategory", parentId: "category-agri", parentName: "Agri" }]
-      : categories;
+    const selectedProduct = url.searchParams.get("product");
+    let data = categories;
+    if (url.searchParams.has("category")) {
+      data = [{ id: "subcategory-grains", name: "Grains", level: "subCategory", parentId: "category-agri", parentName: "Agri" }];
+    } else if (url.searchParams.has("subCategory")) {
+      data = products;
+    } else if (selectedProduct) {
+      variantRequests.push(selectedProduct);
+      data = selectedProduct === "product-cardamom"
+        ? [{ id: "variant-cardamom-a", name: "Cardamom Grade A", level: "productVariant", parentId: selectedProduct, parentName: "Black Cardamom" }]
+        : [{ id: "variant-pepper-a", name: "Pepper Grade A", level: "productVariant", parentId: selectedProduct, parentName: "Black Pepper" }];
+    }
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data }) });
   });
   await login(page, { path: "/auth/associate", email: "seller@e2e.obaol.test" });
@@ -143,6 +157,32 @@ test("product wizard commodity menu matches its field width", async ({ page }) =
   await expect(subcategoryMenu).toBeVisible();
   await subcategoryMenu.getByLabel("Search subcategory").press("Escape");
   await expect(subcategoryMenu).toBeHidden();
+
+  await subcategoryTrigger.click();
+  await page.locator('[data-commodity-menu="subCategory"]:visible').getByText("Grains", { exact: true }).click();
+  const productTrigger = page.locator('[data-commodity-trigger="product"]').last();
+  await expect(productTrigger).toBeFocused();
+  await productTrigger.click();
+  const productMenu = page.locator('[data-commodity-menu="product"]').last();
+  await page.locator('[data-commodity-menu="product"]:visible').getByText("Black Cardamom", { exact: true }).click();
+  await expect(productTrigger).toContainText("Black Cardamom");
+  await expect.poll(() => variantRequests.includes("product-cardamom")).toBe(true);
+
+  const variantTrigger = page.locator('[data-commodity-trigger="productVariant"]').last();
+  await expect(variantTrigger).toBeFocused();
+  await variantTrigger.click();
+  const variantMenu = page.locator('[data-commodity-menu="productVariant"]').last();
+  await page.locator('[data-commodity-menu="productVariant"]:visible').getByText("Cardamom Grade A", { exact: true }).click();
+  await expect(variantTrigger).toContainText("Cardamom Grade A");
+
+  await productTrigger.click();
+  const visibleProductSearch = page.locator('[data-commodity-menu="product"]:visible').getByLabel("Search product");
+  await visibleProductSearch.fill("Black Pepper");
+  await visibleProductSearch.press("Enter");
+  await expect(productTrigger).toContainText("Black Pepper");
+  await expect(variantTrigger).toContainText("Search product variants");
+  await expect(variantTrigger).toBeFocused();
+  await expect.poll(() => variantRequests.includes("product-pepper")).toBe(true);
 });
 
 for (const account of accounts) {

@@ -354,6 +354,9 @@ test("variant rate wizard uses searchable, dependent commodity controls", () => 
   assert.equal(wizard.includes('data-commodity-trigger={field}'), true);
   assert.equal(wizard.includes('aria-expanded:!scale-100'), true);
   assert.equal(wizard.includes('if (nextOpen) updateMenuWidth();'), true);
+  assert.equal(wizard.includes('selectionBehavior="replace"'), true);
+  assert.equal(wizard.includes("onSelectionChange={(keys) =>"), true);
+  assert.equal(wizard.includes("onAction={(key) =>"), false);
   assert.equal(wizard.includes('option.getClientRects().length > 0'), true);
   assert.equal(wizard.includes('trigger.getClientRects().length > 0'), true);
   assert.equal(wizard.includes('<PopoverContent\n          style={menuWidth'), false);

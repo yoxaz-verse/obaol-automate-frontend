@@ -222,9 +222,14 @@ const CommodityPicker = ({
                 <Listbox
                   aria-label={`${label} options`}
                   selectionMode="single"
+                  selectionBehavior="replace"
+                  disallowEmptySelection
                   selectedKeys={selectedKey ? new Set([selectedKey]) : new Set()}
-                  onAction={(key) => {
-                    onSelect(String(key));
+                  onSelectionChange={(keys) => {
+                    if (keys === "all") return;
+                    const nextKey = String(Array.from(keys)[0] || "");
+                    if (!nextKey || nextKey === selectedKey) return;
+                    onSelect(nextKey);
                     setIsOpen(false);
                   }}
                   itemClasses={{

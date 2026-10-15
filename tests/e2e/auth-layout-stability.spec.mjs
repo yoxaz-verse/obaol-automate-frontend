@@ -112,6 +112,70 @@ test("signup redirects an existing email to its matching role with context", asy
   await expect(page.getByLabel("Email Address")).toHaveValue("existing.operator@example.com");
 });
 
+test("Associate signup cannot reach onboarding before OTP and proceeds after verification", async ({ page }) => {
+  await page.unroute(/\/verify-token(?:\?.*)?$/);
+  let verified = false;
+  let verificationRequests = 0;
+
+  await page.route(/\/verify-token(?:\?.*)?$/, async (route) => {
+    verificationRequests += 1;
+    await route.fulfill({
+      status: verified ? 200 : 401,
+      contentType: "application/json",
+      body: JSON.stringify(verified ? {
+        success: true,
+        user: {
+          id: "associate-draft-1",
+          email: "otp.associate@example.com",
+          name: "OTP Associate",
+          role: "Associate",
+          onboardingComplete: false,
+          registrationStatus: "PENDING_REVIEW",
+          verified: { email: true },
+        },
+      } : { success: false, code: "EMAIL_VERIFICATION_REQUIRED" }),
+    });
+  });
+  await page.route(/\/auth\/onboarding\/start$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ success: true, user: { id: "associate-draft-1", email: "otp.associate@example.com", role: "Associate" } }),
+  }));
+  await page.route(/\/verification\/send-otp$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ message: "OTP sent to Associate" }),
+  }));
+  await page.route(/\/verification\/verify-otp$/, async (route) => {
+    verified = true;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ message: "Associate verified successfully" }),
+    });
+  });
+
+  await page.goto("/auth/register", { waitUntil: "domcontentloaded" });
+  await page.getByLabel("Email Address").fill("otp.associate@example.com");
+  await page.getByRole("button", { name: "Send OTP" }).click();
+  await expect(page.getByLabel("Email OTP")).toBeVisible();
+  expect(verificationRequests).toBe(1);
+  await expect(page).toHaveURL(/\/auth\/register/);
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/\/auth\/register/);
+  await expect(page.getByRole("button", { name: "Send OTP" })).toBeVisible();
+  expect(verificationRequests).toBeGreaterThanOrEqual(2);
+
+  await page.getByLabel("Email Address").fill("otp.associate@example.com");
+  await page.getByRole("button", { name: "Send OTP" }).click();
+  await page.getByLabel("Email OTP").fill("246810");
+  await page.getByRole("button", { name: "Verify OTP" }).click();
+  await expect(page.getByText("OTP Verified")).toBeVisible();
+  await page.getByRole("button", { name: "Continue to Onboarding" }).click();
+  await expect(page).toHaveURL(/\/dashboard\/onboarding/);
+});
+
 test("shared auth routes render without a full-screen loading replacement", async ({ page }) => {
   for (const route of ["/auth/operator", "/auth/register?intent=BUY", "/auth/operator/register", "/auth/admin", "/auth/forgot-password?role=Associate"]) {
     await page.goto(route, { waitUntil: "domcontentloaded" });

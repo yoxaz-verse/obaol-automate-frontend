@@ -619,10 +619,6 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
             role: roleLower === "operator" || roleLower === "team" ? "Operator" : "Associate",
           };
           await postData("/auth/onboarding/start", payload);
-          const refreshed = await refreshUser();
-          if (!refreshed) {
-            throw new Error("Session cookie was blocked. Allow cookies for the API domain and retry.");
-          }
           setHasOnboardingSession(true);
         } catch (startError: any) {
           const status = Number(startError?.response?.status || 0);
@@ -685,6 +681,8 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
         return;
       }
       await postData("/verification/verify-otp", { code: otp, method: "email", email: email.trim() }, {});
+      const refreshed = await refreshUser();
+      if (!refreshed) throw new Error("Session cookie blocked. Allow cookies for obaol.com/api.obaol.com and retry.");
       setOtpVerified(true);
       showToastMessage({ type: "success", message: "Email verified.", position: "top-right" });
     } catch (err: any) {

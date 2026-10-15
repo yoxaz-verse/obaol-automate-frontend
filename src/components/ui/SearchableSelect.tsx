@@ -90,6 +90,16 @@ export default function SearchableSelect({
         {label}
         {required ? <span className="ml-1 text-danger">*</span> : null}
       </label>
+      {multiple && selected.length ? (
+        <div className="flex flex-wrap gap-1">
+          {selected.slice(0, 3).map((option) => (
+            <Chip key={option.key} size="sm" variant="flat" onClose={() => toggle(option.key)}>
+              {option.label}
+            </Chip>
+          ))}
+          {selected.length > 3 ? <Chip size="sm" variant="flat">+{selected.length - 3}</Chip> : null}
+        </div>
+      ) : null}
       <Popover
         isOpen={open}
         onOpenChange={(nextOpen) => {
@@ -172,13 +182,13 @@ export default function SearchableSelect({
                     role="option"
                     aria-selected={value.includes(option.key)}
                     onClick={() => toggle(option.key)}
-                    className="flex w-full items-start gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-default-100 focus:bg-default-100 focus:outline-none transition-colors"
+                    className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-default-100 focus:bg-default-100 focus:outline-none transition-colors"
                   >
                     {multiple ? (
-                      <Checkbox isSelected={value.includes(option.key)} isReadOnly className="pointer-events-none mt-0.5" aria-label={option.label} />
+                      <Checkbox isSelected={value.includes(option.key)} isReadOnly className="pointer-events-none" aria-label={option.label} />
                     ) : (
                       <span
-                        className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
                           value.includes(option.key) ? "border-success-500 bg-success-500 text-white" : "border-default-400"
                         }`}
                       >
@@ -216,16 +226,6 @@ export default function SearchableSelect({
           </div>
         </PopoverContent>
       </Popover>
-      {multiple && selected.length ? (
-        <div className="flex flex-wrap gap-1">
-          {selected.slice(0, 3).map((option) => (
-            <Chip key={option.key} size="sm" variant="flat" onClose={() => toggle(option.key)}>
-              {option.label}
-            </Chip>
-          ))}
-          {selected.length > 3 ? <Chip size="sm" variant="flat">+{selected.length - 3}</Chip> : null}
-        </div>
-      ) : null}
       {helperText ? <p className="text-xs text-default-500">{helperText}</p> : null}
     </div>
   );

@@ -101,6 +101,8 @@ const DynamicFilter = dynamic(
 const round2 = (value: number) =>
   Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
 const LISTING_DELETE_WINDOW_MS = 60 * 60 * 1000;
+const LISTING_FRESHNESS_DAYS = 20;
+const DAY_MS = 24 * 60 * 60 * 1000;
 const isValidObjectId = (value: any) =>
   /^[a-f0-9]{24}$/i.test(String(value || "").trim());
 const resolveAdminCommission = (
@@ -886,19 +888,43 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const productClassifications = extractClassifications(item);
               const classificationText = productClassifications.join(" ");
 
+              const lifecycleTimestamp = new Date(
+                item.lastLiveDate || item.updatedAt || item.createdAt,
+              ).getTime();
+              const daysSinceLastLive = Number.isFinite(lifecycleTimestamp)
+                ? Math.floor((listingPolicyNow - lifecycleTimestamp) / DAY_MS)
+                : 0;
+              const effectiveIsLive =
+                typeof item.__effectiveIsLive === "boolean"
+                  ? item.__effectiveIsLive
+                  : Boolean(item.isLive);
+              const isExpired =
+                !effectiveIsLive && daysSinceLastLive >= LISTING_FRESHNESS_DAYS;
+
               return {
                 ...rest,
-                isLive: Boolean(item.isLive),
+                isLive: effectiveIsLive,
+                isExpired,
+                expiryAgeText: isExpired
+                  ? `${daysSinceLastLive} days since last live`
+                  : "",
                 liveStatus: (
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`w-1.5 h-1.5 rounded-full ${item.isLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-danger-500/40"}`}
-                    />
-                    <span
-                      className={`text-[10px] font-black uppercase tracking-widest ${item.isLive ? "text-success-400" : "text-default-400"}`}
-                    >
-                      {item.isLive ? "LIVE" : "OFFLINE"}
-                    </span>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full ${effectiveIsLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : isExpired ? "bg-danger-500" : "bg-danger-500/40"}`}
+                      />
+                      <span
+                        className={`text-[10px] font-black uppercase tracking-widest ${effectiveIsLive ? "text-success-400" : isExpired ? "text-danger-500" : "text-default-400"}`}
+                      >
+                        {effectiveIsLive ? "LIVE" : isExpired ? "EXPIRED" : "OFFLINE"}
+                      </span>
+                    </div>
+                    {isExpired && (
+                      <span className="text-[8px] font-bold text-danger-400 whitespace-nowrap">
+                        {daysSinceLastLive} days since last live
+                      </span>
+                    )}
                   </div>
                 ),
                 associate: (
@@ -1251,6 +1277,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 }),
                               }}
                               onSuccess={() => {
+                                queryClient.invalidateQueries();
                                 refetchData();
                               }}
                             />
@@ -1291,6 +1318,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           }),
                         }}
                         onSuccess={() => {
+                          queryClient.invalidateQueries();
                           refetchData();
                         }}
                       />
@@ -1544,6 +1572,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         }),
                       }}
                       onSuccess={() => {
+                        queryClient.invalidateQueries();
                         refetchData();
                       }}
                     />
@@ -2741,10 +2770,8 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
       });
     },
     onSuccess: () => {
-      // Invalidate just the single item or the entire query
-      queryClient.invalidateQueries({
-        queryKey: [apiEndpoint, variantRate._id],
-      });
+      // Status changes affect Products, Live Products and dependent catalog views.
+      queryClient.invalidateQueries();
       setLoading(false);
       if (typeof refetchData === "function") {
         refetchData();

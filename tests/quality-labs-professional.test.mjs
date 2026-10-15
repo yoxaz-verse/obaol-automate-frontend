@@ -26,6 +26,11 @@ test("lab controls are searchable, multi-selectable and accessible", async () =>
   assert.match(source, /aria-label=\{label\}/);
   assert.match(source, /getBoundingClientRect\(\)\.width/);
   assert.match(source, /width: menuWidth/);
+  const selectedChips = source.indexOf("{multiple && selected.length ? (");
+  const selectTrigger = source.indexOf("<Popover");
+  assert.notEqual(selectedChips, -1);
+  assert.notEqual(selectTrigger, -1);
+  assert.equal(selectedChips < selectTrigger, true, "selected chips should render above the select field");
 });
 
 test("wizard uses searchable fields and direct taxonomy creation", async () => {

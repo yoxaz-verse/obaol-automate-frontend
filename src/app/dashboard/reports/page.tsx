@@ -40,6 +40,11 @@ const formatDate = (value: unknown) => {
   return date.toLocaleString();
 };
 
+const formatLabel = (value: unknown) => String(value || "-")
+  .toLowerCase()
+  .replace(/_/g, " ")
+  .replace(/\b\w/g, (character) => character.toUpperCase());
+
 const statusColor = (status: string) => {
   const normalized = String(status || "").toUpperCase();
   if (normalized === "ACTION_TAKEN" || normalized === "RESOLVED") return "success";
@@ -50,7 +55,7 @@ const statusColor = (status: string) => {
 
 export default function ReportsPage() {
   const queryClient = useQueryClient();
-  const [status, setStatus] = useState<StatusFilter>("ALL");
+  const [status, setStatus] = useState<StatusFilter>("PENDING_REVIEW");
   const [search, setSearch] = useState("");
   const [companyId, setCompanyId] = useState("");
   const [page, setPage] = useState(1);
@@ -91,7 +96,7 @@ export default function ReportsPage() {
   const reportsQuery = useQuery({
     queryKey: ["admin-reports", status, search, companyId, page, limit],
     queryFn: async () => {
-      const params: Record<string, any> = { page, limit, sort: "createdAt:desc" };
+      const params: Record<string, any> = { page, limit, sort: "createdAt:asc" };
       if (status !== "ALL") params.status = status;
       if (search.trim()) params.search = search.trim();
       if (companyId) params.reporterCompanyId = companyId;
@@ -163,9 +168,9 @@ export default function ReportsPage() {
   return (
     <div className="w-full p-4 md:p-6 space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Reports Queue</h1>
+        <h1 className="text-2xl font-bold text-foreground">Reports Review Queue</h1>
         <p className="text-sm text-default-600">
-          Review organization member reports and apply account actions when required.
+          Process the oldest pending submission first, then apply the appropriate review action.
         </p>
       </div>
 
@@ -194,7 +199,7 @@ export default function ReportsPage() {
         >
           {STATUS_OPTIONS.map((option) => (
             <SelectItem key={option} value={option}>
-              {option}
+              {formatLabel(option)}
             </SelectItem>
           ))}
         </Select>
@@ -245,9 +250,9 @@ export default function ReportsPage() {
       <div className="rounded-xl border border-default-200/80 bg-content1/95 p-4 md:p-5 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Company Interest Update Requests</h2>
+            <h2 className="text-lg font-semibold text-foreground">Company Interest Update Queue</h2>
             <p className="text-sm text-default-600">
-              Fast track interest-change approvals requested by associate companies.
+              Review the oldest capability request first. Approved requests move to Action Taken; rejected requests move to Rejected.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -303,7 +308,7 @@ export default function ReportsPage() {
                     </td>
                     <td className="px-3 py-2">
                       <Chip size="sm" color={statusColor(row?.status) as any} variant="flat">
-                        {row?.status || "PENDING_REVIEW"}
+                        {formatLabel(row?.status || "PENDING_REVIEW")}
                       </Chip>
                     </td>
                     <td className="px-3 py-2 text-default-600">{formatDate(row?.createdAt)}</td>
@@ -320,7 +325,7 @@ export default function ReportsPage() {
                           setAdminNotes(String(row?.adminNotes || ""));
                         }}
                       >
-                        Open Review
+                        {String(row?.status || "PENDING_REVIEW").toUpperCase() === "PENDING_REVIEW" ? "Open Review" : "View Review"}
                       </Button>
                     </td>
                   </tr>
@@ -364,10 +369,10 @@ export default function ReportsPage() {
                   <td className="px-3 py-2">{row?.reporterAssociateId?.name || "-"}</td>
                   <td className="px-3 py-2">{row?.targetAssociateId?.name || "-"}</td>
                   <td className="px-3 py-2">{row?.reporterCompanyId?.name || "-"}</td>
-                  <td className="px-3 py-2 text-default-600">{row?.reasonCode || "-"}</td>
+                  <td className="px-3 py-2 text-default-600">{formatLabel(row?.reasonCode)}</td>
                   <td className="px-3 py-2">
                     <Chip size="sm" color={statusColor(row?.status) as any} variant="flat">
-                      {row?.status || "PENDING_REVIEW"}
+                      {formatLabel(row?.status || "PENDING_REVIEW")}
                     </Chip>
                   </td>
                   <td className="px-3 py-2 text-default-600">{formatDate(row?.createdAt)}</td>
@@ -384,7 +389,7 @@ export default function ReportsPage() {
                         setAdminNotes(String(row?.adminNotes || ""));
                       }}
                     >
-                      Review
+                      {String(row?.status || "PENDING_REVIEW").toUpperCase() === "PENDING_REVIEW" ? "Open Review" : "View Review"}
                     </Button>
                   </td>
                 </tr>
@@ -396,7 +401,7 @@ export default function ReportsPage() {
 
       <div className="flex items-center justify-between text-sm text-default-600">
         <div>
-          Page {meta.page || 1} of {meta.totalPages || 1} • Total {meta.total || 0} • Showing {visibleRows.length} on this page
+          Page {meta.page || 1} of {meta.totalPages || 1} • Total {meta.total || 0} • Showing {visibleRows.length} on this page • Oldest first
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -486,7 +491,7 @@ export default function ReportsPage() {
                 >
                   {STATUS_OPTIONS.filter((option) => option !== "ALL").map((option) => (
                     <SelectItem key={option} value={option}>
-                      {option}
+                      {formatLabel(option)}
                     </SelectItem>
                   ))}
                 </Select>
@@ -501,7 +506,7 @@ export default function ReportsPage() {
                 >
                   {ACTION_OPTIONS.map((option) => (
                     <SelectItem key={option} value={option}>
-                      {option}
+                      {formatLabel(option)}
                     </SelectItem>
                   ))}
                 </Select>

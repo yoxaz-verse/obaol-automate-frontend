@@ -63,31 +63,8 @@ const Dashboard: NextPage = () => {
   const companyCapabilities = Array.from(new Set([...providedCapabilities, ...soughtCapabilities]));
   const hasBuyingCapability = providedCapabilities.includes("buyer") || soughtCapabilities.includes("seller") || companyCapabilities.includes("sourcing");
   const hasSellingCapability = providedCapabilities.includes("seller") || soughtCapabilities.includes("buyer");
-  const profileMode = hasBuyingCapability && hasSellingCapability ? "BOTH" : hasBuyingCapability ? "BUY" : hasSellingCapability ? "SELL" : "SERVICE";
   const isBuyingMode = isAssociate && hasBuyingCapability;
   const isSellingMode = isAssociate && hasSellingCapability;
-  const hubTitle = isAdmin
-    ? "Admin Dashboard"
-    : isOperatorUser
-      ? "Operator Dashboard"
-      : profileMode === "SERVICE"
-        ? "Service Provider Workspace"
-      : profileMode === "BUY"
-        ? "Buying Workspace"
-        : profileMode === "SELL"
-          ? "Selling Workspace"
-          : "Trading Workspace";
-  const hubSubtitle = isAdmin
-    ? "System overview is ready."
-    : isOperatorUser
-      ? "Operator overview is ready."
-      : profileMode === "SERVICE"
-        ? "Your company services and execution work are ready."
-      : profileMode === "BUY"
-        ? "Your buying pipeline and next actions are ready."
-        : profileMode === "SELL"
-          ? "Your selling pipeline and next actions are ready."
-          : "Your buying and selling pipelines are ready.";
 
   const [companyLookup, setCompanyLookup] = useState("");
   const [associateLookup, setAssociateLookup] = useState("");
@@ -312,10 +289,6 @@ const Dashboard: NextPage = () => {
       missingStep: item?.missingStep || missingLabel(item),
     }));
   }, [enquiries, summary]);
-
-  const welcomeName = isAssociate
-    ? associateMetrics.associateName || user?.email
-    : user?.name || user?.email || "User";
 
   const executiveLoading = dashboardSummaryQuery.isLoading;
 
@@ -603,7 +576,6 @@ const Dashboard: NextPage = () => {
       isLoading={dashboardSummaryQuery.isLoading}
       perspective={associatePerspective}
       onPerspectiveChange={changeAssociatePerspective}
-      welcomeName={String(welcomeName || user?.email || "Associate")}
     />
   );
 
@@ -811,47 +783,9 @@ const Dashboard: NextPage = () => {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-8">
-      {!isAssociate && <Card className="border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm overflow-hidden rounded-[2.5rem]">
-        <CardBody className={isAssociate ? "p-5 sm:p-6" : "p-8"}>
-          <div className="flex flex-col gap-6">
-            {/* Top Row: Workspace Status & Role Badges */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-default-200/60 dark:border-white/10">
-              <div className="space-y-1.5 min-w-0 flex-1">
-                <div className="flex items-center gap-2.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-obaol-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-obaol-500"></span>
-                  </span>
-                  <span className="text-[10px] font-black tracking-widest uppercase text-obaol-700 dark:text-obaol-400">Workspace ready</span>
-                </div>
-                <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase italic">{hubTitle}</h1>
-                <p className="text-xs md:text-sm text-default-500 font-semibold tracking-tight">
-                  Welcome, <span className="text-foreground">{welcomeName}</span>. {hubSubtitle}
-                </p>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start md:self-center">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-default-200/80 dark:border-white/10 bg-default-100/50 dark:bg-white/5 text-[10px] font-black uppercase tracking-wider text-foreground/80">
-                  <span className="w-1.5 h-1.5 rounded-full bg-obaol-500" />
-                  {isAssociate ? (companyCapabilities.length ? "Capability-led company" : "Company profile setup") : isOperatorUser ? "Operator" : "Admin"}
-                </div>
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-primary-500/30 bg-primary-500/10 text-[10px] font-black uppercase tracking-wider text-primary-600 dark:text-primary-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
-                  {activeOrders} Active Orders
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Row: Unified Command Bar */}
-            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-              <div className="w-full lg:max-w-xl flex-1">
-                <GlobalSearch />
-              </div>
-
-            </div>
-          </div>
-        </CardBody>
-      </Card>}
+      <div className="relative z-40 w-full max-w-xl" aria-label="Quick dashboard navigation">
+        <GlobalSearch />
+      </div>
 
       {executiveLoading && !isAssociate ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

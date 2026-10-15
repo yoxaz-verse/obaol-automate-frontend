@@ -54,7 +54,7 @@ export default function GlobalSearch() {
   };
 
   return (
-    <div className="relative w-full max-w-md" ref={containerRef}>
+    <div className="relative z-50 w-full max-w-xl" ref={containerRef}>
       <Input
         ref={inputRef}
         value={query}
@@ -80,7 +80,7 @@ export default function GlobalSearch() {
       />
 
       {isOpen && (
-        <div className="absolute top-full left-0 w-full mt-2 p-2 bg-background/80 backdrop-blur-2xl border border-divider/50 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute left-0 top-full z-[100] mt-2 w-full overflow-hidden rounded-3xl border border-divider/50 bg-background/95 p-2 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-200">
            {filteredOptions.length > 0 ? (
             <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                {filteredOptions.slice(0, 6).map((option) => (

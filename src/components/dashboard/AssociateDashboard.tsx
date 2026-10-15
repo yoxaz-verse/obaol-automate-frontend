@@ -32,7 +32,6 @@ type AssociateDashboardProps = {
   isLoading: boolean;
   perspective: "provided" | "sought";
   onPerspectiveChange: (perspective: "provided" | "sought") => void;
-  welcomeName: string;
 };
 
 const objectIdPattern = /^[a-f0-9]{24}$/i;
@@ -59,7 +58,6 @@ export default function AssociateDashboard({
   isLoading,
   perspective,
   onPerspectiveChange,
-  welcomeName,
 }: AssociateDashboardProps) {
   const router = useRouter();
   const model = useMemo(() => buildAssociateDashboardModel({
@@ -94,19 +92,8 @@ export default function AssociateDashboard({
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200/90 bg-content1 p-5 shadow-sm dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div className="min-w-0">
-          <p className="text-sm text-default-500">Welcome, <span className="font-semibold text-foreground">{welcomeName}</span></p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-foreground">
-            {perspective === "provided" ? "What your company provides" : "What your company is seeking"}
-          </h1>
-          <p className="mt-1 text-sm text-default-500">
-            {activeCapabilities.length
-              ? `${activeCapabilities.length} configured ${activeCapabilities.length === 1 ? "capability" : "capabilities"} shape this view.`
-              : "Configure this profile to personalize your dashboard."}
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+      <section aria-label="Dashboard perspective controls" className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
           <div role="tablist" aria-label="Dashboard perspective" className="inline-flex rounded-xl border border-default-200 bg-default-100 p-1">
             <Button
               role="tab"
@@ -131,7 +118,7 @@ export default function AssociateDashboard({
               Providing
             </Button>
           </div>
-          {(!hasProvided || !hasSought) && <Button size="sm" variant="light" className="justify-end font-semibold text-primary" onPress={() => router.push("/dashboard/company")}>Configure missing profile</Button>}
+          {(!hasProvided || !hasSought) && <Button size="sm" variant="light" className="font-semibold text-primary sm:justify-end" onPress={() => router.push("/dashboard/company")}>Configure missing profile</Button>}
         </div>
       </section>
 

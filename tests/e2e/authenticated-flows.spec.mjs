@@ -222,7 +222,7 @@ test("BOTH associate focus persists across reloads", async ({ page }) => {
   await expect(page.getByRole("button", { name: /Seller/ })).toHaveAttribute("aria-pressed", "true");
   await page.reload();
   await expect(page.getByRole("button", { name: /Seller/ })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByText("Live listings", { exact: true })).toBeVisible();
+  await expect(page.getByText(/selling enquir(?:y|ies)/i)).toBeVisible();
 });
 
 test("profile uses the shared dashboard workspace styling", async ({ page }) => {

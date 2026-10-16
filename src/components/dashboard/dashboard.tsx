@@ -161,7 +161,6 @@ const Dashboard: NextPage = () => {
   const pendingCompanyApprovals = Number(approvalsCompaniesQuery.data?.data?.meta?.total || 0);
   const pendingApprovalsTotal = pendingAssociateApprovals + pendingCompanyApprovals;
 
-  const associateBuyingCount = Number(summary?.associateBuyingCount || 0);
   const associateSellingCount = Number(summary?.associateSellingCount || 0);
   const associateActionRequired = Number(summary?.associateActionRequired || 0);
   const adminActionRequired = Number(summary?.adminActionRequired || 0);
@@ -569,9 +568,7 @@ const Dashboard: NextPage = () => {
       metrics={associateMetrics}
       pendingActions={pendingActionsList}
       activity={activityFeed}
-      activeOrders={activeOrders}
       actionRequired={associateActionRequired}
-      buyingCount={Number(associateMetrics.totalInquiries || associateBuyingCount) || 0}
       sellingCount={associateSellingCount}
       isLoading={dashboardSummaryQuery.isLoading}
       perspective={associatePerspective}

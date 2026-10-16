@@ -1,38 +1,43 @@
-export type AssociateMetric = {
-  key: "actions" | "buying" | "selling" | "orders" | "listings";
-  label: string;
+export type AssociateCapabilityStat = {
   value: number;
-  description: string;
+  label: string;
   href: string;
 };
 
-export type AssociatePrimaryAction = {
+export type AssociateAttentionAction = {
   eyebrow: string;
   title: string;
   description: string;
   label: string;
   href: string;
-  tone: "warning" | "primary" | "success";
+  tone: "warning";
 };
 
 type AssociateDashboardModelInput = {
   providedCapabilities: string[];
   soughtCapabilities: string[];
   actionRequired: number;
-  buyingCount: number;
   sellingCount: number;
-  activeOrders: number;
   liveProducts: number;
   perspective?: "provided" | "sought";
+};
+
+export type AssociateWorkspaceKind = "buyer" | "seller" | null;
+
+export const getAssociateWorkspaceKind = (
+  slug: string,
+  perspective: "provided" | "sought",
+): AssociateWorkspaceKind => {
+  if (slug === "buyer") return perspective === "provided" ? "buyer" : "seller";
+  if (slug === "seller") return perspective === "provided" ? "seller" : "buyer";
+  return null;
 };
 
 export const buildAssociateDashboardModel = ({
   providedCapabilities,
   soughtCapabilities,
   actionRequired,
-  buyingCount,
   sellingCount,
-  activeOrders,
   liveProducts,
   perspective,
 }: AssociateDashboardModelInput) => {
@@ -52,44 +57,20 @@ export const buildAssociateDashboardModel = ({
       : provided.has("seller") || sought.has("buyer");
   const showFunctions = activeCapabilities.size > 0;
 
-  const metrics: AssociateMetric[] = [
-    {
-      key: "actions",
-      label: "Action required",
-      value: actionRequired,
-      description: "Enquiries waiting for your response",
-      href: "/dashboard/enquiries",
-    },
-    ...(showBuying ? [{
-      key: "buying" as const,
-      label: "Buying enquiries",
-      value: buyingCount,
-      description: "Enquiries where you are the buyer",
-      href: "/dashboard/enquiries",
-    }] : []),
-    ...(showSelling ? [{
-      key: "selling" as const,
-      label: "Selling enquiries",
-      value: sellingCount,
-      description: "Enquiries where you are the supplier",
-      href: "/dashboard/enquiries",
-    }, {
-      key: "listings" as const,
-      label: "Live listings",
+  const capabilityStats: Record<"buyer" | "seller", AssociateCapabilityStat> = {
+    buyer: {
       value: liveProducts,
-      description: "Products currently visible to buyers",
-      href: "/dashboard/product",
-    }] : []),
-    {
-      key: "orders",
-      label: "Active orders",
-      value: activeOrders,
-      description: "Orders currently in progress",
-      href: "/dashboard/orders",
+      label: `${liveProducts === 1 ? "live listing" : "live listings"} available`,
+      href: "/dashboard/marketplace",
     },
-  ];
+    seller: {
+      value: sellingCount,
+      label: sellingCount === 1 ? "selling enquiry" : "selling enquiries",
+      href: "/dashboard/enquiries",
+    },
+  };
 
-  const primaryAction: AssociatePrimaryAction = actionRequired > 0
+  const attentionAction: AssociateAttentionAction | null = actionRequired > 0
     ? {
         eyebrow: "Needs attention",
         title: `${actionRequired} ${actionRequired === 1 ? "enquiry needs" : "enquiries need"} your response`,
@@ -98,43 +79,7 @@ export const buildAssociateDashboardModel = ({
         href: "/dashboard/enquiries",
         tone: "warning",
       }
-    : !showBuying && !showSelling
-      ? {
-          eyebrow: "Next best action",
-          title: "Review your service execution work",
-          description: "Track requests and orders connected to your company capabilities.",
-          label: "Open execution panel",
-          href: "/dashboard/execution-enquiries",
-          tone: "primary",
-        }
-      : showBuying && !showSelling
-        ? {
-            eyebrow: "Next best action",
-            title: "Discover a verified product",
-            description: "Compare live trade listings and start a buying enquiry.",
-            label: "Browse trade listings",
-            href: "/dashboard/marketplace",
-            tone: "primary",
-          }
-        : showSelling && !showBuying
-          ? {
-              eyebrow: "Next best action",
-              title: liveProducts > 0 ? "Keep your listings current" : "Publish your first trade listing",
-              description: liveProducts > 0
-                ? "Review pricing and availability so buyers see accurate offers."
-                : "Add a product and rate to become discoverable to buyers.",
-              label: "Manage listings",
-              href: "/dashboard/product",
-              tone: "success",
-            }
-          : {
-              eyebrow: "Next best action",
-              title: "Continue your trade activity",
-              description: "Discover opportunities or keep your current listings up to date.",
-              label: "Browse trade listings",
-              href: "/dashboard/marketplace",
-              tone: "primary",
-            };
+    : null;
 
-  return { showBuying, showSelling, showFunctions, metrics, primaryAction };
+  return { showBuying, showSelling, showFunctions, capabilityStats, attentionAction };
 };

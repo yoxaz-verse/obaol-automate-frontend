@@ -4,11 +4,11 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, CardBody, CardHeader, Divider, Skeleton } from "@nextui-org/react";
-import { LuArrowRight, LuCheck, LuClock3, LuPackage, LuShoppingBag, LuTrendingUp } from "react-icons/lu";
+import { LuArrowRight, LuCheck } from "react-icons/lu";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
 import { dashboardCopy } from "@/utils/dashboardCopy";
-import { getCompanyFunctionRoleContext, getPreviewDefinition } from "@/utils/companyFunctionPreview";
-import { buildAssociateDashboardModel, type AssociateMetric } from "./associateDashboardModel";
+import { getCompanyFunctionRoleContext, getPreviewDefinition, normalizePreviewFunctionSlug } from "@/utils/companyFunctionPreview";
+import { buildAssociateDashboardModel, getAssociateWorkspaceKind } from "./associateDashboardModel";
 
 const CompanyFunctionComponent = dynamic(() => import("./CompanyFunctionComponent"), {
   loading: () => <Skeleton className="h-48 w-full rounded-2xl" />,
@@ -25,9 +25,7 @@ type AssociateDashboardProps = {
   metrics: Record<string, any>;
   pendingActions: PendingAction[];
   activity: Activity[];
-  activeOrders: number;
   actionRequired: number;
-  buyingCount: number;
   sellingCount: number;
   isLoading: boolean;
   perspective: "provided" | "sought";
@@ -35,13 +33,6 @@ type AssociateDashboardProps = {
 };
 
 const objectIdPattern = /^[a-f0-9]{24}$/i;
-
-const metricIcon = (metric: AssociateMetric) => {
-  if (metric.key === "actions") return <LuClock3 size={19} />;
-  if (metric.key === "buying") return <LuShoppingBag size={19} />;
-  if (metric.key === "selling" || metric.key === "listings") return <LuPackage size={19} />;
-  return <LuTrendingUp size={19} />;
-};
 
 export default function AssociateDashboard({
   providedCapabilities,
@@ -51,9 +42,7 @@ export default function AssociateDashboard({
   metrics,
   pendingActions,
   activity,
-  activeOrders,
   actionRequired,
-  buyingCount,
   sellingCount,
   isLoading,
   perspective,
@@ -64,12 +53,10 @@ export default function AssociateDashboard({
     providedCapabilities,
     soughtCapabilities,
     actionRequired,
-    buyingCount,
     sellingCount,
-    activeOrders,
     liveProducts: Number(metrics.liveProducts || 0),
     perspective,
-  }), [providedCapabilities, soughtCapabilities, actionRequired, buyingCount, sellingCount, activeOrders, metrics.liveProducts, perspective]);
+  }), [providedCapabilities, soughtCapabilities, actionRequired, sellingCount, metrics.liveProducts, perspective]);
 
   const hasProvided = providedCapabilities.length > 0;
   const hasSought = soughtCapabilities.length > 0;
@@ -145,6 +132,8 @@ export default function AssociateDashboard({
                 const definition = getPreviewDefinition(fn.slug, perspective);
                 if (!definition) return null;
                 const context = getCompanyFunctionRoleContext(fn.slug, perspective);
+                const workspaceKind = getAssociateWorkspaceKind(normalizePreviewFunctionSlug(fn.slug), perspective);
+                const capabilityStat = workspaceKind ? model.capabilityStats[workspaceKind] : null;
                 const visibleActions = definition.actions.slice(0, 3);
                 const primaryAction = visibleActions.find((action) => action.primary) || visibleActions[0];
                 const secondaryActions = visibleActions.filter((action) => action !== primaryAction).slice(0, 2);
@@ -162,6 +151,16 @@ export default function AssociateDashboard({
                           <p className="mt-1 text-sm leading-6 text-default-600">{context.explanation}</p>
                         </div>
                       </div>
+                      {capabilityStat ? (
+                        <button
+                          type="button"
+                          onClick={() => router.push(capabilityStat.href)}
+                          className="flex w-full items-center justify-between gap-3 rounded-xl border border-default-200 bg-content1/70 px-4 py-3 text-left transition-colors hover:bg-content1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        >
+                          <span><span className="text-xl font-black text-foreground">{capabilityStat.value.toLocaleString()}</span><span className="ml-2 text-sm font-semibold text-default-600">{capabilityStat.label}</span></span>
+                          <LuArrowRight className="shrink-0 text-default-400" aria-hidden="true" />
+                        </button>
+                      ) : null}
                       <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                         {primaryAction ? <Button className={`min-h-10 font-bold ${perspectiveButton}`} endContent={<LuArrowRight />} onPress={() => router.push(primaryAction.href)}>{primaryAction.label}</Button> : null}
                         {secondaryActions.map((action) => <Button key={`${fn._id}-${action.href}-${action.label}`} variant="light" className={`min-h-10 justify-start font-semibold ${perspectiveText}`} endContent={<LuArrowRight />} onPress={() => router.push(action.href)}>{action.label}</Button>)}
@@ -187,39 +186,14 @@ export default function AssociateDashboard({
         </Card>
       )}
 
-      <section aria-label="Associate overview" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {isLoading ? Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index} className="min-h-36 border border-slate-200/90 bg-content1 shadow-sm dark:border-white/10">
-            <CardBody className="space-y-4 p-5"><Skeleton className="h-4 w-2/3 rounded-lg" /><Skeleton className="h-9 w-1/3 rounded-lg" /><Skeleton className="h-4 w-full rounded-lg" /></CardBody>
-          </Card>
-        )) : model.metrics.map((metric) => (
-          <button key={metric.key} type="button" onClick={() => router.push(metric.href)} className="min-h-36 rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-            <Card className="h-full border border-slate-200/90 bg-content1 shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md dark:border-white/10">
-              <CardBody className="flex h-full flex-col justify-between gap-4 p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-default-500">{metric.label}</p>
-                    <p className="mt-1 text-3xl font-black tracking-tight text-foreground">{metric.value.toLocaleString()}</p>
-                  </div>
-                  <span className="rounded-xl border border-obaol-500/20 bg-obaol-500/10 p-2.5 text-obaol-600 dark:text-obaol-300">{metricIcon(metric)}</span>
-                </div>
-                <span className="flex items-center justify-between gap-3 border-t border-default-100 pt-3 text-sm text-default-500 dark:border-white/5">
-                  <span>{metric.description}</span><LuArrowRight className="shrink-0" aria-hidden="true" />
-                </span>
-              </CardBody>
-            </Card>
-          </button>
-        ))}
-      </section>
-
-      {!isLoading && <Card className={`border shadow-none ${model.primaryAction.tone === "warning" ? "border-warning-500/30 bg-warning-500/10" : model.primaryAction.tone === "success" ? "border-success-500/30 bg-success-500/10" : "border-primary-500/25 bg-primary-500/5"}`}>
+      {!isLoading && model.attentionAction && <Card className="border border-warning-500/30 bg-warning-500/10 shadow-none">
         <CardBody className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-widest text-default-500">{model.primaryAction.eyebrow}</p>
-            <h2 className="mt-1 text-xl font-black tracking-tight text-foreground sm:text-2xl">{model.primaryAction.title}</h2>
-            <p className="mt-2 text-sm leading-6 text-default-600">{model.primaryAction.description}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-default-500">{model.attentionAction.eyebrow}</p>
+            <h2 className="mt-1 text-xl font-black tracking-tight text-foreground sm:text-2xl">{model.attentionAction.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-default-600">{model.attentionAction.description}</p>
           </div>
-          <Button color={model.primaryAction.tone} className="min-h-11 shrink-0 font-bold" endContent={<LuArrowRight />} onPress={() => router.push(model.primaryAction.href)}>{model.primaryAction.label}</Button>
+          <Button color={model.attentionAction.tone} className="min-h-11 shrink-0 font-bold" endContent={<LuArrowRight />} onPress={() => router.push(model.attentionAction.href)}>{model.attentionAction.label}</Button>
         </CardBody>
       </Card>}
 

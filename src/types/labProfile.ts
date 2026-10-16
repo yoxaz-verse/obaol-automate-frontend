@@ -46,6 +46,7 @@ export type LabSnapshot = {
   displayName: string;
   contactEmail: string;
   contactPhone: string;
+  whatsappPhone?: string;
   contactPhoneSecondary?: string;
   address: string;
   physicalCountryId: string | CountryOption;
@@ -69,3 +70,7 @@ export type LabProfile = {
 };
 export const optionId = (value: string | { _id?: string } | null | undefined) => typeof value === "string" ? value : String(value?._id || "");
 export const optionName = (value: string | { name?: string } | null | undefined) => typeof value === "string" ? value : String(value?.name || "");
+export const whatsappHref = (value: string | null | undefined) => {
+  const digits = String(value || "").replace(/\D/g, "");
+  return /^\d{7,15}$/.test(digits) ? `https://wa.me/${digits}` : undefined;
+};

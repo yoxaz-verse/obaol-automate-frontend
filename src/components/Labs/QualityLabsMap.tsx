@@ -6,12 +6,17 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@nextui-org/react";
 import { LuFlaskConical } from "react-icons/lu";
+import { FiMail, FiPhone } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 import { renderToStaticMarkup } from "react-dom/server";
+import { whatsappHref } from "@/types/labProfile";
 
 export type QualityLabMapItem = {
   _id: string;
   name: string;
   contactPhone?: string;
+  whatsappPhone?: string;
+  contactEmail?: string;
   contactPhoneSecondary?: string;
   certificatesSummary?: string;
   capabilityStatus?: string;
@@ -29,7 +34,6 @@ type Props = {
   searchPoint: SearchPoint | null;
   center: [number, number];
   zoom: number;
-  onContact: (lab: QualityLabMapItem) => void;
 };
 
 const mkDotIcon = () =>
@@ -67,7 +71,7 @@ function FitLabBounds({ labs, point }: { labs: QualityLabMapItem[]; point: Searc
   return null;
 }
 
-export default function QualityLabsMap({ labs, searchPoint, center, zoom, onContact }: Props) {
+export default function QualityLabsMap({ labs, searchPoint, center, zoom }: Props) {
   const mapRef = useRef<L.Map | null>(null);
   const markerIcon = useMemo(() => mkDotIcon(), []);
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -104,7 +108,9 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom, onCont
           url={tileUrl}
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {safeLabs.map((lab) => (
+        {safeLabs.map((lab) => {
+          const whatsAppUrl = whatsappHref(lab.whatsappPhone);
+          return (
           <Marker key={lab._id} position={[Number(lab.location?.latitude), Number(lab.location?.longitude)]} icon={markerIcon}>
             <Popup className="tactical-popup">
               <div className="min-w-[240px] p-2 space-y-3 rounded-lg border bg-white border-slate-200 text-slate-900">
@@ -119,21 +125,16 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom, onCont
                   {lab.capabilityStatus === "LEGACY_REQUIRES_MAPPING" ? <span className="rounded-full bg-amber-100 px-2 py-1 text-[9px] font-bold text-amber-800">Requires mapping</span> : <span className="rounded-full bg-emerald-100 px-2 py-1 text-[9px] font-bold text-emerald-800">Structured</span>}
                   {lab.source ? <span className="rounded-full bg-slate-100 px-2 py-1 text-[9px] text-slate-700">{lab.source.replaceAll("_", " ")}</span> : null}
                 </div>
-                <Button
-                  color="success"
-                  variant="solid"
-                  size="sm"
-                  fullWidth
-                  isDisabled={!lab.contactPhone}
-                  onPress={() => onContact(lab)}
-                  className="font-black uppercase tracking-wider text-[10px]"
-                >
-                  Contact
-                </Button>
+                <div className="grid grid-cols-3 gap-1">
+                  <Button as="a" href={lab.contactPhone ? `tel:${lab.contactPhone}` : undefined} isDisabled={!lab.contactPhone} size="sm" variant="flat" isIconOnly aria-label="Call lab"><FiPhone /></Button>
+                  <Button as="a" href={whatsAppUrl} target={whatsAppUrl ? "_blank" : undefined} rel={whatsAppUrl ? "noopener noreferrer" : undefined} isDisabled={!whatsAppUrl} size="sm" color="success" variant="flat" isIconOnly aria-label="Chat on WhatsApp"><FaWhatsapp /></Button>
+                  <Button as="a" href={lab.contactEmail ? `mailto:${lab.contactEmail}` : undefined} isDisabled={!lab.contactEmail} size="sm" variant="flat" isIconOnly aria-label="Email lab"><FiMail /></Button>
+                </div>
               </div>
             </Popup>
           </Marker>
-        ))}
+          );
+        })}
       </MapContainer>
       <style jsx global>{`
         .quality-labs-map .leaflet-control-attribution {

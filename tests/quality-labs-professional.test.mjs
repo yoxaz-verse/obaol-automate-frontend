@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { whatsappHref } from "../src/types/labProfile.ts";
 
 const directoryPath = new URL("../src/app/dashboard/quality-labs/page.tsx", import.meta.url);
 const wizardPath = new URL("../src/app/dashboard/quality-labs/location/page.tsx", import.meta.url);
@@ -50,6 +51,20 @@ test("wizard uses searchable fields and direct taxonomy creation", async () => {
   assert.doesNotMatch(source, /Request missing option/);
   assert.doesNotMatch(source, /window\.prompt/);
   assert.match(source, /sticky bottom-3/);
+  assert.match(source, /WhatsApp number is the same as primary phone/);
+  assert.match(source, /Skip optional step/);
+  assert.match(source, /autoFocus/);
+});
+
+test("lab contacts expose safe explicit WhatsApp actions", async () => {
+  const [directory, map] = await Promise.all([readFile(directoryPath, "utf8"), readFile(mapPath, "utf8")]);
+  assert.equal(whatsappHref("+91 98765-43210"), "https://wa.me/919876543210");
+  assert.equal(whatsappHref("not-a-number"), undefined);
+  assert.equal(whatsappHref("123"), undefined);
+  assert.match(directory, />Call<\/Button>.*>WhatsApp<\/Button>.*>Email<\/Button>/s);
+  assert.match(map, /aria-label="Call lab"/);
+  assert.match(map, /aria-label="Chat on WhatsApp"/);
+  assert.match(map, /aria-label="Email lab"/);
 });
 
 test("lab map fits all markers when no search point is active", async () => {

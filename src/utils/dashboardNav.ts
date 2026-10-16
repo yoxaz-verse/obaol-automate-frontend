@@ -9,6 +9,7 @@ import {
   hasWarehouseWorkspaceAccess,
   isWarehouseDashboardPath,
 } from "@/utils/dashboardAccess";
+import { getCapabilityActionLinks } from "@/utils/companyFunctionPreview";
 
 export { hasWarehouseWorkspaceAccess, isWarehouseDashboardPath } from "@/utils/dashboardAccess";
 
@@ -33,10 +34,28 @@ export const isComingSoonDashboardNavigation = (
 };
 
 export type DashboardNavSection = {
-  label: DashboardSection | DashboardTaskGroup;
+  label: DashboardSection | DashboardTaskGroup | "Seeking" | "Providing" | "Other Services";
   links: string[];
   groups?: Array<{ label: DashboardNavGroup; links: string[] }>;
 };
+
+const ASSOCIATE_EXECUTE_PATHS = [
+  "/dashboard/enquiries",
+  "/dashboard/sample-requests",
+  "/dashboard/orders",
+  "/dashboard/documents",
+  "/dashboard/commercial-documents",
+  "/dashboard/execution-enquiries",
+];
+
+const ASSOCIATE_OTHER_SERVICE_PATHS = new Set([
+  "/dashboard/imports",
+  "/dashboard/external-orders",
+  "/dashboard/inventory",
+  "/dashboard/warehouses",
+  "/dashboard/warehouse-rent",
+  "/dashboard/quality-labs",
+]);
 
 export const getRoleFilteredSidebarOptions = (
   sidebarOptions: SidebarOption[],
@@ -52,7 +71,9 @@ export const getRoleFilteredSidebarOptions = (
 export const getDashboardSidebarSections = (
   filteredOptions: SidebarOption[],
   role: string = "admin",
-  capabilities: string[] = []
+  capabilities: string[] = [],
+  providedCapabilities: string[] = [],
+  soughtCapabilities: string[] = [],
 ): DashboardNavSection[] => {
   const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
   const accessibleRoutes = getAccessibleDashboardRoutes({
@@ -62,28 +83,53 @@ export const getDashboardSidebarSections = (
   const normalizedRole = normalizeDashboardRole(role);
 
   if (normalizedRole === "associate") {
-    const groupForRoute = (route: (typeof accessibleRoutes)[number]): DashboardTaskGroup => {
-      return route.taskGroup;
-    };
-    const groupOrder: DashboardTaskGroup[] = [
-      "Home",
-      "Buy",
-      "Sell",
-      "Execute",
-      "Services",
-      "Warehouse",
-      "Company & Account",
-      "Support",
-    ];
+    const accessiblePathSet = new Set(
+      accessibleRoutes.filter((route) => optionMap.has(route.path)).map((route) => route.path)
+    );
+    const executePathSet = new Set(ASSOCIATE_EXECUTE_PATHS);
+    const reservedPathSet = new Set(
+      accessibleRoutes
+        .filter((route) => ["Home", "Support"].includes(route.taskGroup))
+        .map((route) => route.path)
+    );
 
-    return groupOrder
-      .map((label) => ({
-        label,
+    const capabilityLinks = (
+      selectedCapabilities: string[],
+      perspective: "provided" | "sought",
+    ) => {
+      return getCapabilityActionLinks(selectedCapabilities, perspective).filter((path) => (
+        accessiblePathSet.has(path) &&
+        !executePathSet.has(path) &&
+        !reservedPathSet.has(path)
+      ));
+    };
+
+    const seekingLinks = capabilityLinks(soughtCapabilities, "sought");
+    const providingLinks = capabilityLinks(providedCapabilities, "provided");
+    const selectedCapabilityLinks = new Set([...seekingLinks, ...providingLinks]);
+    const linksForTaskGroup = (taskGroup: DashboardTaskGroup) => accessibleRoutes
+      .filter((route) => optionMap.has(route.path) && route.taskGroup === taskGroup)
+      .map((route) => route.path);
+
+    const associateSections: DashboardNavSection[] = [
+      { label: "Home", links: linksForTaskGroup("Home") },
+      { label: "Seeking", links: seekingLinks },
+      { label: "Providing", links: providingLinks },
+      { label: "Execute", links: ASSOCIATE_EXECUTE_PATHS.filter((path) => accessiblePathSet.has(path)) },
+      {
+        label: "Other Services",
         links: accessibleRoutes
-          .filter((route) => optionMap.has(route.path) && groupForRoute(route) === label)
-          .map((route) => route.path),
-      }))
-      .filter((section) => section.links.length > 0);
+          .filter((route) => optionMap.has(route.path))
+          .map((route) => route.path)
+          .filter((path) => ASSOCIATE_OTHER_SERVICE_PATHS.has(path) && !selectedCapabilityLinks.has(path)),
+      },
+      {
+        label: "Company & Account",
+        links: linksForTaskGroup("Company & Account").filter((path) => !selectedCapabilityLinks.has(path)),
+      },
+      { label: "Support", links: linksForTaskGroup("Support") },
+    ];
+    return associateSections.filter((section) => section.links.length > 0);
   }
   const sectionOrder: DashboardSection[] = [
     "Overview",

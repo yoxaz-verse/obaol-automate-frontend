@@ -160,6 +160,11 @@ export const sidebarOptions = [
     link: "/dashboard/documents",
   },
   {
+    name: "Pure Documents",
+    icon: <FiFileText />,
+    link: "/dashboard/commercial-documents",
+  },
+  {
     name: "Documentation Rules",
     icon: <MdOutlineSettingsInputComponent />,
     link: "/dashboard/documentation-rules",

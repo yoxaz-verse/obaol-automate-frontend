@@ -186,7 +186,9 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const mobileSections = getDashboardSidebarSections(
     filteredOptions as any[],
     String(role || ""),
-    [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
+    capabilities,
+    user?.providedCapabilities || [],
+    user?.soughtCapabilities || [],
   );
   const activeMobileAdminGroup = mobileSections
     .find((section) => section.label === "Operations/Admin")

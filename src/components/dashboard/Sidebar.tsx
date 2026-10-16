@@ -39,7 +39,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const sidebarSections = getDashboardSidebarSections(
         filteredOptions as any[],
         String(user?.role || ""),
-        [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
+        capabilities,
+        user?.providedCapabilities || [],
+        user?.soughtCapabilities || [],
     );
     const activeAdminGroup = sidebarSections
         .find((section) => section.label === "Operations/Admin")

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -106,6 +106,27 @@ test("Associate sidebar routes use the requested buying, account, and support gr
   assert.equal(getDashboardRoute("/dashboard/settings")?.taskGroup, "Company & Account");
   assert.equal(getDashboardRoute("/dashboard/guidance")?.taskGroup, "Support");
   assert.equal(getDashboardRoute("/dashboard/customer-support")?.taskGroup, "Support");
+});
+
+test("Associate desktop and mobile navigation share capability-aware sidebar groups", () => {
+  const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
+  const desktop = readFileSync("src/components/dashboard/Sidebar.tsx", "utf8");
+  const mobile = readFileSync("src/components/dashboard/TopBar.tsx", "utf8");
+  const labels = ["Home", "Seeking", "Providing", "Execute", "Other Services", "Company & Account", "Support"];
+  let previousIndex = -1;
+  for (const label of labels) {
+    const index = navigation.indexOf(`label: \"${label}\"`, previousIndex + 1);
+    assert.ok(index > previousIndex, `${label} should appear in the expected Associate sidebar order`);
+    previousIndex = index;
+  }
+  assert.match(navigation, /getCapabilityActionLinks\(selectedCapabilities, perspective\)/);
+  assert.match(navigation, /!selectedCapabilityLinks\.has\(path\)/);
+  assert.match(navigation, /ASSOCIATE_EXECUTE_PATHS\.filter/);
+  assert.match(readFileSync("src/utils/utils.tsx", "utf8"), /link: "\/dashboard\/commercial-documents"/);
+  for (const source of [desktop, mobile]) {
+    assert.match(source, /user\?\.providedCapabilities \|\| \[\]/);
+    assert.match(source, /user\?\.soughtCapabilities \|\| \[\]/);
+  }
 });
 
 test("SERVICE Associates receive both contact-based service directories", () => {

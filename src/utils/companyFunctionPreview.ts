@@ -98,6 +98,24 @@ export const getPreviewDefinition = (slug: unknown, perspective: "provided" | "s
   };
 };
 
+export const getCapabilityActionLinks = (
+  capabilities: unknown[],
+  perspective: "provided" | "sought" = "provided",
+) => {
+  const links: string[] = [];
+  const seen = new Set<string>();
+
+  capabilities.forEach((slug) => {
+    getPreviewDefinition(slug, perspective)?.actions.forEach(({ href }) => {
+      if (seen.has(href)) return;
+      seen.add(href);
+      links.push(href);
+    });
+  });
+
+  return links;
+};
+
 export const getCompanyFunctionRoleContext = (
   slug: unknown,
   perspective: "provided" | "sought" = "provided",

@@ -4,6 +4,7 @@ import {
   CANONICAL_COMPANY_FUNCTION_SLUGS,
   COMPANY_FUNCTION_PREVIEW_DEFINITIONS,
   filterCanonicalPreviewFunctions,
+  getCapabilityActionLinks,
   getCompanyFunctionRoleContext,
   getPreviewDefinition,
 } from "../src/utils/companyFunctionPreview.ts";
@@ -45,6 +46,21 @@ test("sought trade capabilities use the counterparty workflow", () => {
   assert.equal(seekingSeller?.actions.find(({ primary }) => primary)?.href, "/dashboard/marketplace");
   assert.equal(seekingBuyer?.actions.find(({ primary }) => primary)?.href, "/dashboard/product");
   assert.doesNotMatch(seekingSeller?.actions.find(({ primary }) => primary)?.label || "", /start selling/i);
+});
+
+test("capability action links preserve selection order, invert sought roles, and deduplicate within a group", () => {
+  const providing = getCapabilityActionLinks(["buyer", "sourcing", "buyer"], "provided");
+  const seeking = getCapabilityActionLinks(["buyer"], "sought");
+  assert.equal(providing[0], "/dashboard/marketplace");
+  assert.equal(providing.filter((path) => path === "/dashboard/marketplace").length, 1);
+  assert.equal(seeking[0], "/dashboard/product");
+  assert.ok(seeking.includes("/dashboard/inventory"));
+});
+
+test("selected service capabilities expose their specific destinations", () => {
+  assert.ok(getCapabilityActionLinks(["testing"], "provided").includes("/dashboard/quality-labs"));
+  assert.ok(getCapabilityActionLinks(["warehouse-storage"], "provided").includes("/dashboard/warehouse-rent"));
+  assert.ok(getCapabilityActionLinks(["importing-to-india"], "provided").includes("/dashboard/imports"));
 });
 
 test("buyer and seller capability context explains the user's actual trade role", () => {

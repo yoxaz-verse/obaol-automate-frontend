@@ -94,6 +94,51 @@ test("existing-account redirects show only the trusted sign-in notice", async ({
   await expect(page.getByLabel("Email Address")).toHaveValue("operator@example.com");
 });
 
+test("passkey sign-in appears only when WebAuthn is supported", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (typeof globalThis.PublicKeyCredential !== "function") {
+      Object.defineProperty(globalThis, "PublicKeyCredential", {
+        configurable: true,
+        value: class PublicKeyCredential {},
+      });
+    }
+  });
+  await page.route(/\/auth\/email-status(?:\?.*)?$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ exists: true, role: "Associate" }),
+  }));
+
+  await page.goto("/auth/associate", { waitUntil: "domcontentloaded" });
+  await page.getByLabel("Email Address").fill("passkey@example.com");
+  await page.getByTestId("auth-submit").click();
+  await expect(page.getByTestId("passkey-signin")).toBeVisible();
+
+  await page.goto("/auth/register", { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("passkey-signin")).toHaveCount(0);
+});
+
+test("unsupported browsers do not render a disabled passkey control", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(globalThis, "PublicKeyCredential", {
+      configurable: true,
+      value: undefined,
+    });
+  });
+  await page.route(/\/auth\/email-status(?:\?.*)?$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ exists: true, role: "Associate" }),
+  }));
+
+  await page.goto("/auth/associate", { waitUntil: "domcontentloaded" });
+  await page.getByLabel("Email Address").fill("password@example.com");
+  await page.getByTestId("auth-submit").click();
+
+  await expect(page.getByTestId("passkey-signin")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Sign in with email OTP" })).toBeVisible();
+});
+
 test("signup redirects an existing email to its matching role with context", async ({ page }) => {
   await page.route(/\/auth\/onboarding\/start$/, async (route) => {
     await route.fulfill({

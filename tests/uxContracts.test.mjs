@@ -65,6 +65,13 @@ test("the public entry clearly separates Associate and Operator accounts", () =>
   }
 });
 
+test("passkey sign-in is rendered only after WebAuthn support is confirmed", () => {
+  const login = read("../src/components/Login/login-component.tsx");
+  assert.match(login, /passkeySupport === "supported" && \(\s*<Button[\s\S]*?data-testid="passkey-signin"/);
+  assert.doesNotMatch(login, /isDisabled=\{passkeySupport !== "supported"/);
+  assert.match(login, /startAuthentication\(\{ optionsJSON: optionsResponse\.data\.options \}\)/);
+});
+
 test("active homepage source does not advertise fabricated runtime telemetry", () => {
   const homepage = read("../src/components/home/HomeContent.tsx") + read("../src/components/home/HeroSectionServer.tsx");
   for (const phrase of ["CORE_LATENCY", "AES-256", "SYS_LINK"]) assert.equal(homepage.includes(phrase), false);

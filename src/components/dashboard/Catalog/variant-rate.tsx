@@ -76,6 +76,10 @@ import { resolveMarketplaceSort } from "@/utils/marketplaceSort";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
 import {
+  CONTACT_NUMBER_SPECIFICATION_ERROR,
+  containsPhoneLikeNumber,
+} from "@/utils/enquirySpecificationValidation";
+import {
   useCalculationConfig,
   DEFAULT_CALCULATION_CONFIG,
 } from "@/hooks/useCalculationConfig";
@@ -898,7 +902,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ? Math.floor((listingPolicyNow - lifecycleTimestamp) / HOUR_MS)
                 : 0;
               const effectiveIsLive =
-                typeof item.__effectiveIsLive === "boolean"
+                typeof item.effectiveIsLive === "boolean"
+                  ? item.effectiveIsLive
+                  : typeof item.__effectiveIsLive === "boolean"
                   ? item.__effectiveIsLive
                   : Boolean(item.isLive);
               const isExpired =
@@ -3850,6 +3856,8 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [createdEnquiryId, setCreatedEnquiryId] = useState<string | null>(null);
+  const specificationHasContactNumber =
+    containsPhoneLikeNumber(specification);
 
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
@@ -4058,10 +4066,21 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     onError: (error: any) => {
       console.error("Enquiry submission failed:", error);
       console.error("Error Response:", error?.response?.data);
-      const backendMessage = error?.response?.data?.message;
+      const responseData = error?.response?.data;
+      const backendMessage =
+        responseData && typeof responseData === "object"
+          ? responseData.message
+          : null;
       const validationMessage = error?.response?.data?.error?.message;
-      const fallback =
-        error?.message || "Something went wrong. Please try again.";
+      const isListingConflict =
+        Number(error?.response?.status) === 409 ||
+        responseData?.code === "LISTING_NOT_ENQUIRY_ELIGIBLE";
+      const fallback = isListingConflict
+        ? "This product is no longer available for enquiry. Please refresh the marketplace."
+        : error?.message || "Something went wrong. Please try again.";
+      if (isListingConflict) {
+        queryClient.invalidateQueries({ queryKey: ["variantRate"] });
+      }
       showToastMessage({
         type: "error",
         message: backendMessage || validationMessage || fallback,
@@ -4072,6 +4091,13 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (specificationHasContactNumber) {
+      showToastMessage({
+        type: "error",
+        message: CONTACT_NUMBER_SPECIFICATION_ERROR,
+      });
+      return;
+    }
     if (isAdminUser && !normalizeObjectId(buyerAssociateId)) {
       showToastMessage({
         type: "error",
@@ -4314,10 +4340,29 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
               Specification (Optional)
             </label>
             <textarea
-              className="w-full rounded-xl border border-default-300 bg-default-50 text-foreground min-h-[90px] px-3 py-2 text-sm outline-none focus:border-primary transition-colors resize-y"
+              className={`w-full rounded-xl border bg-default-50 text-foreground min-h-[90px] px-3 py-2 text-sm outline-none transition-colors resize-y ${
+                specificationHasContactNumber
+                  ? "border-danger focus:border-danger"
+                  : "border-default-300 focus:border-primary"
+              }`}
               value={specification}
               onChange={(e) => setSpecification(e.target.value)}
+              aria-invalid={specificationHasContactNumber}
+              aria-describedby={
+                specificationHasContactNumber
+                  ? "enquiry-specification-error"
+                  : undefined
+              }
             />
+            {specificationHasContactNumber && (
+              <p
+                id="enquiry-specification-error"
+                role="alert"
+                className="text-xs text-danger"
+              >
+                {CONTACT_NUMBER_SPECIFICATION_ERROR}
+              </p>
+            )}
           </div>
         </CardBody>
       </Card>
@@ -4327,6 +4372,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         <Button
           type="submit"
           isLoading={isLoading}
+          isDisabled={isLoading || specificationHasContactNumber}
           color="primary"
           size="sm"
           className="font-semibold rounded-lg min-w-[160px]"

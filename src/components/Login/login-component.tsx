@@ -1196,18 +1196,21 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
 
         {authMode === "login" && (!isTwoStepLogin || loginStep === "credentials") && (
           <div className="flex w-full flex-col gap-3">
-            <Button
-              type="button"
-              variant="flat"
-              radius="lg"
-              className="h-12 w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/10 text-xs font-black uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300"
-              startContent={<FiKey />}
-              isLoading={passkeyLoginStatus === "loading"}
-              isDisabled={passkeySupport !== "supported" || isAuthBusy || passkeyLoginStatus === "loading"}
-              onPress={handlePasskeyLogin}
-            >
-              Sign in with passkey
-            </Button>
+            {passkeySupport === "supported" && (
+              <Button
+                type="button"
+                variant="flat"
+                radius="lg"
+                data-testid="passkey-signin"
+                className="h-12 w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/10 text-xs font-black uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300"
+                startContent={<FiKey />}
+                isLoading={passkeyLoginStatus === "loading"}
+                isDisabled={isAuthBusy || passkeyLoginStatus === "loading"}
+                onPress={handlePasskeyLogin}
+              >
+                Sign in with passkey
+              </Button>
+            )}
             {isTwoStepLogin && loginMethod === "password" && (
               <Button
                 type="button"

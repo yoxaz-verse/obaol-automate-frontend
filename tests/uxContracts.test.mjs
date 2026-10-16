@@ -367,6 +367,19 @@ test("trade listings refresh active views and exclude owned live marketplace row
   assert.equal(rates.includes("LISTING_ACTION_CLASS"), true);
 });
 
+test("listing deletion uses a stable non-dismissible confirmation modal", () => {
+  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const deletion = read("../src/components/CurdTable/delete.tsx");
+  assert.equal(rates.includes("const [pendingDeletion, setPendingDeletion]"), true);
+  assert.equal(rates.includes("onPress={() => setPendingDeletion(item)}"), true);
+  assert.equal(rates.includes("{pendingDeletion && ("), true);
+  assert.equal(rates.includes("onClose={() => setPendingDeletion(null)}"), true);
+  assert.equal(deletion.includes("isDismissable={false}"), true);
+  assert.equal(deletion.includes("isKeyboardDismissDisabled"), true);
+  assert.equal(deletion.includes("hideCloseButton={loading}"), true);
+  assert.equal(deletion.includes("if (loading) return;"), true);
+});
+
 test("rate interest links viewers to highlighted company associates with contact actions", () => {
   const interest = read("../src/app/dashboard/rate-interest/page.tsx");
   const companies = read("../src/app/dashboard/companies/page.tsx");

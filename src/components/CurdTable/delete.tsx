@@ -35,9 +35,17 @@ export default function DeleteModal({
   const { isOpen: disclosureOpen, onOpen, onOpenChange: disclosureOnOpenChange } = useDisclosure();
   const isControlled = controlledOpen !== undefined;
   const isOpen = isControlled ? controlledOpen : disclosureOpen;
-  const onOpenChange = isControlled ? controlledClose : disclosureOnOpenChange;
 
   const [loading, setLoading] = useState(false);
+
+  const closeModal = () => {
+    if (loading) return;
+    if (isControlled) {
+      controlledClose?.();
+      return;
+    }
+    disclosureOnOpenChange();
+  };
 
   const deleteItem = useMutation({
     mutationFn: async () =>
@@ -56,8 +64,12 @@ export default function DeleteModal({
         message: `Removed successfully`,
         position: "top-right",
       });
-      onOpenChange();
       setLoading(false);
+      if (isControlled) {
+        controlledClose?.();
+      } else {
+        disclosureOnOpenChange();
+      }
     },
     onError: (error: any) => {
       showToastMessage({
@@ -101,7 +113,12 @@ export default function DeleteModal({
       )}
       <Modal
         isOpen={isOpen}
-        onOpenChange={onOpenChange}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) closeModal();
+        }}
+        isDismissable={false}
+        isKeyboardDismissDisabled
+        hideCloseButton={loading}
         size="sm"
         placement="center"
         backdrop="blur"
@@ -135,7 +152,8 @@ export default function DeleteModal({
                 <Button 
                   className="w-full sm:w-auto font-bold tracking-wider" 
                   variant="flat" 
-                  onPress={onClose}
+                  onPress={closeModal}
+                  isDisabled={loading}
                 >
                   Cancel
                 </Button>

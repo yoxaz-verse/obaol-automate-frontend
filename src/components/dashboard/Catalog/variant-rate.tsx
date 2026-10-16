@@ -48,6 +48,7 @@ import {
   FiMoreHorizontal,
   FiSearch,
   FiRefreshCw,
+  FiTrash2,
 } from "react-icons/fi";
 import { LuMessageSquare, LuBox } from "react-icons/lu";
 import { motion } from "framer-motion";
@@ -311,6 +312,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
   const isMarketplaceView = additionalParams?.view === "marketplace";
+  const isTradeListingRate = rate === "variantRate";
   const marketplaceSort = resolveMarketplaceSort(additionalParams?.isLive);
   const canManageRow = (item: any) => {
     if (!item) return false;
@@ -338,6 +340,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [inventoryQty, setInventoryQty] = useState("");
   const [inventorySubmitting, setInventorySubmitting] = useState(false);
   const [selectedInventoryRate, setSelectedInventoryRate] = useState<any>(null);
+  const [pendingDeletion, setPendingDeletion] = useState<any>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [listingPolicyNow, setListingPolicyNow] = useState(() => Date.now());
   const [inventoryStatusReady, setInventoryStatusReady] = useState(false);
@@ -387,6 +390,22 @@ const VariantRate: React.FC<VariantRateProps> = ({
     <span className="max-w-40 text-right text-[9px] font-bold uppercase tracking-wider text-default-400">
       Listing locked — only status can be changed
     </span>
+  );
+
+  const deleteTrigger = (item: any) => (
+    <Tooltip color="danger" content="Remove Record" closeDelay={0}>
+      <Button
+        isIconOnly
+        size="sm"
+        variant="flat"
+        color="danger"
+        onPress={() => setPendingDeletion(item)}
+        aria-label={`Delete ${toDisplayText(item?.name || item?.customTitle || item?.productVariant, "listing")}`}
+        className="h-10 min-w-10 rounded-xl shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-danger-500/60"
+      >
+        <FiTrash2 size={18} />
+      </Button>
+    </Tooltip>
   );
 
   useEffect(() => {
@@ -1671,16 +1690,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             const actionButtons = (
                               <div className="flex items-center gap-2">
                                 {canManageRow(item) ? (
-                                  rate === "variantRate" ? (
+                                  isTradeListingRate ? (
                                     canDeleteTradeListing(item) ? (
-                                      <DeleteModal
-                                        _id={item._id}
-                                        name={item.name || item.customTitle || item.productVariant}
-                                        deleteApiEndpoint={apiRoutesByRole[rate]}
-                                        refetchData={refetchData}
-                                        useBody={true}
-                                        description={roleLower === "admin" ? undefined : "Listings can only be deleted during the first hour after creation. This action cannot be undone."}
-                                      />
+                                      deleteTrigger(item)
                                     ) : lockedListingMessage
                                   ) : (
                                     <>
@@ -1692,13 +1704,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                         apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
                                         refetchData={refetchData}
                                       />
-                                      <DeleteModal
-                                        _id={item._id}
-                                        name={item.name || item.customTitle || item.productVariant}
-                                        deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
-                                        refetchData={refetchData}
-                                        useBody={true}
-                                      />
+                                      {deleteTrigger(item)}
                                     </>
                                   )
                                 ) : item.isMarketplaceView && item.isOwnedByViewer ? (
@@ -1937,16 +1943,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         const actionButtons = (
                           <div className="flex items-center gap-2">
                             {canManageRow(item) ? (
-                              rate === "variantRate" ? (
+                              isTradeListingRate ? (
                                 canDeleteTradeListing(item) ? (
-                                  <DeleteModal
-                                    _id={item._id}
-                                    name={item.name || item.customTitle || item.productVariant}
-                                    deleteApiEndpoint={apiRoutesByRole[rate]}
-                                    refetchData={refetchData}
-                                    useBody={true}
-                                    description={roleLower === "admin" ? undefined : "Listings can only be deleted during the first hour after creation. This action cannot be undone."}
-                                  />
+                                  deleteTrigger(item)
                                 ) : lockedListingMessage
                               ) : (
                                 <>
@@ -1958,13 +1957,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
                                     refetchData={refetchData}
                                   />
-                                  <DeleteModal
-                                    _id={item._id}
-                                    name={item.name || item.customTitle || item.productVariant}
-                                    deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
-                                    refetchData={refetchData}
-                                    useBody={true}
-                                  />
+                                  {deleteTrigger(item)}
                                 </>
                               )
                             ) : item.isMarketplaceView && item.isOwnedByViewer ? (
@@ -2721,6 +2714,22 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 </ModalFooter>
               </ModalContent>
             </Modal>
+            {pendingDeletion && (
+              <DeleteModal
+                _id={pendingDeletion._id}
+                name={pendingDeletion.name || pendingDeletion.customTitle || pendingDeletion.productVariant}
+                deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
+                refetchData={refetchData}
+                useBody={true}
+                description={
+                  isTradeListingRate && roleLower !== "admin"
+                    ? "Listings can only be deleted during the first hour after creation. This action cannot be undone."
+                    : undefined
+                }
+                isOpen={true}
+                onClose={() => setPendingDeletion(null)}
+              />
+            )}
           </div>
         );
       }}

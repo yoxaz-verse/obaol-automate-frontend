@@ -1738,10 +1738,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
               className="w-full sm:w-auto font-bold"
             >
               {isSubmitting
-                ? (isAssociateUser ? "Submitting listing..." : "Launching listing...")
+                ? (isAssociateUser ? "Publishing your product..." : "Launching listing...")
                 : step < 4
                   ? "Continue"
-                  : (isAssociateUser ? "Submit for Approval" : "Launch Listing")}
+                  : (isAssociateUser ? "Publish Your Product" : "Launch Listing")}
             </Button>
           </ModalFooter>
         )}

@@ -566,8 +566,6 @@ const Dashboard: NextPage = () => {
       associateCompanyId={associateCompanyId}
       companyCapabilitiesConfigured={Boolean(user?.companyCapabilitiesConfigured)}
       metrics={associateMetrics}
-      pendingActions={pendingActionsList}
-      activity={activityFeed}
       actionRequired={associateActionRequired}
       sellingCount={associateSellingCount}
       isLoading={dashboardSummaryQuery.isLoading}

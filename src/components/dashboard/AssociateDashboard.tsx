@@ -1,21 +1,12 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, CardBody, CardHeader, Divider, Skeleton } from "@nextui-org/react";
-import { LuArrowRight, LuCheck } from "react-icons/lu";
+import { Button, Card, CardBody, Skeleton } from "@nextui-org/react";
+import { LuArrowRight } from "react-icons/lu";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
-import { dashboardCopy } from "@/utils/dashboardCopy";
 import { getCompanyFunctionRoleContext, getPreviewDefinition, normalizePreviewFunctionSlug } from "@/utils/companyFunctionPreview";
 import { buildAssociateDashboardModel, getAssociateWorkspaceKind } from "./associateDashboardModel";
-
-const CompanyFunctionComponent = dynamic(() => import("./CompanyFunctionComponent"), {
-  loading: () => <Skeleton className="h-48 w-full rounded-2xl" />,
-});
-
-type PendingAction = { id?: unknown; _id?: unknown; missingStep?: string };
-type Activity = { id?: unknown; type?: string; status?: string; at?: string };
 
 type AssociateDashboardProps = {
   providedCapabilities: string[];
@@ -23,8 +14,6 @@ type AssociateDashboardProps = {
   associateCompanyId: string;
   companyCapabilitiesConfigured: boolean;
   metrics: Record<string, any>;
-  pendingActions: PendingAction[];
-  activity: Activity[];
   actionRequired: number;
   sellingCount: number;
   isLoading: boolean;
@@ -32,16 +21,12 @@ type AssociateDashboardProps = {
   onPerspectiveChange: (perspective: "provided" | "sought") => void;
 };
 
-const objectIdPattern = /^[a-f0-9]{24}$/i;
-
 export default function AssociateDashboard({
   providedCapabilities,
   soughtCapabilities,
   associateCompanyId,
   companyCapabilitiesConfigured,
   metrics,
-  pendingActions,
-  activity,
   actionRequired,
   sellingCount,
   isLoading,
@@ -111,23 +96,20 @@ export default function AssociateDashboard({
 
       {model.showFunctions && (
         <section aria-labelledby="capability-summary-title" className="space-y-3">
-          <div className="flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <h2 id="capability-summary-title" className="text-lg font-black tracking-tight text-foreground">Your capabilities</h2>
-              <p className="mt-1 text-sm text-default-500">Your highest-priority roles and the next useful actions.</p>
-            </div>
-            <span className={`text-xs font-bold uppercase tracking-widest ${perspectiveText}`}>{isSeeking ? "Seeking" : "Providing"} view</span>
+          <div>
+            <h2 id="capability-summary-title" className="text-lg font-black tracking-tight text-foreground">{isSeeking ? "What you are seeking" : "What you provide"}</h2>
+            <p className="mt-1 text-sm text-default-500">{isSeeking ? "The capabilities and partners your company is looking for." : "The capabilities and services your company offers."}</p>
           </div>
           {!associateCompanyId ? (
             <Card className="border border-warning-500/25 bg-warning-500/10 shadow-none"><CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-medium text-foreground">Link a company to load your prioritized capabilities.</p><Button color="warning" variant="flat" onPress={() => router.push("/dashboard/company")}>Open company</Button></CardBody></Card>
           ) : companyFunctionDashboard.isLoading ? (
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{Array.from({ length: Math.min(Math.max(activeCapabilities.length, 1), 2) }).map((_, index) => <Skeleton key={index} className="h-44 rounded-2xl" />)}</div>
+            <div className={`grid grid-cols-1 gap-3 ${activeCapabilities.length > 1 ? "lg:grid-cols-2" : ""}`}>{Array.from({ length: Math.min(Math.max(activeCapabilities.length, 1), 2) }).map((_, index) => <Skeleton key={index} className="h-44 rounded-2xl" />)}</div>
           ) : companyFunctionDashboard.isError ? (
             <Card className="border border-danger-500/25 bg-danger-500/10 shadow-none"><CardBody className="text-sm text-danger">Your capabilities could not be loaded. Try refreshing this page.</CardBody></Card>
           ) : companyFunctionDashboard.orderedFunctions.length === 0 ? (
             <Card className="border border-default-200 shadow-none"><CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-default-500">No capabilities are configured for this view.</p><Button variant="flat" onPress={() => router.push("/dashboard/company")}>Configure company</Button></CardBody></Card>
           ) : (
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className={`grid grid-cols-1 gap-3 ${companyFunctionDashboard.orderedFunctions.length > 1 ? "lg:grid-cols-2" : ""}`}>
               {companyFunctionDashboard.orderedFunctions.map((fn: any) => {
                 const definition = getPreviewDefinition(fn.slug, perspective);
                 if (!definition) return null;
@@ -196,66 +178,6 @@ export default function AssociateDashboard({
           <Button color={model.attentionAction.tone} className="min-h-11 shrink-0 font-bold" endContent={<LuArrowRight />} onPress={() => router.push(model.attentionAction.href)}>{model.attentionAction.label}</Button>
         </CardBody>
       </Card>}
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
-        <Card className="border border-slate-200/90 bg-content1 shadow-sm dark:border-white/10 xl:col-span-3">
-          <CardHeader className="flex items-center justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
-            <div><h2 className="text-base font-bold text-foreground">Pending enquiries</h2><p className="mt-1 text-sm text-default-500">Items waiting for your next step in this {perspective === "provided" ? "providing" : "seeking"} view.</p></div>
-            <Button size="sm" variant="light" className="min-h-10 font-semibold" onPress={() => router.push("/dashboard/enquiries")}>View all</Button>
-          </CardHeader>
-          <Divider className="mt-4" />
-          <CardBody className="p-3 sm:p-4">
-            {pendingActions.length === 0 ? (
-              <div className="flex min-h-32 flex-col items-center justify-center gap-2 text-center"><LuCheck className="text-success" size={24} /><p className="font-semibold text-foreground">You’re all caught up</p><p className="text-sm text-default-500">New actions will appear here.</p></div>
-            ) : pendingActions.slice(0, 6).map((item) => {
-              const id = String(item._id || item.id || "").trim();
-              const canOpen = objectIdPattern.test(id);
-              return (
-                <button key={id || String(item.missingStep)} type="button" disabled={!canOpen} onClick={() => canOpen && router.push(`/dashboard/enquiries/${id}`)} className="flex min-h-14 w-full items-center justify-between gap-4 rounded-xl px-3 py-3 text-left transition-colors enabled:hover:bg-default-100/70 disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                  <span className="min-w-0"><span className="block font-semibold text-foreground">Enquiry {id ? `#${id.slice(-6).toUpperCase()}` : "action"}</span><span className="mt-0.5 block text-sm text-default-500">{item.missingStep || "Review the next required step"}</span></span>
-                  {canOpen && <LuArrowRight className="shrink-0 text-default-400" aria-hidden="true" />}
-                </button>
-              );
-            })}
-          </CardBody>
-        </Card>
-
-        <Card className="border border-slate-200/90 bg-content1 shadow-sm dark:border-white/10 xl:col-span-2">
-          <CardHeader className="px-5 pt-5 sm:px-6 sm:pt-6"><div><h2 className="text-base font-bold text-foreground">Recent activity</h2><p className="mt-1 text-sm text-default-500">Latest enquiries and orders for this perspective.</p></div></CardHeader>
-          <Divider className="mt-4" />
-          <CardBody className="space-y-1 p-4">
-            {isLoading ? Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-14 w-full rounded-xl" />) : activity.length === 0 ? (
-              <div className="flex min-h-32 items-center justify-center text-center text-sm text-default-500">No activity yet. Your latest trade events will appear here.</div>
-            ) : activity.slice(0, 6).map((item) => {
-              const id = String(item.id || "");
-              const isEnquiry = String(item.type || "").toLowerCase() === "enquiry";
-              const href = `${isEnquiry ? "/dashboard/enquiries" : "/dashboard/orders"}/${id}`;
-              const canOpen = objectIdPattern.test(id);
-              return (
-                <button key={`${item.type}-${id}`} type="button" disabled={!canOpen} onClick={() => canOpen && router.push(href)} className="flex min-h-14 w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left enabled:hover:bg-default-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                  <span className="min-w-0"><span className="block truncate font-semibold text-foreground">{item.type || "Activity"} #{id.slice(-6).toUpperCase()}</span><span className="block text-sm text-default-500">{dashboardCopy(item.status || "")}</span></span>
-                  <span className="shrink-0 text-xs text-default-400">{item.at ? new Date(item.at).toLocaleDateString() : ""}</span>
-                </button>
-              );
-            })}
-          </CardBody>
-        </Card>
-      </div>
-
-      {model.showFunctions && (
-        <section aria-labelledby="company-functions-title" className="space-y-4">
-          <div><h2 id="company-functions-title" className="text-lg font-black tracking-tight text-foreground">{perspective === "provided" ? "Capabilities you provide" : "Capabilities you are seeking"}</h2><p className="mt-1 text-sm text-default-500">Actions based on this profile and its priority order.</p></div>
-          {!associateCompanyId ? (
-            <Card className="border border-warning-500/25 bg-warning-500/10 shadow-none"><CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-medium text-foreground">Link a company to load service and selling functions.</p><Button color="warning" variant="flat" onPress={() => router.push("/dashboard/company")}>Open company</Button></CardBody></Card>
-          ) : companyFunctionDashboard.isLoading ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{Array.from({ length: 2 }).map((_, index) => <Skeleton key={index} className="h-48 rounded-2xl" />)}</div>
-          ) : companyFunctionDashboard.isError ? (
-            <Card className="border border-danger-500/25 bg-danger-500/10 shadow-none"><CardBody className="text-sm text-danger">Company functions could not be loaded. Try refreshing this page.</CardBody></Card>
-          ) : companyFunctionDashboard.orderedFunctions.length === 0 ? (
-            <Card className="border db-border-subtle shadow-none"><CardBody className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-default-500">No company functions are configured yet.</p><Button variant="flat" onPress={() => router.push("/dashboard/company")}>Configure company</Button></CardBody></Card>
-          ) : companyFunctionDashboard.orderedFunctions.map((fn: any) => <CompanyFunctionComponent key={fn._id} name={fn.name} slug={fn.slug} priorityRank={fn.priorityRank} metrics={fn.metrics} recentExecutionInquiries={fn.recentExecutionInquiries} recentOrders={fn.recentOrders} perspective={perspective} />)}
-        </section>
-      )}
     </div>
   );
 }

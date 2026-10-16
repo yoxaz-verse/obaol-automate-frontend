@@ -102,12 +102,16 @@ test("company-function requests are gated and fabricated updates are absent", ()
   assert.match(hook, /const canLoad = enabled && Boolean\(companyId\)/);
   assert.equal((hook.match(/enabled: canLoad/g) || []).length, 3);
   assert.doesNotMatch(panel, /Trade listing update released successfully|New logistics route opened/);
-  assert.match(panel, /disabled=\{!canOpen\}/);
   assert.match(panel, /aria-label="Dashboard perspective"/);
   assert.match(panel, /Configure missing profile/);
+  assert.match(panel, /What you are seeking/);
+  assert.match(panel, /What you provide/);
   assert.doesNotMatch(panel, /aria-label="Associate overview"/);
+  assert.doesNotMatch(panel, /Pending enquiries|Recent activity|Capabilities you provide|Capabilities you are seeking/);
+  assert.doesNotMatch(panel, /CompanyFunctionComponent/);
   assert.match(panel, /model\.capabilityStats\[workspaceKind\]/);
   assert.match(panel, /bg-blue-600 text-white hover:bg-blue-700/);
   assert.match(panel, /bg-emerald-600 text-white hover:bg-emerald-700/);
+  assert.match(panel, /orderedFunctions\.length > 1 \? "lg:grid-cols-2" : ""/);
   assert.match(panel, /companyFunctionDashboard\.orderedFunctions\.map/);
 });

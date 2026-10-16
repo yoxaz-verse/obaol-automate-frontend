@@ -353,6 +353,20 @@ test("marketplace enquiry is available for foreign listings while owners manage 
   assert.equal(rates.includes("{primaryMarketplaceEnquiry}\n                                <Popover"), true);
 });
 
+test("trade listings refresh active views and exclude owned live marketplace rows", () => {
+  const marketplace = read("../src/app/dashboard/marketplace/page.tsx");
+  const product = read("../src/app/dashboard/product/page.tsx");
+  const query = read("../src/components/queryComponent.tsx");
+  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  assert.equal(marketplace.includes("isLive: true, excludeOwned: true"), true);
+  assert.equal(marketplace.includes('isActive={currentTable === "marketplace-live"}'), true);
+  assert.equal(product.includes('isActive={currentTable === "mine"}'), true);
+  assert.equal(query.includes("refetchIntervalInBackground: false"), true);
+  assert.equal(query.includes('refetchOnWindowFocus: refreshEnabled ? "always" : false'), true);
+  assert.equal(rates.includes("invalidateListingQueries(queryClient)"), true);
+  assert.equal(rates.includes("LISTING_ACTION_CLASS"), true);
+});
+
 test("rate interest links viewers to highlighted company associates with contact actions", () => {
   const interest = read("../src/app/dashboard/rate-interest/page.tsx");
   const companies = read("../src/app/dashboard/companies/page.tsx");

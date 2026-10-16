@@ -21,6 +21,7 @@ import { FiArchive, FiCheckCircle, FiClock, FiMapPin, FiSearch, FiShield, FiZap 
 import { getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { toast } from "react-toastify";
+import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 
 type BiddingPhase = "UPCOMING" | "OPEN" | "CLOSED" | "AWARDED" | "CANCELLED";
 type Company = { _id: string; name?: string; companyName?: string };
@@ -67,6 +68,9 @@ function ProviderBidForm({ item }: { item: ExecutionBidOpportunity }) {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
+  const noteViolation = detectOffPlatformDisclosure(note, {
+    companyNames: [item.ownBid?.company ? companyName(item.ownBid.company) : ""],
+  });
   useEffect(() => {
     setAmount(item.ownBid?.amount ? String(item.ownBid.amount) : "");
     setNote(item.ownBid?.note || "");
@@ -118,13 +122,16 @@ function ProviderBidForm({ item }: { item: ExecutionBidOpportunity }) {
           value={note}
           onValueChange={setNote}
           description={`${note.length}/500`}
+          isInvalid={Boolean(noteViolation)}
+          errorMessage={noteViolation?.message}
           classNames={{ inputWrapper: "h-12 min-h-12", input: "min-h-6 resize-none" }}
         />
         <Button color="warning" className="h-12 w-full font-bold md:mt-6 md:w-auto" isLoading={mutation.isPending} onPress={() => {
           if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) return setError("Enter a valid amount greater than zero.");
+          if (noteViolation) return setError(noteViolation.message);
           setError("");
           mutation.mutate();
-        }}>{item.ownBid ? "Update bid" : "Submit bid"}</Button>
+        }} isDisabled={Boolean(noteViolation)}>{item.ownBid ? "Update bid" : "Submit bid"}</Button>
       </div>
       {error && <p role="alert" className="mt-2 text-sm font-medium text-danger">{error}</p>}
       {item.ownBid && <p className="mt-2 text-xs text-default-500">You can revise this bid until the bidding window closes.</p>}
@@ -141,6 +148,10 @@ function OperatorActions({ item }: { item: ExecutionBidOpportunity }) {
   const [note, setNote] = useState("");
   const [awardBid, setAwardBid] = useState<Bid | null>(null);
   const [error, setError] = useState("");
+  const representedProvider = candidates.find((candidate) => companyId(candidate) === bidProvider);
+  const noteViolation = detectOffPlatformDisclosure(note, {
+    companyNames: [representedProvider ? companyName(representedProvider) : ""],
+  });
   const mutation = useMutation({
     mutationFn: (payload: Record<string, unknown>) => patchData(`${apiRoutes.enquiry.getAll}/${item.enquiryId}/execution-inquiries/${item.serviceType}`, { taskId: item.taskId, ...payload }),
     onSuccess: () => {
@@ -169,12 +180,13 @@ function OperatorActions({ item }: { item: ExecutionBidOpportunity }) {
           {(candidate) => <AutocompleteItem key={candidate._id}>{companyName(candidate)}</AutocompleteItem>}
         </Autocomplete>
         <Input label="Amount" type="number" min="0.01" value={amount} onValueChange={setAmount} />
-        <Input label="Note (optional)" maxLength={500} value={note} onValueChange={setNote} />
+        <Input label="Note (optional)" maxLength={500} value={note} onValueChange={setNote} isInvalid={Boolean(noteViolation)} errorMessage={noteViolation?.message} />
         <Button color="warning" isLoading={mutation.isPending && !awardBid} onPress={() => {
           if (!bidProvider) return setError("Select an invited provider.");
           if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) return setError("Enter a valid amount greater than zero.");
+          if (noteViolation) return setError(noteViolation.message);
           mutation.mutate({ bidCompanyId: bidProvider, bidAmount: Number(amount), commitNote: note.trim() });
-        }}>Save bid</Button>
+        }} isDisabled={Boolean(noteViolation)}>Save bid</Button>
       </div>}
       {error && <p role="alert" className="text-sm font-medium text-danger">{error}</p>}
 

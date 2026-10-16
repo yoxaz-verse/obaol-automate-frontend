@@ -137,6 +137,8 @@ export interface QueryComponentProps<T> {
   emptyState?: React.ReactNode;
   onMetaChange?: (meta?: QueryComponentMeta) => void;
   enabled?: boolean;
+  refreshEnabled?: boolean;
+  refreshInterval?: number;
 }
 
 export interface StatusUpdateProps {

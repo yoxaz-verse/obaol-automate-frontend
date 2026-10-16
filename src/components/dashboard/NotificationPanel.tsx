@@ -23,6 +23,14 @@ type NotificationItem = {
   isRead: boolean;
   createdAt: string;
   priority?: "low" | "medium" | "high";
+  payload?: {
+    productName?: string;
+    variantName?: string;
+    quantity?: number;
+    unit?: string;
+    buyerName?: string;
+    buyerCompanyName?: string;
+  };
 };
 
 interface NotificationPanelProps {
@@ -153,6 +161,17 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
                            <p className="mt-1.5 text-xs font-medium text-default-500 line-clamp-2 leading-relaxed">
                               {item.message}
                            </p>
+                           {item.type === "INQUIRY_CREATED" && item.payload?.productName ? (
+                             <div className="mt-3 rounded-xl bg-default-100/70 px-3 py-2 dark:bg-white/5">
+                               <p className="truncate text-[11px] font-bold text-foreground">
+                                 {item.payload.productName}{item.payload.variantName ? ` · ${item.payload.variantName}` : ""}
+                               </p>
+                               <p className="mt-1 truncate text-[10px] font-medium text-default-500">
+                                 {item.payload.quantity ? `${item.payload.quantity} ${item.payload.unit || "MT"}` : "Quantity not specified"}
+                                 {item.payload.buyerCompanyName || item.payload.buyerName ? ` · ${item.payload.buyerCompanyName || item.payload.buyerName}` : ""}
+                               </p>
+                             </div>
+                           ) : null}
                            <div className="mt-4 flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-obaol-700 dark:text-obaol-300 uppercase tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-full">

@@ -282,12 +282,13 @@ export default function MarketplacePage() {
                                         {loadedTabs["marketplace-live"] && (
                                             <VariantRate
                                                 rate="variantRate"
-                                                additionalParams={{ ...marketplaceListParams, isLive: true }}
+                                                additionalParams={{ ...marketplaceListParams, isLive: true, excludeOwned: true }}
                                                 hideBuiltInFilters
                                                 externalSearch={liveState.search}
                                                 externalFilters={liveState.filters}
                                                 showCreateButton={false}
                                                 openCreateModalSignal={0}
+                                                isActive={currentTable === "marketplace-live"}
                                             />
                                         )}
                                     </TabAny>
@@ -303,6 +304,7 @@ export default function MarketplacePage() {
                                                 externalFilters={offlineState.filters}
                                                 showCreateButton={false}
                                                 openCreateModalSignal={0}
+                                                isActive={currentTable === "marketplace-offline"}
                                             />
                                         )}
                                     </TabAny>

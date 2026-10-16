@@ -126,6 +126,7 @@ export default function Product() {
                         additionalParams={{ associate: user?.id, view: "product-table" }}
                         showInventoryStatus={inventoryStatusEnabled}
                         inventoryCompanyId={(user as any)?.associateCompanyId || null}
+                        isActive={currentTable === "mine"}
                       />
                     </Tab>
                   )}
@@ -133,6 +134,7 @@ export default function Product() {
                     <VariantRate
                       rate="catalogItem"
                       additionalParams={{ associateId: user?.id }}
+                      isActive={currentTable === "catalog"}
                     />
                   </Tab>
                 </>
@@ -145,6 +147,7 @@ export default function Product() {
                       showAssociateColumn={isOperatorUser}
                       showInventoryStatus={inventoryStatusEnabled}
                       inventoryCompanyId={selectedCompanyId}
+                      isActive={currentTable === "selected"}
                     />
                   </Tab>
                   <Tab key={"live"} title="Live Products">
@@ -154,6 +157,7 @@ export default function Product() {
                       showAssociateColumn={isOperatorUser}
                       showInventoryStatus={inventoryStatusEnabled}
                       inventoryCompanyId={selectedCompanyId}
+                      isActive={currentTable === "live"}
                     />
                   </Tab>
                 </>

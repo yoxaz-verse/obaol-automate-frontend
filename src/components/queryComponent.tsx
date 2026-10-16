@@ -22,6 +22,8 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     emptyState,
     onMetaChange,
     enabled = true,
+    refreshEnabled = false,
+    refreshInterval = 10_000,
   } = props;
   const randomFact = useMemo(() => {
     return loadingFacts[Math.floor(Math.random() * loadingFacts.length)];
@@ -49,11 +51,17 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     queryFn: () => getData(api, params),
     staleTime: 30_000,
     gcTime: 300_000,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: refreshEnabled ? "always" : false,
+    refetchInterval: refreshEnabled ? refreshInterval : false,
+    refetchIntervalInBackground: false,
     retry: 1,
     placeholderData: keepPreviousData,
     enabled,
   });
+
+  useEffect(() => {
+    if (enabled && refreshEnabled) void refetch();
+  }, [enabled, refreshEnabled, refetch]);
 
   const rawResult = page !== undefined ? data?.data?.data : data?.data;
   const responseData =

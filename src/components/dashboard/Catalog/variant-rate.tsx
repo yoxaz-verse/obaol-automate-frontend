@@ -75,15 +75,13 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { resolveMarketplaceSort } from "@/utils/marketplaceSort";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
-import {
-  CONTACT_NUMBER_SPECIFICATION_ERROR,
-  containsPhoneLikeNumber,
-} from "@/utils/enquirySpecificationValidation";
+import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 import {
   useCalculationConfig,
   DEFAULT_CALCULATION_CONFIG,
 } from "@/hooks/useCalculationConfig";
 import type { QueryComponentMeta } from "@/data/interface-data";
+import { invalidateListingQueries } from "@/utils/listingQueryCache";
 
 const VariantRateWizardModal = dynamic(
   () => import("@/components/dashboard/Catalog/VariantRateWizardModal"),
@@ -106,6 +104,8 @@ const DynamicFilter = dynamic(
 const round2 = (value: number) =>
   Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
 const LISTING_DELETE_WINDOW_MS = 60 * 60 * 1000;
+const LISTING_ACTION_CLASS =
+  "h-10 min-w-10 rounded-xl px-3 text-[10px] font-black uppercase tracking-wider shadow-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-obaol-500/60";
 const isValidObjectId = (value: any) =>
   /^[a-f0-9]{24}$/i.test(String(value || "").trim());
 const resolveAdminCommission = (
@@ -226,6 +226,7 @@ interface VariantRateProps {
   inventoryCompanyId?: string | null;
   showCreateButton?: boolean;
   openCreateModalSignal?: number;
+  isActive?: boolean;
 }
 
 /**
@@ -249,6 +250,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   inventoryCompanyId = null,
   showCreateButton = true,
   openCreateModalSignal,
+  isActive = true,
 }) => {
   const router = useRouter();
   const productVariantValue = productVariant || null;
@@ -693,6 +695,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
         ...(productVariantValue && { productVariant: productVariantValue._id }),
       }}
       onMetaChange={displayOnly && !user?.id ? setPublicDisplayMeta : undefined}
+      refreshEnabled={isActive}
+      refreshInterval={10_000}
     >
       {(variantRateData: any, refetch, meta) => {
         // If we have associates, populate the "associate" field values for AddModal
@@ -1266,7 +1270,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 }),
                               }}
                               onSuccess={() => {
-                                queryClient.invalidateQueries();
+                                invalidateListingQueries(queryClient);
                                 refetchData();
                               }}
                             />
@@ -1307,7 +1311,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           }),
                         }}
                         onSuccess={() => {
-                          queryClient.invalidateQueries();
+                          invalidateListingQueries(queryClient);
                           refetchData();
                         }}
                       />
@@ -1560,7 +1564,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         }),
                       }}
                       onSuccess={() => {
-                        queryClient.invalidateQueries();
+                        invalidateListingQueries(queryClient);
                         refetchData();
                       }}
                     />
@@ -1702,7 +1706,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     size="sm"
                                     variant="flat"
                                     color="warning"
-                                    className="h-8 font-bold"
+                                    className={LISTING_ACTION_CLASS}
                                     onPress={() => router.push("/dashboard/product")}
                                     endContent={<FiArrowRight size={14} />}
                                   >
@@ -1770,7 +1774,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     size="sm"
                                     variant="flat"
                                     color="warning"
-                                    className="h-8 font-bold"
+                                    className={LISTING_ACTION_CLASS}
                                     onPress={() => {
                                       setSelectedInventoryRate(item);
                                       setInventoryQty("");
@@ -1968,7 +1972,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 size="sm"
                                 variant="flat"
                                 color="warning"
-                                className="h-8 shrink-0 font-bold"
+                                className={`${LISTING_ACTION_CLASS} shrink-0`}
                                 onPress={() => router.push("/dashboard/product")}
                                 endContent={<FiArrowRight size={14} />}
                               >
@@ -2023,7 +2027,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 size="sm"
                                 variant="flat"
                                 color="warning"
-                                className="h-8 font-bold"
+                                className={LISTING_ACTION_CLASS}
                                 onPress={() => {
                                   setSelectedInventoryRate(item);
                                   setInventoryQty("");
@@ -2357,7 +2361,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     size="sm"
                                     variant="flat"
                                     color="warning"
-                                    className="h-8 shrink-0 font-bold"
+                                    className={`${LISTING_ACTION_CLASS} shrink-0`}
                                     onPress={() => {
                                       setSelectedInventoryRate(item);
                                       setInventoryQty("");
@@ -2384,7 +2388,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       size="sm"
                                       variant="flat"
                                       aria-label={`More options for ${toDisplayText(item.productVariant, "listing")}`}
-                                      className="shrink-0"
+                                      className={`${LISTING_ACTION_CLASS} shrink-0 p-0`}
                                     >
                                       <FiMoreHorizontal size={18} />
                                     </Button>
@@ -2411,7 +2415,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                             size="sm"
                                             variant="flat"
                                             color="warning"
-                                            className="h-8 font-bold"
+                                            className={LISTING_ACTION_CLASS}
                                             onPress={() => router.push("/dashboard/product")}
                                             endContent={<FiArrowRight size={14} />}
                                           >
@@ -2438,7 +2442,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                             size="sm"
                                             variant="flat"
                                             color="warning"
-                                            className="h-8 font-bold"
+                                            className={LISTING_ACTION_CLASS}
                                             onPress={() => {
                                               setSelectedInventoryRate(item);
                                               setInventoryQty("");
@@ -2759,14 +2763,20 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
     },
     onSuccess: () => {
       // Status changes affect Products, Live Products and dependent catalog views.
-      queryClient.invalidateQueries();
+      invalidateListingQueries(queryClient);
       setLoading(false);
       if (typeof refetchData === "function") {
         refetchData();
       }
     },
-    onError: () => {
+    onError: (error: any) => {
+      setIsSelected(Boolean(variantRate.isLive));
       setLoading(false);
+      showToastMessage({
+        type: "error",
+        message: error?.response?.data?.message || "Unable to update listing status.",
+        position: "top-right",
+      });
     },
   });
 
@@ -2805,6 +2815,9 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
           "aria-label": isSelected
             ? "Mark listing as not live"
             : "Mark listing as live",
+          classNames: {
+            wrapper: "ring-offset-background focus-visible:ring-2 focus-visible:ring-obaol-500/60",
+          },
         } as any)}
       />
       {layout === "stacked" && (
@@ -3135,13 +3148,15 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         closeDelay={0}
         className="bg-[#0E0D0A] border border-white/10 rounded-lg shadow-2xl"
       >
-        <span
-          onClick={onOpen}
-          className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all duration-300 ${
-            isCooldownActive
-              ? "bg-success-500/10 text-success-500 cursor-not-allowed opacity-50"
-              : "bg-obaol-500/10 hover:bg-obaol-500/20 text-obaol-500 cursor-pointer active:scale-90"
-          }`}
+        <Button
+          isIconOnly
+          size="sm"
+          variant="flat"
+          color={isCooldownActive ? "success" : "warning"}
+          onPress={onOpen}
+          isDisabled={isCooldownActive}
+          aria-label={cooldownLabel}
+          className={`${LISTING_ACTION_CLASS} p-0 ${isCooldownActive ? "opacity-60" : ""}`}
         >
           <LuBox
             size={22}
@@ -3149,8 +3164,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
               isCooldownActive ? "text-success-600/80" : "text-obaol-600/80"
             }
           />
-          <div className="h-[2px]" />
-        </span>
+        </Button>
       </Tooltip>
       <Modal
         placement="center"
@@ -3625,7 +3639,7 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
         size="sm"
         color="primary"
         variant="flat"
-        className="font-bold"
+        className={LISTING_ACTION_CLASS}
         startContent={<LuMessageSquare size={16} />}
         onPress={beginEnquiry}
       >
@@ -3794,9 +3808,6 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [createdEnquiryId, setCreatedEnquiryId] = useState<string | null>(null);
-  const specificationHasContactNumber =
-    containsPhoneLikeNumber(specification);
-
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const isAdminUser =
@@ -3844,6 +3855,19 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const associateOptions = parseAssociateRows(associatesResponse).filter(
     (item: any) => !item?.isDeleted,
   );
+  const representedBuyer = isAdminUser
+    ? associateOptions.find((item: any) => String(item?._id || "") === buyerAssociateId)
+    : associateProfile;
+  const representedCompany = representedBuyer?.associateCompany;
+  const specificationViolation = detectOffPlatformDisclosure(specification, {
+    companyNames: [
+      typeof representedCompany === "object" ? representedCompany?.name : "",
+      representedCompany?.registeredTradeName,
+      representedCompany?.gstVerification?.legalName,
+      representedCompany?.gstVerification?.tradeName,
+      (user as any)?.companyApproval?.companyName,
+    ],
+  });
 
   useEffect(() => {
     if (!name) {
@@ -4029,10 +4053,10 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (specificationHasContactNumber) {
+    if (specificationViolation) {
       showToastMessage({
         type: "error",
-        message: CONTACT_NUMBER_SPECIFICATION_ERROR,
+        message: specificationViolation.message,
       });
       return;
     }
@@ -4279,26 +4303,26 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
             </label>
             <textarea
               className={`w-full rounded-xl border bg-default-50 text-foreground min-h-[90px] px-3 py-2 text-sm outline-none transition-colors resize-y ${
-                specificationHasContactNumber
+                specificationViolation
                   ? "border-danger focus:border-danger"
                   : "border-default-300 focus:border-primary"
               }`}
               value={specification}
               onChange={(e) => setSpecification(e.target.value)}
-              aria-invalid={specificationHasContactNumber}
+              aria-invalid={Boolean(specificationViolation)}
               aria-describedby={
-                specificationHasContactNumber
+                specificationViolation
                   ? "enquiry-specification-error"
                   : undefined
               }
             />
-            {specificationHasContactNumber && (
+            {specificationViolation && (
               <p
                 id="enquiry-specification-error"
                 role="alert"
                 className="text-xs text-danger"
               >
-                {CONTACT_NUMBER_SPECIFICATION_ERROR}
+                {specificationViolation.message}
               </p>
             )}
           </div>
@@ -4310,7 +4334,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         <Button
           type="submit"
           isLoading={isLoading}
-          isDisabled={isLoading || specificationHasContactNumber}
+          isDisabled={isLoading || Boolean(specificationViolation)}
           color="primary"
           size="sm"
           className="font-semibold rounded-lg min-w-[160px]"
@@ -4388,21 +4412,22 @@ const AddToCatalogButton: React.FC<AddToCatalogButtonProps> = ({
         content={rowItem.isAdded ? "Already in Catalog" : "Add to Catalog"}
         closeDelay={0}
       >
-        <span
-          onClick={!rowItem.isAdded ? onOpen : undefined}
-          className={`flex flex-col items-center justify-center p-2 rounded-xl cursor-pointer active:opacity-50 transition-all duration-200 ${
-            rowItem.isAdded
-              ? "bg-success-500/10 text-success-500 cursor-default"
-              : "bg-blue-500/10 hover:bg-blue-500/20 text-blue-500"
-          }`}
+        <Button
+          isIconOnly
+          size="sm"
+          variant="flat"
+          color={rowItem.isAdded ? "success" : "primary"}
+          onPress={onOpen}
+          isDisabled={rowItem.isAdded}
+          aria-label={rowItem.isAdded ? "Already in catalog" : "Add to catalog"}
+          className={`${LISTING_ACTION_CLASS} p-0 ${rowItem.isAdded ? "opacity-70" : ""}`}
         >
           {rowItem.isAdded ? (
             <FiCheckCircle size={20} className="text-success-600/80" />
           ) : (
             <FiPlusCircle size={20} className="text-blue-600/80" />
           )}
-          <div className="h-[2px]" />
-        </span>
+        </Button>
       </Tooltip>
 
       {isOpen && (

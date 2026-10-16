@@ -81,6 +81,9 @@ type Props = {
   packagingSpecifications: string;
   setPackagingSpecifications: (v: string) => void;
   hasPackagingSpecifications: boolean;
+  tradeInputAttribution?: Record<string, { contributor?: string | null; updatedAt?: string | null }>;
+  packagingDisclosureError?: string;
+  routeNotesDisclosureError?: string;
 
   isInternational: boolean;
   showCargoInsuranceNote?: boolean;
@@ -159,6 +162,9 @@ const ResponsibilityEventForm: React.FC<Props> = ({
   packagingSpecifications,
   setPackagingSpecifications,
   hasPackagingSpecifications,
+  tradeInputAttribution = {},
+  packagingDisclosureError,
+  routeNotesDisclosureError,
   isInternational,
   showCargoInsuranceNote,
   isResponsibilityEventChanged,
@@ -170,6 +176,13 @@ const ResponsibilityEventForm: React.FC<Props> = ({
   showFinalizeButton = true,
   showSaveTermsButton = true,
 }) => {
+  const attributionLabel = (key: string) => {
+    const contributor = String(tradeInputAttribution?.[key]?.contributor || "").toUpperCase();
+    if (contributor === "BUYER") return "Buyer’s opinion";
+    if (contributor === "SELLER") return "Seller’s opinion";
+    if (contributor === "OBAOL") return "OBAOL input";
+    return "Party input";
+  };
   const canToggle = typeof canToggleTradeType === "boolean" ? canToggleTradeType : canEditResponsibilityPlan;
   const selectedIncoterm = incotermOptions?.find((it: any) => String(it?._id || it?.id) === String(selectedIncotermId));
   const selectedIncotermCode = String(selectedIncoterm?.code || "").toUpperCase();
@@ -615,6 +628,9 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 <span className="text-xs font-black uppercase tracking-widest text-foreground">Inland Transportation Segments</span>
                 <span className="text-[11px] text-default-500 font-semibold">Add each inland leg that should run on this order.</span>
               </div>
+              {inlandTransportSegments.length > 0 && (
+                <span className="text-[10px] font-bold text-primary-600">{attributionLabel("inlandTransportSegments")}</span>
+              )}
               {canEditResponsibilityPlan && (
                 <Button
                   size="sm"
@@ -702,6 +718,9 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Product Specs</span>
                 <span className="text-base font-black text-foreground tracking-tighter">Packaging Detail</span>
               </div>
+              {packagingSpecifications.trim() && (
+                <span className="ml-auto text-[10px] font-bold text-primary-600">{attributionLabel("packagingSpecifications")}</span>
+              )}
             </div>
             <Textarea
               size="lg"
@@ -711,6 +730,8 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               isDisabled={!canEditResponsibilityPlan || isReadOnlyAfterConversion}
               minRows={4}
               placeholder="Specify packaging requirements (dimensions, weight, material, handling instructions...)"
+              isInvalid={Boolean(packagingDisclosureError)}
+              errorMessage={packagingDisclosureError}
               classNames={{
                 input: "text-base font-medium",
                 inputWrapper: "bg-white/80 dark:bg-black/40 border border-default-200/50 hover:bg-white focus-within:bg-white shadow-sm transition-all rounded-2xl p-4 h-auto"
@@ -725,6 +746,9 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                   <LuActivity size={20} />
                 </div>
                 <span className="text-sm font-black uppercase tracking-widest text-foreground">Route Notes</span>
+                {String(executionContext.routeNotes || "").trim() && (
+                  <span className="ml-auto text-[10px] font-bold text-primary-600">{attributionLabel("routeNotes")}</span>
+                )}
               </div>
               <Input
                 size="lg"
@@ -736,6 +760,8 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 placeholder="Add logistics constraints..."
                 value={executionContext.routeNotes}
                 onValueChange={(v) => setExecutionContext((prev: any) => ({ ...prev, routeNotes: v }))}
+                isInvalid={Boolean(routeNotesDisclosureError)}
+                errorMessage={routeNotesDisclosureError}
                 isDisabled={!canEditRouteNotes}
               />
             </div>
@@ -776,7 +802,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                           size="lg"
                           className={`h-16 rounded-[1.5rem] font-bold uppercase tracking-widest text-[11px] shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${!isResponsibilityEventChanged && responsibilitySavedAt ? "bg-success text-white" : "bg-foreground text-background"}`}
                           isLoading={Boolean(savingFramework)}
-                          isDisabled={(!isResponsibilityEventChanged && !!responsibilitySavedAt) || isReadOnlyAfterConversion}
+                          isDisabled={Boolean(packagingDisclosureError || routeNotesDisclosureError) || (!isResponsibilityEventChanged && !!responsibilitySavedAt) || isReadOnlyAfterConversion}
                           onPress={() => onSaveFramework()}
                           startContent={!savingFramework && (isResponsibilityEventChanged ? <LuFileCheck size={18} /> : <LuCheck size={18} />)}
                         >
@@ -799,7 +825,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                           variant={isReadOnlyAfterConversion ? "flat" : "shadow"}
                           onPress={() => onFinalize()}
                           isLoading={Boolean(finalizeLoading)}
-                          isDisabled={isReadOnlyAfterConversion}
+                          isDisabled={isReadOnlyAfterConversion || Boolean(packagingDisclosureError || routeNotesDisclosureError)}
                           className={`h-16 rounded-[1.75rem] font-black uppercase tracking-[0.4em] text-[11px] italic transition-all duration-500 relative overflow-hidden group/btn
                             ${isReadOnlyAfterConversion 
                               ? "bg-success/10 text-success border border-success/30 shadow-[0_0_25px_rgba(34,197,94,0.15)]" 

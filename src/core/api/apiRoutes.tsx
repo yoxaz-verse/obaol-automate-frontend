@@ -333,6 +333,7 @@ export const catalogModerationRoutes = {
 };
 
 export const notificationRoutes = {
+  stream: "/notifications/stream",
   list: "/notifications",
   unreadCount: "/notifications/unread-count",
   unreadSummary: "/notifications/unread-summary",

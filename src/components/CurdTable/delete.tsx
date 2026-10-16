@@ -17,6 +17,7 @@ import { deleteData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
 import { DeleteModalProps } from "@/data/interface-data";
+import { invalidateListingQueries } from "@/utils/listingQueryCache";
 
 export default function DeleteModal({
   _id,
@@ -43,6 +44,9 @@ export default function DeleteModal({
       deleteData(`${deleteApiEndpoint}/${_id}`, useBody ? { _id } : undefined),
 
     onSuccess: () => {
+      if (deleteApiEndpoint.includes("variant-rate")) {
+        void invalidateListingQueries(queryClient);
+      }
       queryClient.refetchQueries({
         queryKey,
       });
@@ -80,13 +84,17 @@ export default function DeleteModal({
             </Button>
           ) : (
             <Tooltip color="danger" content="Remove Record" closeDelay={0}>
-              <span
-                onClick={onOpen}
-                className="flex flex-col items-center justify-center p-2 rounded-xl bg-danger-500/10 hover:bg-danger-500/20 cursor-pointer active:opacity-50 group transition-all"
+              <Button
+                isIconOnly
+                size="sm"
+                variant="flat"
+                color="danger"
+                onPress={onOpen}
+                aria-label="Delete listing"
+                className="h-10 min-w-10 rounded-xl shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-danger-500/60"
               >
                 <FiTrash2 size={20} className="text-danger-500/80 group-hover:text-danger-600 transition-colors" />
-                <div className="h-[2px]" />
-              </span>
+              </Button>
             </Tooltip>
           )}
         </div>

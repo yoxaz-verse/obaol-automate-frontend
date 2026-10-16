@@ -71,6 +71,18 @@ test("notifications use the compact inbox and role-aware composer", () => {
   assert.equal(page.includes("notificationCategoryRoutes"), true);
 });
 
+test("dashboard streams enriched enquiry notifications into notification caches", () => {
+  const layout = read("../src/app/dashboard/layout.tsx");
+  const subscriber = read("../src/components/dashboard/LiveNotificationSubscriber.tsx");
+  const panel = read("../src/components/dashboard/NotificationPanel.tsx");
+  assert.equal(layout.includes("<LiveNotificationSubscriber userId={user?.id} />"), true);
+  assert.equal(subscriber.includes("new EventSource(streamUrl(), { withCredentials: true })"), true);
+  assert.equal(subscriber.includes('["notifications", "unread-count"]'), true);
+  assert.equal(subscriber.includes('["notifications", "unread-summary"]'), true);
+  assert.equal(panel.includes("item.payload.productName"), true);
+  assert.equal(panel.includes("item.payload.buyerCompanyName"), true);
+});
+
 test("resolved support conversations expose accessible ratings and private staff reporting", () => {
   const workspace = read("../src/components/dashboard/SupportWorkspace.tsx");
   const routes = read("../src/core/api/apiRoutes.tsx");

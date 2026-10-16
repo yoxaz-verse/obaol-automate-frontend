@@ -17,6 +17,7 @@ import { canAccessDashboardRoute } from "@/utils/dashboardAccess";
 import { isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import DashboardContextBar from "@/components/dashboard/DashboardContextBar";
 import CompanyApprovalBanner from "@/components/dashboard/CompanyApprovalBanner";
+import LiveNotificationSubscriber from "@/components/dashboard/LiveNotificationSubscriber";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -184,6 +185,7 @@ function DashboardLayoutContent({
   return (
     <section data-dashboard-shell className="w-full min-w-0 h-[100dvh] max-h-[100dvh] flex overflow-hidden db-bg relative">
       <PrivateRoute pathname={pathname}>
+        <LiveNotificationSubscriber userId={user?.id} />
         <DashboardEnhancements />
         {!isWorkspaceLocked && (
           <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} isOnboardingLocked={isOnboardingLocked} />

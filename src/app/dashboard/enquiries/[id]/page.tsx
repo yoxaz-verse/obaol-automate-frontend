@@ -43,6 +43,7 @@ import ResponsibilityEventForm from "@/components/dashboard/responsibilities/Res
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
+import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 
 // Defensive aliases to avoid runtime crashes if older JSX still references Lu* icons.
 const LuTrendingDown = FiTrendingDown;
@@ -97,6 +98,13 @@ const sanitizeBuyerOrObaol = (value: any): "buyer" | "obaol" => {
 const sanitizeBuyerOnly = (_value: any): "buyer" => "buyer";
 const sanitizeObaolOnly = (_value: any): "obaol" => "obaol";
 const sanitizeDisplayText = (value: any): string => String(value || "").trim();
+const tradeInputLabel = (entry: any): string => {
+    const contributor = String(entry?.contributor || "").toUpperCase();
+    if (contributor === "BUYER") return "Buyer’s opinion";
+    if (contributor === "SELLER") return "Seller’s opinion";
+    if (contributor === "OBAOL") return "OBAOL input";
+    return "Party input";
+};
 const getProductDisplayName = (enquiry: any): string => {
     const candidates = [
         enquiry?.productId?.name,
@@ -544,6 +552,17 @@ export default function EnquiryDetailsPage() {
     useEffect(() => {
         if (!enquiry) return;
         if (inlandTransportSegments.length > 0) return;
+        const savedSegments = Array.isArray((enquiry as any)?.inlandTransportSegments)
+            ? (enquiry as any).inlandTransportSegments
+            : [];
+        if (savedSegments.length > 0) {
+            setInlandTransportSegments(savedSegments.map((segment: any) => ({
+                label: String(segment?.label || ""),
+                from: String(segment?.from || ""),
+                to: String(segment?.to || ""),
+            })));
+            return;
+        }
         const tasks = Array.isArray((enquiry as any)?.executionInquiries)
             ? (enquiry as any).executionInquiries
             : [];
@@ -1182,6 +1201,7 @@ export default function EnquiryDetailsPage() {
                 responsibilityPlan: normalizedPlan,
                 executionContext,
                 packagingSpecifications,
+                inlandTransportSegments,
                 history: [
                     ...(enquiry.history || []),
                     {
@@ -1606,6 +1626,12 @@ export default function EnquiryDetailsPage() {
     const sellerCompanyName =
         (isImportEnquiry && importSellerCompanyName) ||
         extractAssociateCompanyName(sellerAssociateObj, "sellerAssociateCompanyName");
+    const buyerLocationLabel = String((enquiry as any)?.partyLocations?.buyer?.label || "Location not provided");
+    const sellerLocationLabel = String((enquiry as any)?.partyLocations?.seller?.label || "Location not provided");
+    const tradeInputAttribution = (enquiry as any)?.tradeInputAttribution || {};
+    const supportSubject = `OBAOL support request #${enquiryId.slice(-6).toUpperCase()}`;
+    const supportBody = `OBAOL Support Request\nEnquiry ID: #${enquiryId.slice(-6).toUpperCase()}`;
+    const supportEmailUrl = `mailto:info@support.obaol.com?subject=${encodeURIComponent(supportSubject)}&body=${encodeURIComponent(supportBody)}`;
     const buyerPhone = buyerAssociateObj?.phone || (enquiry as any)?.buyerPhone || null;
     const sellerPhone =
         (isImportEnquiry ? importSellerAssociateObj?.phone : null) ||
@@ -2245,6 +2271,24 @@ export default function EnquiryDetailsPage() {
         String(selectedIncotermId || "") !== String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || "") ||
         String(selectedPaymentTermId || "") !== String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || "");
     const hasPackagingSpecifications = Boolean(String(packagingSpecifications || "").trim());
+    const actorCompany = isBuyer
+        ? (enquiry as any)?.buyerAssociateId?.associateCompany
+        : isSeller
+            ? (enquiry as any)?.sellerAssociateId?.associateCompany
+            : (enquiry as any)?.mediatorAssociateId?.associateCompany;
+    const disclosureOptions = {
+        companyNames: [
+            typeof actorCompany === "object" ? actorCompany?.name : "",
+            actorCompany?.registeredTradeName,
+            actorCompany?.gstVerification?.legalName,
+            actorCompany?.gstVerification?.tradeName,
+            (user as any)?.companyApproval?.companyName,
+        ],
+    };
+    const buyerSpecificationViolation = detectOffPlatformDisclosure(buyerSpecification, disclosureOptions);
+    const packagingSpecificationViolation = detectOffPlatformDisclosure(packagingSpecifications, disclosureOptions);
+    const routeNotesViolation = detectOffPlatformDisclosure(executionContext.routeNotes, disclosureOptions);
+    const conversionNoteViolation = detectOffPlatformDisclosure(conversionNote, disclosureOptions);
     // ─── Financial Calculations ───────────────────────────────────────────────
     const quantity = enquiry.quantity || 0;
     const quantityKg = quantity * 1000;
@@ -3691,6 +3735,20 @@ export default function EnquiryDetailsPage() {
                                         </div>
                                     )}
                                 </div>
+                                <div className="rounded-xl border border-divider bg-default-50/70 p-3 flex flex-col gap-2">
+                                    <div className="flex items-start gap-2 text-sm">
+                                        <LuMapPin size={15} className="mt-0.5 text-primary shrink-0" />
+                                        <span><strong>Buyer from:</strong> {buyerLocationLabel}</span>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-sm">
+                                        <LuMapPin size={15} className="mt-0.5 text-success shrink-0" />
+                                        <span><strong>Seller from:</strong> {sellerLocationLabel}</span>
+                                    </div>
+                                    <Divider className="my-1" />
+                                    <a href={supportEmailUrl} className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+                                        <LuMail size={14} /> Contact support: info@support.obaol.com
+                                    </a>
+                                </div>
                             </CardBody>
                         </Card>
                     )}
@@ -3721,7 +3779,10 @@ export default function EnquiryDetailsPage() {
                                 <span className="text-sm font-semibold text-default-700">{paymentTermLabel || "Not specified"}</span>
                             </div>
                             <div className="flex flex-col gap-2">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Buyer Specification</span>
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className="text-[10px] uppercase font-bold text-default-400">Buyer Specification</span>
+                                    {String(specificationTextRaw || "").trim() && <span className="text-[10px] font-bold text-primary-600">{tradeInputLabel(tradeInputAttribution.specifications)}</span>}
+                                </div>
                                 {isBuyer ? (
                                     <div className="flex flex-col gap-2">
                                         <Textarea
@@ -3731,13 +3792,15 @@ export default function EnquiryDetailsPage() {
                                             isDisabled={isReadOnlyAfterConversion}
                                             placeholder="Add specific requirements..."
                                             className="flex-1"
+                                            isInvalid={Boolean(buyerSpecificationViolation)}
+                                            errorMessage={buyerSpecificationViolation?.message}
                                         />
                                         <Button
                                             size="sm"
                                             color="primary"
                                             variant="flat"
                                             isLoading={updateSpecificationMutation.isPending}
-                                            isDisabled={isReadOnlyAfterConversion || buyerSpecification.trim() === String(specificationTextRaw || "").trim()}
+                                            isDisabled={isReadOnlyAfterConversion || Boolean(buyerSpecificationViolation) || buyerSpecification.trim() === String(specificationTextRaw || "").trim()}
                                             onPress={() => updateSpecificationMutation.mutate()}
                                         >
                                             Save
@@ -3922,6 +3985,9 @@ export default function EnquiryDetailsPage() {
                             packagingSpecifications={packagingSpecifications}
                             setPackagingSpecifications={setPackagingSpecifications}
                             hasPackagingSpecifications={hasPackagingSpecifications}
+                            tradeInputAttribution={tradeInputAttribution}
+                            packagingDisclosureError={packagingSpecificationViolation?.message}
+                            routeNotesDisclosureError={routeNotesViolation?.message}
                             isInternational={executionContext.tradeType === "INTERNATIONAL"}
                             showCargoInsuranceNote={executionContext.tradeType === "INTERNATIONAL"}
                             isResponsibilityEventChanged={isResponsibilityEventChanged}
@@ -4893,6 +4959,8 @@ export default function EnquiryDetailsPage() {
                                             placeholder="Inject tactical instructions for mission execution..."
                                             value={conversionNote}
                                             onValueChange={setConversionNote}
+                                            isInvalid={Boolean(conversionNoteViolation)}
+                                            errorMessage={conversionNoteViolation?.message}
                                             classNames={{
                                                 inputWrapper: "bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all rounded-3xl p-6 min-h-[120px] shadow-inner focus-within:ring-1 focus-within:ring-primary/40",
                                                 label: "hidden",
@@ -4924,6 +4992,10 @@ export default function EnquiryDetailsPage() {
                                                 setConversionError("");
                                                 if (!hasSellerAccepted || !enquiry?.buyerConfirmedAt) {
                                                     setConversionError("Supplier acceptance and buyer confirmation are required before order conversion.");
+                                                    return;
+                                                }
+                                                if (conversionNoteViolation) {
+                                                    setConversionError(conversionNoteViolation.message);
                                                     return;
                                                 }
                                                 if (!hasResponsibilitiesFinalized) {
@@ -4958,6 +5030,7 @@ export default function EnquiryDetailsPage() {
                                                 }
                                             }}
                                             isLoading={applyActionMutation.isPending || isConvertingOrder}
+                                            isDisabled={Boolean(conversionNoteViolation)}
                                             className="flex-1 max-w-[320px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
                                             startContent={!applyActionMutation.isPending && !isConvertingOrder && <FiCheckCircle size={16} />}
                                         >

@@ -35,6 +35,7 @@ import TableFrame from "@/components/CurdTable/table-frame";
 import { getData, postData, patchData, deleteData } from "@/core/api/apiHandler";
 import { apiRoutes, associateCompanyRoutes, associateRoutes, inventoryRoutes, variantRateRoutes, inventoryReservationRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
+import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 
 const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
 const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
@@ -144,9 +145,26 @@ const InventoryList: React.FC = () => {
         else if (Array.isArray(raw)) rows = raw;
         return rows.filter((item: any) => !item?.isDeleted);
     }, [buyersResponse]);
+    const representedBuyer = (isAdmin || isOperatorUser)
+        ? buyerOptions.find((item: any) => String(item?._id || "") === enquiryBuyerAssociateId)
+        : null;
+    const representedCompany = representedBuyer?.associateCompany;
+    const enquiryNotesViolation = detectOffPlatformDisclosure(enquiryNotes, {
+        companyNames: [
+            typeof representedCompany === "object" ? representedCompany?.name : "",
+            representedCompany?.registeredTradeName,
+            representedCompany?.gstVerification?.legalName,
+            representedCompany?.gstVerification?.tradeName,
+            (user as any)?.companyApproval?.companyName,
+        ],
+    });
 
     const handleEnquirySubmit = async () => {
         if (!selectedEnquiryInventory) return;
+        if (enquiryNotesViolation) {
+            showToastMessage({ type: "error", message: enquiryNotesViolation.message, position: "top-right" });
+            return;
+        }
 
         const qty = Number(enquiryQty);
         if (!qty || Number.isNaN(qty) || qty <= 0) {
@@ -1540,6 +1558,8 @@ const InventoryList: React.FC = () => {
                                                 placeholder="Enter specific grade, packaging, target price, or delivery timeline..."
                                                 variant="bordered"
                                                 minRows={3}
+                                                isInvalid={Boolean(enquiryNotesViolation)}
+                                                errorMessage={enquiryNotesViolation?.message}
                                                 classNames={{
                                                     label: "text-xs font-bold text-default-500 uppercase tracking-wider",
                                                 }}
@@ -1564,6 +1584,7 @@ const InventoryList: React.FC = () => {
                                                 color="primary"
                                                 onPress={handleEnquirySubmit}
                                                 isLoading={submittingEnquiry}
+                                                isDisabled={submittingEnquiry || Boolean(enquiryNotesViolation)}
                                                 className="font-bold px-6"
                                                 startContent={!submittingEnquiry ? <FiMessageSquare size={16} /> : undefined}
                                             >

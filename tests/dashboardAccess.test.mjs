@@ -112,7 +112,7 @@ test("Associate desktop and mobile navigation share capability-aware sidebar gro
   const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
   const desktop = readFileSync("src/components/dashboard/Sidebar.tsx", "utf8");
   const mobile = readFileSync("src/components/dashboard/TopBar.tsx", "utf8");
-  const labels = ["Home", "Seeking", "Providing", "Execute", "Other Services", "Company & Account", "Support"];
+  const labels = ["Home", "Seeking", "Providing", "Execute", "Other Services", "Company & Account", "Support", "Coming Soon"];
   let previousIndex = -1;
   for (const label of labels) {
     const index = navigation.indexOf(`label: \"${label}\"`, previousIndex + 1);
@@ -122,11 +122,25 @@ test("Associate desktop and mobile navigation share capability-aware sidebar gro
   assert.match(navigation, /getCapabilityActionLinks\(selectedCapabilities, perspective\)/);
   assert.match(navigation, /!selectedCapabilityLinks\.has\(path\)/);
   assert.match(navigation, /ASSOCIATE_EXECUTE_PATHS\.filter/);
+  assert.match(navigation, /COMING_SOON_NAV_PATH_ORDER\.filter/);
+  assert.match(navigation, /accessiblePathSet\.has\(path\) && !COMING_SOON_NAV_PATHS\.has\(path\)/);
   assert.match(readFileSync("src/utils/utils.tsx", "utf8"), /link: "\/dashboard\/commercial-documents"/);
   for (const source of [desktop, mobile]) {
     assert.match(source, /user\?\.providedCapabilities \|\| \[\]/);
     assert.match(source, /user\?\.soughtCapabilities \|\| \[\]/);
   }
+});
+
+test("Associate coming-soon navigation is ordered, disabled, and does not change direct route access", () => {
+  const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
+  const documents = navigation.indexOf('"/dashboard/documents"');
+  const pureDocuments = navigation.indexOf('"/dashboard/commercial-documents"');
+  const externalOrders = navigation.indexOf('"/dashboard/external-orders"');
+  assert.ok(documents >= 0 && documents < pureDocuments && pureDocuments < externalOrders);
+  assert.match(navigation, /normalizeDashboardRole\(role\) !== "admin" && COMING_SOON_NAV_PATHS\.has\(path\)/);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/commercial-documents", role: "Associate" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/documents", role: "Associate" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/external-orders", role: "Associate" }), true);
 });
 
 test("SERVICE Associates receive both contact-based service directories", () => {

@@ -19,10 +19,13 @@ type SidebarOption = {
   link: string;
 };
 
-const COMING_SOON_NAV_PATHS = new Set([
+const COMING_SOON_NAV_PATH_ORDER = [
   "/dashboard/documents",
+  "/dashboard/commercial-documents",
   "/dashboard/external-orders",
-]);
+] as const;
+
+const COMING_SOON_NAV_PATHS = new Set<string>(COMING_SOON_NAV_PATH_ORDER);
 
 export const isComingSoonDashboardNavigation = (
   path: string,
@@ -34,7 +37,7 @@ export const isComingSoonDashboardNavigation = (
 };
 
 export type DashboardNavSection = {
-  label: DashboardSection | DashboardTaskGroup | "Seeking" | "Providing" | "Other Services";
+  label: DashboardSection | DashboardTaskGroup | "Seeking" | "Providing" | "Other Services" | "Coming Soon";
   links: string[];
   groups?: Array<{ label: DashboardNavGroup; links: string[] }>;
 };
@@ -115,19 +118,20 @@ export const getDashboardSidebarSections = (
       { label: "Home", links: linksForTaskGroup("Home") },
       { label: "Seeking", links: seekingLinks },
       { label: "Providing", links: providingLinks },
-      { label: "Execute", links: ASSOCIATE_EXECUTE_PATHS.filter((path) => accessiblePathSet.has(path)) },
+      { label: "Execute", links: ASSOCIATE_EXECUTE_PATHS.filter((path) => accessiblePathSet.has(path) && !COMING_SOON_NAV_PATHS.has(path)) },
       {
         label: "Other Services",
         links: accessibleRoutes
           .filter((route) => optionMap.has(route.path))
           .map((route) => route.path)
-          .filter((path) => ASSOCIATE_OTHER_SERVICE_PATHS.has(path) && !selectedCapabilityLinks.has(path)),
+          .filter((path) => ASSOCIATE_OTHER_SERVICE_PATHS.has(path) && !selectedCapabilityLinks.has(path) && !COMING_SOON_NAV_PATHS.has(path)),
       },
       {
         label: "Company & Account",
         links: linksForTaskGroup("Company & Account").filter((path) => !selectedCapabilityLinks.has(path)),
       },
       { label: "Support", links: linksForTaskGroup("Support") },
+      { label: "Coming Soon", links: COMING_SOON_NAV_PATH_ORDER.filter((path) => accessiblePathSet.has(path)) },
     ];
     return associateSections.filter((section) => section.links.length > 0);
   }

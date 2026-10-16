@@ -1,6 +1,6 @@
 // components/DeleteModal.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Modal,
   ModalContent,
@@ -11,7 +11,7 @@ import {
   useDisclosure,
   Tooltip,
 } from "@nextui-org/react";
-import { FiTrash2, FiAlertTriangle } from "react-icons/fi";
+import { FiTrash2, FiAlertTriangle, FiX } from "react-icons/fi";
 import { useMutation } from "@tanstack/react-query";
 import { deleteData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
@@ -37,9 +37,10 @@ export default function DeleteModal({
   const isOpen = isControlled ? controlledOpen : disclosureOpen;
 
   const [loading, setLoading] = useState(false);
+  const submittingRef = useRef(false);
 
   const closeModal = () => {
-    if (loading) return;
+    if (submittingRef.current) return;
     if (isControlled) {
       controlledClose?.();
       return;
@@ -64,6 +65,7 @@ export default function DeleteModal({
         message: `Removed successfully`,
         position: "top-right",
       });
+      submittingRef.current = false;
       setLoading(false);
       if (isControlled) {
         controlledClose?.();
@@ -77,11 +79,14 @@ export default function DeleteModal({
         message: error.response?.data?.message || "An error occurred",
         position: "top-right",
       });
+      submittingRef.current = false;
       setLoading(false);
     },
   });
 
   const handleDelete = () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
     deleteItem.mutate();
   };
@@ -114,11 +119,11 @@ export default function DeleteModal({
       <Modal
         isOpen={isOpen}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen) closeModal();
+          if (!isControlled && !nextOpen) closeModal();
         }}
         isDismissable={false}
         isKeyboardDismissDisabled
-        hideCloseButton={loading}
+        hideCloseButton={isControlled || loading}
         size="sm"
         placement="center"
         backdrop="blur"
@@ -132,13 +137,26 @@ export default function DeleteModal({
         }}
       >
         <ModalContent>
-          {(onClose) => (
+          {() => (
             <>
-              <ModalHeader className="flex flex-col gap-1.5">
+              <ModalHeader className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2 text-danger-500">
                   <FiAlertTriangle size={24} className="animate-pulse" />
                   <span className="text-lg font-black uppercase tracking-wider">Confirm Deletion</span>
                 </div>
+                {isControlled && (
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    onPress={closeModal}
+                    isDisabled={loading}
+                    aria-label="Close delete confirmation"
+                    className="-mr-2 -mt-2 min-w-9 rounded-full"
+                  >
+                    <FiX size={18} />
+                  </Button>
+                )}
               </ModalHeader>
               <ModalBody>
                 <p className="text-sm text-default-500 font-medium leading-relaxed">
@@ -162,6 +180,7 @@ export default function DeleteModal({
                   color="danger"
                   onPress={handleDelete}
                   isLoading={loading}
+                  isDisabled={loading}
                   startContent={!loading && <FiTrash2 size={16} />}
                 >
                   Delete

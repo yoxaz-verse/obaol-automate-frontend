@@ -376,8 +376,10 @@ test("listing deletion uses a stable non-dismissible confirmation modal", () => 
   assert.equal(rates.includes("onClose={() => setPendingDeletion(null)}"), true);
   assert.equal(deletion.includes("isDismissable={false}"), true);
   assert.equal(deletion.includes("isKeyboardDismissDisabled"), true);
-  assert.equal(deletion.includes("hideCloseButton={loading}"), true);
-  assert.equal(deletion.includes("if (loading) return;"), true);
+  assert.equal(deletion.includes("hideCloseButton={isControlled || loading}"), true);
+  assert.equal(deletion.includes("if (submittingRef.current) return;"), true);
+  assert.equal(deletion.includes("if (!isControlled && !nextOpen) closeModal();"), true);
+  assert.equal(deletion.includes('aria-label="Close delete confirmation"'), true);
 });
 
 test("rate interest links viewers to highlighted company associates with contact actions", () => {

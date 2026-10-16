@@ -72,6 +72,11 @@ test("passkey sign-in is rendered only after WebAuthn support is confirmed", () 
   assert.match(login, /startAuthentication\(\{ optionsJSON: optionsResponse\.data\.options \}\)/);
 });
 
+test("subcategory deletion is exposed only to admins", () => {
+  const categoryDivision = read("../src/components/dashboard/Catalog/category-division.tsx");
+  assert.match(categoryDivision, /String\(user\?\.role \|\| ""\)\.toLowerCase\(\) === "admin" && \([\s\S]*?<UserDeleteModal/);
+});
+
 test("active homepage source does not advertise fabricated runtime telemetry", () => {
   const homepage = read("../src/components/home/HomeContent.tsx") + read("../src/components/home/HeroSectionServer.tsx");
   for (const phrase of ["CORE_LATENCY", "AES-256", "SYS_LINK"]) assert.equal(homepage.includes(phrase), false);

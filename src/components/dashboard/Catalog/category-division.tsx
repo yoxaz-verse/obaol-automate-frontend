@@ -345,12 +345,14 @@ function SubCategoryList({
                   apiEndpoint={apiRoutesByRole["subCategory"]}
                   refetchData={refetchData}
                 />
-                <UserDeleteModal
-                  _id={sub._id}
-                  name={sub.name}
-                  deleteApiEndpoint={apiRoutesByRole["subCategory"]}
-                  refetchData={refetchData}
-                />
+                {String(user?.role || "").toLowerCase() === "admin" && (
+                  <UserDeleteModal
+                    _id={sub._id}
+                    name={sub.name}
+                    deleteApiEndpoint={apiRoutesByRole["subCategory"]}
+                    refetchData={refetchData}
+                  />
+                )}
               </div>
             )}
           </AccordionItem>

@@ -14,6 +14,7 @@ import OrderCard from "@/components/dashboard/orders/OrderCard";
 import AuthContext from "@/context/AuthContext";
 import { useSoundEffect } from "@/context/SoundContext";
 import { showToastMessage } from "@/utils/utils";
+import { useCompanyAccess } from "@/utils/companyAccess";
 
 export default function OrdersPage() {
     const router = useRouter();
@@ -25,9 +26,10 @@ export default function OrdersPage() {
     const { user } = React.useContext(AuthContext);
     const { play } = useSoundEffect();
     const roleLower = String(user?.role || "").toLowerCase();
+    const { actionsAllowed } = useCompanyAccess();
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const canUseDemo = roleLower === "admin";
-    const canCreateInternal = roleLower === "admin" || roleLower === "associate";
+    const canCreateInternal = roleLower === "admin" || (roleLower === "associate" && actionsAllowed);
 
     useEffect(() => {
         patchData(apiRoutes.notifications.markSectionRead("orders"), {}).catch(() => { });

@@ -27,6 +27,7 @@ import { DEFAULT_STALE_TIME, extractList, useImportReservations, useImportsList 
 import Title from "@/components/titles";
 import InlineLoader from "@/components/ui/InlineLoader";
 import { showToastMessage } from "@/utils/utils";
+import { useCompanyAccess } from "@/utils/companyAccess";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FiPackage, 
@@ -69,11 +70,12 @@ export default function ImportsPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const roleLower = String(user?.role || "").toLowerCase();
-  const canCreate = roleLower === "associate" || roleLower === "admin" || roleLower === "operator" || roleLower === "team";
+  const { actionsAllowed } = useCompanyAccess();
+  const canCreate = (roleLower !== "associate" || actionsAllowed) && (roleLower === "associate" || roleLower === "admin" || roleLower === "operator" || roleLower === "team");
   const needsCompanySelect = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
   const canSetCommission = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
   const canEditAny = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
-  const canReserve = roleLower === "associate" || roleLower === "admin" || roleLower === "operator" || roleLower === "team";
+  const canReserve = (roleLower !== "associate" || actionsAllowed) && (roleLower === "associate" || roleLower === "admin" || roleLower === "operator" || roleLower === "team");
   const canEditListing = (listing: any) => {
     if (roleLower === "admin") return true;
     if (roleLower === "operator" || roleLower === "team") {
@@ -81,6 +83,7 @@ export default function ImportsPage() {
       return String(assignedOperator || "") === String(user?.id || "");
     }
     if (roleLower === "associate") {
+      if (!actionsAllowed) return false;
       return String(listing?.importerAssociateId?._id || listing?.importerAssociateId || "") === String(user?.id || "");
     }
     return false;
@@ -88,6 +91,7 @@ export default function ImportsPage() {
   const canSyncReserves = (listing: any) => {
     if (roleLower === "admin") return true;
     if (roleLower === "associate") {
+      if (!actionsAllowed) return false;
       return String(listing?.importerAssociateId?._id || listing?.importerAssociateId || "") === String(user?.id || "");
     }
     return false;

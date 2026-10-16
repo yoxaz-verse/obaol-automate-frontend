@@ -33,6 +33,7 @@ import PhoneField from "../form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
 import { uploadFormFile } from "@/utils/uploadFormFile";
 import { normalizeApiError } from "@/core/api/apiErrors";
+import { useCompanyAccess } from "@/utils/companyAccess";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -85,6 +86,7 @@ const AddForm: React.FC<AddFormProps> = ({
   onSuccess,
   grid = 2,
 }) => {
+  const { actionsAllowed } = useCompanyAccess();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -1114,7 +1116,8 @@ const AddForm: React.FC<AddFormProps> = ({
               <Button
                 className="min-w-[100px] bg-obaol-400 rounded-3xl text-white h-[38px] text-sm"
                 type="submit"
-                disabled={loading}
+                disabled={loading || !actionsAllowed}
+                title={!actionsAllowed ? "Your company must be accepted before you can add records." : undefined}
               >
                 {loading ? `Adding ${name ?? ""} ...` : `Add ${name ?? ""}`}
               </Button>

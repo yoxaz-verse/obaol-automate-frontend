@@ -33,6 +33,7 @@ import { toTitleCase } from "../titles";
 import { Key } from "@react-types/shared";
 import PhoneField from "../form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
+import { useCompanyAccess } from "@/utils/companyAccess";
 import { uploadFormFile } from "@/utils/uploadFormFile";
 import { normalizeApiError } from "@/core/api/apiErrors";
 
@@ -94,6 +95,7 @@ export default function EditModal({
   isOpen: controlledOpen,
   onClose: controlledClose,
 }: EditModalProps) {
+  const { actionsAllowed } = useCompanyAccess();
   const [open, setOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const isOpenActual = isControlled ? controlledOpen : open;
@@ -921,7 +923,8 @@ export default function EditModal({
                 <div className="flex justify-end mt-4">
                   <Button
                     type="submit"
-                    disabled={loading || (isLocked && !formData.isLive)}
+                    disabled={!actionsAllowed || loading || (isLocked && !formData.isLive)}
+                    title={!actionsAllowed ? "Your company must be accepted before you can update records." : undefined}
                   >
                     {loading ? "Updating…" : "Update"}
                   </Button>

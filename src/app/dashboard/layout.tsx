@@ -16,6 +16,7 @@ import { AuthenticatedProviders } from "@/app/authenticated-provider";
 import { canAccessDashboardRoute } from "@/utils/dashboardAccess";
 import { isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import DashboardContextBar from "@/components/dashboard/DashboardContextBar";
+import CompanyApprovalBanner from "@/components/dashboard/CompanyApprovalBanner";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -208,6 +209,7 @@ function DashboardLayoutContent({
             >
               <div data-dashboard-content className="max-w-[var(--db-content-width)] mx-auto w-full px-3 pb-4 pt-1 md:p-6 min-w-0">
                 <DashboardContextBar />
+                <CompanyApprovalBanner />
                 {children}
               </div>
             </div>

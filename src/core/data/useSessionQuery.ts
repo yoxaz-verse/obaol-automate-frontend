@@ -10,9 +10,10 @@ export const useSessionQuery = () =>
     queryFn: () => getData("/verify-token"),
     staleTime: SESSION_STALE_TIME,
     gcTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchInterval: 60 * 1000,
     retry: 0,
   });
 

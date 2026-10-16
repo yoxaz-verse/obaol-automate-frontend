@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Chip, Input, Select, SelectItem, Spinner, Tab, Tabs, Textarea } from "@nextui-org/react";
-import { getData, patchData } from "@/core/api/apiHandler";
+import { Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner, Tab, Tabs, Textarea } from "@nextui-org/react";
+import { deleteDataBody, getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
-import { LuSearch, LuClipboardCheck, LuUserCheck, LuBuilding2, LuUserCog, LuCheck, LuX, LuChevronLeft, LuChevronRight, LuCalendar, LuMail, LuPhone, LuTag, LuArrowUpRight } from "react-icons/lu";
+import { LuSearch, LuClipboardCheck, LuUserCheck, LuBuilding2, LuUserCog, LuCheck, LuX, LuChevronLeft, LuChevronRight, LuCalendar, LuMail, LuPhone, LuTag, LuArrowUpRight, LuTrash2 } from "react-icons/lu";
 import Title from "@/components/titles";
 import CatalogApprovalQueues from "@/components/dashboard/Approvals/CatalogApprovalQueues";
 import LabApprovalQueues from "@/components/dashboard/Approvals/LabApprovalQueues";
@@ -48,6 +48,9 @@ export default function ApprovalsPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [activeAction, setActiveAction] = useState<{ id: string; action: "APPROVE" | "REJECT" } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; kind: "associate" | "company" } | null>(null);
+  const [deletePreview, setDeletePreview] = useState<any>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
     patchData(apiRoutes.notifications.markSectionRead("approvals"), {}).catch(() => { });
@@ -99,6 +102,33 @@ export default function ApprovalsPage() {
       setActiveAction(null);
     },
   });
+  const previewDeleteMutation = useMutation({
+    mutationFn: async (target: { id: string; kind: "associate" | "company" }) => {
+      const response = await getData(apiRoutes.dataIntegrity.permanentDeletePreview(target.kind, target.id));
+      return response?.data?.data;
+    },
+    onSuccess: setDeletePreview,
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Unable to preview dependencies.", position: "top-right" }),
+  });
+  const permanentDeleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!deleteTarget) throw new Error("No deletion target selected.");
+      return deleteDataBody(apiRoutes.dataIntegrity.permanentDelete(deleteTarget.kind, deleteTarget.id), {}, { confirmation: deleteConfirmation });
+    },
+    onSuccess: (response: any) => {
+      showToastMessage({ type: "success", message: `Permanently deleted. Audit ID: ${response?.data?.data?.auditId || "recorded"}`, position: "top-right" });
+      queryClient.invalidateQueries({ queryKey: ["approvals"] });
+      setDeleteTarget(null); setDeletePreview(null); setDeleteConfirmation("");
+    },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Permanent deletion failed without changes.", position: "top-right" }),
+  });
+
+  const openDeletePreview = (id: string) => {
+    const kind = tab === "companies" ? "company" : "associate";
+    const target = { id, kind } as const;
+    setDeleteTarget(target); setDeletePreview(null); setDeleteConfirmation("");
+    previewDeleteMutation.mutate(target);
+  };
 
   const rows = useMemo(() => (Array.isArray(listQuery.data?.rows) ? listQuery.data?.rows : []), [listQuery.data]);
   const meta = listQuery.data?.meta || { page: 1, pages: 1, total: 0, limit };
@@ -428,6 +458,18 @@ export default function ApprovalsPage() {
                               <LuClipboardCheck size={18} />
                             </div>
                           )}
+                          {tab !== "operators" && (
+                            <Button
+                              isIconOnly
+                              size="sm"
+                              color="danger"
+                              variant="light"
+                              aria-label={`Permanently delete ${tab === "companies" ? "company" : "associate"}`}
+                              onPress={() => openDeletePreview(row._id)}
+                            >
+                              <LuTrash2 size={17} />
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -470,6 +512,29 @@ export default function ApprovalsPage() {
           </Button>
         </div>
       </div>
+
+      <Modal isOpen={Boolean(deleteTarget)} onClose={() => { if (!permanentDeleteMutation.isPending) { setDeleteTarget(null); setDeletePreview(null); setDeleteConfirmation(""); } }} placement="center">
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1 text-danger">Permanent deletion</ModalHeader>
+          <ModalBody>
+            {previewDeleteMutation.isPending ? <Spinner color="danger" /> : deletePreview ? (
+              <>
+                <p className="text-sm text-default-600">This irreversibly deletes <strong>{deletePreview.label}</strong> and all owned or participant-linked records. The transaction fails without changes if any cascade step fails.</p>
+                <div className="max-h-44 overflow-auto rounded-xl border border-divider p-3 text-xs">
+                  {Object.entries(deletePreview.counts || {}).map(([collection, count]) => <div key={collection} className="flex justify-between gap-4"><span>{collection}</span><strong>{Number(count)}</strong></div>)}
+                </div>
+                <Input label={`Type exactly: ${deletePreview.confirmationValue}`} value={deleteConfirmation} onValueChange={setDeleteConfirmation} color="danger" variant="bordered" />
+              </>
+            ) : <p className="text-sm text-danger">Dependency preview could not be loaded. Deletion is disabled.</p>}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={() => setDeleteTarget(null)} isDisabled={permanentDeleteMutation.isPending}>Cancel</Button>
+            <Button color="danger" startContent={<LuTrash2 />} isLoading={permanentDeleteMutation.isPending} isDisabled={!deletePreview || deleteConfirmation !== deletePreview.confirmationValue} onPress={() => permanentDeleteMutation.mutate()}>
+              Delete permanently
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

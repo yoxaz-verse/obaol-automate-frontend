@@ -15,6 +15,15 @@ interface AuthState {
   loading: boolean;
 }
 
+export interface CompanyApproval {
+  companyId: string | null;
+  companyName: string | null;
+  status: "PENDING_REVIEW" | "APPROVED" | "REJECTED";
+  isApproved: boolean;
+  actionsAllowed: boolean;
+  reviewReason: string | null;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -32,6 +41,7 @@ export interface User {
   registrationStatus?: string | null;
   rejectionReason?: string | null;
   pendingSince?: string | null;
+  companyApproval?: CompanyApproval | null;
   isAvailable?: boolean;
   verified: {
     email: boolean;

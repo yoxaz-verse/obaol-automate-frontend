@@ -2,6 +2,10 @@
 
 import axios from "axios";
 import { getLanguageCookie } from "@/utils/languageCookie";
+import { toast } from "react-toastify";
+
+const COMPANY_APPROVAL_REQUIRED = "COMPANY_APPROVAL_REQUIRED";
+const COMPANY_APPROVAL_MESSAGE = "Your company is not accepted yet. You can browse the platform, but business actions are disabled until approval.";
 
 const toAbsoluteBaseUrl = () => {
   const apiBase =
@@ -81,6 +85,13 @@ instance.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Redirect to login or show a notification
       // window.location.href = "/auth";
+    }
+    if (error?.response?.status === 403 && error?.response?.data?.code === COMPANY_APPROVAL_REQUIRED) {
+      const message = error.response.data.message || COMPANY_APPROVAL_MESSAGE;
+      toast.warning(message, { toastId: COMPANY_APPROVAL_REQUIRED, position: "top-right" });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("obaol:company-approval-required", { detail: error.response.data }));
+      }
     }
     return Promise.reject(error);
   }

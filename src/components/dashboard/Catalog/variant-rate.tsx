@@ -106,8 +106,6 @@ const DynamicFilter = dynamic(
 const round2 = (value: number) =>
   Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
 const LISTING_DELETE_WINDOW_MS = 60 * 60 * 1000;
-const LISTING_LIVE_DURATION_HOURS = 24;
-const HOUR_MS = 60 * 60 * 1000;
 const isValidObjectId = (value: any) =>
   /^[a-f0-9]{24}$/i.test(String(value || "").trim());
 const resolveAdminCommission = (
@@ -895,44 +893,27 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const productClassifications = extractClassifications(item);
               const classificationText = productClassifications.join(" ");
 
-              const lifecycleTimestamp = new Date(
-                item.lastLiveDate || item.updatedAt || item.createdAt,
-              ).getTime();
-              const hoursSinceLastLive = Number.isFinite(lifecycleTimestamp)
-                ? Math.floor((listingPolicyNow - lifecycleTimestamp) / HOUR_MS)
-                : 0;
               const effectiveIsLive =
                 typeof item.effectiveIsLive === "boolean"
                   ? item.effectiveIsLive
                   : typeof item.__effectiveIsLive === "boolean"
                   ? item.__effectiveIsLive
                   : Boolean(item.isLive);
-              const isExpired =
-                !effectiveIsLive && hoursSinceLastLive >= LISTING_LIVE_DURATION_HOURS;
               return {
                 ...rest,
                 isLive: effectiveIsLive,
-                isExpired,
-                expiryAgeText: isExpired
-                  ? `${hoursSinceLastLive} hours since last live`
-                  : "",
                 liveStatus: (
                   <div className="flex flex-col items-end gap-0.5">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-1.5 h-1.5 rounded-full ${effectiveIsLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : isExpired ? "bg-danger-500" : "bg-danger-500/40"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${effectiveIsLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-danger-500/40"}`}
                       />
                       <span
-                        className={`text-[10px] font-black uppercase tracking-widest ${effectiveIsLive ? "text-success-400" : isExpired ? "text-danger-500" : "text-default-400"}`}
+                        className={`text-[10px] font-black uppercase tracking-widest ${effectiveIsLive ? "text-success-400" : "text-default-400"}`}
                       >
-                        {effectiveIsLive ? "LIVE" : isExpired ? "EXPIRED" : "OFFLINE"}
+                        {effectiveIsLive ? "LIVE" : "OFFLINE"}
                       </span>
                     </div>
-                    {isExpired && (
-                      <span className="text-[8px] font-bold text-danger-400 whitespace-nowrap">
-                        {hoursSinceLastLive} hours since last live
-                      </span>
-                    )}
                   </div>
                 ),
                 associate: (
@@ -1484,7 +1465,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     No Recent Past Listings
                   </h3>
                   <p className="mt-2 max-w-[390px] text-sm leading-relaxed text-default-500">
-                    Past listings remain visible here for 20 days after they are unpublished. Owners can renew a listing to make it live again for another 24 hours.
+                    Past listings remain visible here for 20 days after they are manually taken offline. Owners can switch them live again at any time.
                   </p>
                 </div>
               ) : finalTableData.length === 0 ? (
@@ -2789,55 +2770,12 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
     },
   });
 
-  const renewMutation = useMutation({
-    mutationFn: async () => postData(variantRateRoutes.renew(variantRate._id), {}),
-    onSuccess: () => {
-      setIsSelected(true);
-      setLoading(false);
-      queryClient.invalidateQueries();
-      showToastMessage({
-        type: "success",
-        message: "Listing renewed and live for another 24 hours.",
-        position: "top-right",
-      });
-      refetchData?.();
-    },
-    onError: (error: any) => {
-      setLoading(false);
-      showToastMessage({
-        type: "error",
-        message: error?.response?.data?.message || "Unable to renew this listing.",
-        position: "top-right",
-      });
-    },
-  });
-
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStatus = e.target.checked;
     setIsSelected(newStatus);
     setLoading(true);
     updateMutation.mutate(newStatus);
   };
-
-  const isVariantRate = apiEndpoint.includes("variant-rates");
-  if (!isSelected && isVariantRate) {
-    return (
-      <Button
-        size="sm"
-        color="warning"
-        variant="flat"
-        isLoading={loading || renewMutation.isPending}
-        startContent={<FiRefreshCw size={14} />}
-        className="h-8 font-black uppercase tracking-wider"
-        onPress={() => {
-          setLoading(true);
-          renewMutation.mutate();
-        }}
-      >
-        Renew
-      </Button>
-    );
-  }
 
   return (
     <div

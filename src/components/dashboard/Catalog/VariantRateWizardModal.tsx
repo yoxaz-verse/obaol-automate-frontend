@@ -1262,6 +1262,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                     <p className="text-lg font-bold text-foreground">{isLive ? "Live" : "Draft"}</p>
                   </div>
                 </div>
+                <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3 mt-6">
+                  <Button className="w-full sm:w-auto font-bold" variant="flat" onPress={handleAddAnother}>Add Another</Button>
+                  <Button className="w-full sm:w-auto font-bold" color="warning" onPress={onClose}>View Products</Button>
+                </div>
               </motion.div>
             ) : (
               <motion.div key={step} {...motionVariants} className="space-y-4 sm:space-y-6">
@@ -1720,18 +1724,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
             )}
           </AnimatePresence>
         </ModalBody>
-        <ModalFooter className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-          <div className="flex w-full sm:w-auto items-center gap-2">
-            {successData ? (
-              <>
-                <Button className="w-full sm:w-auto" variant="flat" onPress={handleAddAnother}>Add Another</Button>
-                <Button className="w-full sm:w-auto" color="warning" onPress={onClose}>View Products</Button>
-              </>
-            ) : (
+        {!successData && (
+          <ModalFooter className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+            <div className="flex w-full sm:w-auto items-center gap-2">
               <Button className="w-full sm:w-auto" variant="light" onPress={step === 1 ? onClose : handleBack} isDisabled={isSubmitting}>Back</Button>
-            )}
-          </div>
-          {!successData && (
+            </div>
             <Button
               color="warning"
               endContent={<FiArrowRight />}
@@ -1746,8 +1743,8 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                   ? "Continue"
                   : (isAssociateUser ? "Submit for Approval" : "Launch Listing")}
             </Button>
-          )}
-        </ModalFooter>
+          </ModalFooter>
+        )}
       </ModalContent>
     </Modal>
   );

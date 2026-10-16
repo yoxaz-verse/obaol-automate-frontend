@@ -249,8 +249,8 @@ export const variantRateRoutes = addCustomRoutes(
   {
     count: `${BASE_PATHS.VARIANT_RATE}/associateCompany`,
     marketplaceStats: `${BASE_PATHS.VARIANT_RATE}/marketplace-stats`,
+    marketplaceVisibilitySummary: `${BASE_PATHS.VARIANT_RATE}/marketplace-visibility-summary`,
     reveal: (id: string) => `${BASE_PATHS.VARIANT_RATE}/${id}/reveal`,
-    renew: (id: string) => `${BASE_PATHS.VARIANT_RATE}/${id}/renew`,
     rateInterestAnalytics: `${BASE_PATHS.VARIANT_RATE}/rate-interest/analytics`,
   }
 );
@@ -419,6 +419,12 @@ export const organizationReportRoutes = {
 export const apiRoutes = {
   analytics: dashboardRoutes,
   approvals: approvalRoutes,
+  dataIntegrity: {
+    orphans: "/admin/data-integrity/orphans",
+    cleanupOrphans: "/admin/data-integrity/orphans/cleanup",
+    permanentDeletePreview: (kind: "associate" | "company", id: string) => `/admin/${kind === "associate" ? "associates" : "associate-companies"}/${id}/permanent-delete-preview`,
+    permanentDelete: (kind: "associate" | "company", id: string) => `/admin/${kind === "associate" ? "associates" : "associate-companies"}/${id}/permanent`,
+  },
   catalogModeration: catalogModerationRoutes,
   notifications: notificationRoutes,
   presence: presenceRoutes,

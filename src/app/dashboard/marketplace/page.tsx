@@ -2,7 +2,7 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Spacer, Tab, Tabs } from "@nextui-org/react";
+import { Button, Chip, Spacer, Tab, Tabs } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { LuWarehouse } from "react-icons/lu";
@@ -15,6 +15,7 @@ import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { variantRateRoutes } from "@/core/api/apiRoutes";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
+import { useCompanyAccess } from "@/utils/companyAccess";
 
 const TabsAny = Tabs as any;
 const TabAny = Tab as any;
@@ -45,13 +46,14 @@ export default function MarketplacePage() {
     const router = useRouter();
     const { user } = useContext(AuthContext);
     const roleLower = String(user?.role || "").toLowerCase();
+    const { actionsAllowed } = useCompanyAccess();
     const isAdmin = roleLower === "admin";
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const isAdminUser = roleLower === "admin" || isOperatorUser;
     const isAssociateUser = roleLower === "associate" || roleLower === "customer";
     const isSellingMode = isAssociateUser && (user?.providedCapabilities || []).includes("seller");
     const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
-    const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
+    const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany && actionsAllowed);
 
     const [currentTable, setCurrentTable] = useState<MarketplaceTabKey>("marketplace-live");
     const [classificationTab, setClassificationTab] = useState<ClassificationTabKey>("all");
@@ -102,6 +104,23 @@ export default function MarketplacePage() {
         },
         enabled: isAdmin,
     });
+    const visibilityQuery = useQuery({
+        queryKey: ["marketplace-visibility-summary"],
+        queryFn: async () => {
+            const response = await getData(variantRateRoutes.marketplaceVisibilitySummary);
+            return response?.data?.data || {};
+        },
+    });
+    const exclusionLabels: Record<string, string> = {
+        missingOwner: "Missing listing owner",
+        missingCompany: "Missing company",
+        ownerUnavailable: "Owner pending or unavailable",
+        companyUnavailable: "Company pending or unavailable",
+        hierarchyUnavailable: "Commodity hierarchy incomplete",
+        offline: "Manually offline",
+        deleted: "Deleted",
+        demo: "Demo data",
+    };
 
     const liveCount = Number(statsQuery.data?.live ?? 0);
     const offlineCount = Number(statsQuery.data?.offline ?? 0);
@@ -137,6 +156,32 @@ export default function MarketplacePage() {
                         </div>
                     </div>
                 </header>
+                <section className="mb-4 rounded-2xl border border-warning-400/25 bg-warning-50/70 p-4 dark:bg-warning-900/10" aria-label="Trade listing visibility explanation">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <p className="text-sm font-bold text-foreground">Why a trade listing may not appear</p>
+                            <p className="mt-1 text-xs leading-relaxed text-default-600">
+                                Only manually-live listings with an approved owner, approved company, and approved commodity hierarchy are shown. Listings do not expire automatically.
+                            </p>
+                        </div>
+                        {!visibilityQuery.isLoading && !visibilityQuery.isError && (
+                            <Chip color="success" variant="flat" className="shrink-0 font-bold">
+                                {Number(visibilityQuery.data?.eligible || 0)} visible
+                            </Chip>
+                        )}
+                    </div>
+                    {visibilityQuery.isError ? (
+                        <p className="mt-2 text-xs text-danger">Visibility diagnostics are temporarily unavailable.</p>
+                    ) : (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            {Object.entries(visibilityQuery.data?.reasons || {}).filter(([, count]) => Number(count) > 0).map(([reason, count]) => (
+                                <Chip key={reason} size="sm" variant="bordered" className="text-[11px]">
+                                    {exclusionLabels[reason] || reason}: {Number(count)}
+                                </Chip>
+                            ))}
+                        </div>
+                    )}
+                </section>
                 {isAdmin && (
                         <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                         <StatCard label="Total Listings" value={displayCount(totalCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />

@@ -9,7 +9,7 @@ import { showToastMessage } from "@/utils/utils";
 
 const TYPES = [
   ["category", "Categories"], ["subCategory", "Subcategories"], ["product", "Products"],
-  ["productVariant", "Variants"], ["variantRate", "Listings"],
+  ["productVariant", "Variants"],
 ] as const;
 
 const rowTitle = (row: any) => row?.name || row?.proposedChanges?.name || (row?.sourceKind === "REVISION" ? "Pending revision" : `Listing ${String(row?._id || "").slice(-6)}`);
@@ -37,7 +37,7 @@ export default function CatalogApprovalQueues() {
   return (
     <section className="rounded-2xl border border-default-200 bg-content1 p-5 space-y-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div><h2 className="text-lg font-bold">Commodity directory approvals</h2><p className="text-xs text-default-500">Review every level of Associate-proposed directory data and listings.</p></div>
+        <div><h2 className="text-lg font-bold">Commodity directory approvals</h2><p className="text-xs text-default-500">Review Associate-proposed categories, products, and variants. Trade listings publish immediately.</p></div>
         <div className="flex flex-col sm:flex-row gap-2">
           <Select label="Queue" selectedKeys={[entityType]} onSelectionChange={(keys) => setEntityType(String(Array.from(keys)[0] || "category"))} className="w-full sm:w-52">
             {TYPES.map(([key, label]) => <SelectItem key={key}>{label}</SelectItem>)}

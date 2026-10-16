@@ -907,7 +907,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       setSuccessData(data);
       showToastMessage({
         type: "success",
-        message: isAssociateUser ? "Listing submitted for admin approval." : "Trade listing launched!",
+        message: isLive ? "Trade listing launched successfully." : "Trade listing saved successfully.",
         position: "top-right",
       });
       setSubmitPhase("idle");
@@ -1242,8 +1242,8 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
             {successData ? (
               <motion.div key="success" {...motionVariants} className="rounded-2xl sm:rounded-3xl border border-success-500/30 bg-success-500/10 p-4 sm:p-8 text-center">
                 <FiCheckCircle size={36} className="mx-auto text-success-400 mb-3 sm:mb-4" />
-                <h4 className="text-lg sm:text-xl font-black text-foreground mb-2">Product listed successfully</h4>
-                <p className="text-xs sm:text-sm text-default-500 mb-4 sm:mb-6">Your product is now live in the trade network.</p>
+                <h4 className="text-lg sm:text-xl font-black text-foreground mb-2">{isLive ? "Trade listing launched successfully" : "Trade listing saved successfully"}</h4>
+                <p className="text-xs sm:text-sm text-default-500 mb-4 sm:mb-6">{isLive ? "Your product is now live in the trade network." : "Your listing is saved offline and can be made live when you are ready."}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-content2 border border-default-200 rounded-2xl p-4 text-left">
                   <div>
                     <p className="text-xs uppercase text-default-400">Rate</p>

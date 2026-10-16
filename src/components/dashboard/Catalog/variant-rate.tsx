@@ -1674,7 +1674,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             const canAddInventory =
                               showInventoryStatus &&
                               item &&
-                              !item.hasInventory &&
                               (roleLower === "admin" ||
                                 isOperatorUser ||
                                 isSellingMode);
@@ -1787,7 +1786,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       setInventoryModalOpen(true);
                                     }}
                                   >
-                                    + Inventory
+                                    + Add Stock
                                   </Button>
                                 )}
                                 {canManageRow(item) && (
@@ -1916,7 +1915,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         const canAddInventory =
                           showInventoryStatus &&
                           item &&
-                          !item.hasInventory &&
                           (roleLower === "admin" ||
                             isOperatorUser ||
                             isSellingMode);
@@ -2027,7 +2025,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   setInventoryModalOpen(true);
                                 }}
                               >
-                                + Inventory
+                                + Add Stock
                               </Button>
                             )}
                             {canManageRow(item) && (
@@ -2361,19 +2359,24 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       setInventoryModalOpen(true);
                                     }}
                                   >
-                                    + Inventory
+                                    + Add Stock
                                   </Button>
                                 )}
                               </div>
-                              <div className="catalog-card-compact-actions hidden items-center justify-between gap-2">
-                                <div className="min-w-0">
-                                  {!canManageRow(item) && !canCreateMarketplaceEnquiry ? (
+                              <div className="catalog-card-compact-actions hidden w-full min-w-0 items-center gap-2">
+                                <div className="min-w-0 flex-1">
+                                  {canCreateMarketplaceEnquiry ? (
+                                    <CreateEnquiryButton
+                                      productVariant={item.productVariantId}
+                                      variantRate={item}
+                                      compact
+                                    />
+                                  ) : !canManageRow(item) ? (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-default-400">
                                       {isLive ? "Live" : "Offline"}
                                     </span>
                                   ) : null}
                                 </div>
-                                {primaryMarketplaceEnquiry}
                                 <Popover placement="bottom-end" showArrow>
                                   <PopoverTrigger>
                                     <Button
@@ -2381,7 +2384,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       size="sm"
                                       variant="flat"
                                       aria-label={`More options for ${toDisplayText(item.productVariant, "listing")}`}
-                                      className={`${LISTING_ACTION_CLASS} shrink-0 p-0`}
+                                      className={`${LISTING_ACTION_CLASS} h-10 w-10 min-w-10 max-w-10 shrink-0 p-0`}
                                     >
                                       <FiMoreHorizontal size={18} />
                                     </Button>
@@ -2442,7 +2445,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                               setInventoryModalOpen(true);
                                             }}
                                           >
-                                            + Inventory
+                                            + Add Stock
                                           </Button>
                                         )}
                                       </div>
@@ -2516,7 +2519,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     </div>
                     <div>
                       <h3 className="text-base font-black tracking-tight text-foreground">
-                        Add Inventory
+                        Add Stock
                       </h3>
                       <p className="text-[10px] text-default-400 font-bold uppercase tracking-widest mt-0.5">
                         Stock in Metric Tonnes (MT)
@@ -2683,16 +2686,19 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           unit: "MT",
                         });
 
-                        showToastMessage({
-                          type: "success",
-                          message: "Inventory added successfully.",
-                          position: "top-right",
-                        });
                         setInventoryModalOpen(false);
                         setInventoryQty("");
                         setSelectedInventoryRate(null);
                         setInventorySubmitting(false);
-                        refetchData();
+                        void queryClient.invalidateQueries({
+                          queryKey: ["inventory-status"],
+                        });
+                        refetchData?.();
+                        showToastMessage({
+                          type: "success",
+                          message: "Stock added successfully.",
+                          position: "top-right",
+                        });
                       } catch (error: any) {
                         console.error(
                           "Inventory add failed:",
@@ -2702,14 +2708,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           type: "error",
                           message:
                             error?.response?.data?.message ||
-                            "Unable to add inventory. Please try again.",
+                            "Unable to add stock. Please try again.",
                           position: "top-right",
                         });
                         setInventorySubmitting(false);
                       }
                     }}
                   >
-                    Add to Inventory
+                    Add Stock
                   </Button>
                 </ModalFooter>
               </ModalContent>
@@ -2848,6 +2854,7 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
 interface CreateEnquiryButtonProps {
   productVariant: string;
   variantRate: any;
+  compact?: boolean;
 }
 
 interface RequestSampleButtonProps {
@@ -3637,18 +3644,25 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
 const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
   variantRate,
   productVariant,
+  compact = false,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const staleWarning = useDisclosure();
   const beginEnquiry = () => variantRate?.isLive ? onOpen() : staleWarning.onOpen();
 
   return (
-    <div className="flex flex-col items-center gap-2 ">
+    <div
+      className={
+        compact
+          ? "flex w-full min-w-0 flex-col items-center gap-2"
+          : "flex flex-col items-center gap-2"
+      }
+    >
       <Button
         size="sm"
         color="primary"
         variant="flat"
-        className={LISTING_ACTION_CLASS}
+        className={`${LISTING_ACTION_CLASS} ${compact ? "w-full min-w-0 gap-1 px-2 text-[9px] tracking-normal" : ""}`}
         startContent={<LuMessageSquare size={16} />}
         onPress={beginEnquiry}
       >

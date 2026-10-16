@@ -350,7 +350,8 @@ test("marketplace enquiry is available for foreign listings while owners manage 
   assert.equal(rates.includes("Manage listing"), true);
   assert.equal(rates.includes("isAssociateUser && !item?.isOwnedByViewer"), true);
   assert.equal(rates.includes('{variantRate?.isLive ? "Enquire" : "Check Current Price"}'), true);
-  assert.equal(rates.includes("{primaryMarketplaceEnquiry}\n                                <Popover"), true);
+  assert.equal(rates.includes("canCreateMarketplaceEnquiry ? (\n                                    <CreateEnquiryButton"), true);
+  assert.equal(rates.includes("variantRate={item}\n                                      compact"), true);
 });
 
 test("trade listings refresh active views and exclude owned live marketplace rows", () => {
@@ -365,6 +366,19 @@ test("trade listings refresh active views and exclude owned live marketplace row
   assert.equal(query.includes('refetchOnWindowFocus: refreshEnabled ? "always" : false'), true);
   assert.equal(rates.includes("invalidateListingQueries(queryClient)"), true);
   assert.equal(rates.includes("LISTING_ACTION_CLASS"), true);
+});
+
+test("trade listings allow authorized users to add stock even when inventory exists", () => {
+  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+
+  assert.equal(rates.includes("+ Add Stock"), true);
+  assert.doesNotMatch(
+    rates,
+    /const canAddInventory =[\s\S]{0,160}!item\.hasInventory/,
+  );
+  assert.match(rates, /queryKey: \["inventory-status"\]/);
+  assert.equal(rates.includes('message: "Stock added successfully."'), true);
+  assert.equal(rates.includes('message: "Enter a valid quantity in MT."'), true);
 });
 
 test("listing deletion uses a stable non-dismissible confirmation modal", () => {
@@ -474,6 +488,10 @@ test("catalog grid cards respond to their container without compressing controls
 
   assert.equal(variantRate.includes('viewMode === "grid"\n                          ? "catalog-responsive-grid"'), true);
   assert.equal(variantRate.includes("catalog-card-compact-actions"), true);
+  assert.equal(variantRate.includes('className="min-w-0 flex-1"'), true);
+  assert.equal(variantRate.includes("compact?: boolean"), true);
+  assert.equal(variantRate.includes("w-10 min-w-10 max-w-10 shrink-0"), true);
+  assert.equal(variantRate.includes("w-full min-w-0 gap-1 px-2 text-[9px] tracking-normal"), true);
   assert.equal(variantRate.includes("catalog-card-status-row"), true);
   assert.equal(variantRate.includes("Listing status"), true);
   assert.equal(variantRate.includes('layout="inline"'), true);

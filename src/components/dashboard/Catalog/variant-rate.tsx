@@ -74,6 +74,7 @@ import {
 } from "@/utils/tableValues";
 import { useCurrency } from "@/context/CurrencyContext";
 import { resolveMarketplaceSort } from "@/utils/marketplaceSort";
+import { formatLastLiveAge } from "@/utils/lastLiveAge";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
@@ -207,6 +208,20 @@ const formatLastLiveDate = (value: any) => {
     month: "short",
     year: "numeric",
   });
+};
+
+const LastLiveAgeBadge = ({ value }: { value: any }) => {
+  const label = formatLastLiveAge(value);
+  if (!label) return null;
+
+  return (
+    <span
+      aria-label={`Last live ${label}`}
+      className="inline-flex w-fit items-center rounded-full border border-amber-200/70 bg-amber-50/80 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300"
+    >
+      Last live {label}
+    </span>
+  );
 };
 
 /**
@@ -883,6 +898,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const hasInventory = Boolean(
                 inventorySummary && inventorySummary.totalQty > 0,
               );
+              const lastLiveDateRaw =
+                item.lastLiveDate || item.updatedAt || item.createdAt;
 
               const supplierRate = item.rate || 0;
               const quantityValue = item.quantity;
@@ -1061,11 +1078,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 isOwnedByViewer: isOwner,
                 isOwnerView: isOwner && !isMarketplace,
                 isAdded: addedRateIds.has(item._id),
+                lastLiveDateRaw,
                 lastLiveDate: (
                   <div className="flex items-center justify-start min-w-[80px]">
-                    {formatLastLiveDate(
-                      item.lastLiveDate || item.updatedAt || item.createdAt,
-                    )}
+                    {formatLastLiveDate(lastLiveDateRaw)}
                   </div>
                 ),
               };
@@ -1820,6 +1836,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       </span>
                                     )}
                                     {item.classification}
+                                    {roleLower === "admin" &&
+                                      isMarketplaceView &&
+                                      !isLive && (
+                                        <LastLiveAgeBadge
+                                          value={item.lastLiveDateRaw}
+                                        />
+                                      )}
                                   </div>
                                 </td>
                                 <td className="py-4 px-6 align-top">
@@ -2070,6 +2093,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     </span>
                                   )}
                                   {item.classification}
+                                  {roleLower === "admin" &&
+                                    isMarketplaceView &&
+                                    !isLive && (
+                                      <LastLiveAgeBadge
+                                        value={item.lastLiveDateRaw}
+                                      />
+                                    )}
                                 </div>
 
                                 <Divider
@@ -2177,7 +2207,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               }}
                               className="group flex flex-col md:flex-row md:items-center justify-between gap-3 p-2 px-3 sm:px-4 bg-content1/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden hover:border-white/10 hover:bg-content1/60 transition-all"
                             >
-                              <div className="flex items-center gap-3 min-w-0">
+                              <div className="flex min-w-0 flex-wrap items-center gap-3">
                                 <div className={`shrink-0 w-2 h-2 rounded-full ${isLive ? "bg-success-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]" : "bg-default-300"}`} />
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0">
                                   <span className="text-xs sm:text-sm font-black text-foreground truncate w-32 sm:w-auto">
@@ -2188,6 +2218,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     {toDisplayText(item.productVariant, "Variant")}
                                   </span>
                                 </div>
+                                {roleLower === "admin" &&
+                                  isMarketplaceView &&
+                                  !isLive && (
+                                    <LastLiveAgeBadge
+                                      value={item.lastLiveDateRaw}
+                                    />
+                                  )}
                               </div>
                               <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4 shrink-0 mt-2 sm:mt-0">
                                 <div className="flex items-center gap-4">
@@ -2237,6 +2274,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       {isLive ? "● Live" : "○ Off"}
                                     </span>
                                   )}
+                                  {roleLower === "admin" &&
+                                    isMarketplaceView &&
+                                    !isLive && (
+                                      <LastLiveAgeBadge
+                                        value={item.lastLiveDateRaw}
+                                      />
+                                    )}
                                   {item.isAdded && !item.supplierIsLive && (
                                     <span className="text-[9px] text-danger-400 font-bold bg-danger-500/10 px-1.5 py-0.5 rounded-md border border-danger-500/20">
                                       Supplier Off

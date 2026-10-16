@@ -381,6 +381,18 @@ test("trade listings allow authorized users to add stock even when inventory exi
   assert.equal(rates.includes('message: "Enter a valid quantity in MT."'), true);
 });
 
+test("past marketplace listings show last-live age to admins only", () => {
+  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+
+  assert.equal(rates.includes("lastLiveDateRaw"), true);
+  assert.equal(rates.includes("Last live {label}"), true);
+  assert.match(
+    rates,
+    /roleLower === "admin" &&\s+isMarketplaceView &&\s+!isLive/,
+  );
+  assert.equal(rates.match(/<LastLiveAgeBadge/g)?.length, 4);
+});
+
 test("listing deletion uses a stable non-dismissible confirmation modal", () => {
   const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
   const deletion = read("../src/components/CurdTable/delete.tsx");

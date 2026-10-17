@@ -1,4 +1,4 @@
-export type SidebarPlacement = "SEEKING" | "PROVIDING" | "BOTH";
+export type SidebarPlacement = "SEEKING" | "PROVIDING" | "BOTH" | "OTHER_SERVICES";
 export type SidebarPageStatus = "LIVE" | "COMING_SOON" | "HIDDEN";
 
 export type SidebarGovernanceMapping = {

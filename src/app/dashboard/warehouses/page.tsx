@@ -17,7 +17,7 @@ import {
 } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Warehouse {
@@ -99,10 +99,12 @@ function LoadingState({ label }: { label: string }) {
 export default function WarehousesPage() {
     const queryClient = useQueryClient();
     const router = useRouter();
+    const pathname = usePathname();
     const { user } = useContext(AuthContext);
     const { formatRate } = useCurrency();
     const roleLower = String(user?.role || "").toLowerCase();
-    const initialTab = roleLower === "admin" ? "my" : "available";
+    const initialTab = pathname.endsWith("/operations") ? "movements" : "my";
+    const isOperationsPage = pathname.endsWith("/operations");
     const [activeTab, setActiveTab] = useState(initialTab);
 
     useEffect(() => {
@@ -265,7 +267,7 @@ export default function WarehousesPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                    <Button
+                    {isOperationsPage && <Button
                         color="default"
                         variant="flat"
                         size="sm"
@@ -274,8 +276,8 @@ export default function WarehousesPage() {
                         className="font-bold"
                     >
                         Inbound
-                    </Button>
-                    <Button
+                    </Button>}
+                    {isOperationsPage && <Button
                         color="default"
                         variant="flat"
                         size="sm"
@@ -284,8 +286,8 @@ export default function WarehousesPage() {
                         className="font-bold"
                     >
                         Outbound
-                    </Button>
-                    <Button
+                    </Button>}
+                    {!isOperationsPage && <Button
                         color="warning"
                         size="sm"
                         startContent={<LuPlus size={16} />}
@@ -293,7 +295,7 @@ export default function WarehousesPage() {
                         className="font-bold shadow-md shadow-obaol-500/20"
                     >
                         Add Warehouse
-                    </Button>
+                    </Button>}
                 </div>
             </div>
 
@@ -301,14 +303,18 @@ export default function WarehousesPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <StatCard icon={<LuWarehouse />} label="Total" value={loadingWarehouses ? "—" : warehouses.length} color="bg-obaol-500/10 text-obaol-500" />
                 <StatCard icon={<BsBoxes />} label="Active" value={loadingWarehouses ? "—" : warehouses.filter(w => w.isActive).length} color="bg-success-500/10 text-success-500" />
-                <StatCard icon={<FiTrendingUp />} label="Movements" value={movements.length || "—"} color="bg-primary-500/10 text-primary-500" />
-                <StatCard icon={<TbContainer />} label="Charge Records" value={charges.length || "—"} color="bg-secondary-500/10 text-secondary-500" />
+                <StatCard icon={<FiTrendingUp />} label="Movements" value={isOperationsPage ? movements.length || "—" : "Operations"} color="bg-primary-500/10 text-primary-500" />
+                <StatCard icon={<TbContainer />} label="Charge Records" value={isOperationsPage ? charges.length || "—" : "Separate"} color="bg-secondary-500/10 text-secondary-500" />
             </div>
 
             {/* Tabs */}
             <Tabs
                 selectedKey={activeTab}
-                onSelectionChange={(key) => setActiveTab(String(key))}
+                onSelectionChange={(key) => {
+                    const tab = String(key);
+                    setActiveTab(tab);
+                    router.push(tab === "my" ? "/dashboard/warehouses" : "/dashboard/warehouses/operations");
+                }}
                 variant="underlined"
                 color="warning"
                 classNames={{
@@ -318,7 +324,7 @@ export default function WarehousesPage() {
                 }}
             >
                 {/* ── My Warehouses Tab ── */}
-                <Tab key="my" title={<div className="flex items-center gap-2"><LuWarehouse size={14} /><span>My Warehouses</span></div>}>
+                {!isOperationsPage && <Tab key="my" title={<div className="flex items-center gap-2"><LuWarehouse size={14} /><span>My Warehouses</span></div>}>
                     {loadingWarehouses ? <LoadingState label="Loading warehouses…" />
                         : errorWarehouses ? <EmptyState icon={<FiAlertCircle />} title="Unable to load" description="Could not fetch warehouse data. Please try again." />
                             : warehouses.length === 0 ? <EmptyState icon={<LuWarehouse />} title="No Warehouses" description="No warehouse facilities registered yet. Click 'Add Warehouse' to get started." />
@@ -394,10 +400,10 @@ export default function WarehousesPage() {
                                         ))}
                                     </div>
                                 )}
-                </Tab>
+                </Tab>}
 
                 {/* ── Available Warehouses Tab ── */}
-                <Tab key="available" title={<div className="flex items-center gap-2"><TbContainer size={14} /><span>Available Warehouses</span></div>}>
+                {false && <Tab key="available" title={<div className="flex items-center gap-2"><TbContainer size={14} /><span>Available Warehouses</span></div>}>
                     {loadingWarehouses ? <LoadingState label="Loading warehouses…" />
                         : errorWarehouses ? <EmptyState icon={<FiAlertCircle />} title="Unable to load" description="Could not fetch warehouse data. Please try again." />
                             : availableWarehouses.length === 0 ? <EmptyState icon={<TbContainer />} title="No Rentals Available" description="No rental warehouses are listed right now." />
@@ -445,10 +451,10 @@ export default function WarehousesPage() {
                                         ))}
                                     </div>
                                 )}
-                </Tab>
+                </Tab>}
 
                 {/* ── Movements Tab ── */}
-                <Tab key="movements" title={<div className="flex items-center gap-2"><TbArrowsUpDown size={14} /><span>Movements</span></div>}>
+                {isOperationsPage && <Tab key="movements" title={<div className="flex items-center gap-2"><TbArrowsUpDown size={14} /><span>Movements</span></div>}>
                     {loadingMovements ? <LoadingState label="Loading movements…" />
                         : movements.length === 0 ? <EmptyState icon={<TbArrowsUpDown />} title="No Movements" description="No stock movement records logged yet." />
                             : (
@@ -474,10 +480,10 @@ export default function WarehousesPage() {
                                     ))}
                                 </div>
                             )}
-                </Tab>
+                </Tab>}
 
                 {/* ── Storage Charges Tab ── */}
-                <Tab key="charges" title={<div className="flex items-center gap-2"><TbContainer size={14} /><span>Storage Charges</span></div>}>
+                {isOperationsPage && <Tab key="charges" title={<div className="flex items-center gap-2"><TbContainer size={14} /><span>Storage Charges</span></div>}>
                     {loadingCharges ? <LoadingState label="Loading charges…" />
                         : charges.length === 0 ? <EmptyState icon={<TbContainer />} title="No Storage Charges" description="No storage charge records have been created yet." />
                             : (
@@ -502,7 +508,7 @@ export default function WarehousesPage() {
                                     ))}
                                 </div>
                             )}
-                </Tab>
+                </Tab>}
             </Tabs>
 
             {/* ─── Edit Warehouse Modal ────────────────────────────────────── */}

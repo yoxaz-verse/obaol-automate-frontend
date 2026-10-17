@@ -5,9 +5,16 @@ export const SIDEBAR_RECOVERY_ROUTES = new Set([
   "/dashboard/onboarding",
   "/dashboard/pending-approval",
   "/dashboard/rejected",
+  "/dashboard/guidance",
   "/dashboard/settings",
   "/dashboard/customer-support",
 ]);
+export const SIDEBAR_COMMON_ROUTES = [
+  "/dashboard",
+  "/dashboard/guidance",
+  "/dashboard/settings",
+  "/dashboard/customer-support",
+] as const;
 const STATUS_WEIGHT: Record<SidebarPageStatus, number> = { HIDDEN: 0, COMING_SOON: 1, LIVE: 2 };
 
 const normalizeSlug = (value: unknown) => String(value || "").trim().toLowerCase().replace(/_/g, "-");
@@ -21,7 +28,8 @@ export const resolveSidebarGovernance = (
   const resolved = new Map<string, ResolvedSidebarPage>();
 
   (mappings || []).filter((row) => functions.has(normalizeSlug(row.functionSlug))).forEach((row) => {
-    const placements: Array<"SEEKING" | "PROVIDING"> = row.placement === "BOTH" ? ["SEEKING", "PROVIDING"] : [row.placement];
+    if ((SIDEBAR_COMMON_ROUTES as readonly string[]).includes(row.routePath)) return;
+    const placements: Array<"SEEKING" | "PROVIDING" | "OTHER_SERVICES"> = row.placement === "BOTH" ? ["SEEKING", "PROVIDING"] : [row.placement];
     placements.forEach((placement) => {
       const key = `${placement}:${row.routePath}`;
       const current = resolved.get(key);
@@ -33,7 +41,11 @@ export const resolveSidebarGovernance = (
     });
   });
 
-  return Array.from(resolved.values()).sort((a, b) => a.order - b.order || a.routePath.localeCompare(b.routePath));
+  const rows = Array.from(resolved.values());
+  const workSpecific = new Set(rows.filter((row) => row.placement !== "OTHER_SERVICES" && row.status !== "HIDDEN").map((row) => row.routePath));
+  return rows
+    .filter((row) => row.placement !== "OTHER_SERVICES" || !workSpecific.has(row.routePath))
+    .sort((a, b) => a.order - b.order || a.routePath.localeCompare(b.routePath));
 };
 
 export const getGovernedRouteStatus = (resolved: ResolvedSidebarPage[], path: string): SidebarPageStatus => {

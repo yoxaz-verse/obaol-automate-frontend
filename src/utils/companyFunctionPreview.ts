@@ -35,12 +35,14 @@ export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinit
   ] },
   { slug: "testing", name: "Quality Testing & Labs", description: "Find quality laboratories and manage product samples and test documentation.", actions: [
     { label: "Find quality labs", href: "/dashboard/quality-labs", description: "Search the quality lab directory and view lab details.", primary: true },
-    { label: "Add or manage lab details", href: "/dashboard/quality-labs/location", description: "Maintain quality lab information when your role allows it." },
+    { label: "My Lab", href: "/dashboard/quality-labs/my", description: "Maintain your laboratory profile, credentials, and testing capabilities." },
+    { label: "Lab execution", href: "/dashboard/quality-labs/execution", description: "Track awarded testing work and received sample custody." },
     { label: "Sample requests", href: "/dashboard/sample-requests", description: "Create and track product sample requests." },
     { label: "Test documents", href: "/dashboard/documents", description: "Keep certificates and testing files together." },
   ] },
   { slug: "warehouse-storage", name: "Warehouse / Storage", description: "Manage storage locations, inventory, and warehouse requirements.", actions: [
-    { label: "Warehouses", href: "/dashboard/warehouses", description: "View and manage warehouse locations.", primary: true },
+    { label: "My Warehouses", href: "/dashboard/warehouses", description: "View and manage warehouse locations.", primary: true },
+    { label: "Warehouse operations", href: "/dashboard/warehouses/operations", description: "Record movements and review storage charges." },
     { label: "Inventory", href: "/dashboard/inventory", description: "Track stock held for trading and fulfillment." },
     { label: "Warehouse booking", href: "/dashboard/warehouse-rent", description: "Find or allocate additional storage space." },
   ] },
@@ -50,7 +52,9 @@ export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinit
     { label: "Commercial documents", href: "/dashboard/commercial-documents", description: "Manage invoices and related trade documents." },
   ] },
   { slug: "importing-to-india", name: "Importing into India", description: "Manage inbound imports to India using the current shipment and trade workflows.", actions: [
-    { label: "Imports to India", href: "/dashboard/imports", description: "Open the existing import shipment workspace.", primary: true },
+    { label: "Import Opportunities", href: "/dashboard/imports", description: "Browse incoming import listings and reserve available quantities.", primary: true },
+    { label: "My Import Listings", href: "/dashboard/imports/my-listings", description: "Create and manage your company’s incoming listings." },
+    { label: "My Reservations", href: "/dashboard/imports/reservations", description: "Track quantities your company has reserved." },
     { label: "Orders", href: "/dashboard/orders", description: "Track the orders connected to imported products." },
     { label: "Documents", href: "/dashboard/documents", description: "Manage import and customs documentation." },
     { label: "Execution requests", href: "/dashboard/execution-enquiries", description: "Follow customs, logistics, and handoff requests." },

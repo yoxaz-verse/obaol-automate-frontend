@@ -35,3 +35,31 @@ test("unmapped routes fail closed while recovery routes remain live", () => {
   assert.equal(getGovernedRouteStatus([], "/dashboard/customer-support"), "LIVE");
   assert.equal(getGovernedRouteStatus([], "/dashboard/onboarding"), "LIVE");
 });
+
+test("participant-specific destinations resolve independently", () => {
+  const resolved = resolveSidebarGovernance([
+    row("testing", "/dashboard/quality-labs", "SEEKING", "LIVE", 1),
+    row("testing", "/dashboard/quality-labs/my", "PROVIDING", "LIVE", 2),
+    row("testing", "/dashboard/quality-labs/execution", "PROVIDING", "COMING_SOON", 3),
+    row("importing-to-india", "/dashboard/imports/my-listings", "PROVIDING", "LIVE", 4),
+    row("importing-to-india", "/dashboard/imports/reservations", "SEEKING", "LIVE", 5),
+    row("warehouse-storage", "/dashboard/warehouses/operations", "PROVIDING", "HIDDEN", 6),
+  ], ["testing", "importing-to-india", "warehouse-storage"], []);
+  assert.equal(getGovernedRouteStatus(resolved, "/dashboard/quality-labs/my"), "LIVE");
+  assert.equal(getGovernedRouteStatus(resolved, "/dashboard/quality-labs/execution"), "COMING_SOON");
+  assert.equal(getGovernedRouteStatus(resolved, "/dashboard/imports/reservations"), "LIVE");
+  assert.equal(getGovernedRouteStatus(resolved, "/dashboard/warehouses/operations"), "HIDDEN");
+});
+
+test("common routes are excluded and work placement suppresses other services", () => {
+  const resolved = resolveSidebarGovernance([
+    row("buyer", "/dashboard", "BOTH", "LIVE", 0),
+    row("buyer", "/dashboard/catalog", "OTHER_SERVICES", "LIVE", 1),
+    row("seller", "/dashboard/catalog", "SEEKING", "COMING_SOON", 5),
+    row("buyer", "/dashboard/quality-labs", "OTHER_SERVICES", "LIVE", 2),
+  ], ["buyer", "seller"], []);
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard"), false);
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/catalog" && item.placement === "OTHER_SERVICES"), false);
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/catalog" && item.placement === "SEEKING"), true);
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/quality-labs" && item.placement === "OTHER_SERVICES"), true);
+});

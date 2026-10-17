@@ -299,6 +299,11 @@ export const sidebarGovernanceRoutes = {
   publish: "/admin/sidebar-governance/publish",
   resetDraft: "/admin/sidebar-governance/reset-draft",
 };
+export const labWorkItemRoutes = {
+  list: "/lab-work-items",
+  detail: (id: string) => `/lab-work-items/${id}`,
+  transition: (id: string) => `/lab-work-items/${id}/status`,
+};
 
 export const generalIntentRoutes = createCRUDRoutes(BASE_PATHS.GENERAL_INTENT);
 export const companyStageRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_STAGE);

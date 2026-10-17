@@ -11,7 +11,7 @@ import {
 } from "@/utils/dashboardAccess";
 import { getCapabilityActionLinks } from "@/utils/companyFunctionPreview";
 import type { ResolvedSidebarPage } from "@/types/sidebarGovernance";
-import { getGovernedRouteStatus } from "@/utils/sidebarGovernance";
+import { getGovernedRouteStatus, SIDEBAR_COMMON_ROUTES } from "@/utils/sidebarGovernance";
 
 export { hasWarehouseWorkspaceAccess, isWarehouseDashboardPath } from "@/utils/dashboardAccess";
 
@@ -41,7 +41,7 @@ export const isComingSoonDashboardNavigation = (
 };
 
 export type DashboardNavSection = {
-  label: DashboardSection | DashboardTaskGroup | "Seeking" | "Providing" | "Other Services" | "Coming Soon";
+  label: DashboardSection | DashboardTaskGroup | "Common" | "Seeking" | "Providing" | "Other Services" | "Coming Soon";
   links: string[];
   groups?: Array<{ label: DashboardNavGroup; links: string[] }>;
 };
@@ -57,11 +57,16 @@ const ASSOCIATE_EXECUTE_PATHS = [
 
 const ASSOCIATE_OTHER_SERVICE_PATHS = new Set([
   "/dashboard/imports",
+  "/dashboard/imports/my-listings",
+  "/dashboard/imports/reservations",
   "/dashboard/external-orders",
   "/dashboard/inventory",
   "/dashboard/warehouses",
+  "/dashboard/warehouses/operations",
   "/dashboard/warehouse-rent",
   "/dashboard/quality-labs",
+  "/dashboard/quality-labs/my",
+  "/dashboard/quality-labs/execution",
 ]);
 
 export const getRoleFilteredSidebarOptions = (
@@ -96,13 +101,15 @@ export const getDashboardSidebarSections = (
   if (normalizedRole === "associate") {
     if (governedPages) {
       const visible = governedPages.filter((row) => row.status !== "HIDDEN" && optionMap.has(row.routePath));
-      const links = (placement: "SEEKING" | "PROVIDING") => visible
+      const links = (placement: "SEEKING" | "PROVIDING" | "OTHER_SERVICES") => visible
         .filter((row) => row.placement === placement)
         .sort((a, b) => a.order - b.order)
         .map((row) => row.routePath);
       return [
+        { label: "Common", links: SIDEBAR_COMMON_ROUTES.filter((path) => optionMap.has(path)) },
         { label: "Seeking", links: links("SEEKING") },
         { label: "Providing", links: links("PROVIDING") },
+        { label: "Other Services", links: links("OTHER_SERVICES") },
       ].filter((section) => section.links.length > 0) as DashboardNavSection[];
     }
     const accessiblePathSet = new Set(
@@ -134,7 +141,7 @@ export const getDashboardSidebarSections = (
       .map((route) => route.path);
 
     const associateSections: DashboardNavSection[] = [
-      { label: "Home", links: linksForTaskGroup("Home") },
+      { label: "Common", links: SIDEBAR_COMMON_ROUTES.filter((path) => accessiblePathSet.has(path)) },
       { label: "Seeking", links: seekingLinks },
       { label: "Providing", links: providingLinks },
       { label: "Execute", links: ASSOCIATE_EXECUTE_PATHS.filter((path) => accessiblePathSet.has(path) && !COMING_SOON_NAV_PATHS.has(path)) },
@@ -147,9 +154,8 @@ export const getDashboardSidebarSections = (
       },
       {
         label: "Company & Account",
-        links: linksForTaskGroup("Company & Account").filter((path) => !selectedCapabilityLinks.has(path)),
+        links: linksForTaskGroup("Company & Account").filter((path) => !selectedCapabilityLinks.has(path) && !(SIDEBAR_COMMON_ROUTES as readonly string[]).includes(path)),
       },
-      { label: "Support", links: linksForTaskGroup("Support") },
       { label: "Coming Soon", links: COMING_SOON_NAV_PATH_ORDER.filter((path) => accessiblePathSet.has(path)) },
     ];
     return associateSections.filter((section) => section.links.length > 0);

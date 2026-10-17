@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import RevealImage from "@/components/ui/RevealImage";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -69,6 +69,8 @@ export default function ImportsPage() {
   const { user } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const roleLower = String(user?.role || "").toLowerCase();
   const { actionsAllowed } = useCompanyAccess();
   const canCreate = (roleLower !== "associate" || actionsAllowed) && (roleLower === "associate" || roleLower === "admin" || roleLower === "operator" || roleLower === "team");
@@ -99,7 +101,15 @@ export default function ImportsPage() {
   const associateCompanyId = String(user?.associateCompanyId || "");
   const reserveNeedsCompany = needsCompanySelect;
 
-  const [activeTab, setActiveTab] = useState<ImportTab>("all");
+  const routeTab: ImportTab = pathname.endsWith("/my-listings") ? "mine" : pathname.endsWith("/reservations") ? "reservations" : "all";
+  const [activeTab, setActiveTab] = useState<ImportTab>(routeTab);
+  useEffect(() => { setActiveTab(routeTab); }, [routeTab]);
+  useEffect(() => {
+    if (pathname !== "/dashboard/imports") return;
+    const legacy = searchParams.get("tab") || (typeof window !== "undefined" ? window.location.hash.replace("#", "") : "");
+    if (legacy === "mine") router.replace("/dashboard/imports/my-listings");
+    if (legacy === "reservations") router.replace("/dashboard/imports/reservations");
+  }, [pathname, router, searchParams]);
   const [createOpen, setCreateOpen] = useState(false);
   const [reserveOpen, setReserveOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -574,7 +584,7 @@ export default function ImportsPage() {
             {/* Decal: Global Stream */}
           </div>
 
-          {canCreate && (
+          {canCreate && activeTab === "mine" && (
              <Button 
                 size="md"
                 className="h-11 rounded-xl font-bold uppercase tracking-wider text-[11px] bg-warning text-black shadow-md hover:scale-105 active:scale-95 transition-all px-8"
@@ -591,7 +601,7 @@ export default function ImportsPage() {
             <Tabs
               aria-label="Import tabs"
               selectedKey={activeTab}
-              onSelectionChange={(key) => setActiveTab(key as ImportTab)}
+              onSelectionChange={(key) => router.push(key === "mine" ? "/dashboard/imports/my-listings" : key === "reservations" ? "/dashboard/imports/reservations" : "/dashboard/imports")}
               variant="underlined"
               color="warning"
               classNames={{
@@ -601,8 +611,8 @@ export default function ImportsPage() {
                 tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning group-data-[selected=true]:scale-105 transition-transform"
               }}
             >
-              <Tab key="all" title="All Listings" />
-              <Tab key="mine" title="My Listings" />
+              <Tab key="all" title="Import Opportunities" />
+              <Tab key="mine" title="My Import Listings" />
               <Tab key="reservations" title="My Reservations" />
             </Tabs>
           </div>

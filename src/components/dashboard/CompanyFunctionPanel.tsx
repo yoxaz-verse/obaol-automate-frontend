@@ -36,14 +36,14 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
     { label: "Documents", href: "/dashboard/documents" },
   ],
   "testing": [
-    { label: "Documents", href: "/dashboard/documents" },
-    { label: "Execution", href: "/dashboard/execution-enquiries" },
-    { label: "Orders", href: "/dashboard/orders" },
+    { label: "Quality Labs", href: "/dashboard/quality-labs" },
+    { label: "My Lab", href: "/dashboard/quality-labs/my" },
+    { label: "Lab Execution", href: "/dashboard/quality-labs/execution" },
   ],
   "warehouse-storage": [
-    { label: "Warehouses", href: "/dashboard/warehouses" },
-    { label: "Inventory", href: "/dashboard/inventory" },
-    { label: "Warehouse Booking", href: "/dashboard/warehouse-rent" },
+    { label: "My Warehouses", href: "/dashboard/warehouses" },
+    { label: "Warehouse Operations", href: "/dashboard/warehouses/operations" },
+    { label: "Warehouse Directory", href: "/dashboard/warehouse-rent" },
   ],
   "freight-forwarding": [
     { label: "Execution", href: "/dashboard/execution-enquiries" },
@@ -51,9 +51,9 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
     { label: "Documents", href: "/dashboard/documents" },
   ],
   "importing-to-india": [
-    { label: "Imports", href: "/dashboard/imports" },
-    { label: "Orders", href: "/dashboard/orders" },
-    { label: "Execution", href: "/dashboard/execution-enquiries" },
+    { label: "Import Opportunities", href: "/dashboard/imports" },
+    { label: "My Import Listings", href: "/dashboard/imports/my-listings" },
+    { label: "My Reservations", href: "/dashboard/imports/reservations" },
   ],
   "exporting-from-india": [
     { label: "Trade Listings", href: "/dashboard/product" },

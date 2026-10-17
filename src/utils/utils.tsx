@@ -15,7 +15,7 @@ import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
 import { LuWarehouse, LuShip, LuShare2 } from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
-import { TbBuildingWarehouse } from "react-icons/tb";
+import { TbBuildingWarehouse, TbArrowsUpDown } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
@@ -85,10 +85,12 @@ export const sidebarOptions = [
     link: "/dashboard/rate-interest",
   },
   {
-    name: "Imports",
+    name: "Import Opportunities",
     icon: <LuShip />,
     link: "/dashboard/imports",
   },
+  { name: "My Import Listings", icon: <LuShip />, link: "/dashboard/imports/my-listings" },
+  { name: "My Reservations", icon: <FiClipboard />, link: "/dashboard/imports/reservations" },
   {
     name: "Commodity Directory", //Translate
     icon: <GiBookAura />,
@@ -100,12 +102,13 @@ export const sidebarOptions = [
     link: "/dashboard/inventory",
   },
   {
-    name: "Warehouses",
+    name: "My Warehouses",
     icon: <LuWarehouse />,
     link: "/dashboard/warehouses",
   },
+  { name: "Warehouse Operations", icon: <TbArrowsUpDown />, link: "/dashboard/warehouses/operations" },
   {
-    name: "Warehouse Booking",
+    name: "Warehouse Directory",
     icon: <TbBuildingWarehouse />,
     link: "/dashboard/warehouse-rent",
   },
@@ -114,6 +117,8 @@ export const sidebarOptions = [
     icon: <LuFlaskConical />,
     link: "/dashboard/quality-labs",
   },
+  { name: "My Lab", icon: <LuFlaskConical />, link: "/dashboard/quality-labs/my" },
+  { name: "Lab Execution", icon: <FiActivity />, link: "/dashboard/quality-labs/execution" },
   {
     name: "My Company",
     icon: <GoOrganization />,

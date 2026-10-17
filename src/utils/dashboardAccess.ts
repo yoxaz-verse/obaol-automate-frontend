@@ -58,6 +58,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
 
   { path: "/dashboard/product", label: "My Trade Listings", section: "Products", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, mobilePriority: 4, primaryAction: { label: "Create trade listing", href: "/dashboard/product" } },
   { path: "/dashboard/catalog", label: "Commodity Directory", section: "Products", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Company & Account" },
+  { path: "/dashboard/catalog/additions", label: "My Catalog Additions", section: "Products", roles: ["associate"], nav: true, searchable: true, taskGroup: "Company & Account", breadcrumbParent: "/dashboard/catalog" },
   { path: "/dashboard/marketplace", label: "Trade Listings", section: "Products", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, mobilePriority: 2, journeyStage: "discover" },
 
   { path: "/dashboard/enquiries", label: "Enquiries", section: "Trade", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, mobilePriority: 3, journeyStage: "negotiate" },
@@ -103,6 +104,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/operator/earnings", label: "Earnings", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
 
   { path: "/dashboard/approvals", label: "Approvals", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/catalog-requests", label: "Catalog Requests", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/reports", label: "Reports", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/rate-interest", label: "Rate Interest", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/sidebar-governance", label: "Sidebar Governance", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },

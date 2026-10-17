@@ -335,6 +335,9 @@ export const approvalRoutes = {
   operatorAction: "/approvals/operators",
   catalogList: (entityType: string) => `/approvals/catalog/${entityType}`,
   catalogAction: (entityType: string, id: string) => `/approvals/catalog/${entityType}/${id}`,
+  catalogEdit: (entityType: string, id: string) => `/approvals/catalog/${entityType}/${id}/edit`,
+  catalogAudit: (entityType: string, id: string) => `/approvals/catalog/${entityType}/${id}/audit`,
+  catalogApproveChain: (entityType: string, id: string) => `/approvals/catalog/${entityType}/${id}/approve-chain`,
 };
 
 export const catalogModerationRoutes = {
@@ -342,6 +345,8 @@ export const catalogModerationRoutes = {
   create: (entityType: string) => `/catalog-moderation/${entityType}`,
   update: (entityType: string, id: string) => `/catalog-moderation/${entityType}/${id}`,
   submit: (entityType: string, id: string) => `/catalog-moderation/${entityType}/${id}/submit`,
+  deletePreview: (entityType: string, id: string) => `/catalog-moderation/${entityType}/${id}/delete-preview`,
+  remove: (entityType: string, id: string) => `/catalog-moderation/${entityType}/${id}`,
 };
 
 export const notificationRoutes = {

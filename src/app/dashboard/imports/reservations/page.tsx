@@ -1,1 +1,5 @@
-export { default } from "../page";
+import { ImportsWorkspace } from "../page";
+
+export default function MyImportReservationsPage() {
+  return <ImportsWorkspace mode="reservations" />;
+}

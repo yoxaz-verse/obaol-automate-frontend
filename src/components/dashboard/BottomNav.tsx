@@ -20,6 +20,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
     role: user?.role,
     providedCapabilities: user?.providedCapabilities || [],
     soughtCapabilities: user?.soughtCapabilities || [],
+    governedPages: governance.isAssociate ? governance.resolved : undefined,
   }).filter((route) => !governance.isAssociate || getGovernedRouteStatus(governance.resolved, route?.path || "") === "LIVE");
 
   const openMore = () => {

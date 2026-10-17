@@ -3,10 +3,10 @@ import { expect, test } from "@playwright/test";
 const password = "FlowTest!234";
 
 const accounts = [
-  { name: "BUY Associate", path: "/auth/associate", email: "buyer@e2e.obaol.test", role: "Buyer", allowed: "/dashboard/marketplace", allowedLabel: "Trade Listings", denied: "/dashboard/product" },
-  { name: "SELL Associate", path: "/auth/associate", email: "seller@e2e.obaol.test", role: "Seller", allowed: "/dashboard/product", allowedLabel: "My Trade Listings", denied: null },
-  { name: "BOTH Associate", path: "/auth/associate", email: "both@e2e.obaol.test", role: "Buyer & Seller", allowed: "/dashboard/enquiries", allowedLabel: "Enquiries", denied: null },
-  { name: "SERVICE Associate", path: "/auth/associate", email: "service@e2e.obaol.test", role: "Service Provider", allowed: "/dashboard/execution-enquiries", allowedLabel: "Execution Panel", denied: "/dashboard/product" },
+  { name: "BUY Associate", path: "/auth/associate", email: "buyer@e2e.obaol.test", role: "Associate", allowed: "/dashboard/marketplace", allowedLabel: "Trade Listings", denied: "/dashboard/product" },
+  { name: "SELL Associate", path: "/auth/associate", email: "seller@e2e.obaol.test", role: "Associate", allowed: "/dashboard/product", allowedLabel: "My Trade Listings", denied: null },
+  { name: "BOTH Associate", path: "/auth/associate", email: "both@e2e.obaol.test", role: "Associate", allowed: "/dashboard/enquiries", allowedLabel: "Enquiries", denied: null },
+  { name: "SERVICE Associate", path: "/auth/associate", email: "service@e2e.obaol.test", role: "Associate", allowed: "/dashboard/execution-enquiries", allowedLabel: "Execution Panel", denied: "/dashboard/product" },
   { name: "Operator", path: "/auth/operator", email: "operator@e2e.obaol.test", role: "Operator", allowed: "/dashboard/operator/hierarchy", allowedLabel: "Hierarchy", group: "Team & Users", denied: "/dashboard/approvals" },
   { name: "Team", path: "/auth/operator", email: "team@e2e.obaol.test", role: "Operator", allowed: "/dashboard/operator/team", allowedLabel: "Team", group: "Team & Users", denied: "/dashboard/approvals" },
   { name: "Admin", path: "/auth/admin", email: "admin@e2e.obaol.test", role: "Admin", allowed: "/dashboard/approvals", allowedLabel: "Approvals", group: "Governance", denied: null },
@@ -218,10 +218,10 @@ test("rejected associate receives an explicit login rejection", async ({ page })
 
 test("BOTH associate focus persists across reloads", async ({ page }) => {
   await login(page, accounts[2]);
-  await page.getByRole("button", { name: /Seller/ }).click();
-  await expect(page.getByRole("button", { name: /Seller/ })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("tab", { name: "Providing", exact: true }).click();
+  await expect(page.getByRole("tab", { name: "Providing", exact: true })).toHaveAttribute("aria-selected", "true");
   await page.reload();
-  await expect(page.getByRole("button", { name: /Seller/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("tab", { name: "Providing", exact: true })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByText(/selling enquir(?:y|ies)/i)).toBeVisible();
 });
 

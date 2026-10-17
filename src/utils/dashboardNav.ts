@@ -189,11 +189,13 @@ export const getDashboardBottomNavigation = ({
   capabilities = [],
   providedCapabilities = [],
   soughtCapabilities = [],
+  governedPages,
 }: {
   role: unknown;
   capabilities?: string[];
   providedCapabilities?: string[];
   soughtCapabilities?: string[];
+  governedPages?: ResolvedSidebarPage[];
 }) => {
   const combinedCapabilities = Array.from(new Set([...capabilities, ...providedCapabilities, ...soughtCapabilities]));
   const routes = getAccessibleDashboardRoutes({ role, capabilities: combinedCapabilities });
@@ -207,9 +209,15 @@ export const getDashboardBottomNavigation = ({
       : provided.has("buyer") || sought.has("seller") || normalized.has("sourcing")
         ? "/dashboard/marketplace"
         : "/dashboard/execution-enquiries";
-    return ["/dashboard", priorityPath, "/dashboard/enquiries", "/dashboard/orders"]
-      .map((path) => routeMap.get(path))
-      .filter(Boolean);
+    const preferred = ["/dashboard", priorityPath, "/dashboard/enquiries", "/dashboard/orders"];
+    const governedLive = (governedPages || [])
+      .filter((row) => row.status === "LIVE")
+      .sort((a, b) => a.order - b.order)
+      .map((row) => row.routePath);
+    const paths = Array.from(new Set([...preferred, ...governedLive])).filter((path) => (
+      path === "/dashboard" || !governedPages || getGovernedRouteStatus(governedPages, path) === "LIVE"
+    ));
+    return paths.map((path) => routeMap.get(path)).filter(Boolean).slice(0, 4);
   }
   return routes
     .filter((route) => route.mobilePriority)

@@ -17,7 +17,7 @@ import {
 } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Warehouse {
@@ -96,15 +96,14 @@ function LoadingState({ label }: { label: string }) {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
-export default function WarehousesPage() {
+export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "operations" }) {
     const queryClient = useQueryClient();
     const router = useRouter();
-    const pathname = usePathname();
     const { user } = useContext(AuthContext);
     const { formatRate } = useCurrency();
     const roleLower = String(user?.role || "").toLowerCase();
-    const initialTab = pathname.endsWith("/operations") ? "movements" : "my";
-    const isOperationsPage = pathname.endsWith("/operations");
+    const initialTab = mode === "operations" ? "movements" : "my";
+    const isOperationsPage = mode === "operations";
     const [activeTab, setActiveTab] = useState(initialTab);
 
     useEffect(() => {
@@ -122,9 +121,7 @@ export default function WarehousesPage() {
 
     // ── Queries ────────────────────────────────────────────────────────────────
     const warehouseScope =
-        activeTab === "available"
-            ? "available"
-            : activeTab === "my"
+        activeTab === "my"
                 ? roleLower === "admin"
                     ? "all"
                     : "my"
@@ -137,15 +134,6 @@ export default function WarehousesPage() {
             return res?.data?.data || res?.data || [];
         },
     });
-    const { data: warehousesAllData } = useQuery({
-        queryKey: ["warehouses", "all"],
-        queryFn: async () => {
-            const res: any = await getData(apiRoutes.warehouses.list, { scope: "all" });
-            return res?.data?.data || res?.data || [];
-        },
-        enabled: activeTab === "available" && roleLower === "admin",
-    });
-
     const { data: categoriesData } = useQuery({
         queryKey: ["warehouse-categories"],
         queryFn: async () => {
@@ -177,18 +165,6 @@ export default function WarehousesPage() {
     });
 
     const warehouses: Warehouse[] = Array.isArray(warehousesData) ? warehousesData : [];
-    const allWarehouses: Warehouse[] = Array.isArray(warehousesAllData) ? warehousesAllData : [];
-    const availableWarehouses: Warehouse[] = useMemo(() => {
-        if (activeTab !== "available") return warehouses;
-        if (warehouses.length > 0) return warehouses;
-        if (roleLower !== "admin") return warehouses;
-        return allWarehouses.filter((wh) => {
-            const listingType = String(wh?.listingType || "").toUpperCase();
-            const rentalActive = wh?.isRentalActive === true || (wh as any)?.isRentalActive === "true" || (wh as any)?.isRentalActive === 1;
-            const active = wh?.isActive === true || (wh as any)?.isActive === "true" || (wh as any)?.isActive === 1;
-            return active && ((listingType === "RENTAL" && rentalActive) || (!wh?.listingType && rentalActive));
-        });
-    }, [activeTab, warehouses, allWarehouses, roleLower]);
     const categories = Array.isArray(categoriesData) ? categoriesData : [];
     const categoryNameMap = new Map(categories.map((cat: any) => [String(cat?._id || ""), cat?.name || ""]));
     const movements = Array.isArray(movementsData) ? movementsData : [];
@@ -395,57 +371,6 @@ export default function WarehousesPage() {
                                                             {wh.contactPhone ? "Contact" : "Contact unavailable"}
                                                         </Button>
                                                     </div>
-                                                </CardBody>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                )}
-                </Tab>}
-
-                {/* ── Available Warehouses Tab ── */}
-                {false && <Tab key="available" title={<div className="flex items-center gap-2"><TbContainer size={14} /><span>Available Warehouses</span></div>}>
-                    {loadingWarehouses ? <LoadingState label="Loading warehouses…" />
-                        : errorWarehouses ? <EmptyState icon={<FiAlertCircle />} title="Unable to load" description="Could not fetch warehouse data. Please try again." />
-                            : availableWarehouses.length === 0 ? <EmptyState icon={<TbContainer />} title="No Rentals Available" description="No rental warehouses are listed right now." />
-                                : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                                        {availableWarehouses.map((wh) => (
-                                            <Card key={wh._id} className="bg-content1 border border-default-200/50 shadow-sm hover:shadow-md hover:border-obaol-500/30 transition-all duration-200">
-                                                <CardHeader className="flex items-start justify-between gap-3 pb-2 px-4 pt-4">
-                                                    <div className="flex items-center gap-3 min-w-0">
-                                                        <div className="w-9 h-9 rounded-xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 flex-shrink-0">
-                                                            <LuWarehouse size={18} />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <h3 className="font-black text-sm text-foreground tracking-tight truncate">{wh.name}</h3>
-                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">Capacity · {wh.totalCapacity ?? 0} MT</p>
-                                                        </div>
-                                                    </div>
-                                                    <Chip size="sm" variant="flat" color="warning" className="text-[9px] font-bold uppercase tracking-wide">Rental</Chip>
-                                                </CardHeader>
-                                                <Divider className="opacity-50" />
-                                                <CardBody className="px-4 py-3 space-y-2">
-                                                    {wh.address && (
-                                                        <p className="text-xs text-default-500 line-clamp-2">{wh.address}</p>
-                                                    )}
-                                                    <div className="flex items-center justify-between text-xs pt-1">
-                                                        <span className="text-default-400 font-medium">
-                                                            {wh.category === "COLD_STORAGE" ? "Cold Storage"
-                                                                : wh.category === "BONDED" ? "Bonded Warehouse"
-                                                                    : wh.category === "AGRO" ? "Agro Warehouse"
-                                                                        : "General Warehouse"}
-                                                        </span>
-                                                        <span className="font-bold text-foreground">Capacity: {wh.totalCapacity ?? 0} MT</span>
-                                                    </div>
-                                                    {Array.isArray(wh.allowedCategoryIds) && wh.allowedCategoryIds.length > 0 && (
-                                                        <div className="flex flex-wrap gap-1 pt-1">
-                                                            {wh.allowedCategoryIds.map((catId) => (
-                                                                <Chip key={catId} size="sm" variant="flat" className="text-[9px] font-bold uppercase tracking-wide">
-                                                                    {categoryNameMap.get(String(catId)) || "Category"}
-                                                                </Chip>
-                                                            ))}
-                                                        </div>
-                                                    )}
                                                 </CardBody>
                                             </Card>
                                         ))}
@@ -747,4 +672,8 @@ export default function WarehousesPage() {
             </Modal>
         </div>
     );
+}
+
+export default function WarehousesPage() {
+    return <WarehousesWorkspace mode="owned" />;
 }

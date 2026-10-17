@@ -1,0 +1,27 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
+
+test("catalog additions use a dedicated owner workspace", () => {
+  const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
+  const additions = read("../src/app/dashboard/catalog/additions/page.tsx");
+  assert.equal(wizard.includes("Requested name"), false);
+  assert.match(wizard, /dashboard\/catalog\/additions/);
+  assert.match(additions, /Private — catalog approval pending/);
+  assert.match(additions, /Locked after approval/);
+  assert.match(additions, /deletePreview/);
+});
+
+test("catalog moderation has a dedicated audited admin queue", () => {
+  const page = read("../src/app/dashboard/catalog-requests/page.tsx");
+  const queue = read("../src/components/dashboard/Approvals/CatalogApprovalQueues.tsx");
+  const approvals = read("../src/app/dashboard/approvals/page.tsx");
+  assert.match(page, /CatalogApprovalQueues/);
+  assert.equal(approvals.includes("CatalogApprovalQueues"), false);
+  assert.match(queue, /Approve chain/);
+  assert.match(queue, /Save audited edit/);
+  assert.match(queue, /Associate/);
+  assert.match(queue, /Company/);
+});

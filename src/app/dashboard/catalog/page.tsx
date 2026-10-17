@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useState, useContext } from "react";
 import dynamic from "next/dynamic";
-import { Input, Chip, Pagination } from "@nextui-org/react";
+import Link from "next/link";
+import { Button, Input, Chip, Pagination } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { FiSearch, FiX, FiFolder, FiPackage, FiLayers, FiChevronRight } from "react-icons/fi";
 import { ProductList } from "@/components/dashboard/Catalog/product-list";
@@ -385,6 +386,7 @@ export default function CatalogPage() {
             )}
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto">
+            {isAssociateUser && <Button as={Link} href="/dashboard/catalog/additions" color="warning" variant="flat" className="shrink-0">My Additions</Button>}
             <div className="w-full md:w-[380px] relative">
               <Input
                 placeholder="Deep search — products, categories, variants..."

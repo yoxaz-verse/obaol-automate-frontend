@@ -26,7 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { fetchCatalogHierarchyOptions, normalizeCatalogSearch, type CatalogHierarchyOption } from "@/utils/catalogHierarchy";
 import { showToastMessage } from "@/utils/utils";
-import { associateCompanyRoutes, associateRoutes, catalogModerationRoutes, productVariantRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
+import { associateCompanyRoutes, associateRoutes, productVariantRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
 import {
   applyProductionMethod,
@@ -331,36 +331,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successData, setSuccessData] = useState<any>(null);
-  const [showCatalogRequest, setShowCatalogRequest] = useState(false);
-  const [catalogRequestName, setCatalogRequestName] = useState("");
-  const [catalogRequestDescription, setCatalogRequestDescription] = useState("");
-
   const roleLower = String(user?.role || "").toLowerCase();
-  const requestEntityType: CommodityField = !formData.category ? "category" : !formData.subCategory ? "subCategory" : !formData.product ? "product" : "productVariant";
-  const catalogRequestMutation = useMutation({
-    mutationFn: async () => {
-      const payload: any = { name: catalogRequestName.trim(), description: catalogRequestDescription.trim() };
-      if (requestEntityType === "subCategory") payload.category = formData.category;
-      if (requestEntityType === "product") payload.subCategory = formData.subCategory;
-      if (requestEntityType === "productVariant") payload.product = formData.product;
-      const created = await postData(catalogModerationRoutes.create(requestEntityType), payload, {});
-      const row = created?.data?.data;
-      if (!row?._id) throw new Error("Catalog proposal was created without an id.");
-      await postData(catalogModerationRoutes.submit(requestEntityType, row._id), {}, {});
-      return row;
-    },
-    onSuccess: (row: any) => {
-      const option: CatalogHierarchyOption = { id: String(row._id), name: String(row.name), level: requestEntityType, parentId: requestEntityType === "category" ? null : String(row.category || row.subCategory || row.product || ""), parentName: null, approvalStatus: "PENDING_REVIEW", reviewNotes: "" };
-      if (requestEntityType === "category") setCategories((prev) => [...prev, option]);
-      if (requestEntityType === "subCategory") setSubCategories((prev) => [...prev, option]);
-      if (requestEntityType === "product") setProducts((prev) => [...prev, option]);
-      if (requestEntityType === "productVariant") setVariants((prev) => [...prev, option]);
-      setValue(requestEntityType, row._id);
-      setCatalogRequestName(""); setCatalogRequestDescription(""); setShowCatalogRequest(false);
-      showToastMessage({ type: "success", message: `${option.name} submitted for admin approval.` });
-    },
-    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Could not submit catalog request." }),
-  });
   const { data: calculationConfig } = useCalculationConfig(roleLower === "admin");
   const commissionPercent =
     calculationConfig?.variantRateCommissionPercent ??
@@ -1318,12 +1289,12 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         <div className="flex items-start gap-2">
                           <FiGlobe size={16} className="text-obaol-400 mt-0.5" />
                           <p className="text-[11px] sm:text-xs text-obaol-700 dark:text-obaol-300 leading-relaxed font-medium">
-                            Can&apos;t find the next directory level? Request it here and continue building your private chain while admin reviews it.
+                            Can&apos;t find the right directory entry? Build and manage a private category, product, and variant chain while admin reviews it.
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-3">
-                          <button type="button" onClick={() => setShowCatalogRequest((value) => !value)} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-obaol-300 hover:text-obaol-200 underline underline-offset-4">
-                            Request {requestEntityType === "productVariant" ? "Variant" : requestEntityType === "subCategory" ? "Subcategory" : requestEntityType.charAt(0).toUpperCase() + requestEntityType.slice(1)}
+                          <button type="button" onClick={() => router.push("/dashboard/catalog/additions?returnTo=/dashboard/product")} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-obaol-300 hover:text-obaol-200 underline underline-offset-4">
+                            Manage My Catalog Additions
                             <FiArrowRight size={14} />
                           </button>
                           <button type="button" onClick={goToGlobalCatalog} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-default-500 hover:text-foreground underline underline-offset-4">
@@ -1331,16 +1302,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           </button>
                         </div>
                       </div>
-                      {showCatalogRequest && roleLower === "associate" && (
-                        <div className="mt-4 grid grid-cols-1 gap-3 border-t border-obaol-500/20 pt-4 sm:grid-cols-2">
-                          <Input label="Requested name" value={catalogRequestName} onValueChange={setCatalogRequestName} />
-                          <Input label="Description" value={catalogRequestDescription} onValueChange={setCatalogRequestDescription} />
-                          <div className="sm:col-span-2 flex justify-end gap-2">
-                            <Button size="sm" variant="light" onPress={() => setShowCatalogRequest(false)}>Cancel</Button>
-                            <Button size="sm" color="warning" isLoading={catalogRequestMutation.isPending} isDisabled={!catalogRequestName.trim()} onPress={() => catalogRequestMutation.mutate()}>Submit for approval</Button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                     <section aria-labelledby="classification-heading" className="rounded-2xl border border-default-200 bg-content1 p-4 sm:p-5">
                       <div className="mb-4">

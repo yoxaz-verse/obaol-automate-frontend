@@ -78,6 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const dotMap: Record<string, number> = {
         "/dashboard/notifications": Number(unreadSummary.notifications || 0),
         "/dashboard/approvals": Number(unreadSummary.approvals || 0),
+        "/dashboard/catalog-requests": Number(unreadSummary.approvals || 0),
         "/dashboard/enquiries": Number(unreadSummary.enquiries || 0),
         "/dashboard/orders": Number(unreadSummary.orders || 0),
         "/dashboard/inventory": Number(unreadSummary.inventory || 0),

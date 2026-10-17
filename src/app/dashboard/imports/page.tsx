@@ -64,7 +64,7 @@ import {
 
 type ImportTab = "all" | "mine" | "reservations";
 
-export default function ImportsPage() {
+export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
   const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
   const { user } = useContext(AuthContext);
   const queryClient = useQueryClient();
@@ -101,9 +101,7 @@ export default function ImportsPage() {
   const associateCompanyId = String(user?.associateCompanyId || "");
   const reserveNeedsCompany = needsCompanySelect;
 
-  const routeTab: ImportTab = pathname.endsWith("/my-listings") ? "mine" : pathname.endsWith("/reservations") ? "reservations" : "all";
-  const [activeTab, setActiveTab] = useState<ImportTab>(routeTab);
-  useEffect(() => { setActiveTab(routeTab); }, [routeTab]);
+  const activeTab: ImportTab = mode;
   useEffect(() => {
     if (pathname !== "/dashboard/imports") return;
     const legacy = searchParams.get("tab") || (typeof window !== "undefined" ? window.location.hash.replace("#", "") : "");
@@ -1988,4 +1986,8 @@ export default function ImportsPage() {
       </Modal>
     </motion.div>
   );
+}
+
+export default function ImportsPage() {
+  return <ImportsWorkspace mode="all" />;
 }

@@ -271,6 +271,11 @@ export const sidebarOptions = [
     link: "/dashboard/function-preview",
   },
   {
+    name: "Sidebar Governance",
+    icon: <MdOutlineSettingsInputComponent />,
+    link: "/dashboard/sidebar-governance",
+  },
+  {
     name: "Essentials", //Translate
     icon: <MdOutlineSettingsInputComponent />,
     link: "/dashboard/essentials",

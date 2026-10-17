@@ -30,6 +30,7 @@ import { getData } from "@/core/api/apiHandler";
 import { notificationRoutes } from "@/core/api/apiRoutes";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSoundEffect } from "@/context/SoundContext";
+import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 
 const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => {
   const { logout, user } = useContext(AuthContext);
@@ -44,6 +45,8 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const mobileMenuReturnFocusRef = useRef<HTMLElement | null>(null);
   const { soundEnabled, setSoundEnabled } = useSoundEffect();
   const [currentTime, setCurrentTime] = useState("");
+  const governance = useSidebarGovernance();
+  const governedPages = governance.isAssociate ? governance.resolved : undefined;
 
   useEffect(() => {
     setMounted(true);
@@ -178,7 +181,8 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const filteredOptions = getRoleFilteredSidebarOptions(
     sidebarOptions as any[],
     String(role || ""),
-    [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
+    [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
+    governedPages,
   );
   const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
   const pathname = usePathname();
@@ -189,6 +193,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     capabilities,
     user?.providedCapabilities || [],
     user?.soughtCapabilities || [],
+    governedPages,
   );
   const activeMobileAdminGroup = mobileSections
     .find((section) => section.label === "Operations/Admin")
@@ -286,15 +291,15 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                          {group.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
                                            <button
                                              key={opt.name}
-                                             onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities)) { router.push(opt.link); setIsMobileMenuOpen(false); } }}
-                                             disabled={isComingSoonDashboardNavigation(opt.link, role, capabilities)}
-                                             aria-label={isComingSoonDashboardNavigation(opt.link, role, capabilities) ? `${opt.name}, coming soon` : opt.name}
-                                             aria-current={isDashboardRouteActive(pathname, opt.link) && !isComingSoonDashboardNavigation(opt.link, role, capabilities) ? "page" : undefined}
-                                             className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isComingSoonDashboardNavigation(opt.link, role, capabilities) ? "cursor-not-allowed text-default-400 opacity-55" : isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                             onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)) { router.push(opt.link); setIsMobileMenuOpen(false); } }}
+                                             disabled={isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)}
+                                             aria-label={isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? `${opt.name}, coming soon` : opt.name}
+                                             aria-current={isDashboardRouteActive(pathname, opt.link) && !isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? "page" : undefined}
+                                             className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? "cursor-not-allowed text-default-400 opacity-55" : isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                            >
                                              <span className="text-lg">{opt.icon}</span>
                                              <span className="text-sm">{opt.name}</span>
-                                             {isComingSoonDashboardNavigation(opt.link, role, capabilities) && (
+                                             {isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) && (
                                                <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-obaol-700 dark:text-obaol-300">Coming soon</span>
                                              )}
                                            </button>
@@ -306,15 +311,15 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                }) : sec.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
                                  <button
                                    key={opt.name}
-                                   onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities)) { router.push(opt.link); setIsMobileMenuOpen(false); } }}
-                                   disabled={isComingSoonDashboardNavigation(opt.link, role, capabilities)}
-                                   aria-label={isComingSoonDashboardNavigation(opt.link, role, capabilities) ? `${opt.name}, coming soon` : opt.name}
-                                   aria-current={isDashboardRouteActive(pathname, opt.link) && !isComingSoonDashboardNavigation(opt.link, role, capabilities) ? "page" : undefined}
-                                   className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isComingSoonDashboardNavigation(opt.link, role, capabilities) ? "cursor-not-allowed text-default-400 opacity-55" : isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                   onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)) { router.push(opt.link); setIsMobileMenuOpen(false); } }}
+                                   disabled={isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)}
+                                   aria-label={isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? `${opt.name}, coming soon` : opt.name}
+                                   aria-current={isDashboardRouteActive(pathname, opt.link) && !isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? "page" : undefined}
+                                   className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? "cursor-not-allowed text-default-400 opacity-55" : isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                  >
                                    <span className="text-lg">{opt.icon}</span>
                                    <span className="text-sm">{opt.name}</span>
-                                   {isComingSoonDashboardNavigation(opt.link, role, capabilities) && (
+                                   {isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) && (
                                      <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-obaol-700 dark:text-obaol-300">Coming soon</span>
                                    )}
                                  </button>

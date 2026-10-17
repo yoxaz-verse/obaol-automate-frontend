@@ -10,6 +10,8 @@ import {
   isWarehouseDashboardPath,
 } from "@/utils/dashboardAccess";
 import { getCapabilityActionLinks } from "@/utils/companyFunctionPreview";
+import type { ResolvedSidebarPage } from "@/types/sidebarGovernance";
+import { getGovernedRouteStatus } from "@/utils/sidebarGovernance";
 
 export { hasWarehouseWorkspaceAccess, isWarehouseDashboardPath } from "@/utils/dashboardAccess";
 
@@ -30,8 +32,10 @@ const COMING_SOON_NAV_PATHS = new Set<string>(COMING_SOON_NAV_PATH_ORDER);
 export const isComingSoonDashboardNavigation = (
   path: string,
   role: unknown,
-  capabilities: string[] = []
+  capabilities: string[] = [],
+  governedPages?: ResolvedSidebarPage[],
 ) => {
+  if (normalizeDashboardRole(role) === "associate" && governedPages) return getGovernedRouteStatus(governedPages, path) === "COMING_SOON";
   if (isWarehouseDashboardPath(path)) return !hasWarehouseWorkspaceAccess(role, capabilities);
   return normalizeDashboardRole(role) !== "admin" && COMING_SOON_NAV_PATHS.has(path);
 };
@@ -63,12 +67,15 @@ const ASSOCIATE_OTHER_SERVICE_PATHS = new Set([
 export const getRoleFilteredSidebarOptions = (
   sidebarOptions: SidebarOption[],
   role: string,
-  capabilities: string[] = []
+  capabilities: string[] = [],
+  governedPages?: ResolvedSidebarPage[],
 ): SidebarOption[] => {
   const allowedLinks = new Set(
     getAccessibleDashboardRoutes({ role, capabilities }).map((route) => route.path)
   );
-  return sidebarOptions.filter((option) => allowedLinks.has(option.link));
+  return sidebarOptions.filter((option) => allowedLinks.has(option.link) && (
+    normalizeDashboardRole(role) !== "associate" || !governedPages || getGovernedRouteStatus(governedPages, option.link) !== "HIDDEN"
+  ));
 };
 
 export const getDashboardSidebarSections = (
@@ -77,6 +84,7 @@ export const getDashboardSidebarSections = (
   capabilities: string[] = [],
   providedCapabilities: string[] = [],
   soughtCapabilities: string[] = [],
+  governedPages?: ResolvedSidebarPage[],
 ): DashboardNavSection[] => {
   const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
   const accessibleRoutes = getAccessibleDashboardRoutes({
@@ -86,6 +94,17 @@ export const getDashboardSidebarSections = (
   const normalizedRole = normalizeDashboardRole(role);
 
   if (normalizedRole === "associate") {
+    if (governedPages) {
+      const visible = governedPages.filter((row) => row.status !== "HIDDEN" && optionMap.has(row.routePath));
+      const links = (placement: "SEEKING" | "PROVIDING") => visible
+        .filter((row) => row.placement === placement)
+        .sort((a, b) => a.order - b.order)
+        .map((row) => row.routePath);
+      return [
+        { label: "Seeking", links: links("SEEKING") },
+        { label: "Providing", links: links("PROVIDING") },
+      ].filter((section) => section.links.length > 0) as DashboardNavSection[];
+    }
     const accessiblePathSet = new Set(
       accessibleRoutes.filter((route) => optionMap.has(route.path)).map((route) => route.path)
     );

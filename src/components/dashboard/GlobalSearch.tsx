@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { sidebarOptions } from "@/utils/utils";
 import AuthContext from "@/context/AuthContext";
 import { getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
+import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 
 export default function GlobalSearch() {
   const [query, setQuery] = useState("");
@@ -15,12 +16,15 @@ export default function GlobalSearch() {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useContext(AuthContext);
+  const governance = useSidebarGovernance();
+  const governedPages = governance.isAssociate ? governance.resolved : undefined;
   const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
 
   const accessibleOptions = getRoleFilteredSidebarOptions(
     sidebarOptions as any[],
     String(user?.role || ""),
-    [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
+    [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
+    governedPages,
   );
   const filteredOptions = accessibleOptions.filter((option) =>
     option.name.toLowerCase().includes(query.toLowerCase())
@@ -87,8 +91,8 @@ export default function GlobalSearch() {
                  <button
                    key={option.link}
                    onClick={() => handleSelect(option.link)}
-                   disabled={isComingSoonDashboardNavigation(option.link, user?.role, capabilities)}
-                   aria-label={isComingSoonDashboardNavigation(option.link, user?.role, capabilities) ? `${option.name}, coming soon` : option.name}
+                   disabled={isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages)}
+                   aria-label={isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages) ? `${option.name}, coming soon` : option.name}
                    className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-primary/5 group transition-all text-left outline-none focus:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-55"
                  >
                    <div className="flex flex-col">
@@ -99,7 +103,7 @@ export default function GlobalSearch() {
                        Redirection: {option.link.replace("/dashboard/", "").replace("-", " ")}
                      </span>
                    </div>
-                   {isComingSoonDashboardNavigation(option.link, user?.role, capabilities) ? (
+                   {isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages) ? (
                      <span className="rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-obaol-700 dark:text-obaol-300">Coming soon</span>
                    ) : (
                      <LuArrowRight size={14} className="text-default-300 group-hover:text-primary transition-all group-hover:translate-x-1" />

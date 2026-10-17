@@ -292,6 +292,13 @@ export const commissionRuleRoutes = createCRUDRoutes(BASE_PATHS.COMMISSION_RULE)
 export const companyFunctionRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_FUNCTION);
 export const companySubFunctionRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_SUB_FUNCTION);
 export const companyFunctionMappingRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_FUNCTION_MAPPING);
+export const sidebarGovernanceRoutes = {
+  published: "/sidebar-governance/published",
+  admin: "/admin/sidebar-governance",
+  draft: "/admin/sidebar-governance/draft",
+  publish: "/admin/sidebar-governance/publish",
+  resetDraft: "/admin/sidebar-governance/reset-draft",
+};
 
 export const generalIntentRoutes = createCRUDRoutes(BASE_PATHS.GENERAL_INTENT);
 export const companyStageRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_STAGE);

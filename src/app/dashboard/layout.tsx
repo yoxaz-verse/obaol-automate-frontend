@@ -18,6 +18,7 @@ import { isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import DashboardContextBar from "@/components/dashboard/DashboardContextBar";
 import CompanyApprovalBanner from "@/components/dashboard/CompanyApprovalBanner";
 import LiveNotificationSubscriber from "@/components/dashboard/LiveNotificationSubscriber";
+import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -51,6 +52,11 @@ function DashboardLayoutContent({
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const [navigationNotice, setNavigationNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNavigationNotice(new URLSearchParams(window.location.search).get("navigation"));
+  }, [pathname]);
 
   // Load state on mount
   useEffect(() => {
@@ -68,6 +74,7 @@ function DashboardLayoutContent({
   };
 
   const { user, loading } = useContext(AuthContext);
+  const governance = useSidebarGovernance();
   const roleLower = String(user?.role || "").toLowerCase();
   const isOperatorFamily = roleLower === "operator" || roleLower === "team";
   const isAssociate = roleLower === "associate";
@@ -164,7 +171,7 @@ function DashboardLayoutContent({
       const [action] = match;
       const route = ACTION_ROUTES[action];
       const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
-      if (!route || !canAccessDashboardRoute({ path: route, role: user?.role }) || isComingSoonDashboardNavigation(route, user?.role, capabilities)) return;
+      if (!route || !canAccessDashboardRoute({ path: route, role: user?.role }) || isComingSoonDashboardNavigation(route, user?.role, capabilities, governance.isAssociate ? governance.resolved : undefined)) return;
 
       event.preventDefault();
       router.push(route);
@@ -172,7 +179,7 @@ function DashboardLayoutContent({
 
     window.addEventListener("keydown", handler, { capture: true });
     return () => window.removeEventListener("keydown", handler, { capture: true } as any);
-  }, [router, user?.providedCapabilities, user?.role, user?.soughtCapabilities]);
+  }, [router, user?.providedCapabilities, user?.role, user?.soughtCapabilities, governance.isAssociate, governance.resolved]);
 
   if (!isMounted || loading) {
     return (
@@ -210,6 +217,11 @@ function DashboardLayoutContent({
               }}
             >
               <div data-dashboard-content className="max-w-[var(--db-content-width)] mx-auto w-full px-3 pb-4 pt-1 md:p-6 min-w-0">
+                {navigationNotice && pathname === "/dashboard" ? (
+                  <div role="status" className="mb-3 rounded-xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-sm text-warning-700 dark:text-warning-300">
+                    {navigationNotice === "coming-soon" ? "That workspace is coming soon and is not available yet." : "That workspace is not available for your current company functions."}
+                  </div>
+                ) : null}
                 <DashboardContextBar />
                 <CompanyApprovalBanner />
                 {children}

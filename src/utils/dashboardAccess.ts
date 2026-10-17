@@ -27,6 +27,7 @@ export type DashboardJourneyStage = "overview" | "discover" | "negotiate" | "sam
 export type DashboardTaskGroup = "Home" | "Buy" | "Sell" | "Execute" | "Services" | "Warehouse" | "Company & Account" | "Support" | "Operations/Admin";
 
 export type DashboardRouteDefinition = {
+  id: string;
   path: string;
   label: string;
   section: DashboardSection;
@@ -47,7 +48,7 @@ export type DashboardRouteDefinition = {
   helpId: string;
 };
 
-type DashboardRouteInput = Omit<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId" | "navIcon" | "taskGroup"> & Partial<Pick<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId" | "navIcon" | "taskGroup">>;
+type DashboardRouteInput = Omit<DashboardRouteDefinition, "id" | "description" | "journeyStage" | "requiredApprovalStates" | "helpId" | "navIcon" | "taskGroup"> & Partial<Pick<DashboardRouteDefinition, "id" | "description" | "journeyStage" | "requiredApprovalStates" | "helpId" | "navIcon" | "taskGroup">>;
 
 const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard", label: "Dashboard", section: "Overview", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true, mobilePriority: 1 },
@@ -78,11 +79,11 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Warehouse" },
   { path: "/dashboard/quality-labs", label: "Quality Labs", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/quality-labs/:id", label: "Quality lab profile", section: "Services", roles: ["admin", "associate", "operator", "team"] },
-  { path: "/dashboard/quality-labs/location", label: "Quality lab location", section: "Services", roles: ["admin", "associate"] },
+  { path: "/dashboard/quality-labs/location", label: "Quality lab location", section: "Services", roles: ["admin", "associate"], breadcrumbParent: "/dashboard/quality-labs" },
 
   { path: "/dashboard/inventory", label: "Inventory", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/warehouses", label: "Warehouses", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Warehouse" },
-  { path: "/dashboard/warehouses/location", label: "Warehouse location", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], taskGroup: "Warehouse" },
+  { path: "/dashboard/warehouses/location", label: "Warehouse location", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], taskGroup: "Warehouse", breadcrumbParent: "/dashboard/warehouses" },
   { path: "/dashboard/company", label: "My Company", section: "Organization", roles: ["associate"], nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
   { path: "/dashboard/referrals", label: "Referrals & Earnings", section: "Organization", roles: ["associate"], nav: true, searchable: true, journeyStage: "organize" },
   { path: "/dashboard/companies", label: "Companies", section: "Organization", roles: ["admin", "operator", "team"], nav: true, searchable: true },
@@ -99,6 +100,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/approvals", label: "Approvals", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/reports", label: "Reports", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/rate-interest", label: "Rate Interest", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/sidebar-governance", label: "Sidebar Governance", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/payments", label: "Payment Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/documentation-rules", label: "Documentation Rules", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/documentation-preview", label: "Documentation Preview", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
@@ -172,6 +174,7 @@ const defaultTaskGroup = (route: DashboardRouteInput): DashboardTaskGroup => {
 
 export const DASHBOARD_ROUTE_MANIFEST: DashboardRouteDefinition[] = DASHBOARD_ROUTE_INPUTS.map((route) => ({
   ...route,
+  id: route.id || route.path.replace(/^\/dashboard\/?/, "").replace(/[:/]/g, "-") || "dashboard",
   navIcon: route.navIcon || navIconByPath[route.path] || "default",
   taskGroup: route.taskGroup || defaultTaskGroup(route),
   activeParent: route.activeParent || route.breadcrumbParent,

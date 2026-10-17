@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { notificationRoutes, supportChatRoutes } from "@/core/api/apiRoutes";
+import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -28,11 +29,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const [, startTransition] = useTransition();
     const [pendingLink, setPendingLink] = useState<string | null>(null);
     const [openAdminGroup, setOpenAdminGroup] = useState<string | null>(null);
+    const governance = useSidebarGovernance();
+    const governedPages = governance.isAssociate ? governance.resolved : undefined;
 
     const filteredOptions = getRoleFilteredSidebarOptions(
         sidebarOptions as any[],
         String(user?.role || ""),
-        [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])]
+        [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
+        governedPages,
     );
     const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
@@ -42,6 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         capabilities,
         user?.providedCapabilities || [],
         user?.soughtCapabilities || [],
+        governedPages,
     );
     const activeAdminGroup = sidebarSections
         .find((section) => section.label === "Operations/Admin")
@@ -83,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const handleOptionClick = (e: React.MouseEvent, optionLink: string) => {
         e.preventDefault();
         if (isOnboardingLocked) return;
-        if (isComingSoonDashboardNavigation(optionLink, user?.role, capabilities)) return;
+        if (isComingSoonDashboardNavigation(optionLink, user?.role, capabilities, governedPages)) return;
         if (pathname === optionLink) return;
 
         play("nav");
@@ -106,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     }, [activeAdminGroupLabel]);
 
     const renderOption = (opt: (typeof filteredOptions)[number], nested = false) => {
-        const isComingSoon = isComingSoonDashboardNavigation(opt.link, user?.role, capabilities);
+        const isComingSoon = isComingSoonDashboardNavigation(opt.link, user?.role, capabilities, governedPages);
         const isActive = !isComingSoon && isDashboardRouteActive(pathname, opt.link);
         const badgeCount = Number(dotMap[opt.link] || 0);
         const isDisabled = isOnboardingLocked || isComingSoon;

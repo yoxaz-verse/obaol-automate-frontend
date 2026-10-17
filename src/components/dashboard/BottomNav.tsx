@@ -8,16 +8,19 @@ import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { getDashboardBottomNavigation } from "@/utils/dashboardNav";
 import { isDashboardRouteActive } from "@/utils/dashboardAccess";
+import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
+import { getGovernedRouteStatus } from "@/utils/sidebarGovernance";
 
 const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolean }) => {
   const pathname = usePathname();
   const { user } = useContext(AuthContext);
+  const governance = useSidebarGovernance();
   const optionsByPath = new Map(sidebarOptions.map((option) => [option.link, option]));
   const routes = getDashboardBottomNavigation({
     role: user?.role,
     providedCapabilities: user?.providedCapabilities || [],
     soughtCapabilities: user?.soughtCapabilities || [],
-  });
+  }).filter((route) => !governance.isAssociate || getGovernedRouteStatus(governance.resolved, route?.path || "") === "LIVE");
 
   const openMore = () => {
     if (isOnboardingLocked) return;

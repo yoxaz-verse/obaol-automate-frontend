@@ -21,6 +21,7 @@ import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell, FiFlag, FiFileText, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen, FiSliders, FiSettings, FiHeadphones } from "react-icons/fi";
 import { LuBox, LuTruck, LuWallet, LuBuilding2, LuStore, LuPackage, LuFlaskConical } from "react-icons/lu";
+import { RiAuctionLine } from "react-icons/ri";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -63,6 +64,11 @@ export const sidebarOptions = [
     name: "Enquiries", //Translate
     icon: <RiFileAddLine />,
     link: "/dashboard/enquiries",
+  },
+  {
+    name: "Bidding",
+    icon: <RiAuctionLine />,
+    link: "/dashboard/bidding",
   },
   {
     name: "Sample Requests",

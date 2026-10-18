@@ -261,6 +261,17 @@ export const enquiryRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.ENQUIRY
   seaPorts: `${BASE_PATHS.ENQUIRY}/sea-ports`,
   buyerOptions: `${BASE_PATHS.ENQUIRY}/buyer-options`,
 });
+export const productBiddingRoutes = {
+  list: "/product-bidding",
+  create: "/product-bidding",
+  update: (id: string) => `/product-bidding/${id}`,
+  publish: (id: string) => `/product-bidding/${id}/publish`,
+  cancel: (id: string) => `/product-bidding/${id}/cancel`,
+  close: (id: string) => `/product-bidding/${id}/close`,
+  offer: (id: string) => `/product-bidding/${id}/offer`,
+  award: (id: string) => `/product-bidding/${id}/award`,
+  confirmEnquiry: (id: string) => `/product-bidding/${id}/confirm-enquiry`,
+};
 export const systemConfigRoutes = {
   obaolCompany: "/system-config/obaol-company",
   calculations: "/system-config/calculations",

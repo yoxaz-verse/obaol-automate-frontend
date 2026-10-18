@@ -36,7 +36,8 @@ export const getData = async (
     }
     return response;
   } catch (error) {
-    console.error("Error in getData:", error);
+    // Callers (typically query boundaries) own presentation and telemetry. Logging
+    // here duplicates handled failures and produces console noise during redirects.
     throw error;
   }
 };

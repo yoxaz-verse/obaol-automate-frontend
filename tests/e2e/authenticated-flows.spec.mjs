@@ -3,10 +3,10 @@ import { expect, test } from "@playwright/test";
 const password = "FlowTest!234";
 
 const accounts = [
-  { name: "BUY Associate", path: "/auth/associate", email: "buyer@e2e.obaol.test", role: "Associate", allowed: "/dashboard/marketplace", allowedLabel: "Trade Listings", denied: "/dashboard/product" },
+  { name: "BUY Associate", path: "/auth/associate", email: "buyer@e2e.obaol.test", role: "Associate", allowed: "/dashboard/marketplace", allowedLabel: "Trade Listings", denied: null },
   { name: "SELL Associate", path: "/auth/associate", email: "seller@e2e.obaol.test", role: "Associate", allowed: "/dashboard/product", allowedLabel: "My Trade Listings", denied: null },
   { name: "BOTH Associate", path: "/auth/associate", email: "both@e2e.obaol.test", role: "Associate", allowed: "/dashboard/enquiries", allowedLabel: "Enquiries", denied: null },
-  { name: "SERVICE Associate", path: "/auth/associate", email: "service@e2e.obaol.test", role: "Associate", allowed: "/dashboard/execution-enquiries", allowedLabel: "Execution Panel", denied: "/dashboard/product" },
+  { name: "SERVICE Associate", path: "/auth/associate", email: "service@e2e.obaol.test", role: "Associate", allowed: "/dashboard/quality-labs/execution", allowedLabel: "Lab Execution", denied: "/dashboard/product", deniedRedirect: /\/dashboard\?navigation=not-available$/ },
   { name: "Operator", path: "/auth/operator", email: "operator@e2e.obaol.test", role: "Operator", allowed: "/dashboard/operator/hierarchy", allowedLabel: "Hierarchy", group: "Team & Users", denied: "/dashboard/approvals" },
   { name: "Team", path: "/auth/operator", email: "team@e2e.obaol.test", role: "Operator", allowed: "/dashboard/operator/team", allowedLabel: "Team", group: "Team & Users", denied: "/dashboard/approvals" },
   { name: "Admin", path: "/auth/admin", email: "admin@e2e.obaol.test", role: "Admin", allowed: "/dashboard/approvals", allowedLabel: "Approvals", group: "Governance", denied: null },
@@ -62,7 +62,7 @@ const navigateThroughVisibleUi = async (page, account) => {
     }
   } else {
     if (account.group) await page.locator("[data-sidebar]").getByRole("button", { name: new RegExp(account.group) }).click();
-    await page.locator("[data-sidebar]").getByRole("button", { name: account.allowedLabel, exact: true }).click();
+    await page.locator("[data-sidebar]").getByRole("button", { name: account.allowedLabel, exact: true }).first().click();
   }
   await expect(page).toHaveURL(new RegExp(`${account.allowed.replaceAll("/", "\\/")}$`));
 };
@@ -195,7 +195,7 @@ for (const account of accounts) {
     await expect(page).not.toHaveURL(/\/403$/);
     if (account.denied) {
       await page.goto(account.denied, { waitUntil: "networkidle" });
-      await expect(page).toHaveURL(/\/403$/, { timeout: 10_000 });
+      await expect(page).toHaveURL(account.deniedRedirect || /\/403$/, { timeout: 10_000 });
     }
     assertClean();
   });

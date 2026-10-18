@@ -57,6 +57,7 @@ const INITIAL_COMMODITY_LOAD_STATES: CommodityLoadStates = {
   product: { status: "idle" },
   productVariant: { status: "idle" },
 };
+const CATALOG_WIZARD_DRAFT_KEY = "obaol.catalog-listing-wizard-draft";
 
 type CommodityPickerProps = {
   field: CommodityField;
@@ -332,6 +333,15 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successData, setSuccessData] = useState<any>(null);
   const roleLower = String(user?.role || "").toLowerCase();
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined") return;
+    try {
+      const saved = window.sessionStorage.getItem(CATALOG_WIZARD_DRAFT_KEY);
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === "object") setFormData((current) => ({ ...parsed, ...current }));
+    } catch { /* Ignore an invalid browser draft and keep the current form. */ }
+  }, [isOpen]);
   const { data: calculationConfig } = useCalculationConfig(roleLower === "admin");
   const commissionPercent =
     calculationConfig?.variantRateCommissionPercent ??
@@ -1293,7 +1303,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-3">
-                          <button type="button" onClick={() => router.push("/dashboard/catalog/additions?returnTo=/dashboard/product")} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-obaol-300 hover:text-obaol-200 underline underline-offset-4">
+                          <button type="button" onClick={() => { window.sessionStorage.setItem(CATALOG_WIZARD_DRAFT_KEY, JSON.stringify(formData)); router.push("/dashboard/catalog/additions?returnTo=/dashboard/product"); }} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-obaol-300 hover:text-obaol-200 underline underline-offset-4">
                             Manage My Catalog Additions
                             <FiArrowRight size={14} />
                           </button>

@@ -11,7 +11,9 @@ export type SidebarGovernanceMapping = {
 
 export type SidebarGovernanceSnapshot = {
   revision: number;
+  resolutionVersion: 1 | 2;
   updatedAt?: string;
+  sectionOrder: Record<"SEEKING" | "PROVIDING" | "OTHER_SERVICES", string[]>;
   mappings: SidebarGovernanceMapping[];
 };
 

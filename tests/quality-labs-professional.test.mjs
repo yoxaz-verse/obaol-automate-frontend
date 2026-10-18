@@ -56,6 +56,19 @@ test("wizard uses searchable fields and direct taxonomy creation", async () => {
   assert.match(source, /autoFocus/);
 });
 
+test("admin selects a company before viewing or changing its shared lab panel", async () => {
+  const source = await readFile(wizardPath, "utf8");
+  assert.match(source, /SearchableSelect label="Associate company to manage"/);
+  assert.match(source, /Select an associate company/);
+  assert.match(source, /draftQuery\.data\?\.draft \|\| draftQuery\.data\?\.published/);
+  assert.match(source, /resetWizard\(\); setCompanyId/);
+  assert.match(source, /Select an associate company before saving/);
+  assert.match(source, /Select an associate company before submitting/);
+  assert.match(source, /isDisabled=\{isAdmin && !companyId\}/);
+  assert.match(source, /Loading the lab profile/);
+  assert.match(source, /Unable to load the lab profile/);
+});
+
 test("lab contacts expose safe explicit WhatsApp actions", async () => {
   const [directory, map] = await Promise.all([readFile(directoryPath, "utf8"), readFile(mapPath, "utf8")]);
   assert.equal(whatsappHref("+91 98765-43210"), "https://wa.me/919876543210");

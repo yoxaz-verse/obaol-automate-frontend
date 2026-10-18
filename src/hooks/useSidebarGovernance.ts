@@ -19,7 +19,7 @@ export const useSidebarGovernance = () => {
     retry: 1,
   });
   const resolved = isAssociate && query.isSuccess
-    ? resolveSidebarGovernance(query.data?.mappings, user?.providedCapabilities || [], user?.soughtCapabilities || [])
+    ? resolveSidebarGovernance(query.data?.mappings, user?.providedCapabilities || [], user?.soughtCapabilities || [], { resolutionVersion: query.data?.resolutionVersion, sectionOrder: query.data?.sectionOrder })
     : [];
   return { ...query, isAssociate, resolved };
 };

@@ -63,3 +63,29 @@ test("common routes are excluded and work placement suppresses other services", 
   assert.equal(resolved.some((item) => item.routePath === "/dashboard/catalog" && item.placement === "SEEKING"), true);
   assert.equal(resolved.some((item) => item.routePath === "/dashboard/quality-labs" && item.placement === "OTHER_SERVICES"), true);
 });
+
+test("v2 resolves seeking and providing against their own company perspectives", () => {
+  const resolved = resolveSidebarGovernance([
+    row("buyer", "/dashboard/bidding", "SEEKING", "LIVE", 0),
+    row("seller", "/dashboard/product", "PROVIDING", "LIVE", 0),
+    row("packaging", "/dashboard/orders", "BOTH", "LIVE", 0),
+  ], ["seller", "packaging"], ["buyer", "packaging"], { resolutionVersion: 2 });
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/bidding" && item.placement === "SEEKING"), true);
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/product" && item.placement === "PROVIDING"), true);
+  assert.deepEqual(resolved.filter((item) => item.routePath === "/dashboard/orders").map((item) => item.placement).sort(), ["PROVIDING", "SEEKING"]);
+});
+
+test("v2 does not activate a work rule from the wrong perspective and uses global section order", () => {
+  const resolved = resolveSidebarGovernance([
+    row("buyer", "/dashboard/bidding", "SEEKING", "LIVE", 0),
+    row("buyer", "/dashboard/catalog", "PROVIDING", "LIVE", 0),
+    row("buyer", "/dashboard/orders", "OTHER_SERVICES", "LIVE", 0),
+    row("seller", "/dashboard/product", "PROVIDING", "LIVE", 99),
+  ], ["buyer", "seller"], [], {
+    resolutionVersion: 2,
+    sectionOrder: { PROVIDING: ["/dashboard/product", "/dashboard/catalog"], SEEKING: [], OTHER_SERVICES: ["/dashboard/orders"] },
+  });
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/bidding"), false);
+  assert.deepEqual(resolved.filter((item) => item.placement === "PROVIDING").map((item) => item.routePath), ["/dashboard/product", "/dashboard/catalog"]);
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/orders" && item.placement === "OTHER_SERVICES"), true);
+});

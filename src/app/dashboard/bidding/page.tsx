@@ -39,6 +39,7 @@ import { deleteData, getData, postData, putData } from "@/core/api/apiHandler";
 import { productBiddingRoutes, productRoutes, variantRateRoutes } from "@/core/api/apiRoutes";
 
 type Mode = "buyer" | "seller";
+type SellerView = "available" | "participating" | "history";
 type EventRow = {
   _id: string;
   title: string;
@@ -63,16 +64,16 @@ const message = (error: any) => error?.response?.data?.message || "The request c
 const dateText = (value?: string) =>
   value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "Not scheduled";
 
-export default function BiddingPage() {
+export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode }) {
   const { user } = useContext(AuthContext);
   const client = useQueryClient();
   const role = String(user?.role || "").toLowerCase();
   const provided = user?.providedCapabilities || [];
   const sought = user?.soughtCapabilities || [];
   const canBuy = role !== "associate" || sought.includes("buyer") || provided.includes("buyer");
-  const canSell = role !== "associate" || provided.includes("seller");
-  const [mode, setMode] = useState<Mode>(canBuy ? "buyer" : "seller");
+  const mode = fixedMode;
   const [status, setStatus] = useState("ALL");
+  const [sellerView, setSellerView] = useState<SellerView>("available");
   const [showCreate, setShowCreate] = useState(false);
   const [activeOffer, setActiveOffer] = useState<EventRow | null>(null);
   const [error, setError] = useState("");
@@ -97,9 +98,9 @@ export default function BiddingPage() {
   });
 
   const eventsQuery = useQuery({
-    queryKey: ["product-bidding", mode, status],
+    queryKey: ["product-bidding", mode, status, sellerView],
     queryFn: async () =>
-      (await getData(productBiddingRoutes.list, { mode, ...(status !== "ALL" ? { status } : {}) }, { cacheMode: "bypass" }))
+      (await getData(productBiddingRoutes.list, { mode, ...(mode === "buyer" && status !== "ALL" ? { status } : {}), ...(mode === "seller" ? { view: sellerView } : {}) }, { cacheMode: "bypass" }))
         .data.data as EventRow[],
   });
 
@@ -268,9 +269,11 @@ export default function BiddingPage() {
               <FiLock />
               <span className="text-xs font-black uppercase tracking-[.2em]">Sealed product offers</span>
             </div>
-            <h1 className="text-3xl font-black">Bidding</h1>
+            <h1 className="text-3xl font-black">{mode === "buyer" ? "My Buying Requests" : "Bidding"}</h1>
             <p className="mt-1 max-w-2xl text-sm text-default-500">
-              Create scheduled buying requirements or participate with a confidential offer linked to your company’s trade listing.
+              {mode === "buyer"
+                ? "Create and manage sealed buying requests, compare offers after closing, and select a winning seller."
+                : "Discover product opportunities and participate with a confidential offer linked to your company’s trade listing."}
             </p>
           </div>
           {mode === "buyer" && canBuy && (
@@ -283,7 +286,7 @@ export default function BiddingPage() {
                 setShowCreate(true);
               }}
             >
-              Create bidding event
+              Create buying request
             </Button>
           )}
         </div>
@@ -302,24 +305,17 @@ export default function BiddingPage() {
       )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <Tabs
-          selectedKey={mode}
-          onSelectionChange={(key) => {
-            setMode(String(key) as Mode);
-            setStatus("ALL");
-          }}
-          color="warning"
-          variant="underlined"
-        >
-          {canBuy && <Tab key="buyer" title="Buying events" />}
-          {canSell && <Tab key="seller" title="Seller opportunities" />}
-        </Tabs>
+        {mode === "seller" ? <Tabs selectedKey={sellerView} onSelectionChange={(key) => setSellerView(String(key) as SellerView)} color="warning" variant="underlined" aria-label="Seller bidding views">
+          <Tab key="available" title="Available" />
+          <Tab key="participating" title="Participating" />
+          <Tab key="history" title="History" />
+        </Tabs> : <div className="text-sm font-semibold text-default-500">Buyer workspace</div>}
         <Button isIconOnly variant="light" aria-label="Refresh" onPress={() => refresh()}>
           <FiRefreshCw />
         </Button>
       </div>
 
-      <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
+      {mode === "buyer" && <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
         {["ALL", ...statuses].map((item) => (
           <Button
             key={item}
@@ -332,7 +328,7 @@ export default function BiddingPage() {
             {item.replaceAll("_", " ")}
           </Button>
         ))}
-      </div>
+      </div>}
 
       {eventsQuery.isLoading ? (
         <div className="flex h-48 items-center justify-center">
@@ -341,8 +337,8 @@ export default function BiddingPage() {
       ) : rows.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-divider py-20 text-center">
           <FiLock className="mx-auto mb-3 text-3xl text-default-300" />
-          <h2 className="font-bold">No bidding events here</h2>
-          <p className="text-sm text-default-500">Events matching this view will appear here.</p>
+          <h2 className="font-bold">{mode === "buyer" ? "No buying requests here" : sellerView === "available" ? "No available bidding opportunities" : sellerView === "participating" ? "You are not participating in any bidding events" : "No bidding history yet"}</h2>
+          <p className="text-sm text-default-500">{mode === "buyer" ? "Buying requests matching this status will appear here." : "Matching seller opportunities will appear here."}</p>
         </div>
       ) : (
         <section className="grid gap-4 lg:grid-cols-2">
@@ -535,7 +531,7 @@ export default function BiddingPage() {
                   <FiLock size={13} />
                   <span>Sealed Procurement</span>
                 </div>
-                <h2 className="text-xl font-black text-foreground sm:text-2xl">Create sealed bidding event</h2>
+                <h2 className="text-xl font-black text-foreground sm:text-2xl">Create sealed buying request</h2>
                 <p className="text-xs font-normal text-default-500 sm:text-sm">
                   Prices remain strictly confidential and sealed until the scheduled event close.
                 </p>
@@ -681,7 +677,7 @@ export default function BiddingPage() {
                   className="font-bold shadow-lg shadow-warning-500/20"
                   startContent={!create.isPending && <FiPlus />}
                 >
-                  Schedule bidding
+                  Schedule buying request
                 </Button>
               </ModalFooter>
             </form>

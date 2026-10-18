@@ -62,7 +62,8 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/marketplace", label: "Trade Listings", section: "Products", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, mobilePriority: 2, journeyStage: "discover" },
 
   { path: "/dashboard/enquiries", label: "Enquiries", section: "Trade", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, mobilePriority: 3, journeyStage: "negotiate" },
-  { path: "/dashboard/bidding", label: "Bidding", section: "Trade", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, journeyStage: "negotiate", taskGroup: "Buy", description: "Create sealed product bidding events or submit confidential offers." },
+  { path: "/dashboard/bidding", label: "Bidding", section: "Trade", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, journeyStage: "negotiate", taskGroup: "Sell", description: "Discover eligible product bidding opportunities and submit confidential offers." },
+  { path: "/dashboard/bidding/my", label: "My Buying Requests", section: "Trade", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, journeyStage: "negotiate", taskGroup: "Buy", description: "Create and manage sealed product buying requests." },
   { path: "/dashboard/enquiries/:id", label: "Enquiry details", section: "Trade", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/enquiries", journeyStage: "negotiate" },
   { path: "/dashboard/sample-requests", label: "Sample Requests", section: "Trade", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, journeyStage: "sample" },
   { path: "/dashboard/sample-requests/:id", label: "Sample request details", section: "Trade", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/sample-requests", journeyStage: "sample" },
@@ -154,6 +155,7 @@ const navIconByPath: Record<string, string> = {
   "/dashboard/product": "listings",
   "/dashboard/enquiries": "enquiries",
   "/dashboard/bidding": "enquiries",
+  "/dashboard/bidding/my": "enquiries",
   "/dashboard/sample-requests": "samples",
   "/dashboard/orders": "orders",
   "/dashboard/documents": "documents",

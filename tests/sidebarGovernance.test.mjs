@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { getGovernedRouteStatus, resolveSidebarGovernance } from "../src/utils/sidebarGovernance.ts";
+
+const governancePagePath = new URL("../src/app/dashboard/sidebar-governance/page.tsx", import.meta.url);
 
 const row = (functionSlug, routePath, placement, status, order = 0) => ({ functionSlug, routePath, placement, status, order });
 
@@ -88,4 +91,26 @@ test("v2 does not activate a work rule from the wrong perspective and uses globa
   assert.equal(resolved.some((item) => item.routePath === "/dashboard/bidding"), false);
   assert.deepEqual(resolved.filter((item) => item.placement === "PROVIDING").map((item) => item.routePath), ["/dashboard/product", "/dashboard/catalog"]);
   assert.equal(resolved.some((item) => item.routePath === "/dashboard/orders" && item.placement === "OTHER_SERVICES"), true);
+});
+
+test("admin editor exposes one independent matrix row per company function", async () => {
+  const source = await readFile(governancePagePath, "utf8");
+  assert.match(source, /selected\.assignments\.map/);
+  assert.match(source, />Company function</);
+  assert.match(source, />Perspective</);
+  assert.match(source, /"Unassigned"/);
+  assert.match(source, /patch\.placement === "UNASSIGNED" \? \{ status: "HIDDEN"/);
+  assert.match(source, /Other Services \(legacy\)/);
+  assert.doesNotMatch(source, /Add audience rule/);
+  assert.doesNotMatch(source, /Unselected functions in Other Services/);
+});
+
+test("seller-only Bidding requires Seller in provided capabilities", () => {
+  const mappings = [
+    row("seller", "/dashboard/bidding", "PROVIDING", "LIVE"),
+    row("buyer", "/dashboard/bidding", "OTHER_SERVICES", "HIDDEN"),
+  ];
+  assert.equal(getGovernedRouteStatus(resolveSidebarGovernance(mappings, [], ["seller"], { resolutionVersion: 2 }), "/dashboard/bidding"), "HIDDEN");
+  assert.equal(resolveSidebarGovernance(mappings, ["seller"], [], { resolutionVersion: 2 }).some((item) => item.routePath === "/dashboard/bidding" && item.placement === "PROVIDING"), true);
+  assert.equal(getGovernedRouteStatus(resolveSidebarGovernance(mappings, ["buyer"], [], { resolutionVersion: 2 }), "/dashboard/bidding"), "HIDDEN");
 });

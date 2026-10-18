@@ -71,6 +71,11 @@ export const sidebarOptions = [
     link: "/dashboard/bidding",
   },
   {
+    name: "My Buying Requests",
+    icon: <RiAuctionLine />,
+    link: "/dashboard/bidding/my",
+  },
+  {
     name: "Sample Requests",
     icon: <LuBox />,
     link: "/dashboard/sample-requests",

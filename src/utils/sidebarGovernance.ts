@@ -15,6 +15,12 @@ export const SIDEBAR_COMMON_ROUTES = [
   "/dashboard/settings",
   "/dashboard/customer-support",
 ] as const;
+export const SIDEBAR_HOME_ROUTES = ["/dashboard"] as const;
+export const SIDEBAR_UTILITY_ROUTES = [
+  "/dashboard/guidance",
+  "/dashboard/settings",
+  "/dashboard/customer-support",
+] as const;
 const STATUS_WEIGHT: Record<SidebarPageStatus, number> = { HIDDEN: 0, COMING_SOON: 1, LIVE: 2 };
 
 const normalizeSlug = (value: unknown) => String(value || "").trim().toLowerCase().replace(/_/g, "-");

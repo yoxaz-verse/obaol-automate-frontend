@@ -112,7 +112,7 @@ test("Associate desktop and mobile navigation share common and governed sidebar 
   const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
   const desktop = readFileSync("src/components/dashboard/Sidebar.tsx", "utf8");
   const mobile = readFileSync("src/components/dashboard/TopBar.tsx", "utf8");
-  const labels = ["Common", "Seeking", "Providing", "Other Services"];
+  const labels = ["Home", "Seeking", "Providing", "Other Services", "Common"];
   let previousIndex = -1;
   for (const label of labels) {
     const index = navigation.indexOf(`label: \"${label}\"`, previousIndex + 1);
@@ -121,7 +121,8 @@ test("Associate desktop and mobile navigation share common and governed sidebar 
   }
   assert.match(navigation, /getCapabilityActionLinks\(selectedCapabilities, perspective\)/);
   assert.match(navigation, /!selectedCapabilityLinks\.has\(path\)/);
-  assert.match(navigation, /SIDEBAR_COMMON_ROUTES\.filter/);
+  assert.match(navigation, /SIDEBAR_HOME_ROUTES\.filter/);
+  assert.match(navigation, /SIDEBAR_UTILITY_ROUTES\.filter/);
   assert.match(navigation, /links\("OTHER_SERVICES"\)/);
   assert.match(readFileSync("src/utils/utils.tsx", "utf8"), /link: "\/dashboard\/commercial-documents"/);
   for (const source of [desktop, mobile]) {

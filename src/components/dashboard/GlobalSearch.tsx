@@ -6,7 +6,7 @@ import { LuSearch, LuArrowRight, LuLayers } from "react-icons/lu";
 import { useRouter } from "next/navigation";
 import { sidebarOptions } from "@/utils/utils";
 import AuthContext from "@/context/AuthContext";
-import { getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
+import { getDashboardSidebarSections, getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 
 export default function GlobalSearch() {
@@ -20,12 +20,22 @@ export default function GlobalSearch() {
   const governedPages = governance.isAssociate ? governance.resolved : undefined;
   const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
 
-  const accessibleOptions = getRoleFilteredSidebarOptions(
+  const roleFilteredOptions = getRoleFilteredSidebarOptions(
     sidebarOptions as any[],
     String(user?.role || ""),
     [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
     governedPages,
   );
+  const accessibleOptions = String(user?.role || "").toLowerCase() === "associate"
+    ? getDashboardSidebarSections(
+      roleFilteredOptions as any[],
+      String(user?.role || ""),
+      capabilities,
+      user?.providedCapabilities || [],
+      user?.soughtCapabilities || [],
+      governedPages,
+    ).flatMap((section) => section.links.map((path) => roleFilteredOptions.find((option) => option.link === path)).filter(Boolean)) as typeof roleFilteredOptions
+    : roleFilteredOptions;
   const filteredOptions = accessibleOptions.filter((option) =>
     option.name.toLowerCase().includes(query.toLowerCase())
   );

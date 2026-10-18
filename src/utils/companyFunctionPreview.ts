@@ -29,9 +29,9 @@ export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinit
     { label: "Track orders", href: "/dashboard/orders", description: "Follow sourced products after confirmation." },
   ] },
   { slug: "packaging", name: "Packaging", description: "Coordinate packaging requirements through active requests, orders, and documents.", actions: [
-    { label: "Execution requests", href: "/dashboard/execution-enquiries", description: "Review packaging work requested for active enquiries.", primary: true },
-    { label: "Orders", href: "/dashboard/orders", description: "Check packaging requirements attached to orders." },
-    { label: "Documents", href: "/dashboard/documents", description: "Manage packing lists, labels, and related files." },
+    { label: "Packaging Services", href: "/dashboard/packaging", description: "Find providers or create a sealed packaging requirement.", primary: true },
+    { label: "My Packaging", href: "/dashboard/packaging/my", description: "Maintain packaging capabilities, credentials, and coverage." },
+    { label: "Packaging Execution", href: "/dashboard/packaging/execution", description: "Track awarded packaging work and dispatch readiness." },
   ] },
   { slug: "testing", name: "Quality Testing & Labs", description: "Find quality laboratories and manage product samples and test documentation.", actions: [
     { label: "Find quality labs", href: "/dashboard/quality-labs", description: "Search the quality lab directory and view lab details.", primary: true },

@@ -86,6 +86,10 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/quality-labs/execution", label: "Lab Execution", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/quality-labs/:id", label: "Quality lab profile", section: "Services", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/quality-labs" },
   { path: "/dashboard/quality-labs/location", label: "Edit lab profile", section: "Services", roles: ["admin", "associate"], breadcrumbParent: "/dashboard/quality-labs/my" },
+  { path: "/dashboard/packaging", label: "Packaging Services", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, description: "Find packaging providers and create sealed packaging requirements." },
+  { path: "/dashboard/packaging/my", label: "My Packaging", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, description: "Manage packaging capabilities, credentials, and service coverage." },
+  { path: "/dashboard/packaging/execution", label: "Packaging Execution", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, description: "Track awarded packaging work through dispatch readiness." },
+  { path: "/dashboard/packaging/:id", label: "Packaging provider", section: "Services", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/packaging" },
 
   { path: "/dashboard/inventory", label: "Inventory", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/warehouses", label: "My Warehouses", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Warehouse" },
@@ -161,6 +165,7 @@ const navIconByPath: Record<string, string> = {
   "/dashboard/external-orders": "external-orders",
   "/dashboard/warehouse-rent": "warehouse",
   "/dashboard/quality-labs": "quality",
+  "/dashboard/packaging": "execution",
   "/dashboard/company": "company",
   "/dashboard/companies": "company",
   "/dashboard/notifications": "notifications",

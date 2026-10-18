@@ -125,6 +125,9 @@ export const sidebarOptions = [
   },
   { name: "My Lab", icon: <LuFlaskConical />, link: "/dashboard/quality-labs/my" },
   { name: "Lab Execution", icon: <FiActivity />, link: "/dashboard/quality-labs/execution" },
+  { name: "Packaging Services", icon: <FiPackage />, link: "/dashboard/packaging" },
+  { name: "My Packaging", icon: <FiPackage />, link: "/dashboard/packaging/my" },
+  { name: "Packaging Execution", icon: <FiActivity />, link: "/dashboard/packaging/execution" },
   {
     name: "My Company",
     icon: <GoOrganization />,

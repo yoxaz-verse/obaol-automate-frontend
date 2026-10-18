@@ -272,6 +272,28 @@ export const productBiddingRoutes = {
   award: (id: string) => `/product-bidding/${id}/award`,
   confirmEnquiry: (id: string) => `/product-bidding/${id}/confirm-enquiry`,
 };
+export const packagingRoutes = {
+  taxonomy: "/packaging/taxonomy",
+  taxonomyRequests: "/packaging/taxonomy/requests",
+  taxonomyReview: (id: string) => `/packaging/taxonomy/${id}`,
+  draft: "/packaging/profiles/draft",
+  submitProfile: "/packaging/profiles/submit",
+  approvals: "/packaging/profiles/approvals",
+  reviewProfile: (id: string) => `/packaging/profiles/approvals/${id}`,
+  directory: "/packaging/directory",
+  profile: (id: string) => `/packaging/directory/${id}`,
+  requirements: "/packaging/requirements",
+  requirement: (id: string) => `/packaging/requirements/${id}`,
+  publish: (id: string) => `/packaging/requirements/${id}/publish`,
+  close: (id: string) => `/packaging/requirements/${id}/close`,
+  cancel: (id: string) => `/packaging/requirements/${id}/cancel`,
+  offer: (id: string) => `/packaging/requirements/${id}/offer`,
+  award: (id: string) => `/packaging/requirements/${id}/award`,
+  workOrders: "/packaging/work-orders",
+  workOrder: (id: string) => `/packaging/work-orders/${id}`,
+  transition: (id: string) => `/packaging/work-orders/${id}/status`,
+  documents: (id: string) => `/packaging/work-orders/${id}/documents`,
+};
 export const systemConfigRoutes = {
   obaolCompany: "/system-config/obaol-company",
   calculations: "/system-config/calculations",

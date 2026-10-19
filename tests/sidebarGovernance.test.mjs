@@ -2,6 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { getGovernedRouteStatus, resolveSidebarGovernance } from "../src/utils/sidebarGovernance.ts";
+import {
+  applyAssignmentPanelStatus,
+  getAssignmentPanelState,
+  toggleFunctionPanel,
+} from "../src/utils/sidebarGovernanceEditor.ts";
 
 const governancePagePath = new URL("../src/app/dashboard/sidebar-governance/page.tsx", import.meta.url);
 
@@ -93,16 +98,57 @@ test("v2 does not activate a work rule from the wrong perspective and uses globa
   assert.equal(resolved.some((item) => item.routePath === "/dashboard/orders" && item.placement === "OTHER_SERVICES"), true);
 });
 
-test("admin editor exposes one independent matrix row per company function", async () => {
+test("admin editor exposes four accessible assignment panels instead of dropdown rows", async () => {
   const source = await readFile(governancePagePath, "utf8");
-  assert.match(source, /selected\.assignments\.map/);
-  assert.match(source, />Company function</);
-  assert.match(source, />Perspective</);
-  assert.match(source, /"Unassigned"/);
-  assert.match(source, /patch\.placement === "UNASSIGNED" \? \{ status: "HIDDEN"/);
-  assert.match(source, /Other Services \(legacy\)/);
-  assert.doesNotMatch(source, /Add audience rule/);
-  assert.doesNotMatch(source, /Unselected functions in Other Services/);
+  assert.match(source, /assignmentPanelPlacements\.map/);
+  assert.match(source, /Seeking For/);
+  assert.match(source, /Seeking & Providing/);
+  assert.match(source, /Other Services/);
+  assert.match(source, /aria-pressed=\{active\}/);
+  assert.match(source, /Mixed statuses/);
+  assert.match(source, />Not shown</);
+  assert.match(source, /\["SEEKING", "PROVIDING", "OTHER_SERVICES"\]/);
+  assert.doesNotMatch(source, /Other Services \(legacy\)/);
+  assert.doesNotMatch(source, /<table/);
+});
+
+test("panel chips move a function exclusively and toggle it back to not shown", () => {
+  const assignments = [
+    { functionSlug: "buyer", placement: "SEEKING", status: "COMING_SOON" },
+    { functionSlug: "seller", placement: "PROVIDING", status: "LIVE" },
+  ];
+  const moved = toggleFunctionPanel(assignments, "buyer", "PROVIDING");
+  assert.deepEqual(moved.find((item) => item.functionSlug === "buyer"), {
+    functionSlug: "buyer", placement: "PROVIDING", status: "LIVE",
+  });
+  const removed = toggleFunctionPanel(moved, "buyer", "PROVIDING");
+  assert.deepEqual(removed.find((item) => item.functionSlug === "buyer"), {
+    functionSlug: "buyer", placement: "UNASSIGNED", status: "HIDDEN",
+  });
+});
+
+test("panel statuses preserve mixed values until an explicit normalization", () => {
+  const assignments = [
+    { functionSlug: "buyer", placement: "BOTH", status: "LIVE" },
+    { functionSlug: "seller", placement: "BOTH", status: "COMING_SOON" },
+    { functionSlug: "packaging", placement: "UNASSIGNED", status: "HIDDEN" },
+  ];
+  assert.deepEqual(getAssignmentPanelState(assignments, "BOTH"), { count: 2, status: "MIXED" });
+  const moved = toggleFunctionPanel(assignments, "packaging", "BOTH");
+  assert.equal(moved.find((item) => item.functionSlug === "packaging")?.status, "LIVE");
+  const normalized = applyAssignmentPanelStatus(moved, "BOTH", "COMING_SOON");
+  assert.deepEqual(normalized.filter((item) => item.placement === "BOTH").map((item) => item.status), ["COMING_SOON", "COMING_SOON", "COMING_SOON"]);
+
+  const assignedWithHiddenStatus = [...assignments, { functionSlug: "testing", placement: "PROVIDING", status: "HIDDEN" }];
+  const movedFromAnotherPanel = toggleFunctionPanel(assignedWithHiddenStatus, "testing", "BOTH");
+  assert.equal(movedFromAnotherPanel.find((item) => item.functionSlug === "testing")?.status, "HIDDEN");
+});
+
+test("hiding Other Services returns selected functions to the existing fallback representation", () => {
+  const assignments = [{ functionSlug: "testing", placement: "OTHER_SERVICES", status: "LIVE" }];
+  assert.deepEqual(applyAssignmentPanelStatus(assignments, "OTHER_SERVICES", "HIDDEN"), [
+    { functionSlug: "testing", placement: "UNASSIGNED", status: "HIDDEN" },
+  ]);
 });
 
 test("seller-only Bidding requires Seller in provided capabilities", () => {

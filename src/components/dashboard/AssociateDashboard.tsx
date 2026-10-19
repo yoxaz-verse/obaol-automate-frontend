@@ -69,17 +69,6 @@ export default function AssociateDashboard({
           <div role="tablist" aria-label="Dashboard perspective" className="inline-flex rounded-xl border border-default-200 bg-default-100 p-1">
             <Button
               role="tab"
-              aria-selected={perspective === "sought"}
-              isDisabled={!hasSought}
-              size="sm"
-              variant="light"
-              className={`min-w-28 font-semibold ${perspective === "sought" ? "bg-blue-600 text-white hover:bg-blue-700" : ""}`}
-              onPress={() => onPerspectiveChange("sought")}
-            >
-              Seeking
-            </Button>
-            <Button
-              role="tab"
               aria-selected={perspective === "provided"}
               isDisabled={!hasProvided}
               size="sm"
@@ -88,6 +77,17 @@ export default function AssociateDashboard({
               onPress={() => onPerspectiveChange("provided")}
             >
               Providing
+            </Button>
+            <Button
+              role="tab"
+              aria-selected={perspective === "sought"}
+              isDisabled={!hasSought}
+              size="sm"
+              variant="light"
+              className={`min-w-28 font-semibold ${perspective === "sought" ? "bg-blue-600 text-white hover:bg-blue-700" : ""}`}
+              onPress={() => onPerspectiveChange("sought")}
+            >
+              Seeking
             </Button>
           </div>
           {(!hasProvided || !hasSought) && <Button size="sm" variant="light" className="font-semibold text-primary sm:justify-end" onPress={() => router.push("/dashboard/company")}>Configure missing profile</Button>}

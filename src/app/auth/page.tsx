@@ -1,10 +1,11 @@
-import AuthEntry from "@/components/Auth/AuthEntry";
-import React from "react";
+import UnifiedAuthFlow from "@/components/Auth/UnifiedAuthFlow";
 
 export default function AuthEntryPage({
   searchParams,
 }: {
-  searchParams?: { view?: string; prefill?: string; reason?: string };
+  searchParams?: { mode?: string; role?: string; view?: string; prefill?: string; intent?: string };
 }) {
-  return <AuthEntry signInView={searchParams?.view === "signin"} prefill={searchParams?.prefill} reason={searchParams?.reason} />;
+  const initialMode = searchParams?.mode === "signup" ? "signup" : "signin";
+  const initialRole = searchParams?.role === "operator" ? "Operator" : "Associate";
+  return <UnifiedAuthFlow initialMode={initialMode} initialRole={initialRole} prefill={searchParams?.prefill} intent={searchParams?.intent} />;
 }

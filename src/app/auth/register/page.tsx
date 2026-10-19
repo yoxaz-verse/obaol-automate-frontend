@@ -1,9 +1,14 @@
-import LoginComponent from "@/components/Login/login-component";
+import { redirect } from "next/navigation";
 
 type PageProps = { searchParams?: { prefill?: string | string[]; intent?: string | string[] } };
 
 const firstValue = (value?: string | string[]) => Array.isArray(value) ? value[0] : value;
 
 export default function RegisterPage({ searchParams }: PageProps) {
-  return <LoginComponent role="Associate" mode="signup" initialQuery={{ prefill: firstValue(searchParams?.prefill), intent: firstValue(searchParams?.intent) }} />;
+  const params = new URLSearchParams({ mode: "signup" });
+  const prefill = firstValue(searchParams?.prefill);
+  const intent = firstValue(searchParams?.intent);
+  if (prefill) params.set("prefill", prefill);
+  if (intent) params.set("intent", intent);
+  redirect(`/auth?${params.toString()}`);
 }

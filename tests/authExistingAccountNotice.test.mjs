@@ -16,14 +16,22 @@ test("existing email signup redirects to the matching sign-in page with a truste
   assert.equal(login.includes('aria-label="Dismiss account notice"'), true);
 });
 
-test("Associate and Operator sign-in pages pass only the redirect reason to the login UI", () => {
+test("Associate and Operator sign-in pages redirect to the unified private flow", () => {
   const associatePage = read("../src/app/auth/associate/page.tsx");
   const operatorPage = read("../src/app/auth/operator/page.tsx");
 
   for (const page of [associatePage, operatorPage]) {
-    assert.equal(page.includes("reason?: string | string[]"), true);
-    assert.equal(page.includes("reason: firstValue(searchParams?.reason)"), true);
+    assert.equal(page.includes('new URLSearchParams({ mode: "signin" })'), true);
+    assert.equal(page.includes('redirect(`/auth?${params.toString()}`)'), true);
+    assert.equal(page.includes("searchParams?.reason"), false);
   }
+});
+
+test("the unified flow does not call the account-enumerating email status endpoint", () => {
+  const unified = read("../src/components/Auth/UnifiedAuthFlow.tsx");
+  assert.equal(unified.includes("/auth/email-status"), false);
+  assert.equal(unified.includes("/auth/unified/password"), true);
+  assert.equal(unified.includes("/verification/send-otp-existing"), true);
 });
 
 test("staff fallback explains the redirect and carries the trusted reason into role sign-in", () => {

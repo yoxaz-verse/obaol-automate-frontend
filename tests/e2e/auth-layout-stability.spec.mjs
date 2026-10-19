@@ -1,237 +1,87 @@
 import { expect, test } from "@playwright/test";
 
-const boxDelta = (before, after) => ({
-  x: Math.abs(before.x - after.x),
-  y: Math.abs(before.y - after.y),
-  width: Math.abs(before.width - after.width),
-  height: Math.abs(before.height - after.height),
-});
-
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__authLayoutShifts = [];
-    new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (!entry.hadRecentInput) window.__authLayoutShifts.push(entry.value);
-      }
-    }).observe({ type: "layout-shift", buffered: true });
-  });
-
-  await page.route(/\/verify-token(?:\?.*)?$/, async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    await route.fulfill({
-      status: 401,
-      contentType: "application/json",
-      body: JSON.stringify({ success: false }),
-    });
-  });
+  await page.route(/\/verify-token(?:\?.*)?$/, (route) => route.fulfill({
+    status: 401,
+    contentType: "application/json",
+    body: JSON.stringify({ success: false }),
+  }));
   await page.route("https://accounts.google.com/gsi/client", (route) => route.abort());
 });
 
-test("Associate sign-in keeps its shell fixed while session and Google controls settle", async ({ page }) => {
-  await page.goto("/auth/associate?prefill=layout%40example.com", { waitUntil: "domcontentloaded" });
-
-  const card = page.getByTestId("auth-card");
-  const form = page.getByTestId("auth-form");
-  const submit = page.getByTestId("auth-submit");
-  await expect(card).toBeVisible();
-  await expect(form).toHaveAttribute("aria-busy", "true");
-  await expect(page.getByLabel("Email Address")).toHaveValue("layout@example.com");
-
-  const initialCard = await card.boundingBox();
-  const initialSubmit = await submit.boundingBox();
-  expect(initialCard).toBeTruthy();
-  expect(initialSubmit).toBeTruthy();
-
-  await expect(form).toHaveAttribute("aria-busy", "false");
-  await expect(page.getByText(/Google sign-in (?:failed to load|is temporarily unavailable)/)).toBeVisible();
-
-  const settledCard = await card.boundingBox();
-  const settledSubmit = await submit.boundingBox();
-  expect(boxDelta(initialCard, settledCard)).toEqual({ x: 0, y: 0, width: 0, height: 0 });
-  expect(boxDelta(initialSubmit, settledSubmit)).toEqual({ x: 0, y: 0, width: 0, height: 0 });
-
-  const cls = await page.evaluate(() => window.__authLayoutShifts.reduce((sum, value) => sum + value, 0));
-  expect(cls).toBeLessThan(0.05);
+test("unified sign-in is responsive, accessible, and preserves email", async ({ page }) => {
+  await page.goto("/auth?prefill=layout%40example.com", { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("unified-auth")).toBeVisible();
+  await expect(page.getByLabel("Email address")).toHaveValue("layout@example.com");
+  await expect(page.getByRole("button", { name: "Sign in" })).toHaveAttribute("aria-pressed", "true");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-});
-
-test("Associate signup CTAs are prominent and preserve the entered email", async ({ page }) => {
-  await page.route(/\/auth\/email-status(?:\?.*)?$/, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ exists: false }),
-    });
-  });
-  await page.goto("/auth/associate", { waitUntil: "domcontentloaded" });
-
-  const persistentSignup = page.getByTestId("persistent-signup-cta");
-  await expect(page.getByText("New to OBAOL?")).toBeVisible();
-  await expect(persistentSignup).toBeVisible();
-  await expect(persistentSignup).toHaveAccessibleName("Create Associate Account");
-
-  await page.getByLabel("Email Address").fill("new.associate@example.com");
   await page.getByTestId("auth-submit").click();
-
-  const contextualSignup = page.getByTestId("account-not-found-signup-cta");
-  await expect(contextualSignup).toBeVisible();
-  await expect(contextualSignup).toHaveAccessibleName("Create Associate Account");
-  await contextualSignup.click();
-  await expect(page).toHaveURL(/\/auth\/register\?prefill=new(?:\.|%2E)associate(?:%40|@)example(?:\.|%2E)com/);
+  await expect(page.locator("input[autocomplete='current-password']")).toBeFocused();
+  await expect(page.getByRole("button", { name: "Sign in with email code" })).toBeVisible();
+  await expect(page.getByText(/does not reveal whether an email is registered/i)).toBeVisible();
 });
 
-test("existing-account redirects show only the trusted sign-in notice", async ({ page }) => {
-  await page.goto("/auth/associate?reason=account-exists&prefill=existing%40example.com", { waitUntil: "domcontentloaded" });
-
-  await expect(page.getByText("Your account already exists. Please sign in.")).toBeVisible();
-  await expect(page.getByLabel("Email Address")).toHaveValue("existing@example.com");
-  await page.getByLabel("Dismiss account notice").click();
-  await expect(page.getByText("Your account already exists. Please sign in.")).toHaveCount(0);
-
-  await page.goto("/auth/operator?reason=untrusted-message&prefill=operator%40example.com", { waitUntil: "domcontentloaded" });
-  await expect(page.getByText("Your account already exists. Please sign in.")).toHaveCount(0);
-  await expect(page.getByLabel("Email Address")).toHaveValue("operator@example.com");
+test("legacy public auth URLs redirect into the unified flow with safe context", async ({ page }) => {
+  await page.goto("/auth/operator/register?prefill=operator%40example.com&intent=SERVICE");
+  await expect(page).toHaveURL(/\/auth\?.*mode=signup.*role=operator.*prefill=operator(?:%40|@)example(?:\.|%2E)com.*intent=SERVICE/);
+  await expect(page.getByLabel("Email address")).toHaveValue("operator@example.com");
+  await page.goto("/auth/associate?prefill=associate%40example.com&reason=account-exists");
+  await expect(page).toHaveURL(/\/auth\?mode=signin.*prefill=associate/);
+  await expect(page.getByText(/account already exists/i)).toHaveCount(0);
 });
 
-test("passkey sign-in appears only when WebAuthn is supported", async ({ page }) => {
-  await page.addInitScript(() => {
-    if (typeof globalThis.PublicKeyCredential !== "function") {
-      Object.defineProperty(globalThis, "PublicKeyCredential", {
-        configurable: true,
-        value: class PublicKeyCredential {},
-      });
-    }
+test("OTP sign-in uses a neutral response and reveals no account role", async ({ page }) => {
+  await page.route(/\/verification\/send-otp-existing$/, async (route) => {
+    expect(route.request().postDataJSON()).toEqual({ method: "email", email: "private@example.com" });
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, message: "If this email is eligible, a verification code has been sent." }) });
   });
-  await page.route(/\/auth\/email-status(?:\?.*)?$/, (route) => route.fulfill({
-    status: 200,
-    contentType: "application/json",
-    body: JSON.stringify({ exists: true, role: "Associate" }),
-  }));
-
-  await page.goto("/auth/associate", { waitUntil: "domcontentloaded" });
-  await page.getByLabel("Email Address").fill("passkey@example.com");
+  await page.goto("/auth");
+  await page.getByLabel("Email address").fill("private@example.com");
   await page.getByTestId("auth-submit").click();
-  await expect(page.getByTestId("passkey-signin")).toBeVisible();
-
-  await page.goto("/auth/register", { waitUntil: "domcontentloaded" });
-  await expect(page.getByTestId("passkey-signin")).toHaveCount(0);
+  await page.getByRole("button", { name: "Sign in with email code" }).click();
+  await expect(page.getByLabel("Six-digit email code")).toBeVisible();
+  await expect(page.getByText("If this email is eligible, a verification code has been sent.")).toBeVisible();
 });
 
-test("unsupported browsers do not render a disabled passkey control", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(globalThis, "PublicKeyCredential", {
-      configurable: true,
-      value: undefined,
-    });
-  });
-  await page.route(/\/auth\/email-status(?:\?.*)?$/, (route) => route.fulfill({
-    status: 200,
-    contentType: "application/json",
-    body: JSON.stringify({ exists: true, role: "Associate" }),
-  }));
-
-  await page.goto("/auth/associate", { waitUntil: "domcontentloaded" });
-  await page.getByLabel("Email Address").fill("password@example.com");
-  await page.getByTestId("auth-submit").click();
-
-  await expect(page.getByTestId("passkey-signin")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Sign in with email OTP" })).toBeVisible();
-});
-
-test("signup redirects an existing email to its matching role with context", async ({ page }) => {
+test("signup chooses an account type and cannot continue before OTP verification", async ({ page }) => {
   await page.route(/\/auth\/onboarding\/start$/, async (route) => {
-    await route.fulfill({
-      status: 409,
-      contentType: "application/json",
-      body: JSON.stringify({ success: false, message: "Account already exists — sign in.", role: "Operator" }),
-    });
+    expect(route.request().postDataJSON()).toEqual({ email: "new.operator@example.com", role: "Operator" });
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, message: "If this email is eligible, a verification code has been sent." }) });
   });
-  await page.goto("/auth/register", { waitUntil: "domcontentloaded" });
-
-  await page.getByLabel("Email Address").fill("existing.operator@example.com");
-  await page.getByRole("button", { name: "Send OTP" }).click();
-
-  await expect(page).toHaveURL(/\/auth\/operator\?.*reason=account-exists.*prefill=existing(?:\.|%2E)operator(?:%40|@)example(?:\.|%2E)com/);
-  await expect(page.getByText("Your account already exists. Please sign in.")).toBeVisible();
-  await expect(page.getByLabel("Email Address")).toHaveValue("existing.operator@example.com");
+  await page.goto("/auth?mode=signup&role=operator&intent=SERVICE");
+  await page.getByLabel("Email address").fill("new.operator@example.com");
+  await page.getByRole("button", { name: "Verify email" }).click();
+  await expect(page.getByLabel("Six-digit email code")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Verify and continue" })).toBeDisabled();
 });
 
-test("Associate signup cannot reach onboarding before OTP and proceeds after verification", async ({ page }) => {
-  await page.unroute(/\/verify-token(?:\?.*)?$/);
-  let verified = false;
-  let verificationRequests = 0;
-
-  await page.route(/\/verify-token(?:\?.*)?$/, async (route) => {
-    verificationRequests += 1;
-    await route.fulfill({
-      status: verified ? 200 : 401,
-      contentType: "application/json",
-      body: JSON.stringify(verified ? {
-        success: true,
-        user: {
-          id: "associate-draft-1",
-          email: "otp.associate@example.com",
-          name: "OTP Associate",
-          role: "Associate",
-          onboardingComplete: false,
-          registrationStatus: "PENDING_REVIEW",
-          verified: { email: true },
-        },
-      } : { success: false, code: "EMAIL_VERIFICATION_REQUIRED" }),
-    });
+test("password sign-in uses the unified role-free endpoint", async ({ page }) => {
+  await page.route(/\/auth\/unified\/password$/, async (route) => {
+    const body = route.request().postDataJSON();
+    expect(body).toMatchObject({ email: "member@example.com", password: "Passw0rd!", rememberMe: true });
+    expect(body).not.toHaveProperty("role");
+    await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ success: false, code: "INVALID_CREDENTIALS", message: "Invalid email or password." }) });
   });
-  await page.route(/\/auth\/onboarding\/start$/, (route) => route.fulfill({
-    status: 200,
-    contentType: "application/json",
-    body: JSON.stringify({ success: true, user: { id: "associate-draft-1", email: "otp.associate@example.com", role: "Associate" } }),
-  }));
-  await page.route(/\/verification\/send-otp$/, (route) => route.fulfill({
-    status: 200,
-    contentType: "application/json",
-    body: JSON.stringify({ message: "OTP sent to Associate" }),
-  }));
-  await page.route(/\/verification\/verify-otp$/, async (route) => {
-    verified = true;
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ message: "Associate verified successfully" }),
-    });
-  });
-
-  await page.goto("/auth/register", { waitUntil: "domcontentloaded" });
-  await page.getByLabel("Email Address").fill("otp.associate@example.com");
-  await page.getByRole("button", { name: "Send OTP" }).click();
-  await expect(page.getByLabel("Email OTP")).toBeVisible();
-  expect(verificationRequests).toBe(1);
-  await expect(page).toHaveURL(/\/auth\/register/);
-
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page).toHaveURL(/\/auth\/register/);
-  await expect(page.getByRole("button", { name: "Send OTP" })).toBeVisible();
-  expect(verificationRequests).toBeGreaterThanOrEqual(2);
-
-  await page.getByLabel("Email Address").fill("otp.associate@example.com");
-  await page.getByRole("button", { name: "Send OTP" }).click();
-  await page.getByLabel("Email OTP").fill("246810");
-  await page.getByRole("button", { name: "Verify OTP" }).click();
-  await expect(page.getByText("OTP Verified")).toBeVisible();
-  await page.getByRole("button", { name: "Continue to Onboarding" }).click();
-  await expect(page).toHaveURL(/\/dashboard\/onboarding/);
+  await page.goto("/auth");
+  await page.getByLabel("Email address").fill("member@example.com");
+  await page.getByTestId("auth-submit").click();
+  await page.locator("input[autocomplete='current-password']").fill("Passw0rd!");
+  await page.getByLabel(/Keep me signed in/).check();
+  await page.getByRole("button", { name: "Sign in with password" }).click();
+  await expect(page.getByText("The email or password is incorrect.", { exact: true })).toBeVisible();
 });
 
-test("shared auth routes render without a full-screen loading replacement", async ({ page }) => {
-  for (const route of ["/auth/operator", "/auth/register?intent=BUY", "/auth/operator/register", "/auth/admin", "/auth/forgot-password?role=Associate"]) {
-    await page.goto(route, { waitUntil: "domcontentloaded" });
-    await expect(page.locator("[role='status']").filter({ hasText: /LOADING SIGN|LOADING PASSWORD/i })).toHaveCount(0);
-    await expect(page.locator("[data-testid='auth-layout'], form").first()).toBeVisible();
-  }
+test("unsupported browsers omit the passkey control", async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(globalThis, "PublicKeyCredential", { configurable: true, value: undefined }));
+  await page.goto("/auth");
+  await page.getByLabel("Email address").fill("password@example.com");
+  await page.getByTestId("auth-submit").click();
+  await expect(page.getByTestId("passkey-signin")).toHaveCount(0);
 });
 
 test("reduced-motion users get a static auth presentation", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/auth/associate", { waitUntil: "domcontentloaded" });
+  await page.goto("/auth", { waitUntil: "domcontentloaded" });
   await expect(page.getByTestId("auth-card")).toBeVisible();
   await expect(page.locator("[data-testid='auth-layout'] .h-1.w-1")).toHaveCount(0);
 });

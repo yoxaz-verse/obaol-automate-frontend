@@ -30,8 +30,8 @@ test("the auth choice screen remains server-rendered without Framer Motion", () 
   assert.match(source, /signInView/);
 });
 
-test("the public auth chooser skips authenticated data providers", () => {
+test("the unified auth route mounts authenticated providers for session bypass", () => {
   const source = readFileSync("src/app/authenticated-provider.tsx", "utf8");
-  assert.match(source, /pathname === ["']\/auth["']/);
-  assert.match(source, /return children/);
+  assert.doesNotMatch(source, /pathname === ["']\/auth["']/);
+  assert.match(source, /<AuthProvider>/);
 });

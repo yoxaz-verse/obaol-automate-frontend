@@ -1,10 +1,14 @@
-import LoginComponent from "@/components/Login/login-component";
-import "react-toastify/dist/ReactToastify.css";
+import { redirect } from "next/navigation";
 
 type PageProps = { searchParams?: { prefill?: string | string[]; intent?: string | string[]; reason?: string | string[] } };
 
 const firstValue = (value?: string | string[]) => Array.isArray(value) ? value[0] : value;
 
 export default function AssociateLoginPage({ searchParams }: PageProps) {
-  return <LoginComponent role="Associate" initialQuery={{ prefill: firstValue(searchParams?.prefill), intent: firstValue(searchParams?.intent), reason: firstValue(searchParams?.reason) }} />;
+  const params = new URLSearchParams({ mode: "signin" });
+  const prefill = firstValue(searchParams?.prefill);
+  const intent = firstValue(searchParams?.intent);
+  if (prefill) params.set("prefill", prefill);
+  if (intent) params.set("intent", intent);
+  redirect(`/auth?${params.toString()}`);
 }

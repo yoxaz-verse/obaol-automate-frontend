@@ -10,6 +10,7 @@ import { FiMail, FiPhone } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { renderToStaticMarkup } from "react-dom/server";
 import { whatsappHref } from "@/types/labProfile";
+import { trackLabContact } from "@/utils/labContact";
 
 export type QualityLabMapItem = {
   _id: string;
@@ -126,9 +127,9 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom }: Prop
                   {lab.source ? <span className="rounded-full bg-slate-100 px-2 py-1 text-[9px] text-slate-700">{lab.source.replaceAll("_", " ")}</span> : null}
                 </div>
                 <div className="grid grid-cols-3 gap-1">
-                  <Button as="a" href={lab.contactPhone ? `tel:${lab.contactPhone}` : undefined} isDisabled={!lab.contactPhone} size="sm" variant="flat" isIconOnly aria-label="Call lab"><FiPhone /></Button>
-                  <Button as="a" href={whatsAppUrl} target={whatsAppUrl ? "_blank" : undefined} rel={whatsAppUrl ? "noopener noreferrer" : undefined} isDisabled={!whatsAppUrl} size="sm" color="success" variant="flat" isIconOnly aria-label="Chat on WhatsApp"><FaWhatsapp /></Button>
-                  <Button as="a" href={lab.contactEmail ? `mailto:${lab.contactEmail}` : undefined} isDisabled={!lab.contactEmail} size="sm" variant="flat" isIconOnly aria-label="Email lab"><FiMail /></Button>
+                  <Button as="a" href={lab.contactPhone ? `tel:${lab.contactPhone}` : undefined} isDisabled={!lab.contactPhone} size="sm" variant="flat" isIconOnly aria-label="Call lab" onPress={() => trackLabContact(lab._id, "PHONE")}><FiPhone /></Button>
+                  <Button as="a" href={whatsAppUrl} target={whatsAppUrl ? "_blank" : undefined} rel={whatsAppUrl ? "noopener noreferrer" : undefined} isDisabled={!whatsAppUrl} size="sm" color="success" variant="flat" isIconOnly aria-label="Chat on WhatsApp" onPress={() => trackLabContact(lab._id, "WHATSAPP")}><FaWhatsapp /></Button>
+                  <Button as="a" href={lab.contactEmail ? `mailto:${lab.contactEmail}` : undefined} isDisabled={!lab.contactEmail} size="sm" variant="flat" isIconOnly aria-label="Email lab" onPress={() => trackLabContact(lab._id, "EMAIL")}><FiMail /></Button>
                 </div>
               </div>
             </Popup>

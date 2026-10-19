@@ -84,6 +84,8 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/warehouse-rent", label: "Warehouse Directory", section: "Warehouse", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Warehouse" },
   { path: "/dashboard/quality-labs", label: "Quality Labs", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/quality-labs/my", label: "My Lab", section: "Services", roles: ["admin", "associate"], nav: true, searchable: true },
+  { path: "/dashboard/quality-labs/my/new", label: "Add lab", section: "Services", roles: ["admin", "associate"], breadcrumbParent: "/dashboard/quality-labs/my" },
+  { path: "/dashboard/quality-labs/my/:id", label: "Edit lab", section: "Services", roles: ["admin", "associate"], breadcrumbParent: "/dashboard/quality-labs/my" },
   { path: "/dashboard/quality-labs/execution", label: "Lab Execution", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/quality-labs/:id", label: "Quality lab profile", section: "Services", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/quality-labs" },
   { path: "/dashboard/quality-labs/location", label: "Edit lab profile", section: "Services", roles: ["admin", "associate"], breadcrumbParent: "/dashboard/quality-labs/my" },

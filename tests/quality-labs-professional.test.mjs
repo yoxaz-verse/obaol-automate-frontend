@@ -7,6 +7,8 @@ const directoryPath = new URL("../src/app/dashboard/quality-labs/page.tsx", impo
 const wizardPath = new URL("../src/app/dashboard/quality-labs/location/page.tsx", import.meta.url);
 const searchablePath = new URL("../src/components/ui/SearchableSelect.tsx", import.meta.url);
 const mapPath = new URL("../src/components/Labs/QualityLabsMap.tsx", import.meta.url);
+const myLabsPath = new URL("../src/app/dashboard/quality-labs/my/page.tsx", import.meta.url);
+const contactPath = new URL("../src/utils/labContact.ts", import.meta.url);
 
 test("lab directory toggles between map and card views with distinct empty states", async () => {
   const source = await readFile(directoryPath, "utf8");
@@ -85,4 +87,24 @@ test("lab map fits all markers when no search point is active", async () => {
   assert.match(source, /function FitLabBounds/);
   assert.match(source, /map\.fitBounds/);
   assert.match(source, /Requires mapping/);
+});
+
+test("My Lab lists multiple profiles and only exposes aggregate contact counts", async () => {
+  const source = await readFile(myLabsPath, "utf8");
+  assert.match(source, /apiRoutes\.labProfiles\.mine/);
+  assert.match(source, />Add Lab<\/Button>/);
+  assert.match(source, /rows\.map/);
+  assert.match(source, /metrics\.PHONE/);
+  assert.match(source, /metrics\.WHATSAPP/);
+  assert.match(source, /metrics\.EMAIL/);
+  assert.doesNotMatch(source, /viewerEmail|viewerPhone|viewerName/);
+});
+
+test("all public lab contact surfaces record a non-blocking aggregate event", async () => {
+  const [directory, map, contact] = await Promise.all([readFile(directoryPath, "utf8"), readFile(mapPath, "utf8"), readFile(contactPath, "utf8")]);
+  assert.match(directory, /trackLabContact\(lab\._id, "PHONE"\)/);
+  assert.match(directory, /trackLabContact\(lab\._id, "WHATSAPP"\)/);
+  assert.match(directory, /trackLabContact\(lab\._id, "EMAIL"\)/);
+  assert.match(map, /trackLabContact\(lab\._id, "PHONE"\)/);
+  assert.match(contact, /\.catch\(\(\) => undefined\)/);
 });

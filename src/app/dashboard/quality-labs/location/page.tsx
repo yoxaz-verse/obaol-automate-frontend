@@ -21,12 +21,14 @@ const emptyCredential = (): LabCredential => ({ accreditationId: "", issuer: "",
 const emptyTemplate = (): LabProductCapabilityTemplate => ({ _id: newId(), name: "", commodityId: "", qualityClassifications: [], testIds: [], parameterIds: [], credentialIds: [], method: "", turnaroundDays: null, sampleRequirements: "", notes: "" });
 const selectionValues = (selection: any) => selection === "all" ? [] : Array.from(selection as Set<React.Key>).map(String);
 
-export default function LabProfileWizard() {
+type LabProfileWizardProps = { labId?: string; managedCompanyId?: string; returnTo?: string };
+
+export default function LabProfileWizard({ labId, managedCompanyId = "", returnTo = "/dashboard/quality-labs/my" }: LabProfileWizardProps = {}) {
   const router = useRouter();
   const client = useQueryClient();
   const { user } = useContext(AuthContext);
   const isAdmin = String(user?.role || "").toLowerCase() === "admin";
-  const [companyId, setCompanyId] = useState("");
+  const [companyId, setCompanyId] = useState(managedCompanyId);
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<LabSnapshot>(emptyProfile);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -42,7 +44,7 @@ export default function LabProfileWizard() {
 
   const companiesQuery = useQuery({ queryKey: ["lab-admin-companies"], queryFn: async () => { const response: any = await getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 500, sort: "name:asc" }); const root = response?.data?.data; return Array.isArray(root?.data) ? root.data : Array.isArray(root) ? root : []; }, enabled: isAdmin });
   const taxonomyQuery = useQuery({ queryKey: ["lab-taxonomy"], queryFn: async () => (await getData(apiRoutes.labProfiles.taxonomy)).data.data });
-  const draftQuery = useQuery({ queryKey: ["lab-profile-draft", companyId], queryFn: async () => (await getData(apiRoutes.labProfiles.draft, companyId ? { companyId } : {})).data.data, enabled: !isAdmin || Boolean(companyId), retry: false });
+  const draftQuery = useQuery({ queryKey: ["lab-profile-draft", labId || "legacy", companyId], queryFn: async () => (await getData(labId ? apiRoutes.labProfiles.mineDetail(labId) : apiRoutes.labProfiles.draft, !labId && companyId ? { companyId } : {})).data.data, enabled: Boolean(labId) || !isAdmin || Boolean(companyId), retry: false });
 
   useEffect(() => {
     if (!draftQuery.isSuccess) return;
@@ -105,13 +107,13 @@ export default function LabProfileWizard() {
 
   const save = useMutation({ mutationFn: () => {
     if (isAdmin && !companyId) throw new Error("Select an associate company before saving.");
-    return putData(apiRoutes.labProfiles.draft, { profile, ...(companyId ? { companyId } : {}) });
+    return putData(labId ? apiRoutes.labProfiles.mineDraft(labId) : apiRoutes.labProfiles.draft, { profile, ...(!labId && companyId ? { companyId } : {}) });
   }, onSuccess: () => { client.invalidateQueries({ queryKey: ["lab-profile-draft"] }); showToastMessage({ type: "success", message: "Lab draft saved." }); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to save draft." }) });
   const submit = useMutation({ mutationFn: async () => {
     if (isAdmin && !companyId) throw new Error("Select an associate company before submitting.");
-    await putData(apiRoutes.labProfiles.draft, { profile, ...(companyId ? { companyId } : {}) });
-    return postData(apiRoutes.labProfiles.submit, companyId ? { companyId } : {});
-  }, onSuccess: () => { showToastMessage({ type: "success", message: "Lab profile submitted for review." }); router.push("/dashboard/quality-labs"); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to submit profile." }) });
+    await putData(labId ? apiRoutes.labProfiles.mineDraft(labId) : apiRoutes.labProfiles.draft, { profile, ...(!labId && companyId ? { companyId } : {}) });
+    return postData(labId ? apiRoutes.labProfiles.mineSubmit(labId) : apiRoutes.labProfiles.submit, !labId && companyId ? { companyId } : {});
+  }, onSuccess: () => { showToastMessage({ type: "success", message: "Lab profile submitted for review." }); router.push(returnTo); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to submit profile." }) });
 
   const openRequest = (kind: string, target: { templateId?: string; credentialIndex?: number } = {}) => {
     const nextTarget = { ...target };
@@ -171,10 +173,10 @@ export default function LabProfileWizard() {
   const deleteTemplate = (template: LabProductCapabilityTemplate) => { const uses = usageCount(template._id); if (uses) return showToastMessage({ type: "warning", message: `Remove this capability from ${uses} country assignment(s) before deleting it.` }); setField("productCapabilityTemplates", profile.productCapabilityTemplates.filter((item) => item._id !== template._id)); };
   const visibleAssignments = useMemo(() => profile.countryAssignments.filter((assignment) => { const text = `${countryName(optionId(assignment.countryId))} ${assignment.productTemplateIds.map(templateName).join(" ")}`.toLowerCase(); return text.includes(assignmentSearch.trim().toLowerCase()); }).sort((a, b) => countryName(optionId(a.countryId)).localeCompare(countryName(optionId(b.countryId)))), [profile.countryAssignments, profile.productCapabilityTemplates, assignmentSearch, countries]);
 
-  const header = <header><Button variant="light" startContent={<FiArrowLeft />} onPress={() => router.push("/dashboard/quality-labs")}>Back</Button><h1 className="mt-3 text-3xl font-black">Country-first lab capability setup</h1><p className="mt-2 text-sm text-default-500">Create each product capability once, then assign it to every export country where it is accepted.</p>{isAdmin ? <div className="mt-4 max-w-xl"><SearchableSelect label="Associate company to manage" multiple={false} allowSelectAll={false} options={(companiesQuery.data || []).map((company: any) => ({ key: company._id, label: company.name }))} value={companyId ? [companyId] : []} onChange={(values) => { resetWizard(); setCompanyId(values[0] || ""); }} />{companiesQuery.isLoading ? <p className="mt-2 text-xs text-default-500">Loading associate companies…</p> : null}{companiesQuery.isError ? <p className="mt-2 text-sm text-danger">Unable to load associate companies. Refresh the page to try again.</p> : null}</div> : null}{draftQuery.data?.status ? <Chip className="mt-3" color={draftQuery.data.status === "REJECTED" ? "danger" : draftQuery.data.status === "PENDING_REVIEW" ? "warning" : "success"} variant="flat">{draftQuery.data.status.replaceAll("_", " ")}</Chip> : null}{draftQuery.data?.reviewNotes ? <p className="mt-2 text-sm text-danger">Review note: {draftQuery.data.reviewNotes}</p> : null}</header>;
+  const header = <header><Button variant="light" startContent={<FiArrowLeft />} onPress={() => router.push(returnTo)}>Back to My Lab</Button><h1 className="mt-3 text-3xl font-black">Country-first lab capability setup</h1><p className="mt-2 text-sm text-default-500">Create each product capability once, then assign it to every export country where it is accepted.</p>{isAdmin && !labId ? <div className="mt-4 max-w-xl"><SearchableSelect label="Associate company to manage" multiple={false} allowSelectAll={false} options={(companiesQuery.data || []).map((company: any) => ({ key: company._id, label: company.name }))} value={companyId ? [companyId] : []} onChange={(values) => { resetWizard(); setCompanyId(values[0] || ""); }} />{companiesQuery.isLoading ? <p className="mt-2 text-xs text-default-500">Loading associate companies…</p> : null}{companiesQuery.isError ? <p className="mt-2 text-sm text-danger">Unable to load associate companies. Refresh the page to try again.</p> : null}</div> : null}{draftQuery.data?.status ? <Chip className="mt-3" color={draftQuery.data.status === "REJECTED" ? "danger" : draftQuery.data.status === "PENDING_REVIEW" ? "warning" : "success"} variant="flat">{draftQuery.data.status.replaceAll("_", " ")}</Chip> : null}{draftQuery.data?.reviewNotes ? <p className="mt-2 text-sm text-danger">Review note: {draftQuery.data.reviewNotes}</p> : null}</header>;
   const statePage = (content: any) => <section className="min-h-screen bg-background p-4 md:p-8"><div className="mx-auto max-w-6xl space-y-6">{header}{content}</div></section>;
 
-  if (isAdmin && !companyId) return statePage(<Card className="border border-dashed border-default-300"><CardBody className="items-center gap-2 p-10 text-center"><h2 className="text-xl font-black">Select an associate company</h2><p className="max-w-xl text-sm text-default-500">Choose a company above to view and manage the exact lab profile its associates use.</p></CardBody></Card>);
+  if (isAdmin && !labId && !companyId) return statePage(<Card className="border border-dashed border-default-300"><CardBody className="items-center gap-2 p-10 text-center"><h2 className="text-xl font-black">Select an associate company</h2><p className="max-w-xl text-sm text-default-500">Choose a company above to view and manage the exact lab profile its associates use.</p></CardBody></Card>);
   if (taxonomyQuery.isLoading || draftQuery.isLoading) return statePage(<Card className="border border-default-200"><CardBody className="flex min-h-64 items-center justify-center gap-3"><Spinner color="success" /><p className="text-sm text-default-500">Loading the lab profile…</p></CardBody></Card>);
   if (taxonomyQuery.isError || draftQuery.isError) return statePage(<Card className="border border-danger-200"><CardBody className="items-center gap-3 p-10 text-center"><h2 className="text-xl font-black">Unable to load the lab profile</h2><p className="text-sm text-default-500">The selected company’s panel could not be loaded. Try again before making changes.</p><Button color="danger" variant="flat" onPress={() => { taxonomyQuery.refetch(); draftQuery.refetch(); }}>Try again</Button></CardBody></Card>);
   return <section className="min-h-screen bg-background p-4 md:p-8"><div className="mx-auto max-w-6xl space-y-6">

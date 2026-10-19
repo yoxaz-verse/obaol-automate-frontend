@@ -4,6 +4,8 @@ import { readFile } from "node:fs/promises";
 import { getGovernedRouteStatus, resolveSidebarGovernance } from "../src/utils/sidebarGovernance.ts";
 import {
   applyAssignmentPanelStatus,
+  assignmentAppearsInPanel,
+  assignmentPanelPlacements,
   getAssignmentPanelState,
   toggleFunctionPanel,
 } from "../src/utils/sidebarGovernanceEditor.ts";
@@ -98,11 +100,11 @@ test("v2 does not activate a work rule from the wrong perspective and uses globa
   assert.equal(resolved.some((item) => item.routePath === "/dashboard/orders" && item.placement === "OTHER_SERVICES"), true);
 });
 
-test("admin editor exposes four accessible assignment panels instead of dropdown rows", async () => {
+test("admin editor exposes three independent assignment panels instead of dropdown rows", async () => {
   const source = await readFile(governancePagePath, "utf8");
+  assert.deepEqual(assignmentPanelPlacements, ["SEEKING", "PROVIDING", "OTHER_SERVICES"]);
   assert.match(source, /assignmentPanelPlacements\.map/);
   assert.match(source, /Seeking For/);
-  assert.match(source, /Seeking & Providing/);
   assert.match(source, /Other Services/);
   assert.match(source, /aria-pressed=\{active\}/);
   assert.match(source, /Mixed statuses/);
@@ -112,16 +114,23 @@ test("admin editor exposes four accessible assignment panels instead of dropdown
   assert.doesNotMatch(source, /<table/);
 });
 
-test("panel chips move a function exclusively and toggle it back to not shown", () => {
+test("seeking and providing chips combine internally and can be removed independently", () => {
   const assignments = [
     { functionSlug: "buyer", placement: "SEEKING", status: "COMING_SOON" },
     { functionSlug: "seller", placement: "PROVIDING", status: "LIVE" },
   ];
-  const moved = toggleFunctionPanel(assignments, "buyer", "PROVIDING");
-  assert.deepEqual(moved.find((item) => item.functionSlug === "buyer"), {
-    functionSlug: "buyer", placement: "PROVIDING", status: "LIVE",
+  const both = toggleFunctionPanel(assignments, "buyer", "PROVIDING");
+  assert.deepEqual(both.find((item) => item.functionSlug === "buyer"), {
+    functionSlug: "buyer", placement: "BOTH", status: "COMING_SOON",
   });
-  const removed = toggleFunctionPanel(moved, "buyer", "PROVIDING");
+  assert.equal(assignmentAppearsInPanel(both[0], "SEEKING"), true);
+  assert.equal(assignmentAppearsInPanel(both[0], "PROVIDING"), true);
+  assert.equal(assignmentAppearsInPanel(both[0], "OTHER_SERVICES"), false);
+  const seekingOnly = toggleFunctionPanel(both, "buyer", "PROVIDING");
+  assert.deepEqual(seekingOnly.find((item) => item.functionSlug === "buyer"), {
+    functionSlug: "buyer", placement: "SEEKING", status: "COMING_SOON",
+  });
+  const removed = toggleFunctionPanel(seekingOnly, "buyer", "SEEKING");
   assert.deepEqual(removed.find((item) => item.functionSlug === "buyer"), {
     functionSlug: "buyer", placement: "UNASSIGNED", status: "HIDDEN",
   });
@@ -133,15 +142,26 @@ test("panel statuses preserve mixed values until an explicit normalization", () 
     { functionSlug: "seller", placement: "BOTH", status: "COMING_SOON" },
     { functionSlug: "packaging", placement: "UNASSIGNED", status: "HIDDEN" },
   ];
-  assert.deepEqual(getAssignmentPanelState(assignments, "BOTH"), { count: 2, status: "MIXED" });
-  const moved = toggleFunctionPanel(assignments, "packaging", "BOTH");
+  assert.deepEqual(getAssignmentPanelState(assignments, "SEEKING"), { count: 2, status: "MIXED" });
+  assert.deepEqual(getAssignmentPanelState(assignments, "PROVIDING"), { count: 2, status: "MIXED" });
+  const moved = toggleFunctionPanel(assignments, "packaging", "SEEKING");
   assert.equal(moved.find((item) => item.functionSlug === "packaging")?.status, "LIVE");
-  const normalized = applyAssignmentPanelStatus(moved, "BOTH", "COMING_SOON");
-  assert.deepEqual(normalized.filter((item) => item.placement === "BOTH").map((item) => item.status), ["COMING_SOON", "COMING_SOON", "COMING_SOON"]);
+  const normalized = applyAssignmentPanelStatus(moved, "SEEKING", "COMING_SOON");
+  assert.deepEqual(normalized.filter((item) => ["SEEKING", "BOTH"].includes(item.placement)).map((item) => item.status), ["COMING_SOON", "COMING_SOON", "COMING_SOON"]);
+  assert.deepEqual(getAssignmentPanelState(normalized, "PROVIDING"), { count: 2, status: "COMING_SOON" });
 
   const assignedWithHiddenStatus = [...assignments, { functionSlug: "testing", placement: "PROVIDING", status: "HIDDEN" }];
-  const movedFromAnotherPanel = toggleFunctionPanel(assignedWithHiddenStatus, "testing", "BOTH");
+  const movedFromAnotherPanel = toggleFunctionPanel(assignedWithHiddenStatus, "testing", "SEEKING");
+  assert.equal(movedFromAnotherPanel.find((item) => item.functionSlug === "testing")?.placement, "BOTH");
   assert.equal(movedFromAnotherPanel.find((item) => item.functionSlug === "testing")?.status, "HIDDEN");
+});
+
+test("Other Services stays exclusive from work perspectives", () => {
+  const assignments = [{ functionSlug: "warehouse-storage", placement: "BOTH", status: "LIVE" }];
+  const other = toggleFunctionPanel(assignments, "warehouse-storage", "OTHER_SERVICES");
+  assert.deepEqual(other, [{ functionSlug: "warehouse-storage", placement: "OTHER_SERVICES", status: "LIVE" }]);
+  const providing = toggleFunctionPanel(other, "warehouse-storage", "PROVIDING");
+  assert.deepEqual(providing, [{ functionSlug: "warehouse-storage", placement: "PROVIDING", status: "LIVE" }]);
 });
 
 test("hiding Other Services returns selected functions to the existing fallback representation", () => {

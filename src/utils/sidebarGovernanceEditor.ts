@@ -6,21 +6,26 @@ export type FunctionAssignment = {
   placement: FunctionPlacement;
   status: SidebarPageStatus;
 };
-export type AssignmentPanelPlacement = SidebarPlacement;
+export type AssignmentPanelPlacement = Exclude<SidebarPlacement, "BOTH">;
 export type AssignmentPanelStatus = SidebarPageStatus | "MIXED";
 
 export const assignmentPanelPlacements: AssignmentPanelPlacement[] = [
   "SEEKING",
   "PROVIDING",
-  "BOTH",
   "OTHER_SERVICES",
 ];
+
+export const assignmentAppearsInPanel = (
+  assignment: FunctionAssignment,
+  placement: AssignmentPanelPlacement,
+): boolean => assignment.placement === placement
+  || (assignment.placement === "BOTH" && placement !== "OTHER_SERVICES");
 
 export const getAssignmentPanelState = (
   assignments: FunctionAssignment[],
   placement: AssignmentPanelPlacement,
 ): { count: number; status: AssignmentPanelStatus } => {
-  const selected = assignments.filter((assignment) => assignment.placement === placement);
+  const selected = assignments.filter((assignment) => assignmentAppearsInPanel(assignment, placement));
   const uniqueStatuses = new Set(selected.map((assignment) => assignment.status));
   return {
     count: selected.length,
@@ -35,9 +40,23 @@ export const toggleFunctionPanel = (
 ): FunctionAssignment[] => {
   const current = assignments.find((assignment) => assignment.functionSlug === functionSlug);
   if (!current) return assignments;
+
+  if (current.placement === "BOTH" && targetPlacement !== "OTHER_SERVICES") {
+    const remainingPlacement = targetPlacement === "SEEKING" ? "PROVIDING" : "SEEKING";
+    return assignments.map((assignment) => assignment.functionSlug === functionSlug
+      ? { ...assignment, placement: remainingPlacement }
+      : assignment);
+  }
   if (current.placement === targetPlacement) {
     return assignments.map((assignment) => assignment.functionSlug === functionSlug
       ? { ...assignment, placement: "UNASSIGNED", status: "HIDDEN" }
+      : assignment);
+  }
+
+  const oppositeWorkPlacement = targetPlacement === "SEEKING" ? "PROVIDING" : targetPlacement === "PROVIDING" ? "SEEKING" : null;
+  if (oppositeWorkPlacement && current.placement === oppositeWorkPlacement) {
+    return assignments.map((assignment) => assignment.functionSlug === functionSlug
+      ? { ...assignment, placement: "BOTH" }
       : assignment);
   }
 
@@ -57,7 +76,7 @@ export const applyAssignmentPanelStatus = (
   placement: AssignmentPanelPlacement,
   status: SidebarPageStatus,
 ): FunctionAssignment[] => assignments.map((assignment) => {
-  if (assignment.placement !== placement) return assignment;
+  if (!assignmentAppearsInPanel(assignment, placement)) return assignment;
   // A hidden Other Services mapping is the existing wire representation for
   // an unassigned function, so keep the editor and a subsequent reload aligned.
   if (placement === "OTHER_SERVICES" && status === "HIDDEN") {

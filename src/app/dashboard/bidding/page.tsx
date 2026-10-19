@@ -36,7 +36,7 @@ import {
 } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { deleteData, getData, postData, putData } from "@/core/api/apiHandler";
-import { productBiddingRoutes, productRoutes, variantRateRoutes } from "@/core/api/apiRoutes";
+import { productBiddingRoutes, productRoutes, productVariantRoutes, variantRateRoutes } from "@/core/api/apiRoutes";
 
 type Mode = "buyer" | "seller";
 type SellerView = "available" | "participating" | "history";
@@ -80,6 +80,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   const [draft, setDraft] = useState<any>({
     title: "",
     product: "",
+    productVariant: "",
     quantity: "",
     unit: "MT",
     specifications: "",
@@ -107,6 +108,12 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   const productsQuery = useQuery({
     queryKey: ["bidding-products"],
     queryFn: async () => (await getData(productRoutes.getAll, { limit: 200 })).data?.data?.data || [],
+  });
+
+  const productVariantsQuery = useQuery({
+    queryKey: ["bidding-product-variants", draft.product],
+    queryFn: async () => (await getData(productVariantRoutes.getAll, { product: draft.product, limit: 200 })).data?.data?.data || [],
+    enabled: mode === "buyer" && Boolean(draft.product),
   });
 
   const listingsQuery = useQuery({
@@ -171,6 +178,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
       setDraft({
         title: "",
         product: "",
+        productVariant: "",
         quantity: "",
         unit: "MT",
         specifications: "",
@@ -208,6 +216,10 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
     }
     if (!draft.product) {
       setError("Please search and select a product.");
+      return;
+    }
+    if (!draft.productVariant) {
+      setError("Please select the required product variant or grade.");
       return;
     }
     if (!draft.quantity || Number(draft.quantity) <= 0) {
@@ -507,6 +519,8 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
       {/* Create Sealed Bidding Event Modal */}
       <Modal
         isOpen={showCreate}
+        isDismissable={false}
+        isKeyboardDismissDisabled
         onOpenChange={(isOpen) => {
           if (!isOpen) {
             setShowCreate(false);
@@ -517,7 +531,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
         scrollBehavior="inside"
         backdrop="blur"
         classNames={{
-          base: "border border-default-200 bg-background/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl shadow-2xl rounded-3xl",
+          base: "min-h-[min(760px,90vh)] border border-default-200 bg-background/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl shadow-2xl rounded-3xl",
           header: "border-b border-default-100 px-6 py-5",
           body: "px-6 py-5",
           footer: "border-t border-default-100 px-6 py-4",
@@ -557,7 +571,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     className="md:col-span-2"
                     items={productOptions}
                     selectedKey={draft.product || null}
-                    onSelectionChange={(key) => setDraft((prev: any) => ({ ...prev, product: key ? String(key) : "" }))}
+                    onSelectionChange={(key) => setDraft((prev: any) => ({ ...prev, product: key ? String(key) : "", productVariant: "" }))}
                     startContent={<FiSearch className="shrink-0 text-default-400 text-sm" />}
                     inputProps={{
                       classNames: {
@@ -582,6 +596,23 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                         </div>
                       </AutocompleteItem>
                     )}
+                  </Autocomplete>
+                  <Autocomplete
+                    label="Variant / Grade"
+                    placeholder={draft.product ? "Search and select variant" : "Select a product first"}
+                    variant="bordered"
+                    isRequired
+                    isDisabled={!draft.product}
+                    className="md:col-span-2"
+                    items={(productVariantsQuery.data || []).map((variant: any) => ({ id: String(variant._id), name: String(variant.name || "Variant") }))}
+                    selectedKey={draft.productVariant || null}
+                    onSelectionChange={(key) => setDraft((prev: any) => ({ ...prev, productVariant: key ? String(key) : "" }))}
+                    startContent={<FiLayers className="shrink-0 text-default-400 text-sm" />}
+                    inputProps={{ classNames: { label: themeField.label, inputWrapper: themeField.inputWrapper } }}
+                    listboxProps={{ emptyContent: productVariantsQuery.isLoading ? "Loading variants..." : "No variants found for this product" }}
+                    popoverProps={{ classNames: { content: "border border-default-200 bg-content1 shadow-2xl z-[120]" } }}
+                  >
+                    {(variant: any) => <AutocompleteItem key={variant.id} textValue={variant.name}><span className="text-sm font-semibold text-foreground">{variant.name}</span></AutocompleteItem>}
                   </Autocomplete>
                   <Input
                     label="Quantity"

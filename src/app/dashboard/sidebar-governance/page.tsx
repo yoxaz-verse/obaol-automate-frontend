@@ -11,6 +11,7 @@ import { showToastMessage } from "@/utils/utils";
 import { resolveSidebarGovernance } from "@/utils/sidebarGovernance";
 import {
   applyAssignmentPanelStatus,
+  assignmentAppearsInPanel,
   assignmentPanelPlacements,
   getAssignmentPanelState,
   toggleFunctionPanel,
@@ -30,7 +31,6 @@ const statusLabel = (value: SidebarPageStatus) => value === "COMING_SOON" ? "Com
 const panelDetails: Record<AssignmentPanelPlacement, { label: string; description: string }> = {
   SEEKING: { label: "Seeking For", description: "Shown when the company seeks this function." },
   PROVIDING: { label: "Providing", description: "Shown when the company provides this function." },
-  BOTH: { label: "Seeking & Providing", description: "Shown independently on both company perspectives." },
   OTHER_SERVICES: { label: "Other Services", description: "Shown outside work sections. Hidden returns selected functions to Not shown." },
 };
 
@@ -59,7 +59,7 @@ function AssignmentPanel({
   const state = getAssignmentPanelState(assignments, placement);
   const panelId = `assignment-panel-${placement.toLowerCase()}`;
 
-  return <section aria-labelledby={panelId} className="rounded-2xl border border-default-200 bg-content1 p-4 shadow-sm">
+  return <section aria-labelledby={panelId} className={`rounded-2xl border border-default-200 bg-content1 p-4 shadow-sm ${placement === "OTHER_SERVICES" ? "md:col-span-2" : ""}`}>
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <div className="flex items-center gap-2">
@@ -85,7 +85,7 @@ function AssignmentPanel({
     </div>
     <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label={`${details.label} company functions`}>
       {functions.map((fn) => {
-        const active = assignments.some((assignment) => assignment.functionSlug === fn.slug && assignment.placement === placement);
+        const active = assignments.some((assignment) => assignment.functionSlug === fn.slug && assignmentAppearsInPanel(assignment, placement));
         return <button
           key={fn.slug}
           type="button"

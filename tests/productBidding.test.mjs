@@ -20,6 +20,9 @@ test("bidding workspace fixes the seller page and buyer page to separate modes",
   assert.match(page, /Participating/);
   assert.match(page, /History/);
   assert.match(page, /Create buying request/);
+  assert.match(page, /Variant \/ Grade/);
+  assert.match(page, /productVariant/);
+  assert.match(page, /isDismissable=\{false\}/);
   assert.match(page, /Review draft/);
   assert.match(page, /Confirm enquiry/);
   assert.match(buyerPage, /fixedMode="buyer"/);

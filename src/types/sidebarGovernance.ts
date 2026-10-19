@@ -1,4 +1,4 @@
-export type SidebarPlacement = "SEEKING" | "PROVIDING" | "BOTH" | "OTHER_SERVICES";
+export type SidebarPlacement = "SEEKING" | "PROVIDING" | "BOTH" | "OTHER_SERVICES" | "UNASSIGNED";
 export type SidebarPageStatus = "LIVE" | "COMING_SOON" | "HIDDEN";
 
 export type SidebarGovernanceMapping = {
@@ -19,7 +19,7 @@ export type SidebarGovernanceSnapshot = {
 
 export type ResolvedSidebarPage = {
   routePath: string;
-  placement: Exclude<SidebarPlacement, "BOTH">;
+  placement: "SEEKING" | "PROVIDING" | "OTHER_SERVICES";
   status: SidebarPageStatus;
   order: number;
 };

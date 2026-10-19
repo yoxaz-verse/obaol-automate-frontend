@@ -1,6 +1,6 @@
 import type { SidebarPageStatus, SidebarPlacement } from "@/types/sidebarGovernance";
 
-export type FunctionPlacement = SidebarPlacement | "UNASSIGNED";
+export type FunctionPlacement = SidebarPlacement;
 export type FunctionAssignment = {
   functionSlug: string;
   placement: FunctionPlacement;
@@ -13,13 +13,14 @@ export const assignmentPanelPlacements: AssignmentPanelPlacement[] = [
   "SEEKING",
   "PROVIDING",
   "OTHER_SERVICES",
+  "UNASSIGNED",
 ];
 
 export const assignmentAppearsInPanel = (
   assignment: FunctionAssignment,
   placement: AssignmentPanelPlacement,
 ): boolean => assignment.placement === placement
-  || (assignment.placement === "BOTH" && placement !== "OTHER_SERVICES");
+  || (assignment.placement === "BOTH" && (placement === "SEEKING" || placement === "PROVIDING"));
 
 export const getAssignmentPanelState = (
   assignments: FunctionAssignment[],
@@ -41,7 +42,13 @@ export const toggleFunctionPanel = (
   const current = assignments.find((assignment) => assignment.functionSlug === functionSlug);
   if (!current) return assignments;
 
-  if (current.placement === "BOTH" && targetPlacement !== "OTHER_SERVICES") {
+  if (targetPlacement === "UNASSIGNED") {
+    if (current.placement === "UNASSIGNED") return assignments;
+    return assignments.map((assignment) => assignment.functionSlug === functionSlug
+      ? { ...assignment, placement: "UNASSIGNED", status: "HIDDEN" }
+      : assignment);
+  }
+  if (current.placement === "BOTH" && (targetPlacement === "SEEKING" || targetPlacement === "PROVIDING")) {
     const remainingPlacement = targetPlacement === "SEEKING" ? "PROVIDING" : "SEEKING";
     return assignments.map((assignment) => assignment.functionSlug === functionSlug
       ? { ...assignment, placement: remainingPlacement }
@@ -77,10 +84,5 @@ export const applyAssignmentPanelStatus = (
   status: SidebarPageStatus,
 ): FunctionAssignment[] => assignments.map((assignment) => {
   if (!assignmentAppearsInPanel(assignment, placement)) return assignment;
-  // A hidden Other Services mapping is the existing wire representation for
-  // an unassigned function, so keep the editor and a subsequent reload aligned.
-  if (placement === "OTHER_SERVICES" && status === "HIDDEN") {
-    return { ...assignment, placement: "UNASSIGNED", status: "HIDDEN" };
-  }
   return { ...assignment, status };
 });

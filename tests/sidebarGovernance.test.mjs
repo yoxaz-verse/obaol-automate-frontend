@@ -100,15 +100,15 @@ test("v2 does not activate a work rule from the wrong perspective and uses globa
   assert.equal(resolved.some((item) => item.routePath === "/dashboard/orders" && item.placement === "OTHER_SERVICES"), true);
 });
 
-test("admin editor exposes three independent assignment panels instead of dropdown rows", async () => {
+test("admin editor exposes four assignment panels including Unassigned", async () => {
   const source = await readFile(governancePagePath, "utf8");
-  assert.deepEqual(assignmentPanelPlacements, ["SEEKING", "PROVIDING", "OTHER_SERVICES"]);
+  assert.deepEqual(assignmentPanelPlacements, ["SEEKING", "PROVIDING", "OTHER_SERVICES", "UNASSIGNED"]);
   assert.match(source, /assignmentPanelPlacements\.map/);
   assert.match(source, /Seeking For/);
   assert.match(source, /Other Services/);
+  assert.match(source, /Not shown anywhere in associate navigation/);
   assert.match(source, /aria-pressed=\{active\}/);
   assert.match(source, /Mixed statuses/);
-  assert.match(source, />Not shown</);
   assert.match(source, /\["SEEKING", "PROVIDING", "OTHER_SERVICES"\]/);
   assert.doesNotMatch(source, /Other Services \(legacy\)/);
   assert.doesNotMatch(source, /<table/);
@@ -164,17 +164,27 @@ test("Other Services stays exclusive from work perspectives", () => {
   assert.deepEqual(providing, [{ functionSlug: "warehouse-storage", placement: "PROVIDING", status: "LIVE" }]);
 });
 
-test("hiding Other Services returns selected functions to the existing fallback representation", () => {
+test("Unassigned is a stable explicit state and Other Services can remain Hidden", () => {
   const assignments = [{ functionSlug: "testing", placement: "OTHER_SERVICES", status: "LIVE" }];
   assert.deepEqual(applyAssignmentPanelStatus(assignments, "OTHER_SERVICES", "HIDDEN"), [
-    { functionSlug: "testing", placement: "UNASSIGNED", status: "HIDDEN" },
+    { functionSlug: "testing", placement: "OTHER_SERVICES", status: "HIDDEN" },
   ]);
+  const unassigned = toggleFunctionPanel(assignments, "testing", "UNASSIGNED");
+  assert.deepEqual(unassigned, [{ functionSlug: "testing", placement: "UNASSIGNED", status: "HIDDEN" }]);
+  assert.deepEqual(toggleFunctionPanel(unassigned, "testing", "UNASSIGNED"), unassigned);
+  assert.equal(assignmentAppearsInPanel(unassigned[0], "UNASSIGNED"), true);
+});
+
+test("Unassigned mappings never resolve into associate navigation", () => {
+  const mappings = [row("buyer", "/dashboard/bidding", "UNASSIGNED", "HIDDEN")];
+  assert.deepEqual(resolveSidebarGovernance(mappings, ["buyer"], ["buyer"], { resolutionVersion: 2 }), []);
+  assert.equal(getGovernedRouteStatus([], "/dashboard/bidding"), "HIDDEN");
 });
 
 test("seller-only Bidding requires Seller in provided capabilities", () => {
   const mappings = [
     row("seller", "/dashboard/bidding", "PROVIDING", "LIVE"),
-    row("buyer", "/dashboard/bidding", "OTHER_SERVICES", "HIDDEN"),
+    row("buyer", "/dashboard/bidding", "UNASSIGNED", "HIDDEN"),
   ];
   assert.equal(getGovernedRouteStatus(resolveSidebarGovernance(mappings, [], ["seller"], { resolutionVersion: 2 }), "/dashboard/bidding"), "HIDDEN");
   assert.equal(resolveSidebarGovernance(mappings, ["seller"], [], { resolutionVersion: 2 }).some((item) => item.routePath === "/dashboard/bidding" && item.placement === "PROVIDING"), true);

@@ -31,14 +31,15 @@ const statusLabel = (value: SidebarPageStatus) => value === "COMING_SOON" ? "Com
 const panelDetails: Record<AssignmentPanelPlacement, { label: string; description: string }> = {
   SEEKING: { label: "Seeking For", description: "Shown when the company seeks this function." },
   PROVIDING: { label: "Providing", description: "Shown when the company provides this function." },
-  OTHER_SERVICES: { label: "Other Services", description: "Shown outside work sections. Hidden returns selected functions to Not shown." },
+  OTHER_SERVICES: { label: "Other Services", description: "Shown as an additional service outside work sections." },
+  UNASSIGNED: { label: "Unassigned", description: "Not shown anywhere in associate navigation." },
 };
 
 const groupMappings = (routes: RouteRow[], functions: FunctionRow[], mappings: SidebarGovernanceMapping[]): PageRule[] => routes.map((route) => {
   const rows = new Map(mappings.filter((row) => row.routePath === route.path).map((row) => [row.functionSlug, row]));
   return { id: route.id, routePath: route.path, label: route.label, assignments: functions.map((fn) => {
     const row = rows.get(fn.slug);
-    return row ? { functionSlug: fn.slug, placement: row.placement === "OTHER_SERVICES" && row.status === "HIDDEN" ? "UNASSIGNED" : row.placement, status: row.status } : { functionSlug: fn.slug, placement: "UNASSIGNED", status: "HIDDEN" };
+    return row ? { functionSlug: fn.slug, placement: row.placement, status: row.status } : { functionSlug: fn.slug, placement: "UNASSIGNED", status: "HIDDEN" };
   }) };
 });
 
@@ -59,7 +60,7 @@ function AssignmentPanel({
   const state = getAssignmentPanelState(assignments, placement);
   const panelId = `assignment-panel-${placement.toLowerCase()}`;
 
-  return <section aria-labelledby={panelId} className={`rounded-2xl border border-default-200 bg-content1 p-4 shadow-sm ${placement === "OTHER_SERVICES" ? "md:col-span-2" : ""}`}>
+  return <section aria-labelledby={panelId} className="rounded-2xl border border-default-200 bg-content1 p-4 shadow-sm">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <div className="flex items-center gap-2">
@@ -68,9 +69,9 @@ function AssignmentPanel({
         </div>
         <p className="mt-1 text-xs text-default-500">{details.description}</p>
       </div>
-      {state.status === "MIXED" && <Chip size="sm" color="warning" variant="flat">Mixed statuses</Chip>}
+      {placement !== "UNASSIGNED" && state.status === "MIXED" && <Chip size="sm" color="warning" variant="flat">Mixed statuses</Chip>}
     </div>
-    <div role="group" aria-label={`${details.label} status`} className="mt-4 grid grid-cols-3 rounded-xl bg-default-100 p-1">
+    {placement !== "UNASSIGNED" && <div role="group" aria-label={`${details.label} status`} className="mt-4 grid grid-cols-3 rounded-xl bg-default-100 p-1">
       {statuses.map((status) => {
         const active = state.status === status;
         return <button
@@ -82,7 +83,7 @@ function AssignmentPanel({
           className={`min-h-10 rounded-lg px-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${active ? "bg-content1 text-foreground shadow-sm" : "text-default-500 hover:text-foreground"} disabled:cursor-not-allowed disabled:opacity-40`}
         >{statusLabel(status)}</button>;
       })}
-    </div>
+    </div>}
     <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label={`${details.label} company functions`}>
       {functions.map((fn) => {
         const active = assignments.some((assignment) => assignment.functionSlug === fn.slug && assignmentAppearsInPanel(assignment, placement));
@@ -130,10 +131,10 @@ export default function SidebarGovernancePage() {
   const filteredPages = pages.filter((page) => `${page.label} ${page.routePath}`.toLowerCase().includes(search.trim().toLowerCase()));
   const updatePage = (updater: (page: PageRule) => PageRule) => { setPages((current) => current.map((page) => page.routePath === selectedPath ? updater(page) : page)); setDirty(true); };
   const mappings = useMemo(() => pages.flatMap((page) => page.assignments.map((assignment) => {
-    const placement = assignment.placement === "UNASSIGNED" ? "OTHER_SERVICES" as const : assignment.placement;
     const status = assignment.placement === "UNASSIGNED" ? "HIDDEN" as const : assignment.status;
-    const orderSection = placement === "BOTH" ? "SEEKING" : placement;
-    return { functionSlug: assignment.functionSlug, routePath: page.routePath, placement, status, order: Math.max(0, sectionOrder[orderSection].indexOf(page.routePath)) };
+    const orderSection = assignment.placement === "BOTH" ? "SEEKING" : assignment.placement;
+    const order = orderSection === "UNASSIGNED" ? 0 : Math.max(0, sectionOrder[orderSection].indexOf(page.routePath));
+    return { functionSlug: assignment.functionSlug, routePath: page.routePath, placement: assignment.placement, status, order };
   })), [pages, sectionOrder]);
 
   const toggleAssignmentPanel = (functionSlug: string, placement: AssignmentPanelPlacement) => updatePage((page) => ({
@@ -169,7 +170,7 @@ export default function SidebarGovernancePage() {
           <div>
             <h2 className="text-xl font-bold">{selected.label}</h2>
             <p className="text-xs text-default-400">{selected.routePath}</p>
-            <p className="mt-3 rounded-lg bg-default-100 p-3 text-xs text-default-500">Select a function chip to assign it to that panel. Selecting its active chip again removes it from this page. Each function can belong to only one panel.</p>
+            <p className="mt-3 rounded-lg bg-default-100 p-3 text-xs text-default-500">Assign each function to Seeking, Providing, Other Services, or Unassigned. A function may be active in both work perspectives; Unassigned functions are safely omitted when published.</p>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             {assignmentPanelPlacements.map((placement) => <AssignmentPanel
@@ -181,21 +182,11 @@ export default function SidebarGovernancePage() {
               onStatusChange={setAssignmentPanelStatus}
             />)}
           </div>
-          <div className="rounded-xl border border-dashed border-default-300 p-3">
-            <p className="text-xs font-black uppercase tracking-wider text-default-400">Not shown</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {selected.assignments.filter((assignment) => assignment.placement === "UNASSIGNED").map((assignment) => {
-                const fn = query.data.functions.find((item) => item.slug === assignment.functionSlug);
-                return <Chip key={assignment.functionSlug} size="sm" variant="flat">{fn?.name || assignment.functionSlug}</Chip>;
-              })}
-              {!selected.assignments.some((assignment) => assignment.placement === "UNASSIGNED") && <span className="text-xs text-default-400">All functions are assigned.</span>}
-            </div>
-          </div>
         </CardBody></Card>
         <div className="grid gap-3 md:grid-cols-3">{(["SEEKING", "PROVIDING", "OTHER_SERVICES"] as Section[]).map((section) => <OrderList key={section} section={section} routes={query.data.routes} order={sectionOrder[section]} onChange={(next) => { setSectionOrder((current) => ({ ...current, [section]: next })); setDirty(true); }} />)}</div>
       </>}</div>
       <Card className="h-fit xl:sticky xl:top-6"><CardBody className="gap-4"><div className="flex items-center gap-2"><FiEye /><h2 className="font-bold">Preview</h2></div><div className="flex gap-2"><Button size="sm" variant={previewDevice === "desktop" ? "solid" : "flat"} onPress={() => setPreviewDevice("desktop")}>Desktop</Button><Button size="sm" variant={previewDevice === "mobile" ? "solid" : "flat"} onPress={() => setPreviewDevice("mobile")}>Mobile</Button></div>{(["sought", "provided"] as const).map((side) => <fieldset key={side}><legend className="mb-2 text-[10px] font-black uppercase tracking-wider text-default-400">{side === "sought" ? "Seeking functions" : "Providing functions"}</legend><div className="flex flex-wrap gap-1">{query.data.functions.map((fn) => { const active = (side === "sought" ? previewSought : previewProvided).includes(fn.slug); return <button key={fn.slug} aria-pressed={active} onClick={() => togglePreview(side, fn.slug)} className={`rounded-full border px-2 py-1 text-[10px] ${active ? "border-primary bg-primary/10 text-primary" : "border-default-200 text-default-500"}`}>{fn.name}</button>; })}</div></fieldset>)}<div className={`rounded-xl border border-default-200 bg-background p-3 ${previewDevice === "mobile" ? "mx-auto max-w-[230px]" : "w-full"}`}><PreviewSection title="Home · always available" routes={homeRoutes} />{(["SEEKING", "PROVIDING", "OTHER_SERVICES"] as Section[]).map((section) => { const rows = previewRows.filter((row) => row.placement === section); return rows.length ? <PreviewSection key={section} title={sectionLabels[section]} routes={rows.map((row) => ({ path: row.routePath, label: query.data.routes.find((route) => route.path === row.routePath)?.label || row.routePath, status: row.status }))} /> : null; })}<PreviewSection title="Common · always available" routes={utilityRoutes} /></div></CardBody></Card>
     </div>
-    <Modal isOpen={publishOpen} onOpenChange={setPublishOpen}><ModalContent><ModalHeader>Publish page-first governance?</ModalHeader><ModalBody><p className="text-sm text-default-600">Publish draft revision {query.data.config.draft.revision} as resolution v2 for {pages.length} pages and {query.data.functions.length} functions. This activates separate Seeking and Providing matching, page fallbacks, and all three section orders.</p>{dirty && <p className="text-sm text-warning">Unsaved edits will be saved first.</p>}</ModalBody><ModalFooter><Button variant="flat" onPress={() => setPublishOpen(false)}>Cancel</Button><Button color="primary" onPress={publish} isLoading={saving}>Publish complete draft</Button></ModalFooter></ModalContent></Modal>
+    <Modal isOpen={publishOpen} onOpenChange={setPublishOpen}><ModalContent><ModalHeader>Publish page-first governance?</ModalHeader><ModalBody><p className="text-sm text-default-600">Publish draft revision {query.data.config.draft.revision} as resolution v2 for {pages.length} pages and {query.data.functions.length} functions. This activates separate Seeking and Providing matching, explicit Unassigned functions, and all three visible section orders.</p>{dirty && <p className="text-sm text-warning">Unsaved edits will be saved first.</p>}</ModalBody><ModalFooter><Button variant="flat" onPress={() => setPublishOpen(false)}>Cancel</Button><Button color="primary" onPress={publish} isLoading={saving}>Publish complete draft</Button></ModalFooter></ModalContent></Modal>
   </div>;
 }

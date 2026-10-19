@@ -37,7 +37,7 @@ export const resolveSidebarGovernance = (
   const resolved = new Map<string, ResolvedSidebarPage>();
 
   (mappings || []).filter((row) => functions.has(normalizeSlug(row.functionSlug))).forEach((row) => {
-    if ((SIDEBAR_COMMON_ROUTES as readonly string[]).includes(row.routePath)) return;
+    if ((SIDEBAR_COMMON_ROUTES as readonly string[]).includes(row.routePath) || row.placement === "UNASSIGNED") return;
     const slug = normalizeSlug(row.functionSlug);
     const placements: Array<"SEEKING" | "PROVIDING" | "OTHER_SERVICES"> = options?.resolutionVersion === 2
       ? row.placement === "BOTH"

@@ -204,6 +204,18 @@ test("homepage services use a nine-chapter multi-entity scroll story without aut
     "packaging", "logistics", "warehouse", "freight",
   ]);
   assert.equal(services.includes('data-service-story="true"'), true);
+  assert.equal(services.includes("data-service-intro-status={introStatus}"), true);
+  assert.equal(services.includes('data-service-intro-layer="dream"'), true);
+  assert.equal(services.includes('data-service-intro-content="true"'), true);
+  assert.equal(services.includes("Every trade begins as a possibility"), true);
+  assert.equal(services.includes('data-service-intro-trigger="true"'), true);
+  assert.equal(services.includes('threshold: 0.35'), true);
+  assert.equal(services.includes('introStatus !== "waiting"'), true);
+  assert.equal(services.includes('adaptiveMotion.prefersReducedMotion'), true);
+  assert.equal(services.includes('setIntroStatus("complete")'), true);
+  assert.equal(services.includes("window.setTimeout"), true);
+  assert.equal(services.includes("window.clearTimeout"), true);
+  assert.equal(services.includes('import { motion } from "framer-motion"'), true);
   assert.equal(services.includes("data-service-chapter={service.id}"), true);
   assert.equal(services.includes("data-active-service={active.id}"), true);
   assert.equal(services.includes("sticky top-28"), true);

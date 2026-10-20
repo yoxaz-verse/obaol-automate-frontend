@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState, type ComponentType, type RefCallback } from "react";
 import { FiCheckCircle, FiFileText, FiPackage, FiSearch, FiShoppingBag, FiTarget, FiTruck } from "react-icons/fi";
 import { FaShip, FaWarehouse } from "react-icons/fa6";
@@ -65,8 +66,11 @@ function Chapter({ service, index, active, chapterRef }: { service: ServiceChapt
 
 export default function ServiceShowcase() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [introStatus, setIntroStatus] = useState<"waiting" | "playing" | "complete">("waiting");
   const adaptiveMotion = useAdaptiveMotion();
+  const adaptiveMotionRef = useRef(adaptiveMotion);
   const sectionRef = useRef<HTMLElement>(null);
+  const introTriggerRef = useRef<HTMLDivElement>(null);
   const chapterNodesRef = useRef<Array<HTMLElement | null>>([]);
   const chapterRefSetters = useMemo(
     () => services.map((_, index): RefCallback<HTMLElement> => (node) => {
@@ -76,6 +80,39 @@ export default function ServiceShowcase() {
   );
   const active = services[activeIndex];
   const ActiveIcon = active.icon;
+
+  useEffect(() => {
+    adaptiveMotionRef.current = adaptiveMotion;
+  }, [adaptiveMotion]);
+
+  useEffect(() => {
+    if (introStatus !== "playing") return;
+
+    const completionTimer = window.setTimeout(
+      () => setIntroStatus("complete"),
+      adaptiveMotionRef.current.shouldReduceMotion ? 800 : 1900,
+    );
+    return () => window.clearTimeout(completionTimer);
+  }, [introStatus]);
+
+  useEffect(() => {
+    const introTrigger = introTriggerRef.current;
+    if (!introTrigger || introStatus !== "waiting") return;
+
+    if (adaptiveMotion.prefersReducedMotion) {
+      setIntroStatus("complete");
+      return;
+    }
+
+    const introObserver = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      introObserver.disconnect();
+      setIntroStatus("playing");
+    }, { threshold: 0.35, rootMargin: "0px 0px -8%" });
+
+    introObserver.observe(introTrigger);
+    return () => introObserver.disconnect();
+  }, [adaptiveMotion.prefersReducedMotion, introStatus]);
 
   useEffect(() => {
     if (adaptiveMotion.isMobile) return;
@@ -147,12 +184,53 @@ export default function ServiceShowcase() {
   }, [adaptiveMotion.isMobile]);
 
   return (
-    <section ref={sectionRef} data-service-story="true" aria-labelledby="service-story-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-16 md:py-24 public-standard-section">
+    <section ref={sectionRef} data-service-story="true" data-service-intro-status={introStatus} aria-labelledby="service-story-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-16 md:py-24 public-standard-section">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(207,152,60,0.12),transparent_28%)]" />
-      <div className="container relative z-10 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container">
+      {introStatus === "playing" && (
+        <motion.div
+          data-service-intro-layer="dream"
+          aria-hidden="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 1, 0] }}
+          transition={{ duration: adaptiveMotionRef.current.shouldReduceMotion ? 0.75 : 1.8, times: [0, 0.16, 0.62, 1], ease: "easeInOut" }}
+          onAnimationComplete={() => setIntroStatus("complete")}
+          className="pointer-events-none absolute inset-0 z-20 overflow-hidden bg-[rgba(249,247,242,0.9)] dark:bg-[rgba(12,11,9,0.9)]"
+        >
+          <motion.div
+            initial={adaptiveMotionRef.current.shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.08, filter: "blur(16px) saturate(0.78)" }}
+            animate={adaptiveMotionRef.current.shouldReduceMotion ? { opacity: [0, 0.38, 0] } : { opacity: [0, 0.68, 0.56, 0], scale: [1.08, 1.03, 1, 1], filter: ["blur(16px) saturate(0.78)", "blur(5px) saturate(0.9)", "blur(0px) saturate(0.96)", "blur(2px) saturate(0.96)"] }}
+            transition={{ duration: adaptiveMotionRef.current.shouldReduceMotion ? 0.75 : 1.8, times: adaptiveMotionRef.current.shouldReduceMotion ? [0, 0.45, 1] : [0, 0.35, 0.72, 1], ease: "easeOut" }}
+            className="absolute inset-[-5%]"
+          >
+            <div data-ink-artwork-mask="spacious" style={spaciousInkArtworkMaskStyle} className="absolute inset-[4%] overflow-hidden opacity-75">
+              <Image src={services[0].image} alt="" fill priority sizes="100vw" className="object-cover object-center" />
+              <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/25 to-background/65" />
+            </div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 0.72, 0.45, 0] }} transition={{ duration: 1.8, times: [0, 0.28, 0.72, 1] }} className="absolute -left-[8%] top-[6%] h-[70%] w-[58%] rounded-full bg-amber-300/25 blur-[90px] dark:bg-amber-500/15" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 0.5, 0.32, 0] }} transition={{ duration: 1.8, times: [0, 0.32, 0.72, 1] }} className="absolute -right-[8%] bottom-[3%] h-[62%] w-[52%] rounded-full bg-violet-300/25 blur-[100px] dark:bg-violet-500/15" />
+          <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
+            <motion.p
+              initial={{ opacity: 0, y: adaptiveMotionRef.current.shouldReduceMotion ? 0 : 10 }}
+              animate={{ opacity: [0, 1, 1, 0], y: adaptiveMotionRef.current.shouldReduceMotion ? 0 : [10, 0, 0, -4] }}
+              transition={{ duration: adaptiveMotionRef.current.shouldReduceMotion ? 0.75 : 1.65, times: [0, 0.28, 0.7, 1], ease: "easeOut" }}
+              className="max-w-3xl text-2xl font-semibold tracking-[-0.025em] text-foreground/85 drop-shadow-sm sm:text-4xl lg:text-5xl"
+            >
+              Every trade begins as a possibility
+            </motion.p>
+          </div>
+        </motion.div>
+      )}
+      <motion.div
+        data-service-intro-content="true"
+        initial={false}
+        animate={introStatus === "complete" ? { opacity: 1, y: 0, filter: "blur(0px)" } : introStatus === "playing" ? { opacity: [0.72, 0.84, 1], y: adaptiveMotion.shouldReduceMotion ? 0 : [8, 4, 0], filter: adaptiveMotion.shouldReduceMotion ? "blur(0px)" : ["blur(4px)", "blur(2px)", "blur(0px)"] } : { opacity: 0.72, y: adaptiveMotion.shouldReduceMotion ? 0 : 8, filter: adaptiveMotion.shouldReduceMotion ? "blur(0px)" : "blur(4px)" }}
+        transition={{ duration: adaptiveMotion.shouldReduceMotion ? 0.35 : 1.15, delay: introStatus === "playing" && !adaptiveMotion.shouldReduceMotion ? 0.55 : 0, ease: [0.22, 1, 0.36, 1] }}
+        className="container relative z-10 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container"
+      >
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
           <div>
-            <div className="mb-10 space-y-5 lg:mb-2">
+            <div ref={introTriggerRef} data-service-intro-trigger="true" className="mb-10 space-y-5 lg:mb-2">
               <p className={homeTitleStyles.sectionKicker}>Connected Execution Network</p>
               <h2 id="service-story-title" className={homeTitleStyles.sectionTitle}>Different specialists. One connected trade.</h2>
               <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/65">Discovery starts the trade, then buyers, suppliers, and specialist partners each perform their own work. OBAOL connects the handoffs, records, and progress—it does not replace them.</p>
@@ -191,7 +269,7 @@ export default function ServiceShowcase() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

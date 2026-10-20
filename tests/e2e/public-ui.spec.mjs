@@ -24,6 +24,8 @@ for (const theme of ["light", "dark"]) {
 
       const serviceStory = page.locator('[data-service-story="true"]');
       await serviceStory.scrollIntoViewIfNeeded();
+      await expect(serviceStory).toHaveAttribute("data-service-intro-status", "complete");
+      await expect(serviceStory.locator('[data-service-intro-layer="dream"]')).toHaveCount(0);
       await expect(serviceStory.getByRole("heading", { name: "Different specialists. One connected trade." })).toBeVisible();
       await expect(serviceStory.getByText("OBAOL connects the handoffs, records, and progress—it does not replace them.", { exact: false })).toBeVisible();
       await expect(serviceStory.locator('[data-service-chapter="discovery"]')).toBeVisible();
@@ -74,6 +76,10 @@ test("service scroll story keeps every chapter synchronized in both directions",
 
   const story = page.locator('[data-service-story="true"]');
   await story.scrollIntoViewIfNeeded();
+  await expect(story).toHaveAttribute("data-service-intro-status", "playing");
+  await expect(story.locator('[data-service-intro-layer="dream"]')).toBeVisible();
+  await expect(story).toHaveAttribute("data-service-intro-status", "complete", { timeout: 5000 });
+  await expect(story.locator('[data-service-intro-layer="dream"]')).toHaveCount(0);
   const panel = story.locator("[data-active-service]");
   await expect(panel).toBeVisible();
 
@@ -87,6 +93,10 @@ test("service scroll story keeps every chapter synchronized in both directions",
   for (const id of [...chapterIds].reverse()) await assertChapter(id);
   await assertChapter("warehouse");
   await assertChapter("documentation");
+  await page.locator('[data-natural-scroll-hero="true"]').scrollIntoViewIfNeeded();
+  await story.scrollIntoViewIfNeeded();
+  await expect(story).toHaveAttribute("data-service-intro-status", "complete");
+  await expect(story.locator('[data-service-intro-layer="dream"]')).toHaveCount(0);
 });
 
 test("public navigation supports keyboard dismissal and private styling stays isolated", async ({ page }) => {

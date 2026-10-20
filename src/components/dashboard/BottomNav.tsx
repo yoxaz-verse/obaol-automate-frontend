@@ -9,7 +9,6 @@ import { sidebarOptions } from "@/utils/utils";
 import { getDashboardBottomNavigation } from "@/utils/dashboardNav";
 import { isDashboardRouteActive } from "@/utils/dashboardAccess";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
-import { getGovernedRouteStatus } from "@/utils/sidebarGovernance";
 
 const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolean }) => {
   const pathname = usePathname();
@@ -21,7 +20,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
     providedCapabilities: user?.providedCapabilities || [],
     soughtCapabilities: user?.soughtCapabilities || [],
     governedPages: governance.isAssociate ? governance.resolved : undefined,
-  }).filter((route) => !governance.isAssociate || getGovernedRouteStatus(governance.resolved, route?.path || "") === "LIVE");
+  }).filter((route) => !governance.isAssociate || governance.getRouteStatus(route?.path || "") === "LIVE");
 
   const openMore = () => {
     if (isOnboardingLocked) return;

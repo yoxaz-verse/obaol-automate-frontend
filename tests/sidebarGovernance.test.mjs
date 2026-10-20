@@ -6,11 +6,20 @@ import {
   applyAssignmentPanelStatus,
   assignmentAppearsInPanel,
   assignmentPanelPlacements,
+  compileGovernanceMappings,
+  createAssignmentMatrix,
+  createSidebarGovernanceEditorState,
   getAssignmentPanelState,
+  sidebarGovernanceEditorReducer,
+  summarizeGovernanceChanges,
   toggleFunctionPanel,
 } from "../src/utils/sidebarGovernanceEditor.ts";
 
 const governancePagePath = new URL("../src/app/dashboard/sidebar-governance/page.tsx", import.meta.url);
+const assignmentPanelPath = new URL("../src/components/sidebar-governance/PageAssignments.tsx", import.meta.url);
+const orderAndPreviewPath = new URL("../src/components/sidebar-governance/OrderAndPreview.tsx", import.meta.url);
+const governanceHookPath = new URL("../src/hooks/useSidebarGovernance.tsx", import.meta.url);
+const dashboardLayoutPath = new URL("../src/app/dashboard/layout.tsx", import.meta.url);
 
 const row = (functionSlug, routePath, placement, status, order = 0) => ({ functionSlug, routePath, placement, status, order });
 
@@ -101,17 +110,53 @@ test("v2 does not activate a work rule from the wrong perspective and uses globa
 });
 
 test("admin editor exposes four assignment panels including Unassigned", async () => {
-  const source = await readFile(governancePagePath, "utf8");
+  const source = `${await readFile(governancePagePath, "utf8")}\n${await readFile(assignmentPanelPath, "utf8")}\n${await readFile(orderAndPreviewPath, "utf8")}`;
   assert.deepEqual(assignmentPanelPlacements, ["SEEKING", "PROVIDING", "OTHER_SERVICES", "UNASSIGNED"]);
   assert.match(source, /assignmentPanelPlacements\.map/);
   assert.match(source, /Seeking For/);
   assert.match(source, /Other Services/);
-  assert.match(source, /Not shown anywhere in associate navigation/);
+  assert.match(source, /Intentionally omitted from associate navigation/);
   assert.match(source, /aria-pressed=\{active\}/);
   assert.match(source, /Mixed statuses/);
   assert.match(source, /\["SEEKING", "PROVIDING", "OTHER_SERVICES"\]/);
   assert.doesNotMatch(source, /Other Services \(legacy\)/);
   assert.doesNotMatch(source, /<table/);
+});
+
+test("keyed editor reducer updates one page and compiles a complete matrix", () => {
+  const routes = [
+    { id: "marketplace", path: "/dashboard/marketplace", label: "Trade Listings" },
+    { id: "orders", path: "/dashboard/orders", label: "Orders" },
+  ];
+  const functions = [
+    { _id: "1", slug: "buyer", name: "Buyer" },
+    { _id: "2", slug: "seller", name: "Seller" },
+  ];
+  const order = { SEEKING: routes.map((item) => item.path), PROVIDING: routes.map((item) => item.path), OTHER_SERVICES: routes.map((item) => item.path) };
+  const matrix = createAssignmentMatrix(routes, functions, [row("buyer", "/dashboard/marketplace", "SEEKING", "LIVE")]);
+  let state = createSidebarGovernanceEditorState(matrix, order, 7);
+  state = sidebarGovernanceEditorReducer(state, { type: "TOGGLE_FUNCTION", routePath: "/dashboard/orders", functionSlug: "seller", placement: "PROVIDING" });
+  assert.equal(state.matrix["/dashboard/marketplace"], matrix["/dashboard/marketplace"]);
+  assert.equal(state.matrix["/dashboard/orders"].seller.placement, "PROVIDING");
+  assert.deepEqual(summarizeGovernanceChanges(state), { changedPages: 1, assignmentChanges: 1, changedSections: 0 });
+  const compiled = compileGovernanceMappings(state.matrix, state.sectionOrder);
+  assert.equal(compiled.length, routes.length * functions.length);
+  assert.equal(compiled.find((item) => item.routePath === "/dashboard/orders" && item.functionSlug === "buyer")?.placement, "UNASSIGNED");
+  state = sidebarGovernanceEditorReducer(state, { type: "TOGGLE_FUNCTION", routePath: "/dashboard/orders", functionSlug: "seller", placement: "PROVIDING" });
+  assert.deepEqual(state.dirtyPages, []);
+  state = sidebarGovernanceEditorReducer(state, { type: "SET_SECTION_ORDER", section: "SEEKING", order: [...order.SEEKING].reverse() });
+  assert.deepEqual(state.dirtySections, ["SEEKING"]);
+  state = sidebarGovernanceEditorReducer(state, { type: "SET_SECTION_ORDER", section: "SEEKING", order: order.SEEKING });
+  assert.deepEqual(state.dirtySections, []);
+});
+
+test("dashboard shares one memoized governance provider across navigation surfaces", async () => {
+  const hookSource = await readFile(governanceHookPath, "utf8");
+  const layoutSource = await readFile(dashboardLayoutPath, "utf8");
+  assert.equal((hookSource.match(/useQuery\s*\(/g) || []).length, 1);
+  assert.match(hookSource, /SidebarGovernanceContext\.Provider/);
+  assert.match(hookSource, /indexResolvedSidebarGovernance/);
+  assert.match(layoutSource, /<SidebarGovernanceProvider>/);
 });
 
 test("seeking and providing chips combine internally and can be removed independently", () => {

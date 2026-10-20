@@ -1,4 +1,4 @@
-export type LabOption = { _id: string; kind?: string; name: string; unit?: string; method?: string; parentIds?: string[] };
+export type LabOption = { _id: string; kind?: string; name: string; unit?: string; method?: string; parentIds?: string[]; status?: "ACTIVE" | "REQUESTED" | "REJECTED" | "INACTIVE" };
 export type CountryOption = { _id: string; name: string };
 export type LabCredential = {
   _id?: string;
@@ -63,7 +63,9 @@ export type LabSnapshot = {
 export type LabProfile = {
   _id: string;
   companyId?: { _id: string; name: string; externalListingSource?: string };
-  status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED";
+  status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+  revision: number;
+  archivedAt?: string | null;
   reviewNotes?: string;
   draft?: LabSnapshot;
   published?: LabSnapshot;

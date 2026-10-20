@@ -5,7 +5,7 @@ import BrandedLoader from "@/components/ui/BrandedLoader";
 import { canAccessDashboardRoute } from "@/utils/dashboardAccess";
 import { getDashboardRoute } from "@/utils/dashboardAccess";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
-import { getGovernedRouteStatus, SIDEBAR_RECOVERY_ROUTES } from "@/utils/sidebarGovernance";
+import { SIDEBAR_RECOVERY_ROUTES } from "@/utils/sidebarGovernance";
 
 const PrivateRoute = ({
   children,
@@ -19,7 +19,7 @@ const PrivateRoute = ({
   const governance = useSidebarGovernance();
   const route = getDashboardRoute(pathname);
   const governedPath = route?.activeParent || route?.breadcrumbParent || route?.path || pathname;
-  const governedStatus = governance.isAssociate ? getGovernedRouteStatus(governance.resolved, governedPath) : "LIVE";
+  const governedStatus = governance.isAssociate ? governance.getRouteStatus(governedPath) : "LIVE";
   const governancePending = governance.isAssociate && governance.isLoading;
 
   const roleAllowed = Boolean(user) && canAccessDashboardRoute({

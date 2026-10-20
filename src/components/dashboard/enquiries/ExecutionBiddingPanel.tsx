@@ -147,11 +147,16 @@ function OperatorActions({ item }: { item: ExecutionBidOpportunity }) {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [awardBid, setAwardBid] = useState<Bid | null>(null);
+  const [labProfileId, setLabProfileId] = useState("");
   const [error, setError] = useState("");
   const representedProvider = candidates.find((candidate) => companyId(candidate) === bidProvider);
   const noteViolation = detectOffPlatformDisclosure(note, {
     companyNames: [representedProvider ? companyName(representedProvider) : ""],
   });
+  const awardCompanyId = companyId(awardBid?.company);
+  const facilitiesQuery = useQuery({ queryKey: ["award-lab-facilities", awardCompanyId], queryFn: async () => (await getData(apiRoutes.labProfiles.providerFacilities(awardCompanyId))).data.data || [], enabled: Boolean(awardBid && item.serviceType === "QUALITY_TESTING" && awardCompanyId) });
+  const facilities: any[] = facilitiesQuery.data || [];
+  useEffect(() => { setLabProfileId(facilities.length === 1 ? facilities[0]._id : ""); }, [facilities]);
   const mutation = useMutation({
     mutationFn: (payload: Record<string, unknown>) => patchData(`${apiRoutes.enquiry.getAll}/${item.enquiryId}/execution-inquiries/${item.serviceType}`, { taskId: item.taskId, ...payload }),
     onSuccess: () => {
@@ -196,8 +201,9 @@ function OperatorActions({ item }: { item: ExecutionBidOpportunity }) {
           <ModalBody>
             <p>This will award <strong>{companyName(awardBid?.company)}</strong> the work at <strong>{awardBid?.amount}</strong>, close bidding, and mark all other bids as not selected.</p>
             {awardBid?.note && <p className="rounded-lg bg-default-100 p-3 text-sm">{awardBid.note}</p>}
+            {item.serviceType === "QUALITY_TESTING" ? <Select label="Laboratory facility" isRequired isLoading={facilitiesQuery.isLoading} selectedKeys={labProfileId ? [labProfileId] : []} onSelectionChange={(keys) => setLabProfileId(keys === "all" ? "" : String(Array.from(keys)[0] || ""))}>{facilities.map((facility) => <SelectItem key={facility._id} textValue={facility.published?.displayName || "Laboratory"}>{facility.published?.displayName || "Laboratory"}{facility.published?.city ? ` · ${facility.published.city}` : ""}</SelectItem>)}</Select> : null}
           </ModalBody>
-          <ModalFooter><Button variant="light" onPress={onClose}>Go back</Button><Button color="success" isLoading={mutation.isPending} onPress={() => mutation.mutate({ committedProvider: companyId(awardBid?.company) })}>Confirm winner</Button></ModalFooter>
+          <ModalFooter><Button variant="light" onPress={onClose}>Go back</Button><Button color="success" isLoading={mutation.isPending} isDisabled={item.serviceType === "QUALITY_TESTING" && (!labProfileId || facilitiesQuery.isLoading)} onPress={() => mutation.mutate({ committedProvider: companyId(awardBid?.company), ...(item.serviceType === "QUALITY_TESTING" ? { labProfileId } : {}) })}>Confirm winner</Button></ModalFooter>
         </>}</ModalContent>
       </Modal>
     </div>

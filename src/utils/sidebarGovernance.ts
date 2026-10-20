@@ -82,3 +82,26 @@ export const getGovernedRouteStatus = (resolved: ResolvedSidebarPage[], path: st
   if (!rows.length) return "HIDDEN";
   return rows.reduce<SidebarPageStatus>((best, row) => STATUS_WEIGHT[row.status] > STATUS_WEIGHT[best] ? row.status : best, "HIDDEN");
 };
+
+export const indexResolvedSidebarGovernance = (resolved: ResolvedSidebarPage[]) => {
+  const sections: Record<ResolvedSidebarPage["placement"], ResolvedSidebarPage[]> = {
+    SEEKING: [],
+    PROVIDING: [],
+    OTHER_SERVICES: [],
+  };
+  const statusByRoute = new Map<string, SidebarPageStatus>();
+
+  resolved.forEach((row) => {
+    sections[row.placement].push(row);
+    const current = statusByRoute.get(row.routePath) || "HIDDEN";
+    if (STATUS_WEIGHT[row.status] > STATUS_WEIGHT[current]) statusByRoute.set(row.routePath, row.status);
+  });
+
+  return {
+    sections,
+    statusByRoute,
+    getRouteStatus: (path: string): SidebarPageStatus => SIDEBAR_RECOVERY_ROUTES.has(path)
+      ? "LIVE"
+      : statusByRoute.get(path) || "HIDDEN",
+  };
+};

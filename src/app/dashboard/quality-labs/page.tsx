@@ -1,9 +1,9 @@
 "use client";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, CardBody, Chip, Input, Pagination, Spinner, Switch } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FiGrid, FiMail, FiMap, FiMapPin, FiPhone, FiSearch, FiSliders } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { LuPlus, LuRotateCcw } from "react-icons/lu";
@@ -19,17 +19,21 @@ import { trackLabContact } from "@/utils/labContact";
 const QualityLabsMap = dynamic(() => import("@/components/Labs/QualityLabsMap"), { ssr: false });
 type Filters = { search: string; state: string; city: string; source: string[]; physicalCountryIds: string[]; destinationCountryIds: string[]; commodityIds: string[]; qualityClassifications: string[]; testIds: string[]; parameterIds: string[]; accreditationIds: string[]; verifiedOnly: boolean; latitude: string; longitude: string; radiusKm: string[] };
 const EMPTY: Filters = { search: "", state: "", city: "", source: [], physicalCountryIds: [], destinationCountryIds: [], commodityIds: [], qualityClassifications: [], testIds: [], parameterIds: [], accreditationIds: [], verifiedOnly: false, latitude: "", longitude: "", radiusKm: [] };
+const filtersFromSearch = (search: { get(key: string): string | null }): Filters => ({ ...EMPTY, search: search.get("search") || "", state: search.get("state") || "", city: search.get("city") || "", latitude: search.get("latitude") || "", longitude: search.get("longitude") || "", verifiedOnly: search.get("verifiedOnly") === "true", source: search.get("source") ? [search.get("source")!] : [], radiusKm: search.get("radiusKm") ? [search.get("radiusKm")!] : [], physicalCountryIds: search.get("physicalCountryIds")?.split(",").filter(Boolean) || [], destinationCountryIds: search.get("destinationCountryIds")?.split(",").filter(Boolean) || [], commodityIds: search.get("commodityIds")?.split(",").filter(Boolean) || [], qualityClassifications: search.get("qualityClassifications")?.split(",").filter(Boolean) || [], testIds: search.get("testIds")?.split(",").filter(Boolean) || [], parameterIds: search.get("parameterIds")?.split(",").filter(Boolean) || [], accreditationIds: search.get("accreditationIds")?.split(",").filter(Boolean) || [] });
 const option = (item: { _id: string; name: string }): SearchableOption => ({ key: item._id, label: item.name });
 
 export default function QualityLabsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useContext(AuthContext);
   const canManage = ["admin", "associate"].includes(String(user?.role || "").toLowerCase());
-  const [filters, setFilters] = useState<Filters>(EMPTY);
-  const [applied, setApplied] = useState<Filters>(EMPTY);
-  const [page, setPage] = useState(1);
+  const initialFilters = useMemo(() => filtersFromSearch(searchParams), [searchParams]);
+  const [filters, setFilters] = useState<Filters>(initialFilters);
+  const [applied, setApplied] = useState<Filters>(initialFilters);
+  const [page, setPage] = useState(() => Math.max(1, Number(searchParams.get("page")) || 1));
   const [viewMode, setViewMode] = useState<"map" | "cards">("map");
   const params = useMemo(() => Object.fromEntries(Object.entries({ ...applied, source: applied.source[0] || "", radiusKm: applied.radiusKm[0] || "", page, limit: 18 }).map(([key, value]) => [key, Array.isArray(value) ? value.join(",") : value]).filter(([, value]) => value !== "" && value !== false)), [applied, page]);
+  useEffect(() => { const queryString = new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString(); router.replace(`?${queryString}`, { scroll: false }); }, [params, router]);
   const query = useQuery({ queryKey: ["lab-directory-v3", params], queryFn: async () => (await getData(apiRoutes.labProfiles.directory, params as any)).data });
   const payload: any = query.data || {};
   const labs: Array<LabProfile & { capabilityStatus?: string }> = Array.isArray(payload.data) ? payload.data : [];

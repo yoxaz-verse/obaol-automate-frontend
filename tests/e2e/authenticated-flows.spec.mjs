@@ -34,12 +34,13 @@ const installFailureGuards = (page) => {
 const login = async (page, account) => {
   await page.goto(account.path);
   await page.getByLabel("Email Address").fill(account.email);
-  if (await page.getByLabel("Password").count() === 0) {
-    await page.getByRole("button", { name: /^Sign In$/ }).click();
-    await expect(page.getByLabel("Password")).toBeVisible();
+  const passwordInput = page.locator('input[type="password"]');
+  if (await passwordInput.count() === 0) {
+    await page.getByTestId("auth-submit").click();
+    await expect(passwordInput).toBeVisible();
   }
-  await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: /^Sign In$/ }).click();
+  await passwordInput.fill(password);
+  await page.getByRole("button", { name: /^Sign in with password$/i }).click();
   await expect(page).toHaveURL(/\/dashboard(?:[/?]|$)/, { timeout: 15_000 });
   await expect(page.locator("[data-dashboard-shell]")).toBeVisible();
 };
@@ -58,7 +59,7 @@ const navigateThroughVisibleUi = async (page, account) => {
         const group = dialog.getByRole("button", { name: new RegExp(account.group) });
         if (await group.getAttribute("aria-expanded") !== "true") await group.click();
       }
-      await dialog.getByRole("button", { name: account.allowedLabel, exact: true }).click();
+      await dialog.getByRole("button", { name: account.allowedLabel, exact: true }).first().click();
     }
   } else {
     if (account.group) await page.locator("[data-sidebar]").getByRole("button", { name: new RegExp(account.group) }).click();
@@ -253,4 +254,38 @@ test("mobile navigation exposes stable labels and restores focus after Escape", 
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog", { name: "Workspace navigation" })).toHaveCount(0);
   await expect(more).toBeFocused();
+});
+
+test("associate dashboard fetches published sidebar governance once", async ({ page }) => {
+  let governanceRequests = 0;
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname.endsWith("/sidebar-governance/published")) governanceRequests += 1;
+  });
+  await login(page, accounts[0]);
+  await navigateThroughVisibleUi(page, accounts[0]);
+  await expect(page.getByText("Trade Listing Discovery", { exact: true })).toBeVisible();
+  await expect.poll(() => governanceRequests).toBe(1);
+});
+
+test("admin can save and publish a chip-based governance edit", async ({ page }) => {
+  test.skip((page.viewportSize()?.width || 0) < 768, "publication mutation runs once in the desktop project");
+  await login(page, accounts[6]);
+  await page.goto("/dashboard/sidebar-governance");
+  await expect(page.getByRole("heading", { name: "Sidebar Governance", exact: true })).toBeVisible();
+  await page.getByLabel("Search sidebar pages").fill("Bidding");
+  await page.locator('[data-governance-route="/dashboard/bidding"]').click();
+
+  const seeking = page.getByRole("region", { name: "Seeking For" });
+  await seeking.getByRole("button", { name: "Buyer", exact: true }).click();
+  await expect(page.getByText("Unsaved changes", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByText("Unsaved changes", { exact: true })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Publish", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Publish sidebar governance?" });
+  await expect(dialog).toBeVisible();
+  const publish = dialog.getByRole("button", { name: "Publish complete draft", exact: true });
+  await publish.focus();
+  await publish.press("Enter");
+  await expect(dialog).toBeHidden();
 });

@@ -18,7 +18,7 @@ import { isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import DashboardContextBar from "@/components/dashboard/DashboardContextBar";
 import CompanyApprovalBanner from "@/components/dashboard/CompanyApprovalBanner";
 import LiveNotificationSubscriber from "@/components/dashboard/LiveNotificationSubscriber";
-import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
+import { SidebarGovernanceProvider, useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -242,7 +242,9 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthenticatedProviders>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      <SidebarGovernanceProvider>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      </SidebarGovernanceProvider>
     </AuthenticatedProviders>
   );
 }

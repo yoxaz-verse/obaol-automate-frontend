@@ -12,6 +12,7 @@ import { showToastMessage } from "@/utils/utils";
 import SearchableSelect from "@/components/ui/SearchableSelect";
 import type { CountryOption, LabCountryAssignment, LabCredential, LabOption, LabProductCapabilityTemplate, LabSnapshot } from "@/types/labProfile";
 import { optionId, optionName } from "@/types/labProfile";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
 
 const STEPS = ["Lab identity", "Credential library", "Product capabilities", "Country product coverage", "Review"];
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(12)), (byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -41,14 +42,17 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   const [stepErrors, setStepErrors] = useState<Record<number, boolean>>({});
   const [whatsappSameAsPrimary, setWhatsappSameAsPrimary] = useState(true);
   const [customWhatsappPhone, setCustomWhatsappPhone] = useState("");
+  const [revision, setRevision] = useState(1);
+  const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(emptyProfile()));
 
   const companiesQuery = useQuery({ queryKey: ["lab-admin-companies"], queryFn: async () => { const response: any = await getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 500, sort: "name:asc" }); const root = response?.data?.data; return Array.isArray(root?.data) ? root.data : Array.isArray(root) ? root : []; }, enabled: isAdmin });
   const taxonomyQuery = useQuery({ queryKey: ["lab-taxonomy"], queryFn: async () => (await getData(apiRoutes.labProfiles.taxonomy)).data.data });
-  const draftQuery = useQuery({ queryKey: ["lab-profile-draft", labId || "legacy", companyId], queryFn: async () => (await getData(labId ? apiRoutes.labProfiles.mineDetail(labId) : apiRoutes.labProfiles.draft, !labId && companyId ? { companyId } : {})).data.data, enabled: Boolean(labId) || !isAdmin || Boolean(companyId), retry: false });
+  const draftQuery = useQuery({ queryKey: ["lab-profile-draft", labId, companyId], queryFn: async () => (await getData(apiRoutes.labProfiles.mineDetail(labId!), companyId ? { companyId } : {})).data.data, enabled: Boolean(labId), retry: false });
 
   useEffect(() => {
     if (!draftQuery.isSuccess) return;
     const draft = draftQuery.data?.draft || draftQuery.data?.published;
+    setRevision(Number(draftQuery.data?.revision || 1));
     if (!draft) {
       setProfile(emptyProfile());
       setWhatsappSameAsPrimary(true);
@@ -59,15 +63,20 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
     const usesPrimaryPhone = Boolean(savedWhatsapp) && savedWhatsapp.replace(/\D/g, "") === String(draft.contactPhone || "").replace(/\D/g, "");
     setWhatsappSameAsPrimary(usesPrimaryPhone);
     setCustomWhatsappPhone(usesPrimaryPhone ? "" : savedWhatsapp);
-    setProfile({
+    const normalized = {
       ...draft,
       whatsappPhone: savedWhatsapp,
       physicalCountryId: optionId(draft.physicalCountryId),
       credentials: (draft.credentials || []).map((credential: LabCredential) => ({ ...credential, _id: undefined, accreditationId: optionId(credential.accreditationId) })),
       productCapabilityTemplates: (draft.productCapabilityTemplates || []).map((template: LabProductCapabilityTemplate) => ({ ...template, _id: String(template._id), commodityId: optionId(template.commodityId), testIds: (template.testIds || []).map(optionId), parameterIds: (template.parameterIds || []).map(optionId) })),
       countryAssignments: (draft.countryAssignments || []).map((assignment: LabCountryAssignment) => ({ ...assignment, countryId: optionId(assignment.countryId), productTemplateIds: (assignment.productTemplateIds || []).map(String) })),
-    });
+    };
+    setProfile(normalized);
+    setSavedSnapshot(JSON.stringify(normalized));
   }, [draftQuery.data, draftQuery.isSuccess]);
+
+  const dirty = JSON.stringify(profile) !== savedSnapshot;
+  useUnsavedChangesGuard(dirty, "You have unsaved laboratory profile changes. Leave without saving?");
 
   const resetWizard = () => {
     setProfile(emptyProfile());
@@ -105,14 +114,21 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   const updateCredential = (index: number, field: keyof LabCredential, value: any) => setField("credentials", profile.credentials.map((credential, i) => i === index ? { ...credential, [field]: value } : credential));
   const updateTemplate = (id: string, field: keyof LabProductCapabilityTemplate, value: any) => setField("productCapabilityTemplates", profile.productCapabilityTemplates.map((template) => template._id === id ? { ...template, [field]: value } : template));
 
-  const save = useMutation({ mutationFn: () => {
+  const save = useMutation({ mutationFn: async () => {
     if (isAdmin && !companyId) throw new Error("Select an associate company before saving.");
-    return putData(labId ? apiRoutes.labProfiles.mineDraft(labId) : apiRoutes.labProfiles.draft, { profile, ...(!labId && companyId ? { companyId } : {}) });
-  }, onSuccess: () => { client.invalidateQueries({ queryKey: ["lab-profile-draft"] }); showToastMessage({ type: "success", message: "Lab draft saved." }); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to save draft." }) });
+    return labId
+      ? putData(apiRoutes.labProfiles.mineDraft(labId), { profile, expectedRevision: revision, ...(companyId ? { companyId } : {}) })
+      : postData(apiRoutes.labProfiles.mine, { profile, ...(companyId ? { companyId } : {}) });
+  }, onSuccess: (response: any) => { const saved = response?.data?.data; setRevision(Number(saved?.revision || revision + 1)); setSavedSnapshot(JSON.stringify(profile)); client.invalidateQueries({ queryKey: ["lab-profile-draft"] }); client.invalidateQueries({ queryKey: ["my-labs"] }); showToastMessage({ type: "success", message: "Lab draft saved." }); if (!labId && saved?._id) router.replace(`/dashboard/quality-labs/my/${saved._id}${companyId ? `?companyId=${companyId}` : ""}`); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to save draft." }) });
   const submit = useMutation({ mutationFn: async () => {
     if (isAdmin && !companyId) throw new Error("Select an associate company before submitting.");
-    await putData(labId ? apiRoutes.labProfiles.mineDraft(labId) : apiRoutes.labProfiles.draft, { profile, ...(!labId && companyId ? { companyId } : {}) });
-    return postData(labId ? apiRoutes.labProfiles.mineSubmit(labId) : apiRoutes.labProfiles.submit, !labId && companyId ? { companyId } : {});
+    if (!labId) {
+      const created: any = await postData(apiRoutes.labProfiles.mine, { profile, ...(companyId ? { companyId } : {}) });
+      const row = created?.data?.data;
+      return postData(apiRoutes.labProfiles.mineSubmit(row._id), { expectedRevision: row.revision, ...(companyId ? { companyId } : {}) });
+    }
+    const saved: any = await putData(apiRoutes.labProfiles.mineDraft(labId), { profile, expectedRevision: revision, ...(companyId ? { companyId } : {}) });
+    return postData(apiRoutes.labProfiles.mineSubmit(labId), { expectedRevision: saved?.data?.data?.revision, ...(companyId ? { companyId } : {}) });
   }, onSuccess: () => { showToastMessage({ type: "success", message: "Lab profile submitted for review." }); router.push(returnTo); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to submit profile." }) });
 
   const openRequest = (kind: string, target: { templateId?: string; credentialIndex?: number } = {}) => {
@@ -138,7 +154,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
       if (template && requestModal.kind === "TEST") updateTemplate(template._id, "testIds", Array.from(new Set([...template.testIds.map(optionId), created._id])));
       if (template && requestModal.kind === "PARAMETER") updateTemplate(template._id, "parameterIds", Array.from(new Set([...template.parameterIds.map(optionId), created._id])));
       await taxonomyQuery.refetch();
-      showToastMessage({ type: "success", message: `${requestModal.name.trim()} is ready to use.` });
+      showToastMessage({ type: "success", message: `${requestModal.name.trim()} was requested and can be used in this draft while it awaits approval.` });
       setRequestModal((current) => ({ ...current, open: false }));
     } catch (error: any) { showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to add option." }); }
   };
@@ -177,8 +193,8 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   const statePage = (content: any) => <section className="min-h-screen bg-background p-4 md:p-8"><div className="mx-auto max-w-6xl space-y-6">{header}{content}</div></section>;
 
   if (isAdmin && !labId && !companyId) return statePage(<Card className="border border-dashed border-default-300"><CardBody className="items-center gap-2 p-10 text-center"><h2 className="text-xl font-black">Select an associate company</h2><p className="max-w-xl text-sm text-default-500">Choose a company above to view and manage the exact lab profile its associates use.</p></CardBody></Card>);
-  if (taxonomyQuery.isLoading || draftQuery.isLoading) return statePage(<Card className="border border-default-200"><CardBody className="flex min-h-64 items-center justify-center gap-3"><Spinner color="success" /><p className="text-sm text-default-500">Loading the lab profile…</p></CardBody></Card>);
-  if (taxonomyQuery.isError || draftQuery.isError) return statePage(<Card className="border border-danger-200"><CardBody className="items-center gap-3 p-10 text-center"><h2 className="text-xl font-black">Unable to load the lab profile</h2><p className="text-sm text-default-500">The selected company’s panel could not be loaded. Try again before making changes.</p><Button color="danger" variant="flat" onPress={() => { taxonomyQuery.refetch(); draftQuery.refetch(); }}>Try again</Button></CardBody></Card>);
+  if (taxonomyQuery.isLoading || (labId && draftQuery.isLoading)) return statePage(<Card className="border border-default-200"><CardBody className="flex min-h-64 items-center justify-center gap-3"><Spinner color="success" /><p className="text-sm text-default-500">Loading the lab profile…</p></CardBody></Card>);
+  if (taxonomyQuery.isError || (labId && draftQuery.isError)) return statePage(<Card className="border border-danger-200"><CardBody className="items-center gap-3 p-10 text-center"><h2 className="text-xl font-black">Unable to load the lab profile</h2><p className="text-sm text-default-500">The selected company’s panel could not be loaded. Try again before making changes.</p><Button color="danger" variant="flat" onPress={() => { taxonomyQuery.refetch(); if (labId) draftQuery.refetch(); }}>Try again</Button></CardBody></Card>);
   return <section className="min-h-screen bg-background p-4 md:p-8"><div className="mx-auto max-w-6xl space-y-6">
     {header}
     <div className="grid grid-cols-5 gap-2" aria-label="Lab setup progress">{STEPS.map((name, index) => <button key={name} type="button" onClick={() => setStep(index)} aria-current={step === index ? "step" : undefined} className={`rounded-xl border p-3 text-left text-[10px] font-bold uppercase tracking-wider ${step === index ? "border-success-500 bg-success-500/10 text-success-500" : stepErrors[index] ? "border-danger bg-danger-50 text-danger" : index < step ? "border-success-300 bg-success-50 text-success-600" : "border-default-200 text-default-500"}`}><span className="flex items-center justify-between"><span>{index + 1}</span>{index === 1 ? <span className="hidden normal-case tracking-normal sm:inline">Optional</span> : index < step ? <FiCheck aria-label="Completed" /> : null}</span><span className="hidden md:block">{name}</span></button>)}</div>
@@ -192,7 +208,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
     </CardBody></Card>
     <Modal isOpen={requestModal.open} onOpenChange={(open) => setRequestModal((current) => ({ ...current, open }))}>
       <ModalContent><ModalHeader>Add {requestModal.kind.toLowerCase()}</ModalHeader><ModalBody>
-        <p className="text-sm text-default-500">This option will be active immediately and available to all laboratories.</p>
+        <p className="text-sm text-default-500">This option will stay private to your draft until an administrator approves it.</p>
         <Input autoFocus label="Option name" labelPlacement="outside" placeholder={`Enter ${requestModal.kind.toLowerCase()} name`} isRequired value={requestModal.name} onValueChange={(name) => setRequestModal((current) => ({ ...current, name }))} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); requestOption(); } }} />
         <Textarea label="Description" labelPlacement="outside" placeholder="Explain what this option represents" value={requestModal.description} onValueChange={(description) => setRequestModal((current) => ({ ...current, description }))} />
         {requestModal.kind === "PARAMETER" ? <Input label="Unit" labelPlacement="outside" placeholder="e.g. mg/kg" value={requestModal.unit} onValueChange={(unit) => setRequestModal((current) => ({ ...current, unit }))} /> : null}

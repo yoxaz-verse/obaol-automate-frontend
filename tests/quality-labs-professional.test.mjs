@@ -9,6 +9,7 @@ const searchablePath = new URL("../src/components/ui/SearchableSelect.tsx", impo
 const mapPath = new URL("../src/components/Labs/QualityLabsMap.tsx", import.meta.url);
 const myLabsPath = new URL("../src/app/dashboard/quality-labs/my/page.tsx", import.meta.url);
 const contactPath = new URL("../src/utils/labContact.ts", import.meta.url);
+const detailPath = new URL("../src/app/dashboard/quality-labs/[id]/page.tsx", import.meta.url);
 
 test("lab directory toggles between map and card views with distinct empty states", async () => {
   const source = await readFile(directoryPath, "utf8");
@@ -109,4 +110,12 @@ test("all public lab contact surfaces record a non-blocking aggregate event", as
   assert.match(directory, /trackLabContact\(lab\._id, "EMAIL"\)/);
   assert.match(map, /trackLabContact\(lab\._id, "PHONE"\)/);
   assert.match(contact, /\.catch\(\(\) => undefined\)/);
+});
+
+test("published lab profiles hand off to the existing testing enquiry workflow", async () => {
+  const source = await readFile(detailPath, "utf8");
+  assert.match(source, /Start testing enquiry/);
+  assert.match(source, /serviceType=QUALITY_TESTING/);
+  assert.match(source, /providerCompanyId=/);
+  assert.match(source, /labProfileId=/);
 });

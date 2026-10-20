@@ -23,7 +23,7 @@ export default function LabExecutionPage() {
   const query = useQuery({ queryKey: ["lab-work-items", state, status, page], queryFn: async () => (await getData(labWorkItemRoutes.list, { state, status: status || undefined, page, limit: 20 })).data });
   const transition = useMutation({ mutationFn: ({ id, status }: { id: string; status: CustodyStatus }) => patchData(labWorkItemRoutes.transition(id), { status, note: notes[id] || "" }), onSuccess: (_response, variables) => { setNotes((current) => ({ ...current, [variables.id]: "" })); client.invalidateQueries({ queryKey: ["lab-work-items"] }); showToastMessage({ type: "success", message: "Sample custody status updated." }); }, onError: (error: any) => { showToastMessage({ type: "error", message: error?.response?.data?.message || "Unable to update sample custody." }); if (error?.response?.status === 409) query.refetch(); } });
   const payload: any = query.data || {};
-  const rows: WorkItem[] = payload.data || [];
+  const rows: WorkItem[] = useMemo(() => payload.data || [], [payload.data]);
   const visible = useMemo(() => { const term = search.trim().toLowerCase(); return term ? rows.filter((row) => `${row.inquiryId?.enquiryCode || ""} ${row.labProfileId?.published?.displayName || ""}`.toLowerCase().includes(term)) : rows; }, [rows, search]);
   const counts = payload.meta?.counts || {};
   return <section className="space-y-6 pb-16">

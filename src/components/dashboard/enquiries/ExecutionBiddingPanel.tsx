@@ -155,7 +155,7 @@ function OperatorActions({ item }: { item: ExecutionBidOpportunity }) {
   });
   const awardCompanyId = companyId(awardBid?.company);
   const facilitiesQuery = useQuery({ queryKey: ["award-lab-facilities", awardCompanyId], queryFn: async () => (await getData(apiRoutes.labProfiles.providerFacilities(awardCompanyId))).data.data || [], enabled: Boolean(awardBid && item.serviceType === "QUALITY_TESTING" && awardCompanyId) });
-  const facilities: any[] = facilitiesQuery.data || [];
+  const facilities: any[] = useMemo(() => facilitiesQuery.data || [], [facilitiesQuery.data]);
   useEffect(() => { setLabProfileId(facilities.length === 1 ? facilities[0]._id : ""); }, [facilities]);
   const mutation = useMutation({
     mutationFn: (payload: Record<string, unknown>) => patchData(`${apiRoutes.enquiry.getAll}/${item.enquiryId}/execution-inquiries/${item.serviceType}`, { taskId: item.taskId, ...payload }),

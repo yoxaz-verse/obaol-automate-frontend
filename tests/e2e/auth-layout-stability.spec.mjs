@@ -85,3 +85,42 @@ test("reduced-motion users get a static auth presentation", async ({ page }) => 
   await expect(page.getByTestId("auth-card")).toBeVisible();
   await expect(page.locator("[data-testid='auth-layout'] .h-1.w-1")).toHaveCount(0);
 });
+
+test("switching authentication modes keeps the card anchored", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/auth?mode=signin&prefill=layout%40example.com&intent=SERVICE", { waitUntil: "domcontentloaded" });
+
+  const card = page.getByTestId("auth-card");
+  const signInBox = await card.boundingBox();
+  expect(signInBox).not.toBeNull();
+
+  const createAccount = page.getByRole("button", { name: "Create account" });
+  await createAccount.click();
+  await expect(createAccount).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: "Create your OBAOL account" })).toBeVisible();
+  await expect(page).toHaveURL(/\/auth\?mode=signup&role=associate&prefill=layout(?:%40|@)example(?:\.|%2E)com&intent=SERVICE/);
+  const signUpBox = await card.boundingBox();
+  expect(signUpBox).not.toBeNull();
+  expect(Math.abs(signUpBox.y - signInBox.y)).toBeLessThanOrEqual(2);
+  expect(Math.abs(signUpBox.x - signInBox.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(signUpBox.width - signInBox.width)).toBeLessThanOrEqual(2);
+
+  const signIn = page.getByRole("button", { name: "Sign in" });
+  await signIn.click();
+  await expect(signIn).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
+  await expect(page).toHaveURL(/\/auth\?mode=signin&prefill=layout(?:%40|@)example(?:\.|%2E)com&intent=SERVICE/);
+  const returnedBox = await card.boundingBox();
+  expect(returnedBox).not.toBeNull();
+  expect(Math.abs(returnedBox.y - signInBox.y)).toBeLessThanOrEqual(2);
+
+  for (let index = 0; index < 3; index += 1) {
+    await createAccount.click();
+    await signIn.click();
+  }
+  const repeatedBox = await card.boundingBox();
+  expect(repeatedBox).not.toBeNull();
+  expect(Math.abs(repeatedBox.y - signInBox.y)).toBeLessThanOrEqual(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

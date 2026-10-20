@@ -36,6 +36,7 @@ interface AuthLayoutProps {
         audienceLabels?: string[];
     };
     onboarding?: boolean;
+    stableContentTop?: boolean;
 }
 
 const FloatingPixel = ({ delay }: { delay: number }) => {
@@ -246,7 +247,7 @@ const MobileOnboardingGuidance = ({ leftPanel }: { leftPanel: LeftPanelContent }
     </details>
 );
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel, roleIdentity, onboarding = false }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel, roleIdentity, onboarding = false, stableContentTop = false }) => {
     if (embedded) {
         return (
             <div data-auth-embedded className="w-full text-foreground">
@@ -340,7 +341,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                 {/* Right side: account form */}
                 <div className="relative flex min-h-screen min-h-[100dvh] w-full flex-col overflow-y-auto bg-transparent custom-scrollbar lg:w-7/12">
-                    <div className="flex-grow flex items-center justify-center p-4 lg:p-8 xl:p-10 relative z-10">
+                    <div className={`relative z-10 flex flex-grow justify-center p-4 lg:px-8 lg:pb-8 xl:px-10 xl:pb-10 ${stableContentTop ? "items-start lg:pt-[clamp(4rem,14vh,10rem)]" : "items-center lg:pt-8 xl:pt-10"}`}>
                         <motion.div
                             className={`w-full ${cardMaxWidthClass} relative`}
                             initial={false}
@@ -374,7 +375,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     <div className="absolute right-0 top-0 -mr-20 -mt-20 h-40 w-40 rounded-full bg-obaol-500/10 opacity-0 blur-[80px] transition-opacity duration-1000 group-hover:opacity-100" />
 
                                     {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
-                                    <div className="mb-5 relative">
+                                    <div className={`relative mb-5 ${stableContentTop ? "min-h-[6.25rem] sm:min-h-[5rem]" : ""}`}>
                                         <h1 className="text-2xl font-bold leading-none tracking-tight text-slate-900 dark:text-foreground lg:text-3xl">
                                             {title}
                                         </h1>

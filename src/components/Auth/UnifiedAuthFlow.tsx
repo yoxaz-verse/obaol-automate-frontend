@@ -83,12 +83,18 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   const showError = (error: any) => setStatus(normalizeAuthError(error));
 
   const switchMode = (nextMode: AuthMode) => {
+    if (nextMode === mode) return;
     setMode(nextMode);
     setStage("email");
     setPassword("");
     setOtp("");
     setStatus(null);
-    router.replace(`/auth?mode=${nextMode === "signup" ? "signup" : "signin"}${email ? `&prefill=${encodeURIComponent(email)}` : ""}${intent ? `&intent=${encodeURIComponent(intent)}` : ""}`);
+    const params = new URLSearchParams();
+    params.set("mode", nextMode === "signup" ? "signup" : "signin");
+    if (nextMode === "signup") params.set("role", role.toLowerCase());
+    if (email) params.set("prefill", email);
+    if (intent) params.set("intent", intent);
+    window.history.replaceState(window.history.state, "", `/auth?${params.toString()}`);
   };
 
   const continueFromEmail = async (event: FormEvent) => {
@@ -233,6 +239,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       title={mode === "signin" ? "Welcome back" : "Create your OBAOL account"}
       subtitle={mode === "signin" ? "One secure sign-in for Associate and Operator accounts." : "Verify your email, choose your account type, and complete onboarding."}
       cardMaxWidthClass="max-w-[500px]"
+      stableContentTop
       leftPanel={{ headline: "OBAOL", highlight: "ONE SECURE ACCESS", description: "Access commodity discovery, verified partners, execution workflows, documents, and orders from one account entry.", points: ["Password, email code, Google, or passkey", "Private account discovery", "Secure session management"], footer: "Agro trade execution" }}
     >
       <div data-testid="unified-auth" className="space-y-5">

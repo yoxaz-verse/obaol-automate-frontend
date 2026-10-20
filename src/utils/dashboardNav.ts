@@ -12,6 +12,10 @@ import {
 import { getCapabilityActionLinks } from "@/utils/companyFunctionPreview";
 import type { ResolvedSidebarPage } from "@/types/sidebarGovernance";
 import { getGovernedRouteStatus, SIDEBAR_COMMON_ROUTES, SIDEBAR_HOME_ROUTES, SIDEBAR_UTILITY_ROUTES } from "@/utils/sidebarGovernance";
+import { DASHBOARD_ADMIN_WORKFLOW_GROUPS, type AdminWorkflowGroup } from "@/utils/adminSidebarGroups";
+
+export { DASHBOARD_ADMIN_WORKFLOW_GROUPS } from "@/utils/adminSidebarGroups";
+export type { AdminWorkflowGroup } from "@/utils/adminSidebarGroups";
 
 export { hasWarehouseWorkspaceAccess, isWarehouseDashboardPath } from "@/utils/dashboardAccess";
 
@@ -41,9 +45,9 @@ export const isComingSoonDashboardNavigation = (
 };
 
 export type DashboardNavSection = {
-  label: DashboardSection | DashboardTaskGroup | "Home" | "Common" | "Seeking" | "Providing" | "Other Services" | "Coming Soon";
+  label: DashboardSection | DashboardTaskGroup | "Home" | "Common" | "Seeking" | "Providing" | "Other Services" | "Coming Soon" | "Business Workflows";
   links: string[];
-  groups?: Array<{ label: DashboardNavGroup; links: string[] }>;
+  groups?: Array<{ label: DashboardNavGroup | AdminWorkflowGroup; links: string[] }>;
 };
 
 const ASSOCIATE_EXECUTE_PATHS = [
@@ -162,6 +166,39 @@ export const getDashboardSidebarSections = (
     ];
     return associateSections.filter((section) => section.links.length > 0);
   }
+
+  if (normalizedRole === "admin") {
+    const availableLinks = new Set(filteredOptions.map((option) => option.link));
+    const workflowGroups = DASHBOARD_ADMIN_WORKFLOW_GROUPS
+      .map((group) => ({
+        ...group,
+        links: group.links.filter((path) => availableLinks.has(path)),
+      }))
+      .filter((group) => group.links.length > 0);
+    const linksForSection = (section: DashboardSection) => accessibleRoutes
+      .filter((route) => route.section === section && optionMap.has(route.path))
+      .map((route) => route.path);
+    const organizationLinks = linksForSection("Organization")
+      .filter((path) => path !== "/dashboard/inventory");
+    const adminRoutes = accessibleRoutes
+      .filter((route) => route.section === "Operations/Admin" && optionMap.has(route.path));
+
+    return [
+      { label: "Overview", links: linksForSection("Overview") },
+      {
+        label: "Business Workflows",
+        links: workflowGroups.flatMap((group) => group.links),
+        groups: workflowGroups,
+      },
+      { label: "Organization", links: organizationLinks },
+      {
+        label: "Operations/Admin",
+        links: adminRoutes.map((route) => route.path),
+        groups: getDashboardAdminGroups(adminRoutes),
+      },
+    ].filter((section) => section.links.length > 0) as DashboardNavSection[];
+  }
+
   const sectionOrder: DashboardSection[] = [
     "Overview",
     "Trade",

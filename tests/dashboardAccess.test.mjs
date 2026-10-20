@@ -14,6 +14,7 @@ import {
   isWarehouseDashboardPath,
   normalizeDashboardRole,
 } from "../src/utils/dashboardAccess.ts";
+import { DASHBOARD_ADMIN_WORKFLOW_GROUPS } from "../src/utils/adminSidebarGroups.ts";
 
 const collectPages = (directory) => readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
   const fullPath = join(directory, entry.name);
@@ -129,6 +130,40 @@ test("Associate desktop and mobile navigation share common and governed sidebar 
     assert.match(source, /user\?\.providedCapabilities \|\| \[\]/);
     assert.match(source, /user\?\.soughtCapabilities \|\| \[\]/);
   }
+});
+
+test("Admin sidebar groups operational routes by workflow without duplicates", () => {
+  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.map((group) => group.label), [
+    "Buyer / Seeking",
+    "Seller / Providing",
+    "Shared / Execution",
+    "Labs",
+    "Packaging",
+    "Warehouse",
+  ]);
+  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Buyer / Seeking")?.links, [
+    "/dashboard/marketplace",
+    "/dashboard/bidding/my",
+    "/dashboard/imports",
+    "/dashboard/catalog",
+  ]);
+  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Seller / Providing")?.links, [
+    "/dashboard/product",
+    "/dashboard/bidding",
+    "/dashboard/imports/my-listings",
+    "/dashboard/inventory",
+  ]);
+  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Labs")?.links, [
+    "/dashboard/quality-labs",
+    "/dashboard/quality-labs/my",
+    "/dashboard/quality-labs/execution",
+  ]);
+  const groupedLinks = DASHBOARD_ADMIN_WORKFLOW_GROUPS.flatMap((group) => group.links);
+  const expectedOperationalLinks = getAccessibleDashboardRoutes({ role: "Admin" })
+    .filter((route) => ["Trade", "Products", "Services", "Warehouse"].includes(route.section) || route.path === "/dashboard/inventory")
+    .map((route) => route.path);
+  assert.equal(new Set(groupedLinks).size, groupedLinks.length);
+  assert.deepEqual(new Set(groupedLinks), new Set(expectedOperationalLinks));
 });
 
 test("Associate coming-soon navigation is ordered, disabled, and does not change direct route access", () => {

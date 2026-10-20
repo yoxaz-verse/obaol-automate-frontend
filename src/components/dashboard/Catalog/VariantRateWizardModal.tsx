@@ -1647,27 +1647,27 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           <div className="text-xs uppercase text-default-400">Classification</div>
                           <div className="flex flex-wrap gap-2 mt-1">
                             {isConventional && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-default-300/40 bg-default-500/10 text-default-300">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-400/50 dark:border-slate-500/50 bg-slate-500/15 text-slate-800 dark:text-slate-100">
                                 Conventional
                               </span>
                             )}
                             {isNatural && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-500/40 bg-amber-500/15 text-amber-400">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-400">
                                 Natural
                               </span>
                             )}
                             {isOrganic && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
                                 Organic
                               </span>
                             )}
                             {isIpmQuality && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-300">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-700 dark:text-sky-300">
                                 IPM
                               </span>
                             )}
                             {isGiTagged && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-300">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300">
                                 GI Tag
                               </span>
                             )}

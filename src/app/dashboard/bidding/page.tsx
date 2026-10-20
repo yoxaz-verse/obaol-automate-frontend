@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Autocomplete,
@@ -37,6 +37,7 @@ import {
 import AuthContext from "@/context/AuthContext";
 import { deleteData, getData, postData, putData } from "@/core/api/apiHandler";
 import { productBiddingRoutes, productRoutes, productVariantRoutes, variantRateRoutes } from "@/core/api/apiRoutes";
+import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 
 type Mode = "buyer" | "seller";
 type SellerView = "available" | "participating" | "history";
@@ -63,6 +64,20 @@ const statuses = ["DRAFT", "SCHEDULED", "OPEN", "CLOSED", "AWARDED", "CANCELLED"
 const message = (error: any) => error?.response?.data?.message || "The request could not be completed.";
 const dateText = (value?: string) =>
   value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "Not scheduled";
+type CreateField = "title" | "product" | "productVariant" | "quantity" | "opensAt" | "closesAt" | "deliveryDate" | "specifications";
+type CreateErrors = Partial<Record<CreateField, string>>;
+type OpenMode = "now" | "scheduled";
+const localDateTimeValue = (date: Date) => {
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+};
+const nextLocalDate = (value: string) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  date.setDate(date.getDate() + 1);
+  return localDateTimeValue(date).slice(0, 10);
+};
 
 export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode }) {
   const { user } = useContext(AuthContext);
@@ -76,7 +91,12 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   const [sellerView, setSellerView] = useState<SellerView>("available");
   const [showCreate, setShowCreate] = useState(false);
   const [activeOffer, setActiveOffer] = useState<EventRow | null>(null);
-  const [error, setError] = useState("");
+  const [pageError, setPageError] = useState("");
+  const [createError, setCreateError] = useState("");
+  const [createErrors, setCreateErrors] = useState<CreateErrors>({});
+  const [offerError, setOfferError] = useState("");
+  const [openMode, setOpenMode] = useState<OpenMode>("now");
+  const createErrorRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState<any>({
     title: "",
     product: "",
@@ -150,46 +170,79 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
 
   const refresh = () => client.invalidateQueries({ queryKey: ["product-bidding"] });
 
+  const clearCreateFieldError = (field: CreateField) => {
+    if (!createErrors[field]) return;
+    const next = { ...createErrors };
+    delete next[field];
+    setCreateErrors(next);
+    if (!Object.keys(next).length) setCreateError("");
+  };
+
+  const updateDisclosureField = (field: "title" | "specifications", value: string) => {
+    const violation = detectOffPlatformDisclosure(value);
+    setDraft((current: any) => ({ ...current, [field]: value }));
+    const next = { ...createErrors };
+    if (violation) next[field] = violation.message;
+    else delete next[field];
+    setCreateErrors(next);
+    if (!Object.keys(next).length) setCreateError("");
+  };
+
+  const resetCreateForm = () => {
+    setOpenMode("now");
+    setCreateError("");
+    setCreateErrors({});
+    setDraft({
+      title: "", product: "", productVariant: "", quantity: "", unit: "MT",
+      specifications: "", deliveryLocation: "", deliveryDate: "", opensAt: "", closesAt: "",
+    });
+  };
+
+  const focusCreateError = (errors: CreateErrors) => {
+    const firstField = Object.keys(errors)[0];
+    window.setTimeout(() => {
+      const field = firstField ? document.getElementById(`buying-request-${firstField}`) : null;
+      if (field instanceof HTMLElement) {
+        field.scrollIntoView({ behavior: "smooth", block: "center" });
+        field.focus();
+      } else {
+        createErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        createErrorRef.current?.focus();
+      }
+    }, 0);
+  };
+
   const action = useMutation({
     mutationFn: async ({ url, body = {}, method = "post" }: any) => (method === "delete" ? deleteData(url) : postData(url, body)),
     onSuccess: () => {
-      setError("");
+      setPageError("");
       setActiveOffer(null);
       refresh();
     },
-    onError: (e) => setError(message(e)),
+    onError: (e) => setPageError(message(e)),
   });
 
   const create = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ effectiveOpensAt }: { effectiveOpensAt: Date }) => {
       const created = await postData(productBiddingRoutes.create, {
         ...draft,
         quantity: Number(draft.quantity),
-        deliveryDate: draft.deliveryDate || null,
+        deliveryDate: draft.deliveryDate ? new Date(`${draft.deliveryDate}T00:00:00`).toISOString() : null,
       });
       await postData(productBiddingRoutes.publish(created.data.data._id), {
-        opensAt: new Date(draft.opensAt).toISOString(),
+        opensAt: effectiveOpensAt.toISOString(),
         closesAt: new Date(draft.closesAt).toISOString(),
       });
     },
     onSuccess: () => {
       setShowCreate(false);
-      setError("");
-      setDraft({
-        title: "",
-        product: "",
-        productVariant: "",
-        quantity: "",
-        unit: "MT",
-        specifications: "",
-        deliveryLocation: "",
-        deliveryDate: "",
-        opensAt: "",
-        closesAt: "",
-      });
+      resetCreateForm();
       refresh();
     },
-    onError: (e) => setError(message(e)),
+    onError: (e) => {
+      setCreateError(message(e));
+      focusCreateError({});
+    },
   });
 
   const submitOffer = useMutation({
@@ -202,57 +255,59 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
       }),
     onSuccess: () => {
       setActiveOffer(null);
-      setError("");
+      setOfferError("");
       refresh();
     },
-    onError: (e) => setError(message(e)),
+    onError: (e) => setOfferError(message(e)),
   });
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!draft.title.trim()) {
-      setError("Please enter a title for the bidding event.");
+    const errors: CreateErrors = {};
+    const now = new Date();
+    const effectiveOpensAt = openMode === "now" ? now : new Date(draft.opensAt);
+    const closesAt = new Date(draft.closesAt);
+    const titleViolation = detectOffPlatformDisclosure(draft.title);
+    const specificationsViolation = detectOffPlatformDisclosure(draft.specifications);
+    if (!draft.title.trim()) errors.title = "Enter a title for the buying request.";
+    else if (titleViolation) errors.title = titleViolation.message;
+    if (!draft.product) errors.product = "Search for and select a product.";
+    if (!draft.productVariant) errors.productVariant = "Select the required variant or grade.";
+    if (!draft.quantity || Number(draft.quantity) <= 0) errors.quantity = "Enter a quantity greater than zero.";
+    if (openMode === "scheduled" && (!draft.opensAt || Number.isNaN(effectiveOpensAt.getTime()) || effectiveOpensAt <= now)) {
+      errors.opensAt = "Choose an opening time in the future.";
+    }
+    if (!draft.closesAt || Number.isNaN(closesAt.getTime())) errors.closesAt = "Choose a closing date and time.";
+    else if (closesAt <= effectiveOpensAt) errors.closesAt = "Closing must be later than opening.";
+    if (!draft.deliveryDate) errors.deliveryDate = "Choose a delivery date.";
+    else if (draft.deliveryDate < nextLocalDate(draft.closesAt)) errors.deliveryDate = "Delivery must be on a later day than closing.";
+    if (specificationsViolation) errors.specifications = specificationsViolation.message;
+    if (Object.keys(errors).length) {
+      setCreateErrors(errors);
+      setCreateError("Review the highlighted fields before scheduling this request.");
+      focusCreateError(errors);
       return;
     }
-    if (!draft.product) {
-      setError("Please search and select a product.");
-      return;
-    }
-    if (!draft.productVariant) {
-      setError("Please select the required product variant or grade.");
-      return;
-    }
-    if (!draft.quantity || Number(draft.quantity) <= 0) {
-      setError("Please enter a valid quantity.");
-      return;
-    }
-    if (!draft.opensAt || !draft.closesAt) {
-      setError("Please specify both opening and closing dates and times.");
-      return;
-    }
-    if (new Date(draft.closesAt) <= new Date(draft.opensAt)) {
-      setError("Closes at must be scheduled after Opens at.");
-      return;
-    }
-    setError("");
-    create.mutate();
+    setCreateErrors({});
+    setCreateError("");
+    create.mutate({ effectiveOpensAt });
   };
 
   const handleSubmitOffer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!offer.listing) {
-      setError("Please select a matching trade listing.");
+      setOfferError("Please select a matching trade listing.");
       return;
     }
     if (!offer.unitPrice || Number(offer.unitPrice) <= 0) {
-      setError("Please enter a valid unit price.");
+      setOfferError("Please enter a valid unit price.");
       return;
     }
     if (!offer.offeredQuantity || Number(offer.offeredQuantity) <= 0) {
-      setError("Please enter a valid offered quantity.");
+      setOfferError("Please enter a valid offered quantity.");
       return;
     }
-    setError("");
+    setOfferError("");
     submitOffer.mutate();
   };
 
@@ -294,7 +349,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
               startContent={<FiPlus />}
               className="font-bold shadow-lg shadow-warning-500/20"
               onPress={() => {
-                setError("");
+                resetCreateForm();
                 setShowCreate(true);
               }}
             >
@@ -304,13 +359,13 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
         </div>
       </header>
 
-      {error && (
+      {pageError && (
         <div
           role="alert"
           className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-danger-500/30 bg-danger-500/10 p-4 text-sm font-semibold text-danger-500"
         >
-          <span>{error}</span>
-          <Button isIconOnly size="sm" variant="light" color="danger" onPress={() => setError("")} aria-label="Dismiss error">
+          <span>{pageError}</span>
+          <Button isIconOnly size="sm" variant="light" color="danger" onPress={() => setPageError("")} aria-label="Dismiss error">
             <FiX size={16} />
           </Button>
         </div>
@@ -451,7 +506,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     variant="flat"
                     className="font-bold"
                     onPress={() => {
-                      setError("");
+                      setOfferError("");
                       setActiveOffer(item);
                       setOffer(
                         item.ownOffer
@@ -524,17 +579,18 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
         onOpenChange={(isOpen) => {
           if (!isOpen) {
             setShowCreate(false);
-            setError("");
+            setCreateError("");
+            setCreateErrors({});
           }
         }}
-        size="2xl"
+        size="3xl"
         scrollBehavior="inside"
         backdrop="blur"
         classNames={{
-          base: "min-h-[min(760px,90vh)] border border-default-200 bg-background/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl shadow-2xl rounded-3xl",
-          header: "border-b border-default-100 px-6 py-5",
-          body: "px-6 py-5",
-          footer: "border-t border-default-100 px-6 py-4",
+          base: "border border-default-200 bg-content1/95 backdrop-blur-2xl shadow-2xl rounded-2xl sm:rounded-3xl",
+          header: "border-b border-default-100 px-5 py-4 sm:px-7 sm:py-5",
+          body: "px-5 py-5 sm:px-7",
+          footer: "border-t border-default-100 px-5 py-4 sm:px-7",
         }}
       >
         <ModalContent>
@@ -550,20 +606,35 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                   Prices remain strictly confidential and sealed until the scheduled event close.
                 </p>
               </ModalHeader>
-              <ModalBody>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <ModalBody className="gap-5">
+                {createError && (
+                  <div ref={createErrorRef} tabIndex={-1} role="alert" className="rounded-xl border border-danger-300 bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700 outline-none dark:bg-danger-500/10 dark:text-danger-400">
+                    {createError}
+                  </div>
+                )}
+
+                <section aria-labelledby="requirement-heading" className="space-y-4 rounded-2xl border border-default-200 bg-default-50/60 p-4 sm:p-5 dark:bg-content2/40">
+                  <div>
+                    <h3 id="requirement-heading" className="font-bold text-foreground">Requirement</h3>
+                    <p className="text-xs text-default-500">Describe what you need without sharing direct contact details.</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Input
+                    id="buying-request-title"
                     label="Title"
                     placeholder="e.g. Bulk Wheat Procurement Q4"
                     variant="bordered"
                     isRequired
                     value={draft.title}
-                    onValueChange={(val) => setDraft((prev: any) => ({ ...prev, title: val }))}
+                    onValueChange={(val) => updateDisclosureField("title", val)}
                     className="md:col-span-2"
                     classNames={themeField}
+                    isInvalid={Boolean(createErrors.title)}
+                    errorMessage={createErrors.title}
                     startContent={<FiTag className="shrink-0 text-default-400 text-sm" />}
                   />
                   <Autocomplete
+                    id="buying-request-product"
                     label="Product"
                     placeholder="Search and select product"
                     variant="bordered"
@@ -571,7 +642,10 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     className="md:col-span-2"
                     items={productOptions}
                     selectedKey={draft.product || null}
-                    onSelectionChange={(key) => setDraft((prev: any) => ({ ...prev, product: key ? String(key) : "", productVariant: "" }))}
+                    onSelectionChange={(key) => { setDraft((prev: any) => ({ ...prev, product: key ? String(key) : "", productVariant: "" })); clearCreateFieldError("product"); }}
+                    isInvalid={Boolean(createErrors.product)}
+                    errorMessage={createErrors.product}
+                    maxListboxHeight={224}
                     startContent={<FiSearch className="shrink-0 text-default-400 text-sm" />}
                     inputProps={{
                       classNames: {
@@ -583,8 +657,10 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                       emptyContent: productsQuery.isLoading ? "Loading products..." : "No products found",
                     }}
                     popoverProps={{
+                      placement: "bottom-start",
+                      shouldFlip: true,
                       classNames: {
-                        content: "border border-default-200 bg-content1 shadow-2xl z-[120]",
+                        content: "border border-default-200 bg-content1 shadow-xl z-[120] max-h-60",
                       },
                     }}
                   >
@@ -598,6 +674,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     )}
                   </Autocomplete>
                   <Autocomplete
+                    id="buying-request-productVariant"
                     label="Variant / Grade"
                     placeholder={draft.product ? "Search and select variant" : "Select a product first"}
                     variant="bordered"
@@ -606,15 +683,19 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     className="md:col-span-2"
                     items={(productVariantsQuery.data || []).map((variant: any) => ({ id: String(variant._id), name: String(variant.name || "Variant") }))}
                     selectedKey={draft.productVariant || null}
-                    onSelectionChange={(key) => setDraft((prev: any) => ({ ...prev, productVariant: key ? String(key) : "" }))}
+                    onSelectionChange={(key) => { setDraft((prev: any) => ({ ...prev, productVariant: key ? String(key) : "" })); clearCreateFieldError("productVariant"); }}
+                    isInvalid={Boolean(createErrors.productVariant)}
+                    errorMessage={createErrors.productVariant}
+                    maxListboxHeight={224}
                     startContent={<FiLayers className="shrink-0 text-default-400 text-sm" />}
                     inputProps={{ classNames: { label: themeField.label, inputWrapper: themeField.inputWrapper } }}
                     listboxProps={{ emptyContent: productVariantsQuery.isLoading ? "Loading variants..." : "No variants found for this product" }}
-                    popoverProps={{ classNames: { content: "border border-default-200 bg-content1 shadow-2xl z-[120]" } }}
+                    popoverProps={{ placement: "bottom-start", shouldFlip: true, classNames: { content: "border border-default-200 bg-content1 shadow-xl z-[120] max-h-60" } }}
                   >
                     {(variant: any) => <AutocompleteItem key={variant.id} textValue={variant.name}><span className="text-sm font-semibold text-foreground">{variant.name}</span></AutocompleteItem>}
                   </Autocomplete>
                   <Input
+                    id="buying-request-quantity"
                     label="Quantity"
                     placeholder="0.00"
                     type="number"
@@ -623,8 +704,10 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     variant="bordered"
                     isRequired
                     value={draft.quantity}
-                    onValueChange={(val) => setDraft((prev: any) => ({ ...prev, quantity: val }))}
+                    onValueChange={(val) => { setDraft((prev: any) => ({ ...prev, quantity: val })); clearCreateFieldError("quantity"); }}
                     classNames={themeField}
+                    isInvalid={Boolean(createErrors.quantity)}
+                    errorMessage={createErrors.quantity}
                     startContent={<FiHash className="shrink-0 text-default-400 text-sm" />}
                   />
                   <Select
@@ -646,33 +729,71 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                       Quintal
                     </SelectItem>
                   </Select>
-                  <Input
+                  </div>
+                </section>
+
+                <section aria-labelledby="schedule-heading" className="space-y-4 rounded-2xl border border-default-200 p-4 sm:p-5">
+                  <div>
+                    <h3 id="schedule-heading" className="font-bold text-foreground">Bidding schedule</h3>
+                    <p className="text-xs text-default-500">Choose when sellers can begin and when sealed offers close.</p>
+                  </div>
+                  <div role="group" aria-label="Opening time" className="grid grid-cols-2 gap-2 rounded-xl bg-default-100 p-1">
+                    <Button type="button" size="sm" variant={openMode === "now" ? "solid" : "light"} color={openMode === "now" ? "warning" : "default"} className="font-semibold" onPress={() => { setOpenMode("now"); setDraft((current: any) => ({ ...current, opensAt: "", closesAt: "", deliveryDate: "" })); clearCreateFieldError("opensAt"); clearCreateFieldError("closesAt"); clearCreateFieldError("deliveryDate"); }}>Open now</Button>
+                    <Button type="button" size="sm" variant={openMode === "scheduled" ? "solid" : "light"} color={openMode === "scheduled" ? "warning" : "default"} className="font-semibold" onPress={() => { setOpenMode("scheduled"); setDraft((current: any) => ({ ...current, opensAt: "", closesAt: "", deliveryDate: "" })); }}>Schedule for later</Button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {openMode === "scheduled" ? <Input
+                    id="buying-request-opensAt"
                     type="datetime-local"
-                    label="Opens at"
+                    label="Opening time"
                     variant="bordered"
                     isRequired
+                    min={localDateTimeValue(new Date())}
                     value={draft.opensAt}
-                    onValueChange={(val) => setDraft((prev: any) => ({ ...prev, opensAt: val }))}
+                    onValueChange={(val) => { setDraft((prev: any) => ({ ...prev, opensAt: val, closesAt: "", deliveryDate: "" })); clearCreateFieldError("opensAt"); clearCreateFieldError("closesAt"); clearCreateFieldError("deliveryDate"); }}
                     classNames={themeField}
+                    isInvalid={Boolean(createErrors.opensAt)}
+                    errorMessage={createErrors.opensAt}
                     startContent={<FiClock className="shrink-0 text-default-400 text-sm" />}
-                  />
+                  /> : <div className="flex min-h-12 items-center gap-3 rounded-xl border border-success-300/50 bg-success-50 px-4 text-sm dark:bg-success-500/10">
+                    <span className="grid size-8 place-items-center rounded-full bg-success-100 text-success-600 dark:bg-success-500/20"><FiClock /></span>
+                    <div><p className="font-semibold text-success-700 dark:text-success-400">Starts immediately</p><p className="text-xs text-default-500">Opening time is set when you submit.</p></div>
+                  </div>}
                   <Input
+                    id="buying-request-closesAt"
                     type="datetime-local"
-                    label="Closes at"
+                    label="Closing time"
                     variant="bordered"
                     isRequired
+                    min={openMode === "scheduled" && draft.opensAt ? draft.opensAt : localDateTimeValue(new Date())}
                     value={draft.closesAt}
-                    onValueChange={(val) => setDraft((prev: any) => ({ ...prev, closesAt: val }))}
+                    onValueChange={(val) => { setDraft((prev: any) => ({ ...prev, closesAt: val, deliveryDate: "" })); clearCreateFieldError("closesAt"); clearCreateFieldError("deliveryDate"); }}
                     classNames={themeField}
+                    isInvalid={Boolean(createErrors.closesAt)}
+                    errorMessage={createErrors.closesAt}
                     startContent={<FiClock className="shrink-0 text-default-400 text-sm" />}
                   />
+                  </div>
+                </section>
+
+                <section aria-labelledby="delivery-heading" className="space-y-4 rounded-2xl border border-default-200 p-4 sm:p-5">
+                  <div>
+                    <h3 id="delivery-heading" className="font-bold text-foreground">Delivery &amp; terms</h3>
+                    <p className="text-xs text-default-500">Delivery must be scheduled after bidding has closed.</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Input
+                    id="buying-request-deliveryDate"
                     type="date"
                     label="Delivery date"
                     variant="bordered"
+                    isRequired
+                    min={nextLocalDate(draft.closesAt)}
                     value={draft.deliveryDate}
-                    onValueChange={(val) => setDraft((prev: any) => ({ ...prev, deliveryDate: val }))}
+                    onValueChange={(val) => { setDraft((prev: any) => ({ ...prev, deliveryDate: val })); clearCreateFieldError("deliveryDate"); }}
                     classNames={themeField}
+                    isInvalid={Boolean(createErrors.deliveryDate)}
+                    errorMessage={createErrors.deliveryDate}
                     startContent={<FiCalendar className="shrink-0 text-default-400 text-sm" />}
                   />
                   <Input
@@ -685,26 +806,31 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     startContent={<FiMapPin className="shrink-0 text-default-400 text-sm" />}
                   />
                   <Textarea
+                    id="buying-request-specifications"
                     label="Specifications & Terms"
                     placeholder="Specify grading standards, moisture limits, packaging, or special inspection terms..."
                     variant="bordered"
                     minRows={3}
                     maxRows={5}
                     value={draft.specifications}
-                    onValueChange={(val) => setDraft((prev: any) => ({ ...prev, specifications: val }))}
+                    onValueChange={(val) => updateDisclosureField("specifications", val)}
                     className="md:col-span-2"
                     classNames={textareaThemeField}
+                    isInvalid={Boolean(createErrors.specifications)}
+                    errorMessage={createErrors.specifications}
                   />
-                </div>
+                  </div>
+                </section>
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
+                <Button variant="flat" isDisabled={create.isPending} onPress={onClose}>
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   color="warning"
                   isLoading={create.isPending}
+                  isDisabled={create.isPending}
                   className="font-bold shadow-lg shadow-warning-500/20"
                   startContent={!create.isPending && <FiPlus />}
                 >
@@ -722,7 +848,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
         onOpenChange={(isOpen) => {
           if (!isOpen) {
             setActiveOffer(null);
-            setError("");
+            setOfferError("");
           }
         }}
         size="xl"
@@ -749,6 +875,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                 </p>
               </ModalHeader>
               <ModalBody className="space-y-4">
+                {offerError && <div role="alert" className="rounded-xl border border-danger-300 bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700 dark:bg-danger-500/10 dark:text-danger-400">{offerError}</div>}
                 {activeOffer && (
                   <div className="flex items-center justify-between rounded-2xl border border-warning-500/30 bg-warning-500/10 p-3.5 text-xs text-foreground">
                     <div>

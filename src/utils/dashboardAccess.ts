@@ -112,7 +112,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/operator/earnings", label: "Earnings", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
 
   { path: "/dashboard/approvals", label: "Approvals", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/catalog-requests", label: "Catalog Requests", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/catalog-requests", label: "Catalog Requests", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: false, searchable: true },
   { path: "/dashboard/reports", label: "Reports", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/rate-interest", label: "Rate Interest", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/sidebar-governance", label: "Sidebar Governance", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },

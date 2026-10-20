@@ -28,7 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const { user } = useContext(AuthContext);
     const [, startTransition] = useTransition();
     const [pendingLink, setPendingLink] = useState<string | null>(null);
-    const [openAdminGroup, setOpenAdminGroup] = useState<string | null>(null);
+    const [openNavigationGroup, setOpenNavigationGroup] = useState<string | null>(null);
     const governance = useSidebarGovernance();
     const governedPages = governance.isAssociate ? governance.resolved : undefined;
 
@@ -48,9 +48,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         user?.soughtCapabilities || [],
         governedPages,
     );
-    const activeAdminGroup = sidebarSections
-        .find((section) => section.label === "Operations/Admin")
-        ?.groups?.find((group) => group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`)));
+    const activeNavigationGroup = sidebarSections
+        .flatMap((section) => section.groups || [])
+        .find((group) => group.links.some((link) => isDashboardRouteActive(pathname, link)));
 
     const { play } = useSoundEffect();
 
@@ -106,10 +106,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         }
     }, [pathname, pendingLink]);
 
-    const activeAdminGroupLabel = activeAdminGroup?.label;
+    const activeNavigationGroupLabel = activeNavigationGroup?.label;
     React.useEffect(() => {
-        if (activeAdminGroupLabel) setOpenAdminGroup(activeAdminGroupLabel);
-    }, [activeAdminGroupLabel]);
+        if (activeNavigationGroupLabel) setOpenNavigationGroup(activeNavigationGroupLabel);
+    }, [activeNavigationGroupLabel]);
 
     const renderOption = (opt: (typeof filteredOptions)[number], nested = false) => {
         const isComingSoon = isComingSoonDashboardNavigation(opt.link, user?.role, capabilities, governedPages);
@@ -238,14 +238,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                             )}
                             <div className="space-y-0.5">
                                 {!isCollapsed && section.groups ? section.groups.map((group) => {
-                                    const isOpen = openAdminGroup === group.label;
+                                    const isOpen = openNavigationGroup === group.label;
                                     const hasActiveLink = group.links.some((link) => isDashboardRouteActive(pathname, link));
                                     return (
                                         <div key={group.label} className="space-y-0.5">
                                             <button
                                                 type="button"
                                                 aria-expanded={isOpen}
-                                                onClick={() => setOpenAdminGroup(isOpen ? null : group.label)}
+                                                onClick={() => setOpenNavigationGroup(isOpen ? null : group.label)}
                                                 className={`w-full h-9 px-3 flex items-center justify-between rounded-xl text-[9px] font-black uppercase tracking-[0.18em] transition-colors ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300" : "text-default-400 hover:text-foreground hover:db-inset"}`}
                                             >
                                                 <span className="truncate">{group.label}</span>

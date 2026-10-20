@@ -40,7 +40,7 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     label: "Conventional",
     priority: 0,
     icon: FiPackage,
-    iconClass: "text-default-300",
+    iconClass: "text-slate-700 dark:text-slate-200",
     watermarkIconClass: "text-default-400/45",
     watermarkOpacityClass: "opacity-[0.08]",
     watermarkSizeClass: "text-[36rem] md:text-[48rem] lg:text-[56rem]",
@@ -54,7 +54,7 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     shellBorderClass: "border-default-200",
     headingAccentClass: "text-warning-500",
     chipActiveClass: "bg-warning-500 text-black border-warning-400",
-    chipIdleClass: "border-default-300/25 bg-default-500/10 text-default-200",
+    chipIdleClass: "border-slate-400/40 dark:border-slate-600/40 bg-slate-500/10 text-slate-800 dark:text-slate-200",
     tabActiveClass: "text-warning-500",
     tabIdleClass: "text-default-400",
     tabPillActiveClass: "bg-warning-500/15 border-warning-400/50 shadow-sm",
@@ -63,7 +63,7 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-default-400/50 via-warning-400/35 to-transparent",
     cardOverlayClass: "from-default-500/10 via-transparent to-transparent",
-    badgeClass: "bg-default-500/15 text-default-300 border-default-300/30",
+    badgeClass: "bg-slate-500/15 text-slate-800 dark:text-slate-100 border-slate-400/50 dark:border-slate-500/50 font-bold",
   },
   natural: {
     key: "natural",
@@ -93,7 +93,7 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-amber-500/65 via-lime-400/35 to-transparent",
     cardOverlayClass: "from-amber-500/18 via-lime-500/10 to-transparent",
-    badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/35",
+    badgeClass: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/35 font-bold",
   },
   organic: {
     key: "organic",
@@ -123,7 +123,7 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-emerald-500/70 via-green-400/35 to-transparent",
     cardOverlayClass: "from-emerald-500/20 via-green-500/10 to-transparent",
-    badgeClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
+    badgeClass: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/35 font-bold",
   },
   ipm: {
     key: "ipm",
@@ -153,7 +153,7 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-sky-500/70 via-cyan-400/35 to-transparent",
     cardOverlayClass: "from-sky-500/18 via-cyan-500/10 to-transparent",
-    badgeClass: "bg-sky-500/15 text-sky-300 border-sky-400/35",
+    badgeClass: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-400/35 font-bold",
   },
   "gi-tag": {
     key: "gi-tag",
@@ -183,7 +183,7 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-fuchsia-500/70 via-orange-400/45 to-transparent",
     cardOverlayClass: "from-fuchsia-500/18 via-orange-500/12 to-transparent",
-    badgeClass: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-400/35",
+    badgeClass: "bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-400/35 font-bold",
   },
 };
 

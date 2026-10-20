@@ -25,5 +25,11 @@ test("bidding workspace fixes the seller page and buyer page to separate modes",
   assert.match(page, /isDismissable=\{false\}/);
   assert.match(page, /Review draft/);
   assert.match(page, /Confirm enquiry/);
+  assert.match(page, /Open now/);
+  assert.match(page, /Schedule for later/);
+  assert.match(page, /Delivery must be on a later day than closing/);
+  assert.match(page, /detectOffPlatformDisclosure/);
+  assert.match(page, /role="alert"/);
+  assert.match(page, /maxListboxHeight=\{224\}/);
   assert.match(buyerPage, /fixedMode="buyer"/);
 });

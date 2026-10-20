@@ -37,7 +37,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [openMobileAdminGroup, setOpenMobileAdminGroup] = useState<string | null>(null);
+  const [openMobileNavigationGroup, setOpenMobileNavigationGroup] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const notificationRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -195,14 +195,14 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     user?.soughtCapabilities || [],
     governedPages,
   );
-  const activeMobileAdminGroup = mobileSections
-    .find((section) => section.label === "Operations/Admin")
-    ?.groups?.find((group) => group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`)));
+  const activeMobileNavigationGroup = mobileSections
+    .flatMap((section) => section.groups || [])
+    .find((group) => group.links.some((link) => isDashboardRouteActive(pathname, link)));
 
-  const activeMobileAdminGroupLabel = activeMobileAdminGroup?.label;
+  const activeMobileNavigationGroupLabel = activeMobileNavigationGroup?.label;
   useEffect(() => {
-    if (activeMobileAdminGroupLabel) setOpenMobileAdminGroup(activeMobileAdminGroupLabel);
-  }, [activeMobileAdminGroupLabel]);
+    if (activeMobileNavigationGroupLabel) setOpenMobileNavigationGroup(activeMobileNavigationGroupLabel);
+  }, [activeMobileNavigationGroupLabel]);
 
   return (
     <div
@@ -273,14 +273,14 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                              <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-3 px-3">{sec.label}</p>
                              <div className="space-y-1">
                                {sec.groups ? sec.groups.map((group) => {
-                                 const isOpen = openMobileAdminGroup === group.label;
+                                 const isOpen = openMobileNavigationGroup === group.label;
                                  const hasActiveLink = group.links.some((link) => isDashboardRouteActive(pathname, link));
                                  return (
                                    <div key={group.label} className="space-y-1">
                                      <button
                                        type="button"
                                        aria-expanded={isOpen}
-                                       onClick={() => setOpenMobileAdminGroup(isOpen ? null : group.label)}
+                                       onClick={() => setOpenMobileNavigationGroup(isOpen ? null : group.label)}
                                        className={`w-full min-h-11 flex items-center justify-between px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.16em] transition-all ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300 bg-obaol-500/5" : "text-default-500 hover:db-inset"}`}
                                      >
                                        <span>{group.label}</span>

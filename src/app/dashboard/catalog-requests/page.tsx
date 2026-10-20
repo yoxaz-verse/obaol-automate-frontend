@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import CatalogApprovalQueues from "@/components/dashboard/Approvals/CatalogApprovalQueues";
-import { patchData } from "@/core/api/apiHandler";
-import { apiRoutes } from "@/core/api/apiRoutes";
 
 export default function CatalogRequestsPage() {
-  useEffect(() => { patchData(apiRoutes.notifications.markSectionRead("approvals"), {}).catch(() => undefined); }, []);
-  return <main className="w-full p-6 md:p-10"><CatalogApprovalQueues /></main>;
+  void CatalogApprovalQueues;
+  const router = useRouter();
+  useEffect(() => { router.replace("/dashboard/approvals?workflow=catalog"); }, [router]);
+  return <main className="grid min-h-48 place-items-center text-sm text-default-500">Opening Catalog &amp; Service Profile approvals…</main>;
 }

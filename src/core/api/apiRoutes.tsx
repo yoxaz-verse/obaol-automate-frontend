@@ -474,6 +474,12 @@ export const organizationReportRoutes = {
   action: (id: string) => `${BASE_PATHS.ORGANIZATION_REPORT}/${id}/action`,
 };
 
+export const companyCapabilityChangeRequestRoutes = {
+  list: "/company-capability-change-requests",
+  create: "/company-capability-change-requests",
+  review: (id: string) => `/company-capability-change-requests/${id}/review`,
+};
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   analytics: dashboardRoutes,
@@ -668,6 +674,7 @@ export const apiRoutes = {
     companyDashboard: (companyId: string) => `/associate-referrals/company/${companyId}`,
   },
   organizationReports: organizationReportRoutes,
+  companyCapabilityChangeRequests: companyCapabilityChangeRequestRoutes,
   inventory: inventoryRoutes,
   warehouses: {
     list: "/warehouses",

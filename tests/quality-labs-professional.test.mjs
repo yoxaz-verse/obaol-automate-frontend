@@ -57,6 +57,16 @@ test("wizard uses searchable fields and direct taxonomy creation", async () => {
   assert.match(source, /WhatsApp number is the same as primary phone/);
   assert.match(source, /Skip optional step/);
   assert.match(source, /autoFocus/);
+  assert.match(source, /Manage products/);
+  assert.match(source, /Copy setup/);
+  assert.match(source, /Products to remove/);
+  assert.match(source, /Existing products in those countries will be kept/);
+  assert.match(source, /No country coverage added yet/);
+  assert.match(source, /No matching country coverage/);
+  assert.doesNotMatch(source, /Manage assignments/);
+  assert.doesNotMatch(source, /Countries to manage/);
+  assert.doesNotMatch(source, /Configured source country/);
+  assert.doesNotMatch(source, /<Accordion/);
 });
 
 test("admin selects a company before viewing or changing its shared lab panel", async () => {

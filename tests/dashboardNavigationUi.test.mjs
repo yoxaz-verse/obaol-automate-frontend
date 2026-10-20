@@ -5,22 +5,22 @@ import { fileURLToPath } from "node:url";
 
 const read = (path) => readFileSync(fileURLToPath(new URL(path, import.meta.url)), "utf8");
 
-test("desktop Operations/Admin groups are accordion-controlled while the collapsed rail stays flat", () => {
+test("desktop navigation groups are accordion-controlled while the collapsed rail stays flat", () => {
   const sidebar = read("../src/components/dashboard/Sidebar.tsx");
 
-  assert.equal(sidebar.includes("setOpenAdminGroup(isOpen ? null : group.label)"), true);
+  assert.equal(sidebar.includes("setOpenNavigationGroup(isOpen ? null : group.label)"), true);
   assert.equal(sidebar.includes("aria-expanded={isOpen}"), true);
-  assert.equal(sidebar.includes("if (activeAdminGroupLabel) setOpenAdminGroup(activeAdminGroupLabel)"), true);
+  assert.equal(sidebar.includes("if (activeNavigationGroupLabel) setOpenNavigationGroup(activeNavigationGroupLabel)"), true);
   assert.equal(sidebar.includes('aria-current={isActive ? "page" : undefined}'), true);
   assert.equal(sidebar.includes("!isCollapsed && section.groups ?"), true);
   assert.equal(sidebar.includes(": sectionOptions.map((opt) => renderOption(opt))"), true);
 });
 
-test("mobile Operations/Admin groups share accordion and active-route behavior", () => {
+test("mobile navigation groups share accordion and active-route behavior", () => {
   const topBar = read("../src/components/dashboard/TopBar.tsx");
 
-  assert.equal(topBar.includes("setOpenMobileAdminGroup(isOpen ? null : group.label)"), true);
-  assert.equal(topBar.includes("if (activeMobileAdminGroupLabel) setOpenMobileAdminGroup(activeMobileAdminGroupLabel)"), true);
+  assert.equal(topBar.includes("setOpenMobileNavigationGroup(isOpen ? null : group.label)"), true);
+  assert.equal(topBar.includes("if (activeMobileNavigationGroupLabel) setOpenMobileNavigationGroup(activeMobileNavigationGroupLabel)"), true);
   assert.equal(topBar.includes("{sec.groups ? sec.groups.map((group) =>"), true);
   assert.equal(topBar.includes("setIsMobileMenuOpen(false)"), true);
   assert.equal(topBar.includes('role="dialog"'), true);

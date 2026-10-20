@@ -146,6 +146,15 @@ export default function CompanyWorkspacePage() {
     enabled: isAssociate && Boolean(associateCompanyId),
   });
 
+  const capabilityRequestsQuery = useQuery({
+    queryKey: ["company-capability-requests", associateCompanyId],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.companyCapabilityChangeRequests.list, { page: 1, limit: 200 });
+      return response?.data?.data || [];
+    },
+    enabled: isAssociate && Boolean(associateCompanyId),
+  });
+
   const interestsQuery = useQuery({
     queryKey: ["company-workspace-interests", associateCompanyId],
     queryFn: async () => {
@@ -271,17 +280,12 @@ export default function CompanyWorkspacePage() {
   const interestRequestMutation = useMutation({
     mutationFn: async () => {
       if (!requestedProvidedIds.length || !requestedSoughtIds.length) throw new Error("Select at least one provided and one sought category.");
-      const response = await postData(apiRoutes.organizationReports.create, {
-        targetAssociateId: user?.id,
-        reasonCode: "COMPANY_INTEREST_UPDATE",
-        description: interestNote.trim() || "Company interest update request from My Company.",
-        payload: {
-          requestedProvidedFunctionIds: requestedProvidedIds,
-          requestedSoughtFunctionIds: requestedSoughtIds,
-          requestedProvidedFunctionPriorities: requestedProvidedPriorities,
-          requestedSoughtFunctionPriorities: requestedSoughtPriorities,
-          note: interestNote.trim(),
-        },
+      const response = await postData(apiRoutes.companyCapabilityChangeRequests.create, {
+        requestedProvidedFunctionIds: requestedProvidedIds,
+        requestedSoughtFunctionIds: requestedSoughtIds,
+        requestedProvidedFunctionPriorities: requestedProvidedPriorities,
+        requestedSoughtFunctionPriorities: requestedSoughtPriorities,
+        note: interestNote.trim(),
       });
       if (!response?.data?.success) {
         throw new Error(response?.data?.message || "Failed to submit interest request.");
@@ -298,8 +302,8 @@ export default function CompanyWorkspacePage() {
       });
       setRecentInterestSubmission({
         requestedInterests:
-          Array.isArray(createdReport?.payload?.requestedProvidedFunctionIds) && createdReport.payload.requestedProvidedFunctionIds.length
-            ? [...createdReport.payload.requestedProvidedFunctionIds, ...(createdReport.payload.requestedSoughtFunctionIds || [])].map((value: any) => String(value || ""))
+          Array.isArray(createdReport?.requestedProvidedFunctionIds) && createdReport.requestedProvidedFunctionIds.length
+            ? [...createdReport.requestedProvidedFunctionIds, ...(createdReport.requestedSoughtFunctionIds || [])].map((value: any) => String(value || ""))
             : submittedInterests,
         createdAt: String(createdReport?.createdAt || new Date().toISOString()),
         syncing: !Boolean(createdReport?._id),
@@ -310,7 +314,7 @@ export default function CompanyWorkspacePage() {
       setRequestedProvidedPriorities([]);
       setRequestedSoughtPriorities([]);
       setInterestNote("");
-      queryClient.invalidateQueries({ queryKey: ["company-workspace-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["company-capability-requests"] });
     },
     onError: (error: any) => {
       showToastMessage({
@@ -368,10 +372,17 @@ export default function CompanyWorkspacePage() {
     : Array.isArray(interestsQuery.data?.approvedCompanyFunctionPriorities)
       ? interestsQuery.data.approvedCompanyFunctionPriorities.map(String)
       : [];
-  const interestReports = useMemo(
-    () => reports.filter((row: any) => String(row?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE"),
-    [reports]
-  );
+  const interestReports = useMemo(() => (Array.isArray(capabilityRequestsQuery.data) ? capabilityRequestsQuery.data : []).map((row: any) => ({
+    ...row,
+    payload: {
+      requestedProvidedFunctionIds: row.requestedProvidedFunctionIds || [],
+      requestedSoughtFunctionIds: row.requestedSoughtFunctionIds || [],
+      requestedProvidedFunctionPriorities: row.requestedProvidedFunctionPriorities || [],
+      requestedSoughtFunctionPriorities: row.requestedSoughtFunctionPriorities || [],
+    },
+    adminNotes: row.reviewNotes,
+    reporterAssociateId: row.requesterAssociateId,
+  })), [capabilityRequestsQuery.data]);
   const interestStatusSummary = useMemo(() => {
     const summary = {
       pending: 0,
@@ -386,7 +397,7 @@ export default function CompanyWorkspacePage() {
       const status = String(row?.status || "").toUpperCase();
       if (status === "PENDING_REVIEW") summary.pending += 1;
       if (status === "UNDER_REVIEW") summary.underReview += 1;
-      if (status === "ACTION_TAKEN") summary.actionTaken += 1;
+      if (status === "APPROVED") summary.actionTaken += 1;
       if (status === "REJECTED") summary.rejected += 1;
     });
     return summary;
@@ -879,7 +890,7 @@ export default function CompanyWorkspacePage() {
               Another request cannot be submitted until this request is reviewed.
             </div>
             <div className="mt-1 text-xs text-obaol-700/90 dark:text-obaol-200/90">
-              Approval is completed by Admin from Dashboard &gt; Reports.
+              Approval is completed by Admin from Dashboard &gt; Approvals &gt; Company Capabilities.
             </div>
             <div className="mt-1 text-xs text-obaol-700/90 dark:text-obaol-200/90">
               Categories requested:
@@ -970,7 +981,7 @@ export default function CompanyWorkspacePage() {
           <h2 className="text-xl font-semibold text-foreground">Capability Request Tracking</h2>
           <p className="text-sm text-default-600">See what was requested, who submitted it, and the admin decision.</p>
         </div>
-        {reportsQuery.isLoading ? (
+        {capabilityRequestsQuery.isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Spinner />
           </div>

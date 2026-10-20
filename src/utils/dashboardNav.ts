@@ -190,12 +190,12 @@ export const getDashboardSidebarSections = (
         links: workflowGroups.flatMap((group) => group.links),
         groups: workflowGroups,
       },
-      { label: "Organization", links: organizationLinks },
       {
         label: "Operations/Admin",
         links: adminRoutes.map((route) => route.path),
         groups: getDashboardAdminGroups(adminRoutes),
       },
+      { label: "Organization", links: organizationLinks },
     ].filter((section) => section.links.length > 0) as DashboardNavSection[];
   }
 

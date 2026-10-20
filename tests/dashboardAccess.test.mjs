@@ -166,6 +166,16 @@ test("Admin sidebar groups operational routes by workflow without duplicates", (
   assert.deepEqual(new Set(groupedLinks), new Set(expectedOperationalLinks));
 });
 
+test("Admin sidebar places Organization below Operations/Admin", () => {
+  const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
+  const adminBranch = navigation.slice(navigation.indexOf('if (normalizedRole === "admin")'));
+  const operationsIndex = adminBranch.indexOf('label: "Operations/Admin"');
+  const organizationIndex = adminBranch.indexOf('label: "Organization"');
+
+  assert.ok(operationsIndex >= 0);
+  assert.ok(organizationIndex > operationsIndex);
+});
+
 test("Associate coming-soon navigation is ordered, disabled, and does not change direct route access", () => {
   const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
   const documents = navigation.indexOf('"/dashboard/documents"');

@@ -10,6 +10,7 @@ const mapPath = new URL("../src/components/Labs/QualityLabsMap.tsx", import.meta
 const myLabsPath = new URL("../src/app/dashboard/quality-labs/my/page.tsx", import.meta.url);
 const contactPath = new URL("../src/utils/labContact.ts", import.meta.url);
 const detailPath = new URL("../src/app/dashboard/quality-labs/[id]/page.tsx", import.meta.url);
+const approvalPath = new URL("../src/components/dashboard/Approvals/LabApprovalQueues.tsx", import.meta.url);
 
 test("lab directory toggles between map and card views with distinct empty states", async () => {
   const source = await readFile(directoryPath, "utf8");
@@ -128,4 +129,14 @@ test("published lab profiles hand off to the existing testing enquiry workflow",
   assert.match(source, /serviceType=QUALITY_TESTING/);
   assert.match(source, /providerCompanyId=/);
   assert.match(source, /labProfileId=/);
+});
+
+test("lab publication failures remain visible on the affected approval card", async () => {
+  const source = await readFile(approvalPath, "utf8");
+  assert.match(source, /reviewErrors/);
+  assert.match(source, /role="alert"/);
+  assert.match(source, /Unable to complete this review/);
+  assert.match(source, /Profile published\./);
+  assert.match(source, /Profile rejected\./);
+  assert.match(source, /review\.variables\?\.id === lab\._id/);
 });

@@ -1,10 +1,18 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { Autocomplete, AutocompleteItem, Avatar, Spinner } from "@nextui-org/react";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { Autocomplete, AutocompleteItem, Avatar, Button, Spinner } from "@nextui-org/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateCompanyRoutes } from "@/core/api/apiRoutes";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  getNextCompanySearchPage,
+  mergeCompanySearchPages,
+  parseCompanySearchPage,
+} from "./companySearchUtils";
+
+const SEARCH_MIN_LENGTH = 2;
+const SEARCH_PAGE_SIZE = 50;
 
 // 🔎 same icon you had
 const SearchIcon = ({
@@ -76,6 +84,8 @@ export default function CompanySearch({
   const [selectedKey, setSelectedKey] = useState<string | null>(
     defaultSelected ?? null
   );
+  const [isOpen, setIsOpen] = useState(false);
+  const scrollRef = useRef<HTMLElement | null>(null);
   const userSelectedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -85,34 +95,59 @@ export default function CompanySearch({
     return () => clearTimeout(timer);
   }, [inputValue]);
 
-  const querySearch = debouncedInputValue;
+  const querySearch = debouncedInputValue.trim();
+  const searchEnabled = querySearch.length >= SEARCH_MIN_LENGTH;
 
-  const requestParams = {
-    page: 1,
-    limit: 50,
-    view: "picker",
-    ...(queryParams || {}),
-    ...(querySearch ? { search: querySearch } : {}),
-  };
+  const companyQuery = useInfiniteQuery({
+    queryKey: ["companies", "search", queryParams || {}, querySearch],
+    initialPageParam: 1,
+    enabled: searchEnabled,
+    queryFn: async ({ pageParam, signal }) => {
+      const response = await getData(
+        associateCompanyRoutes.getAll,
+        {
+          ...(queryParams || {}),
+          page: pageParam,
+          limit: SEARCH_PAGE_SIZE,
+          view: "picker",
+          search: querySearch,
+        },
+        { signal },
+      );
+      return parseCompanySearchPage<Company>(response);
+    },
+    getNextPageParam: getNextCompanySearchPage,
+  });
 
-  const { data: companyData, isLoading, isFetching } = useQuery({
-    queryKey: ["companies", requestParams],
-    queryFn: () => getData(associateCompanyRoutes.getAll, requestParams),
+  const selectedCompanyQuery = useQuery({
+    queryKey: ["companies", "selected", queryParams || {}, defaultSelected],
+    enabled: Boolean(defaultSelected),
+    queryFn: async ({ signal }) => {
+      const response = await getData(
+        associateCompanyRoutes.getAll,
+        {
+          ...(queryParams || {}),
+          page: 1,
+          limit: 1,
+          view: "picker",
+          _id: defaultSelected,
+        },
+        { signal },
+      );
+      return parseCompanySearchPage<Company>(response).companies[0] || null;
+    },
   });
 
   const companies = useMemo(() => {
-    const rawCompanies = Array.isArray(companyData?.data?.data?.data)
-      ? companyData?.data?.data?.data
-      : Array.isArray(companyData?.data?.data?.data?.data)
-        ? companyData?.data?.data?.data?.data
-        : Array.isArray(companyData?.data?.data)
-          ? companyData?.data?.data
-          : Array.isArray(companyData?.data)
-            ? companyData?.data
-            : [];
-    const nextCompanies: Company[] = rawCompanies || [];
+    const pages = companyQuery.data?.pages || [];
+    const nextCompanies = mergeCompanySearchPages<Company>(pages);
+    const selectedCompany = selectedCompanyQuery.data;
+    if (selectedCompany && !nextCompanies.some((company) => company._id === selectedCompany._id)) {
+      nextCompanies.push(selectedCompany);
+      nextCompanies.sort((left, right) => left.name.localeCompare(right.name, undefined, { sensitivity: "base" }));
+    }
     return itemsFilter ? itemsFilter(nextCompanies) : nextCompanies;
-  }, [companyData, itemsFilter]);
+  }, [companyQuery.data?.pages, itemsFilter, selectedCompanyQuery.data]);
 
   useEffect(() => {
     if (defaultSelected === undefined) return;
@@ -131,22 +166,66 @@ export default function CompanySearch({
     }
   }, [companies, defaultSelected, onSelectCompany]);
 
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (!isOpen || !scrollElement || !searchEnabled) return;
+
+    const onScroll = () => {
+      const distanceFromBottom =
+        scrollElement.scrollHeight - scrollElement.scrollTop - scrollElement.clientHeight;
+      if (
+        distanceFromBottom <= 80 &&
+        companyQuery.hasNextPage &&
+        !companyQuery.isFetchingNextPage
+      ) {
+        void companyQuery.fetchNextPage();
+      }
+    };
+
+    scrollElement.addEventListener("scroll", onScroll, { passive: true });
+    return () => scrollElement.removeEventListener("scroll", onScroll);
+  }, [
+    companyQuery.fetchNextPage,
+    companyQuery.hasNextPage,
+    companyQuery.isFetchingNextPage,
+    isOpen,
+    searchEnabled,
+  ]);
+
   const AutocompleteAny = Autocomplete as any;
-  const isBusy = isLoading || isFetching;
+  const isInitialLoading = companyQuery.isLoading || companyQuery.isFetching;
+  const isLoadingMore = companyQuery.isFetchingNextPage;
+  const isBusy = isInitialLoading || isLoadingMore;
+  const emptyContent = !searchEnabled
+    ? `Type at least ${SEARCH_MIN_LENGTH} characters to search.`
+    : companyQuery.isError
+      ? (
+        <div className="flex flex-col items-center gap-2 py-2">
+          <span>Unable to search companies.</span>
+          <Button size="sm" variant="flat" onPress={() => companyQuery.refetch()}>
+            Try again
+          </Button>
+        </div>
+      )
+      : isInitialLoading
+        ? "Searching companies..."
+        : "No matching companies found.";
 
   return (
     <div className="w-full max-w-md mb-6">
       <AutocompleteAny
         aria-label="Select a company"
         items={companies}
+        scrollRef={scrollRef}
         maxListboxHeight={400}
         itemHeight={60}
-        placeholder={isBusy ? "Loading company options..." : "Search by company name"}
+        placeholder="Search by company name"
         variant="bordered"
         radius="full"
         selectedKey={selectedKey || undefined}
+        onOpenChange={setIsOpen}
         isClearable
-        isDisabled={isDisabled || (isLoading && companies.length === 0)}
+        isDisabled={isDisabled}
         className="text-obaol-400 w-full"
         classNames={{
           base: "max-w-full",
@@ -157,6 +236,14 @@ export default function CompanySearch({
           <SearchIcon className="text-default-400" size={20} strokeWidth={2.5} />
         }
         endContent={isBusy ? <Spinner {...({ size: "sm", color: "warning" } as any)} /> : null}
+        listboxProps={{
+          emptyContent,
+          bottomContent: isLoadingMore ? (
+            <div className="flex justify-center py-2">
+              <Spinner size="sm" color="warning" />
+            </div>
+          ) : null,
+        }}
         inputProps={{
           classNames: {
             input: "ml-1",
@@ -247,7 +334,15 @@ export default function CompanySearch({
         )}
       </AutocompleteAny>
       <div className="mt-2 px-2 text-[11px] text-default-400">
-        {isBusy ? "Updating company options..." : `${companies.length} company option${companies.length === 1 ? "" : "s"} available`}
+        {!searchEnabled
+          ? `Type at least ${SEARCH_MIN_LENGTH} characters to search companies`
+          : companyQuery.isError
+            ? "Company search failed. Try again."
+            : isLoadingMore
+              ? "Loading more company options..."
+              : isInitialLoading
+                ? "Searching companies..."
+                : `${companies.length} company option${companies.length === 1 ? "" : "s"} loaded${companyQuery.hasNextPage ? " · scroll for more" : ""}`}
       </div>
     </div>
   );

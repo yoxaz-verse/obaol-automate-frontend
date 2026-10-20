@@ -14,6 +14,7 @@ const obaol = {
   800: "#604018",
   900: "#38230F",
   950: "#1E1208",
+  DEFAULT: "#CF983C",
 };
 
 const semanticWarning = {
@@ -27,6 +28,7 @@ const semanticWarning = {
   700: "#B45309",
   800: "#92400E",
   900: "#78350F",
+  DEFAULT: "#F59E0B",
 };
 
 const config: Config = {
@@ -56,12 +58,15 @@ const config: Config = {
           colors: {
             primary: {
               ...obaol,
+              DEFAULT: "#CF983C",
               foreground: "#1E1208",
             },
             warning: {
               ...semanticWarning,
+              DEFAULT: "#F59E0B",
               foreground: "#1F1300",
             },
+            focus: "#CF983C",
             background: "#f1f4f8",
             foreground: "#0f172a",
             divider: "rgba(203, 213, 225, 0.95)",
@@ -88,12 +93,15 @@ const config: Config = {
           colors: {
             primary: {
               ...obaol,
+              DEFAULT: "#CF983C",
               foreground: "#1E1208",
             },
             warning: {
               ...semanticWarning,
+              DEFAULT: "#F59E0B",
               foreground: "#1F1300",
             },
+            focus: "#CF983C",
             background: "#090806",
             foreground: "#ECEDEE",
             content1: "#0E0D0A",

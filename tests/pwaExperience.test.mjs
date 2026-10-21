@@ -6,10 +6,25 @@ const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf
 
 test("PWA runtime never caches API or mutation responses", () => {
   const worker = read("public/sw.js");
+  assert.match(worker, /obaol-shell-v2/);
   assert.match(worker, /request\.method !== "GET"/);
   assert.match(worker, /url\.pathname\.startsWith\("\/api\/"\)/);
   assert.match(worker, /request\.mode === "navigate"/);
   assert.match(worker, /offline\.html/);
+});
+
+test("offline fallback is branded, accessible, and reconnects automatically", () => {
+  const offline = read("public/offline.html");
+  assert.match(offline, /src="\/logo\.png" alt="OBAOL"/);
+  assert.match(offline, /#cf983c/i);
+  assert.match(offline, /prefers-color-scheme:dark/);
+  assert.match(offline, /prefers-reduced-motion:reduce/);
+  assert.match(offline, /aria-live="polite"/);
+  assert.match(offline, /id="retry-button"/);
+  assert.match(offline, /Still offline\. Check your connection and try again\./);
+  assert.match(offline, /addEventListener\("online",reloadWhenConnected\)/);
+  assert.match(offline, /window\.location\.reload\(\)/);
+  assert.match(offline, /transaction data is never stored for offline use/);
 });
 
 test("install manager supports browser prompts, iOS guidance, cooldown, and updates", () => {

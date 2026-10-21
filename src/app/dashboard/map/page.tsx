@@ -6,8 +6,12 @@ import { variantRateRoutes } from "@/core/api/apiRoutes";
 import LiveMapWrapper from "@/components/LiveMap/LiveMapWrapper";
 import { initialTableConfig } from "@/utils/tableValues";
 import { useState } from "react";
-import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
-import { Spacer } from "@nextui-org/react";
+import dynamic from "next/dynamic";
+
+const DynamicFilter = dynamic(() => import("@/components/CurdTable/dynamic-filtering"), {
+  ssr: false,
+  loading: () => <div className="h-10 w-10 animate-pulse rounded-xl bg-content1/70 motion-reduce:animate-none" role="status" aria-label="Loading filters" />,
+});
 
 export default function Page() {
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
@@ -58,7 +62,7 @@ export default function Page() {
           onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
         />
       </div>
-      <Spacer y={2} />
+      <div className="h-2" aria-hidden="true" />
       <div className="rounded-bl-lg  w-[95%]">
         <LiveMapWrapper mappingValue={variantRateValue} />
       </div>

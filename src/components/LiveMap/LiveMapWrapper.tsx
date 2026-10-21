@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { MarkerData } from "@/components/LiveMap/LiveMap";
+import type { MarkerData } from "@/components/LiveMap/LiveMap";
 import { Spinner } from "@nextui-org/react";
 import { LuMapPin } from "react-icons/lu";
 

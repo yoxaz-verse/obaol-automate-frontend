@@ -6,16 +6,21 @@ import Link from "next/link";
 import { Button, Input, Chip, Pagination } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { FiSearch, FiX, FiFolder, FiPackage, FiLayers, FiChevronRight } from "react-icons/fi";
-import { ProductList } from "@/components/dashboard/Catalog/product-list";
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import CatalogBreadcrumbs from "@/components/dashboard/Catalog/catalog-breadcrumbs";
 import CategoryGrid from "@/components/dashboard/Catalog/category-grid";
 import AuthContext from "@/context/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
 import { getData } from "@/core/api/apiHandler";
 
-const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
+const DeferredAddModal = dynamic(() => import("@/components/ui/DeferredAddModal"), { ssr: false });
+const ProductList = dynamic(
+  () => import("@/components/dashboard/Catalog/product-list").then((module) => module.ProductList),
+  {
+    ssr: false,
+    loading: () => <div className="min-h-[420px] animate-pulse rounded-2xl bg-foreground/[0.03] motion-reduce:animate-none" role="status" aria-label="Loading product details" />,
+  }
+);
 const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
 const UserDeleteModal = dynamic(() => import("@/components/CurdTable/delete"), { ssr: false });
 
@@ -55,9 +60,7 @@ function DeepSearchResult({
   };
 
   return (
-    <motion.button
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+    <button
       className="w-full text-left group flex items-center gap-4 p-4 rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-obaol-500/5 hover:border-obaol-500/20 transition-all outline-none focus:outline-none"
       onClick={() => onNavigate(item, type)}
     >
@@ -86,7 +89,7 @@ function DeepSearchResult({
       <span className={`shrink-0 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${typeColors[type]}`}>
         {labels[type]}
       </span>
-    </motion.button>
+    </button>
   );
 }
 
@@ -214,10 +217,8 @@ function DeepSearchPanel({
               </p>
               <div className="flex flex-col gap-2">
                 {items.map(item => (
-                  <motion.button
+                  <button
                     key={item._id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
                     className="w-full text-left group flex items-center gap-4 p-4 rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-blue-500/5 hover:border-blue-500/20 transition-all outline-none"
                     onClick={() => {
                       // For now just clear search or maybe we could navigate to a company profile?
@@ -235,7 +236,7 @@ function DeepSearchPanel({
                     <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">
                       Company
                     </span>
-                  </motion.button>
+                  </button>
                 ))}
               </div>
             </div>
@@ -405,7 +406,7 @@ export default function CatalogPage() {
             </div>
 
             {isAdmin && !selectedProduct && !isSearching && (
-              <AddModal
+              <DeferredAddModal
                 name={config.label}
                 currentTable={config.table}
                 formFields={tableConfig[config.table].filter((f: any) =>
@@ -428,13 +429,8 @@ export default function CatalogPage() {
         {!isSearching && <CatalogBreadcrumbs paths={navigation} onNavigate={handleBreadcrumbNavigate} />}
 
         {/* Search Mode Label */}
-        <AnimatePresence>
-          {isSearching && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-            className="flex items-center gap-3 mb-5"
+        {isSearching && (
+            <div className="flex animate-in items-center gap-3 fade-in slide-in-from-top-2 duration-200 motion-reduce:animate-none mb-5"
             >
               <FiSearch className="text-obaol-500" size={16} />
               <span className="text-sm font-semibold text-default-500">
@@ -447,30 +443,22 @@ export default function CatalogPage() {
               >
                 <FiX size={12} /> Clear
               </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+        )}
 
         {/* Content Area */}
         <div className="flex-1 w-full min-h-[600px]">
-          <AnimatePresence mode="wait">
             {isSearching ? (
-              <motion.div
+              <div
                 key="search"
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -2 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="animate-in fade-in slide-in-from-bottom-1 duration-200 motion-reduce:animate-none"
               >
                 <DeepSearchPanel search={search} onNavigate={handleSearchNavigate} />
-              </motion.div>
+              </div>
             ) : (
-              <motion.div
+              <div
                 key="browse"
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -2 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="animate-in fade-in slide-in-from-bottom-1 duration-200 motion-reduce:animate-none"
               >
                 {selectedProduct ? (
                   <div className={`rounded-2xl p-3 sm:p-5 lg:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden border ${directoryShellClass} ${directoryBorderClass}`}>
@@ -556,9 +544,8 @@ export default function CatalogPage() {
                     }}
                   </QueryComponent>
                 )}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
       </div>
 

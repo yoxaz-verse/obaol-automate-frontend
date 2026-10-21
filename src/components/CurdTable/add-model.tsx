@@ -13,7 +13,7 @@ import { LuPlus } from "react-icons/lu";
 import { AddModalProps } from "@/data/interface-data";
 import AddForm from "./add-form";
 
-const AddModal: React.FC<AddModalProps & { onSuccess?: (data: any) => void }> = ({
+const AddModal: React.FC<AddModalProps & { onSuccess?: (data: any) => void; defaultOpen?: boolean; hideTrigger?: boolean; onRequestClose?: () => void }> = ({
   name,
   buttonLabel,
   currentTable,
@@ -22,15 +22,21 @@ const AddModal: React.FC<AddModalProps & { onSuccess?: (data: any) => void }> = 
   refetchData,
   additionalVariable,
   onSuccess,
+  defaultOpen = false,
+  hideTrigger = false,
+  onRequestClose,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
 
   const openModal = () => setOpen(true);
-  const closeModal = () => setOpen(false);
+  const closeModal = () => {
+    setOpen(false);
+    onRequestClose?.();
+  };
 
   return (
     <>
-      <div className="flex justify-end pr-2 group">
+      {!hideTrigger && <div className="flex justify-end pr-2 group">
         <Button
           size="sm"
           onPress={openModal}
@@ -41,7 +47,7 @@ const AddModal: React.FC<AddModalProps & { onSuccess?: (data: any) => void }> = 
         >
           {buttonLabel || (name ? `Add ${name}` : `Create ${currentTable}`)}
         </Button>
-      </div>
+      </div>}
 
       <Modal
         isOpen={open}

@@ -8,12 +8,15 @@ const read = (path) => readFileSync(fileURLToPath(new URL(path, import.meta.url)
 test("desktop navigation groups are accordion-controlled while the collapsed rail stays flat", () => {
   const sidebar = read("../src/components/dashboard/Sidebar.tsx");
 
-  assert.equal(sidebar.includes("setOpenNavigationGroup(isOpen ? null : group.label)"), true);
+  assert.equal(sidebar.includes("setOpenNavigationGroup(isOpen ? null : row.label)"), true);
   assert.equal(sidebar.includes("aria-expanded={isOpen}"), true);
   assert.equal(sidebar.includes("if (activeNavigationGroupLabel) setOpenNavigationGroup(activeNavigationGroupLabel)"), true);
   assert.equal(sidebar.includes('aria-current={isActive ? "page" : undefined}'), true);
-  assert.equal(sidebar.includes("!isCollapsed && section.groups ?"), true);
-  assert.equal(sidebar.includes(": sectionOptions.map((opt) => renderOption(opt))"), true);
+  assert.equal(sidebar.includes('kind: "group"'), true);
+  assert.equal(sidebar.includes('row.kind === "group" && !isCollapsed'), true);
+  assert.equal(sidebar.includes("rowOptions.map((opt) => renderOption(opt))"), true);
+  assert.equal(sidebar.includes("Business Workflows"), false);
+  assert.equal(sidebar.includes("Operations/Admin"), false);
 });
 
 test("mobile navigation groups share accordion and active-route behavior", () => {

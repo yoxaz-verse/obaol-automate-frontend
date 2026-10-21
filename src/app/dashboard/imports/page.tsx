@@ -3,6 +3,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import RevealImage from "@/components/ui/RevealImage";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -28,6 +29,8 @@ import Title from "@/components/titles";
 import InlineLoader from "@/components/ui/InlineLoader";
 import { showToastMessage } from "@/utils/utils";
 import { useCompanyAccess } from "@/utils/companyAccess";
+import { getDashboardRouteLabel } from "@/utils/dashboardAccess";
+import { formatImportReservationDate, getImportReservationPresentation } from "@/utils/importReservationPresentation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FiPackage, 
@@ -72,6 +75,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const roleLower = String(user?.role || "").toLowerCase();
+  const reservationPageLabel = getDashboardRouteLabel("/dashboard/imports/reservations", roleLower);
   const { actionsAllowed } = useCompanyAccess();
   const canCreate = (roleLower !== "associate" || actionsAllowed) && (roleLower === "associate" || roleLower === "admin" || roleLower === "operator" || roleLower === "team");
   const needsCompanySelect = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
@@ -188,6 +192,12 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
   const reservations = reservationsResponse?.list ?? extractList(reservationsResponse?.raw ?? reservationsResponse);
   const resolveReservationStatus = (reservation: any) =>
     String(reservation?.reservationStatus || reservation?.status || "PENDING").toUpperCase();
+  const reservationToneClasses = (tone: ReturnType<typeof getImportReservationPresentation>["tone"]) => {
+    if (tone === "success") return "border-success-500/20 bg-success-500/10 text-success-600 dark:text-success-400";
+    if (tone === "danger") return "border-danger-500/20 bg-danger-500/10 text-danger-600 dark:text-danger-400";
+    if (tone === "neutral") return "border-default-300 bg-default-100 text-default-600 dark:border-white/10 dark:bg-white/5 dark:text-default-300";
+    return "border-obaol-500/20 bg-obaol-500/10 text-obaol-700 dark:text-obaol-300";
+  };
   const resolveImportStatus = (listing: any) =>
     String(listing?.importStatus || "LISTED").toUpperCase();
   const isTerminalListing = (listing: any) => String(listing?.status || "").toUpperCase() === "CLOSED";
@@ -611,7 +621,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
             >
               <Tab key="all" title="Import Opportunities" />
               <Tab key="mine" title="My Import Listings" />
-              <Tab key="reservations" title="My Reservations" />
+              <Tab key="reservations" title={reservationPageLabel} />
             </Tabs>
           </div>
 
@@ -625,7 +635,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
 
             {activeTab === "reservations" && reservationsLoading && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20">
-                <InlineLoader message="Loading reservations..." />
+                <InlineLoader message={`Loading ${reservationPageLabel.toLowerCase()}...`} />
               </motion.div>
             )}
 
@@ -833,68 +843,81 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                 key="reservations"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8"
+                className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3"
               >
-                {reservations.map((reservation: any, idx: number) => (
-                  <motion.div
-                    key={reservation._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                  >
-                    <Card className="rounded-[2.5rem] bg-white dark:bg-[#090806] border border-default-300 dark:border-white/20 shadow-none overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full">
-                      <CardHeader className="flex items-start justify-between p-8 pb-4">
-                        <div className="flex flex-col gap-1.5">
-                           <span className="text-[9px] font-bold uppercase tracking-widest text-obaol-500 pb-1">Reserve Node</span>
-                           <h4 className="text-lg font-bold text-foreground uppercase tracking-tight line-clamp-2">
-                             {reservation.listingId?.commodityName || "Import Mission"}
-                           </h4>
-                           <div className="flex items-center gap-3 mt-2">
-                              <div className="flex items-center gap-1.5 text-default-400">
-                                <LuMapPin size={12} />
-                                <span className="text-[9px] font-bold uppercase tracking-widest">{reservation.listingId?.portName || "Port TBD"}</span>
-                              </div>
-                           </div>
-                        </div>
-                        <div className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                          resolveReservationStatus(reservation) === "APPROVED" ? "bg-success-500/10 text-success-500 border border-success-500/20" :
-                          resolveReservationStatus(reservation) === "REJECTED" ? "bg-danger-500/10 text-danger-500 border border-danger-500/20" :
-                          "bg-obaol-500/10 text-obaol-500 border border-obaol-500/20"
-                        }`}>
-                          {resolveReservationStatus(reservation)}
-                        </div>
-                      </CardHeader>
-
-                      <CardBody className="px-8 pb-8 pt-4 gap-8">
-                        <div className="grid grid-cols-2 gap-6 bg-foreground/[0.03] border border-foreground/5 p-5 rounded-[2rem]">
-                           <div className="flex flex-col gap-1">
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Allocated</span>
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-lg font-bold text-foreground">{reservation.quantityRequested}</span>
-                                <span className="text-[10px] font-bold text-default-500 uppercase">MT</span>
-                              </div>
-                           </div>
-                           <div className="flex flex-col gap-1 items-end">
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400 text-right">Mission ETA</span>
-                              <span className="text-xs font-bold text-foreground text-right">
-                                {reservation.listingId?.expectedArrivalDate ? new Date(reservation.listingId.expectedArrivalDate).toLocaleDateString() : "Pending"}
-                              </span>
-                           </div>
-                        </div>
-
-                        {canViewSensitive(reservation.listingId) && (
-                          <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 rounded-xl bg-foreground/[0.03] border border-foreground/5 flex items-center justify-center">
-                               <FiUser size={16} className="text-default-400" />
-                             </div>
-                             <div className="flex-1">
-                               <span className="text-[9px] font-bold uppercase tracking-widest text-default-400 block mb-0.5">Mission Authority</span>
-                               <p className="text-xs font-bold uppercase italic truncate">{reservation.listingId?.importerCompanyId?.name || "Encrypted Node"}</p>
-                             </div>
+                {reservations.map((reservation: any, idx: number) => {
+                  const status = resolveReservationStatus(reservation);
+                  const presentation = getImportReservationPresentation(status);
+                  const listing = reservation.listingId || {};
+                  const variantName = typeof listing.productVariant === "object" ? listing.productVariant?.name : "";
+                  return (
+                    <motion.div
+                      key={reservation._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                    >
+                      <Card className="h-full overflow-hidden rounded-[2rem] border border-default-300 bg-white shadow-none transition-all duration-300 hover:border-obaol-500/40 dark:border-white/15 dark:bg-[#090806]">
+                        <CardHeader className="flex flex-col items-stretch gap-4 p-6 pb-3 sm:p-7 sm:pb-3">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                              <span className="mb-1 block text-[9px] font-bold uppercase tracking-[0.2em] text-obaol-600 dark:text-obaol-400">Import Reservation</span>
+                              <h4 className="break-words text-lg font-bold leading-snug tracking-tight text-foreground">
+                                {listing.commodityName || "Product not available"}
+                              </h4>
+                              {variantName && !String(listing.commodityName || "").toLowerCase().includes(String(variantName).toLowerCase()) && (
+                                <p className="mt-1 text-xs font-semibold text-default-500">Variant: {variantName}</p>
+                              )}
+                            </div>
+                            <span className={`w-fit shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-widest ${reservationToneClasses(presentation.tone)}`}>
+                              {presentation.label}
+                            </span>
                           </div>
-                        )}
+                          <div className={`rounded-2xl border px-4 py-3 text-xs font-medium leading-relaxed ${reservationToneClasses(presentation.tone)}`}>
+                            {presentation.description}
+                          </div>
+                        </CardHeader>
 
-                        {resolveReservationStatus(reservation) === "PENDING" && (
+                        <CardBody className="gap-5 px-6 pb-6 pt-3 sm:px-7 sm:pb-7">
+                          <div className="grid grid-cols-2 gap-x-5 gap-y-5 rounded-2xl border border-foreground/5 bg-foreground/[0.03] p-5">
+                            <div className="flex min-w-0 flex-col gap-1">
+                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Reserved Quantity</span>
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="text-xl font-bold text-foreground">{reservation.quantityRequested ?? "Not available"}</span>
+                                {reservation.quantityRequested != null && <span className="text-[10px] font-bold uppercase text-default-500">{listing.quantityUnit || "MT"}</span>}
+                              </div>
+                            </div>
+                            <div className="flex min-w-0 flex-col items-end gap-1 text-right">
+                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Expected Arrival</span>
+                              <span className="text-xs font-bold text-foreground">{formatImportReservationDate(listing.expectedArrivalDate)}</span>
+                            </div>
+                            <div className="col-span-2 h-px bg-divider/50" />
+                            <div className="flex min-w-0 flex-col gap-1">
+                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Destination Port</span>
+                              <span className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                                <LuMapPin size={13} className="shrink-0 text-obaol-500" />
+                                <span className="truncate">{listing.portName || listing.portId?.name || "Not available"}</span>
+                              </span>
+                            </div>
+                            <div className="flex min-w-0 flex-col items-end gap-1 text-right">
+                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Requested On</span>
+                              <span className="text-xs font-bold text-foreground">{formatImportReservationDate(reservation.requestedAt || reservation.createdAt)}</span>
+                            </div>
+                          </div>
+
+                          {canViewSensitive(listing) && (
+                            <div className="flex items-center gap-3 rounded-2xl border border-foreground/5 px-4 py-3">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.03]">
+                                <FiUser size={15} className="text-default-400" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <span className="block text-[9px] font-bold uppercase tracking-widest text-default-400">Importer</span>
+                                <p className="truncate text-xs font-bold text-foreground">{listing.importerCompanyId?.name || "Not available"}</p>
+                              </div>
+                            </div>
+                          )}
+
+                        {status === "PENDING" && (
                           <div className="grid grid-cols-2 gap-3 mt-2">
                              <Button
                                className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background shadow-md hover:scale-[1.02] active:scale-95 transition-all"
@@ -925,12 +948,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           </div>
                         )}
                         
-                        {resolveReservationStatus(reservation) === "APPROVED" && (
+                        {(status === "APPROVED" || status === "ACCEPTED") && (
                            <div className="flex flex-col gap-3">
-                              <div className="flex items-center gap-2 p-4 rounded-xl bg-success-500/5 border border-success-500/10">
-                                 <LuCheck size={14} className="text-success-500" />
-                                 <span className="text-[9px] font-bold uppercase tracking-widest text-success-500">Reservation Secured // Ready for Enquiry</span>
-                              </div>
                               <Button
                                 fullWidth
                                 className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background shadow-md transition-all active:scale-95"
@@ -941,19 +960,15 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                 startContent={redirectingEnquiryId !== reservation._id && <FiLock size={16} />}
                                 isLoading={lockReservationMutation.isPending || redirectingEnquiryId === reservation._id}
                               >
-                                {redirectingEnquiryId === reservation._id ? "Initializing Redirection..." : "Lock & Initialize Enquiry"}
+                                {redirectingEnquiryId === reservation._id ? "Creating enquiry..." : "Lock reservation & create enquiry"}
                               </Button>
                               {lockErrorById[reservation._id] && (
                                 <div className="text-xs text-danger-400">{lockErrorById[reservation._id]}</div>
                               )}
                            </div>
                         )}
-                        {resolveReservationStatus(reservation) === "LOCKED" && (
+                        {status === "LOCKED" && (
                           <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-2 p-4 rounded-xl bg-foreground/[0.03] border border-foreground/5">
-                              <LuCheck size={14} className="text-foreground" />
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-foreground">Enquiry Created</span>
-                            </div>
                             <Button
                               fullWidth
                               className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background shadow-md transition-all active:scale-95"
@@ -970,14 +985,29 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                               }}
                               startContent={redirectingEnquiryId !== reservation._id && <FiExternalLink size={16} />}
                             >
-                              {redirectingEnquiryId === reservation._id ? "Redirecting Framework..." : "Open Enquiry"}
+                              {redirectingEnquiryId === reservation._id ? "Opening enquiry..." : "Open enquiry"}
                             </Button>
                           </div>
                         )}
                       </CardBody>
                     </Card>
                   </motion.div>
-                ))}
+                  );
+                })}
+                {reservations.length === 0 && (
+                  <div className="col-span-full flex min-h-[320px] flex-col items-center justify-center rounded-[2rem] border border-dashed border-default-300 bg-content1/60 px-6 py-12 text-center dark:border-white/15">
+                    <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-obaol-500/20 bg-obaol-500/10 text-obaol-600 dark:text-obaol-300">
+                      <FiPackage size={28} />
+                    </div>
+                    <h3 className="text-lg font-bold text-foreground">No import reservations yet</h3>
+                    <p className="mt-2 max-w-md text-sm leading-relaxed text-default-500">
+                      Reservations will appear here after you reserve an available quantity from an Import Opportunity.
+                    </p>
+                    <Button as={Link} href="/dashboard/imports" className="mt-6 bg-foreground px-6 font-bold text-background" endContent={<FiArrowRight size={15} />}>
+                      Browse import opportunities
+                    </Button>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -1406,7 +1436,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                     </div>
                     <h4 className="text-lg font-bold text-white uppercase tracking-tight">Reserve Request Initialized</h4>
                     <p className="text-xs text-default-400 max-w-[280px]">
-                      Your allocation request has been broadcasted. Tracking will be available in &quot;My Reservations&quot; once approved.
+                      Your reservation request has been submitted. You can track its review status in &quot;{reservationPageLabel}&quot;.
                     </p>
                   </motion.div>
                 )}

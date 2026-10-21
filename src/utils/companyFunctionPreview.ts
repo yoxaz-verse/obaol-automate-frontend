@@ -56,7 +56,7 @@ export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinit
   { slug: "importing-to-india", name: "Importing into India", description: "Manage inbound imports to India using the current shipment and trade workflows.", actions: [
     { label: "Import Opportunities", href: "/dashboard/imports", description: "Browse incoming import listings and reserve available quantities.", primary: true },
     { label: "My Import Listings", href: "/dashboard/imports/my-listings", description: "Create and manage your company’s incoming listings." },
-    { label: "My Reservations", href: "/dashboard/imports/reservations", description: "Track quantities your company has reserved." },
+    { label: "My Import Reservations", href: "/dashboard/imports/reservations", description: "Track quantities your company has reserved from inbound import opportunities." },
     { label: "Orders", href: "/dashboard/orders", description: "Track the orders connected to imported products." },
     { label: "Documents", href: "/dashboard/documents", description: "Manage import and customs documentation." },
     { label: "Execution requests", href: "/dashboard/execution-enquiries", description: "Follow customs, logistics, and handoff requests." },

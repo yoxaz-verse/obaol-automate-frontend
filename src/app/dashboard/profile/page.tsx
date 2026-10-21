@@ -24,7 +24,6 @@ import { extractCount, extractList } from "@/core/data/queryUtils";
 import InsightCard from "@/components/dashboard/InsightCard";
 import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiKey, FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
-import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/browser";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardField, DashboardPage, DashboardPanel, DashboardSectionHeader, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 
@@ -322,7 +321,7 @@ function PasskeySecurityPanel() {
   });
 
   const passkeys = data?.data?.passkeys || [];
-  const passkeySupported = typeof window !== "undefined" && browserSupportsWebAuthn();
+  const passkeySupported = typeof window !== "undefined" && "PublicKeyCredential" in window;
 
   const sendOtp = async () => {
     setIsSendingOtp(true);
@@ -350,6 +349,11 @@ function PasskeySecurityPanel() {
         otpCode,
         deviceLabel,
       });
+      const { browserSupportsWebAuthn, startRegistration } = await import("@simplewebauthn/browser");
+      if (!browserSupportsWebAuthn()) {
+        setStatusMessage("Passkeys are not available on this browser.");
+        return;
+      }
       const registrationResponse = await startRegistration({ optionsJSON: optionsResponse.data.options });
       await postData("/auth/passkeys/registration/verify", {
         response: registrationResponse,

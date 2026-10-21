@@ -53,7 +53,7 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
   "importing-to-india": [
     { label: "Import Opportunities", href: "/dashboard/imports" },
     { label: "My Import Listings", href: "/dashboard/imports/my-listings" },
-    { label: "My Reservations", href: "/dashboard/imports/reservations" },
+    { label: "My Import Reservations", href: "/dashboard/imports/reservations" },
   ],
   "exporting-from-india": [
     { label: "Trade Listings", href: "/dashboard/product" },

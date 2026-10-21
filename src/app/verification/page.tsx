@@ -1,7 +1,6 @@
 import { buildMetadata, buildWebPageJsonLd } from "@/utils/seo";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import FadeIn from "./FadeIn";
-import { Spacer } from "@nextui-org/react";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 import { 
@@ -348,7 +347,7 @@ export default function VerificationPage() {
           </div>
         </FadeIn>
 
-        <Spacer y={32} />
+        <div className="h-32" aria-hidden="true" />
 
         <FadeIn>
           <div className="text-center max-w-3xl mx-auto bg-foreground text-background p-12 rounded-[3rem] shadow-2xl relative overflow-hidden">

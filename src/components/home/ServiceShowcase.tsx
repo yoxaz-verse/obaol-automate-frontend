@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState, type ComponentType, type RefCallback } from "react";
+import { motion, useInView } from "framer-motion";
+import { useMemo, useRef, useState, type ComponentType } from "react";
 import { FiCheckCircle, FiFileText, FiPackage, FiSearch, FiShoppingBag, FiTarget, FiTruck } from "react-icons/fi";
 import { FaShip, FaWarehouse } from "react-icons/fa6";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
-import { spaciousInkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 export type ServiceChapter = {
@@ -34,242 +33,110 @@ const services: readonly ServiceChapter[] = [
   { id: "freight", title: "Freight Forwarding", role: "Freight forwarders", description: "Freight forwarders coordinate customs, vessel planning, port documents, and shipment milestones through closing.", outcome: "Cargo cleared and moving to buyer", image: "/images/services/freight-trade-art-v2.webp", imageAlt: "Expressive ink-and-watercolor artwork of freight professionals coordinating container and vessel operations at an international terminal", imagePosition: "center 42%", icon: FaShip, accent: "#84cc16" },
 ] as const;
 
-function Chapter({ service, index, active, chapterRef }: { service: ServiceChapter; index: number; active: boolean; chapterRef: RefCallback<HTMLElement> }) {
-  const Icon = service.icon;
+const fragmentLayouts = [
+  "lg:col-span-3 lg:row-span-2",
+  "lg:col-span-2 lg:row-span-1",
+  "lg:col-span-2 lg:row-span-2",
+  "lg:col-span-3 lg:row-span-1",
+  "lg:col-span-2 lg:row-span-1",
+  "lg:col-span-3 lg:row-span-2",
+  "lg:col-span-2 lg:row-span-2",
+  "lg:col-span-3 lg:row-span-1",
+] as const;
 
-  return (
-    <article ref={chapterRef} data-service-chapter={service.id} className="relative lg:flex lg:min-h-[72svh] lg:items-center">
-      <div className={`relative border-l pl-7 transition-colors duration-500 lg:py-16 ${active ? "border-obaol-400" : "border-default-200"}`}>
-        <span className={`absolute -left-[7px] top-1 h-3.5 w-3.5 rounded-full border-4 border-background transition-colors lg:top-[4.25rem] ${active ? "bg-obaol-400 shadow-[0_0_18px_rgba(207,152,60,0.75)]" : "bg-default-300"}`} />
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-xs font-black text-obaol-600 dark:text-obaol-300">{String(index + 1).padStart(2, "0")}</span>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/45">{service.role}</span>
-        </div>
-        <h3 className="mt-3 text-3xl font-black tracking-tight text-foreground sm:text-4xl">{service.title}</h3>
-        <p className="mt-4 max-w-xl text-sm font-medium leading-relaxed text-foreground/65 sm:text-base">{service.description}</p>
-        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-default-200/80 bg-content1/70 p-4 text-sm font-bold text-foreground/80">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-black" style={{ backgroundColor: service.accent }}><Icon size={16} /></span>
-          <span className="pt-1.5">{service.outcome}</span>
-        </div>
-
-        <div className="relative mt-7 aspect-[4/3] lg:hidden">
-          <div data-ink-artwork-mask="spacious" style={spaciousInkArtworkMaskStyle} className="absolute inset-[3%] overflow-hidden">
-            <Image src={service.image} alt={service.imageAlt} fill sizes="(max-width: 1023px) 90vw, 1px" className="object-cover" style={{ objectPosition: service.imagePosition }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-          </div>
-          <span className="absolute bottom-4 left-4 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-white backdrop-blur-md">Indian origin operations</span>
-        </div>
-      </div>
-    </article>
-  );
-}
+const fragmentPositions = ["20% 35%", "72% 30%", "35% 70%", "80% 55%", "18% 68%", "62% 72%", "42% 28%", "84% 76%"] as const;
 
 export default function ServiceShowcase() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [introStatus, setIntroStatus] = useState<"waiting" | "playing" | "complete">("waiting");
   const adaptiveMotion = useAdaptiveMotion();
-  const adaptiveMotionRef = useRef(adaptiveMotion);
   const sectionRef = useRef<HTMLElement>(null);
-  const introTriggerRef = useRef<HTMLDivElement>(null);
-  const chapterNodesRef = useRef<Array<HTMLElement | null>>([]);
-  const chapterRefSetters = useMemo(
-    () => services.map((_, index): RefCallback<HTMLElement> => (node) => {
-      chapterNodesRef.current[index] = node;
-    }),
-    [],
-  );
+  const puzzleInView = useInView(sectionRef, { once: true, amount: 0.15 });
   const active = services[activeIndex];
-  const ActiveIcon = active.icon;
-
-  useEffect(() => {
-    adaptiveMotionRef.current = adaptiveMotion;
-  }, [adaptiveMotion]);
-
-  useEffect(() => {
-    if (introStatus !== "playing") return;
-
-    const completionTimer = window.setTimeout(
-      () => setIntroStatus("complete"),
-      adaptiveMotionRef.current.shouldReduceMotion ? 800 : 1900,
-    );
-    return () => window.clearTimeout(completionTimer);
-  }, [introStatus]);
-
-  useEffect(() => {
-    const introTrigger = introTriggerRef.current;
-    if (!introTrigger || introStatus !== "waiting") return;
-
-    if (adaptiveMotion.prefersReducedMotion) {
-      setIntroStatus("complete");
-      return;
-    }
-
-    const introObserver = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      introObserver.disconnect();
-      setIntroStatus("playing");
-    }, { threshold: 0.35, rootMargin: "0px 0px -8%" });
-
-    introObserver.observe(introTrigger);
-    return () => introObserver.disconnect();
-  }, [adaptiveMotion.prefersReducedMotion, introStatus]);
-
-  useEffect(() => {
-    if (adaptiveMotion.isMobile) return;
-
-    const section = sectionRef.current;
-    if (!section) return;
-
-    let frameId = 0;
-    let isTracking = false;
-
-    const updateActiveChapter = () => {
-      frameId = 0;
-      const nodes = chapterNodesRef.current.filter((node): node is HTMLElement => node !== null);
-      if (nodes.length !== services.length) return;
-
-      const activationLine = window.innerHeight * 0.45;
-      const sectionRect = section.getBoundingClientRect();
-      let nextIndex = 0;
-
-      if (sectionRect.bottom <= activationLine) {
-        nextIndex = services.length - 1;
-      } else if (sectionRect.top < activationLine) {
-        let nearestDistance = Number.POSITIVE_INFINITY;
-        nodes.forEach((node, index) => {
-          const rect = node.getBoundingClientRect();
-          const distance = Math.abs(rect.top + rect.height / 2 - activationLine);
-          if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nextIndex = index;
-          }
-        });
-      }
-
-      setActiveIndex((current) => current === nextIndex ? current : nextIndex);
-    };
-
-    const scheduleUpdate = () => {
-      if (!isTracking || frameId) return;
-      frameId = window.requestAnimationFrame(updateActiveChapter);
-    };
-
-    const startTracking = () => {
-      if (isTracking) return;
-      isTracking = true;
-      window.addEventListener("scroll", scheduleUpdate, { passive: true });
-      window.addEventListener("resize", scheduleUpdate);
-      scheduleUpdate();
-    };
-
-    const stopTracking = () => {
-      if (!isTracking) return;
-      isTracking = false;
-      window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
-      if (frameId) window.cancelAnimationFrame(frameId);
-      frameId = 0;
-    };
-
-    const sectionObserver = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) startTracking();
-      else stopTracking();
-    }, { rootMargin: "100px 0px" });
-
-    sectionObserver.observe(section);
-    return () => {
-      sectionObserver.disconnect();
-      stopTracking();
-    };
-  }, [adaptiveMotion.isMobile]);
+  const orderedServices = useMemo(() => [active, ...services.filter((_, index) => index !== activeIndex)], [active, activeIndex]);
+  const puzzleAssembled = adaptiveMotion.prefersReducedMotion || puzzleInView;
 
   return (
-    <section ref={sectionRef} data-service-story="true" data-service-intro-status={introStatus} aria-labelledby="service-story-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-16 md:py-24 public-standard-section">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(207,152,60,0.12),transparent_28%)]" />
-      {introStatus === "playing" && (
-        <motion.div
-          data-service-intro-layer="dream"
-          aria-hidden="true"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 1, 1, 0] }}
-          transition={{ duration: adaptiveMotionRef.current.shouldReduceMotion ? 0.75 : 1.8, times: [0, 0.16, 0.62, 1], ease: "easeInOut" }}
-          onAnimationComplete={() => setIntroStatus("complete")}
-          className="pointer-events-none absolute inset-0 z-20 overflow-hidden bg-[rgba(249,247,242,0.9)] dark:bg-[rgba(12,11,9,0.9)]"
-        >
-          <motion.div
-            initial={adaptiveMotionRef.current.shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.08, filter: "blur(16px) saturate(0.78)" }}
-            animate={adaptiveMotionRef.current.shouldReduceMotion ? { opacity: [0, 0.38, 0] } : { opacity: [0, 0.68, 0.56, 0], scale: [1.08, 1.03, 1, 1], filter: ["blur(16px) saturate(0.78)", "blur(5px) saturate(0.9)", "blur(0px) saturate(0.96)", "blur(2px) saturate(0.96)"] }}
-            transition={{ duration: adaptiveMotionRef.current.shouldReduceMotion ? 0.75 : 1.8, times: adaptiveMotionRef.current.shouldReduceMotion ? [0, 0.45, 1] : [0, 0.35, 0.72, 1], ease: "easeOut" }}
-            className="absolute inset-[-5%]"
-          >
-            <div data-ink-artwork-mask="spacious" style={spaciousInkArtworkMaskStyle} className="absolute inset-[4%] overflow-hidden opacity-75">
-              <Image src={services[0].image} alt="" fill priority sizes="100vw" className="object-cover object-center" />
-              <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/25 to-background/65" />
-            </div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 0.72, 0.45, 0] }} transition={{ duration: 1.8, times: [0, 0.28, 0.72, 1] }} className="absolute -left-[8%] top-[6%] h-[70%] w-[58%] rounded-full bg-amber-300/25 blur-[90px] dark:bg-amber-500/15" />
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 0.5, 0.32, 0] }} transition={{ duration: 1.8, times: [0, 0.32, 0.72, 1] }} className="absolute -right-[8%] bottom-[3%] h-[62%] w-[52%] rounded-full bg-violet-300/25 blur-[100px] dark:bg-violet-500/15" />
-          <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
-            <motion.p
-              initial={{ opacity: 0, y: adaptiveMotionRef.current.shouldReduceMotion ? 0 : 10 }}
-              animate={{ opacity: [0, 1, 1, 0], y: adaptiveMotionRef.current.shouldReduceMotion ? 0 : [10, 0, 0, -4] }}
-              transition={{ duration: adaptiveMotionRef.current.shouldReduceMotion ? 0.75 : 1.65, times: [0, 0.28, 0.7, 1], ease: "easeOut" }}
-              className="max-w-3xl text-2xl font-semibold tracking-[-0.025em] text-foreground/85 drop-shadow-sm sm:text-4xl lg:text-5xl"
-            >
-              Every trade begins as a possibility
-            </motion.p>
-          </div>
-        </motion.div>
-      )}
-      <motion.div
-        data-service-intro-content="true"
-        initial={false}
-        animate={introStatus === "complete" ? { opacity: 1, y: 0, filter: "blur(0px)" } : introStatus === "playing" ? { opacity: [0.72, 0.84, 1], y: adaptiveMotion.shouldReduceMotion ? 0 : [8, 4, 0], filter: adaptiveMotion.shouldReduceMotion ? "blur(0px)" : ["blur(4px)", "blur(2px)", "blur(0px)"] } : { opacity: 0.72, y: adaptiveMotion.shouldReduceMotion ? 0 : 8, filter: adaptiveMotion.shouldReduceMotion ? "blur(0px)" : "blur(4px)" }}
-        transition={{ duration: adaptiveMotion.shouldReduceMotion ? 0.35 : 1.15, delay: introStatus === "playing" && !adaptiveMotion.shouldReduceMotion ? 0.55 : 0, ease: [0.22, 1, 0.36, 1] }}
-        className="container relative z-10 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container"
-      >
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
+    <section ref={sectionRef} data-service-puzzle="true" data-puzzle-assembled={puzzleAssembled ? "true" : "false"} aria-labelledby="service-puzzle-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-14 md:py-20 public-standard-section">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(207,152,60,0.1),transparent_28%),radial-gradient(circle_at_86%_78%,rgba(96,165,250,0.07),transparent_24%)]" />
+      <div className="container relative z-10 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container">
+        <div className="mb-9 grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-14">
           <div>
-            <div ref={introTriggerRef} data-service-intro-trigger="true" className="mb-10 space-y-5 lg:mb-2">
-              <p className={homeTitleStyles.sectionKicker}>Connected Execution Network</p>
-              <h2 id="service-story-title" className={homeTitleStyles.sectionTitle}>Different specialists. One connected trade.</h2>
-              <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/65">Discovery starts the trade, then buyers, suppliers, and specialist partners each perform their own work. OBAOL connects the handoffs, records, and progress—it does not replace them.</p>
-            </div>
-            <div className="space-y-12 lg:space-y-0">
-              {services.map((service, index) => (
-                <Chapter key={service.id} service={service} index={index} active={index === activeIndex} chapterRef={chapterRefSetters[index]} />
-              ))}
-            </div>
+            <p className={homeTitleStyles.sectionKicker}>Connected Execution Network</p>
+            <h2 id="service-puzzle-title" className={`${homeTitleStyles.sectionTitle} mt-4`}>Different specialists. One connected trade.</h2>
           </div>
-
-          <div className="relative hidden lg:block">
-            <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-12rem)] min-h-[480px] max-h-[650px]">
-              <div className="pointer-events-none absolute inset-[8%] rounded-full bg-obaol-400/10 blur-3xl dark:bg-obaol-400/[0.08]" />
-              {services.map((service, index) => {
-                const isActive = index === activeIndex;
-                return (
-                <div key={service.id} data-service-artwork-layer="true" data-ink-artwork-mask="spacious" aria-hidden={!isActive} style={spaciousInkArtworkMaskStyle} className={`absolute inset-[4%] overflow-hidden transition-[opacity,filter] ease-out ${adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[550ms]"} ${isActive ? "z-[1] opacity-100 blur-0 saturate-100" : "z-0 opacity-0 blur-[2px] saturate-[0.92]"}`}>
-                  <Image src={service.image} alt={isActive ? service.imageAlt : ""} aria-hidden={!isActive} fill priority={index === 0} sizes="(max-width: 1023px) 1px, 52vw" className="object-cover" style={{ objectPosition: service.imagePosition }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/15" />
-                </div>
-                );
-              })}
-              <div className="absolute inset-x-[4%] top-[3%] z-10 flex items-center justify-between px-9 py-8">
-                <span className="rounded-full border border-white/15 bg-black/55 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/75 backdrop-blur-md">Indian origin operations</span>
-                <span className="font-mono text-xs font-black text-white/60">{String(activeIndex + 1).padStart(2, "0")} / {String(services.length).padStart(2, "0")}</span>
-              </div>
-              <div className="absolute inset-x-12 bottom-7 z-10 rounded-[1.5rem] border border-white/12 bg-black/62 p-5 text-white shadow-[0_18px_48px_-28px_rgba(0,0,0,0.9)] backdrop-blur-lg">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-black" style={{ backgroundColor: active.accent }}><ActiveIcon size={20} /></span>
-                  <div><p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/45">Active chapter</p><p className="mt-1 text-2xl font-black">{active.title}</p></div>
-                </div>
-                <p className="mt-4 text-sm font-semibold text-white/72">Outcome: {active.outcome}</p>
-                <div className="mt-5 flex gap-1.5" aria-hidden="true">{services.map((service, index) => <span key={service.id} className={`h-1 flex-1 rounded-full transition-colors ${index === activeIndex ? "bg-obaol-400" : "bg-white/20"}`} />)}</div>
-              </div>
-            </div>
-          </div>
+          <p className="max-w-2xl text-sm font-medium leading-relaxed text-foreground/65 sm:text-base">Select a piece to see how each specialist completes a distinct part of the trade. OBAOL connects the work without replacing the people performing it.</p>
         </div>
-      </motion.div>
+
+        <div data-service-puzzle-grid="true" className="grid grid-flow-dense grid-cols-2 auto-rows-[108px] gap-2.5 sm:auto-rows-[126px] sm:gap-3 lg:grid-cols-12 lg:auto-rows-[112px] lg:gap-4">
+          {orderedServices.map((service, position) => {
+            const serviceIndex = services.findIndex((item) => item.id === service.id);
+            const isSelected = serviceIndex === activeIndex;
+            const Icon = service.icon;
+            const fragmentIndex = Math.max(0, position - 1);
+            const pieceClass = isSelected
+              ? "col-span-2 row-span-3 sm:row-span-3 lg:col-span-7 lg:row-span-4"
+              : `col-span-1 row-span-1 ${fragmentLayouts[fragmentIndex]}`;
+
+            return (
+              <motion.button
+                layout={!adaptiveMotion.prefersReducedMotion}
+                key={service.id}
+                type="button"
+                data-service-piece={service.id}
+                data-service-selected={isSelected ? "true" : "false"}
+                aria-pressed={isSelected}
+                aria-controls="service-puzzle-details"
+                aria-label={isSelected ? `Selected service: ${service.title}` : `View ${service.title} service`}
+                onClick={() => setActiveIndex(serviceIndex)}
+                initial={adaptiveMotion.prefersReducedMotion ? false : { opacity: 0, y: 14, scale: 0.96 }}
+                animate={puzzleAssembled ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 14, scale: 0.96 }}
+                transition={adaptiveMotion.prefersReducedMotion ? { duration: 0 } : { layout: { duration: 0.48, ease: [0.22, 1, 0.36, 1] }, opacity: { duration: 0.38, delay: position * 0.045 }, y: { duration: 0.48, delay: position * 0.045 }, scale: { duration: 0.48, delay: position * 0.045 } }}
+                className={`group relative min-w-0 overflow-hidden border text-left shadow-[0_18px_50px_-34px_rgba(15,23,42,0.6)] outline-none transition-[border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${pieceClass} ${isSelected ? "rounded-[1.65rem] border-obaol-400/45 sm:rounded-[2rem]" : "rounded-[1.15rem] border-white/20 hover:border-obaol-400/55 sm:rounded-[1.45rem]"}`}
+              >
+                <Image
+                  src={service.image}
+                  alt={isSelected ? service.imageAlt : ""}
+                  fill
+                  priority={serviceIndex === 0}
+                  sizes={isSelected ? "(max-width: 1023px) 100vw, 58vw" : "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 24vw"}
+                  data-service-partial-image={isSelected ? "false" : "true"}
+                  className={`object-cover transition-transform duration-500 ${isSelected ? "scale-100" : "scale-[1.16] saturate-[0.88] group-hover:scale-[1.1]"}`}
+                  style={{ objectPosition: isSelected ? service.imagePosition : fragmentPositions[fragmentIndex] }}
+                />
+                <div className={`absolute inset-0 ${isSelected ? "bg-gradient-to-t from-black via-black/30 to-black/10" : "bg-gradient-to-t from-black/90 via-black/25 to-black/5"}`} />
+
+                {isSelected ? (
+                  <div id="service-puzzle-details" className="absolute inset-x-0 bottom-0 z-10 p-5 text-white sm:p-7 lg:p-8">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-black sm:h-12 sm:w-12" style={{ backgroundColor: service.accent }}><Icon size={20} /></span>
+                      <div className="min-w-0">
+                        <p className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-white/60">{String(serviceIndex + 1).padStart(2, "0")} · {service.role}</p>
+                        <h3 className="mt-1 text-2xl font-black leading-tight tracking-tight sm:text-3xl lg:text-4xl">{service.title}</h3>
+                      </div>
+                    </div>
+                    <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-white/78 sm:text-base">{service.description}</p>
+                    <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-black/45 px-3 py-2 text-xs font-bold text-white/88 backdrop-blur-md sm:text-sm">
+                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: service.accent }} />
+                      <span className="truncate">{service.outcome}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="absolute inset-x-0 bottom-0 z-10 p-3 text-white sm:p-4">
+                    <div className="flex items-end justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-mono text-[8px] font-black text-white/60 sm:text-[9px]">{String(serviceIndex + 1).padStart(2, "0")}</p>
+                        <p className="mt-1 line-clamp-2 text-xs font-black leading-tight sm:text-sm">{service.title}</p>
+                      </div>
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-black" style={{ backgroundColor: service.accent }}><Icon size={14} /></span>
+                    </div>
+                  </div>
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+        <p aria-live="polite" aria-atomic="true" className="sr-only">Selected service: {active.title}. {active.description} Outcome: {active.outcome}.</p>
+      </div>
     </section>
   );
 }

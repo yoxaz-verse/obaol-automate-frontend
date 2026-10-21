@@ -1,4 +1,4 @@
-const CACHE_NAME = "obaol-shell-v1";
+const CACHE_NAME = "obaol-shell-v2";
 const SHELL_ASSETS = ["/offline.html", "/logo.png", "/pwa/icon-192.png", "/pwa/icon-512.png"];
 
 self.addEventListener("install", (event) => {

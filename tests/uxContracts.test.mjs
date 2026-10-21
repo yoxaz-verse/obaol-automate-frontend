@@ -190,7 +190,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-art-v2.webp", import.meta.url))), true);
 });
 
-test("homepage services use a nine-chapter multi-entity scroll story without autoplay", () => {
+test("homepage services use a compact nine-piece interactive puzzle", () => {
   const services = read("../src/components/home/ServiceShowcase.tsx");
   const homeContent = read("../src/components/home/HomeContent.tsx");
   const hero = read("../src/components/home/HeroSectionServer.tsx");
@@ -203,42 +203,28 @@ test("homepage services use a nine-chapter multi-entity scroll story without aut
     "discovery", "sourcing", "documentation", "procurement", "quality",
     "packaging", "logistics", "warehouse", "freight",
   ]);
-  assert.equal(services.includes('data-service-story="true"'), true);
-  assert.equal(services.includes("data-service-intro-status={introStatus}"), true);
-  assert.equal(services.includes('data-service-intro-layer="dream"'), true);
-  assert.equal(services.includes('data-service-intro-content="true"'), true);
-  assert.equal(services.includes("Every trade begins as a possibility"), true);
-  assert.equal(services.includes('data-service-intro-trigger="true"'), true);
-  assert.equal(services.includes('threshold: 0.35'), true);
-  assert.equal(services.includes('introStatus !== "waiting"'), true);
-  assert.equal(services.includes('adaptiveMotion.prefersReducedMotion'), true);
-  assert.equal(services.includes('setIntroStatus("complete")'), true);
-  assert.equal(services.includes("window.setTimeout"), true);
-  assert.equal(services.includes("window.clearTimeout"), true);
-  assert.equal(services.includes('import { motion } from "framer-motion"'), true);
-  assert.equal(services.includes("data-service-chapter={service.id}"), true);
-  assert.equal(services.includes("data-active-service={active.id}"), true);
-  assert.equal(services.includes("sticky top-28"), true);
-  assert.equal(services.includes("IntersectionObserver"), true);
-  assert.equal(services.includes("requestAnimationFrame"), true);
-  assert.equal(services.includes("window.innerHeight * 0.45"), true);
-  assert.equal(services.includes("lg:min-h-[72svh]"), true);
-  assert.equal(services.includes('className="relative hidden lg:block"'), true);
-  assert.equal(services.includes("lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"), true);
-  assert.equal(services.includes('data-service-artwork-layer="true"'), true);
-  assert.equal(services.includes('data-ink-artwork-mask="spacious"'), true);
-  assert.equal(services.includes("spaciousInkArtworkMaskStyle"), true);
-  assert.equal(services.includes("absolute inset-[4%]"), true);
-  assert.equal(services.includes("max-h-[650px]"), true);
-  assert.equal(services.includes("rounded-[2rem] border border-obaol-500/20 bg-black"), false);
-  assert.equal(services.includes("if (adaptiveMotion.isMobile) return"), true);
-  assert.equal(services.includes("if (adaptiveMotion.shouldReduceMotion) return"), false);
-  assert.equal(services.includes('adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[550ms]"'), true);
-  assert.equal(services.includes('adaptiveMotion.shouldReduceMotion ? "hidden"'), false);
-  assert.equal(services.includes("AnimatePresence"), false);
-  assert.equal(services.includes('mode="wait"'), false);
-  assert.equal(services.includes("onActivate"), false);
-  assert.equal(services.includes("setInterval"), false);
+  assert.equal(services.includes('data-service-puzzle="true"'), true);
+  assert.equal(services.includes('data-service-puzzle-grid="true"'), true);
+  assert.equal(services.includes("data-puzzle-assembled={puzzleAssembled"), true);
+  assert.equal(services.includes("data-service-piece={service.id}"), true);
+  assert.equal(services.includes('data-service-selected={isSelected ? "true" : "false"}'), true);
+  assert.equal(services.includes('data-service-partial-image={isSelected ? "false" : "true"}'), true);
+  assert.equal(services.includes("aria-pressed={isSelected}"), true);
+  assert.equal(services.includes('aria-live="polite"'), true);
+  assert.equal(services.includes('aria-controls="service-puzzle-details"'), true);
+  assert.equal(services.includes("useInView"), true);
+  assert.equal(services.includes("once: true"), true);
+  assert.equal(services.includes("layout={!adaptiveMotion.prefersReducedMotion}"), true);
+  assert.equal(services.includes("grid-cols-2"), true);
+  assert.equal(services.includes("lg:grid-cols-12"), true);
+  assert.equal(services.includes("lg:col-span-7 lg:row-span-4"), true);
+  assert.equal(services.includes("fragmentLayouts"), true);
+  assert.equal(services.includes("fragmentPositions"), true);
+  assert.equal(services.includes('data-service-story="true"'), false);
+  assert.equal(services.includes("sticky top-28"), false);
+  assert.equal(services.includes("lg:min-h-[72svh]"), false);
+  assert.equal(services.includes("IntersectionObserver"), false);
+  assert.equal(services.includes("Every trade begins as a possibility"), false);
   assert.equal(services.includes("images.pexels.com"), false);
   assert.equal(imagePaths.length, 9);
   assert.equal(new Set(imagePaths).size, 9);
@@ -252,7 +238,7 @@ test("homepage services use a nine-chapter multi-entity scroll story without aut
     "Warehouse operators", "Freight forwarders",
   ]) assert.equal(services.includes(phrase), true);
   assert.equal(services.includes("Different specialists. One connected trade."), true);
-  assert.equal(services.includes("OBAOL connects the handoffs, records, and progress—it does not replace them."), true);
+  assert.equal(services.includes("OBAOL connects the work without replacing the people performing it."), true);
   assert.equal(hero.includes("Open registration—buyers, suppliers, and specialist service partners can join without an invitation."), true);
   assert.equal(homeContent.includes("OBAOL is the technology and coordination platform"), true);
   assert.equal(homeContent.includes("Independent trade participants do the specialist work."), true);

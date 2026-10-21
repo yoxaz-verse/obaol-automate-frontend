@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import StateDisplay from "@/components/ui/StateDisplay";
 
 const join = (...values: Array<string | undefined | false>) => values.filter(Boolean).join(" ");
 
@@ -66,12 +67,7 @@ export function DashboardEmptyState({
   className?: string;
 }) {
   return (
-    <DashboardPanel className={join("flex flex-col items-center px-5 py-10 text-center", className)}>
-      {icon && <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-obaol-500/20 bg-obaol-500/10 text-obaol-600 dark:text-obaol-300">{icon}</div>}
-      <h2 className="dashboard-section-title">{title}</h2>
-      {description && <p className="mt-2 max-w-xl text-sm leading-6 db-muted">{description}</p>}
-      {action && <div className="mt-5">{action}</div>}
-    </DashboardPanel>
+    <StateDisplay title={title} description={description} icon={icon} action={action} className={className} />
   );
 }
 

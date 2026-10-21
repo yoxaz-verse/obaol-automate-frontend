@@ -47,3 +47,19 @@ Initial correctness baseline: frontend 20 tests passed, main backend 88 tests pa
 - Frontend: 25/25 unit tests and 32/32 mobile Playwright checks passed after aligning a stale auth assertion with the existing chooser UI. Chart tiles now defer their chart modules; no additional `/dashboard` route-size decrease was measured in this batch.
 - Backend: 90/90 tests passed, including the new index regression tests. Developer API: 8/8 contract test groups passed, including MCP tool names, transport authentication, and calculator permissions.
 - API infrastructure smoke: the initial 200-request run returned 40% errors because the existing global limiter allows 120/min, not because of server exceptions. With the corrected default, `/health` returned 0% errors over 50 requests at concurrency 20, p95 14.3 ms on a local loopback run. This is not a substitute for authenticated read-path load testing against a representative dataset.
+
+## Shared-foundation batch (2026-10-21)
+
+- Before changes: 479 source files, 94,837 lines, 1,892 `any` references, 60 console calls, 268 client components, and 40 files over 500 lines.
+- Scope: consolidate reusable headers and empty/error/loading presentation, remove Framer Motion from the generic empty state, and migrate reports, commercial documents, quality-lab directory/execution, catalog additions, and function preview.
+- Compatibility: existing `PageHeader` action props remain supported; no routes, APIs, permissions, persisted data, or specialized workflow behavior are changed.
+- After changes: 481 source files, 94,900 lines, 1,892 `any` references, 60 console calls, 266 client components, and 40 files over 500 lines. The two new source files are shared state primitives; client components decreased by two.
+- Type-check, 214/214 unit tests, production build, and asset audit pass. The bundle audit still fails on pre-existing over-budget routes (`/`, users, catalog, profile, map, and verification); none of those route implementations were changed by this batch. The build also retains existing lint warnings outside the migrated files.
+
+## Deferred-client batch (2026-10-21)
+
+- Scope: mount only the selected user-management tab, defer catalog creation and product/rate workflows until requested, load WebAuthn at registration time, defer map filters, and replace presentation-only Framer Motion usage in verification, catalog transitions, and the public footer.
+- Route gzip changes from the pre-batch audit: `/` 197.2 KB to 156.8 KB, users 275 KB to 172.3 KB, catalog 505.1 KB to 278.4 KB, profile 461.9 KB to 458 KB, map 391.6 KB to 176.6 KB, and verification 542.2 KB to 154.5 KB.
+- All configured route budgets pass. The largest saving comes from keeping the 4,517-line variant-rate workflow out of the catalog directory's initial bundle while preserving it behind product selection.
+- After changes: 482 source files, 94,777 lines, 1,893 `any` references, 60 console calls, 266 client components, and 40 files over 500 lines. The additional source file is a reusable deferred add-modal boundary; client-component and large-file counts did not increase.
+- Type-check, 219/219 unit tests, production build, bundle audit, and asset audit pass. The build retains pre-existing lint and accessibility warnings outside the changed boundaries.

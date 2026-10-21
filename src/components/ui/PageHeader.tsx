@@ -9,6 +9,10 @@ export type PageHeaderProps = {
   breadcrumbs?: Array<{ label: string; href?: string }>;
   primaryAction?: { label: string; href: string };
   secondaryAction?: ReactNode;
+  actions?: ReactNode;
+  variant?: "panel" | "plain";
+  eyebrowTone?: "brand" | "success" | "warning" | "danger";
+  className?: string;
 };
 
 export default function PageHeader({
@@ -18,9 +22,19 @@ export default function PageHeader({
   breadcrumbs = [],
   primaryAction,
   secondaryAction,
+  actions,
+  variant = "panel",
+  eyebrowTone = "brand",
+  className,
 }: PageHeaderProps) {
-  return (
-    <DashboardPanel className="mb-6 p-5 md:p-7" feature>
+  const eyebrowToneClass = {
+    brand: "text-obaol-700 dark:text-obaol-300",
+    success: "text-success-500",
+    warning: "text-warning",
+    danger: "text-danger-500",
+  }[eyebrowTone];
+  const content = (
+    <>
       {breadcrumbs.length > 0 && (
         <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-xs db-muted">
           {breadcrumbs.map((item, index) => (
@@ -33,21 +47,27 @@ export default function PageHeader({
       )}
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0 max-w-3xl">
-          {eyebrow && <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300">{eyebrow}</p>}
+          {eyebrow && <p className={`mb-2 text-xs font-bold uppercase tracking-[0.16em] ${eyebrowToneClass}`}>{eyebrow}</p>}
           <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{title}</h1>
           {description && <p className="mt-2 max-w-2xl text-sm leading-6 db-muted md:text-base">{description}</p>}
         </div>
-        {(primaryAction || secondaryAction) && (
+        {(actions || primaryAction || secondaryAction) && (
           <div className="flex flex-wrap items-center gap-3">
-            {secondaryAction}
+            {actions ?? secondaryAction}
             {primaryAction && (
-              <Link href={primaryAction.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-5 py-2.5 text-sm font-bold text-obaol-950 hover:bg-obaol-400">
+              <Link href={primaryAction.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-5 py-2.5 text-sm font-bold text-obaol-950 outline-none transition hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2">
                 {primaryAction.label}
               </Link>
             )}
           </div>
         )}
       </div>
-    </DashboardPanel>
+    </>
   );
+
+  if (variant === "plain") {
+    return <header className={className}>{content}</header>;
+  }
+
+  return <DashboardPanel className={["mb-6 p-5 md:p-7", className].filter(Boolean).join(" ")} feature>{content}</DashboardPanel>;
 }

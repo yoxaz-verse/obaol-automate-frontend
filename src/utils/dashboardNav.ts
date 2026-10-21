@@ -8,6 +8,7 @@ import {
   isDashboardRouteActive,
   hasWarehouseWorkspaceAccess,
   isWarehouseDashboardPath,
+  getDashboardRouteLabel,
 } from "@/utils/dashboardAccess";
 import { getCapabilityActionLinks } from "@/utils/companyFunctionPreview";
 import type { ResolvedSidebarPage } from "@/types/sidebarGovernance";
@@ -82,9 +83,11 @@ export const getRoleFilteredSidebarOptions = (
   const allowedLinks = new Set(
     getAccessibleDashboardRoutes({ role, capabilities }).map((route) => route.path)
   );
-  return sidebarOptions.filter((option) => allowedLinks.has(option.link) && (
-    normalizeDashboardRole(role) !== "associate" || !governedPages || getGovernedRouteStatus(governedPages, option.link) !== "HIDDEN"
-  ));
+  return sidebarOptions
+    .filter((option) => allowedLinks.has(option.link) && (
+      normalizeDashboardRole(role) !== "associate" || !governedPages || getGovernedRouteStatus(governedPages, option.link) !== "HIDDEN"
+    ))
+    .map((option) => ({ ...option, name: getDashboardRouteLabel(option.link, role) }));
 };
 
 export const getDashboardSidebarSections = (
@@ -256,11 +259,12 @@ export const getDashboardBottomNavigation = ({
     const paths = Array.from(new Set([...preferred, ...governedLive])).filter((path) => (
       path === "/dashboard" || !governedPages || getGovernedRouteStatus(governedPages, path) === "LIVE"
     ));
-    return paths.map((path) => routeMap.get(path)).filter(Boolean).slice(0, 4);
+    return paths.map((path) => routeMap.get(path)).filter(Boolean).map((route) => route ? ({ ...route, label: getDashboardRouteLabel(route.path, role) }) : route).slice(0, 4);
   }
   return routes
     .filter((route) => route.mobilePriority)
     .sort((a, b) => Number(a.mobilePriority) - Number(b.mobilePriority))
+    .map((route) => ({ ...route, label: getDashboardRouteLabel(route.path, role) }))
     .slice(0, 4);
 };
 

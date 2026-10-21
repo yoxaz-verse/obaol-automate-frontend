@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useContext } from "react";
 import { usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
-import { getDashboardRoute } from "@/utils/dashboardAccess";
+import { getDashboardRoute, getDashboardRouteLabel } from "@/utils/dashboardAccess";
 import { deriveExperienceContext } from "@/utils/experienceContext";
 
 export default function DashboardContextBar() {
@@ -35,7 +35,7 @@ export default function DashboardContextBar() {
             <span aria-hidden="true">/</span>
           </>
         )}
-        <span className="truncate font-semibold text-foreground" aria-current="page">{route.label}</span>
+        <span className="truncate font-semibold text-foreground" aria-current="page">{getDashboardRouteLabel(route.path, user?.role)}</span>
       </nav>
       <div className="flex items-center gap-3">
         <span className="rounded-full bg-obaol-500/10 px-2.5 py-1 font-semibold text-obaol-700 dark:text-obaol-300">{roleLabel}</span>

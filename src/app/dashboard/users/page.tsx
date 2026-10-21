@@ -4,11 +4,19 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { Tabs, Tab } from "@nextui-org/react";
-import CustomerSupportAgents from "@/components/dashboard/Users/customer-support-agents";
+
+const CustomerSupportAgents = dynamic(
+  () => import("@/components/dashboard/Users/customer-support-agents"),
+  { loading: () => <UserPanelPlaceholder /> }
+);
 
 const UserTabContent = dynamic(() => import("@/components/dashboard/Users/user-tab-content"), {
-  loading: () => <div className="min-h-[360px] rounded-2xl border border-default-200 bg-content1/70" />,
+  loading: () => <UserPanelPlaceholder />,
 });
+
+function UserPanelPlaceholder() {
+  return <div className="min-h-[360px] animate-pulse rounded-2xl border border-default-200 bg-content1/70 motion-reduce:animate-none" role="status" aria-label="Loading users" />;
+}
 
 const USER_TABLES = [
   { key: "customerSupport", title: "Customer Support" },
@@ -43,7 +51,11 @@ export default function Page() {
             {USER_TABLES.map((table) => (
               <Tab key={table.key} title={table.title}>
                 {/* Render UserTabContent for the current table */}
-                {table.key === "customerSupport" ? <CustomerSupportAgents /> : <UserTabContent currentTable={table.key} />}
+                {table.key === currentTable
+                  ? table.key === "customerSupport"
+                    ? <CustomerSupportAgents />
+                    : <UserTabContent currentTable={table.key} />
+                  : null}
               </Tab>
             ))}
           </Tabs>

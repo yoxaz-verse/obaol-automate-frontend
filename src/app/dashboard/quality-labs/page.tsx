@@ -2,7 +2,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, CardBody, Chip, Input, Pagination, Spinner, Switch } from "@nextui-org/react";
+import { Button, Card, CardBody, Chip, Input, Pagination, Switch } from "@nextui-org/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FiGrid, FiMail, FiMap, FiMapPin, FiPhone, FiSearch, FiSliders } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
@@ -15,6 +15,10 @@ import { showToastMessage } from "@/utils/utils";
 import type { CountryOption, LabOption, LabProfile } from "@/types/labProfile";
 import { optionName, whatsappHref } from "@/types/labProfile";
 import { trackLabContact } from "@/utils/labContact";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
+import ErrorState from "@/components/ui/ErrorState";
+import LoadingState from "@/components/ui/LoadingState";
 
 const QualityLabsMap = dynamic(() => import("@/components/Labs/QualityLabsMap"), { ssr: false });
 type Filters = { search: string; state: string; city: string; source: string[]; physicalCountryIds: string[]; destinationCountryIds: string[]; commodityIds: string[]; qualityClassifications: string[]; testIds: string[]; parameterIds: string[]; accreditationIds: string[]; verifiedOnly: boolean; latitude: string; longitude: string; radiusKm: string[] };
@@ -52,7 +56,7 @@ export default function QualityLabsPage() {
   const searchable = (label: string, options: SearchableOption[], value: string[], onChange: (value: string[]) => void, props: any = {}) => <SearchableSelect label={label} options={options} value={value} onChange={onChange} {...props} />;
 
   return <section className="min-h-screen bg-background p-4 text-foreground md:p-8"><div className="mx-auto max-w-[1500px] space-y-6">
-    <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.3em] text-success-500">Quality network</p><h1 className="mt-2 text-3xl font-black">Quality Testing Labs</h1><p className="mt-2 max-w-2xl text-sm text-default-500">Find laboratories by physical location, export-market acceptance, product coverage, tests, and verified credentials.</p></div>{canManage ? <Button color="success" startContent={<LuPlus />} onPress={() => router.push("/dashboard/quality-labs/my")}>Manage My Lab</Button> : null}</header>
+    <PageHeader variant="plain" eyebrowTone="success" eyebrow="Quality network" title="Quality Testing Labs" description="Find laboratories by physical location, export-market acceptance, product coverage, tests, and verified credentials." actions={canManage ? <Button color="success" startContent={<LuPlus />} onPress={() => router.push("/dashboard/quality-labs/my")}>Manage My Lab</Button> : null} />
     <Card className="border border-default-200 shadow-sm"><CardBody className="gap-6 p-5 md:p-6">
       <div className="flex items-center justify-between"><div className="flex items-center gap-2"><FiSliders className="text-success-500" /><div><h2 className="font-bold">Filter laboratory network</h2><p className="text-xs text-default-500">Leave filters empty to explore every published lab.</p></div></div>{activeEntries.length ? <Chip color="success" variant="flat">{activeEntries.length} active</Chip> : null}</div>
       <div><h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-default-500">Lab location</h3><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"><Input label="Lab name or location" labelPlacement="outside" placeholder="Search by name, city, or address" value={filters.search} onValueChange={(value) => set("search", value)} startContent={<FiSearch />} variant="bordered" classNames={{ inputWrapper: "h-12" }} />{searchable("Physical country", countries.map(option), filters.physicalCountryIds, (value) => set("physicalCountryIds", value))}<Input label="State / region" labelPlacement="outside" placeholder="Enter state or region" value={filters.state} onValueChange={(value) => set("state", value)} variant="bordered" classNames={{ inputWrapper: "h-12" }} /><Input label="City / district" labelPlacement="outside" placeholder="Enter city or district" value={filters.city} onValueChange={(value) => set("city", value)} variant="bordered" classNames={{ inputWrapper: "h-12" }} /></div></div>
@@ -68,7 +72,7 @@ export default function QualityLabsPage() {
         <Button size="sm" variant={viewMode === "cards" ? "solid" : "light"} color={viewMode === "cards" ? "success" : "default"} startContent={<FiGrid />} aria-pressed={viewMode === "cards"} onPress={() => setViewMode("cards")}>Card view</Button>
       </div>
     </div>
-    {query.isLoading ? <div className="flex justify-center py-24"><Spinner color="success" /></div> : query.isError ? <Card><CardBody className="py-16 text-center text-danger">Unable to load the laboratory directory.</CardBody></Card> : !(payload.meta?.total || 0) ? <Card><CardBody className="py-16 text-center"><h3 className="font-bold">{activeEntries.length ? "No labs match these filters" : "No published labs are available yet"}</h3><p className="mt-2 text-sm text-default-500">{activeEntries.length ? "Remove one or more filters and try again." : "Published laboratories will appear here once available."}</p></CardBody></Card> : <>
+    {query.isLoading ? <LoadingState title="Loading laboratory network" message="Finding published labs and their testing capabilities." /> : query.isError ? <ErrorState title="Unable to load the laboratory directory" onRetry={() => query.refetch()} /> : !(payload.meta?.total || 0) ? <EmptyState title={activeEntries.length ? "No labs match these filters" : "No published labs are available yet"} message={activeEntries.length ? "Remove one or more filters and try again." : "Published laboratories will appear here once available."} /> : <>
       {viewMode === "map" ? <>
         <div className="h-[520px] overflow-hidden rounded-2xl border border-default-200 shadow-sm"><QualityLabsMap center={[20.5937, 78.9629]} zoom={5} searchPoint={applied.latitude && applied.longitude ? { latitude: Number(applied.latitude), longitude: Number(applied.longitude), label: "Search center" } : null} labs={markers} /></div>
         {labs.some((lab) => !Number.isFinite(Number(lab.published?.location?.latitude)) || !Number.isFinite(Number(lab.published?.location?.longitude))) ? <p className="text-xs text-default-500">Some labs do not have map coordinates and are available in Card view.</p> : null}

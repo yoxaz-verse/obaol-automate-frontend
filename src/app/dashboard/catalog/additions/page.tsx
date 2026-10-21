@@ -8,6 +8,10 @@ import { deleteDataBody, getData, patchData, postData } from "@/core/api/apiHand
 import { catalogModerationRoutes } from "@/core/api/apiRoutes";
 import { fetchCatalogHierarchyOptions, type CatalogHierarchyOption } from "@/utils/catalogHierarchy";
 import { showToastMessage } from "@/utils/utils";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
+import LoadingState from "@/components/ui/LoadingState";
+import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
 
 type EntityType = "category" | "subCategory" | "product" | "productVariant";
 const TYPES: Array<{ key: EntityType; label: string; parent?: EntityType; parentField?: string }> = [
@@ -64,13 +68,10 @@ export default function CatalogAdditionsPage() {
   });
   const startEdit = (row: any) => { setEditing(row); setType(row.entityType); setName(row.name || ""); setDescription(row.description || ""); setCategoryId(String(row.hierarchy?.category?._id || row.category || "")); setSubCategoryId(String(row.hierarchy?.subCategory?._id || row.subCategory || "")); setParentId(String(row.product || "")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
-  return <main className="w-full p-6 md:p-10 space-y-7">
-    <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-      <div><p className="text-xs font-bold uppercase tracking-[0.25em] text-warning">Private catalog builder</p><h1 className="mt-2 text-3xl font-black">My Catalog Additions</h1><p className="mt-2 max-w-3xl text-sm text-default-500">Build categories, products, and variants privately. Your live rates remain private until the complete hierarchy is approved.</p></div>
-      <Button as={Link} href="/dashboard/product" variant="flat">Return to trade listings</Button>
-    </div>
-    <section className="rounded-2xl border border-default-200 bg-content1 p-5 space-y-4">
-      <h2 className="text-lg font-bold">{editing ? `Edit ${editing.name}` : "Add a directory item"}</h2>
+  return <DashboardPage className="w-full space-y-7 p-6 md:p-10">
+    <PageHeader variant="plain" eyebrowTone="warning" eyebrow="Private catalog builder" title="My Catalog Additions" description="Build categories, products, and variants privately. Your live rates remain private until the complete hierarchy is approved." actions={<Button as={Link} href="/dashboard/product" variant="flat">Return to trade listings</Button>} />
+    <DashboardPanel className="space-y-4 p-5">
+      <DashboardSectionHeader title={editing ? `Edit ${editing.name}` : "Add a directory item"} />
       <div className="grid gap-3 md:grid-cols-2">
         <Select label="Item type" selectedKeys={[type]} isDisabled={Boolean(editing)} onSelectionChange={(keys) => { setType(String(Array.from(keys)[0]) as EntityType); setParentId(""); setCategoryId(""); setSubCategoryId(""); }}>{TYPES.map((item) => <SelectItem key={item.key}>{item.label}</SelectItem>)}</Select>
         {type !== "category" && <Select label="Parent category" selectedKeys={categoryId ? [categoryId] : []} onSelectionChange={(keys) => { const id = String(Array.from(keys)[0] || ""); setCategoryId(id); setSubCategoryId(""); setParentId(type === "subCategory" ? id : ""); }}>{(categories.data || []).map((item: CatalogHierarchyOption) => <SelectItem key={item.id}>{item.name}{item.approvalStatus !== "APPROVED" ? ` · ${item.approvalStatus.replaceAll("_", " ")}` : ""}</SelectItem>)}</Select>}
@@ -80,10 +81,10 @@ export default function CatalogAdditionsPage() {
         <Textarea label="Description" value={description} onValueChange={setDescription} />
       </div>
       <div className="flex justify-end gap-2">{editing && <Button variant="light" onPress={() => { setEditing(null); setName(""); setDescription(""); setParentId(""); }}>Cancel</Button>}<Button color="warning" isLoading={save.isPending} isDisabled={!name.trim() || Boolean(definition.parent && !parentId)} onPress={() => save.mutate()}>{editing ? "Save changes" : "Save draft"}</Button></div>
-    </section>
+    </DashboardPanel>
     <section className="space-y-3">
-      <div className="flex items-center justify-between"><h2 className="text-xl font-bold">Your hierarchy</h2><span className="text-sm text-default-500">{rows.length} additions</span></div>
-      {mine.isLoading ? <p className="rounded-2xl bg-content1 p-8 text-center text-default-500">Loading your additions…</p> : rows.length === 0 ? <p className="rounded-2xl border border-dashed border-default-300 p-10 text-center text-default-500">No private catalog additions yet.</p> : rows.map((row: any) => {
+      <DashboardSectionHeader title="Your hierarchy" action={<span className="text-sm text-default-500">{rows.length} additions</span>} />
+      {mine.isLoading ? <LoadingState compact title="Loading your additions" /> : rows.length === 0 ? <EmptyState title="No private catalog additions yet" message="Add a directory item above to begin building your private hierarchy." /> : rows.map((row: any) => {
         const status = String(row.approvalStatus || "APPROVED"); const locked = status === "APPROVED";
         const path = [row.hierarchy?.category?.name, row.hierarchy?.subCategory?.name, row.hierarchy?.product?.name, row.hierarchy?.productVariant?.name].filter(Boolean).join(" › ");
         return <article key={`${row.entityType}-${row._id}`} className="rounded-2xl border border-default-200 bg-content1 p-4">
@@ -92,5 +93,5 @@ export default function CatalogAdditionsPage() {
         </article>;
       })}
     </section>
-  </main>;
+  </DashboardPage>;
 }

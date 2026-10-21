@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { MdEmail } from "react-icons/md";
 import { FaLinkedin, FaArrowRight } from "react-icons/fa";
 import { FiArrowUp } from "react-icons/fi";
@@ -15,24 +14,6 @@ export default function Footer() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        staggerChildren: 0.1,
-        duration: 0.8,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
     <footer className="relative bg-background border-t border-white/[0.05] pt-24 pb-12 overflow-hidden z-0">
       {/* DECORATIVE BACKGROUND ELEMENTS */}
@@ -42,14 +23,9 @@ export default function Footer() {
 
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 public-layout-container">
-        <motion.div
-          variants={containerVariants}
-          initial="visible"
-          animate="visible"
-          className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8"
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8">
           {/* BRAND SECTION */}
-          <motion.div variants={itemVariants} className="lg:col-span-5 flex flex-col items-start">
+          <div className="lg:col-span-5 flex flex-col items-start">
             <Link href="/" className="group">
               <h3 className="flex items-center gap-2 text-3xl font-bold tracking-[-0.025em] text-foreground">
                 OBAOL <span className="bg-gradient-to-r from-obaol-700 to-obaol-500 bg-clip-text text-transparent dark:from-obaol-200 dark:to-obaol-500">Supreme</span>
@@ -95,12 +71,12 @@ export default function Footer() {
                 </a>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* LINKS GRID */}
           <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-12">
             {/* PLATFORM */}
-            <motion.div variants={itemVariants}>
+            <div>
               <h4 className="mb-8 text-sm font-bold uppercase tracking-[0.2em] text-foreground">Platform</h4>
               <ul className="flex flex-col gap-4">
                 {[
@@ -120,10 +96,10 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
 
             {/* RESOURCES */}
-            <motion.div variants={itemVariants}>
+            <div>
               <h4 className="mb-8 text-sm font-bold uppercase tracking-[0.2em] text-foreground">Resources</h4>
               <ul className="flex flex-col gap-4">
                 {[
@@ -141,10 +117,10 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
 
             {/* LEGAL */}
-            <motion.div variants={itemVariants} className="col-span-2 md:col-span-1">
+            <div className="col-span-2 md:col-span-1">
               <h4 className="mb-8 text-sm font-bold uppercase tracking-[0.2em] text-foreground">Legal</h4>
               <ul className="flex flex-col gap-4">
                 {[
@@ -161,29 +137,19 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* GIANT FOREGROUND TEXT */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="mt-24 w-full flex justify-center items-center overflow-hidden"
-        >
+        <div className="mt-24 w-full flex justify-center items-center overflow-hidden">
           <p aria-hidden="true" className="whitespace-nowrap text-[clamp(2.5rem,11vw,140px)] font-bold leading-none tracking-[-0.035em] text-foreground">
             OBAOL Supreme
           </p>
-        </motion.div>
+        </div>
 
         {/* BOTTOM SECTION */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="mt-24 pt-12 border-t border-white/[0.05] flex flex-col md:flex-row items-center justify-between gap-8"
-        >
+        <div className="mt-24 pt-12 border-t border-white/[0.05] flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex flex-col items-center md:items-start gap-2">
             <p className="text-xs text-default-500 font-medium">
               © {new Date().getFullYear()} OBAOL Supreme. All rights reserved.
@@ -207,7 +173,7 @@ export default function Footer() {
           <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] hidden md:block">
             Architected for Execution.
           </p>
-        </motion.div>
+        </div>
       </div>
     </footer>
   );

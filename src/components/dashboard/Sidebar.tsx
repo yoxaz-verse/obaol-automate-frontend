@@ -48,6 +48,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         user?.soughtCapabilities || [],
         governedPages,
     );
+    type NavigationRow = { kind: "group" | "section"; label: string; links: string[] };
+    const navigationRows = sidebarSections.flatMap<NavigationRow>((section) => section.groups
+        ? section.groups.map((group) => ({
+            kind: "group",
+            label: group.label,
+            links: group.links,
+        }))
+        : [{
+            kind: "section",
+            label: section.label,
+            links: section.links,
+        }]);
     const activeNavigationGroup = sidebarSections
         .flatMap((section) => section.groups || [])
         .find((group) => group.links.some((link) => isDashboardRouteActive(pathname, link)));
@@ -216,7 +228,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             </div>
 
             {/* Navigation Array */}
-            <div className="flex-1 min-h-0 px-4 space-y-6 overflow-y-auto overscroll-contain no-scrollbar pb-10">
+            <div className="flex-1 min-h-0 px-4 space-y-0.5 overflow-y-auto overscroll-contain no-scrollbar pb-10">
                 {isOnboardingLocked && !isCollapsed && (
                     <div className="mx-2 mb-2 rounded-xl border border-obaol-500/20 bg-obaol-500/10 px-3 py-2">
                         <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
@@ -224,41 +236,43 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                         </p>
                     </div>
                 )}
-                {sidebarSections.map((section, idx) => {
-                    const sectionOptions = section.links.map(l => optionMap.get(l)).filter(Boolean) as typeof filteredOptions;
-                    if (sectionOptions.length === 0) return null;
+                {navigationRows.map((row, idx) => {
+                    const rowOptions = row.links.map((link) => optionMap.get(link)).filter(Boolean) as typeof filteredOptions;
+                    if (rowOptions.length === 0) return null;
+
+                    if (row.kind === "group" && !isCollapsed) {
+                        const isOpen = openNavigationGroup === row.label;
+                        const hasActiveLink = row.links.some((link) => isDashboardRouteActive(pathname, link));
+                        return (
+                            <div key={row.label} className="space-y-0.5">
+                                <button
+                                    type="button"
+                                    aria-expanded={isOpen}
+                                    onClick={() => setOpenNavigationGroup(isOpen ? null : row.label)}
+                                    className={`w-full h-9 px-3 flex items-center justify-between rounded-xl text-[9px] font-black uppercase tracking-[0.18em] transition-colors ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300" : "text-default-400 hover:text-foreground hover:db-inset"}`}
+                                >
+                                    <span className="truncate">{row.label}</span>
+                                    <FiChevronDown size={13} className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                                </button>
+                                {isOpen && (
+                                    <div className="space-y-0.5 border-l border-default-200/70 dark:border-white/10 ml-3 pl-1">
+                                        {rowOptions.map((opt) => renderOption(opt, true))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
 
                     return (
-                        <div key={section.label || idx} className="space-y-2">
-                            {!isCollapsed && section.label && (
+                        <div key={`${row.label}-${idx}`} className={`${isCollapsed ? "" : "pt-5"} space-y-2`}>
+                            {!isCollapsed && row.label && (
                                 <div className="px-3 flex items-center gap-3">
-                                    <span className="text-[10px] font-semibold text-default-500 uppercase tracking-[0.12em]">{section.label}</span>
+                                    <span className="text-[10px] font-semibold text-default-500 uppercase tracking-[0.12em]">{row.label}</span>
                                     <div className="flex-1 h-[1px] bg-gradient-to-r from-default-200 dark:from-white/5 to-transparent" />
                                 </div>
                             )}
                             <div className="space-y-0.5">
-                                {!isCollapsed && section.groups ? section.groups.map((group) => {
-                                    const isOpen = openNavigationGroup === group.label;
-                                    const hasActiveLink = group.links.some((link) => isDashboardRouteActive(pathname, link));
-                                    return (
-                                        <div key={group.label} className="space-y-0.5">
-                                            <button
-                                                type="button"
-                                                aria-expanded={isOpen}
-                                                onClick={() => setOpenNavigationGroup(isOpen ? null : group.label)}
-                                                className={`w-full h-9 px-3 flex items-center justify-between rounded-xl text-[9px] font-black uppercase tracking-[0.18em] transition-colors ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300" : "text-default-400 hover:text-foreground hover:db-inset"}`}
-                                            >
-                                                <span className="truncate">{group.label}</span>
-                                                <FiChevronDown size={13} className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                                            </button>
-                                            {isOpen && (
-                                                <div className="space-y-0.5 border-l border-default-200/70 dark:border-white/10 ml-3 pl-1">
-                                                    {group.links.map((link) => optionMap.get(link)).filter(Boolean).map((opt) => renderOption(opt!, true))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                }) : sectionOptions.map((opt) => renderOption(opt))}
+                                {rowOptions.map((opt) => renderOption(opt))}
                             </div>
                         </div>
                     );

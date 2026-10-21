@@ -101,7 +101,7 @@ export const sidebarOptions = [
     link: "/dashboard/imports",
   },
   { name: "My Import Listings", icon: <LuShip />, link: "/dashboard/imports/my-listings" },
-  { name: "My Reservations", icon: <FiClipboard />, link: "/dashboard/imports/reservations" },
+  { name: "Import Reservations", icon: <FiClipboard />, link: "/dashboard/imports/reservations" },
   {
     name: "Commodity Directory", //Translate
     icon: <GiBookAura />,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useMemo, useState } from "react";
-import { Button, Card, CardBody, Checkbox, CheckboxGroup, Input, Spinner } from "@nextui-org/react";
+import { Button, Card, CardBody, Checkbox, CheckboxGroup, Input } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { LuChevronDown, LuChevronUp, LuInfo, LuSearch } from "react-icons/lu";
 import AuthContext from "@/context/AuthContext";
@@ -10,6 +10,10 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractList } from "@/core/data/queryUtils";
 import CompanyFunctionComponent from "@/components/dashboard/CompanyFunctionComponent";
 import { filterCanonicalPreviewFunctions, getPreviewDefinition, normalizePreviewFunctionSlug } from "@/utils/companyFunctionPreview";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
+import ErrorState from "@/components/ui/ErrorState";
+import LoadingState from "@/components/ui/LoadingState";
 
 type FunctionRow = { _id: string; slug: string; name: string };
 
@@ -67,16 +71,18 @@ export default function FunctionPreviewPage() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+    <div className="space-y-6">
+      <PageHeader variant="plain" title="Function preview" description="Choose, arrange, and preview the actions currently available for each company function." />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
       <aside>
         <Card className="rounded-2xl border border-default-200 shadow-sm lg:sticky lg:top-6">
           <CardBody className="space-y-5 p-5">
-            <div><h1 className="text-xl font-bold">Select functions</h1><p className="mt-1 text-sm text-default-500">Choose and arrange the functions you want to preview.</p></div>
+            <div><h2 className="text-xl font-bold">Select functions</h2><p className="mt-1 text-sm text-default-500">Choose and arrange the functions you want to preview.</p></div>
             <Input aria-label="Search functions" placeholder="Search functions" value={search} onValueChange={setSearch} startContent={<LuSearch className="text-default-400" />} variant="bordered" />
             {functionsQuery.isLoading ? (
-              <div className="flex items-center justify-center py-12"><Spinner label="Loading functions" /></div>
+              <LoadingState compact title="Loading functions" className="border-0" />
             ) : functionsQuery.isError ? (
-              <div className="rounded-xl bg-danger-50 p-4 text-sm text-danger-700">Functions could not be loaded. Try refreshing the page.</div>
+              <ErrorState title="Functions could not be loaded" message="Try refreshing the page." onRetry={() => functionsQuery.refetch()} compact />
             ) : (
               <CheckboxGroup value={selected} onValueChange={(values) => setSelected(values as string[])} className="gap-2">
                 {filteredFunctions.map((fn) => {
@@ -102,7 +108,7 @@ export default function FunctionPreviewPage() {
       </aside>
 
       <main className="space-y-5 pb-16">
-        <div><h2 className="text-2xl font-bold">Function preview</h2><p className="mt-1 text-sm text-default-500">Each function shows only actions that are currently available in OBAOL.</p></div>
+        <div><h2 className="text-2xl font-bold">Selected functions</h2><p className="mt-1 text-sm text-default-500">Each function shows only actions that are currently available in OBAOL.</p></div>
         {selectedFunctions.length ? selectedFunctions.map((fn, index) => (
           <CompanyFunctionComponent
             key={fn._id}
@@ -113,15 +119,10 @@ export default function FunctionPreviewPage() {
             previewMode
           />
         )) : (
-          <Card className="rounded-2xl border border-dashed border-default-300 shadow-none">
-            <CardBody className="items-center py-16 text-center">
-              <h3 className="font-semibold">No functions selected</h3>
-              <p className="mt-2 max-w-md text-sm text-default-500">Select one or more functions from the list to see the actions available for each role.</p>
-              <Button className="mt-5" color="primary" variant="flat" onPress={() => setSelected(functions.slice(0, 3).map((fn) => String(fn._id)))}>Select first three</Button>
-            </CardBody>
-          </Card>
+          <EmptyState title="No functions selected" message="Select one or more functions from the list to see the actions available for each role." action={<Button color="primary" variant="flat" onPress={() => setSelected(functions.slice(0, 3).map((fn) => String(fn._id)))}>Select first three</Button>} />
         )}
       </main>
+      </div>
     </div>
   );
 }

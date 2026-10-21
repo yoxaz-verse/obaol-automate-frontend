@@ -77,7 +77,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
 
   { path: "/dashboard/imports", label: "Import Opportunities", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/imports/my-listings", label: "My Import Listings", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/imports/reservations", label: "My Reservations", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
+  { path: "/dashboard/imports/reservations", label: "Import Reservations", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, description: "Review reserved quantities on inbound import opportunities and continue approved reservations to enquiry." },
   { path: "/dashboard/external-orders", label: "External Orders", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/external-orders/new", label: "New external order", section: "Services", roles: ["admin", "associate", "operator", "team"] },
   { path: "/dashboard/execution-enquiries", label: "Execution Panel", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
@@ -217,6 +217,13 @@ export const normalizeDashboardRole = (role: unknown): DashboardRole | null => {
   return null;
 };
 
+export const getDashboardRouteLabel = (path: string, role: unknown) => {
+  if (normalizePath(path) === "/dashboard/imports/reservations") {
+    return normalizeDashboardRole(role) === "associate" ? "My Import Reservations" : "Import Reservations";
+  }
+  return getDashboardRoute(path)?.label || path;
+};
+
 export const WAREHOUSE_CAPABILITY = "warehouse-storage";
 
 export const isWarehouseDashboardPath = (path: string) =>
@@ -276,11 +283,13 @@ export const getAccessibleDashboardRoutes = ({
   role: unknown;
   capabilities?: string[];
 }) => {
-  return DASHBOARD_ROUTE_MANIFEST.filter((route) => {
-    if (!route.nav || !canAccessDashboardRoute({ path: route.path, role })) return false;
-    if (route.hiddenFromAssociateNav && normalizeDashboardRole(role) === "associate") return false;
-    return true;
-  });
+  return DASHBOARD_ROUTE_MANIFEST
+    .filter((route) => {
+      if (!route.nav || !canAccessDashboardRoute({ path: route.path, role })) return false;
+      if (route.hiddenFromAssociateNav && normalizeDashboardRole(role) === "associate") return false;
+      return true;
+    })
+    .map((route) => ({ ...route, label: getDashboardRouteLabel(route.path, role) }));
 };
 
 export const getDashboardAdminGroups = (routes: DashboardRouteDefinition[]) =>

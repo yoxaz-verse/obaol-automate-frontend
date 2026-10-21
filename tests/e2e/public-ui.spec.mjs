@@ -22,13 +22,12 @@ for (const theme of ["light", "dark"]) {
         expect(stageBox.x + stageBox.width).toBeLessThanOrEqual(width + 1);
       }
 
-      const serviceStory = page.locator('[data-service-story="true"]');
-      await serviceStory.scrollIntoViewIfNeeded();
-      await expect(serviceStory).toHaveAttribute("data-service-intro-status", "complete");
-      await expect(serviceStory.locator('[data-service-intro-layer="dream"]')).toHaveCount(0);
-      await expect(serviceStory.getByRole("heading", { name: "Different specialists. One connected trade." })).toBeVisible();
-      await expect(serviceStory.getByText("OBAOL connects the handoffs, records, and progress—it does not replace them.", { exact: false })).toBeVisible();
-      await expect(serviceStory.locator('[data-service-chapter="discovery"]')).toBeVisible();
+      const servicePuzzle = page.locator('[data-service-puzzle="true"]');
+      await servicePuzzle.scrollIntoViewIfNeeded();
+      await expect(servicePuzzle).toHaveAttribute("data-puzzle-assembled", "true");
+      await expect(servicePuzzle.getByRole("heading", { name: "Different specialists. One connected trade." })).toBeVisible();
+      await expect(servicePuzzle.locator('[data-service-piece]')).toHaveCount(9);
+      await expect(servicePuzzle.locator('[data-service-selected="true"]')).toHaveCount(1);
       // The execution workspace is code-split. Scroll its stable server-rendered
       // boundary before asserting the interactive client content.
       await page.locator("#execution-workspace").scrollIntoViewIfNeeded();
@@ -48,7 +47,7 @@ for (const theme of ["light", "dark"]) {
   }
 }
 
-test("service scroll story keeps every chapter synchronized in both directions", async ({ page }) => {
+test("service puzzle reveals every service with accessible selection", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.addInitScript(() => {
@@ -74,29 +73,33 @@ test("service scroll story keeps every chapter synchronized in both directions",
   });
   await page.goto("/");
 
-  const story = page.locator('[data-service-story="true"]');
-  await story.scrollIntoViewIfNeeded();
-  await expect(story).toHaveAttribute("data-service-intro-status", "playing");
-  await expect(story.locator('[data-service-intro-layer="dream"]')).toBeVisible();
-  await expect(story).toHaveAttribute("data-service-intro-status", "complete", { timeout: 5000 });
-  await expect(story.locator('[data-service-intro-layer="dream"]')).toHaveCount(0);
-  const panel = story.locator("[data-active-service]");
-  await expect(panel).toBeVisible();
+  const puzzle = page.locator('[data-service-puzzle="true"]');
+  await puzzle.scrollIntoViewIfNeeded();
+  await expect(puzzle).toHaveAttribute("data-puzzle-assembled", "true");
+  await expect(puzzle.locator('[data-service-piece]')).toHaveCount(9);
 
-  const chapterIds = ["discovery", "sourcing", "documentation", "procurement", "quality", "packaging", "logistics", "warehouse", "freight"];
-  const assertChapter = async (id) => {
-    await story.locator(`[data-service-chapter="${id}"]`).evaluate((element) => element.scrollIntoView({ block: "center" }));
-    await expect(panel).toHaveAttribute("data-active-service", id);
-  };
+  const services = [
+    ["discovery", "Discovery"], ["sourcing", "Sourcing"], ["documentation", "Documentation & Planning"],
+    ["procurement", "Procurement"], ["quality", "Quality Testing"], ["packaging", "Packaging"],
+    ["logistics", "Logistics"], ["warehouse", "Warehouse"], ["freight", "Freight Forwarding"],
+  ];
 
-  for (const id of chapterIds) await assertChapter(id);
-  for (const id of [...chapterIds].reverse()) await assertChapter(id);
-  await assertChapter("warehouse");
-  await assertChapter("documentation");
-  await page.locator('[data-natural-scroll-hero="true"]').scrollIntoViewIfNeeded();
-  await story.scrollIntoViewIfNeeded();
-  await expect(story).toHaveAttribute("data-service-intro-status", "complete");
-  await expect(story.locator('[data-service-intro-layer="dream"]')).toHaveCount(0);
+  for (const [id, title] of services) {
+    const piece = puzzle.locator(`[data-service-piece="${id}"]`);
+    await piece.click();
+    await expect(piece).toHaveAttribute("aria-pressed", "true");
+    await expect(piece).toHaveAttribute("data-service-selected", "true");
+    await expect(piece.getByRole("heading", { name: title })).toBeVisible();
+    await expect(piece.locator('[data-service-partial-image="false"]')).toHaveCount(1);
+    await expect(puzzle.locator('[data-service-selected="true"]')).toHaveCount(1);
+  }
+
+  const sourcing = puzzle.locator('[data-service-piece="sourcing"]');
+  await sourcing.focus();
+  await page.keyboard.press("Enter");
+  await expect(sourcing).toHaveAttribute("aria-pressed", "true");
+  await expect(puzzle.locator('[aria-live="polite"]')).toContainText("Selected service: Sourcing");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test("public navigation supports keyboard dismissal and private styling stays isolated", async ({ page }) => {

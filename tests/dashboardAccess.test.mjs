@@ -13,6 +13,7 @@ import {
   isDashboardRouteActive,
   isWarehouseDashboardPath,
   normalizeDashboardRole,
+  getDashboardRouteLabel,
 } from "../src/utils/dashboardAccess.ts";
 import { DASHBOARD_ADMIN_WORKFLOW_GROUPS } from "../src/utils/adminSidebarGroups.ts";
 
@@ -25,6 +26,18 @@ const collectPages = (directory) => readdirSync(directory, { withFileTypes: true
 test("unknown dashboard routes are denied", () => {
   assert.equal(getDashboardRoute("/dashboard/not-a-real-route"), null);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/not-a-real-route", role: "Admin" }), false);
+});
+
+test("import reservation labels reflect the viewer scope", () => {
+  assert.equal(getDashboardRouteLabel("/dashboard/imports/reservations", "Associate"), "My Import Reservations");
+  for (const role of ["Admin", "Operator", "Team"]) {
+    assert.equal(getDashboardRouteLabel("/dashboard/imports/reservations", role), "Import Reservations");
+  }
+  assert.equal(getDashboardRouteLabel("/dashboard/imports", "Associate"), "Import Opportunities");
+  assert.equal(
+    getAccessibleDashboardRoutes({ role: "Associate" }).find((route) => route.path === "/dashboard/imports/reservations")?.label,
+    "My Import Reservations",
+  );
 });
 
 test("legacy Customer is normalized to an Associate without capability gating", () => {

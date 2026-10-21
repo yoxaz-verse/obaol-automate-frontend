@@ -134,21 +134,29 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('className="hidden border-y border-default-200/70 bg-default-50/55 py-7 dark:bg-default-50/[0.025] md:block lg:py-8"'), true);
   assert.equal(explorer.includes('data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="mt-'), false);
   assert.equal(explorer.includes("data-execution-stage-group={phase.phase.toLowerCase()}"), true);
-  assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), true);
+  assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), false);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-depth-scene="true"'), true);
-  assert.equal(explorer.includes('data-hero-segmented-artwork="true"'), true);
-  for (const layer of ["origin", "prepare", "move"]) {
+  assert.equal(explorer.includes('data-hero-layered-artwork="true"'), true);
+  assert.equal(explorer.includes('data-hero-segmented-artwork="true"'), false);
+  for (const layer of ["background", "logistics", "operations", "commodities"]) {
     assert.equal(explorer.includes(`data-hero-depth-layer="${layer}"`), true);
+    assert.equal(explorer.includes(`/images/hero-layers/${layer}.webp`), true);
   }
-  for (const obsoleteLayer of ["back", "middle", "front"]) {
+  for (const obsoleteLayer of ["back", "middle", "front", "origin", "prepare", "move"]) {
     assert.equal(explorer.includes(`data-hero-depth-layer="${obsoleteLayer}"`), false);
   }
-  assert.equal(explorer.match(/src="\/images\/hero-agro-execution-art-v2\.webp"/g)?.length, 3);
+  assert.equal(explorer.includes("grid-cols-[0.86fr_1.18fr_0.92fr]"), false);
+  assert.equal(explorer.includes("rounded-l-["), false);
+  assert.equal(explorer.includes("border border-white"), false);
+  assert.equal(explorer.includes('data-hero-parallax={parallaxEnabled ? "active" : "static"}'), true);
+  assert.equal(explorer.includes("useScroll"), true);
+  assert.equal(explorer.includes("useTransform"), true);
+  assert.equal(explorer.includes("adaptiveMotion.allowDecorativeMotion"), true);
   assert.equal(explorer.includes('role="img"'), true);
   assert.equal(explorer.includes("farm sourcing through preparation and onward to delivery"), true);
-  assert.equal(explorer.match(/alt=""/g)?.length, 3);
-  assert.equal(explorer.includes("inkArtworkMaskStyle"), false);
+  assert.equal(explorer.match(/alt=""/g)?.length, 4);
+  assert.equal(explorer.includes("inkArtworkMaskStyle"), true);
   assert.equal(explorer.includes("A shared path for every trade role"), true);
   assert.equal(explorer.includes("10 connected stages"), true);
   assert.equal(explorer.includes("Complete trade execution"), false);
@@ -191,6 +199,12 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   }
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.webp", import.meta.url))), true);
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-art-v2.webp", import.meta.url))), true);
+  for (const layer of ["background", "logistics", "operations", "commodities"]) {
+    const layerPath = fileURLToPath(new URL(`../public/images/hero-layers/${layer}.webp`, import.meta.url));
+    assert.equal(existsSync(layerPath), true);
+    const layerBytes = readFileSync(layerPath);
+    if (layer !== "background") assert.equal(layerBytes.includes(Buffer.from("ALPH")), true, `${layer} should preserve transparency`);
+  }
 });
 
 test("homepage services use a mobile puzzle and desktop synchronized chapter story", () => {

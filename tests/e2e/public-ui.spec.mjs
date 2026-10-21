@@ -59,18 +59,16 @@ for (const theme of ["light", "dark"]) {
       expect(previewBox.x).toBeGreaterThanOrEqual(0);
       expect(previewBox.x + previewBox.width).toBeLessThanOrEqual(width + 1);
       await expect(page.locator('[data-perspective-card="true"]')).toHaveCount(3);
-      const segmentedArtwork = page.locator('[data-hero-segmented-artwork="true"]');
-      await expect(segmentedArtwork).toHaveAttribute("role", "img");
-      await expect(segmentedArtwork.locator('[data-hero-depth-layer]')).toHaveCount(3);
-      for (const layer of ["origin", "prepare", "move"]) {
-        await expect(segmentedArtwork.locator(`[data-hero-depth-layer="${layer}"]`)).toBeVisible();
+      const layeredArtwork = page.locator('[data-hero-layered-artwork="true"]');
+      await expect(layeredArtwork).toHaveAttribute("role", "img");
+      await expect(page.locator('[data-hero-depth-scene="true"]')).toHaveAttribute("data-hero-parallax", "static");
+      await expect(layeredArtwork.locator('[data-hero-depth-layer]')).toHaveCount(4);
+      for (const layer of ["background", "logistics", "operations", "commodities"]) {
+        await expect(layeredArtwork.locator(`[data-hero-depth-layer="${layer}"]`)).toBeVisible();
       }
-      const artworkBox = await segmentedArtwork.boundingBox();
-      const layerBoxes = await Promise.all(["origin", "prepare", "move"].map((layer) => segmentedArtwork.locator(`[data-hero-depth-layer="${layer}"]`).boundingBox()));
+      const artworkBox = await layeredArtwork.boundingBox();
       expect(artworkBox.x).toBeGreaterThanOrEqual(0);
       expect(artworkBox.x + artworkBox.width).toBeLessThanOrEqual(width + 1);
-      expect(layerBoxes[0].x + layerBoxes[0].width).toBeLessThan(layerBoxes[1].x);
-      expect(layerBoxes[1].x + layerBoxes[1].width).toBeLessThan(layerBoxes[2].x);
       const hierarchyIsCorrect = await page.evaluate(() => {
         const workspace = document.querySelector("#capability-explorer");
         const stages = document.querySelector('[data-execution-stage-band="true"]');
@@ -136,6 +134,34 @@ test("service puzzle reveals every service with accessible selection", async ({ 
   await expect(sourcing).toHaveAttribute("aria-pressed", "true");
   await expect(puzzle.locator('[aria-live="polite"]')).toContainText("Selected service: Sourcing");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("desktop hero uses distinct restrained object-layer parallax", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    const nativeMatchMedia = window.matchMedia.bind(window);
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: (query) => {
+        if (query.includes("hover: none") || query.includes("pointer: coarse") || query.includes("update: slow")) {
+          return { matches: false, media: query, onchange: null, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent() { return true; } };
+        }
+        return nativeMatchMedia(query);
+      },
+    });
+  });
+  await page.goto("/");
+
+  const scene = page.locator('[data-hero-depth-scene="true"]');
+  await expect(scene).toHaveAttribute("data-hero-parallax", "active");
+  const layers = ["logistics", "operations", "commodities"];
+  const before = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
+  await page.evaluate(() => window.scrollTo({ top: 500, behavior: "instant" }));
+  await page.waitForTimeout(120);
+  const after = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
+  expect(after).not.toEqual(before);
+  expect(new Set(after).size).toBe(3);
 });
 
 test("desktop service story synchronizes in both scroll directions", async ({ page }) => {

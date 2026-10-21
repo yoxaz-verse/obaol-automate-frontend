@@ -1,4 +1,10 @@
+"use client";
+
 import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+import { inkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
+import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 export type HeroStage = {
   id: string;
@@ -17,58 +23,71 @@ const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"
 ];
 
 export default function HeroStageExplorer() {
+  const sceneRef = useRef<HTMLElement>(null);
+  const adaptiveMotion = useAdaptiveMotion();
+  const { scrollYProgress } = useScroll({ target: sceneRef, offset: ["start end", "end start"] });
+  const logisticsY = useTransform(scrollYProgress, [0, 1], [2, -2]);
+  const operationsY = useTransform(scrollYProgress, [0, 1], [4, -4]);
+  const commoditiesY = useTransform(scrollYProgress, [0, 1], [6, -6]);
+  const parallaxEnabled = adaptiveMotion.allowDecorativeMotion;
+
   return (
-    <div data-hero-panel="execution-map" data-hero-depth-scene="true" className="relative min-w-0 px-1 py-5 sm:px-4 lg:py-8 [perspective:1200px]">
+    <div data-hero-panel="execution-map" data-hero-depth-scene="true" data-hero-parallax={parallaxEnabled ? "active" : "static"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:py-8">
       <h2 className="sr-only">Connected Indian agro trade operations</h2>
       <div className="pointer-events-none absolute inset-[16%_8%_10%] rounded-full bg-obaol-400/12 blur-3xl dark:bg-obaol-400/[0.08]" />
       <figure
-        data-hero-segmented-artwork="true"
+        ref={sceneRef}
+        data-hero-layered-artwork="true"
         data-hero-lifecycle-visual="true"
         role="img"
         aria-label="Watercolor illustration of connected Indian agro trade operations moving from farm sourcing through preparation and onward to delivery"
-        className="relative grid aspect-[16/9] grid-cols-[0.86fr_1.18fr_0.92fr] items-stretch gap-1.5 sm:gap-2.5 lg:gap-3.5 [transform-style:preserve-3d]"
+        className="relative aspect-[1672/941] w-full"
       >
-        <div data-hero-depth-layer="origin" aria-hidden="true" className="relative my-[7%] overflow-hidden rounded-l-[1.4rem] rounded-r-lg border border-white/60 bg-content1 shadow-[0_18px_30px_-22px_rgba(15,23,42,0.48)] [transform:translate3d(0,8px,-14px)_rotateY(2deg)] sm:rounded-l-[1.75rem] dark:border-white/15">
+        <div data-hero-depth-layer="background" aria-hidden="true" data-ink-artwork-mask="true" style={inkArtworkMaskStyle} className="absolute inset-0">
           <Image
-            src="/images/hero-agro-execution-art-v2.webp"
+            src="/images/hero-layers/background.webp"
             alt=""
             aria-hidden="true"
             fill
             priority
-            sizes="(max-width: 1023px) 30vw, 18vw"
-            className="object-cover contrast-[1.02] saturate-[0.98] dark:brightness-[0.8] dark:saturate-[0.9]"
-            style={{ objectPosition: "16% center" }}
+            sizes="(max-width: 1023px) 100vw, 58vw"
+            className="object-contain contrast-[1.01] saturate-[0.98] dark:brightness-[0.8] dark:saturate-[0.9]"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-black/[0.08]" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-obaol-500/[0.04]" />
         </div>
-        <div data-hero-depth-layer="prepare" aria-hidden="true" className="relative my-[1.5%] overflow-hidden rounded-xl border border-white/70 bg-content1 shadow-[0_28px_44px_-27px_rgba(15,23,42,0.62)] [transform:translateZ(22px)] sm:rounded-[1.4rem] dark:border-white/20">
+        <motion.div data-hero-depth-layer="logistics" aria-hidden="true" style={{ y: parallaxEnabled ? logisticsY : 0 }} className="absolute inset-0 z-10 will-change-transform [filter:drop-shadow(0_4px_5px_rgba(15,23,42,0.08))]">
           <Image
-            src="/images/hero-agro-execution-art-v2.webp"
+            src="/images/hero-layers/logistics.webp"
             alt=""
             aria-hidden="true"
             fill
             priority
-            sizes="(max-width: 1023px) 40vw, 24vw"
-            className="object-cover contrast-[1.03] saturate-[1.02] dark:brightness-[0.82] dark:saturate-[0.92]"
-            style={{ objectPosition: "52% center" }}
+            sizes="(max-width: 1023px) 100vw, 58vw"
+            className="object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/14 via-transparent to-obaol-500/[0.08]" />
-          <div className="pointer-events-none absolute inset-y-[8%] left-0 w-px bg-white/70 dark:bg-white/25" />
-          <div className="pointer-events-none absolute inset-y-[8%] right-0 w-px bg-black/10 dark:bg-white/10" />
-        </div>
-        <div data-hero-depth-layer="move" aria-hidden="true" className="relative my-[5%] overflow-hidden rounded-l-lg rounded-r-[1.4rem] border border-white/60 bg-content1 shadow-[0_20px_34px_-24px_rgba(15,23,42,0.52)] [transform:translate3d(0,5px,-8px)_rotateY(-2deg)] sm:rounded-r-[1.75rem] dark:border-white/15">
+        </motion.div>
+        <motion.div data-hero-depth-layer="operations" aria-hidden="true" style={{ y: parallaxEnabled ? operationsY : 0 }} className="absolute inset-0 z-20 will-change-transform [filter:drop-shadow(0_5px_7px_rgba(15,23,42,0.1))]">
           <Image
-            src="/images/hero-agro-execution-art-v2.webp"
+            src="/images/hero-layers/operations.webp"
             alt=""
             aria-hidden="true"
             fill
             priority
-            sizes="(max-width: 1023px) 32vw, 19vw"
-            className="object-cover contrast-[1.02] saturate-[0.98] dark:brightness-[0.8] dark:saturate-[0.9]"
-            style={{ objectPosition: "87% center" }}
+            sizes="(max-width: 1023px) 100vw, 58vw"
+            className="object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-l from-obaol-500/[0.08] via-transparent to-black/[0.08]" />
-        </div>
+        </motion.div>
+        <motion.div data-hero-depth-layer="commodities" aria-hidden="true" style={{ y: parallaxEnabled ? commoditiesY : 0 }} className="absolute inset-0 z-30 will-change-transform [filter:drop-shadow(0_7px_9px_rgba(15,23,42,0.12))]">
+          <Image
+            src="/images/hero-layers/commodities.webp"
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="(max-width: 1023px) 100vw, 58vw"
+            className="object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
+          />
+        </motion.div>
       </figure>
     </div>
   );

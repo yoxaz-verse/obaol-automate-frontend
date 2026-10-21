@@ -33,3 +33,31 @@ test("bidding workspace fixes the seller page and buyer page to separate modes",
   assert.match(page, /maxListboxHeight=\{224\}/);
   assert.match(buyerPage, /fixedMode="buyer"/);
 });
+
+test("buying request catalog pickers use controlled debounced server search", () => {
+  assert.match(page, /useDebouncedValue\(productSearch\.trim\(\), 300\)/);
+  assert.match(page, /useDebouncedValue\(variantSearch\.trim\(\), 300\)/);
+  assert.match(page, /queryKey: \["bidding-products", debouncedProductSearch\]/);
+  assert.match(page, /queryKey: \["bidding-product-variants", draft\.product, debouncedVariantSearch\]/);
+  assert.match(page, /search: debouncedProductSearch/);
+  assert.match(page, /product: draft\.product/);
+  assert.match(page, /search: debouncedVariantSearch/);
+  assert.match(page, /inputValue=\{productSearch\}/);
+  assert.match(page, /inputValue=\{variantSearch\}/);
+  assert.match(page, /clearProductSelection\(\)/);
+  assert.match(page, /variantInputRef\.current\?\.blur\(\)/);
+  assert.match(page, /productInputRef\.current\?\.blur\(\)/);
+  assert.match(page, /allowsCustomValue=\{false\}/);
+});
+
+test("buying request modal exposes useful catalog states and flat surfaces", () => {
+  assert.match(page, /Searching products\.\.\./);
+  assert.match(page, /Unable to load products\./);
+  assert.match(page, /No matching products found/);
+  assert.match(page, /Searching variants\.\.\./);
+  assert.match(page, /Unable to load variants\./);
+  assert.match(page, /No matching variants found/);
+  assert.match(page, /backdrop="opaque"/);
+  assert.match(page, /base: "border border-default-200 bg-content1 shadow-none/);
+  assert.match(page, /content: "border border-default-200 bg-content1 shadow-none/);
+});

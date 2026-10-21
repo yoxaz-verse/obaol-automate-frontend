@@ -1,10 +1,11 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, CardBody, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Spinner, Switch, Textarea } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import { FiArrowLeft, FiArrowRight, FiCheck, FiCopy, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
+import dynamic from "next/dynamic";
+import { FiArrowLeft, FiArrowRight, FiCheck, FiCopy, FiMapPin, FiNavigation, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { getData, postData, putData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
@@ -21,6 +22,30 @@ const emptyProfile = (): LabSnapshot => ({ ...EMPTY, credentials: [], productCap
 const emptyCredential = (): LabCredential => ({ accreditationId: "", issuer: "", credentialNumber: "", validFrom: "", validTo: "", documentUrl: "", verificationStatus: "PENDING" });
 const emptyTemplate = (): LabProductCapabilityTemplate => ({ _id: newId(), name: "", commodityId: "", qualityClassifications: [], testIds: [], parameterIds: [], credentialIds: [], method: "", turnaroundDays: null, sampleRequirements: "", notes: "" });
 const selectionValues = (selection: any) => selection === "all" ? [] : Array.from(selection as Set<React.Key>).map(String);
+const LocationPicker = dynamic(() => import("@/components/Warehouse/WarehouseLocationPicker"), { ssr: false });
+const validLocation = (location?: LabSnapshot["location"]) => Number.isFinite(location?.latitude) && Number.isFinite(location?.longitude) && Number(location?.latitude) >= -90 && Number(location?.latitude) <= 90 && Number(location?.longitude) >= -180 && Number(location?.longitude) <= 180;
+
+const forwardGeocode = async (query: string) => {
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=${encodeURIComponent(query)}`);
+  if (!response.ok) throw new Error("Address search failed");
+  const rows = await response.json();
+  if (!Array.isArray(rows) || !rows.length) return null;
+  return { latitude: Number(rows[0].lat), longitude: Number(rows[0].lon) };
+};
+
+const reverseGeocode = async (latitude: number, longitude: number) => {
+  const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${latitude}&lon=${longitude}`);
+  if (!response.ok) throw new Error("Location lookup failed");
+  const result = await response.json();
+  const address = result?.address || {};
+  return {
+    label: result?.display_name || "Selected laboratory location",
+    street: [address.house_number, address.road || address.pedestrian || address.neighbourhood].filter(Boolean).join(" "),
+    city: address.city || address.town || address.village || address.county || "",
+    state: address.state || address.region || "",
+    country: address.country || "",
+  };
+};
 
 type LabProfileWizardProps = { labId?: string; managedCompanyId?: string; returnTo?: string };
 type CoverageDialog = { open: boolean; mode: "manage" | "copy"; countryId: string };
@@ -44,6 +69,10 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   const [customWhatsappPhone, setCustomWhatsappPhone] = useState("");
   const [revision, setRevision] = useState(1);
   const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(emptyProfile()));
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
+  const [locationBusy, setLocationBusy] = useState(false);
+  const [locationError, setLocationError] = useState("");
+  const locationPanelRef = useRef<HTMLDivElement>(null);
 
   const companiesQuery = useQuery({ queryKey: ["lab-admin-companies"], queryFn: async () => { const response: any = await getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 500, sort: "name:asc" }); const root = response?.data?.data; return Array.isArray(root?.data) ? root.data : Array.isArray(root) ? root : []; }, enabled: isAdmin });
   const taxonomyQuery = useQuery({ queryKey: ["lab-taxonomy"], queryFn: async () => (await getData(apiRoutes.labProfiles.taxonomy)).data.data });
@@ -57,6 +86,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
       setProfile(emptyProfile());
       setWhatsappSameAsPrimary(true);
       setCustomWhatsappPhone("");
+      setLocationConfirmed(false);
       return;
     }
     const savedWhatsapp = String(draft.whatsappPhone || "");
@@ -72,6 +102,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
       countryAssignments: (draft.countryAssignments || []).map((assignment: LabCountryAssignment) => ({ ...assignment, countryId: optionId(assignment.countryId), productTemplateIds: (assignment.productTemplateIds || []).map(String) })),
     };
     setProfile(normalized);
+    setLocationConfirmed(validLocation(normalized.location));
     setSavedSnapshot(JSON.stringify(normalized));
   }, [draftQuery.data, draftQuery.isSuccess]);
 
@@ -89,6 +120,8 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
     setWhatsappSameAsPrimary(true);
     setCustomWhatsappPhone("");
     setStep(0);
+    setLocationConfirmed(false);
+    setLocationError("");
   };
 
   const items: LabOption[] = taxonomyQuery.data?.items || [];
@@ -103,6 +136,50 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   };
   const usageCount = (templateId: string) => profile.countryAssignments.filter((assignment) => assignment.productTemplateIds.includes(templateId)).length;
   const setField = (field: keyof LabSnapshot, value: any) => setProfile((current) => ({ ...current, [field]: value }));
+  const setAddressField = (field: "physicalCountryId" | "state" | "city" | "address", value: any) => {
+    setField(field, value);
+    if (validLocation(profile.location)) setLocationConfirmed(false);
+  };
+  const focusLocation = () => requestAnimationFrame(() => locationPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
+  const applyLocation = async (latitude: number, longitude: number) => {
+    if (!validLocation({ latitude, longitude })) {
+      setLocationError("Choose a valid point on the map.");
+      return;
+    }
+    setLocationBusy(true);
+    setLocationError("");
+    try {
+      const details = await reverseGeocode(latitude, longitude);
+      const matchedCountry = countries.find((country) => country.name.localeCompare(details.country, undefined, { sensitivity: "base" }) === 0);
+      setProfile((current) => ({ ...current, physicalCountryId: optionId(current.physicalCountryId) || matchedCountry?._id || "", state: current.state || details.state, city: current.city || details.city, address: current.address || details.street, location: { latitude, longitude, label: details.label } }));
+    } catch {
+      setProfile((current) => ({ ...current, location: { latitude, longitude, label: "Selected laboratory location" } }));
+      setLocationError("The coordinates were saved, but the address could not be resolved automatically.");
+    } finally {
+      setLocationConfirmed(true);
+      setLocationBusy(false);
+    }
+  };
+  const findAddressOnMap = async () => {
+    const query = [profile.address, profile.city, profile.state, countryName(optionId(profile.physicalCountryId))].filter(Boolean).join(", ");
+    if (!query) return setLocationError("Enter the physical address before searching the map.");
+    setLocationBusy(true);
+    setLocationError("");
+    try {
+      const result = await forwardGeocode(query);
+      if (!result || !validLocation(result)) throw new Error("not found");
+      await applyLocation(result.latitude, result.longitude);
+    } catch {
+      setLocationError("We could not find that address. Check the address or select the location directly on the map.");
+      setLocationBusy(false);
+    }
+  };
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) return setLocationError("Current location is not supported by this browser.");
+    setLocationBusy(true);
+    setLocationError("");
+    navigator.geolocation.getCurrentPosition(({ coords }) => void applyLocation(coords.latitude, coords.longitude), () => { setLocationBusy(false); setLocationError("Location access was unavailable. Allow access or select a point on the map."); }, { enableHighAccuracy: true, timeout: 15000 });
+  };
   const setPrimaryPhone = (value: string) => setProfile((current) => ({ ...current, contactPhone: value, ...(whatsappSameAsPrimary ? { whatsappPhone: value } : {}) }));
   const setWhatsAppMatchesPrimary = (matches: boolean) => {
     setWhatsappSameAsPrimary(matches);
@@ -113,20 +190,21 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   const updateCredential = (index: number, field: keyof LabCredential, value: any) => setField("credentials", profile.credentials.map((credential, i) => i === index ? { ...credential, [field]: value } : credential));
   const updateTemplate = (id: string, field: keyof LabProductCapabilityTemplate, value: any) => setField("productCapabilityTemplates", profile.productCapabilityTemplates.map((template) => template._id === id ? { ...template, [field]: value } : template));
 
+  const profileForSave = () => ({ ...profile, location: locationConfirmed ? profile.location : undefined });
   const save = useMutation({ mutationFn: async () => {
     if (isAdmin && !companyId) throw new Error("Select an associate company before saving.");
     return labId
-      ? putData(apiRoutes.labProfiles.mineDraft(labId), { profile, expectedRevision: revision, ...(companyId ? { companyId } : {}) })
-      : postData(apiRoutes.labProfiles.mine, { profile, ...(companyId ? { companyId } : {}) });
-  }, onSuccess: (response: any) => { const saved = response?.data?.data; setRevision(Number(saved?.revision || revision + 1)); setSavedSnapshot(JSON.stringify(profile)); client.invalidateQueries({ queryKey: ["lab-profile-draft"] }); client.invalidateQueries({ queryKey: ["my-labs"] }); showToastMessage({ type: "success", message: "Lab draft saved." }); if (!labId && saved?._id) router.replace(`/dashboard/quality-labs/my/${saved._id}${companyId ? `?companyId=${companyId}` : ""}`); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to save draft." }) });
+      ? putData(apiRoutes.labProfiles.mineDraft(labId), { profile: profileForSave(), expectedRevision: revision, ...(companyId ? { companyId } : {}) })
+      : postData(apiRoutes.labProfiles.mine, { profile: profileForSave(), ...(companyId ? { companyId } : {}) });
+  }, onSuccess: (response: any) => { const saved = response?.data?.data; const savedProfile = profileForSave(); setProfile(savedProfile); setRevision(Number(saved?.revision || revision + 1)); setSavedSnapshot(JSON.stringify(savedProfile)); client.invalidateQueries({ queryKey: ["lab-profile-draft"] }); client.invalidateQueries({ queryKey: ["my-labs"] }); showToastMessage({ type: "success", message: "Lab draft saved." }); if (!labId && saved?._id) router.replace(`/dashboard/quality-labs/my/${saved._id}${companyId ? `?companyId=${companyId}` : ""}`); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to save draft." }) });
   const submit = useMutation({ mutationFn: async () => {
     if (isAdmin && !companyId) throw new Error("Select an associate company before submitting.");
     if (!labId) {
-      const created: any = await postData(apiRoutes.labProfiles.mine, { profile, ...(companyId ? { companyId } : {}) });
+      const created: any = await postData(apiRoutes.labProfiles.mine, { profile: profileForSave(), ...(companyId ? { companyId } : {}) });
       const row = created?.data?.data;
       return postData(apiRoutes.labProfiles.mineSubmit(row._id), { expectedRevision: row.revision, ...(companyId ? { companyId } : {}) });
     }
-    const saved: any = await putData(apiRoutes.labProfiles.mineDraft(labId), { profile, expectedRevision: revision, ...(companyId ? { companyId } : {}) });
+    const saved: any = await putData(apiRoutes.labProfiles.mineDraft(labId), { profile: profileForSave(), expectedRevision: revision, ...(companyId ? { companyId } : {}) });
     return postData(apiRoutes.labProfiles.mineSubmit(labId), { expectedRevision: saved?.data?.data?.revision, ...(companyId ? { companyId } : {}) });
   }, onSuccess: () => { showToastMessage({ type: "success", message: "Lab profile submitted for review." }); router.push(returnTo); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to submit profile." }) });
 
@@ -158,8 +236,9 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
     } catch (error: any) { showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to add option." }); }
   };
   const validateStep = () => {
-    const invalid = step === 0 ? !profile.displayName.trim() || !profile.contactEmail.trim() || !profile.contactPhone.trim() || !optionId(profile.physicalCountryId) || !profile.address.trim() : step === 1 ? profile.credentials.some((credential) => !optionId(credential.accreditationId) || !credential.issuer.trim() || Boolean(credential.validFrom && credential.validTo && new Date(credential.validTo) < new Date(credential.validFrom))) : step === 2 ? profile.productCapabilityTemplates.some((template) => !optionId(template.commodityId)) : step === 3 ? !profile.countryAssignments.length : false;
-    if (invalid) { setStepErrors((current) => ({ ...current, [step]: true })); showToastMessage({ type: "warning", message: "Complete the required fields before continuing." }); return false; }
+    const locationInvalid = step === 0 && (!validLocation(profile.location) || !locationConfirmed);
+    const invalid = step === 0 ? !profile.displayName.trim() || !profile.contactEmail.trim() || !profile.contactPhone.trim() || !optionId(profile.physicalCountryId) || !profile.address.trim() || locationInvalid : step === 1 ? profile.credentials.some((credential) => !optionId(credential.accreditationId) || !credential.issuer.trim() || Boolean(credential.validFrom && credential.validTo && new Date(credential.validTo) < new Date(credential.validFrom))) : step === 2 ? profile.productCapabilityTemplates.some((template) => !optionId(template.commodityId)) : step === 3 ? !profile.countryAssignments.length : false;
+    if (invalid) { setStepErrors((current) => ({ ...current, [step]: true })); if (locationInvalid) { setLocationError(validLocation(profile.location) ? "Confirm the laboratory location again after changing the address." : "Select the laboratory’s exact location on the map before continuing."); focusLocation(); } showToastMessage({ type: "warning", message: locationInvalid ? "Select and confirm the exact laboratory location." : "Complete the required fields before continuing." }); return false; }
     setStepErrors((current) => ({ ...current, [step]: false })); return true;
   };
   const assignTemplates = () => {
@@ -232,14 +311,19 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   if (taxonomyQuery.isError || (labId && draftQuery.isError)) return statePage(<Card className="border border-danger-200"><CardBody className="items-center gap-3 p-10 text-center"><h2 className="text-xl font-black">Unable to load the lab profile</h2><p className="text-sm text-default-500">The selected company’s panel could not be loaded. Try again before making changes.</p><Button color="danger" variant="flat" onPress={() => { taxonomyQuery.refetch(); if (labId) draftQuery.refetch(); }}>Try again</Button></CardBody></Card>);
   return <section className="min-h-screen bg-background p-4 md:p-8"><div className="mx-auto max-w-6xl space-y-6">
     {header}
-    <div className="grid grid-cols-5 gap-2" aria-label="Lab setup progress">{STEPS.map((name, index) => <button key={name} type="button" onClick={() => setStep(index)} aria-current={step === index ? "step" : undefined} className={`min-h-16 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold leading-4 tracking-normal transition-colors ${step === index ? "border-success-500 bg-success-500/10 text-success-600" : stepErrors[index] ? "border-danger bg-danger-50 text-danger" : index < step ? "border-success-300 bg-success-50 text-success-600" : "border-default-200 text-default-500"}`}><span className="flex items-center justify-between text-[11px] leading-none"><span className="tabular-nums">{String(index + 1).padStart(2, "0")}</span>{index === 1 ? <span className="hidden font-medium text-default-400 sm:inline">Optional</span> : index < step ? <FiCheck aria-label="Completed" /> : null}</span><span className="mt-2 hidden md:block">{name}</span></button>)}</div>
+    <div className="grid grid-cols-5 gap-2" aria-label="Lab setup progress">{STEPS.map((name, index) => <button key={name} type="button" onClick={() => { if (step === 0 && index > 0 && !validateStep()) return; setStep(index); }} aria-current={step === index ? "step" : undefined} className={`min-h-16 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold leading-4 tracking-normal transition-colors ${step === index ? "border-success-500 bg-success-500/10 text-success-600" : stepErrors[index] ? "border-danger bg-danger-50 text-danger" : index < step ? "border-success-300 bg-success-50 text-success-600" : "border-default-200 text-default-500"}`}><span className="flex items-center justify-between text-[11px] leading-none"><span className="tabular-nums">{String(index + 1).padStart(2, "0")}</span>{index === 1 ? <span className="hidden font-medium text-default-400 sm:inline">Optional</span> : index < step ? <FiCheck aria-label="Completed" /> : null}</span><span className="mt-2 hidden md:block">{name}</span></button>)}</div>
     <Card className="border border-default-200"><CardBody className="gap-5 p-5 md:p-8">
       {step === 0 ? <>
         <div className="space-y-1"><h2 className="text-xl font-black leading-tight tracking-tight">Laboratory identity</h2><p className="text-sm leading-6 tracking-normal text-default-500">Provide the public contact and physical location details used in the directory.</p></div>
         <div className="space-y-8">
           <div><h3 className="mb-4 text-sm font-bold leading-5 tracking-normal text-default-600">Laboratory details</h3><div className="grid gap-x-5 gap-y-5 md:grid-cols-2"><Input label="Lab display name" labelPlacement="outside" placeholder="e.g. OBAOL Food Testing Laboratory" isRequired value={profile.displayName} onValueChange={(value) => setField("displayName", value)} classNames={identityFieldClassNames} /><Textarea label="Public summary" labelPlacement="outside" placeholder="Briefly describe the laboratory and its core capabilities" value={profile.summary} onValueChange={(value) => setField("summary", value)} classNames={{ label: identityFieldClassNames.label, input: "text-base leading-6 tracking-normal", inputWrapper: "min-h-24 rounded-xl bg-default-100 px-4 py-3" }} /></div></div>
           <div><h3 className="mb-4 text-sm font-bold leading-5 tracking-normal text-default-600">Contact information</h3><div className="grid gap-x-5 gap-y-5 md:grid-cols-2"><Input label="Contact email" labelPlacement="outside" placeholder="laboratory@example.com" type="email" isRequired value={profile.contactEmail} onValueChange={(value) => setField("contactEmail", value)} classNames={identityFieldClassNames} /><Input label="Primary phone" labelPlacement="outside" placeholder="+91 00000 00000" description="Include the international country code" isRequired value={profile.contactPhone} onValueChange={setPrimaryPhone} classNames={identityFieldClassNames} /><div className="rounded-2xl border border-default-200 bg-default-50/50 p-4 md:col-span-2 md:p-5"><div className="flex min-h-8 items-center"><Switch size="sm" color="success" isSelected={whatsappSameAsPrimary} onValueChange={setWhatsAppMatchesPrimary} classNames={{ base: "max-w-full gap-3", wrapper: "mr-0 shrink-0", label: "text-sm font-semibold leading-5 tracking-normal text-foreground" }}>WhatsApp number is the same as primary phone</Switch></div>{!whatsappSameAsPrimary ? <div className="mt-5 border-t border-default-200 pt-5"><Input label="WhatsApp number" labelPlacement="outside" placeholder="+91 00000 00000" description="Optional · include the international country code" value={profile.whatsappPhone || ""} onValueChange={setWhatsAppPhone} classNames={identityFieldClassNames} /></div> : <p className="mt-2 pl-11 text-xs leading-5 tracking-normal text-default-500">WhatsApp will use {profile.contactPhone || "the primary phone number"}.</p>}</div><Input label="Secondary phone" labelPlacement="outside" placeholder="Optional alternate number" value={profile.contactPhoneSecondary} onValueChange={(value) => setField("contactPhoneSecondary", value)} classNames={identityFieldClassNames} /></div></div>
-          <div><h3 className="mb-4 text-sm font-bold leading-5 tracking-normal text-default-600">Physical address</h3><div className="grid gap-x-5 gap-y-5 md:grid-cols-2"><SearchableSelect label="Physical country" required multiple={false} allowSelectAll={false} options={countries.map((country) => ({ key: country._id, label: country.name }))} value={profile.physicalCountryId ? [optionId(profile.physicalCountryId)] : []} onChange={(values) => setField("physicalCountryId", values[0] || "")} /><Input label="State / region" labelPlacement="outside" placeholder="State or region" value={profile.state} onValueChange={(value) => setField("state", value)} classNames={identityFieldClassNames} /><Input label="City / district" labelPlacement="outside" placeholder="City or district" value={profile.city} onValueChange={(value) => setField("city", value)} classNames={identityFieldClassNames} /><Input label="Street address" labelPlacement="outside" placeholder="Building, street, area and postal code" isRequired value={profile.address} onValueChange={(value) => setField("address", value)} classNames={identityFieldClassNames} /></div></div>
+          <div><h3 className="mb-4 text-sm font-bold leading-5 tracking-normal text-default-600">Physical address</h3><div className="grid gap-x-5 gap-y-5 md:grid-cols-2"><SearchableSelect label="Physical country" required multiple={false} allowSelectAll={false} options={countries.map((country) => ({ key: country._id, label: country.name }))} value={profile.physicalCountryId ? [optionId(profile.physicalCountryId)] : []} onChange={(values) => setAddressField("physicalCountryId", values[0] || "")} /><Input label="State / region" labelPlacement="outside" placeholder="State or region" value={profile.state} onValueChange={(value) => setAddressField("state", value)} classNames={identityFieldClassNames} /><Input label="City / district" labelPlacement="outside" placeholder="City or district" value={profile.city} onValueChange={(value) => setAddressField("city", value)} classNames={identityFieldClassNames} /><Input label="Street address" labelPlacement="outside" placeholder="Building, street, area and postal code" isRequired value={profile.address} onValueChange={(value) => setAddressField("address", value)} classNames={identityFieldClassNames} /></div></div>
+          <div ref={locationPanelRef} className={`overflow-hidden rounded-2xl border bg-content1 ${locationError && (!validLocation(profile.location) || !locationConfirmed) ? "border-danger" : "border-default-200"}`}>
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-default-200 p-5"><div className="flex gap-3"><span className="rounded-xl bg-success-50 p-2.5 text-success-600"><FiMapPin /></span><div><h3 className="font-bold leading-5">Exact laboratory location <span className="text-danger">*</span></h3><p className="mt-1 text-sm leading-5 text-default-500">Search the address or click the map to place the laboratory marker.</p></div></div><div className="flex flex-wrap gap-2"><Button size="sm" variant="bordered" isLoading={locationBusy} startContent={<FiSearch />} onPress={findAddressOnMap}>Find address on map</Button><Button size="sm" variant="flat" isDisabled={locationBusy} startContent={<FiNavigation />} onPress={useCurrentLocation}>Use current location</Button></div></div>
+            <LocationPicker value={validLocation(profile.location) ? { latitude: Number(profile.location?.latitude), longitude: Number(profile.location?.longitude) } : null} onChange={({ latitude, longitude }) => void applyLocation(latitude, longitude)} height={300} />
+            <div className="border-t border-default-200 p-4">{validLocation(profile.location) && locationConfirmed ? <div className="flex items-start gap-2 text-sm text-success-700"><FiCheck className="mt-0.5 shrink-0" /><div><b>Location confirmed</b><p className="mt-0.5 text-xs leading-5 text-default-500">{profile.location?.label || "Selected laboratory location"} · {Number(profile.location?.latitude).toFixed(5)}, {Number(profile.location?.longitude).toFixed(5)}</p></div></div> : validLocation(profile.location) ? <p className="text-sm text-warning-600">The address changed. Select the marker again or find the address on the map to confirm it.</p> : <p className="text-sm text-default-500">No map location selected yet.</p>}{locationError ? <p role="alert" className={`mt-2 text-sm ${validLocation(profile.location) && locationConfirmed ? "text-warning-600" : "text-danger"}`}>{locationError}</p> : null}</div>
+          </div>
         </div>
       </> : null}
       {step === 1 ? <><div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-black">Reusable credential library</h2><p className="text-sm text-default-500">Add a certificate or accreditation once and reuse it across product capabilities.</p></div><Button size="sm" variant="flat" startContent={<FiPlus />} onPress={() => openRequest("ACCREDITATION")}>Add accreditation</Button></div>{!profile.credentials.length ? <div className="rounded-xl border border-dashed border-default-300 p-8 text-center"><p className="font-semibold">No credentials added yet</p><p className="mt-1 text-sm text-default-500">Credentials are optional. Only the accreditation type and issuing body are required when you add one.</p></div> : null}{profile.credentials.map((credential, index) => <Card key={credential._id || index} className="border border-default-200"><CardBody className="gap-3"><div className="flex justify-between"><b>Credential {index + 1}</b><Button isIconOnly size="sm" color="danger" variant="light" onPress={() => setField("credentials", profile.credentials.filter((_, i) => i !== index))}><FiTrash2 /></Button></div><div className="grid gap-3 md:grid-cols-2"><SearchableSelect label="Accreditation / certificate" required multiple={false} allowSelectAll={false} options={byKind("ACCREDITATION").map((option) => ({ key: option._id, label: option.name }))} value={credential.accreditationId ? [optionId(credential.accreditationId)] : []} onChange={(values) => updateCredential(index, "accreditationId", values[0] || "")} emptyActionLabel="Add accreditation" onEmptyAction={() => openRequest("ACCREDITATION", { credentialIndex: index })} /><Input label="Issuing body" description="The organization that issued this credential" isRequired value={credential.issuer} onValueChange={(value) => updateCredential(index, "issuer", value)} /><Input label="Credential number (optional)" value={credential.credentialNumber} onValueChange={(value) => updateCredential(index, "credentialNumber", value)} /><Input label="Supporting document (optional)" description="Add a public document URL if available. Credentials without proof remain not verified." type="url" value={credential.documentUrl} onValueChange={(value) => updateCredential(index, "documentUrl", value)} /><Input label="Valid from (optional)" type="date" value={String(credential.validFrom || "").slice(0, 10)} onValueChange={(value) => updateCredential(index, "validFrom", value || null)} /><Input label="Valid to (optional)" type="date" value={String(credential.validTo || "").slice(0, 10)} onValueChange={(value) => updateCredential(index, "validTo", value || null)} /></div></CardBody></Card>)}<Button startContent={<FiPlus />} onPress={() => setField("credentials", [...profile.credentials, emptyCredential()])}>Add credential</Button></> : null}

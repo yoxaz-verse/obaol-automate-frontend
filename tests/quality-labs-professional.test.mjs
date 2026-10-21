@@ -68,6 +68,12 @@ test("wizard uses searchable fields and direct taxonomy creation", async () => {
   assert.doesNotMatch(source, /Countries to manage/);
   assert.doesNotMatch(source, /Configured source country/);
   assert.doesNotMatch(source, /<Accordion/);
+  assert.match(source, /Exact laboratory location/);
+  assert.match(source, /Find address on map/);
+  assert.match(source, /Use current location/);
+  assert.match(source, /locationConfirmed/);
+  assert.match(source, /Select the laboratory’s exact location on the map before continuing/);
+  assert.match(source, /location: locationConfirmed \? profile\.location : undefined/);
 });
 
 test("admin selects a company before viewing or changing its shared lab panel", async () => {

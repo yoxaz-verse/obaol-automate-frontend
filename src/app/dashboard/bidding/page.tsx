@@ -38,6 +38,7 @@ import AuthContext from "@/context/AuthContext";
 import { deleteData, getData, postData, putData } from "@/core/api/apiHandler";
 import { productBiddingRoutes, productRoutes, productVariantRoutes, variantRateRoutes } from "@/core/api/apiRoutes";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 type Mode = "buyer" | "seller";
 type SellerView = "available" | "participating" | "history";
@@ -96,7 +97,13 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   const [createErrors, setCreateErrors] = useState<CreateErrors>({});
   const [offerError, setOfferError] = useState("");
   const [openMode, setOpenMode] = useState<OpenMode>("now");
+  const [productSearch, setProductSearch] = useState("");
+  const [variantSearch, setVariantSearch] = useState("");
+  const debouncedProductSearch = useDebouncedValue(productSearch.trim(), 300);
+  const debouncedVariantSearch = useDebouncedValue(variantSearch.trim(), 300);
   const createErrorRef = useRef<HTMLDivElement>(null);
+  const productInputRef = useRef<HTMLInputElement>(null);
+  const variantInputRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<any>({
     title: "",
     product: "",
@@ -126,14 +133,26 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   });
 
   const productsQuery = useQuery({
-    queryKey: ["bidding-products"],
-    queryFn: async () => (await getData(productRoutes.getAll, { limit: 200 })).data?.data?.data || [],
+    queryKey: ["bidding-products", debouncedProductSearch],
+    queryFn: async () =>
+      (await getData(productRoutes.getAll, {
+        limit: 50,
+        sort: "name:asc",
+        ...(debouncedProductSearch ? { search: debouncedProductSearch } : {}),
+      }, { cacheMode: "bypass" })).data?.data?.data || [],
+    enabled: mode === "buyer" && showCreate,
   });
 
   const productVariantsQuery = useQuery({
-    queryKey: ["bidding-product-variants", draft.product],
-    queryFn: async () => (await getData(productVariantRoutes.getAll, { product: draft.product, limit: 200 })).data?.data?.data || [],
-    enabled: mode === "buyer" && Boolean(draft.product),
+    queryKey: ["bidding-product-variants", draft.product, debouncedVariantSearch],
+    queryFn: async () =>
+      (await getData(productVariantRoutes.getAll, {
+        product: draft.product,
+        limit: 50,
+        sort: "name:asc",
+        ...(debouncedVariantSearch ? { search: debouncedVariantSearch } : {}),
+      }, { cacheMode: "bypass" })).data?.data?.data || [],
+    enabled: mode === "buyer" && showCreate && Boolean(draft.product),
   });
 
   const listingsQuery = useQuery({
@@ -159,6 +178,14 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
       category: p.category?.name || p.subCategory?.name || "",
     }));
   }, [productsQuery.data]);
+
+  const variantOptions = useMemo(
+    () => (productVariantsQuery.data || []).map((variant: any) => ({
+      id: String(variant._id),
+      name: String(variant.name || "Variant"),
+    })),
+    [productVariantsQuery.data]
+  );
 
   const listingOptions = useMemo(() => {
     return matchingListings.map((row: any) => ({
@@ -192,6 +219,8 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
     setOpenMode("now");
     setCreateError("");
     setCreateErrors({});
+    setProductSearch("");
+    setVariantSearch("");
     setDraft({
       title: "", product: "", productVariant: "", quantity: "", unit: "MT",
       specifications: "", deliveryLocation: "", deliveryDate: "", opensAt: "", closesAt: "",
@@ -311,18 +340,70 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
     submitOffer.mutate();
   };
 
+  const clearProductSelection = () => {
+    setDraft((current: any) => ({ ...current, product: "", productVariant: "" }));
+    setVariantSearch("");
+    variantInputRef.current?.blur();
+  };
+
+  const handleProductInputChange = (value: string) => {
+    setProductSearch(value);
+    const selected = productOptions.find((option) => option.id === String(draft.product || ""));
+    if (draft.product && value.trim().toLocaleLowerCase() !== selected?.name.trim().toLocaleLowerCase()) {
+      clearProductSelection();
+    }
+  };
+
+  const handleProductSelection = (key: React.Key | null) => {
+    if (key == null) {
+      if (!productSearch.trim()) clearProductSelection();
+      return;
+    }
+    const selected = productOptions.find((option) => option.id === String(key));
+    if (!selected) return;
+    setDraft((current: any) => ({ ...current, product: selected.id, productVariant: "" }));
+    setProductSearch(selected.name);
+    setVariantSearch("");
+    productInputRef.current?.blur();
+    clearCreateFieldError("product");
+  };
+
+  const handleVariantInputChange = (value: string) => {
+    setVariantSearch(value);
+    const selected = variantOptions.find((option) => option.id === String(draft.productVariant || ""));
+    if (draft.productVariant && value.trim().toLocaleLowerCase() !== selected?.name.trim().toLocaleLowerCase()) {
+      setDraft((current: any) => ({ ...current, productVariant: "" }));
+    }
+  };
+
+  const handleVariantSelection = (key: React.Key | null) => {
+    if (key == null) {
+      if (!variantSearch.trim()) setDraft((current: any) => ({ ...current, productVariant: "" }));
+      return;
+    }
+    const selected = variantOptions.find((option) => option.id === String(key));
+    if (!selected) return;
+    setDraft((current: any) => ({ ...current, productVariant: selected.id }));
+    setVariantSearch(selected.name);
+    variantInputRef.current?.blur();
+    clearCreateFieldError("productVariant");
+  };
+
+  const productSearchPending = productSearch.trim() !== debouncedProductSearch || productsQuery.isFetching;
+  const variantSearchPending = variantSearch.trim() !== debouncedVariantSearch || productVariantsQuery.isFetching;
+
   const themeField = {
     label: "font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-default-500 mb-1",
     inputWrapper:
-      "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[focus=true]:border-warning-500 data-[focus=true]:ring-2 data-[focus=true]:ring-warning-500/20 transition-all border shadow-inner",
+      "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[focus=true]:border-warning-500 data-[focus=true]:ring-2 data-[focus=true]:ring-warning-500/20 transition-all border shadow-none",
     trigger:
-      "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[open=true]:border-warning-500 data-[open=true]:ring-2 data-[open=true]:ring-warning-500/20 transition-all border shadow-inner",
+      "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[open=true]:border-warning-500 data-[open=true]:ring-2 data-[open=true]:ring-warning-500/20 transition-all border shadow-none",
   };
 
   const textareaThemeField = {
     label: "font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-default-500 mb-1",
     inputWrapper:
-      "py-3 rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[focus=true]:border-warning-500 data-[focus=true]:ring-2 data-[focus=true]:ring-warning-500/20 transition-all border shadow-inner",
+      "py-3 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[focus=true]:border-warning-500 data-[focus=true]:ring-2 data-[focus=true]:ring-warning-500/20 transition-all border shadow-none",
   };
 
   const rows = eventsQuery.data || [];
@@ -579,15 +660,15 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
         onOpenChange={(isOpen) => {
           if (!isOpen) {
             setShowCreate(false);
-            setCreateError("");
-            setCreateErrors({});
+            resetCreateForm();
           }
         }}
         size="3xl"
         scrollBehavior="inside"
-        backdrop="blur"
+        backdrop="opaque"
         classNames={{
-          base: "border border-default-200 bg-content1/95 backdrop-blur-2xl shadow-2xl rounded-2xl sm:rounded-3xl",
+          backdrop: "bg-black/45",
+          base: "border border-default-200 bg-content1 shadow-none rounded-2xl sm:rounded-3xl",
           header: "border-b border-default-100 px-5 py-4 sm:px-7 sm:py-5",
           body: "px-5 py-5 sm:px-7",
           footer: "border-t border-default-100 px-5 py-4 sm:px-7",
@@ -613,7 +694,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                   </div>
                 )}
 
-                <section aria-labelledby="requirement-heading" className="space-y-4 rounded-2xl border border-default-200 bg-default-50/60 p-4 sm:p-5 dark:bg-content2/40">
+                <section aria-labelledby="requirement-heading" className="space-y-4 rounded-2xl border border-default-200 bg-default-50 p-4 sm:p-5 dark:bg-content2">
                   <div>
                     <h3 id="requirement-heading" className="font-bold text-foreground">Requirement</h3>
                     <p className="text-xs text-default-500">Describe what you need without sharing direct contact details.</p>
@@ -634,6 +715,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     startContent={<FiTag className="shrink-0 text-default-400 text-sm" />}
                   />
                   <Autocomplete
+                    ref={productInputRef}
                     id="buying-request-product"
                     label="Product"
                     placeholder="Search and select product"
@@ -642,7 +724,13 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     className="md:col-span-2"
                     items={productOptions}
                     selectedKey={draft.product || null}
-                    onSelectionChange={(key) => { setDraft((prev: any) => ({ ...prev, product: key ? String(key) : "", productVariant: "" })); clearCreateFieldError("product"); }}
+                    inputValue={productSearch}
+                    onInputChange={handleProductInputChange}
+                    onSelectionChange={handleProductSelection}
+                    onOpenChange={(open) => {
+                      if (open) variantInputRef.current?.blur();
+                    }}
+                    allowsCustomValue={false}
                     isInvalid={Boolean(createErrors.product)}
                     errorMessage={createErrors.product}
                     maxListboxHeight={224}
@@ -654,13 +742,22 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                       },
                     }}
                     listboxProps={{
-                      emptyContent: productsQuery.isLoading ? "Loading products..." : "No products found",
+                      emptyContent: productSearchPending
+                        ? "Searching products..."
+                        : productsQuery.isError
+                          ? (
+                            <div className="flex flex-col items-center gap-2 py-2">
+                              <span>Unable to load products.</span>
+                              <Button size="sm" variant="flat" onPress={() => productsQuery.refetch()}>Try again</Button>
+                            </div>
+                          )
+                          : "No matching products found",
                     }}
                     popoverProps={{
                       placement: "bottom-start",
                       shouldFlip: true,
                       classNames: {
-                        content: "border border-default-200 bg-content1 shadow-xl z-[120] max-h-60",
+                        content: "border border-default-200 bg-content1 shadow-none z-[120] max-h-60",
                       },
                     }}
                   >
@@ -674,6 +771,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     )}
                   </Autocomplete>
                   <Autocomplete
+                    ref={variantInputRef}
                     id="buying-request-productVariant"
                     label="Variant / Grade"
                     placeholder={draft.product ? "Search and select variant" : "Select a product first"}
@@ -681,16 +779,37 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     isRequired
                     isDisabled={!draft.product}
                     className="md:col-span-2"
-                    items={(productVariantsQuery.data || []).map((variant: any) => ({ id: String(variant._id), name: String(variant.name || "Variant") }))}
+                    items={variantOptions}
                     selectedKey={draft.productVariant || null}
-                    onSelectionChange={(key) => { setDraft((prev: any) => ({ ...prev, productVariant: key ? String(key) : "" })); clearCreateFieldError("productVariant"); }}
+                    inputValue={variantSearch}
+                    onInputChange={handleVariantInputChange}
+                    onSelectionChange={handleVariantSelection}
+                    onOpenChange={(open) => {
+                      if (open) productInputRef.current?.blur();
+                    }}
+                    allowsCustomValue={false}
                     isInvalid={Boolean(createErrors.productVariant)}
                     errorMessage={createErrors.productVariant}
                     maxListboxHeight={224}
                     startContent={<FiLayers className="shrink-0 text-default-400 text-sm" />}
                     inputProps={{ classNames: { label: themeField.label, inputWrapper: themeField.inputWrapper } }}
-                    listboxProps={{ emptyContent: productVariantsQuery.isLoading ? "Loading variants..." : "No variants found for this product" }}
-                    popoverProps={{ placement: "bottom-start", shouldFlip: true, classNames: { content: "border border-default-200 bg-content1 shadow-xl z-[120] max-h-60" } }}
+                    listboxProps={{
+                      emptyContent: !draft.product
+                        ? "Select a product first"
+                        : variantSearchPending
+                          ? "Searching variants..."
+                          : productVariantsQuery.isError
+                            ? (
+                              <div className="flex flex-col items-center gap-2 py-2">
+                                <span>Unable to load variants.</span>
+                                <Button size="sm" variant="flat" onPress={() => productVariantsQuery.refetch()}>Try again</Button>
+                              </div>
+                            )
+                            : variantSearch.trim()
+                              ? "No matching variants found"
+                              : "No variants found for this product",
+                    }}
+                    popoverProps={{ placement: "bottom-start", shouldFlip: true, classNames: { content: "border border-default-200 bg-content1 shadow-none z-[120] max-h-60" } }}
                   >
                     {(variant: any) => <AutocompleteItem key={variant.id} textValue={variant.name}><span className="text-sm font-semibold text-foreground">{variant.name}</span></AutocompleteItem>}
                   </Autocomplete>

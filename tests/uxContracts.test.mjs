@@ -153,6 +153,9 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("useScroll"), true);
   assert.equal(explorer.includes("useTransform"), true);
   assert.equal(explorer.includes("adaptiveMotion.allowDecorativeMotion"), true);
+  assert.equal(explorer.includes("origin-right scale-[0.62]"), true);
+  assert.equal(explorer.includes("origin-bottom-left scale-[0.88]"), true);
+  assert.equal(explorer.includes("origin-bottom-left scale-[0.58]"), true);
   assert.equal(explorer.includes('role="img"'), true);
   assert.equal(explorer.includes("farm sourcing through preparation and onward to delivery"), true);
   assert.equal(explorer.match(/alt=""/g)?.length, 4);

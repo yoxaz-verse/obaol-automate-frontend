@@ -63,7 +63,7 @@ export default function HeroStageExplorer() {
             fill
             priority
             sizes="(max-width: 1023px) 100vw, 58vw"
-            className="object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
+            className="origin-right scale-[0.62] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
           />
         </motion.div>
         <motion.div data-hero-depth-layer="operations" aria-hidden="true" style={{ y: parallaxEnabled ? operationsY : 0 }} className="absolute inset-0 z-20 will-change-transform [filter:drop-shadow(0_5px_7px_rgba(15,23,42,0.1))]">
@@ -74,7 +74,7 @@ export default function HeroStageExplorer() {
             fill
             priority
             sizes="(max-width: 1023px) 100vw, 58vw"
-            className="object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
+            className="origin-bottom-left scale-[0.88] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
           />
         </motion.div>
         <motion.div data-hero-depth-layer="commodities" aria-hidden="true" style={{ y: parallaxEnabled ? commoditiesY : 0 }} className="absolute inset-0 z-30 will-change-transform [filter:drop-shadow(0_7px_9px_rgba(15,23,42,0.12))]">
@@ -85,7 +85,7 @@ export default function HeroStageExplorer() {
             fill
             priority
             sizes="(max-width: 1023px) 100vw, 58vw"
-            className="object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
+            className="origin-bottom-left scale-[0.58] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
           />
         </motion.div>
       </figure>

@@ -188,6 +188,15 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("Watercolor illustration of connected Indian agro trade operations"), true);
   assert.equal(accents.includes("data-home-parallax-accents={placement}"), true);
   assert.equal(accents.includes("data-parallax-accent={accent.id}"), true);
+  assert.equal(accents.includes("data-accent-depth={accent.depth}"), true);
+  assert.equal(accents.includes("data-accent-size={accent.size}"), true);
+  assert.equal(accents.includes('type AccentDepth = "foreground" | "middle" | "background"'), true);
+  assert.equal(accents.includes('type AccentSize = "small" | "medium" | "large"'), true);
+  assert.equal(accents.includes('/images/home-accents/warehouse-forklift.webp'), true);
+  assert.equal(accents.includes('/images/home-accents/cargo-ship.webp'), true);
+  assert.equal(accents.includes("travel: 38"), true);
+  assert.equal(accents.includes("travel: 26"), true);
+  assert.equal(accents.includes("travel: 20"), true);
   assert.equal(accents.includes('data-accent-motion={enabled ? "active" : "static"}'), true);
   assert.equal(accents.includes('className="pointer-events-none absolute inset-0 z-20 hidden overflow-hidden lg:block"'), true);
   assert.equal(accents.includes("!adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch"), true);
@@ -227,7 +236,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
     const layerBytes = readFileSync(layerPath);
     if (layer !== "background") assert.equal(layerBytes.includes(Buffer.from("ALPH")), true, `${layer} should preserve transparency`);
   }
-  for (const accent of ["commodity-spices", "verification-clipboard", "laboratory-sample", "packaging-sack", "logistics-container"]) {
+  for (const accent of ["commodity-spices", "verification-clipboard", "laboratory-sample", "packaging-sack", "logistics-container", "warehouse-forklift", "cargo-ship"]) {
     const accentPath = fileURLToPath(new URL(`../public/images/home-accents/${accent}.webp`, import.meta.url));
     assert.equal(existsSync(accentPath), true, `${accent} should exist`);
     assert.equal(readFileSync(accentPath).includes(Buffer.from("ALPH")), true, `${accent} should preserve transparency`);

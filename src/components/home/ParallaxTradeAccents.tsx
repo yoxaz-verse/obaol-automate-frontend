@@ -6,6 +6,8 @@ import { useRef } from "react";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 type AccentPlacement = "hero" | "services" | "workspace";
+type AccentDepth = "foreground" | "middle" | "background";
+type AccentSize = "small" | "medium" | "large";
 
 type Accent = {
   id: string;
@@ -13,35 +15,42 @@ type Accent = {
   className: string;
   aspect: string;
   travel: number;
+  xTravel: number;
+  depth: AccentDepth;
+  size: AccentSize;
 };
 
 const accents: Record<AccentPlacement, readonly Accent[]> = {
   hero: [
-    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "bottom-[2%] left-[43%] w-[clamp(6rem,8vw,9rem)] opacity-70", aspect: "aspect-[640/427]", travel: 16 },
-    { id: "verification", src: "/images/home-accents/verification-clipboard.webp", className: "left-[42%] top-[17%] w-[clamp(4.5rem,6vw,7rem)] opacity-55", aspect: "aspect-[640/427]", travel: 10 },
-    { id: "logistics", src: "/images/home-accents/logistics-container.webp", className: "right-[-3%] top-[11%] w-[clamp(7rem,10vw,12rem)] opacity-65", aspect: "aspect-[640/427]", travel: 18 },
+    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "bottom-[1%] left-[42%] w-[clamp(8rem,9vw,11rem)] opacity-70", aspect: "aspect-[640/427]", travel: 38, xTravel: 4, depth: "foreground", size: "small" },
+    { id: "verification", src: "/images/home-accents/verification-clipboard.webp", className: "left-[40%] top-[14%] w-[clamp(7rem,7vw,9rem)] opacity-55", aspect: "aspect-[640/427]", travel: 26, xTravel: -3, depth: "middle", size: "medium" },
+    { id: "logistics", src: "/images/home-accents/logistics-container.webp", className: "right-[-9%] top-[7%] w-[clamp(18rem,20vw,24rem)] opacity-60", aspect: "aspect-[640/427]", travel: 20, xTravel: 3, depth: "background", size: "large" },
   ],
   services: [
-    { id: "laboratory", src: "/images/home-accents/laboratory-sample.webp", className: "left-[-2.5rem] top-[7%] w-[clamp(5rem,7vw,8rem)] opacity-45", aspect: "aspect-[560/518]", travel: 12 },
-    { id: "packaging", src: "/images/home-accents/packaging-sack.webp", className: "bottom-[2%] right-[-2rem] w-[clamp(5rem,7vw,8rem)] opacity-45", aspect: "aspect-[560/525]", travel: 16 },
+    { id: "laboratory", src: "/images/home-accents/laboratory-sample.webp", className: "left-[-2.5rem] top-[7%] w-[clamp(6rem,7vw,8rem)] opacity-45", aspect: "aspect-[560/518]", travel: 34, xTravel: 4, depth: "foreground", size: "small" },
+    { id: "packaging", src: "/images/home-accents/packaging-sack.webp", className: "bottom-[2%] right-[14%] w-[clamp(9rem,10vw,12rem)] opacity-40", aspect: "aspect-[560/525]", travel: 26, xTravel: -3, depth: "middle", size: "medium" },
+    { id: "forklift", src: "/images/home-accents/warehouse-forklift.webp", className: "right-[-5%] top-[34%] w-[clamp(15rem,18vw,20rem)] opacity-48", aspect: "aspect-[720/575]", travel: 20, xTravel: 5, depth: "background", size: "large" },
   ],
   workspace: [
-    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "left-[-2.5rem] top-[12%] w-[clamp(5rem,7vw,8rem)] opacity-40", aspect: "aspect-[640/427]", travel: 10 },
-    { id: "logistics", src: "/images/home-accents/logistics-container.webp", className: "bottom-[4%] right-[-3rem] w-[clamp(6rem,8vw,9rem)] opacity-40", aspect: "aspect-[640/427]", travel: 16 },
+    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "left-[-2.5rem] top-[12%] w-[clamp(7rem,8vw,9rem)] opacity-38", aspect: "aspect-[640/427]", travel: 36, xTravel: 4, depth: "foreground", size: "small" },
+    { id: "cargo-ship", src: "/images/home-accents/cargo-ship.webp", className: "bottom-[1%] right-[-7%] w-[clamp(18rem,23vw,26rem)] opacity-48", aspect: "aspect-[800/451]", travel: 18, xTravel: -5, depth: "background", size: "large" },
   ],
 };
 
 function ParallaxAccent({ accent, placement, progress, enabled }: { accent: Accent; placement: AccentPlacement; progress: MotionValue<number>; enabled: boolean }) {
   const y = useTransform(progress, [0, 1], [accent.travel / 2, accent.travel / -2]);
+  const x = useTransform(progress, [0, 1], [accent.xTravel / -2, accent.xTravel / 2]);
 
   return (
     <motion.div
       data-parallax-accent={accent.id}
       data-accent-placement={placement}
-      style={{ y: enabled ? y : 0 }}
+      data-accent-depth={accent.depth}
+      data-accent-size={accent.size}
+      style={{ x: enabled ? x : 0, y: enabled ? y : 0 }}
       className={`absolute ${accent.aspect} ${accent.className} will-change-transform [filter:drop-shadow(0_10px_12px_rgba(15,23,42,0.12))]`}
     >
-      <Image src={accent.src} alt="" aria-hidden="true" fill sizes="12rem" className="object-contain" />
+      <Image src={accent.src} alt="" aria-hidden="true" fill sizes={accent.size === "large" ? "26rem" : "12rem"} className="object-contain" />
     </motion.div>
   );
 }

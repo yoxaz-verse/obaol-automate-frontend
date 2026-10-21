@@ -63,6 +63,11 @@ for (const theme of ["light", "dark"]) {
       await expect(layeredArtwork).toHaveAttribute("role", "img");
       await expect(page.locator('[data-hero-depth-scene="true"]')).toHaveAttribute("data-hero-parallax", "static");
       await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(3);
+      await expect(page.locator('[data-parallax-accent]')).toHaveCount(8);
+      await expect(page.locator('[data-accent-depth="foreground"]')).toHaveCount(3);
+      await expect(page.locator('[data-accent-depth="middle"]')).toHaveCount(2);
+      await expect(page.locator('[data-accent-depth="background"]')).toHaveCount(3);
+      await expect(page.locator('[data-accent-size="large"]')).toHaveCount(3);
       for (const placement of ["hero", "services", "workspace"]) {
         await expect(page.locator(`[data-home-parallax-accents="${placement}"]`)).toHaveAttribute("data-accent-motion", "static");
       }
@@ -165,6 +170,17 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   await expect(scene).toHaveAttribute("data-hero-parallax", "active");
   await expect(heroAccents).toHaveAttribute("data-accent-motion", "active");
   await expect(heroAccents.locator('[data-parallax-accent]')).toHaveCount(3);
+  const pepper = heroAccents.locator('[data-parallax-accent="commodity"]');
+  const clipboard = heroAccents.locator('[data-parallax-accent="verification"]');
+  const container = heroAccents.locator('[data-parallax-accent="logistics"]');
+  await expect(pepper).toHaveAttribute("data-accent-depth", "foreground");
+  await expect(clipboard).toHaveAttribute("data-accent-depth", "middle");
+  await expect(container).toHaveAttribute("data-accent-depth", "background");
+  const pepperBox = await pepper.boundingBox();
+  const clipboardBox = await clipboard.boundingBox();
+  const containerBox = await container.boundingBox();
+  expect(containerBox.width).toBeGreaterThanOrEqual(pepperBox.width * 2);
+  expect(containerBox.width).toBeGreaterThan(clipboardBox.width);
   const heroBox = await hero.boundingBox();
   const layoutBox = await centeredLayout.boundingBox();
   const artworkBox = await scene.locator('[data-hero-layered-artwork="true"]').boundingBox();
@@ -186,6 +202,17 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   expect(backgroundAfter).toBe(backgroundBefore);
   expect(accentAfter).not.toEqual(accentBefore);
   expect(new Set(accentAfter).size).toBe(3);
+  const accentTravel = (beforeTransform, afterTransform) => {
+    const y = (transform) => {
+      if (transform === "none") return 0;
+      const values = transform.slice(transform.indexOf("(") + 1, -1).split(",").map(Number);
+      return transform.startsWith("matrix3d") ? values[13] : values[5];
+    };
+    return Math.abs(y(afterTransform) - y(beforeTransform));
+  };
+  const travelByAccent = accentBefore.map((transform, index) => accentTravel(transform, accentAfter[index]));
+  expect(travelByAccent[0]).toBeGreaterThan(travelByAccent[1]);
+  expect(travelByAccent[1]).toBeGreaterThan(travelByAccent[2]);
 });
 
 test("centered desktop hero remains contained on a short laptop viewport", async ({ page }) => {

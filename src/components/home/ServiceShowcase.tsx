@@ -34,14 +34,14 @@ const services: readonly ServiceChapter[] = [
 ] as const;
 
 const fragmentLayouts = [
-  "lg:col-span-3 lg:row-span-2",
-  "lg:col-span-2 lg:row-span-1",
-  "lg:col-span-2 lg:row-span-2",
-  "lg:col-span-3 lg:row-span-1",
-  "lg:col-span-2 lg:row-span-1",
-  "lg:col-span-3 lg:row-span-2",
-  "lg:col-span-2 lg:row-span-2",
-  "lg:col-span-3 lg:row-span-1",
+  "col-span-1 row-span-2 lg:col-span-3 lg:row-span-2",
+  "col-span-1 row-span-1 lg:col-span-2 lg:row-span-1",
+  "col-span-1 row-span-1 lg:col-span-2 lg:row-span-2",
+  "col-span-2 row-span-1 lg:col-span-3 lg:row-span-1",
+  "col-span-1 row-span-1 lg:col-span-2 lg:row-span-1",
+  "col-span-1 row-span-2 lg:col-span-3 lg:row-span-2",
+  "col-span-1 row-span-2 lg:col-span-2 lg:row-span-2",
+  "col-span-1 row-span-1 lg:col-span-3 lg:row-span-1",
 ] as const;
 
 const fragmentPositions = ["20% 35%", "72% 30%", "35% 70%", "80% 55%", "18% 68%", "62% 72%", "42% 28%", "84% 76%"] as const;
@@ -67,7 +67,7 @@ export default function ServiceShowcase() {
           <p className="max-w-2xl text-sm font-medium leading-relaxed text-foreground/65 sm:text-base">Select a piece to see how each specialist completes a distinct part of the trade. OBAOL connects the work without replacing the people performing it.</p>
         </div>
 
-        <div data-service-puzzle-grid="true" className="grid grid-flow-dense grid-cols-2 auto-rows-[108px] gap-2.5 sm:auto-rows-[126px] sm:gap-3 lg:grid-cols-12 lg:auto-rows-[112px] lg:gap-4">
+        <div data-service-puzzle-grid="true" data-mobile-layout="irregular" className="grid grid-flow-dense grid-cols-2 auto-rows-[96px] gap-2.5 sm:auto-rows-[118px] sm:gap-3 lg:grid-cols-12 lg:auto-rows-[112px] lg:gap-4">
           {orderedServices.map((service, position) => {
             const serviceIndex = services.findIndex((item) => item.id === service.id);
             const isSelected = serviceIndex === activeIndex;
@@ -75,7 +75,7 @@ export default function ServiceShowcase() {
             const fragmentIndex = Math.max(0, position - 1);
             const pieceClass = isSelected
               ? "col-span-2 row-span-3 sm:row-span-3 lg:col-span-7 lg:row-span-4"
-              : `col-span-1 row-span-1 ${fragmentLayouts[fragmentIndex]}`;
+              : fragmentLayouts[fragmentIndex];
 
             return (
               <motion.button

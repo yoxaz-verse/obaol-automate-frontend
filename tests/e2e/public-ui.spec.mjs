@@ -28,6 +28,12 @@ for (const theme of ["light", "dark"]) {
       await expect(servicePuzzle.getByRole("heading", { name: "Different specialists. One connected trade." })).toBeVisible();
       await expect(servicePuzzle.locator('[data-service-piece]')).toHaveCount(9);
       await expect(servicePuzzle.locator('[data-service-selected="true"]')).toHaveCount(1);
+      if (width === 375) {
+        await expect(servicePuzzle.locator('[data-service-puzzle-grid="true"]')).toHaveAttribute("data-mobile-layout", "irregular");
+        const portraitBox = await servicePuzzle.locator('[data-service-piece="sourcing"]').boundingBox();
+        const compactBox = await servicePuzzle.locator('[data-service-piece="documentation"]').boundingBox();
+        expect(portraitBox.height).toBeGreaterThan(compactBox.height * 1.5);
+      }
       // The execution workspace is code-split. Scroll its stable server-rendered
       // boundary before asserting the interactive client content.
       await page.locator("#execution-workspace").scrollIntoViewIfNeeded();

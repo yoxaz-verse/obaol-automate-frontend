@@ -216,6 +216,9 @@ test("homepage services use a compact nine-piece interactive puzzle", () => {
   assert.equal(services.includes("once: true"), true);
   assert.equal(services.includes("layout={!adaptiveMotion.prefersReducedMotion}"), true);
   assert.equal(services.includes("grid-cols-2"), true);
+  assert.equal(services.includes('data-mobile-layout="irregular"'), true);
+  assert.equal(services.includes('"col-span-1 row-span-2 lg:col-span-3 lg:row-span-2"'), true);
+  assert.equal(services.includes('"col-span-2 row-span-1 lg:col-span-3 lg:row-span-1"'), true);
   assert.equal(services.includes("lg:grid-cols-12"), true);
   assert.equal(services.includes("lg:col-span-7 lg:row-span-4"), true);
   assert.equal(services.includes("fragmentLayouts"), true);

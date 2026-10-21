@@ -38,7 +38,10 @@ for (const theme of ["light", "dark"]) {
         await expect(desktopStory).toBeVisible();
         await expect(desktopStory.locator('[data-service-chapter]')).toHaveCount(9);
         await expect(desktopStory.locator('[data-active-service]')).toBeVisible();
-        await expect(desktopStory.locator('[data-service-depth-layer]')).toHaveCount(3);
+        await expect(desktopStory.locator('[data-service-background-wash="true"]')).toBeVisible();
+        await expect(desktopStory.locator('[data-service-depth-layer]')).toHaveCount(0);
+        await expect(desktopStory.locator('[data-service-overlay-meta="true"]')).toBeVisible();
+        await expect(desktopStory.locator('[data-service-overlay-chapter="true"]')).toBeVisible();
       }
       if (width === 375) {
         await expect(servicePuzzle.locator('[data-service-puzzle-grid="true"]')).toHaveAttribute("data-mobile-layout", "irregular");
@@ -63,9 +66,9 @@ for (const theme of ["light", "dark"]) {
       await expect(layeredArtwork).toHaveAttribute("role", "img");
       await expect(page.locator('[data-hero-depth-scene="true"]')).toHaveAttribute("data-hero-parallax", "static");
       await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(3);
-      await expect(page.locator('[data-parallax-accent]')).toHaveCount(8);
+      await expect(page.locator('[data-parallax-accent]')).toHaveCount(7);
       await expect(page.locator('[data-accent-depth="foreground"]')).toHaveCount(3);
-      await expect(page.locator('[data-accent-depth="middle"]')).toHaveCount(2);
+      await expect(page.locator('[data-accent-depth="middle"]')).toHaveCount(1);
       await expect(page.locator('[data-accent-depth="background"]')).toHaveCount(3);
       await expect(page.locator('[data-accent-size="large"]')).toHaveCount(3);
       for (const placement of ["hero", "services", "workspace"]) {
@@ -169,6 +172,7 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   const heroAccents = hero.locator('[data-home-parallax-accents="hero"]');
   await expect(scene).toHaveAttribute("data-hero-parallax", "active");
   await expect(heroAccents).toHaveAttribute("data-accent-motion", "active");
+  await expect(heroAccents).toHaveAttribute("data-hero-floating-composition", "true");
   await expect(heroAccents.locator('[data-parallax-accent]')).toHaveCount(3);
   const pepper = heroAccents.locator('[data-parallax-accent="commodity"]');
   const clipboard = heroAccents.locator('[data-parallax-accent="verification"]');
@@ -184,10 +188,25 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   const heroBox = await hero.boundingBox();
   const layoutBox = await centeredLayout.boundingBox();
   const artworkBox = await scene.locator('[data-hero-layered-artwork="true"]').boundingBox();
+  const copyBox = await centeredLayout.locator(":scope > div").first().boundingBox();
   expect(heroBox.height).toBeGreaterThanOrEqual(700);
   expect(Math.abs((layoutBox.y + layoutBox.height / 2) - (heroBox.y + heroBox.height / 2))).toBeLessThan(45);
   expect(artworkBox.width).toBeGreaterThan(layoutBox.width * 0.55);
   expect(artworkBox.x + artworkBox.width).toBeGreaterThanOrEqual(1416);
+  expect(clipboardBox.x).toBeLessThan(artworkBox.x + 1);
+  expect(clipboardBox.x + clipboardBox.width).toBeGreaterThan(artworkBox.x);
+  expect(containerBox.x).toBeLessThan(artworkBox.x + artworkBox.width);
+  expect(containerBox.x + containerBox.width).toBeGreaterThan(artworkBox.x + artworkBox.width);
+  expect(pepperBox.y).toBeLessThan(artworkBox.y + artworkBox.height);
+  expect(pepperBox.y + pepperBox.height).toBeGreaterThan(artworkBox.y + artworkBox.height);
+  for (const accentBox of [pepperBox, clipboardBox, containerBox]) {
+    const overlapsCopy = accentBox.x < copyBox.x + copyBox.width && accentBox.x + accentBox.width > copyBox.x
+      && accentBox.y < copyBox.y + copyBox.height && accentBox.y + accentBox.height > copyBox.y;
+    expect(overlapsCopy).toBe(false);
+  }
+  const supportingOpacity = await page.locator('[data-accent-placement="services"], [data-accent-placement="workspace"]').evaluateAll((elements) => elements.map((element) => Number(getComputedStyle(element).opacity)));
+  const heroOpacity = await heroAccents.locator('[data-parallax-accent]').evaluateAll((elements) => elements.map((element) => Number(getComputedStyle(element).opacity)));
+  expect(Math.max(...supportingOpacity)).toBeLessThan(Math.min(...heroOpacity));
   const layers = ["logistics", "operations", "commodities"];
   const accentBefore = await heroAccents.locator('[data-parallax-accent]').evaluateAll((elements) => elements.map((element) => getComputedStyle(element).transform));
   const backgroundBefore = await scene.locator('[data-hero-depth-layer="background"]').evaluate((element) => getComputedStyle(element).transform);
@@ -264,6 +283,12 @@ test("desktop service story synchronizes in both scroll directions", async ({ pa
     await expect(activePanel).toHaveAttribute("data-active-service", id);
   }
   await expect(activePanel.locator('[data-service-artwork-layer="true"]')).toHaveCount(9);
+  const washBox = await activePanel.locator('[data-service-background-wash="true"]').boundingBox();
+  expect(washBox.x).toBeGreaterThanOrEqual(0);
+  expect(washBox.x + washBox.width).toBeLessThanOrEqual(1441);
+  await expect(activePanel.locator('[data-service-overlay-meta="true"]')).toContainText("Indian origin operations");
+  await expect(activePanel.locator('[data-service-overlay-chapter="true"]')).toContainText("Active chapter");
+  await expect(activePanel.locator('[data-service-depth-layer]')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 

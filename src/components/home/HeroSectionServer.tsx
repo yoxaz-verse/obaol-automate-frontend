@@ -1,6 +1,5 @@
 import HeroCTA from "@/components/home/HeroCTA";
 import HeroStageExplorer, { type HeroStage } from "@/components/home/HeroStageExplorer";
-import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
 
 export const HERO_STAGES = [
   { id: "discovery", label: "Discovery", message: "Discover verified products and reliable origin suppliers.", src: "/images/execution-flow/01-discovery.webp", deliverable: "Product Coverage & Origin Sourcing", phase: "Plan" },
@@ -24,8 +23,6 @@ export default function HeroSectionServer() {
         <div className="absolute top-1/3 right-10 h-[400px] w-[400px] rounded-full bg-amber-500/[0.06] blur-[100px] dark:bg-amber-500/10" />
         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-30 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
       </div>
-      <ParallaxTradeAccents placement="hero" />
-
       <div className="public-layout-container relative z-30 mx-auto w-full max-w-[96rem] px-6 sm:px-12">
         <div
           data-hero-centered-layout="true"

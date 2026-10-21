@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { inkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
+import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 export type HeroStage = {
@@ -40,6 +41,7 @@ export default function HeroStageExplorer() {
     <div data-hero-panel="execution-map" data-hero-depth-scene="true" data-hero-parallax={parallaxEnabled ? "active" : "static"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
       <h2 className="sr-only">Connected Indian agro trade operations</h2>
       <div className="pointer-events-none absolute inset-[16%_8%_10%] rounded-full bg-obaol-400/12 blur-3xl dark:bg-obaol-400/[0.08]" />
+      <ParallaxTradeAccents placement="hero" progress={smoothScrollProgress} motionEnabled={parallaxEnabled} />
       <figure
         ref={sceneRef}
         data-hero-layered-artwork="true"

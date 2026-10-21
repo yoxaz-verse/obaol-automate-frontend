@@ -133,7 +133,8 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(hero.includes("lg:min-h-[clamp(36rem,calc(100svh-6rem),50rem)]"), true);
   assert.equal(hero.includes("max-w-[90rem]"), true);
   assert.equal(hero.includes("lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
-  assert.equal(hero.includes('<ParallaxTradeAccents placement="hero" />'), true);
+  assert.equal(hero.includes('<ParallaxTradeAccents placement="hero" />'), false);
+  assert.equal(explorer.includes('<ParallaxTradeAccents placement="hero" progress={smoothScrollProgress} motionEnabled={parallaxEnabled} />'), true);
   assert.equal(heroCta.includes("pt-5 lg:pt-6"), true);
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
   assert.equal(explorer.includes("lg:px-0 lg:py-0"), true);
@@ -190,15 +191,16 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(accents.includes("data-parallax-accent={accent.id}"), true);
   assert.equal(accents.includes("data-accent-depth={accent.depth}"), true);
   assert.equal(accents.includes("data-accent-size={accent.size}"), true);
+  assert.equal(accents.includes('data-hero-floating-composition={isHeroComposition ? "true" : undefined}'), true);
   assert.equal(accents.includes('type AccentDepth = "foreground" | "middle" | "background"'), true);
   assert.equal(accents.includes('type AccentSize = "small" | "medium" | "large"'), true);
   assert.equal(accents.includes('/images/home-accents/warehouse-forklift.webp'), true);
   assert.equal(accents.includes('/images/home-accents/cargo-ship.webp'), true);
-  assert.equal(accents.includes("travel: 38"), true);
+  assert.equal(accents.includes("travel: 36"), true);
   assert.equal(accents.includes("travel: 26"), true);
   assert.equal(accents.includes("travel: 20"), true);
   assert.equal(accents.includes('data-accent-motion={enabled ? "active" : "static"}'), true);
-  assert.equal(accents.includes('className="pointer-events-none absolute inset-0 z-20 hidden overflow-hidden lg:block"'), true);
+  assert.equal(accents.includes('isHeroComposition ? "z-40 overflow-visible" : "z-20 overflow-hidden"'), true);
   assert.equal(accents.includes("!adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch"), true);
   assert.equal(explorer.includes("animate-ping"), false);
   assert.equal(explorer.includes("group-hover:scale"), false);
@@ -282,9 +284,11 @@ test("homepage services use a mobile puzzle and desktop synchronized chapter sto
   assert.equal(services.includes("min-h-[72svh]"), true);
   assert.equal(services.includes("IntersectionObserver"), true);
   assert.equal(services.includes("requestAnimationFrame"), true);
-  for (const layer of ["back", "middle", "front"]) {
-    assert.equal(services.includes(`data-service-depth-layer="${layer}"`), true);
-  }
+  assert.equal(services.includes('data-service-background-wash="true"'), true);
+  assert.equal(services.includes('data-service-overlay-meta="true"'), true);
+  assert.equal(services.includes('data-service-overlay-chapter="true"'), true);
+  assert.equal(services.includes("data-service-depth-layer"), false);
+  assert.equal(services.includes("maskImage: \"radial-gradient"), true);
   assert.equal(services.includes("Every trade begins as a possibility"), false);
   assert.equal(services.includes("images.pexels.com"), false);
   assert.equal(imagePaths.length, 9);

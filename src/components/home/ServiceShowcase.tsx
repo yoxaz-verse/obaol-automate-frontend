@@ -223,31 +223,35 @@ export default function ServiceShowcase() {
             ))}
           </div>
           <div className="relative">
-            <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-12rem)] min-h-[480px] max-h-[650px] [perspective:1200px]">
-              <div data-service-depth-layer="back" aria-hidden="true" className="pointer-events-none absolute inset-[7%_1%_1%_9%] rounded-[2rem] border border-obaol-400/20 bg-obaol-400/10 shadow-[0_30px_70px_-38px_rgba(207,152,60,0.65)] [transform:translate3d(16px,17px,-26px)_rotateY(-2deg)]" />
-              <div data-service-depth-layer="middle" aria-hidden="true" className="pointer-events-none absolute inset-[5%_3%_3%_6%] rounded-[2rem] border border-default-200/70 bg-content1/70 shadow-[0_24px_55px_-38px_rgba(15,23,42,0.65)] [transform:translate3d(7px,8px,-10px)_rotateY(-1deg)]" />
-              <div data-service-depth-layer="front" className="absolute inset-[4%] overflow-hidden rounded-[1.75rem] border border-white/25 bg-black shadow-[0_30px_45px_-28px_rgba(15,23,42,0.7)] [transform:rotateX(0.8deg)_rotateY(-1.5deg)_translateZ(16px)]">
+            <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-12rem)] min-h-[480px] max-h-[650px]">
+              <div
+                data-service-background-wash="true"
+                className="absolute inset-0 overflow-hidden"
+                style={{
+                  WebkitMaskImage: "radial-gradient(ellipse 78% 84% at 52% 50%, black 48%, rgba(0,0,0,0.9) 63%, transparent 100%)",
+                  maskImage: "radial-gradient(ellipse 78% 84% at 52% 50%, black 48%, rgba(0,0,0,0.9) 63%, transparent 100%)",
+                }}
+              >
                 {services.map((service, index) => {
                   const isActive = index === activeIndex;
                   return (
                     <div key={service.id} data-service-artwork-layer="true" aria-hidden={!isActive} className={`absolute inset-0 transition-[opacity,filter,transform] ease-out ${adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[550ms]"} ${isActive ? "z-[1] scale-100 opacity-100 blur-0" : "z-0 scale-[1.015] opacity-0 blur-[2px]"}`}>
-                      <Image src={service.image} alt={isActive ? service.imageAlt : ""} aria-hidden={!isActive} fill priority={index === 0} sizes="(max-width: 1023px) 1px, 52vw" className="object-cover" style={{ objectPosition: service.imagePosition }} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-black/10" />
+                      <Image src={service.image} alt={isActive ? service.imageAlt : ""} aria-hidden={!isActive} fill priority={index === 0} sizes="(max-width: 1023px) 1px, 52vw" className="object-cover opacity-75 saturate-[0.82] contrast-[0.92]" style={{ objectPosition: service.imagePosition }} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-background/15" />
                     </div>
                   );
                 })}
-                <div className="pointer-events-none absolute inset-0 z-[2] rounded-[inherit] ring-1 ring-inset ring-white/20" />
               </div>
-              <div className="absolute inset-x-[4%] top-[3%] z-10 flex items-center justify-between px-9 py-8 [transform:translateZ(28px)]">
-                <span className="rounded-full border border-white/15 bg-black/55 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/75 backdrop-blur-md">Indian origin operations</span>
-                <span className="font-mono text-xs font-black text-white/60">{String(activeIndex + 1).padStart(2, "0")} / {String(services.length).padStart(2, "0")}</span>
+              <div data-service-overlay-meta="true" className="absolute inset-x-[7%] top-[8%] z-10 flex items-center justify-between text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.75)]">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">Indian origin operations</span>
+                <span className="font-mono text-xs font-black text-white/70">{String(activeIndex + 1).padStart(2, "0")} / {String(services.length).padStart(2, "0")}</span>
               </div>
-              <div className="absolute inset-x-12 bottom-7 z-10 rounded-[1.5rem] border border-white/12 bg-black/65 p-5 text-white shadow-[0_18px_48px_-28px_rgba(0,0,0,0.9)] backdrop-blur-lg [transform:translateZ(32px)]">
+              <div data-service-overlay-chapter="true" className="absolute inset-x-[7%] bottom-[8%] z-10 text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.8)]">
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-black" style={{ backgroundColor: active.accent }}><ActiveIcon size={20} /></span>
-                  <div><p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/45">Active chapter</p><p className="mt-1 text-2xl font-black">{active.title}</p></div>
+                  <div><p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/55">Active chapter</p><p className="mt-1 text-2xl font-black">{active.title}</p></div>
                 </div>
-                <p className="mt-4 text-sm font-semibold text-white/72">Outcome: {active.outcome}</p>
+                <p className="mt-4 text-sm font-semibold text-white/80">Outcome: {active.outcome}</p>
                 <div className="mt-5 flex gap-1.5" aria-hidden="true">{services.map((service, index) => <span key={service.id} className={`h-1 flex-1 rounded-full transition-colors ${index === activeIndex ? "bg-obaol-400" : "bg-white/20"}`} />)}</div>
               </div>
             </div>

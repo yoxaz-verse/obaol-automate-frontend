@@ -128,7 +128,12 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/hero-operations/")).join(""), "/images/hero-operations/freight.webp");
   assert.equal(hero.includes('"use client"'), false);
   assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
+  assert.equal(hero.includes('data-hero-centered-layout="true"'), true);
+  assert.equal(hero.includes("lg:min-h-[clamp(36rem,calc(100svh-6rem),50rem)]"), true);
+  assert.equal(hero.includes("max-w-[90rem]"), true);
+  assert.equal(hero.includes("lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
+  assert.equal(explorer.includes("lg:px-0 lg:py-0"), true);
   assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
   assert.equal(explorer.includes('data-execution-stage-band="true"'), true);
   assert.equal(explorer.includes('className="hidden border-y border-default-200/70 bg-default-50/55 py-7 dark:bg-default-50/[0.025] md:block lg:py-8"'), true);

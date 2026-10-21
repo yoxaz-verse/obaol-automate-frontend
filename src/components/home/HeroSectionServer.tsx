@@ -16,7 +16,7 @@ export const HERO_STAGES = [
 
 export default function HeroSectionServer() {
   return (
-    <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-8 pt-16 lg:pb-10 lg:pt-16">
+    <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-8 pt-16 lg:py-8">
       {/* Ambient background glow & grid mesh */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-obaol-500/10 blur-[120px] dark:bg-obaol-500/14" />
@@ -24,8 +24,11 @@ export default function HeroSectionServer() {
         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-30 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
       </div>
 
-      <div className="public-layout-container relative z-10 container mx-auto px-6 sm:px-12">
-        <div className="mx-auto grid w-full max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center xl:gap-20">
+      <div className="public-layout-container relative z-10 mx-auto w-full max-w-[96rem] px-6 sm:px-12">
+        <div
+          data-hero-centered-layout="true"
+          className="mx-auto grid w-full max-w-[90rem] gap-12 lg:min-h-[clamp(36rem,calc(100svh-6rem),50rem)] lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:items-center lg:gap-10 xl:gap-14"
+        >
           <div className="space-y-5 lg:py-2">
             {/* Status / Kicker Pill */}
             <div className="inline-flex items-center gap-2.5 py-1">

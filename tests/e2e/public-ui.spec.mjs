@@ -154,7 +154,15 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   await page.goto("/");
 
   const scene = page.locator('[data-hero-depth-scene="true"]');
+  const hero = page.locator('[data-natural-scroll-hero="true"]');
+  const centeredLayout = hero.locator('[data-hero-centered-layout="true"]');
   await expect(scene).toHaveAttribute("data-hero-parallax", "active");
+  const heroBox = await hero.boundingBox();
+  const layoutBox = await centeredLayout.boundingBox();
+  const artworkBox = await scene.locator('[data-hero-layered-artwork="true"]').boundingBox();
+  expect(heroBox.height).toBeGreaterThanOrEqual(700);
+  expect(Math.abs((layoutBox.y + layoutBox.height / 2) - (heroBox.y + heroBox.height / 2))).toBeLessThan(45);
+  expect(artworkBox.width).toBeGreaterThan(layoutBox.width * 0.55);
   const layers = ["logistics", "operations", "commodities"];
   const backgroundBefore = await scene.locator('[data-hero-depth-layer="background"]').evaluate((element) => getComputedStyle(element).transform);
   const before = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
@@ -165,6 +173,24 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   expect(after).not.toEqual(before);
   expect(new Set(after).size).toBe(3);
   expect(backgroundAfter).toBe(backgroundBefore);
+});
+
+test("centered desktop hero remains contained on a short laptop viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 650 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+
+  const hero = page.locator('[data-natural-scroll-hero="true"]');
+  const layout = hero.locator('[data-hero-centered-layout="true"]');
+  const scene = hero.locator('[data-hero-depth-scene="true"]');
+  await expect(layout).toBeVisible();
+  await expect(scene).toHaveAttribute("data-hero-parallax", "static");
+  await expect(hero.getByRole("link", { name: /Open Workspace|Join the Open Platform/ })).toBeVisible();
+  const heroBox = await hero.boundingBox();
+  const sceneBox = await scene.boundingBox();
+  expect(sceneBox.y).toBeGreaterThanOrEqual(heroBox.y);
+  expect(sceneBox.y + sceneBox.height).toBeLessThanOrEqual(heroBox.y + heroBox.height + 1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test("desktop service story synchronizes in both scroll directions", async ({ page }) => {

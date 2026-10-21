@@ -9,7 +9,7 @@ export default function HeroCTA() {
   const href = !loading && isAuthenticated ? "/dashboard" : "/auth";
 
   return (
-    <div className="flex w-full max-w-xl flex-col items-start gap-5 pt-2">
+    <div className="flex w-full max-w-xl flex-col items-start gap-5 pt-5 lg:pt-6">
       {/* Primary Action Button */}
       <Link
         href={href}

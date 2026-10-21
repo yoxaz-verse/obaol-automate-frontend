@@ -48,7 +48,10 @@ test("lab controls are searchable, multi-selectable and accessible", async () =>
 
 test("wizard uses searchable fields and direct taxonomy creation", async () => {
   const [source, locationPicker] = await Promise.all([readFile(wizardPath, "utf8"), readFile(locationPickerPath, "utf8")]);
-  assert.match(source, /SearchableSelect label="Physical country"/);
+  assert.doesNotMatch(source, /SearchableSelect label="Physical country"/);
+  assert.doesNotMatch(source, /<Input label="State \/ region"/);
+  assert.doesNotMatch(source, /<Input label="City \/ district"/);
+  assert.doesNotMatch(source, /<Input label="Street address"/);
   assert.match(source, /SearchableSelect label="Target countries"/);
   assert.match(source, /Add \{requestModal\.kind\.toLowerCase\(\)\}/);
   assert.match(source, /Add and select/);
@@ -76,12 +79,26 @@ test("wizard uses searchable fields and direct taxonomy creation", async () => {
   assert.match(source, /markerVariant="lab"/);
   assert.match(source, /Use current location/);
   assert.match(source, /locationConfirmed/);
+  assert.match(source, /physicalCountryId: matchedCountry\._id, state: details\.state, city: details\.city, address: details\.label/);
+  assert.doesNotMatch(source, /current\.state \|\| details\.state/);
+  assert.match(source, /country-unavailable/);
+  assert.match(source, /We could not resolve this point to a supported country and address/);
   assert.match(source, /Select the laboratory’s exact location on the map before continuing/);
   assert.match(source, /location: locationConfirmed \? profile\.location : undefined/);
   assert.match(locationPicker, /markerVariant\?: "warehouse" \| "lab"/);
   assert.match(locationPicker, /markerVariant = "warehouse"/);
   assert.match(locationPicker, /LuFlaskConical/);
   assert.match(locationPicker, /lab-location-pin__shape/);
+});
+
+test("lab location surfaces prefer the map-resolved label while retaining legacy fallbacks", async () => {
+  const [directory, myLabs, detail] = await Promise.all([readFile(directoryPath, "utf8"), readFile(myLabsPath, "utf8"), readFile(detailPath, "utf8")]);
+  assert.match(directory, /profile\.location\?\.label \|\|/);
+  assert.match(myLabs, /profile\.location\?\.label \|\|/);
+  assert.match(detail, /profile\.location\?\.label \|\|/);
+  assert.match(directory, /searchable\("Physical country"/);
+  assert.match(directory, /label="State \/ region"/);
+  assert.match(directory, /label="City \/ district"/);
 });
 
 test("admin selects a company before viewing or changing its shared lab panel", async () => {
@@ -95,6 +112,15 @@ test("admin selects a company before viewing or changing its shared lab panel", 
   assert.match(source, /isDisabled=\{isAdmin && !companyId\}/);
   assert.match(source, /Loading the lab profile/);
   assert.match(source, /Unable to load the lab profile/);
+});
+
+test("new lab submission preserves a created draft for safe retry", async () => {
+  const source = await readFile(wizardPath, "utf8");
+  assert.match(source, /createdLabRef/);
+  assert.match(source, /rememberCreatedLab\(row\)/);
+  assert.match(source, /router\.replace\(`\/dashboard\/quality-labs\/my\/\$\{created\.id\}/);
+  assert.match(source, /if \(!createdNow\).*mineDraft\(targetId\)/s);
+  assert.match(source, /Your lab draft was saved, but it could not be submitted\. Please retry\./);
 });
 
 test("lab contacts expose safe explicit WhatsApp actions", async () => {

@@ -37,7 +37,7 @@ export default function HeroStageExplorer() {
   const parallaxEnabled = !adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch;
 
   return (
-    <div data-hero-panel="execution-map" data-hero-depth-scene="true" data-hero-parallax={parallaxEnabled ? "active" : "static"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0">
+    <div data-hero-panel="execution-map" data-hero-depth-scene="true" data-hero-parallax={parallaxEnabled ? "active" : "static"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
       <h2 className="sr-only">Connected Indian agro trade operations</h2>
       <div className="pointer-events-none absolute inset-[16%_8%_10%] rounded-full bg-obaol-400/12 blur-3xl dark:bg-obaol-400/[0.08]" />
       <figure

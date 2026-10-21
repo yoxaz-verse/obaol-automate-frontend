@@ -62,13 +62,18 @@ for (const theme of ["light", "dark"]) {
       const layeredArtwork = page.locator('[data-hero-layered-artwork="true"]');
       await expect(layeredArtwork).toHaveAttribute("role", "img");
       await expect(page.locator('[data-hero-depth-scene="true"]')).toHaveAttribute("data-hero-parallax", "static");
+      await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(3);
+      for (const placement of ["hero", "services", "workspace"]) {
+        await expect(page.locator(`[data-home-parallax-accents="${placement}"]`)).toHaveAttribute("data-accent-motion", "static");
+      }
       await expect(layeredArtwork.locator('[data-hero-depth-layer]')).toHaveCount(4);
       for (const layer of ["background", "logistics", "operations", "commodities"]) {
         await expect(layeredArtwork.locator(`[data-hero-depth-layer="${layer}"]`)).toBeVisible();
       }
       const artworkBox = await layeredArtwork.boundingBox();
       expect(artworkBox.x).toBeGreaterThanOrEqual(0);
-      expect(artworkBox.x + artworkBox.width).toBeLessThanOrEqual(width + 1);
+      if (width < 1280) expect(artworkBox.x + artworkBox.width).toBeLessThanOrEqual(width + 1);
+      else expect(artworkBox.x + artworkBox.width).toBeGreaterThanOrEqual(width - 24);
       const hierarchyIsCorrect = await page.evaluate(() => {
         const workspace = document.querySelector("#capability-explorer");
         const stages = document.querySelector('[data-execution-stage-band="true"]');
@@ -156,23 +161,31 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   const scene = page.locator('[data-hero-depth-scene="true"]');
   const hero = page.locator('[data-natural-scroll-hero="true"]');
   const centeredLayout = hero.locator('[data-hero-centered-layout="true"]');
+  const heroAccents = hero.locator('[data-home-parallax-accents="hero"]');
   await expect(scene).toHaveAttribute("data-hero-parallax", "active");
+  await expect(heroAccents).toHaveAttribute("data-accent-motion", "active");
+  await expect(heroAccents.locator('[data-parallax-accent]')).toHaveCount(3);
   const heroBox = await hero.boundingBox();
   const layoutBox = await centeredLayout.boundingBox();
   const artworkBox = await scene.locator('[data-hero-layered-artwork="true"]').boundingBox();
   expect(heroBox.height).toBeGreaterThanOrEqual(700);
   expect(Math.abs((layoutBox.y + layoutBox.height / 2) - (heroBox.y + heroBox.height / 2))).toBeLessThan(45);
   expect(artworkBox.width).toBeGreaterThan(layoutBox.width * 0.55);
+  expect(artworkBox.x + artworkBox.width).toBeGreaterThanOrEqual(1416);
   const layers = ["logistics", "operations", "commodities"];
+  const accentBefore = await heroAccents.locator('[data-parallax-accent]').evaluateAll((elements) => elements.map((element) => getComputedStyle(element).transform));
   const backgroundBefore = await scene.locator('[data-hero-depth-layer="background"]').evaluate((element) => getComputedStyle(element).transform);
   const before = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
   await page.evaluate(() => window.scrollTo({ top: 500, behavior: "instant" }));
   await page.waitForTimeout(350);
   const after = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
   const backgroundAfter = await scene.locator('[data-hero-depth-layer="background"]').evaluate((element) => getComputedStyle(element).transform);
+  const accentAfter = await heroAccents.locator('[data-parallax-accent]').evaluateAll((elements) => elements.map((element) => getComputedStyle(element).transform));
   expect(after).not.toEqual(before);
   expect(new Set(after).size).toBe(3);
   expect(backgroundAfter).toBe(backgroundBefore);
+  expect(accentAfter).not.toEqual(accentBefore);
+  expect(new Set(accentAfter).size).toBe(3);
 });
 
 test("centered desktop hero remains contained on a short laptop viewport", async ({ page }) => {
@@ -183,13 +196,18 @@ test("centered desktop hero remains contained on a short laptop viewport", async
   const hero = page.locator('[data-natural-scroll-hero="true"]');
   const layout = hero.locator('[data-hero-centered-layout="true"]');
   const scene = hero.locator('[data-hero-depth-scene="true"]');
+  const heroAccents = hero.locator('[data-home-parallax-accents="hero"]');
   await expect(layout).toBeVisible();
   await expect(scene).toHaveAttribute("data-hero-parallax", "static");
+  await expect(heroAccents).toHaveAttribute("data-accent-motion", "static");
   await expect(hero.getByRole("link", { name: /Open Workspace|Join the Open Platform/ })).toBeVisible();
+  const paragraphBox = await hero.getByText("Buyers, suppliers, and specialist partners coordinate one trade through shared technology, clear handoffs, and visible progress.").boundingBox();
+  const ctaBox = await hero.getByRole("link", { name: /Open Workspace|Join the Open Platform/ }).boundingBox();
   const heroBox = await hero.boundingBox();
   const sceneBox = await scene.boundingBox();
   expect(sceneBox.y).toBeGreaterThanOrEqual(heroBox.y);
   expect(sceneBox.y + sceneBox.height).toBeLessThanOrEqual(heroBox.y + heroBox.height + 1);
+  expect(ctaBox.y - (paragraphBox.y + paragraphBox.height)).toBeGreaterThanOrEqual(32);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 

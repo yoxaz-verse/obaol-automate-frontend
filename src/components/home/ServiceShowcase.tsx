@@ -7,6 +7,7 @@ import { FiCheckCircle, FiFileText, FiPackage, FiSearch, FiShoppingBag, FiTarget
 import { FaShip, FaWarehouse } from "react-icons/fa6";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
+import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
 
 export type ServiceChapter = {
   id: string;
@@ -133,7 +134,8 @@ export default function ServiceShowcase() {
   return (
     <section ref={sectionRef} data-service-showcase="true" aria-labelledby="service-showcase-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-14 md:py-20 public-standard-section">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(207,152,60,0.1),transparent_28%),radial-gradient(circle_at_86%_78%,rgba(96,165,250,0.07),transparent_24%)]" />
-      <div className="container relative z-10 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container">
+      <ParallaxTradeAccents placement="services" />
+      <div className="container relative z-30 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container">
         <div className="mb-9 grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-14">
           <div>
             <p className={homeTitleStyles.sectionKicker}>Connected Execution Network</p>

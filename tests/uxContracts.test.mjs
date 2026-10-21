@@ -110,6 +110,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   const homeContent = read("../src/components/home/HomeContent.tsx");
   const homepage = read("../src/app/page.tsx");
   const globals = read("../src/app/globals.css");
+  const accents = read("../src/components/home/ParallaxTradeAccents.tsx");
   const stagesBlock = hero.match(/const HERO_STAGES = \[[\s\S]*?\] as const satisfies readonly HeroStage\[\];/)?.[0] ?? "";
   const imagePaths = [...stagesBlock.matchAll(/src: "(\/images\/[^"]+)"/g)].map((match) => match[1]);
   const stageLabels = [...stagesBlock.matchAll(/label: "([^"]+)"/g)].map((match) => match[1]);
@@ -132,8 +133,11 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(hero.includes("lg:min-h-[clamp(36rem,calc(100svh-6rem),50rem)]"), true);
   assert.equal(hero.includes("max-w-[90rem]"), true);
   assert.equal(hero.includes("lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
+  assert.equal(hero.includes('<ParallaxTradeAccents placement="hero" />'), true);
+  assert.equal(heroCta.includes("pt-5 lg:pt-6"), true);
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
   assert.equal(explorer.includes("lg:px-0 lg:py-0"), true);
+  assert.equal(explorer.includes("xl:w-[calc(100%+clamp(3rem,8vw,10rem))]"), true);
   assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
   assert.equal(explorer.includes('data-execution-stage-band="true"'), true);
   assert.equal(explorer.includes('className="hidden border-y border-default-200/70 bg-default-50/55 py-7 dark:bg-default-50/[0.025] md:block lg:py-8"'), true);
@@ -182,10 +186,15 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("md:grid-cols-2"), true);
   assert.equal(explorer.includes("xl:grid-cols-[3fr_3fr_3fr_1.2fr]"), true);
   assert.equal(explorer.includes("Watercolor illustration of connected Indian agro trade operations"), true);
+  assert.equal(accents.includes("data-home-parallax-accents={placement}"), true);
+  assert.equal(accents.includes("data-parallax-accent={accent.id}"), true);
+  assert.equal(accents.includes('data-accent-motion={enabled ? "active" : "static"}'), true);
+  assert.equal(accents.includes('className="pointer-events-none absolute inset-0 z-20 hidden overflow-hidden lg:block"'), true);
+  assert.equal(accents.includes("!adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch"), true);
   assert.equal(explorer.includes("animate-ping"), false);
   assert.equal(explorer.includes("group-hover:scale"), false);
   assert.equal(explorer.includes("<svg"), false);
-  assert.equal(explorer.includes("xl:w-[calc"), false);
+  assert.equal(explorer.includes("xl:w-[calc"), true);
   assert.equal(explorer.includes('aria-label="All ten execution stages grouped by phase"'), true);
   assert.equal(explorer.includes('role="tablist"'), false);
   assert.equal(explorer.includes("setActiveIndex"), false);
@@ -217,6 +226,11 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
     assert.equal(existsSync(layerPath), true);
     const layerBytes = readFileSync(layerPath);
     if (layer !== "background") assert.equal(layerBytes.includes(Buffer.from("ALPH")), true, `${layer} should preserve transparency`);
+  }
+  for (const accent of ["commodity-spices", "verification-clipboard", "laboratory-sample", "packaging-sack", "logistics-container"]) {
+    const accentPath = fileURLToPath(new URL(`../public/images/home-accents/${accent}.webp`, import.meta.url));
+    assert.equal(existsSync(accentPath), true, `${accent} should exist`);
+    assert.equal(readFileSync(accentPath).includes(Buffer.from("ALPH")), true, `${accent} should preserve transparency`);
   }
 });
 

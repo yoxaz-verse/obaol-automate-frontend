@@ -11,6 +11,7 @@ import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 import PerspectiveGateway from "@/components/home/PerspectiveGateway";
 import DeferredExecutionWorkspace from "@/components/home/DeferredExecutionWorkspace";
+import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
 
 const intentCards = [
     {
@@ -37,8 +38,9 @@ export default function HomeContent() {
             <Header />
             <HeroSection />
             <DeferredServiceShowcase />
-            <section id="capability-explorer" className="relative scroll-mt-28 py-12 md:scroll-mt-36 md:py-16 public-standard-section">
-                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
+            <section id="capability-explorer" className="relative overflow-clip scroll-mt-28 py-12 md:scroll-mt-36 md:py-16 public-standard-section">
+                <ParallaxTradeAccents placement="workspace" />
+                <div className="container relative z-30 mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
                     <div className="flex flex-col gap-10 md:gap-16">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 items-start">
                             <div className="lg:col-span-5 space-y-5 md:space-y-6">

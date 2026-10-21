@@ -1,5 +1,6 @@
 import HeroCTA from "@/components/home/HeroCTA";
 import HeroStageExplorer, { type HeroStage } from "@/components/home/HeroStageExplorer";
+import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
 
 export const HERO_STAGES = [
   { id: "discovery", label: "Discovery", message: "Discover verified products and reliable origin suppliers.", src: "/images/execution-flow/01-discovery.webp", deliverable: "Product Coverage & Origin Sourcing", phase: "Plan" },
@@ -23,8 +24,9 @@ export default function HeroSectionServer() {
         <div className="absolute top-1/3 right-10 h-[400px] w-[400px] rounded-full bg-amber-500/[0.06] blur-[100px] dark:bg-amber-500/10" />
         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-30 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
       </div>
+      <ParallaxTradeAccents placement="hero" />
 
-      <div className="public-layout-container relative z-10 mx-auto w-full max-w-[96rem] px-6 sm:px-12">
+      <div className="public-layout-container relative z-30 mx-auto w-full max-w-[96rem] px-6 sm:px-12">
         <div
           data-hero-centered-layout="true"
           className="mx-auto grid w-full max-w-[90rem] gap-12 lg:min-h-[clamp(36rem,calc(100svh-6rem),50rem)] lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:items-center lg:gap-10 xl:gap-14"

@@ -1,5 +1,5 @@
 export type LabOption = { _id: string; kind?: string; name: string; unit?: string; method?: string; parentIds?: string[]; status?: "ACTIVE" | "REQUESTED" | "REJECTED" | "INACTIVE" };
-export type CountryOption = { _id: string; name: string };
+export type CountryOption = { _id: string; name: string; code?: string };
 export type LabCredential = {
   _id?: string;
   accreditationId: string | LabOption;

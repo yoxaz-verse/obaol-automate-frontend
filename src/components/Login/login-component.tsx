@@ -130,19 +130,12 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
     setErrorMessage("Your account already exists. Please sign in.");
   }, [authMode, initialQuery.reason]);
 
-  const redirectExistingAccountToSignIn = useCallback((existingRole?: string, existingEmail?: string) => {
-    const normalizedRole = String(existingRole || role).toLowerCase();
-    const target = normalizedRole === "operator"
-      ? "/auth/operator"
-      : normalizedRole === "associate"
-        ? "/auth/associate"
-        : "/auth?view=signin";
-    const params = new URLSearchParams({ reason: "account-exists" });
+  const redirectExistingAccountToSignIn = useCallback((existingEmail?: string) => {
+    const params = new URLSearchParams({ mode: "signin", reason: "account-exists" });
     const prefill = String(existingEmail || email).trim();
     if (prefill) params.set("prefill", prefill);
-    const separator = target.includes("?") ? "&" : "?";
-    router.push(`${target}${separator}${params.toString()}`);
-  }, [email, role, router]);
+    router.push(`/auth?${params.toString()}`);
+  }, [email, router]);
 
   useEffect(() => {
     if (typeof window === "undefined" || authMode !== "login") return;
@@ -215,8 +208,8 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
         setIsRedirecting(true);
       }
     } catch (error: any) {
-      if (authMode === "signup" && Number(error?.response?.status || 0) === 409) {
-        redirectExistingAccountToSignIn(error?.response?.data?.role || roleValue);
+      if (authMode === "signup" && error?.response?.data?.code === "ACCOUNT_EXISTS") {
+        redirectExistingAccountToSignIn(email);
         return;
       }
       const rawMessage = error?.response?.data?.message || error?.message || "Google login failed.";
@@ -235,7 +228,7 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
     } finally {
       setIsLoading(false);
     }
-  }, [authMode, initialQuery.intent, loginWithGoogle, rememberMe, redirectExistingAccountToSignIn, refreshUser, roleLower, router]);
+  }, [authMode, email, initialQuery.intent, loginWithGoogle, rememberMe, redirectExistingAccountToSignIn, refreshUser, roleLower, router]);
 
   useEffect(() => {
     if (authMode === "signup") {
@@ -622,8 +615,8 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
           setHasOnboardingSession(true);
         } catch (startError: any) {
           const status = Number(startError?.response?.status || 0);
-          if (status === 409) {
-            redirectExistingAccountToSignIn(startError?.response?.data?.role, email);
+          if (status === 409 && startError?.response?.data?.code === "ACCOUNT_EXISTS") {
+            redirectExistingAccountToSignIn(email);
             return;
           } else {
             throw startError;

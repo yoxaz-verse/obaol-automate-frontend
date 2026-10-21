@@ -5,12 +5,15 @@ import { fileURLToPath } from "node:url";
 
 const read = (path) => readFileSync(fileURLToPath(new URL(path, import.meta.url)), "utf8");
 
-test("existing email signup redirects to the matching sign-in page with a trusted notice", () => {
+test("legacy signup routes use the same private existing-account redirect", () => {
   const login = read("../src/components/Login/login-component.tsx");
 
-  assert.equal(login.includes('new URLSearchParams({ reason: "account-exists" })'), true);
-  assert.equal(login.includes('redirectExistingAccountToSignIn(startError?.response?.data?.role, email)'), true);
-  assert.equal(login.includes('redirectExistingAccountToSignIn(error?.response?.data?.role || roleValue)'), true);
+  assert.equal(login.includes('new URLSearchParams({ mode: "signin", reason: "account-exists" })'), true);
+  assert.equal(login.includes('redirectExistingAccountToSignIn(email)'), true);
+  assert.equal(login.includes('error?.response?.data?.code === "ACCOUNT_EXISTS"'), true);
+  assert.equal(login.includes('router.push(`/auth?${params.toString()}`)'), true);
+  assert.equal(login.includes("redirectExistingAccountToSignIn(startError?.response?.data?.role"), false);
+  assert.equal(login.includes("redirectExistingAccountToSignIn(error?.response?.data?.role"), false);
   assert.equal(login.includes('setErrorMessage("Your account already exists. Please sign in.")'), true);
   assert.equal(login.includes('initialQuery.reason !== "account-exists"'), true);
   assert.equal(login.includes('aria-label="Dismiss account notice"'), true);

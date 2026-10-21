@@ -4,7 +4,7 @@ import { FormEvent, useCallback, useContext, useEffect, useId, useRef, useState 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
-import { FiArrowLeft, FiCheck, FiEye, FiEyeOff, FiKey, FiMail, FiShield, FiUser, FiUsers } from "react-icons/fi";
+import { FiArrowLeft, FiCheck, FiEye, FiEyeOff, FiKey, FiMail, FiShield, FiUser, FiUsers, FiX } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { postData } from "@/core/api/apiHandler";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
@@ -82,6 +82,21 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
   const showError = (error: any) => setStatus(normalizeAuthError(error));
 
+  const redirectExistingAccountToSignIn = useCallback(() => {
+    setMode("signin");
+    setStage("email");
+    setPassword("");
+    setOtp("");
+    const params = new URLSearchParams({ mode: "signin", prefill: email.trim().toLowerCase(), reason: "account-exists" });
+    if (intent) params.set("intent", intent);
+    window.history.replaceState(window.history.state, "", `/auth?${params.toString()}`);
+    setStatus({
+      tone: "info",
+      code: "ACCOUNT_EXISTS",
+      message: "An account already exists for this email. Please sign in instead.",
+    });
+  }, [email, intent]);
+
   const switchMode = (nextMode: AuthMode) => {
     if (nextMode === mode) return;
     setMode(nextMode);
@@ -114,8 +129,9 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       await postData("/auth/onboarding/start", { email: email.trim().toLowerCase(), role });
       beginOtpWindow();
       setStatus({ tone: "info", message: "If this email is eligible, a verification code has been sent." });
-    } catch (error) {
-      showError(error);
+    } catch (error: any) {
+      if (error?.response?.data?.code === "ACCOUNT_EXISTS") redirectExistingAccountToSignIn();
+      else showError(error);
     } finally {
       setBusy("");
     }
@@ -213,12 +229,13 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
         rememberMe,
       });
       await finishAuthentication(result.data?.next || (mode === "signup" ? "/dashboard/onboarding?auth=google" : undefined));
-    } catch (error) {
-      showError(error);
+    } catch (error: any) {
+      if (mode === "signup" && error?.response?.data?.code === "ACCOUNT_EXISTS") redirectExistingAccountToSignIn();
+      else showError(error);
     } finally {
       setBusy("");
     }
-  }, [finishAuthentication, mode, rememberMe, role]);
+  }, [finishAuthentication, mode, redirectExistingAccountToSignIn, rememberMe, role]);
 
   useEffect(() => {
     if (!googleClientId || stage !== "email") return;
@@ -251,8 +268,13 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
           ))}
         </div>
 
-        <div aria-live="polite" aria-atomic="true" role={status?.tone === "error" ? "alert" : "status"} className={status ? `min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}` : "min-h-0"}>
+        <div aria-live="polite" aria-atomic="true" role={status?.tone === "error" ? "alert" : "status"} className={status ? `relative min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}` : "min-h-0"}>
           {status?.message}
+          {status?.code === "ACCOUNT_EXISTS" && (
+            <button type="button" aria-label="Dismiss account notice" onClick={() => setStatus(null)} className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg text-current/70 hover:bg-black/5 dark:hover:bg-white/10">
+              <FiX aria-hidden />
+            </button>
+          )}
         </div>
 
         {stage === "email" && (

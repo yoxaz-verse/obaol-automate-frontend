@@ -12,6 +12,7 @@ export const normalizeAuthError = (error: any): AuthStatus => {
   const retryAfter = Number(error?.response?.data?.retryAfterSeconds || 0);
   const messages: Record<string, string> = {
     INVALID_CREDENTIALS: "The email or password is incorrect.",
+    ACCOUNT_EXISTS: "An account already exists for this email. Please sign in instead.",
     OTP_EXPIRED: "That verification code is invalid or has expired. Request a new code and try again.",
     ACCOUNT_BLOCKED: "This account cannot access OBAOL. Contact support if you believe this is a mistake.",
     ACCOUNT_PENDING: "Your registration is still awaiting approval.",

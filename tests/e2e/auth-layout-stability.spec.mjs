@@ -55,6 +55,33 @@ test("signup chooses an account type and cannot continue before OTP verification
   await expect(page.getByRole("button", { name: "Verify and continue" })).toBeDisabled();
 });
 
+test("existing-email signup switches to sign-in without opening OTP verification", async ({ page }) => {
+  await page.route(/\/auth\/onboarding\/start$/, async (route) => {
+    expect(route.request().postDataJSON()).toEqual({ email: "existing@example.com", role: "Associate" });
+    await route.fulfill({
+      status: 409,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: false,
+        code: "ACCOUNT_EXISTS",
+        message: "An account already exists for this email. Please sign in.",
+      }),
+    });
+  });
+
+  await page.goto("/auth?mode=signup&role=associate");
+  await page.getByLabel("Email address").fill("existing@example.com");
+  await page.getByRole("button", { name: "Verify email" }).click();
+
+  await expect(page.getByRole("button", { name: "Sign in" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByLabel("Email address")).toHaveValue("existing@example.com");
+  await expect(page.getByText("An account already exists for this email. Please sign in instead.")).toBeVisible();
+  await expect(page.getByLabel("Six-digit email code")).toHaveCount(0);
+  await expect(page).toHaveURL(/mode=signin.*prefill=existing(?:%40|@)example(?:\.|%2E)com.*reason=account-exists/);
+  await page.getByLabel("Dismiss account notice").click();
+  await expect(page.getByText("An account already exists for this email. Please sign in instead.")).toHaveCount(0);
+});
+
 test("password sign-in uses the unified role-free endpoint", async ({ page }) => {
   await page.route(/\/auth\/unified\/password$/, async (route) => {
     const body = route.request().postDataJSON();

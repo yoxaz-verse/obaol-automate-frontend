@@ -29,9 +29,16 @@ test("Associate and Operator sign-in pages redirect to the unified private flow"
 
 test("the unified flow does not call the account-enumerating email status endpoint", () => {
   const unified = read("../src/components/Auth/UnifiedAuthFlow.tsx");
+  const authUtils = read("../src/utils/unifiedAuth.ts");
   assert.equal(unified.includes("/auth/email-status"), false);
   assert.equal(unified.includes("/auth/unified/password"), true);
   assert.equal(unified.includes("/verification/send-otp-existing"), true);
+  assert.equal(unified.includes('error?.response?.data?.code === "ACCOUNT_EXISTS"'), true);
+  assert.equal(unified.includes('setMode("signin")'), true);
+  assert.equal(unified.includes('setStage("email")'), true);
+  assert.equal(unified.includes('reason: "account-exists"'), true);
+  assert.equal(unified.includes('aria-label="Dismiss account notice"'), true);
+  assert.equal(authUtils.includes('ACCOUNT_EXISTS: "An account already exists for this email. Please sign in instead."'), true);
 });
 
 test("staff fallback explains the redirect and carries the trusted reason into role sign-in", () => {

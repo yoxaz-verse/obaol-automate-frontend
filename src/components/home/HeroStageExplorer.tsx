@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { inkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
@@ -25,11 +25,16 @@ const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"
 export default function HeroStageExplorer() {
   const sceneRef = useRef<HTMLElement>(null);
   const adaptiveMotion = useAdaptiveMotion();
-  const { scrollYProgress } = useScroll({ target: sceneRef, offset: ["start end", "end start"] });
-  const logisticsY = useTransform(scrollYProgress, [0, 1], [2, -2]);
-  const operationsY = useTransform(scrollYProgress, [0, 1], [4, -4]);
-  const commoditiesY = useTransform(scrollYProgress, [0, 1], [6, -6]);
-  const parallaxEnabled = adaptiveMotion.allowDecorativeMotion;
+  const { scrollYProgress } = useScroll({ target: sceneRef, offset: ["start 85%", "end 15%"] });
+  const smoothScrollProgress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 24,
+    mass: 0.35,
+  });
+  const logisticsY = useTransform(smoothScrollProgress, [0, 1], [3, -3]);
+  const operationsY = useTransform(smoothScrollProgress, [0, 1], [6, -6]);
+  const commoditiesY = useTransform(smoothScrollProgress, [0, 1], [10, -10]);
+  const parallaxEnabled = !adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch;
 
   return (
     <div data-hero-panel="execution-map" data-hero-depth-scene="true" data-hero-parallax={parallaxEnabled ? "active" : "static"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:py-8">

@@ -151,8 +151,13 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("border border-white"), false);
   assert.equal(explorer.includes('data-hero-parallax={parallaxEnabled ? "active" : "static"}'), true);
   assert.equal(explorer.includes("useScroll"), true);
+  assert.equal(explorer.includes("useSpring"), true);
   assert.equal(explorer.includes("useTransform"), true);
-  assert.equal(explorer.includes("adaptiveMotion.allowDecorativeMotion"), true);
+  assert.equal(explorer.includes('offset: ["start 85%", "end 15%"]'), true);
+  assert.equal(explorer.includes("[3, -3]"), true);
+  assert.equal(explorer.includes("[6, -6]"), true);
+  assert.equal(explorer.includes("[10, -10]"), true);
+  assert.equal(explorer.includes("!adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch"), true);
   assert.equal(explorer.includes("origin-right scale-[0.62]"), true);
   assert.equal(explorer.includes("origin-bottom-left scale-[0.88]"), true);
   assert.equal(explorer.includes("origin-bottom-left scale-[0.58]"), true);

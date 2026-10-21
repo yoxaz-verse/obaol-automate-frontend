@@ -72,6 +72,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   const [locationConfirmed, setLocationConfirmed] = useState(false);
   const [locationBusy, setLocationBusy] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [mapSearch, setMapSearch] = useState("");
   const locationPanelRef = useRef<HTMLDivElement>(null);
 
   const companiesQuery = useQuery({ queryKey: ["lab-admin-companies"], queryFn: async () => { const response: any = await getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 500, sort: "name:asc" }); const root = response?.data?.data; return Array.isArray(root?.data) ? root.data : Array.isArray(root) ? root : []; }, enabled: isAdmin });
@@ -122,6 +123,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
     setStep(0);
     setLocationConfirmed(false);
     setLocationError("");
+    setMapSearch("");
   };
 
   const items: LabOption[] = taxonomyQuery.data?.items || [];
@@ -160,9 +162,9 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
       setLocationBusy(false);
     }
   };
-  const findAddressOnMap = async () => {
-    const query = [profile.address, profile.city, profile.state, countryName(optionId(profile.physicalCountryId))].filter(Boolean).join(", ");
-    if (!query) return setLocationError("Enter the physical address before searching the map.");
+  const searchAddressOnMap = async () => {
+    const query = mapSearch.trim();
+    if (!query) return setLocationError("Enter an address or place to search the map.");
     setLocationBusy(true);
     setLocationError("");
     try {
@@ -170,7 +172,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
       if (!result || !validLocation(result)) throw new Error("not found");
       await applyLocation(result.latitude, result.longitude);
     } catch {
-      setLocationError("We could not find that address. Check the address or select the location directly on the map.");
+      setLocationError("We could not find that address or place. Check the search or select the location directly on the map.");
       setLocationBusy(false);
     }
   };
@@ -320,8 +322,12 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
           <div><h3 className="mb-4 text-sm font-bold leading-5 tracking-normal text-default-600">Contact information</h3><div className="grid gap-x-5 gap-y-5 md:grid-cols-2"><Input label="Contact email" labelPlacement="outside" placeholder="laboratory@example.com" type="email" isRequired value={profile.contactEmail} onValueChange={(value) => setField("contactEmail", value)} classNames={identityFieldClassNames} /><Input label="Primary phone" labelPlacement="outside" placeholder="+91 00000 00000" description="Include the international country code" isRequired value={profile.contactPhone} onValueChange={setPrimaryPhone} classNames={identityFieldClassNames} /><div className="rounded-2xl border border-default-200 bg-default-50/50 p-4 md:col-span-2 md:p-5"><div className="flex min-h-8 items-center"><Switch size="sm" color="success" isSelected={whatsappSameAsPrimary} onValueChange={setWhatsAppMatchesPrimary} classNames={{ base: "max-w-full gap-3", wrapper: "mr-0 shrink-0", label: "text-sm font-semibold leading-5 tracking-normal text-foreground" }}>WhatsApp number is the same as primary phone</Switch></div>{!whatsappSameAsPrimary ? <div className="mt-5 border-t border-default-200 pt-5"><Input label="WhatsApp number" labelPlacement="outside" placeholder="+91 00000 00000" description="Optional · include the international country code" value={profile.whatsappPhone || ""} onValueChange={setWhatsAppPhone} classNames={identityFieldClassNames} /></div> : <p className="mt-2 pl-11 text-xs leading-5 tracking-normal text-default-500">WhatsApp will use {profile.contactPhone || "the primary phone number"}.</p>}</div><Input label="Secondary phone" labelPlacement="outside" placeholder="Optional alternate number" value={profile.contactPhoneSecondary} onValueChange={(value) => setField("contactPhoneSecondary", value)} classNames={identityFieldClassNames} /></div></div>
           <div><h3 className="mb-4 text-sm font-bold leading-5 tracking-normal text-default-600">Physical address</h3><div className="grid gap-x-5 gap-y-5 md:grid-cols-2"><SearchableSelect label="Physical country" required multiple={false} allowSelectAll={false} options={countries.map((country) => ({ key: country._id, label: country.name }))} value={profile.physicalCountryId ? [optionId(profile.physicalCountryId)] : []} onChange={(values) => setAddressField("physicalCountryId", values[0] || "")} /><Input label="State / region" labelPlacement="outside" placeholder="State or region" value={profile.state} onValueChange={(value) => setAddressField("state", value)} classNames={identityFieldClassNames} /><Input label="City / district" labelPlacement="outside" placeholder="City or district" value={profile.city} onValueChange={(value) => setAddressField("city", value)} classNames={identityFieldClassNames} /><Input label="Street address" labelPlacement="outside" placeholder="Building, street, area and postal code" isRequired value={profile.address} onValueChange={(value) => setAddressField("address", value)} classNames={identityFieldClassNames} /></div></div>
           <div ref={locationPanelRef} className={`overflow-hidden rounded-2xl border bg-content1 ${locationError && (!validLocation(profile.location) || !locationConfirmed) ? "border-danger" : "border-default-200"}`}>
-            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-default-200 p-5"><div className="flex gap-3"><span className="rounded-xl bg-success-50 p-2.5 text-success-600"><FiMapPin /></span><div><h3 className="font-bold leading-5">Exact laboratory location <span className="text-danger">*</span></h3><p className="mt-1 text-sm leading-5 text-default-500">Search the address or click the map to place the laboratory marker.</p></div></div><div className="flex flex-wrap gap-2"><Button size="sm" variant="bordered" isLoading={locationBusy} startContent={<FiSearch />} onPress={findAddressOnMap}>Find address on map</Button><Button size="sm" variant="flat" isDisabled={locationBusy} startContent={<FiNavigation />} onPress={useCurrentLocation}>Use current location</Button></div></div>
-            <LocationPicker value={validLocation(profile.location) ? { latitude: Number(profile.location?.latitude), longitude: Number(profile.location?.longitude) } : null} onChange={({ latitude, longitude }) => void applyLocation(latitude, longitude)} height={300} />
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-default-200 p-5"><div className="flex gap-3"><span className="rounded-xl bg-success-50 p-2.5 text-success-600"><FiMapPin /></span><div><h3 className="font-bold leading-5">Exact laboratory location <span className="text-danger">*</span></h3><p className="mt-1 text-sm leading-5 text-default-500">Search an address or click the map to place the laboratory marker.</p></div></div><Button size="sm" variant="flat" isDisabled={locationBusy} startContent={<FiNavigation />} onPress={useCurrentLocation}>Use current location</Button></div>
+            <form className="flex flex-col gap-2 border-b border-default-200 p-4 sm:flex-row" onSubmit={(event) => { event.preventDefault(); void searchAddressOnMap(); }}>
+              <Input aria-label="Search address or place" placeholder="Search address, landmark, city, or postal code" value={mapSearch} onValueChange={setMapSearch} startContent={<FiSearch className="shrink-0 text-default-400" />} isDisabled={locationBusy} className="flex-1" />
+              <Button type="submit" color="success" isLoading={locationBusy} isDisabled={locationBusy}>Search map</Button>
+            </form>
+            <LocationPicker markerVariant="lab" value={validLocation(profile.location) ? { latitude: Number(profile.location?.latitude), longitude: Number(profile.location?.longitude) } : null} onChange={({ latitude, longitude }) => void applyLocation(latitude, longitude)} height={300} />
             <div className="border-t border-default-200 p-4">{validLocation(profile.location) && locationConfirmed ? <div className="flex items-start gap-2 text-sm text-success-700"><FiCheck className="mt-0.5 shrink-0" /><div><b>Location confirmed</b><p className="mt-0.5 text-xs leading-5 text-default-500">{profile.location?.label || "Selected laboratory location"} · {Number(profile.location?.latitude).toFixed(5)}, {Number(profile.location?.longitude).toFixed(5)}</p></div></div> : validLocation(profile.location) ? <p className="text-sm text-warning-600">The address changed. Select the marker again or find the address on the map to confirm it.</p> : <p className="text-sm text-default-500">No map location selected yet.</p>}{locationError ? <p role="alert" className={`mt-2 text-sm ${validLocation(profile.location) && locationConfirmed ? "text-warning-600" : "text-danger"}`}>{locationError}</p> : null}</div>
           </div>
         </div>

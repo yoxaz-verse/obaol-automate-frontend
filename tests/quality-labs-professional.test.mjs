@@ -11,6 +11,7 @@ const myLabsPath = new URL("../src/app/dashboard/quality-labs/my/page.tsx", impo
 const contactPath = new URL("../src/utils/labContact.ts", import.meta.url);
 const detailPath = new URL("../src/app/dashboard/quality-labs/[id]/page.tsx", import.meta.url);
 const approvalPath = new URL("../src/components/dashboard/Approvals/LabApprovalQueues.tsx", import.meta.url);
+const locationPickerPath = new URL("../src/components/Warehouse/WarehouseLocationPicker.tsx", import.meta.url);
 
 test("lab directory toggles between map and card views with distinct empty states", async () => {
   const source = await readFile(directoryPath, "utf8");
@@ -46,7 +47,7 @@ test("lab controls are searchable, multi-selectable and accessible", async () =>
 });
 
 test("wizard uses searchable fields and direct taxonomy creation", async () => {
-  const source = await readFile(wizardPath, "utf8");
+  const [source, locationPicker] = await Promise.all([readFile(wizardPath, "utf8"), readFile(locationPickerPath, "utf8")]);
   assert.match(source, /SearchableSelect label="Physical country"/);
   assert.match(source, /SearchableSelect label="Target countries"/);
   assert.match(source, /Add \{requestModal\.kind\.toLowerCase\(\)\}/);
@@ -69,11 +70,18 @@ test("wizard uses searchable fields and direct taxonomy creation", async () => {
   assert.doesNotMatch(source, /Configured source country/);
   assert.doesNotMatch(source, /<Accordion/);
   assert.match(source, /Exact laboratory location/);
-  assert.match(source, /Find address on map/);
+  assert.match(source, /aria-label="Search address or place"/);
+  assert.match(source, /onSubmit=.*searchAddressOnMap/);
+  assert.match(source, /Enter an address or place to search the map/);
+  assert.match(source, /markerVariant="lab"/);
   assert.match(source, /Use current location/);
   assert.match(source, /locationConfirmed/);
   assert.match(source, /Select the laboratory’s exact location on the map before continuing/);
   assert.match(source, /location: locationConfirmed \? profile\.location : undefined/);
+  assert.match(locationPicker, /markerVariant\?: "warehouse" \| "lab"/);
+  assert.match(locationPicker, /markerVariant = "warehouse"/);
+  assert.match(locationPicker, /LuFlaskConical/);
+  assert.match(locationPicker, /lab-location-pin__shape/);
 });
 
 test("admin selects a company before viewing or changing its shared lab panel", async () => {

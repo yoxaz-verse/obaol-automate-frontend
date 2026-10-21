@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { LuFlaskConical } from "react-icons/lu";
+import { renderToStaticMarkup } from "react-dom/server";
 
 export type WarehouseLocationValue = {
   latitude: number;
@@ -14,9 +16,10 @@ type WarehouseLocationPickerProps = {
   value: WarehouseLocationValue | null;
   onChange: (value: WarehouseLocationValue) => void;
   height?: number;
+  markerVariant?: "warehouse" | "lab";
 };
 
-const markerIcon = L.divIcon({
+const warehouseMarkerIcon = L.divIcon({
   className: "warehouse-pin",
   html: `
     <div class="warehouse-pin__core">
@@ -29,6 +32,18 @@ const markerIcon = L.divIcon({
   `,
   iconSize: [28, 28],
   iconAnchor: [14, 28],
+});
+
+const labMarkerIcon = L.divIcon({
+  className: "lab-location-pin",
+  html: `
+    <div class="lab-location-pin__shape"></div>
+    <div class="lab-location-pin__glyph" aria-hidden="true">
+      ${renderToStaticMarkup(<LuFlaskConical />)}
+    </div>
+  `,
+  iconSize: [32, 38],
+  iconAnchor: [16, 38],
 });
 
 function ClickHandler({ onPick }: { onPick: (value: WarehouseLocationValue) => void }) {
@@ -75,6 +90,7 @@ export default function WarehouseLocationPicker({
   value,
   onChange,
   height = 320,
+  markerVariant = "warehouse",
 }: WarehouseLocationPickerProps) {
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
   const tileAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
@@ -99,7 +115,7 @@ export default function WarehouseLocationPicker({
           attribution={tileAttribution}
         />
         {value && (
-          <Marker position={[value.latitude, value.longitude]} icon={markerIcon} />
+          <Marker position={[value.latitude, value.longitude]} icon={markerVariant === "lab" ? labMarkerIcon : warehouseMarkerIcon} />
         )}
       </MapContainer>
       <style jsx global>{`
@@ -131,6 +147,37 @@ export default function WarehouseLocationPicker({
           top: 50%;
           transform: translate(-50%, -50%);
           pointer-events: none;
+        }
+        .lab-location-pin {
+          position: relative;
+          background: transparent;
+          border: none;
+        }
+        .lab-location-pin__shape {
+          position: absolute;
+          left: 2px;
+          top: 1px;
+          width: 28px;
+          height: 28px;
+          transform: rotate(-45deg);
+          border: 2px solid #22c55e;
+          border-radius: 50% 50% 50% 0;
+          background: #0b1220;
+          box-shadow: 0 7px 16px rgba(0, 0, 0, 0.35);
+        }
+        .lab-location-pin__glyph {
+          position: absolute;
+          left: 7px;
+          top: 6px;
+          width: 18px;
+          height: 18px;
+          color: #22c55e;
+          line-height: 1;
+          pointer-events: none;
+        }
+        .lab-location-pin__glyph svg {
+          width: 18px;
+          height: 18px;
         }
       `}</style>
     </div>

@@ -156,12 +156,15 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   const scene = page.locator('[data-hero-depth-scene="true"]');
   await expect(scene).toHaveAttribute("data-hero-parallax", "active");
   const layers = ["logistics", "operations", "commodities"];
+  const backgroundBefore = await scene.locator('[data-hero-depth-layer="background"]').evaluate((element) => getComputedStyle(element).transform);
   const before = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
   await page.evaluate(() => window.scrollTo({ top: 500, behavior: "instant" }));
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(350);
   const after = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
+  const backgroundAfter = await scene.locator('[data-hero-depth-layer="background"]').evaluate((element) => getComputedStyle(element).transform);
   expect(after).not.toEqual(before);
   expect(new Set(after).size).toBe(3);
+  expect(backgroundAfter).toBe(backgroundBefore);
 });
 
 test("desktop service story synchronizes in both scroll directions", async ({ page }) => {

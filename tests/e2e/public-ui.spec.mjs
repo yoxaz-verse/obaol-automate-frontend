@@ -59,7 +59,18 @@ for (const theme of ["light", "dark"]) {
       expect(previewBox.x).toBeGreaterThanOrEqual(0);
       expect(previewBox.x + previewBox.width).toBeLessThanOrEqual(width + 1);
       await expect(page.locator('[data-perspective-card="true"]')).toHaveCount(3);
-      await expect(page.locator('[data-hero-depth-layer]')).toHaveCount(3);
+      const segmentedArtwork = page.locator('[data-hero-segmented-artwork="true"]');
+      await expect(segmentedArtwork).toHaveAttribute("role", "img");
+      await expect(segmentedArtwork.locator('[data-hero-depth-layer]')).toHaveCount(3);
+      for (const layer of ["origin", "prepare", "move"]) {
+        await expect(segmentedArtwork.locator(`[data-hero-depth-layer="${layer}"]`)).toBeVisible();
+      }
+      const artworkBox = await segmentedArtwork.boundingBox();
+      const layerBoxes = await Promise.all(["origin", "prepare", "move"].map((layer) => segmentedArtwork.locator(`[data-hero-depth-layer="${layer}"]`).boundingBox()));
+      expect(artworkBox.x).toBeGreaterThanOrEqual(0);
+      expect(artworkBox.x + artworkBox.width).toBeLessThanOrEqual(width + 1);
+      expect(layerBoxes[0].x + layerBoxes[0].width).toBeLessThan(layerBoxes[1].x);
+      expect(layerBoxes[1].x + layerBoxes[1].width).toBeLessThan(layerBoxes[2].x);
       const hierarchyIsCorrect = await page.evaluate(() => {
         const workspace = document.querySelector("#capability-explorer");
         const stages = document.querySelector('[data-execution-stage-band="true"]');

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { inkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
 
 export type HeroStage = {
   id: string;
@@ -19,24 +18,58 @@ const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"
 
 export default function HeroStageExplorer() {
   return (
-    <div data-hero-panel="execution-map" data-hero-depth-scene="true" className="relative min-w-0 px-2 py-5 sm:px-6 lg:py-8 [perspective:1200px]">
+    <div data-hero-panel="execution-map" data-hero-depth-scene="true" className="relative min-w-0 px-1 py-5 sm:px-4 lg:py-8 [perspective:1200px]">
       <h2 className="sr-only">Connected Indian agro trade operations</h2>
-      <div className="pointer-events-none absolute inset-[12%] rounded-full bg-obaol-400/15 blur-3xl dark:bg-obaol-400/10" />
-      <div data-hero-depth-layer="back" aria-hidden="true" className="absolute inset-[12%_5%_5%_13%] rounded-[2rem] border border-obaol-400/20 bg-obaol-400/10 shadow-[0_28px_70px_-36px_rgba(207,152,60,0.7)] [transform:translate3d(18px,18px,-28px)_rotateY(-3deg)]" />
-      <div data-hero-depth-layer="middle" aria-hidden="true" className="absolute inset-[8%_8%_9%_8%] rounded-[2rem] border border-white/50 bg-content1/45 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.65)] [transform:translate3d(8px,9px,-12px)_rotateY(-2deg)] dark:border-white/10" />
-      <div data-hero-depth-layer="front" data-hero-lifecycle-visual="true" data-hero-masked-image="true" data-ink-artwork-mask="true" style={inkArtworkMaskStyle} className="relative aspect-[16/9] overflow-hidden drop-shadow-[0_30px_30px_rgba(15,23,42,0.18)] [transform:rotateX(1.5deg)_rotateY(-2deg)_translateZ(18px)]">
-        <div className="absolute -inset-[2%]">
+      <div className="pointer-events-none absolute inset-[16%_8%_10%] rounded-full bg-obaol-400/12 blur-3xl dark:bg-obaol-400/[0.08]" />
+      <figure
+        data-hero-segmented-artwork="true"
+        data-hero-lifecycle-visual="true"
+        role="img"
+        aria-label="Watercolor illustration of connected Indian agro trade operations moving from farm sourcing through preparation and onward to delivery"
+        className="relative grid aspect-[16/9] grid-cols-[0.86fr_1.18fr_0.92fr] items-stretch gap-1.5 sm:gap-2.5 lg:gap-3.5 [transform-style:preserve-3d]"
+      >
+        <div data-hero-depth-layer="origin" aria-hidden="true" className="relative my-[7%] overflow-hidden rounded-l-[1.4rem] rounded-r-lg border border-white/60 bg-content1 shadow-[0_18px_30px_-22px_rgba(15,23,42,0.48)] [transform:translate3d(0,8px,-14px)_rotateY(2deg)] sm:rounded-l-[1.75rem] dark:border-white/15">
           <Image
             src="/images/hero-agro-execution-art-v2.webp"
-            alt="Expressive ink-and-watercolor artwork of connected Indian agro trade operations from origin through processing and dispatch"
+            alt=""
+            aria-hidden="true"
             fill
             priority
-            sizes="(max-width: 1023px) 100vw, 58vw"
-            className="object-cover object-center contrast-[1.02] saturate-[0.98] dark:brightness-[0.8] dark:saturate-[0.9]"
+            sizes="(max-width: 1023px) 30vw, 18vw"
+            className="object-cover contrast-[1.02] saturate-[0.98] dark:brightness-[0.8] dark:saturate-[0.9]"
+            style={{ objectPosition: "16% center" }}
           />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-black/[0.08]" />
         </div>
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/14 via-transparent to-obaol-500/10" />
-      </div>
+        <div data-hero-depth-layer="prepare" aria-hidden="true" className="relative my-[1.5%] overflow-hidden rounded-xl border border-white/70 bg-content1 shadow-[0_28px_44px_-27px_rgba(15,23,42,0.62)] [transform:translateZ(22px)] sm:rounded-[1.4rem] dark:border-white/20">
+          <Image
+            src="/images/hero-agro-execution-art-v2.webp"
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="(max-width: 1023px) 40vw, 24vw"
+            className="object-cover contrast-[1.03] saturate-[1.02] dark:brightness-[0.82] dark:saturate-[0.92]"
+            style={{ objectPosition: "52% center" }}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/14 via-transparent to-obaol-500/[0.08]" />
+          <div className="pointer-events-none absolute inset-y-[8%] left-0 w-px bg-white/70 dark:bg-white/25" />
+          <div className="pointer-events-none absolute inset-y-[8%] right-0 w-px bg-black/10 dark:bg-white/10" />
+        </div>
+        <div data-hero-depth-layer="move" aria-hidden="true" className="relative my-[5%] overflow-hidden rounded-l-lg rounded-r-[1.4rem] border border-white/60 bg-content1 shadow-[0_20px_34px_-24px_rgba(15,23,42,0.52)] [transform:translate3d(0,5px,-8px)_rotateY(-2deg)] sm:rounded-r-[1.75rem] dark:border-white/15">
+          <Image
+            src="/images/hero-agro-execution-art-v2.webp"
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="(max-width: 1023px) 32vw, 19vw"
+            className="object-cover contrast-[1.02] saturate-[0.98] dark:brightness-[0.8] dark:saturate-[0.9]"
+            style={{ objectPosition: "87% center" }}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-l from-obaol-500/[0.08] via-transparent to-black/[0.08]" />
+        </div>
+      </figure>
     </div>
   );
 }

@@ -110,8 +110,6 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   const homeContent = read("../src/components/home/HomeContent.tsx");
   const homepage = read("../src/app/page.tsx");
   const globals = read("../src/app/globals.css");
-  const inkMaskStyle = read("../src/components/home/inkArtworkMask.ts");
-  const inkMaskAsset = read("../public/images/masks/ink-wash-edge.svg");
   const stagesBlock = hero.match(/const HERO_STAGES = \[[\s\S]*?\] as const satisfies readonly HeroStage\[\];/)?.[0] ?? "";
   const imagePaths = [...stagesBlock.matchAll(/src: "(\/images\/[^"]+)"/g)].map((match) => match[1]);
   const stageLabels = [...stagesBlock.matchAll(/label: "([^"]+)"/g)].map((match) => match[1]);
@@ -139,19 +137,18 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), true);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-depth-scene="true"'), true);
-  for (const layer of ["back", "middle", "front"]) {
+  assert.equal(explorer.includes('data-hero-segmented-artwork="true"'), true);
+  for (const layer of ["origin", "prepare", "move"]) {
     assert.equal(explorer.includes(`data-hero-depth-layer="${layer}"`), true);
   }
-  assert.equal(explorer.includes('data-hero-masked-image="true"'), true);
-  assert.equal(explorer.includes('data-ink-artwork-mask="true"'), true);
-  assert.equal(explorer.includes("inkArtworkMaskStyle"), true);
-  assert.equal(inkMaskStyle.includes("maskImage: inkMask"), true);
-  assert.equal(inkMaskStyle.includes("WebkitMaskImage: inkMask"), true);
-  assert.equal(inkMaskStyle.includes("spaciousInkArtworkMaskStyle"), true);
-  assert.equal(inkMaskAsset.includes('filter id="ink-edge"'), true);
-  assert.equal(inkMaskAsset.includes("feTurbulence"), true);
-  assert.equal(inkMaskAsset.includes('style="background:transparent"'), true);
-  assert.equal(inkMaskAsset.includes("<circle"), false);
+  for (const obsoleteLayer of ["back", "middle", "front"]) {
+    assert.equal(explorer.includes(`data-hero-depth-layer="${obsoleteLayer}"`), false);
+  }
+  assert.equal(explorer.match(/src="\/images\/hero-agro-execution-art-v2\.webp"/g)?.length, 3);
+  assert.equal(explorer.includes('role="img"'), true);
+  assert.equal(explorer.includes("farm sourcing through preparation and onward to delivery"), true);
+  assert.equal(explorer.match(/alt=""/g)?.length, 3);
+  assert.equal(explorer.includes("inkArtworkMaskStyle"), false);
   assert.equal(explorer.includes("A shared path for every trade role"), true);
   assert.equal(explorer.includes("10 connected stages"), true);
   assert.equal(explorer.includes("Complete trade execution"), false);
@@ -163,7 +160,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("grid-cols-1"), true);
   assert.equal(explorer.includes("md:grid-cols-2"), true);
   assert.equal(explorer.includes("xl:grid-cols-[3fr_3fr_3fr_1.2fr]"), true);
-  assert.equal(explorer.includes("connected Indian agro trade operations from origin through processing and dispatch"), true);
+  assert.equal(explorer.includes("Watercolor illustration of connected Indian agro trade operations"), true);
   assert.equal(explorer.includes("animate-ping"), false);
   assert.equal(explorer.includes("group-hover:scale"), false);
   assert.equal(explorer.includes("<svg"), false);

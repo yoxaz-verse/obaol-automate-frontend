@@ -1,7 +1,7 @@
 import HeroCTA from "@/components/home/HeroCTA";
-import HeroStageExplorer, { HeroStageBand, type HeroStage } from "@/components/home/HeroStageExplorer";
+import HeroStageExplorer, { type HeroStage } from "@/components/home/HeroStageExplorer";
 
-const HERO_STAGES = [
+export const HERO_STAGES = [
   { id: "discovery", label: "Discovery", message: "Discover verified products and reliable origin suppliers.", src: "/images/execution-flow/01-discovery.webp", deliverable: "Product Coverage & Origin Sourcing", phase: "Plan" },
   { id: "sampling", label: "Sampling", message: "Review physical samples before committing to a trade.", src: "/images/execution-flow/02-sampling.webp", deliverable: "Physical Lab & Quality Sample Test", phase: "Plan" },
   { id: "coordination", label: "Coordination", message: "Keep every trade partner aligned in real-time.", src: "/images/execution-flow/03-coordination.webp", deliverable: "Counterparty Deal Terms Alignment", phase: "Plan" },
@@ -16,7 +16,6 @@ const HERO_STAGES = [
 
 export default function HeroSectionServer() {
   return (
-    <>
     <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-8 pt-16 lg:pb-10 lg:pt-16">
       {/* Ambient background glow & grid mesh */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -34,7 +33,7 @@ export default function HeroSectionServer() {
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-obaol-500"></span>
               </span>
               <span className="text-[11px] font-extrabold uppercase tracking-[0.25em] text-obaol-700 dark:text-obaol-300 sm:text-xs">
-                Open Agro Execution Platform
+                One platform. Every trade role.
               </span>
             </div>
 
@@ -55,10 +54,7 @@ export default function HeroSectionServer() {
             </div>
 
             {/* Subheading */}
-            <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">
-              Open registration—buyers, suppliers, and specialist service partners can join without an invitation.
-              <span className="mt-1 block font-bold text-foreground sm:mt-0"> Participant and company verification still applies to keep execution trusted.</span>
-            </p>
+            <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">Buyers, suppliers, and specialist partners coordinate one trade through shared technology, clear handoffs, and visible progress.</p>
 
             <HeroCTA />
           </div>
@@ -68,7 +64,5 @@ export default function HeroSectionServer() {
 
       </div>
     </section>
-    <HeroStageBand stages={HERO_STAGES} />
-    </>
   );
 }

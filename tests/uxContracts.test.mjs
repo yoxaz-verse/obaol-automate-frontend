@@ -82,17 +82,19 @@ test("active homepage source does not advertise fabricated runtime telemetry", (
   for (const phrase of ["CORE_LATENCY", "AES-256", "SYS_LINK"]) assert.equal(homepage.includes(phrase), false);
 });
 
-test("homepage communicates open registration without weakening verification", () => {
+test("homepage hero leads with one coordinated platform while preserving registration paths", () => {
   const hero = read("../src/components/home/HeroSectionServer.tsx");
   const heroCta = read("../src/components/home/HeroCTA.tsx");
   const header = read("../src/components/home/header.tsx");
   const homepage = read("../src/app/page.tsx");
 
   for (const phrase of [
-    "Open Agro Execution Platform",
-    "Open registration—buyers, suppliers, and specialist service partners can join without an invitation.",
-    "Participant and company verification still applies to keep execution trusted.",
+    "One platform. Every trade role.",
+    "Buyers, suppliers, and specialist partners coordinate one trade through shared technology, clear handoffs, and visible progress.",
   ]) assert.equal(hero.includes(phrase), true);
+  for (const phrase of ["Open Agro Execution Platform", "Open registration—", "10 verified stages"]) {
+    assert.equal(hero.includes(phrase), false);
+  }
   assert.equal(heroCta.includes('isAuthenticated ? "Open Workspace" : "Join the Open Platform"'), true);
   assert.equal(heroCta.includes('const href = !loading && isAuthenticated ? "/dashboard" : "/auth"'), true);
   assert.equal(header.includes('signedIn ? "Open workspace" : "Join Platform"'), true);
@@ -101,7 +103,7 @@ test("homepage communicates open registration without weakening verification", (
   assert.equal(homepage.includes("An open-registration platform"), true);
 });
 
-test("homepage hero presents the complete static ten-stage execution map", () => {
+test("homepage hero is calm and the complete ten-stage map appears later", () => {
   const hero = read("../src/components/home/HeroSectionServer.tsx");
   const explorer = read("../src/components/home/HeroStageExplorer.tsx");
   const heroCta = read("../src/components/home/HeroCTA.tsx");
@@ -132,16 +134,15 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
   assert.equal(explorer.includes('data-execution-stage-band="true"'), true);
   assert.equal(explorer.includes('className="hidden border-y border-default-200/70 bg-default-50/55 py-7 dark:bg-default-50/[0.025] md:block lg:py-8"'), true);
-  assert.equal(explorer.includes('data-hero-assistant-safe-zone="true"'), true);
   assert.equal(explorer.includes('data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="mt-'), false);
-  assert.equal(explorer.includes("data-execution-phase={phase.phase.toLowerCase()}"), true);
   assert.equal(explorer.includes("data-execution-stage-group={phase.phase.toLowerCase()}"), true);
   assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), true);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
-  assert.equal(explorer.includes('data-hero-lifecycle-visual="true"'), true);
-  assert.equal(explorer.includes('data-hero-lifecycle-heading="true"'), true);
+  assert.equal(explorer.includes('data-hero-depth-scene="true"'), true);
+  for (const layer of ["back", "middle", "front"]) {
+    assert.equal(explorer.includes(`data-hero-depth-layer="${layer}"`), true);
+  }
   assert.equal(explorer.includes('data-hero-masked-image="true"'), true);
-  assert.equal(explorer.includes('data-hero-ink-fade="true"'), true);
   assert.equal(explorer.includes('data-ink-artwork-mask="true"'), true);
   assert.equal(explorer.includes("inkArtworkMaskStyle"), true);
   assert.equal(inkMaskStyle.includes("maskImage: inkMask"), true);
@@ -151,16 +152,18 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(inkMaskAsset.includes("feTurbulence"), true);
   assert.equal(inkMaskAsset.includes('style="background:transparent"'), true);
   assert.equal(inkMaskAsset.includes("<circle"), false);
-  assert.equal(explorer.includes("From origin to delivery"), true);
-  assert.equal(explorer.includes("One connected agro execution system"), false);
-  assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
+  assert.equal(explorer.includes("A shared path for every trade role"), true);
+  assert.equal(explorer.includes("10 connected stages"), true);
+  assert.equal(explorer.includes("Complete trade execution"), false);
+  assert.equal(explorer.includes("From origin to delivery"), false);
+  assert.equal(explorer.includes('data-execution-route="phase-rail"'), false);
   assert.equal(explorer.includes('data-execution-route="stepped"'), false);
   assert.equal(explorer.includes("stages.filter("), true);
   assert.equal(explorer.includes('data-execution-stage-grid="true"'), true);
   assert.equal(explorer.includes("grid-cols-1"), true);
   assert.equal(explorer.includes("md:grid-cols-2"), true);
   assert.equal(explorer.includes("xl:grid-cols-[3fr_3fr_3fr_1.2fr]"), true);
-  assert.equal(explorer.includes("Expressive ink-and-watercolor artwork of the Indian agro-trade lifecycle from crop sourcing and documentation through quality verification, packaging, warehousing, and delivery"), true);
+  assert.equal(explorer.includes("connected Indian agro trade operations from origin through processing and dispatch"), true);
   assert.equal(explorer.includes("animate-ping"), false);
   assert.equal(explorer.includes("group-hover:scale"), false);
   assert.equal(explorer.includes("<svg"), false);
@@ -175,7 +178,10 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(heroCta.includes("Start Selling"), false);
   assert.equal(heroCta.includes("Work in Operations"), false);
   assert.equal(hero.includes("animate-ping"), false);
-  assert.equal(hero.indexOf("</section>") < hero.indexOf("<HeroStageBand stages={HERO_STAGES} />"), true);
+  assert.equal(hero.includes("<HeroStageBand"), false);
+  assert.equal(homeContent.includes("<HeroStageBand stages={HERO_STAGES} />"), true);
+  assert.equal(homeContent.indexOf('<section id="capability-explorer"') < homeContent.indexOf("<HeroStageBand stages={HERO_STAGES} />"), true);
+  assert.equal(homeContent.indexOf("<HeroStageBand stages={HERO_STAGES} />") < homeContent.indexOf("<PerspectiveGateway />"), true);
   assert.equal(hero.includes('data-natural-scroll-hero="true"'), true);
   assert.equal(hero.includes('lg:sticky lg:top-28'), false);
   assert.equal(homepage.includes('className="obaol-home bg-background text-foreground"'), true);
@@ -190,7 +196,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-art-v2.webp", import.meta.url))), true);
 });
 
-test("homepage services use a compact nine-piece interactive puzzle", () => {
+test("homepage services use a mobile puzzle and desktop synchronized chapter story", () => {
   const services = read("../src/components/home/ServiceShowcase.tsx");
   const homeContent = read("../src/components/home/HomeContent.tsx");
   const hero = read("../src/components/home/HeroSectionServer.tsx");
@@ -204,6 +210,8 @@ test("homepage services use a compact nine-piece interactive puzzle", () => {
     "packaging", "logistics", "warehouse", "freight",
   ]);
   assert.equal(services.includes('data-service-puzzle="true"'), true);
+  assert.equal(services.includes('data-service-mobile-puzzle="true"'), true);
+  assert.equal(services.includes('data-service-desktop-story="true"'), true);
   assert.equal(services.includes('data-service-puzzle-grid="true"'), true);
   assert.equal(services.includes("data-puzzle-assembled={puzzleAssembled"), true);
   assert.equal(services.includes("data-service-piece={service.id}"), true);
@@ -217,16 +225,19 @@ test("homepage services use a compact nine-piece interactive puzzle", () => {
   assert.equal(services.includes("layout={!adaptiveMotion.prefersReducedMotion}"), true);
   assert.equal(services.includes("grid-cols-2"), true);
   assert.equal(services.includes('data-mobile-layout="irregular"'), true);
-  assert.equal(services.includes('"col-span-1 row-span-2 lg:col-span-3 lg:row-span-2"'), true);
-  assert.equal(services.includes('"col-span-2 row-span-1 lg:col-span-3 lg:row-span-1"'), true);
-  assert.equal(services.includes("lg:grid-cols-12"), true);
-  assert.equal(services.includes("lg:col-span-7 lg:row-span-4"), true);
   assert.equal(services.includes("fragmentLayouts"), true);
   assert.equal(services.includes("fragmentPositions"), true);
-  assert.equal(services.includes('data-service-story="true"'), false);
-  assert.equal(services.includes("sticky top-28"), false);
-  assert.equal(services.includes("lg:min-h-[72svh]"), false);
-  assert.equal(services.includes("IntersectionObserver"), false);
+  assert.equal(services.includes("lg:hidden"), true);
+  assert.equal(services.includes("hidden gap-20 lg:grid"), true);
+  assert.equal(services.includes("data-service-chapter={service.id}"), true);
+  assert.equal(services.includes("data-active-service={active.id}"), true);
+  assert.equal(services.includes("sticky top-28"), true);
+  assert.equal(services.includes("min-h-[72svh]"), true);
+  assert.equal(services.includes("IntersectionObserver"), true);
+  assert.equal(services.includes("requestAnimationFrame"), true);
+  for (const layer of ["back", "middle", "front"]) {
+    assert.equal(services.includes(`data-service-depth-layer="${layer}"`), true);
+  }
   assert.equal(services.includes("Every trade begins as a possibility"), false);
   assert.equal(services.includes("images.pexels.com"), false);
   assert.equal(imagePaths.length, 9);
@@ -242,7 +253,7 @@ test("homepage services use a compact nine-piece interactive puzzle", () => {
   ]) assert.equal(services.includes(phrase), true);
   assert.equal(services.includes("Different specialists. One connected trade."), true);
   assert.equal(services.includes("OBAOL connects the work without replacing the people performing it."), true);
-  assert.equal(hero.includes("Open registration—buyers, suppliers, and specialist service partners can join without an invitation."), true);
+  assert.equal(hero.includes("One platform. Every trade role."), true);
   assert.equal(homeContent.includes("OBAOL is the technology and coordination platform"), true);
   assert.equal(homeContent.includes("Independent trade participants do the specialist work."), true);
   assert.equal(homepage.includes("open-registration B2B agro execution platform"), true);
@@ -251,7 +262,8 @@ test("homepage services use a compact nine-piece interactive puzzle", () => {
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);
   }
   assert.equal(homeContent.indexOf("<DeferredServiceShowcase />") < homeContent.indexOf('<section id="capability-explorer"'), true);
-  assert.equal(homeContent.indexOf('<section id="capability-explorer"') < homeContent.indexOf("<PerspectiveGateway />"), true);
+  assert.equal(homeContent.indexOf('<section id="capability-explorer"') < homeContent.indexOf("<HeroStageBand stages={HERO_STAGES} />"), true);
+  assert.equal(homeContent.indexOf("<HeroStageBand stages={HERO_STAGES} />") < homeContent.indexOf("<PerspectiveGateway />"), true);
 });
 
 test("the OBAOL perspective gateway presents a premium three-card entry point", () => {

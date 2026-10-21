@@ -2,7 +2,8 @@ import { FiArrowRight, FiCompass, FiGitBranch } from "react-icons/fi";
 import { FaShieldHalved, FaTruckFront, FaEarthAsia } from "react-icons/fa6";
 import Link from "next/link";
 import Header from "@/components/home/header";
-import HeroSection from "@/components/home/HeroSectionServer";
+import HeroSection, { HERO_STAGES } from "@/components/home/HeroSectionServer";
+import { HeroStageBand } from "@/components/home/HeroStageExplorer";
 import DeferredServiceShowcase from "@/components/home/DeferredServiceShowcase";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
@@ -67,6 +68,7 @@ export default function HomeContent() {
 
                 </div>
             </section>
+            <HeroStageBand stages={HERO_STAGES} />
             <PerspectiveGateway />
 
             <section className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 my-10 public-layout-container">

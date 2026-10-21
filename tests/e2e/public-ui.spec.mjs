@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 for (const theme of ["light", "dark"]) {
-  for (const width of [375, 768, 1440]) {
+  for (const width of [375, 768, 1024, 1440]) {
     test(`public preview is readable at ${width}px in ${theme}`, async ({ page }) => {
       await page.setViewportSize({ width, height: 1000 });
       await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
@@ -16,18 +16,30 @@ for (const theme of ["light", "dark"]) {
         await expect(stageGrid.locator('[data-execution-stage-group]')).toHaveCount(4);
         await expect(stageGrid.locator('[data-execution-stage="discovery"]')).toBeVisible();
         const stageColumns = await stageGrid.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").length);
-        expect(stageColumns).toBe(width === 768 ? 2 : 4);
+        expect(stageColumns).toBe(width >= 1280 ? 4 : 2);
         const stageBox = await stageGrid.boundingBox();
         expect(stageBox.x).toBeGreaterThanOrEqual(0);
         expect(stageBox.x + stageBox.width).toBeLessThanOrEqual(width + 1);
       }
 
-      const servicePuzzle = page.locator('[data-service-puzzle="true"]');
-      await servicePuzzle.scrollIntoViewIfNeeded();
-      await expect(servicePuzzle).toHaveAttribute("data-puzzle-assembled", "true");
-      await expect(servicePuzzle.getByRole("heading", { name: "Different specialists. One connected trade." })).toBeVisible();
-      await expect(servicePuzzle.locator('[data-service-piece]')).toHaveCount(9);
-      await expect(servicePuzzle.locator('[data-service-selected="true"]')).toHaveCount(1);
+      const showcase = page.locator('[data-service-showcase="true"]');
+      const servicePuzzle = page.locator('[data-service-mobile-puzzle="true"]');
+      const desktopStory = page.locator('[data-service-desktop-story="true"]');
+      await showcase.scrollIntoViewIfNeeded();
+      await expect(showcase.getByRole("heading", { name: "Different specialists. One connected trade." })).toBeVisible();
+      if (width < 1024) {
+        await expect(servicePuzzle).toBeVisible();
+        await expect(desktopStory).toBeHidden();
+        await expect(servicePuzzle).toHaveAttribute("data-puzzle-assembled", "true");
+        await expect(servicePuzzle.locator('[data-service-piece]')).toHaveCount(9);
+        await expect(servicePuzzle.locator('[data-service-selected="true"]')).toHaveCount(1);
+      } else {
+        await expect(servicePuzzle).toBeHidden();
+        await expect(desktopStory).toBeVisible();
+        await expect(desktopStory.locator('[data-service-chapter]')).toHaveCount(9);
+        await expect(desktopStory.locator('[data-active-service]')).toBeVisible();
+        await expect(desktopStory.locator('[data-service-depth-layer]')).toHaveCount(3);
+      }
       if (width === 375) {
         await expect(servicePuzzle.locator('[data-service-puzzle-grid="true"]')).toHaveAttribute("data-mobile-layout", "irregular");
         const portraitBox = await servicePuzzle.locator('[data-service-piece="sourcing"]').boundingBox();
@@ -47,6 +59,13 @@ for (const theme of ["light", "dark"]) {
       expect(previewBox.x).toBeGreaterThanOrEqual(0);
       expect(previewBox.x + previewBox.width).toBeLessThanOrEqual(width + 1);
       await expect(page.locator('[data-perspective-card="true"]')).toHaveCount(3);
+      await expect(page.locator('[data-hero-depth-layer]')).toHaveCount(3);
+      const hierarchyIsCorrect = await page.evaluate(() => {
+        const workspace = document.querySelector("#capability-explorer");
+        const stages = document.querySelector('[data-execution-stage-band="true"]');
+        return Boolean(workspace && stages && (workspace.compareDocumentPosition(stages) & Node.DOCUMENT_POSITION_FOLLOWING));
+      });
+      expect(hierarchyIsCorrect).toBe(true);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.screenshot({ path: `test-results/public-home-${width}-${theme}.png`, fullPage: false });
     });
@@ -54,7 +73,7 @@ for (const theme of ["light", "dark"]) {
 }
 
 test("service puzzle reveals every service with accessible selection", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.setViewportSize({ width: 768, height: 1000 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.addInitScript(() => {
     const nativeMatchMedia = window.matchMedia.bind(window);
@@ -105,6 +124,35 @@ test("service puzzle reveals every service with accessible selection", async ({ 
   await page.keyboard.press("Enter");
   await expect(sourcing).toHaveAttribute("aria-pressed", "true");
   await expect(puzzle.locator('[aria-live="polite"]')).toContainText("Selected service: Sourcing");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("desktop service story synchronizes in both scroll directions", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    const nativeMatchMedia = window.matchMedia.bind(window);
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: (query) => {
+        if (query.includes("hover: none") || query.includes("pointer: coarse") || query.includes("update: slow")) {
+          return { matches: false, media: query, onchange: null, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent() { return true; } };
+        }
+        return nativeMatchMedia(query);
+      },
+    });
+  });
+  await page.goto("/");
+
+  const story = page.locator('[data-service-desktop-story="true"]');
+  await expect(story).toBeVisible();
+  const activePanel = story.locator('[data-active-service]');
+  for (const id of ["discovery", "quality", "freight", "documentation", "discovery"]) {
+    await story.locator(`[data-service-chapter="${id}"]`).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(120);
+    await expect(activePanel).toHaveAttribute("data-active-service", id);
+  }
+  await expect(activePanel.locator('[data-service-artwork-layer="true"]')).toHaveCount(9);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 

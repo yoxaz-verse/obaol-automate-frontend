@@ -22,9 +22,9 @@ type Accent = {
 
 const accents: Record<AccentPlacement, readonly Accent[]> = {
   hero: [
-    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "bottom-[-8%] left-[6%] w-[clamp(8rem,9vw,11rem)] opacity-65", aspect: "aspect-[640/427]", travel: 36, xTravel: 3, depth: "foreground", size: "small" },
-    { id: "verification", src: "/images/home-accents/verification-clipboard.webp", className: "left-[-4%] top-[1%] w-[clamp(7rem,7vw,9rem)] opacity-50", aspect: "aspect-[640/427]", travel: 26, xTravel: -2, depth: "middle", size: "medium" },
-    { id: "logistics", src: "/images/home-accents/logistics-container.webp", className: "right-[-13%] top-[3%] w-[clamp(18rem,20vw,24rem)] opacity-55", aspect: "aspect-[640/427]", travel: 20, xTravel: 3, depth: "background", size: "large" },
+    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "bottom-[-21%] left-[1%] w-[clamp(7rem,7vw,9rem)] opacity-55", aspect: "aspect-[640/427]", travel: 34, xTravel: 3, depth: "foreground", size: "small" },
+    { id: "verification", src: "/images/home-accents/verification-clipboard.webp", className: "left-[-13%] top-[-24%] w-[clamp(6.5rem,6.5vw,8.5rem)] opacity-[0.42]", aspect: "aspect-[640/427]", travel: 24, xTravel: -2, depth: "middle", size: "medium" },
+    { id: "logistics", src: "/images/home-accents/logistics-container.webp", className: "right-[-19%] top-[-18%] w-[clamp(14rem,16vw,19rem)] opacity-[0.42]", aspect: "aspect-[640/427]", travel: 18, xTravel: 3, depth: "background", size: "large" },
   ],
   services: [
     { id: "laboratory", src: "/images/home-accents/laboratory-sample.webp", className: "left-[-2.5rem] top-[7%] w-[clamp(6rem,7vw,8rem)] opacity-[0.3]", aspect: "aspect-[560/518]", travel: 32, xTravel: 3, depth: "foreground", size: "small" },
@@ -47,7 +47,7 @@ function ParallaxAccent({ accent, placement, progress, enabled }: { accent: Acce
       data-accent-depth={accent.depth}
       data-accent-size={accent.size}
       style={{ x: enabled ? x : 0, y: enabled ? y : 0 }}
-      className={`absolute ${accent.aspect} ${accent.className} will-change-transform [filter:drop-shadow(0_10px_12px_rgba(15,23,42,0.12))]`}
+      className={`absolute ${accent.aspect} ${accent.className} will-change-transform [filter:drop-shadow(0_8px_10px_rgba(15,23,42,0.09))]`}
     >
       <Image src={accent.src} alt="" aria-hidden="true" fill sizes={accent.size === "large" ? "26rem" : "12rem"} className="object-contain" />
     </motion.div>

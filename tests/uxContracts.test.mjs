@@ -196,8 +196,8 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(accents.includes('type AccentSize = "small" | "medium" | "large"'), true);
   assert.equal(accents.includes('/images/home-accents/warehouse-forklift.webp'), true);
   assert.equal(accents.includes('/images/home-accents/cargo-ship.webp'), true);
-  assert.equal(accents.includes("travel: 36"), true);
-  assert.equal(accents.includes("travel: 26"), true);
+  assert.equal(accents.includes("travel: 34"), true);
+  assert.equal(accents.includes("travel: 24"), true);
   assert.equal(accents.includes("travel: 20"), true);
   assert.equal(accents.includes('data-accent-motion={enabled ? "active" : "static"}'), true);
   assert.equal(accents.includes('isHeroComposition ? "z-40 overflow-visible" : "z-20 overflow-hidden"'), true);

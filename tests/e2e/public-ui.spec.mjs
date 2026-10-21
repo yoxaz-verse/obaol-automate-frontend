@@ -194,15 +194,24 @@ test("desktop hero uses distinct restrained object-layer parallax", async ({ pag
   expect(artworkBox.width).toBeGreaterThan(layoutBox.width * 0.55);
   expect(artworkBox.x + artworkBox.width).toBeGreaterThanOrEqual(1416);
   expect(clipboardBox.x).toBeLessThan(artworkBox.x + 1);
-  expect(clipboardBox.x + clipboardBox.width).toBeGreaterThan(artworkBox.x);
-  expect(containerBox.x).toBeLessThan(artworkBox.x + artworkBox.width);
+  expect(clipboardBox.x + clipboardBox.width).toBeGreaterThan(artworkBox.x - 24);
+  expect(containerBox.x).toBeLessThan(artworkBox.x + artworkBox.width + 24);
   expect(containerBox.x + containerBox.width).toBeGreaterThan(artworkBox.x + artworkBox.width);
-  expect(pepperBox.y).toBeLessThan(artworkBox.y + artworkBox.height);
+  expect(pepperBox.y).toBeLessThan(artworkBox.y + artworkBox.height + 56);
   expect(pepperBox.y + pepperBox.height).toBeGreaterThan(artworkBox.y + artworkBox.height);
+  const artworkCore = {
+    x: artworkBox.x + artworkBox.width * 0.18,
+    y: artworkBox.y + artworkBox.height * 0.18,
+    width: artworkBox.width * 0.64,
+    height: artworkBox.height * 0.64,
+  };
   for (const accentBox of [pepperBox, clipboardBox, containerBox]) {
     const overlapsCopy = accentBox.x < copyBox.x + copyBox.width && accentBox.x + accentBox.width > copyBox.x
       && accentBox.y < copyBox.y + copyBox.height && accentBox.y + accentBox.height > copyBox.y;
     expect(overlapsCopy).toBe(false);
+    const overlapsArtworkCore = accentBox.x < artworkCore.x + artworkCore.width && accentBox.x + accentBox.width > artworkCore.x
+      && accentBox.y < artworkCore.y + artworkCore.height && accentBox.y + accentBox.height > artworkCore.y;
+    expect(overlapsArtworkCore).toBe(false);
   }
   const supportingOpacity = await page.locator('[data-accent-placement="services"], [data-accent-placement="workspace"]').evaluateAll((elements) => elements.map((element) => Number(getComputedStyle(element).opacity)));
   const heroOpacity = await heroAccents.locator('[data-parallax-accent]').evaluateAll((elements) => elements.map((element) => Number(getComputedStyle(element).opacity)));

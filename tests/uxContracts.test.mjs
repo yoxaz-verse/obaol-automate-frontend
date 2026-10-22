@@ -179,7 +179,13 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("10 connected stages"), true);
   assert.equal(explorer.includes("Complete trade execution"), false);
   assert.equal(explorer.includes("From origin to delivery"), false);
-  assert.equal(explorer.includes('data-execution-route="phase-rail"'), false);
+  assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
+  assert.equal(explorer.includes('aria-label="Execution phases: Plan, Verify, Move, and Close"'), true);
+  assert.equal(explorer.includes("data-execution-phase={phase.phase.toLowerCase()}"), true);
+  assert.equal(explorer.includes('data-hero-atmosphere="true"'), true);
+  assert.equal(explorer.includes('data-atmosphere-motion="static"'), true);
+  assert.equal(explorer.includes('data-hero-atmosphere-theme="light"'), true);
+  assert.equal(explorer.includes('data-hero-atmosphere-theme="dark"'), true);
   assert.equal(explorer.includes('data-execution-route="stepped"'), false);
   assert.equal(explorer.includes("stages.filter("), true);
   assert.equal(explorer.includes('data-execution-stage-grid="true"'), true);

@@ -64,14 +64,21 @@ for (const theme of ["light", "dark"]) {
       await expect(page.locator('[data-perspective-card="true"]')).toHaveCount(3);
       const layeredArtwork = page.locator('[data-hero-layered-artwork="true"]');
       await expect(layeredArtwork).toHaveAttribute("role", "img");
+      const atmosphere = layeredArtwork.locator('[data-hero-atmosphere="true"]');
+      await expect(atmosphere).toHaveAttribute("data-atmosphere-motion", "static");
+      await expect(atmosphere.locator(`[data-hero-atmosphere-theme="${theme}"]`)).toBeVisible();
+      await expect(atmosphere.locator(`[data-hero-atmosphere-theme="${theme === "light" ? "dark" : "light"}"]`)).toBeHidden();
+      const phaseRail = page.locator('[data-execution-route="phase-rail"]');
+      await expect(phaseRail.locator('[data-execution-phase]')).toHaveCount(4);
+      expect(await phaseRail.locator('[data-execution-phase]').allTextContents()).toEqual(["Plan", "Verify", "Move", "Close"]);
       await expect(page.locator('[data-hero-depth-scene="true"]')).toHaveAttribute("data-hero-parallax", "static");
-      await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(3);
+      await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(4);
       await expect(page.locator('[data-parallax-accent]')).toHaveCount(7);
-      await expect(page.locator('[data-accent-depth="foreground"]')).toHaveCount(3);
+      await expect(page.locator('[data-accent-depth="foreground"]')).toHaveCount(4);
       await expect(page.locator('[data-accent-depth="middle"]')).toHaveCount(1);
-      await expect(page.locator('[data-accent-depth="background"]')).toHaveCount(3);
+      await expect(page.locator('[data-accent-depth="background"]')).toHaveCount(2);
       await expect(page.locator('[data-accent-size="large"]')).toHaveCount(3);
-      for (const placement of ["hero", "services", "workspace"]) {
+      for (const placement of ["hero", "services", "serviceChapter", "workspace"]) {
         await expect(page.locator(`[data-home-parallax-accents="${placement}"]`)).toHaveAttribute("data-accent-motion", "static");
       }
       await expect(layeredArtwork.locator('[data-hero-depth-layer]')).toHaveCount(4);
@@ -79,9 +86,13 @@ for (const theme of ["light", "dark"]) {
         await expect(layeredArtwork.locator(`[data-hero-depth-layer="${layer}"]`)).toBeVisible();
       }
       const artworkBox = await layeredArtwork.boundingBox();
+      const railBox = await phaseRail.boundingBox();
       expect(artworkBox.x).toBeGreaterThanOrEqual(0);
       if (width < 1280) expect(artworkBox.x + artworkBox.width).toBeLessThanOrEqual(width + 1);
       else expect(artworkBox.x + artworkBox.width).toBeGreaterThanOrEqual(width - 24);
+      expect(railBox.y).toBeGreaterThanOrEqual(artworkBox.y + artworkBox.height - 1);
+      expect(railBox.x).toBeGreaterThanOrEqual(0);
+      expect(railBox.x + railBox.width).toBeLessThanOrEqual(width + 1);
       const hierarchyIsCorrect = await page.evaluate(() => {
         const workspace = document.querySelector("#capability-explorer");
         const stages = document.querySelector('[data-execution-stage-band="true"]');

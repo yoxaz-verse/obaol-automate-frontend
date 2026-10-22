@@ -41,7 +41,6 @@ export default function HeroStageExplorer() {
     <div data-hero-panel="execution-map" data-hero-depth-scene="true" data-hero-parallax={parallaxEnabled ? "active" : "static"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
       <h2 className="sr-only">Connected Indian agro trade operations</h2>
       <div className="pointer-events-none absolute inset-[16%_8%_10%] rounded-full bg-obaol-400/12 blur-3xl dark:bg-obaol-400/[0.08]" />
-      <ParallaxTradeAccents placement="hero" progress={smoothScrollProgress} motionEnabled={parallaxEnabled} />
       <figure
         ref={sceneRef}
         data-hero-layered-artwork="true"
@@ -50,6 +49,30 @@ export default function HeroStageExplorer() {
         aria-label="Watercolor illustration of connected Indian agro trade operations moving from farm sourcing through preparation and onward to delivery"
         className="relative aspect-[1672/941] w-full"
       >
+        <div
+          data-hero-atmosphere="true"
+          data-atmosphere-motion="static"
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-[12%] -left-[6%] -right-[6%] -top-[10%] z-0"
+        >
+          <div
+            data-hero-atmosphere-theme="light"
+            className="absolute inset-0 dark:hidden"
+            style={{
+              backgroundImage: "radial-gradient(ellipse 46% 40% at 22% 58%, rgba(255,255,255,0.96) 0%, rgba(235,245,255,0.72) 42%, transparent 76%), radial-gradient(ellipse 52% 44% at 76% 42%, rgba(255,255,255,0.92) 0%, rgba(219,235,248,0.62) 48%, transparent 80%), radial-gradient(ellipse 55% 30% at 58% 78%, rgba(255,247,229,0.58) 0%, transparent 76%)",
+              filter: "blur(22px)",
+            }}
+          />
+          <div
+            data-hero-atmosphere-theme="dark"
+            className="absolute inset-0 hidden dark:block"
+            style={{
+              backgroundImage: "radial-gradient(ellipse 48% 42% at 24% 56%, rgba(30,35,38,0.8) 0%, rgba(20,24,27,0.5) 48%, transparent 78%), radial-gradient(ellipse 54% 46% at 76% 42%, rgba(42,38,31,0.72) 0%, rgba(28,27,25,0.46) 50%, transparent 80%), radial-gradient(ellipse 50% 28% at 58% 78%, rgba(207,152,60,0.16) 0%, transparent 76%)",
+              filter: "blur(24px)",
+            }}
+          />
+        </div>
+        <ParallaxTradeAccents placement="hero" progress={smoothScrollProgress} motionEnabled={parallaxEnabled} />
         <div data-hero-depth-layer="background" aria-hidden="true" data-ink-artwork-mask="true" style={inkArtworkMaskStyle} className="absolute inset-0">
           <Image
             src="/images/hero-layers/background.webp"
@@ -96,6 +119,18 @@ export default function HeroStageExplorer() {
           />
         </motion.div>
       </figure>
+
+      <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Close" className="relative z-30 mx-[7%] mt-1 pb-2 sm:mx-[9%] sm:mt-2 lg:pb-0">
+        <div className="absolute left-[7px] right-[7px] top-[7px] h-px bg-obaol-700/70 dark:bg-obaol-300/70" />
+        <div className="relative grid grid-cols-4">
+          {phaseGroups.map((phase, index) => (
+            <div key={phase.phase} data-execution-phase={phase.phase.toLowerCase()} className={index === phaseGroups.length - 1 ? "text-right" : index > 0 ? "text-center" : ""}>
+              <span className={`mb-2 block size-[15px] rounded-full border-[3px] border-background bg-obaol-500 shadow-[0_0_0_1px_rgba(180,119,18,0.75)] dark:shadow-[0_0_0_1px_rgba(228,199,153,0.72)] sm:mb-3 ${index === phaseGroups.length - 1 ? "ml-auto" : index > 0 ? "mx-auto" : ""}`} />
+              <span className="block text-[8px] font-bold uppercase tracking-[0.14em] text-foreground sm:text-[10px] sm:tracking-[0.2em] xl:text-[11px]">{phase.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

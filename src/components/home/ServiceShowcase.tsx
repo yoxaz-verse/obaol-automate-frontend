@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useSpring, useTransform } from "framer-motion";
 import { useEffect, useMemo, useRef, useState, type ComponentType, type RefCallback } from "react";
 import { FiCheckCircle, FiFileText, FiPackage, FiSearch, FiShoppingBag, FiTarget, FiTruck } from "react-icons/fi";
 import { FaShip, FaWarehouse } from "react-icons/fa6";
@@ -76,6 +76,10 @@ export default function ServiceShowcase() {
   const desktopStoryRef = useRef<HTMLDivElement>(null);
   const chapterNodesRef = useRef<Array<HTMLElement | null>>([]);
   const puzzleInView = useInView(sectionRef, { once: true, amount: 0.15 });
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
+  const smoothScrollProgress = useSpring(scrollYProgress, { stiffness: 90, damping: 24, mass: 0.45 });
+  const artworkY = useTransform(smoothScrollProgress, [0, 1], [24, -24]);
+  const artworkScale = useTransform(smoothScrollProgress, [0, 0.5, 1], [1.025, 1.055, 1.025]);
   const active = services[activeIndex];
   const ActiveIcon = active.icon;
   const orderedServices = useMemo(() => [active, ...services.filter((_, index) => index !== activeIndex)], [active, activeIndex]);
@@ -224,6 +228,7 @@ export default function ServiceShowcase() {
           </div>
           <div className="relative">
             <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-12rem)] min-h-[480px] max-h-[650px]">
+              <ParallaxTradeAccents placement="serviceChapter" progress={smoothScrollProgress} motionEnabled={adaptiveMotion.allowDecorativeMotion} activeServiceId={active.id} />
               <div
                 data-service-background-wash="true"
                 className="absolute inset-0 overflow-hidden"
@@ -235,10 +240,16 @@ export default function ServiceShowcase() {
                 {services.map((service, index) => {
                   const isActive = index === activeIndex;
                   return (
-                    <div key={service.id} data-service-artwork-layer="true" aria-hidden={!isActive} className={`absolute inset-0 transition-[opacity,filter,transform] ease-out ${adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[550ms]"} ${isActive ? "z-[1] scale-100 opacity-100 blur-0" : "z-0 scale-[1.015] opacity-0 blur-[2px]"}`}>
+                    <motion.div
+                      key={service.id}
+                      data-service-artwork-layer="true"
+                      aria-hidden={!isActive}
+                      style={{ y: adaptiveMotion.allowDecorativeMotion ? artworkY : 0, scale: adaptiveMotion.allowDecorativeMotion ? artworkScale : 1 }}
+                      className={`absolute inset-0 transition-[opacity,filter] ease-out ${adaptiveMotion.prefersReducedMotion ? "duration-0" : "duration-[550ms]"} ${isActive ? "z-[1] opacity-100 blur-0" : "z-0 opacity-0 blur-[2px]"}`}
+                    >
                       <Image src={service.image} alt={isActive ? service.imageAlt : ""} aria-hidden={!isActive} fill priority={index === 0} sizes="(max-width: 1023px) 1px, 52vw" className="object-cover opacity-75 saturate-[0.82] contrast-[0.92]" style={{ objectPosition: service.imagePosition }} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-background/15" />
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>

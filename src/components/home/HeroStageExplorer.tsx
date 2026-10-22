@@ -32,9 +32,9 @@ export default function HeroStageExplorer() {
     damping: 24,
     mass: 0.35,
   });
-  const logisticsY = useTransform(smoothScrollProgress, [0, 1], [3, -3]);
-  const operationsY = useTransform(smoothScrollProgress, [0, 1], [6, -6]);
-  const commoditiesY = useTransform(smoothScrollProgress, [0, 1], [10, -10]);
+  const logisticsY = useTransform(smoothScrollProgress, [0, 1], [10, -10]);
+  const operationsY = useTransform(smoothScrollProgress, [0, 1], [22.5, -22.5]);
+  const commoditiesY = useTransform(smoothScrollProgress, [0, 1], [40, -40]);
   const parallaxEnabled = !adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch;
 
   return (

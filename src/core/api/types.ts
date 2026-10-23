@@ -8,8 +8,11 @@ export type ApiSuccess<T> = {
 
 export type ApiFailure = {
   success: false;
+  code: string;
   message: string;
-  errors?: unknown;
+  errors?: Record<string, string | string[]>;
+  status?: number;
+  requestId?: string;
 };
 
 export type PaginatedData<T> = {
@@ -17,7 +20,12 @@ export type PaginatedData<T> = {
   page?: number;
   limit?: number;
   totalCount?: number;
+  total?: number;
+  pages?: number;
 };
+
+export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
+export type ApiListResponse<T> = ApiSuccess<PaginatedData<T>>;
 
 export type EntityId = string;
 

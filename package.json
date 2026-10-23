@@ -8,6 +8,7 @@
     "analyze": "ANALYZE=true next build",
     "check:bundle": "node scripts/check-bundle-budget.mjs",
     "metrics:static": "node scripts/code-health.mjs",
+    "check:health": "node scripts/code-health.mjs src --check",
     "metrics:assets": "node scripts/audit-public-assets.mjs",
     "start": "next start",
     "lint": "next lint",
@@ -17,7 +18,7 @@
     "test:e2e:mobile": "playwright test",
     "test:e2e:authenticated": "playwright test tests/e2e/authenticated-flows.spec.mjs",
     "test:perf:mobile": "node scripts/run-lighthouse-mobile.mjs",
-    "test:quality": "npm run typecheck && npm test && npm run build && npm run check:bundle && npm run metrics:assets",
+    "test:quality": "npm run typecheck && npm run check:health && npm test && npm run build && npm run check:bundle && npm run metrics:assets",
     "test:website": "npm run test:quality && npm run test:e2e:mobile && npm run test:perf:mobile",
     "typecheck": "tsc --noEmit --incremental false"
   },

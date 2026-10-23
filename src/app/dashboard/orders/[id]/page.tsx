@@ -51,37 +51,33 @@ import BrandedLoader from "@/components/ui/BrandedLoader";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
+import { OWNER_OPTIONS, getOwnerLabel } from "@/features/trade-workflow/domain";
+import { normalizeApiError } from "@/core/api/apiErrors";
+import {
+    DOCUMENT_TYPE_LABELS,
+    ORDER_CORE_DOCUMENT_TYPES,
+    OWNER_LAYERS,
+    SUBFLOW_DATE_MAP,
+    SUBFLOW_DOCUMENT_TYPES,
+} from "@/features/orders/config";
+import {
+    actionByLabel,
+    companyName,
+    executionBidLabel,
+    executionTaskLabel,
+    OrderRule,
+    unwrapList,
+} from "@/features/orders/readModel";
+import {
+    buildOrderActorContext,
+    canActOnOrderRule,
+    canEditOrderSubflow,
+    canViewOrderFleet,
+    canViewOrderRule,
+    isInternalOrderActor,
+} from "@/features/orders/permissions";
 
 dayjs.extend(relativeTime);
-
-const OWNER_OPTIONS = [
-    { key: "buyer", label: "Buyer" },
-    { key: "seller", label: "Supplier" },
-    { key: "obaol", label: "OBAOL Team" },
-] as const;
-
-const RESPONSIBILITY_TASKS = [
-    { key: "procurementBy", label: "Procurement", dateKeys: ["procurementDate", "procurementCompletedDate"] },
-    { key: "certificateBy", label: "Certification", dateKeys: ["certificateRequestedDate", "certificateIssuedDate"] },
-    { key: "transportBy", label: "Inland Transportation", dateKeys: ["transportDispatchDate"] },
-    { key: "packagingBy", label: "Packaging", dateKeys: ["packagingStartDate", "packagingCompletedDate"] },
-    { key: "qualityTestingBy", label: "Quality Testing", dateKeys: ["qualitySampleSentDate", "qualityApprovedDate"] },
-    { key: "shippingBy", label: "Freight Forwarding / Shipping", dateKeys: ["shippingBookedDate", "customsClearanceDate"], internationalOnly: true },
-] as const;
-
-const MILESTONE_LABELS: Record<string, string> = {
-    procurementDate: "Start",
-    procurementCompletedDate: "Done",
-    certificateRequestedDate: "Requested",
-    certificateIssuedDate: "Issued",
-    transportDispatchDate: "Dispatch",
-    packagingStartDate: "Start",
-    packagingCompletedDate: "Done",
-    qualitySampleSentDate: "Sample Sent",
-    qualityApprovedDate: "Approved",
-    shippingBookedDate: "Booked",
-    customsClearanceDate: "Customs",
-};
 
 export default function OrderDetailsPage() {
     useEffect(() => {
@@ -243,8 +239,8 @@ export default function OrderDetailsPage() {
             toast.success("Operators updated");
             queryClient.invalidateQueries({ queryKey: ["order", orderId] });
         },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Unable to update operators");
+        onError: (error: unknown) => {
+            toast.error(normalizeApiError(error, "Unable to update operators").message);
         },
     });
     const incotermOptions = Array.isArray(incotermResponse?.data?.data?.data)
@@ -271,8 +267,8 @@ export default function OrderDetailsPage() {
             setPlanError("");
             queryClient.invalidateQueries({ queryKey: ["order", id] });
         },
-        onError: (error: any) => {
-            const message = error?.response?.data?.message || error?.message || "Failed to update order.";
+        onError: (error: unknown) => {
+            const message = normalizeApiError(error, "Failed to update order.").message;
             toast.error(message);
             setPlanError(message);
         }
@@ -285,8 +281,8 @@ export default function OrderDetailsPage() {
             toast.success("Workflow stage updated.");
             queryClient.invalidateQueries({ queryKey: ["order", id] });
         },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || error?.message || "Failed to update workflow stage.");
+        onError: (error: unknown) => {
+            toast.error(normalizeApiError(error, "Failed to update workflow stage.").message);
         },
     });
     const updateSubflowStageMutation = useMutation({
@@ -310,8 +306,8 @@ export default function OrderDetailsPage() {
             toast.success("Subflow stage updated.");
             queryClient.invalidateQueries({ queryKey: ["order", id] });
         },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || error?.message || "Failed to update subflow stage.");
+        onError: (error: unknown) => {
+            toast.error(normalizeApiError(error, "Failed to update subflow stage.").message);
         },
     });
     const createDocMutation = useMutation({
@@ -330,8 +326,8 @@ export default function OrderDetailsPage() {
             setDocActionFileUrl("");
             queryClient.invalidateQueries({ queryKey: ["trade-documents", "order", orderId] });
         },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Failed to create document.");
+        onError: (error: unknown) => {
+            toast.error(normalizeApiError(error, "Failed to create document.").message);
         },
     });
 
@@ -426,7 +422,6 @@ export default function OrderDetailsPage() {
             }
         });
     }
-    const getOwnerLabel = (val: string) => OWNER_OPTIONS.find((item) => item.key === val)?.label || "Not set";
     const updateMilestone = (key: string, value: any) =>
         setMilestones((prev: any) => ({ ...prev, [key]: value }));
     const orderTradeType = String(
@@ -442,40 +437,8 @@ export default function OrderDetailsPage() {
             setPlanError("");
         }
     }, [planError, milestones.schedulingMode, milestones.schedulingFinalizedDate]);
-    const ownerLayers = [
-        { key: "buyer", title: "Buyer Layer" },
-        { key: "seller", title: "Supplier Layer" },
-        { key: "obaol", title: "Authority Layer (OBAOL)" },
-    ] as const;
+    const ownerLayers = OWNER_LAYERS;
     const formatMilestoneDate = (value: any) => (value ? dayjs(value).format("DD MMM YYYY") : "Pending");
-
-    const SUBFLOW_DATE_MAP: Record<string, { key: string; label: string; type: string }[]> = {
-        PROCUREMENT: [
-            { key: "procurementDate", label: "START DATE", type: "date" },
-            { key: "procurementInspectionDate", label: "INSPECTION DATE", type: "date" },
-            { key: "procurementCompletedDate", label: "COMPLETION DATE", type: "date" },
-        ],
-        PACKAGING: [
-            { key: "packagingStartDate", label: "PACKING START", type: "date" },
-            { key: "packagingCompletedDate", label: "PACKING DONE", type: "date" },
-        ],
-        INLAND_TRANSPORTATION: [
-            { key: "transportDispatchDate", label: "DISPATCH DATE", type: "date" },
-        ],
-        CERTIFICATION: [
-            { key: "certificateRequestedDate", label: "REQUESTED DATE", type: "date" },
-            { key: "certificateIssuedDate", label: "ISSUED DATE", type: "date" },
-        ],
-        FREIGHT_FORWARDING: [
-            { key: "shippingBookedDate", label: "BOOKING DATE", type: "date" },
-            { key: "customsClearanceDate", label: "CUSTOMS DATE", type: "date" },
-        ],
-        QUALITY_QA: [
-            { key: "qualitySampleSentDate", label: "SAMPLE SENT", type: "date" },
-            { key: "labExpectedReportDate", label: "LAB ETA", type: "date" },
-            { key: "qualityApprovedDate", label: "APPROVAL DATE", type: "date" },
-        ],
-    };
 
     const addTruck = () => {
         setLogisticsList([...logisticsList, {
@@ -599,32 +562,10 @@ export default function OrderDetailsPage() {
     if (!order) return <div>Order not found</div>;
     const roleLower = String(user?.role || "").toLowerCase();
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
-    const getExecutionTaskLabel = (type: string) => {
-        const key = String(type || "").toUpperCase();
-        if (key === "PROCUREMENT") return "Procurement";
-        if (key === "PACKAGING") return "Packaging";
-        if (key === "QUALITY_TESTING") return "Quality Testing";
-        if (key === "QUALITY_QA") return "Quality Testing";
-        if (key === "CERTIFICATION") return "Certification";
-        if (key === "WAREHOUSE") return "Warehouse";
-        if (key === "TRANSPORTATION") return "Inland Transportation";
-        if (key === "SHIPPING") return "Freight Forwarding";
-        return key.replaceAll("_", " ");
-    };
-    const getCompanyName = (company: any) => {
-        if (!company) return "Unknown";
-        if (typeof company === "string") return company;
-        return String(company?.name || company?.companyName || company?._id || "Unknown");
-    };
-    const getExecutionBidLabel = (task?: any) => {
-        if (!task) return "Awaiting bids";
-        if (task?.committedProvider || task?.committedCompany || task?.committedVendor) return "Provider committed";
-        const bids = Array.isArray(task?.bids) ? task.bids : [];
-        if (bids.length > 0) return "Under bidding";
-        if (String(task?.status || "").toUpperCase() === "IN_PROGRESS") return "In progress";
-        if (String(task?.status || "").toUpperCase() === "COMPLETED") return "Completed";
-        return "Awaiting bids";
-    };
+    const orderActor = buildOrderActorContext(user, linkedEnquiry);
+    const getExecutionTaskLabel = executionTaskLabel;
+    const getCompanyName = companyName;
+    const getExecutionBidLabel = executionBidLabel;
     const supplierOperatorId = (
         (linkedEnquiry as any)?.supplierOperatorId?._id ||
         (linkedEnquiry as any)?.supplierOperatorId ||
@@ -653,16 +594,7 @@ export default function OrderDetailsPage() {
         );
     }
 
-    const parseOrderRules = (raw: any): any[] => {
-        if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
-        if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
-        if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
-        if (Array.isArray(raw?.data?.data)) return raw.data.data;
-        if (Array.isArray(raw?.data)) return raw.data;
-        if (Array.isArray(raw)) return raw;
-        return [];
-    };
-    const orderRules = parseOrderRules(orderRulesResponse).filter((r: any) => !r?.isDeleted);
+    const orderRules = unwrapList<OrderRule>(orderRulesResponse).filter((r) => !r.isDeleted);
     const isExternal = Boolean((order as any)?.isExternal);
     const ordersBackHref = isExternal ? "/dashboard/external-orders" : "/dashboard/orders";
     const sortedOrderStages = orderRules
@@ -696,31 +628,9 @@ export default function OrderDetailsPage() {
         "Not specified";
     const paymentTermLabel =
         paymentTermOptions.find((item: any) => String(item?._id) === String(orderPaymentTermId))?.label || "Not specified";
-    const DOC_TYPE_LABELS: Record<string, string> = {
-        PROFORMA_INVOICE: "Proforma Invoice",
-        BILL_OF_LADING: "Bill of Lading",
-        AIR_WAYBILL: "Air Waybill",
-        LORRY_RECEIPT: "Lorry Receipt",
-        LCL_DRAFT: "LCL Draft",
-        PACKING_LIST: "Packing List",
-        INSPECTION_CERTIFICATE: "Inspection Certificate",
-        QUALITY_CERTIFICATE: "Quality Certificate",
-        PHYTOSANITARY_CERTIFICATE: "Phytosanitary Certificate",
-        FUMIGATION_CERTIFICATE: "Fumigation Certificate",
-        INSURANCE_CERTIFICATE: "Insurance Certificate",
-        SALES_CONTRACT: "Sales Contract",
-        PAYMENT_ADVICE: "Payment Advice",
-        INVOICE: "Invoice",
-    };
-    const SUBFLOW_DOC_MAP: Record<string, string[]> = {
-        PROCUREMENT: [],
-        PACKAGING: ["PACKING_LIST"],
-        QUALITY_QA: ["INSPECTION_CERTIFICATE", "QUALITY_CERTIFICATE"],
-        CERTIFICATION: ["PHYTOSANITARY_CERTIFICATE", "FUMIGATION_CERTIFICATE"],
-        INLAND_TRANSPORTATION: ["LORRY_RECEIPT", "LCL_DRAFT"],
-        FREIGHT_FORWARDING: ["BILL_OF_LADING", "AIR_WAYBILL", "INSURANCE_CERTIFICATE"],
-    };
-    const ORDER_CORE_DOC_TYPES = ["SALES_CONTRACT", "PURCHASE_ORDER", "INVOICE", "PAYMENT_ADVICE"];
+    const DOC_TYPE_LABELS = DOCUMENT_TYPE_LABELS;
+    const SUBFLOW_DOC_MAP = SUBFLOW_DOCUMENT_TYPES;
+    const ORDER_CORE_DOC_TYPES = ORDER_CORE_DOCUMENT_TYPES;
     const docRulesAll = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
     const operatorOptions = Array.isArray(operators) ? operators : [];
     const docRuleByType = new Map<string, any>();
@@ -828,42 +738,8 @@ export default function OrderDetailsPage() {
             }
             return [buildStatus()];
         });
-    const canSeeRule = (rule: any) => {
-        const visibility = String(rule.visibility || "BOTH");
-        if (roleLower === "admin" || roleLower === "operator" || roleLower === "team") return true;
-        if (visibility === "INTERNAL") return false;
-        if (visibility === "BOTH") return true;
-        const buyerId = String((linkedEnquiry as any)?.buyerAssociateId?._id || (linkedEnquiry as any)?.buyerAssociateId || "");
-        const sellerId = String((linkedEnquiry as any)?.sellerAssociateId?._id || (linkedEnquiry as any)?.sellerAssociateId || "");
-        const userId = String(user?.id || "");
-        if (visibility === "BUYER") return buyerId === userId;
-        if (visibility === "SELLER") return sellerId === userId;
-        return false;
-    };
-
-    const canEditSubflow = (subflowType: string) => {
-        if (roleLower === "admin" || roleLower === "operator" || roleLower === "team") return true;
-
-        const type = String(subflowType).toUpperCase();
-        let respKey = "";
-        if (type === "PROCUREMENT") respKey = "procurementBy";
-        else if (type === "PACKAGING") respKey = "packagingBy";
-        else if (type === "INLAND_TRANSPORTATION") respKey = "transportBy";
-        else if (type === "CERTIFICATION") respKey = "certificateBy";
-        else if (type === "FREIGHT_FORWARDING") respKey = "shippingBy";
-        else if (type === "QUALITY_QA") respKey = "qualityTestingBy";
-
-        if (!respKey) return false;
-
-        const owner = responsibilities[respKey] || "obaol";
-        const userId = String(user?.id || "");
-        const buyerId = String((linkedEnquiry as any)?.buyerAssociateId?._id || (linkedEnquiry as any)?.buyerAssociateId || "");
-        const sellerId = String((linkedEnquiry as any)?.sellerAssociateId?._id || (linkedEnquiry as any)?.sellerAssociateId || "");
-
-        if (owner === "buyer") return buyerId === userId;
-        if (owner === "seller") return sellerId === userId;
-        return false;
-    };
+    const canSeeRule = (rule: unknown) => canViewOrderRule(rule, orderActor);
+    const canEditSubflow = (subflowType: string) => canEditOrderSubflow(subflowType, responsibilities, orderActor);
 
     const isBiddingConfirmed = (subflowType: string, instanceKey?: string) => {
         if (!hasLinkedExecutionTasks) return true;
@@ -885,42 +761,11 @@ export default function OrderDetailsPage() {
         );
     };
 
-    const canSeeFleet = () => {
-        const isLogisticsActive = subflowTypes.includes("INLAND_TRANSPORTATION");
-        if (!isLogisticsActive) return false;
-
-        if (roleLower === "admin" || roleLower === "operator" || roleLower === "team") return true;
-
-        const transportOwner = responsibilities.transportBy || "obaol";
-        const userId = String(user?.id || "");
-        const buyerId = String((linkedEnquiry as any)?.buyerAssociateId?._id || (linkedEnquiry as any)?.buyerAssociateId || "");
-        const sellerId = String((linkedEnquiry as any)?.sellerAssociateId?._id || (linkedEnquiry as any)?.sellerAssociateId || "");
-
-        if (transportOwner === "buyer") return buyerId === userId;
-        if (transportOwner === "seller") return sellerId === userId;
-        return false;
-    };
-    const canActOnRule = (rule: any) => {
-        if (roleLower === "admin" || roleLower === "operator" || roleLower === "team") return true;
-        const roleKey = String(rule.responsibleRole || "");
-        const buyerId = String((linkedEnquiry as any)?.buyerAssociateId?._id || (linkedEnquiry as any)?.buyerAssociateId || "");
-        const sellerId = String((linkedEnquiry as any)?.sellerAssociateId?._id || (linkedEnquiry as any)?.sellerAssociateId || "");
-        const userId = String(user?.id || "");
-        if (roleKey === "BUYER") return buyerId === userId;
-        if (roleKey === "SELLER") return sellerId === userId;
-        return false;
-    };
+    const canSeeFleet = () => canViewOrderFleet(subflowTypes, responsibilities, orderActor);
+    const canActOnRule = (rule: unknown) => canActOnOrderRule(rule, orderActor);
     const isSystemAdmin = roleLower === "admin";
-    const canManageMainFlow = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
-    const formatActionByLabel = (value: string) => {
-        const normalized = String(value || "").toUpperCase();
-        if (normalized === "BUYER") return "Buyer";
-        if (normalized === "SELLER" || normalized === "SUPPLIER") return "Supplier";
-        if (normalized === "BOTH") return "Buyer & Supplier";
-        if (normalized === "EITHER") return "Buyer or Supplier";
-        if (normalized === "OBAOL" || normalized === "INTERNAL") return "OBAOL";
-        return "";
-    };
+    const canManageMainFlow = isInternalOrderActor(orderActor);
+    const formatActionByLabel = actionByLabel;
     const hasDocType = (type: string) => (docsForOrder || []).some((doc: any) => String(doc?.type || "") === type);
     const getLatestDocByType = (type: string) => {
         const matches = (docsForOrder || []).filter((doc: any) => String(doc?.type || "").toUpperCase() === String(type || "").toUpperCase());

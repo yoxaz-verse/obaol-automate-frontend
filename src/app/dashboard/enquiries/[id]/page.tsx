@@ -44,6 +44,22 @@ import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTe
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
+import {
+    ExecutionContext,
+    OWNER_OPTIONS,
+    ResponsibilityPlan,
+    normalizeExecutionContext,
+    sanitizeBuyerOnly,
+    sanitizeBuyerOrObaol,
+    sanitizeObaolOnly,
+    sanitizeOwner,
+} from "@/features/trade-workflow/domain";
+import {
+    getProductDisplayName,
+    getVariantDisplayName,
+    sanitizeDisplayText,
+    tradeInputLabel,
+} from "@/features/enquiries/display";
 
 // Defensive aliases to avoid runtime crashes if older JSX still references Lu* icons.
 const LuTrendingDown = FiTrendingDown;
@@ -51,87 +67,6 @@ const LuCreditCard = FiPercent;
 const LuFileSignature = FiFileText;
 const LuEdit3 = FiEdit3;
 const LuCheckCircle = FiCheckCircle;
-
-type ResponsibilityPlan = {
-    procurementBy: "buyer" | "seller" | "obaol" | "";
-    certificateBy: "buyer" | "seller" | "obaol" | "";
-    transportBy: "buyer" | "seller" | "obaol" | "";
-    shippingBy: "buyer" | "seller" | "obaol" | "";
-    packagingBy: "buyer" | "seller" | "obaol" | "";
-    qualityTestingBy: "buyer" | "seller" | "obaol" | "";
-    cargoInsuranceBy: "buyer" | "seller" | "obaol" | "";
-    exportCustomsBy: "buyer" | "seller" | "obaol" | "";
-    importCustomsBy: "buyer" | "obaol" | "";
-    dutiesTaxesBy: "buyer" | "";
-    portHandlingBy: "buyer" | "obaol" | "";
-    destinationInlandTransportBy: "buyer" | "obaol" | "";
-    destinationInspectionBy: "buyer" | "obaol" | "";
-    finalDeliveryConfirmationBy: "obaol" | "";
-};
-type ExecutionContext = {
-    tradeType: "DOMESTIC" | "INTERNATIONAL";
-    originCountry: string;
-    originState: string;
-    originDistrict: string;
-    originPort: string;
-    destinationCountry: string;
-    destinationState: string;
-    destinationDistrict: string;
-    destinationPort: string;
-    routeNotes: string;
-};
-
-const OWNER_OPTIONS = [
-    { key: "buyer", label: "Buyer" },
-    { key: "seller", label: "Supplier" },
-    { key: "obaol", label: "Executors" },
-] as const;
-const VALID_OWNER_KEYS = new Set(OWNER_OPTIONS.map((item) => item.key));
-const sanitizeOwner = (value: any): "buyer" | "seller" | "obaol" => {
-    const raw = String(value || "").toLowerCase();
-    return VALID_OWNER_KEYS.has(raw as any) ? (raw as "buyer" | "seller" | "obaol") : "obaol";
-};
-const sanitizeBuyerOrObaol = (value: any): "buyer" | "obaol" => {
-    const raw = String(value || "").toLowerCase();
-    return raw === "obaol" ? "obaol" : "buyer";
-};
-const sanitizeBuyerOnly = (_value: any): "buyer" => "buyer";
-const sanitizeObaolOnly = (_value: any): "obaol" => "obaol";
-const sanitizeDisplayText = (value: any): string => String(value || "").trim();
-const tradeInputLabel = (entry: any): string => {
-    const contributor = String(entry?.contributor || "").toUpperCase();
-    if (contributor === "BUYER") return "Buyer’s opinion";
-    if (contributor === "SELLER") return "Seller’s opinion";
-    if (contributor === "OBAOL") return "OBAOL input";
-    return "Party input";
-};
-const getProductDisplayName = (enquiry: any): string => {
-    const candidates = [
-        enquiry?.productId?.name,
-        enquiry?.productVariant?.product?.name,
-        enquiry?.variantRateId?.product?.name,
-    ];
-    return candidates.map(sanitizeDisplayText).find(Boolean) || "Unknown Product";
-};
-const getVariantDisplayName = (enquiry: any, liveRate: any): string => {
-    const specificationFallback = sanitizeDisplayText((enquiry as any)?.specifications || (enquiry as any)?.specification || "")
-        .replace(/\s+/g, " ")
-        .split(/\s+Notes:/i)[0]
-        .trim();
-    const candidates = [
-        enquiry?.productVariant?.name,
-        enquiry?.variantId?.name,
-        enquiry?.variantRateId?.productVariant?.name,
-        enquiry?.variantRateId?.variant?.name,
-        enquiry?.variantRateId?.name,
-        liveRate?.productVariant?.name,
-        liveRate?.variant?.name,
-        (enquiry as any)?.productVariantName,
-        (enquiry as any)?.variantName,
-        specificationFallback,
-    ];
-    return candidates.map(sanitizeDisplayText).find(Boolean) || "Unknown Variant";
-};
 
 export default function EnquiryDetailsPage() {
     const { id } = useParams();
@@ -2233,18 +2168,6 @@ export default function EnquiryDetailsPage() {
             routeNotes: String(raw.routeNotes || ""),
         } as ExecutionContext;
     })();
-    const normalizeExecutionContext = (ctx: ExecutionContext): ExecutionContext => ({
-        tradeType: ctx.tradeType === "INTERNATIONAL" ? "INTERNATIONAL" : "DOMESTIC",
-        originCountry: String(ctx.originCountry || ""),
-        originState: String(ctx.originState || ""),
-        originDistrict: String(ctx.originDistrict || ""),
-        originPort: String(ctx.originPort || ""),
-        destinationCountry: String(ctx.destinationCountry || ""),
-        destinationState: String(ctx.destinationState || ""),
-        destinationDistrict: String(ctx.destinationDistrict || ""),
-        destinationPort: String(ctx.destinationPort || ""),
-        routeNotes: String(ctx.routeNotes || ""),
-    });
     const isResponsibilityPlanChanged =
         (responsibilityPlan.procurementBy || "") !== (initialPlan.procurementBy || "") ||
         (responsibilityPlan.certificateBy || "") !== (initialPlan.certificateBy || "") ||

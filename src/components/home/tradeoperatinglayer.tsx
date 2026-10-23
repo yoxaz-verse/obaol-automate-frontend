@@ -76,7 +76,7 @@ export default function WhoCanUseObaol() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-6 text-default-400 text-base md:text-lg"
+            className="mt-6 text-default-600 text-base md:text-lg"
           >
             Participants can enter the ecosystem, learn how real trades work,
             and contribute value without needing upfront investment to start.

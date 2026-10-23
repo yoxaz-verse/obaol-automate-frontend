@@ -1,6 +1,5 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 type AdaptiveMotionState = {
@@ -28,13 +27,13 @@ type NavigatorWithDeviceMemory = Navigator & {
 };
 
 export function useAdaptiveMotion(): AdaptiveMotionState {
-  const prefersReducedMotion = useReducedMotion() ?? false;
   const [state, setState] = useState(defaultState);
 
   useEffect(() => {
     const mobileMedia = window.matchMedia("(max-width: 1023px)");
     const touchMedia = window.matchMedia("(hover: none), (pointer: coarse)");
     const lowPowerMedia = window.matchMedia("(update: slow)");
+    const reducedMotionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const update = () => {
       const nav = window.navigator as NavigatorWithDeviceMemory;
@@ -43,6 +42,7 @@ export function useAdaptiveMotion(): AdaptiveMotionState {
       const isMobile = mobileMedia.matches;
       const isTouch = touchMedia.matches;
       const isLowPower = lowPowerMedia.matches || isLowMemory || isLowCore;
+      const prefersReducedMotion = reducedMotionMedia.matches;
       const shouldReduceMotion = prefersReducedMotion || isMobile || isTouch || isLowPower;
 
       setState({
@@ -60,19 +60,15 @@ export function useAdaptiveMotion(): AdaptiveMotionState {
     mobileMedia.addEventListener("change", update);
     touchMedia.addEventListener("change", update);
     lowPowerMedia.addEventListener("change", update);
+    reducedMotionMedia.addEventListener("change", update);
 
     return () => {
       mobileMedia.removeEventListener("change", update);
       touchMedia.removeEventListener("change", update);
       lowPowerMedia.removeEventListener("change", update);
+      reducedMotionMedia.removeEventListener("change", update);
     };
-  }, [prefersReducedMotion]);
+  }, []);
 
-  return {
-    ...state,
-    prefersReducedMotion,
-    shouldReduceMotion: prefersReducedMotion || state.shouldReduceMotion,
-    allowDecorativeMotion: !prefersReducedMotion && state.allowDecorativeMotion,
-    allowPointerEffects: !prefersReducedMotion && state.allowPointerEffects,
-  };
+  return state;
 }

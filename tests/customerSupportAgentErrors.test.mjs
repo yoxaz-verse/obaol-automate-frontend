@@ -17,10 +17,12 @@ test("support-agent modal renders dynamic API and field errors", () => {
 });
 
 test("one global toast host renders application notifications", () => {
-  const providers = read("../src/app/public-provider.tsx");
+  const publicProviders = read("../src/app/public-provider.tsx");
+  const authenticatedProviders = read("../src/app/authenticated-provider.tsx");
   const layout = read("../src/app/layout.tsx");
   const notifications = read("../src/app/dashboard/notifications/page.tsx");
-  assert.equal(providers.includes("<ToastContainer"), true);
+  assert.equal(publicProviders.includes("<ToastContainer"), false);
+  assert.equal(authenticatedProviders.includes("<ToastContainer"), true);
   assert.equal(layout.includes('react-toastify/dist/ReactToastify.css'), true);
   assert.equal(notifications.includes("<ToastContainer"), false);
 });

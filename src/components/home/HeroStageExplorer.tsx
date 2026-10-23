@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { inkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
 import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
@@ -26,16 +25,32 @@ const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"
 export default function HeroStageExplorer() {
   const sceneRef = useRef<HTMLElement>(null);
   const adaptiveMotion = useAdaptiveMotion();
-  const { scrollYProgress } = useScroll({ target: sceneRef, offset: ["start 85%", "end 15%"] });
-  const smoothScrollProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 24,
-    mass: 0.35,
-  });
-  const logisticsY = useTransform(smoothScrollProgress, [0, 1], [10, -10]);
-  const operationsY = useTransform(smoothScrollProgress, [0, 1], [22.5, -22.5]);
-  const commoditiesY = useTransform(smoothScrollProgress, [0, 1], [40, -40]);
   const parallaxEnabled = !adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch;
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || !parallaxEnabled) return;
+    const layers = Array.from(scene.querySelectorAll<HTMLElement>("[data-hero-depth-travel]"));
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = scene.getBoundingClientRect();
+      const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
+      for (const layer of layers) {
+        const travel = Number(layer.dataset.heroDepthTravel || 0);
+        layer.style.transform = `translate3d(0, ${(0.5 - progress) * travel}px, 0)`;
+      }
+    };
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [parallaxEnabled]);
 
   return (
     <div data-hero-panel="execution-map" data-hero-depth-scene="true" data-hero-parallax={parallaxEnabled ? "active" : "static"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
@@ -72,7 +87,7 @@ export default function HeroStageExplorer() {
             }}
           />
         </div>
-        <ParallaxTradeAccents placement="hero" progress={smoothScrollProgress} motionEnabled={parallaxEnabled} />
+        <ParallaxTradeAccents placement="hero" motionEnabled={parallaxEnabled} />
         <div data-hero-depth-layer="background" aria-hidden="true" data-ink-artwork-mask="true" style={inkArtworkMaskStyle} className="absolute inset-0">
           <Image
             src="/images/hero-layers/background.webp"
@@ -80,44 +95,48 @@ export default function HeroStageExplorer() {
             aria-hidden="true"
             fill
             priority
+            quality={65}
             sizes="(max-width: 1023px) 100vw, 58vw"
             className="object-contain contrast-[1.01] saturate-[0.98] dark:brightness-[0.8] dark:saturate-[0.9]"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-obaol-500/[0.04]" />
         </div>
-        <motion.div data-hero-depth-layer="logistics" aria-hidden="true" style={{ y: parallaxEnabled ? logisticsY : 0 }} className="absolute inset-0 z-10 will-change-transform [filter:drop-shadow(0_4px_5px_rgba(15,23,42,0.08))]">
+        <div data-hero-depth-layer="logistics" data-hero-depth-travel="20" aria-hidden="true" className="absolute inset-0 z-10 will-change-transform [filter:drop-shadow(0_4px_5px_rgba(15,23,42,0.08))]">
           <Image
             src="/images/hero-layers/logistics.webp"
             alt=""
             aria-hidden="true"
             fill
-            priority
+            loading="eager"
+            quality={65}
             sizes="(max-width: 1023px) 100vw, 58vw"
             className="origin-right scale-[0.62] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
           />
-        </motion.div>
-        <motion.div data-hero-depth-layer="operations" aria-hidden="true" style={{ y: parallaxEnabled ? operationsY : 0 }} className="absolute inset-0 z-20 will-change-transform [filter:drop-shadow(0_5px_7px_rgba(15,23,42,0.1))]">
+        </div>
+        <div data-hero-depth-layer="operations" data-hero-depth-travel="45" aria-hidden="true" className="absolute inset-0 z-20 will-change-transform [filter:drop-shadow(0_5px_7px_rgba(15,23,42,0.1))]">
           <Image
             src="/images/hero-layers/operations.webp"
             alt=""
             aria-hidden="true"
             fill
-            priority
+            loading="eager"
+            quality={65}
             sizes="(max-width: 1023px) 100vw, 58vw"
             className="origin-bottom-left scale-[0.88] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
           />
-        </motion.div>
-        <motion.div data-hero-depth-layer="commodities" aria-hidden="true" style={{ y: parallaxEnabled ? commoditiesY : 0 }} className="absolute inset-0 z-30 will-change-transform [filter:drop-shadow(0_7px_9px_rgba(15,23,42,0.12))]">
+        </div>
+        <div data-hero-depth-layer="commodities" data-hero-depth-travel="80" aria-hidden="true" className="absolute inset-0 z-30 will-change-transform [filter:drop-shadow(0_7px_9px_rgba(15,23,42,0.12))]">
           <Image
             src="/images/hero-layers/commodities.webp"
             alt=""
             aria-hidden="true"
             fill
             priority
+            quality={65}
             sizes="(max-width: 1023px) 100vw, 58vw"
             className="origin-bottom-left scale-[0.58] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
           />
-        </motion.div>
+        </div>
       </figure>
 
       <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Close" className="relative z-30 mx-[7%] mt-1 pb-2 sm:mx-[9%] sm:mt-2 lg:pb-0">

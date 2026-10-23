@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/context/AuthContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { NextUIProvider } from "@nextui-org/react";
+import { ToastContainer } from "react-toastify";
 
 const ReactQueryDevtools = dynamic(
   () => import("@tanstack/react-query-devtools").then((m) => m.ReactQueryDevtools),
@@ -28,13 +30,16 @@ export const queryClient = new QueryClient({
 
 export function AuthenticatedProviders({ children }: { children: React.ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CurrencyProvider>{children}</CurrencyProvider>
-      </AuthProvider>
-      {process.env.NODE_ENV === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
-    </QueryClientProvider>
+    <NextUIProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <CurrencyProvider>{children}</CurrencyProvider>
+        </AuthProvider>
+        <ToastContainer position="top-right" newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover limit={4} />
+        {process.env.NODE_ENV === "development" && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
+      </QueryClientProvider>
+    </NextUIProvider>
   );
 }

@@ -558,10 +558,11 @@ export const apiRoutes = {
     cancel: (id: string) => `${BASE_PATHS.IMPORT_RESERVATION}/${id}/cancel`,
   },
   commercialDocuments: {
-    list: "/commercial-documents", customers: "/commercial-documents/customers",
-    create: "/commercial-documents", getOne: (id: string) => `/commercial-documents/${id}`,
-    update: (id: string) => `/commercial-documents/${id}`, action: (id: string, action: string) => `/commercial-documents/${id}/${action}`,
-    share: (token: string) => `/commercial-documents/share/${token}`,
+    list: `${BASE_PATHS.TRADE_DOCUMENT}`, customers: `${BASE_PATHS.TRADE_DOCUMENT}/customers`,
+    create: `${BASE_PATHS.TRADE_DOCUMENT}`, getOne: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
+    update: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`, action: (id: string, action: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/${action}`,
+    share: (token: string) => `${BASE_PATHS.TRADE_DOCUMENT}/share/${token}`,
+    pdf: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/pdf`,
   },
   tradeDocuments: {
     list: `${BASE_PATHS.TRADE_DOCUMENT}`,

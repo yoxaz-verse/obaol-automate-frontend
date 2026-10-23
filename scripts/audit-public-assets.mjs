@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
+import { publicAssetAllowlist } from "./public-assets-allowlist.mjs";
 
 const publicRoot = "public";
 const searchRoots = ["src", "tests", "next.config.mjs"];
@@ -19,7 +20,9 @@ const source = searchRoots.flatMap((path) => walk(path))
 
 const assets = walk(publicRoot).map((path) => {
   const publicPath = `/${relative(publicRoot, path).split(sep).join("/")}`;
-  return { path: publicPath, bytes: statSync(path).size, referenced: source.includes(publicPath) };
+  const directReference = source.includes(publicPath);
+  const allowlisted = publicAssetAllowlist.has(publicPath);
+  return { path: publicPath, bytes: statSync(path).size, referenced: directReference || allowlisted, directReference, allowlisted };
 }).sort((a, b) => b.bytes - a.bytes);
 
 const summary = {
@@ -34,3 +37,9 @@ const summary = {
 mkdirSync("reports/performance", { recursive: true });
 writeFileSync("reports/performance/public-assets.json", JSON.stringify(summary, null, 2));
 console.log(JSON.stringify(summary, null, 2));
+
+const maxUnreferencedBytes = Number(process.env.MAX_UNREFERENCED_PUBLIC_BYTES || 30 * 1024 * 1024);
+if (summary.unreferencedBytes > maxUnreferencedBytes) {
+  console.error(`Unreferenced public assets exceed budget: ${summary.unreferencedBytes} > ${maxUnreferencedBytes} bytes`);
+  process.exitCode = 1;
+}

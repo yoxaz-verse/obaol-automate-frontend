@@ -228,7 +228,7 @@ export default function ServiceShowcase() {
           </div>
           <div className="relative">
             <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-12rem)] min-h-[480px] max-h-[650px]">
-              <ParallaxTradeAccents placement="serviceChapter" progress={smoothScrollProgress} motionEnabled={adaptiveMotion.allowDecorativeMotion} activeServiceId={active.id} />
+              <ParallaxTradeAccents placement="serviceChapter" motionEnabled={adaptiveMotion.allowDecorativeMotion} activeServiceId={active.id} />
               <div
                 data-service-background-wash="true"
                 className="absolute inset-0 overflow-hidden"

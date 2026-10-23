@@ -28,7 +28,7 @@ const ServiceShowcase = dynamic(() => import("@/components/home/ServiceShowcase"
 
 export default function DeferredServiceShowcase() {
   return (
-    <DeferredSection rootMargin="640px 0px">
+    <DeferredSection rootMargin="240px 0px">
       <ServiceShowcase />
     </DeferredSection>
   );

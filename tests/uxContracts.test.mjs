@@ -134,7 +134,8 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(hero.includes("max-w-[90rem]"), true);
   assert.equal(hero.includes("lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
   assert.equal(hero.includes('<ParallaxTradeAccents placement="hero" />'), false);
-  assert.equal(explorer.includes('<ParallaxTradeAccents placement="hero" progress={smoothScrollProgress} motionEnabled={parallaxEnabled} />'), true);
+  assert.equal(explorer.includes('<ParallaxTradeAccents placement="hero" motionEnabled={parallaxEnabled} />'), true);
+  assert.equal(explorer.includes('from "framer-motion"'), false);
   assert.equal(heroCta.includes("pt-5 lg:pt-6"), true);
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
   assert.equal(explorer.includes("lg:px-0 lg:py-0"), true);
@@ -160,13 +161,11 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("rounded-l-["), false);
   assert.equal(explorer.includes("border border-white"), false);
   assert.equal(explorer.includes('data-hero-parallax={parallaxEnabled ? "active" : "static"}'), true);
-  assert.equal(explorer.includes("useScroll"), true);
-  assert.equal(explorer.includes("useSpring"), true);
-  assert.equal(explorer.includes("useTransform"), true);
-  assert.equal(explorer.includes('offset: ["start 85%", "end 15%"]'), true);
-  assert.equal(explorer.includes("[10, -10]"), true);
-  assert.equal(explorer.includes("[22.5, -22.5]"), true);
-  assert.equal(explorer.includes("[40, -40]"), true);
+  assert.equal(explorer.includes("requestAnimationFrame(update)"), true);
+  assert.equal(explorer.includes('addEventListener("scroll", schedule, { passive: true })'), true);
+  assert.equal(explorer.includes('data-hero-depth-travel="20"'), true);
+  assert.equal(explorer.includes('data-hero-depth-travel="45"'), true);
+  assert.equal(explorer.includes('data-hero-depth-travel="80"'), true);
   assert.equal(explorer.includes("!adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch"), true);
   assert.equal(explorer.includes("origin-right scale-[0.62]"), true);
   assert.equal(explorer.includes("origin-bottom-left scale-[0.88]"), true);

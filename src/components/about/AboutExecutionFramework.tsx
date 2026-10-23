@@ -125,8 +125,8 @@ export default function AboutExecutionFramework() {
                                     {step.icon}
                                 </div>
                                 <div className="text-[10px] font-black uppercase tracking-widest text-orange-500/50 mb-2">Step 0{i + 1}</div>
-                                <h4 className="text-lg font-black text-foreground leading-tight mb-2">{step.label}</h4>
-                                <p className="text-xs text-foreground/40 font-medium leading-relaxed">{step.desc}</p>
+                                <h3 className="text-lg font-black text-foreground leading-tight mb-2">{step.label}</h3>
+                                <p className="text-xs text-foreground/70 font-medium leading-relaxed">{step.desc}</p>
                             </motion.div>
                         ))}
                     </div>

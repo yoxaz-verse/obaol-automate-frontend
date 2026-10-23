@@ -1,385 +1,535 @@
 {
-  "generatedAt": "2026-10-20T21:41:31.283Z",
-  "totalBytes": 63282505,
-  "referencedBytes": 6759155,
-  "unreferencedBytes": 56523350,
+  "generatedAt": "2026-10-22T19:15:16.311Z",
+  "totalBytes": 34240960,
+  "referencedBytes": 8967915,
+  "unreferencedBytes": 25273045,
   "largestReferenced": [
+    {
+      "path": "/images/hero-layers/background.webp",
+      "bytes": 544386,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
     {
       "path": "/images/india_map.webp",
       "bytes": 510084,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-agro-execution-art-v2.webp",
       "bytes": 479988,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-layers/commodities.webp",
+      "bytes": 462016,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/services/logistics-trade-art-v2.webp",
       "bytes": 452236,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/services/warehouse-trade-art-v2.webp",
       "bytes": 438468,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/services/freight-trade-art-v2.webp",
       "bytes": 437190,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/services/procurement-trade-art-v2.webp",
       "bytes": 427456,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/services/documentation-trade-art-v2.webp",
       "bytes": 424366,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/services/packaging-trade-art-v2.webp",
       "bytes": 422822,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/services/sourcing-trade-art-v2.webp",
       "bytes": 417628,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/services/quality-trade-art-v2.webp",
       "bytes": 403788,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/execution-flow/01-discovery-art-v2.webp",
       "bytes": 357158,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-layers/operations.webp",
+      "bytes": 317024,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/Jacob-Alwin-New.jpg",
       "bytes": 283979,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-layers/logistics.webp",
+      "bytes": 201230,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/home-accents/warehouse-forklift.webp",
+      "bytes": 169710,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/home-accents/cargo-ship.webp",
+      "bytes": 158802,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/execution-flow/08-procurement.webp",
       "bytes": 149328,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/execution-flow/07-packaging.webp",
       "bytes": 145920,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-operations/port-operations-stock.webp",
       "bytes": 142392,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/execution-flow/02-sampling.webp",
       "bytes": 135410,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/execution-flow/05-inspection-visit.webp",
       "bytes": 131288,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/execution-flow/09-inland-transportation.webp",
       "bytes": 114556,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     },
     {
       "path": "/images/order-execution-laptop.webp",
       "bytes": 112924,
-      "referenced": true
-    },
-    {
-      "path": "/images/execution-flow/06-quality-testing.webp",
-      "bytes": 109454,
-      "referenced": true
-    },
-    {
-      "path": "/images/recognitions/gem.svg",
-      "bytes": 102133,
-      "referenced": true
-    },
-    {
-      "path": "/images/execution-flow/04-documentation.webp",
-      "bytes": 93440,
-      "referenced": true
-    },
-    {
-      "path": "/images/execution-flow/03-coordination.webp",
-      "bytes": 87656,
-      "referenced": true
-    },
-    {
-      "path": "/images/hero-operations/freight.webp",
-      "bytes": 84628,
-      "referenced": true
-    },
-    {
-      "path": "/images/order-execution-tracking.webp",
-      "bytes": 65344,
-      "referenced": true
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
     }
   ],
   "largestUnreferencedCandidates": [
     {
-      "path": "/images/hero-left-spice-banner.png",
-      "bytes": 12864166,
-      "referenced": false
-    },
-    {
-      "path": "/Auth Page Banner.png",
-      "bytes": 6903236,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero_dock.png",
-      "bytes": 4511265,
-      "referenced": false
-    },
-    {
-      "path": "/images/Jacob-Alwin-Obaol.png",
-      "bytes": 2551761,
-      "referenced": false
-    },
-    {
       "path": "/images/services/sourcing-india.webp",
       "bytes": 1609962,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/warehouse-india.webp",
       "bytes": 1609962,
-      "referenced": false
-    },
-    {
-      "path": "/images/hero-bg-supply-chain.png",
-      "bytes": 1470879,
-      "referenced": false
-    },
-    {
-      "path": "/images/india_map.png",
-      "bytes": 1181601,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/warehouse.png",
       "bytes": 1032043,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/logistics.png",
       "bytes": 1012952,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/packaging.png",
       "bytes": 961172,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/freight.png",
       "bytes": 938149,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/procurement.png",
       "bytes": 921049,
-      "referenced": false
-    },
-    {
-      "path": "/obaol-supreme-logo-concept-v2.png",
-      "bytes": 894237,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/sourcing.png",
       "bytes": 869455,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/roles/associate/trade_map.png",
       "bytes": 862429,
-      "referenced": false
-    },
-    {
-      "path": "/obaol-supreme-logo-concept.png",
-      "bytes": 862354,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/quality.png",
       "bytes": 850011,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/roles/associate/hero_bg.png",
       "bytes": 843833,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/documentation.png",
       "bytes": 802504,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/packaging-india.webp",
       "bytes": 772744,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/recognitions/msme-official.png",
       "bytes": 682038,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/freight-india.webp",
       "bytes": 623800,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/logistics-india.webp",
       "bytes": 623800,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/procurement-india.webp",
       "bytes": 527652,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-agro-execution-sketch.webp",
       "bytes": 436552,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/freight-trade-sketch.webp",
       "bytes": 381256,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/logistics-trade-sketch.webp",
       "bytes": 376924,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/documentation-india.webp",
       "bytes": 358378,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/warehouse-trade-sketch.webp",
       "bytes": 353178,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/sourcing-trade-sketch.webp",
       "bytes": 325112,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-agro-execution-v2.webp",
       "bytes": 304584,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/packaging-trade-sketch.webp",
       "bytes": 303342,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/documentation-trade-sketch.webp",
       "bytes": 302172,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/warehouse-india-professional.webp",
       "bytes": 295710,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/procurement-trade-sketch.webp",
       "bytes": 293692,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/execution-flow/01-discovery-sketch.webp",
       "bytes": 272544,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/quality-trade-sketch.webp",
       "bytes": 272534,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/quality-india.webp",
       "bytes": 263154,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-collage/packaging.webp",
       "bytes": 245630,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/warehouse-trade-v2.webp",
       "bytes": 235882,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-collage/freight.webp",
       "bytes": 220932,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/freight-trade-v2.webp",
       "bytes": 217046,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/logistics-trade-v2.webp",
       "bytes": 186780,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/procurement-trade-v2.webp",
       "bytes": 176882,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/sourcing-trade-v2.webp",
       "bytes": 171048,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-collage/procurement.webp",
       "bytes": 170484,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/services/packaging-trade-v2.webp",
       "bytes": 170204,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-collage/logistics.webp",
       "bytes": 168112,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     },
     {
       "path": "/images/hero-collage/sourcing.webp",
       "bytes": 151806,
-      "referenced": false
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-operations/procurement-goods.webp",
+      "bytes": 148926,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-operations/pallet-loading-stock.webp",
+      "bytes": 147100,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-operations/coordination-alt.webp",
+      "bytes": 134918,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/services/documentation-trade-v2.webp",
+      "bytes": 125550,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/services/quality-trade-v2.webp",
+      "bytes": 123114,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-operations/coordination.webp",
+      "bytes": 116240,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-operations/warehouse.webp",
+      "bytes": 115762,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-operations/coordination-stock.webp",
+      "bytes": 115636,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
     }
   ]
 }

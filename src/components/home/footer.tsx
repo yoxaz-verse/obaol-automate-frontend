@@ -62,6 +62,7 @@ export default function Footer() {
 
               <div className="flex items-center gap-6">
                 <a
+                  aria-label="Follow OBAOL on LinkedIn"
                   href={BUSINESS_IDENTITY.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"

@@ -64,7 +64,7 @@ export default function DocumentationRulesPage() {
     sortOrder: 0,
   });
 
-  const { data: rulesResponse } = useQuery({
+  const { data: rulesResponse, isLoading: rulesLoading, isError: rulesError } = useQuery({
     queryKey: ["document-rules"],
     queryFn: () => getData(apiRoutes.documentRules.list),
   });
@@ -182,6 +182,8 @@ export default function DocumentationRulesPage() {
 
       <div className="mx-2 md:mx-6 mb-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6">
         <div className="flex flex-col gap-4">
+          {rulesLoading && <div role="status" className="rounded-xl border border-default-200 p-4 text-sm text-default-500">Loading documentation rules…</div>}
+          {rulesError && <div role="alert" className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">Documentation rules could not be loaded.</div>}
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <Input
               className="w-full md:w-80"

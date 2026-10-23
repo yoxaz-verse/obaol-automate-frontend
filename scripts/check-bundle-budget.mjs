@@ -4,7 +4,7 @@ import { gzipSync } from "node:zlib";
 const manifest = JSON.parse(readFileSync(".next/app-build-manifest.json", "utf8"));
 const budgets = {
   "/dashboard/page": 300,
-  "/page": 185,
+  "/page": 150,
   "/auth/page": 200,
   "/product/[slug]/page": 210,
   "/trade-directory/[slug]/page": 210,

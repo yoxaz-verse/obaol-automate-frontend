@@ -220,6 +220,8 @@ export default function DocumentationTemplatesPage() {
     <section>
       <Title title="Documentation Templates" visuallyHidden />
       <div className="mx-2 md:mx-6 mb-6 flex flex-col gap-4">
+        {(documentTypesQuery.isLoading || templatesQuery.isLoading) && <div role="status" className="rounded-xl border border-default-200 p-4 text-sm text-default-500">Loading document configuration…</div>}
+        {(documentTypesQuery.isError || templatesQuery.isError || letterheadQuery.isError) && <div role="alert" className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">Documentation configuration could not be loaded. Retry before editing or publishing.</div>}
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <Select size="sm" selectedKeys={[documentType]} onSelectionChange={(keys) => setDocumentType(String(Array.from(keys)[0] || "LOI"))} className="w-[260px]" label="Document Type">
@@ -237,8 +239,8 @@ export default function DocumentationTemplatesPage() {
               <Button color="primary" onPress={() => createDraftMutation.mutate()} isLoading={createDraftMutation.isPending}>Create Draft</Button>
             ) : (
               <>
-                <Button color="primary" onPress={() => saveDraftMutation.mutate()} isLoading={saveDraftMutation.isPending}>Save Draft</Button>
-                <Button color="secondary" onPress={() => publishMutation.mutate()} isLoading={publishMutation.isPending}>Publish</Button>
+                <Button color="primary" onPress={() => saveDraftMutation.mutate()} isLoading={saveDraftMutation.isPending} isDisabled={!localLayout}>Save Draft</Button>
+                <Button color="secondary" onPress={() => publishMutation.mutate()} isLoading={publishMutation.isPending} isDisabled={!localLayout || (activationMode === "SCHEDULED" && !activationAt)}>Publish</Button>
               </>
             )}
             <Button variant="flat" onPress={() => seedMutation.mutate()} isLoading={seedMutation.isPending}>Restore Presets</Button>

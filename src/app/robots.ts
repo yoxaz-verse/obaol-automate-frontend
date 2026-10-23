@@ -1,5 +1,6 @@
 // app/robots.ts
 import type { MetadataRoute } from "next";
+import { BASE_URL } from "@/utils/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -37,6 +38,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: "https://obaol.com/sitemap.xml",
+    sitemap: `${BASE_URL}/sitemap.xml`,
   };
 }

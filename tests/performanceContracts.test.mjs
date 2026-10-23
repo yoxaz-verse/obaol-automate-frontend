@@ -35,3 +35,28 @@ test("the unified auth route mounts authenticated providers for session bypass",
   assert.doesNotMatch(source, /pathname === ["']\/auth["']/);
   assert.match(source, /<AuthProvider>/);
 });
+
+test("public routes do not eagerly load authenticated UI and toast runtimes", () => {
+  const publicProviders = readFileSync("src/app/public-provider.tsx", "utf8");
+  const authenticatedProviders = readFileSync("src/app/authenticated-provider.tsx", "utf8");
+  assert.doesNotMatch(publicProviders, /NextUIProvider|ToastContainer/);
+  assert.match(authenticatedProviders, /NextUIProvider/);
+  assert.match(authenticatedProviders, /ToastContainer/);
+});
+
+test("the homepage hero avoids Framer Motion on the critical path", () => {
+  const hero = readFileSync("src/components/home/HeroStageExplorer.tsx", "utf8");
+  const accents = readFileSync("src/components/home/ParallaxTradeAccents.tsx", "utf8");
+  const adaptiveMotion = readFileSync("src/hooks/useAdaptiveMotion.ts", "utf8");
+  assert.doesNotMatch(hero, /from ["']framer-motion["']/);
+  assert.doesNotMatch(accents, /from ["']framer-motion["']/);
+  assert.doesNotMatch(adaptiveMotion, /from ["']framer-motion["']/);
+  assert.match(hero, /requestAnimationFrame/);
+  assert.match(adaptiveMotion, /prefers-reduced-motion: reduce/);
+});
+
+test("the public session probe stays out of the Axios bundle", () => {
+  const source = readFileSync("src/hooks/usePublicAuthStatus.ts", "utf8");
+  assert.doesNotMatch(source, /apiHandler|axios/);
+  assert.match(source, /credentials: "include"/);
+});

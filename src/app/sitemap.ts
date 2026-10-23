@@ -2,9 +2,10 @@
 import { MetadataRoute } from "next";
 import { buildPublicWebApiUrl } from "@/utils/publicApi";
 import { associateRoleSlugs, getAssociateRolePath } from "@/data/associateRoles";
+import { BASE_URL } from "@/utils/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://obaol.com";
+  const baseUrl = BASE_URL;
   const lastModified = new Date();
 
   const staticEntries: MetadataRoute.Sitemap = [

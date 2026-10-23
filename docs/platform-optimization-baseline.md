@@ -63,3 +63,11 @@ Initial correctness baseline: frontend 20 tests passed, main backend 88 tests pa
 - All configured route budgets pass. The largest saving comes from keeping the 4,517-line variant-rate workflow out of the catalog directory's initial bundle while preserving it behind product selection.
 - After changes: 482 source files, 94,777 lines, 1,893 `any` references, 60 console calls, 266 client components, and 40 files over 500 lines. The additional source file is a reusable deferred add-modal boundary; client-component and large-file counts did not increase.
 - Type-check, 219/219 unit tests, production build, bundle audit, and asset audit pass. The build retains pre-existing lint and accessibility warnings outside the changed boundaries.
+
+## Public critical-path and asset batch (2026-10-23)
+
+- Moved NextUI and the toast host out of the global public provider and into authenticated routes; the public session probe now uses a small credentialed Fetch request instead of importing Axios.
+- Replaced the homepage hero's eager Framer Motion scroll machinery with requestAnimationFrame-driven transforms that retain the layered composition, desktop parallax, and reduced-motion behavior.
+- Homepage route gzip decreased from 204.7 KB to 130.8 KB and its production first-load JavaScript is 133 KB. The homepage budget is tightened from 185 KB to 150 KB gzip.
+- Removed nine confirmed-unreferenced legacy image files. The asset audit now supports an explicit indirect-reference allowlist and fails above a 30 MB unreferenced-asset budget.
+- Type-check, production build, 223/223 unit tests, and all configured bundle budgets pass. Existing lint warnings in unrelated dashboard files remain unchanged.

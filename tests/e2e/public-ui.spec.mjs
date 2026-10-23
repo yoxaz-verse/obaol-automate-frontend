@@ -194,6 +194,7 @@ test("desktop hero uses distinct cinematic object-layer parallax", async ({ page
   const heroBox = await hero.boundingBox();
   const layoutBox = await centeredLayout.boundingBox();
   const artworkBox = await scene.locator('[data-hero-layered-artwork="true"]').boundingBox();
+  const phaseRailBox = await scene.locator('[data-execution-route="phase-rail"]').boundingBox();
   const copyBox = await centeredLayout.locator(":scope > div").first().boundingBox();
   expect(heroBox.height).toBeGreaterThanOrEqual(700);
   expect(Math.abs((layoutBox.y + layoutBox.height / 2) - (heroBox.y + heroBox.height / 2))).toBeLessThan(45);
@@ -201,8 +202,8 @@ test("desktop hero uses distinct cinematic object-layer parallax", async ({ page
   expect(artworkBox.x + artworkBox.width).toBeGreaterThanOrEqual(1416);
   expect(clipboardBox.x).toBeLessThan(artworkBox.x + 1);
   expect(clipboardBox.x + clipboardBox.width).toBeGreaterThan(artworkBox.x - 24);
-  expect(pepperBox.y).toBeLessThan(artworkBox.y + artworkBox.height + 56);
-  expect(pepperBox.y + pepperBox.height).toBeGreaterThan(artworkBox.y + artworkBox.height);
+  expect(pepperBox.y).toBeLessThan(artworkBox.y + artworkBox.height);
+  expect(pepperBox.y + pepperBox.height).toBeLessThanOrEqual(phaseRailBox.y + 1);
   const artworkCore = {
     x: artworkBox.x + artworkBox.width * 0.18,
     y: artworkBox.y + artworkBox.height * 0.18,

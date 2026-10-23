@@ -83,7 +83,7 @@ export default function StartedIn() {
             transition={{ duration: 0.6 }}
             className="p-8 md:p-10 rounded-3xl border border-default-200/50 bg-white/[0.02] backdrop-blur-2xl hover:bg-white/[0.04] transition-all duration-500 public-surface-card"
           >
-            <p className="text-base md:text-lg text-default-400 leading-relaxed">
+            <p className="text-base md:text-lg text-default-600 leading-relaxed">
               We began by building and validating the system in India — not
               because it is geographically limited, but because India represents
               one of the <span className="text-foreground font-semibold">most complex commodity trading environments</span>.
@@ -107,7 +107,7 @@ export default function StartedIn() {
               system can operate reliably across global trade routes.
             </p>
 
-            <p className="mt-6 text-sm md:text-base text-default-400 leading-relaxed">
+            <p className="mt-6 text-sm md:text-base text-default-600 leading-relaxed">
               A platform capable of handling domestic complexity is inherently
               prepared for international trade execution.
             </p>
@@ -124,7 +124,7 @@ export default function StartedIn() {
         >
           <div className="h-px w-full bg-gradient-to-r from-orange-500/0 via-orange-500/30 to-green-500/0" />
           <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-48 h-px bg-gradient-to-r from-transparent via-default-200 to-transparent opacity-30" />
-          <p className="mt-8 text-sm md:text-base font-medium text-default-400 max-w-3xl leading-relaxed text-center sm:text-left">
+          <p className="mt-8 text-sm md:text-base font-medium text-default-600 max-w-3xl leading-relaxed text-center sm:text-left">
             A system proven in a high-complexity domestic market is structurally
             ready to support global commodity trade execution.
           </p>

@@ -30,7 +30,7 @@ const webPageJsonLd = buildWebPageJsonLd({
 });
 export default function AboutPage() {
   return (
-    <section>
+    <main>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
@@ -44,6 +44,6 @@ export default function AboutPage() {
       </div>
       <CTASection />
       <Footer />
-    </section>
+    </main>
   );
 }

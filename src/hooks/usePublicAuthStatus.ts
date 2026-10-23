@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getData } from "@/core/api/apiHandler";
 import type { User } from "@/context/AuthContext";
 
 type PublicAuthStatus = {
@@ -22,9 +21,21 @@ export function usePublicAuthStatus(): PublicAuthStatus {
 
     const loadSession = async () => {
       try {
-        const response = await getData("/verify-token");
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "/api/v1/web";
+        const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN?.replace(/\/+$/, "") || "";
+        const baseUrl = /^https?:\/\//i.test(apiBase)
+          ? apiBase
+          : backendOrigin
+            ? `${backendOrigin}${apiBase.startsWith("/") ? apiBase : `/${apiBase}`}`
+            : apiBase;
+        const response = await fetch(`${baseUrl.replace(/\/+$/, "")}/verify-token`, {
+          credentials: "include",
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) throw new Error("No active session");
         if (cancelled) return;
-        const payload = response?.data;
+        const body = await response.json();
+        const payload = body?.data ?? body;
         const user = payload?.success && payload?.user ? payload.user : null;
         setStatus({
           isAuthenticated: Boolean(user),

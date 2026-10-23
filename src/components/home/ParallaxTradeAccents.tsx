@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, type MotionValue, useScroll, useSpring, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 type AccentPlacement = "hero" | "services" | "serviceChapter" | "workspace";
@@ -23,7 +22,7 @@ type Accent = {
 
 const accents: Record<AccentPlacement, readonly Accent[]> = {
   hero: [
-    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "bottom-[-14%] left-[1%] w-[clamp(7rem,7vw,9rem)] opacity-55", aspect: "aspect-[640/427]", travel: 96, xTravel: 18, depth: "foreground", size: "small" },
+    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "bottom-[10%] left-[1%] w-[clamp(7rem,7vw,9rem)] opacity-55", aspect: "aspect-[640/427]", travel: 96, xTravel: 18, depth: "foreground", size: "small" },
     { id: "verification", src: "/images/home-accents/verification-clipboard.webp", className: "left-[-13%] top-[-24%] w-[clamp(6.5rem,6.5vw,8.5rem)] opacity-[0.42]", aspect: "aspect-[640/427]", travel: 60, xTravel: -10, depth: "middle", size: "medium" },
   ],
   services: [
@@ -39,39 +38,61 @@ const accents: Record<AccentPlacement, readonly Accent[]> = {
   ],
 };
 
-function ParallaxAccent({ accent, placement, progress, enabled, visible }: { accent: Accent; placement: AccentPlacement; progress: MotionValue<number>; enabled: boolean; visible: boolean }) {
-  const y = useTransform(progress, [0, 1], [accent.travel / 2, accent.travel / -2]);
-  const x = useTransform(progress, [0, 1], [accent.xTravel / -2, accent.xTravel / 2]);
-
+function ParallaxAccent({ accent, placement, visible }: { accent: Accent; placement: AccentPlacement; visible: boolean }) {
   return (
-    <motion.div
+    <div
       data-parallax-accent={accent.id}
       data-accent-placement={placement}
       data-accent-depth={accent.depth}
       data-accent-size={accent.size}
       data-accent-service={accent.serviceId}
       data-accent-visible={visible ? "true" : "false"}
-      style={{ x: enabled ? x : 0, y: enabled ? y : 0 }}
-      initial={false}
-      animate={accent.serviceId ? { opacity: visible ? 0.62 : 0, scale: visible ? 1 : 0.9 } : undefined}
-      transition={enabled ? { duration: 0.55, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
-      className={`absolute ${accent.aspect} ${accent.className} will-change-transform [filter:drop-shadow(0_8px_10px_rgba(15,23,42,0.09))]`}
+      data-accent-travel={accent.travel}
+      data-accent-x-travel={accent.xTravel}
+      style={accent.serviceId ? { opacity: visible ? 0.62 : 0, scale: visible ? "1" : "0.9" } : undefined}
+      className={`absolute ${accent.aspect} ${accent.className} transition-[opacity,scale] duration-500 [filter:drop-shadow(0_8px_10px_rgba(15,23,42,0.09))]`}
     >
       <Image src={accent.src} alt="" aria-hidden="true" fill sizes={accent.size === "large" ? "26rem" : "12rem"} className="object-contain" />
-    </motion.div>
+    </div>
   );
 }
 
-export default function ParallaxTradeAccents({ placement, progress: sharedProgress, motionEnabled, activeServiceId }: { placement: AccentPlacement; progress?: MotionValue<number>; motionEnabled?: boolean; activeServiceId?: string }) {
+export default function ParallaxTradeAccents({ placement, motionEnabled, activeServiceId }: { placement: AccentPlacement; motionEnabled?: boolean; activeServiceId?: string }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const adaptiveMotion = useAdaptiveMotion();
-  const { scrollYProgress } = useScroll({ target: rootRef, offset: ["start end", "end start"] });
-  const localProgress = useSpring(scrollYProgress, { stiffness: 110, damping: 26, mass: 0.4 });
-  const progress = sharedProgress ?? localProgress;
   const adaptiveMotionEnabled = !adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch;
   const enabled = motionEnabled ?? adaptiveMotionEnabled;
   const isHeroComposition = placement === "hero";
   const isChapterComposition = placement === "serviceChapter";
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !enabled) return;
+    const items = Array.from(root.querySelectorAll<HTMLElement>("[data-parallax-accent]"));
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = root.getBoundingClientRect();
+      const range = window.innerHeight + rect.height;
+      const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / Math.max(range, 1)));
+      for (const item of items) {
+        const travel = Number(item.dataset.accentTravel || 0);
+        const xTravel = Number(item.dataset.accentXTravel || 0);
+        item.style.transform = `translate3d(${(progress - 0.5) * xTravel}px, ${(0.5 - progress) * travel}px, 0)`;
+      }
+    };
+    const schedule = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [enabled]);
 
   return (
     <div
@@ -84,7 +105,7 @@ export default function ParallaxTradeAccents({ placement, progress: sharedProgre
     >
       {accents[placement].map((accent) => {
         const visible = !accent.serviceId || accent.serviceId === activeServiceId;
-        return <ParallaxAccent key={`${placement}-${accent.id}`} accent={accent} placement={placement} progress={progress} enabled={enabled} visible={visible} />;
+        return <ParallaxAccent key={`${placement}-${accent.id}`} accent={accent} placement={placement} visible={visible} />;
       })}
     </div>
   );

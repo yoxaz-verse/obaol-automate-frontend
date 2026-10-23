@@ -52,6 +52,8 @@ export default function DocumentationPreviewPage() {
       <Title title="Documentation Preview" visuallyHidden />
 
       <div className="mx-2 md:mx-6 mb-4 flex flex-col gap-4">
+        {enquiriesQuery.isLoading && <div role="status" className="rounded-xl border border-default-200 p-4 text-sm text-default-500">Loading enquiries…</div>}
+        {enquiriesQuery.isError && <div role="alert" className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">Enquiries could not be loaded. Retry before previewing live document data.</div>}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <Select
@@ -98,7 +100,9 @@ export default function DocumentationPreviewPage() {
         <div className="flex justify-center">
           <div className="w-full max-w-[880px]">
             <div className="bg-white text-black shadow-2xl rounded-lg p-6 min-h-[1123px] border border-default-200">
-              {selectedEnquiry ? (
+              {selectedEnquiryId && !selectedEnquiry ? (
+                <div className="h-full min-h-[1020px] flex items-center justify-center text-sm text-default-500">Loading selected enquiry…</div>
+              ) : selectedEnquiry ? (
                 <DocumentTemplatePreview docType={docType} enquiry={selectedEnquiry} />
               ) : (
                 <div className="h-full min-h-[1020px] flex items-center justify-center text-sm text-default-500">

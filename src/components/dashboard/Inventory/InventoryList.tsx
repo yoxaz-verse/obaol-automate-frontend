@@ -36,6 +36,8 @@ import { getData, postData, patchData, deleteData } from "@/core/api/apiHandler"
 import { apiRoutes, associateCompanyRoutes, associateRoutes, inventoryRoutes, variantRateRoutes, inventoryReservationRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
+import { buildInventoryPresentation, daysStored as calculateDaysStored, normalizeObjectId } from "@/features/inventory/domain";
+import { normalizeApiError } from "@/core/api/apiErrors";
 
 const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
 const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
@@ -83,13 +85,6 @@ const InventoryList: React.FC = () => {
     const [enquiryContactName, setEnquiryContactName] = useState("");
     const [enquiryContactPhone, setEnquiryContactPhone] = useState("");
     const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
-
-    const OBJECT_ID_REGEX = /^[a-fA-F0-9]{24}$/;
-    const normalizeObjectId = (value: any): string => {
-        const raw = typeof value === "string" ? value : typeof value === "object" && value !== null ? value._id || value.id || "" : "";
-        const normalized = String(raw || "").trim();
-        return OBJECT_ID_REGEX.test(normalized) ? normalized : "";
-    };
 
     const openEnquiryModal = (item: any) => {
         setSelectedEnquiryInventory(item);
@@ -273,11 +268,10 @@ const InventoryList: React.FC = () => {
             if (createdId) {
                 router.push(`/dashboard/enquiries/${createdId}`);
             }
-        } catch (error: any) {
-            console.error("Inventory enquiry creation failed:", error);
+        } catch (error: unknown) {
             showToastMessage({
                 type: "error",
-                message: error?.response?.data?.message || "Failed to create trade enquiry. Please try again.",
+                message: normalizeApiError(error, "Failed to create trade enquiry. Please try again.").message,
                 position: "top-right",
             });
             setSubmittingEnquiry(false);
@@ -416,15 +410,6 @@ const InventoryList: React.FC = () => {
         setCustomDays("");
     };
 
-    const computeDaysStored = (storedAt?: string | Date | null) => {
-        if (!storedAt) return null;
-        const storedTime = new Date(storedAt).getTime();
-        if (Number.isNaN(storedTime)) return null;
-        const now = Date.now();
-        const diffDays = Math.floor((now - storedTime) / (24 * 60 * 60 * 1000));
-        return Math.max(1, diffDays);
-    };
-
     return (
         <div className="w-full">
             {(isAdmin || isOperatorUser) && (
@@ -468,109 +453,12 @@ const InventoryList: React.FC = () => {
                     }}
                 >
                     {(inventoryData: any, refetch, meta) => {
-                        const rawData = inventoryData?.data ?? inventoryData ?? [];
-                        const items = Array.isArray(rawData) ? rawData : (rawData?.data || []);
-
-                        const reservationRows = Array.isArray(reservationData?.data?.data?.data)
-                            ? reservationData?.data?.data?.data
-                            : (reservationData?.data?.data || []);
-
-                        const reservedByInventoryId = new Map<string, number>();
-                        const reservedByVariantKey = new Map<string, number>();
-                        for (const reservation of reservationRows || []) {
-                            const inventoryId = reservation.inventoryId?._id || reservation.inventoryId;
-                            const pvId = reservation.productVariant?._id || reservation.productVariant;
-                            const compId = reservation.associateCompany?._id || reservation.associateCompany || "";
-                            const qty = Number(reservation.quantity || 0);
-                            if (inventoryId) {
-                                reservedByInventoryId.set(
-                                    String(inventoryId),
-                                    (reservedByInventoryId.get(String(inventoryId)) || 0) + qty
-                                );
-                            }
-                            if (pvId) {
-                                const key = `${pvId}::${compId}`;
-                                reservedByVariantKey.set(key, (reservedByVariantKey.get(key) || 0) + qty);
-                            }
-                        }
-
-                        const tableData = items.map((item: any) => {
-                            const inventoryId = String(item._id || item.id || "");
-                            const reservedQty = reservedByInventoryId.get(inventoryId) || 0;
-                            const totalQty = Number(item.quantity || 0);
-                            const availableQty = Math.max(0, totalQty - reservedQty);
-                            return ({
-                                ...item,
-                                product: item.product?.name || "N/A",
-                                productVariant: item.productVariant?.name || "N/A",
-                                associate: item.associateCompany?.name || item.associate?.name || "OBAOL",
-                                associateId: item.associate?._id || item.associate,
-                                associateCompanyId: item.associateCompany?._id || item.associateCompany,
-                                productVariantId: item.productVariant?._id || item.productVariant,
-                                productId: item.product?._id || item.product,
-                                stateId: item.state?._id || item.state,
-                                districtId: item.district?._id || item.district,
-                                divisionId: item.division?._id || item.division,
-                                pincodeEntryId: item.pincodeEntry?._id || item.pincodeEntry,
-                                linkedVariantRateId: item.linkedVariantRate?._id || item.linkedVariantRate,
-                                reservedQty,
-                                availableQty,
-                            });
-                        });
-
-                        const warehouseRows = Array.isArray(warehouseData?.data?.data?.data)
-                            ? warehouseData?.data?.data?.data
-                            : (warehouseData?.data?.data || []);
-                        const warehouseMap = new Map<string, any>();
-                        for (const wh of warehouseRows || []) {
-                            const whId = wh?._id || wh?.id;
-                            if (whId) warehouseMap.set(String(whId), wh);
-                        }
-
-                        const summaryMap = new Map<string, { key: string; name: string; company: string; totalQty: number; warehouses: Set<string>; reservedQty: number }>();
-                        for (const row of tableData) {
-                            const key = `${row.productVariantId}::${row.associateCompanyId || ""}`;
-                            if (!summaryMap.has(key)) {
-                                summaryMap.set(key, {
-                                    key,
-                                    name: row.productVariant,
-                                    company: row.associate,
-                                    totalQty: 0,
-                                    warehouses: new Set<string>(),
-                                    reservedQty: reservedByVariantKey.get(key) || 0,
-                                });
-                            }
-                            const summary = summaryMap.get(key)!;
-                            summary.totalQty += Number(row.quantity || 0);
-                            if (row.warehouseName) summary.warehouses.add(String(row.warehouseName));
-                        }
-
-                        const summaryRows = Array.from(summaryMap.values());
-
-                        const inventoryKeySet = new Set(
-                            tableData.map((row: any) => `${row.productVariantId}::${row.associateCompanyId || ""}`)
-                        );
-
-                        const rateRows = Array.isArray(suggestedRateData?.data?.data?.data)
-                            ? suggestedRateData?.data?.data?.data
-                            : (suggestedRateData?.data?.data || []);
-
-                        const rateMap = new Map<string, any>();
-                        const rateById = new Map<string, any>();
-                        for (const rate of rateRows || []) {
-                            const pvId = rate.productVariant?._id || rate.productVariant;
-                            const compId = rate.associateCompany?._id || rate.associateCompany || "";
-                            const rateId = rate._id || rate.id;
-                            if (rateId) rateById.set(String(rateId), rate);
-                            if (pvId) rateMap.set(`${pvId}::${compId}`, rate);
-                        }
-
-                        const suggestedRates = (rateRows || []).filter((rate: any) => {
-                            const pvId = rate.productVariant?._id || rate.productVariant;
-                            const compId = rate.associateCompany?._id || rate.associateCompany;
-                            if (!pvId) return false;
-                            if (effectiveCompanyId && String(compId) !== String(effectiveCompanyId)) return false;
-                            return !inventoryKeySet.has(`${pvId}::${compId || ""}`);
+                        const { tableData, reservationRows, summaryRows, warehouseMap, rateMap, rateById, suggestedRates } = buildInventoryPresentation({
+                            inventory: inventoryData,
+                            reservations: reservationData,
+                            warehouses: warehouseData,
+                            rates: suggestedRateData,
+                            companyId: effectiveCompanyId,
                         });
 
                         const openStockModal = (rate: any) => {
@@ -645,11 +533,10 @@ const InventoryList: React.FC = () => {
                                 });
                                 closeStockModal();
                                 refetch?.();
-                            } catch (error: any) {
-                                console.error("Inventory add failed:", error?.response?.data || error);
+                            } catch (error: unknown) {
                                 showToastMessage({
                                     type: "error",
-                                    message: error?.response?.data?.message || "Unable to add inventory. Please try again.",
+                                    message: normalizeApiError(error, "Unable to add inventory. Please try again.").message,
                                     position: "top-right",
                                 });
                                 setSubmittingStock(false);
@@ -698,10 +585,10 @@ const InventoryList: React.FC = () => {
                                 await queryClient.invalidateQueries({
                                     queryKey: ["inventory-suggested-rates", effectiveCompanyId, user?.id],
                                 });
-                            } catch (error: any) {
+                            } catch (error: unknown) {
                                 showToastMessage({
                                     type: "error",
-                                    message: error?.response?.data?.message || "Unable to save rate. Please try again.",
+                                    message: normalizeApiError(error, "Unable to save rate. Please try again.").message,
                                     position: "top-right",
                                 });
                                 setSubmittingRate(false);
@@ -722,10 +609,10 @@ const InventoryList: React.FC = () => {
                                 await queryClient.invalidateQueries({
                                     queryKey: ["inventory-suggested-rates", effectiveCompanyId, user?.id],
                                 });
-                            } catch (error: any) {
+                            } catch (error: unknown) {
                                 showToastMessage({
                                     type: "error",
-                                    message: error?.response?.data?.message || "Unable to unpublish rate.",
+                                    message: normalizeApiError(error, "Unable to unpublish rate.").message,
                                     position: "top-right",
                                 });
                             }
@@ -767,10 +654,10 @@ const InventoryList: React.FC = () => {
                                                             position: "top-right",
                                                         });
                                                         refetch?.();
-                                                    } catch (error: any) {
+                                                    } catch (error: unknown) {
                                                         showToastMessage({
                                                             type: "error",
-                                                            message: error?.response?.data?.message || "Unable to load demo inventory.",
+                                                            message: normalizeApiError(error, "Unable to load demo inventory.").message,
                                                             position: "top-right",
                                                         });
                                                     } finally {
@@ -795,10 +682,10 @@ const InventoryList: React.FC = () => {
                                                             position: "top-right",
                                                         });
                                                         refetch?.();
-                                                    } catch (error: any) {
+                                                    } catch (error: unknown) {
                                                         showToastMessage({
                                                             type: "error",
-                                                            message: error?.response?.data?.message || "Unable to clear demo inventory.",
+                                                            message: normalizeApiError(error, "Unable to clear demo inventory.").message,
                                                             position: "top-right",
                                                         });
                                                     } finally {
@@ -1299,7 +1186,7 @@ const InventoryList: React.FC = () => {
                                                 const warehouse = warehouseId ? warehouseMap.get(String(warehouseId)) : null;
                                                 const ratePerUnit = warehouse?.storageRatePerUnit;
                                                 const rateUnit = warehouse?.unit || "KG";
-                                                const daysStored = computeDaysStored(storedAt);
+                                                const daysStored = calculateDaysStored(storedAt);
                                                 const quantity = Number(costInventory?.quantity || 0);
                                                 const dailyCost =
                                                     ratePerUnit && quantity ? Number(ratePerUnit) * quantity : null;
@@ -1329,7 +1216,7 @@ const InventoryList: React.FC = () => {
                                                                 {warehouseName}
                                                             </div>
                                                             <div className="text-xs text-default-500">
-                                                                Rate: {ratePerUnit} / {rateUnit}
+                                                                Rate: {String(ratePerUnit)} / {String(rateUnit)}
                                                             </div>
                                                         </div>
                                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

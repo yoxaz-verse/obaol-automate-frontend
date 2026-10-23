@@ -138,17 +138,20 @@ export default function EditModal({
           return { key: field.key, options };
         });
 
-      const results = await Promise.all(fetchOptionsPromises);
+      const results = await Promise.allSettled(fetchOptionsPromises);
 
       const optionsMap: Record<string, any[]> = {};
-      results.forEach(({ key, options }) => {
-        optionsMap[key] = options;
+      let firstError: unknown;
+      results.forEach((result) => {
+        if (result.status === "fulfilled") optionsMap[result.value.key] = result.value.options;
+        else firstError ??= result.reason;
       });
 
       setDynamicOptions((prev) => ({
         ...prev,
         ...optionsMap,
       }));
+      if (firstError) toast.error(normalizeApiError(firstError, "Some form options could not be loaded. Reopen the form to retry.").message);
     };
 
     preloadDynamicSelectOptions();
@@ -187,8 +190,8 @@ export default function EditModal({
             try {
               const updatedValues = await field.dynamicValuesFn(String(parentValue));
               updates[field.key] = updatedValues;
-            } catch (err) {
-              console.error(`Error fetching dependency for ${field.key}:`, err);
+            } catch (error: unknown) {
+              toast.error(normalizeApiError(error, `Could not load ${field.label.toLowerCase()} options.`).message);
             }
           }
         }
@@ -278,8 +281,8 @@ export default function EditModal({
         const uploadedFile = await uploadFormFile(selectedUploadFile, formData);
         payload.fileId = uploadedFile.fileId;
         payload.fileURL = uploadedFile.fileURL;
-      } catch (error: any) {
-        toast.error(error?.message || "File upload failed");
+      } catch (error: unknown) {
+        toast.error(normalizeApiError(error, "File upload failed").message);
         setLoading(false);
         return;
       }

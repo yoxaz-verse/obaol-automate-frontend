@@ -1,0 +1,26 @@
+import * as routes from "@/core/api/apiRoutes";
+
+export const apiRoutesByRole: Record<string, string> = {
+  admin: routes.adminRoutes.getAll, inventoryManager: routes.inventoryManagerRoutes.getAll,
+  projectManager: routes.projectManagerRoutes.getAll, worker: routes.workerRoutes.getAll,
+  projectType: routes.projectTypeRoutes.getAll, serviceCompany: routes.serviceCompanyRoutes.getAll,
+  projectStatus: routes.projectStatusRoutes.getAll, projects: routes.projectRoutes.getAll,
+  activity: routes.activityRoutes.getAll, activityType: routes.activityTypeRoutes.getAll,
+  activityStatus: routes.activityStatusRoutes.getAll, timeSheet: routes.timeSheetRoutes.getAll,
+  activityFile: routes.activityFileRoutes.getAll, associateCompany: routes.associateCompanyRoutes.getAll,
+  associate: routes.associateRoutes.getAll, operator: routes.operatorRoutes.getAll,
+  category: routes.categoryRoutes.getAll, subCategory: routes.subCategoryRoutes.getAll,
+  product: routes.productRoutes.getAll, productVariant: routes.productVariantRoutes.getAll,
+  variantRate: routes.variantRateRoutes.getAll, displayedRate: routes.displayedRateRoutes.getAll,
+  catalogItem: routes.catalogItemRoutes.getAll, enquiry: routes.enquiryRoutes.getAll,
+  enquiryProcessStatus: routes.enquiryProcessStatusRoutes.getAll, incoterm: routes.incotermRoutes.getAll,
+  paymentTerm: routes.paymentTermRoutes.getAll, commissionRule: routes.commissionRuleRoutes.getAll,
+  designation: routes.designationRoutes.getAll, companyType: routes.companyTypeRoutes.getAll,
+  certification: routes.certificationRoutes.getAll, companyBusinessModel: routes.companyBusinessModelRoutes.getAll,
+  companyFunction: routes.companyFunctionRoutes.getAll, companySubFunction: routes.companySubFunctionRoutes.getAll,
+  generalIntent: routes.generalIntentRoutes.getAll, subIntent: routes.subIntentRoutes.getAll,
+  companyStage: routes.companyStageRoutes.getAll, researchedCompany: routes.researchedCompanyRoutes.getAll,
+  jobRole: routes.jobRoleRoutes.getAll, jobType: routes.jobTypeRoutes.getAll,
+  language: routes.languageRoutes.getAll, inventories: routes.inventoryRoutes.getAll,
+  warehouse: routes.warehouseRoutes.getAll,
+};

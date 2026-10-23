@@ -6,8 +6,8 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const between = (source, start, end) => source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start)));
 
 test("Associate Company essentials use only the current capability and jurisdiction fields", () => {
-  const source = read("../src/utils/tableValues.tsx");
-  const config = between(source, "  associateCompany: [", "  researchedCompany: [");
+  const source = read("../src/features/table-framework/schemas/entities/associateCompany.ts");
+  const config = source;
 
   for (const expected of [
     'key: "geoType"',
@@ -23,8 +23,8 @@ test("Associate Company essentials use only the current capability and jurisdict
 });
 
 test("Researched Company retains classification and matches required database fields", () => {
-  const source = read("../src/utils/tableValues.tsx");
-  const config = between(source, "  researchedCompany: [", "  companyType: [");
+  const source = read("../src/features/table-framework/schemas/entities/researchedCompany.ts");
+  const config = source;
 
   assert.equal(config.includes('key: "companyType"'), true);
   assert.equal(config.includes('key: "feedback"'), true);

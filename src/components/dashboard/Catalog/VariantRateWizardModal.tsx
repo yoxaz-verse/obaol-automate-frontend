@@ -32,6 +32,13 @@ import {
   applyProductionMethod,
   type ProductionMethod,
 } from "@/utils/productClassification";
+import { normalizeApiError } from "@/core/api/apiErrors";
+import {
+  buildClassificationPayload,
+  mapRateWizardBackendError,
+  stepForRateWizardErrors,
+  validateRateWizardLaunch,
+} from "@/features/catalog/rateWizardDomain";
 
 type WizardProps = {
   isOpen: boolean;
@@ -850,7 +857,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           throw new Error("The selected variant is no longer associated with this product.");
         }
       }
-      const classificationPayload = normalizeClassificationPayload();
+      const classificationPayload = buildClassificationPayload(formData);
       const payload: any = {
         rate: Number(formData.rate || 0),
         unit: formData.unit,
@@ -894,19 +901,13 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       setSubmitPhase("idle");
       onSuccess?.(data);
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.message || error?.message || "Failed to create rate.";
-      if (process.env.NODE_ENV !== "production") {
-        console.error("[LaunchListing] error", {
-          phase: submitPhase,
-          status: error?.response?.status,
-          message,
-        });
-      }
-      const mapped = mapBackendErrorToFields(message);
+    onError: (error: unknown) => {
+      const normalized = normalizeApiError(error, "Failed to create rate.");
+      const message = normalized.message;
+      const mapped = { ...mapRateWizardBackendError(message), ...normalized.fieldErrors };
       if (Object.keys(mapped).length > 0) {
         setErrors((prev) => ({ ...prev, ...mapped }));
-        setStep(getStepForErrors(Object.keys(mapped)));
+        setStep(stepForRateWizardErrors(Object.keys(mapped)));
       }
       showToastMessage({
         type: "error",
@@ -1056,132 +1057,18 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     );
   };
 
-  const getStepForErrors = (keys: string[]): number => {
-    const step1Keys = new Set([
-      "category", "subCategory", "product", "productVariant",
-      "classification",
-      "giName", "giCertificateNumber",
-      "organicCertificationBody", "organicCertificationBodyOther",
-      "organicCertificateNumber", "organicCertificateValidFrom", "organicCertificateValidTo",
-      "organicCertifiedQuantity", "organicCertifiedQuantityUnit", "organicCertificationScope",
-    ]);
-    const step2Keys = new Set(["rate", "unit", "associate"]);
-    const step3Keys = new Set(["locationSource", "warehouseId", "officeAddress"]);
-    if (keys.some((k) => step1Keys.has(k))) return 1;
-    if (keys.some((k) => step2Keys.has(k))) return 2;
-    if (keys.some((k) => step3Keys.has(k))) return 3;
-    return 4;
-  };
-
   const validateForLaunch = (): boolean => {
-    const nextErrors: Record<string, string> = {};
-    if (!fixedVariantId) {
-      if (!formData.category) nextErrors.category = "Select a category.";
-      if (!formData.subCategory) nextErrors.subCategory = "Select a sub category.";
-      if (!formData.product) nextErrors.product = "Select a product.";
-      if (!formData.productVariant) nextErrors.productVariant = "Select a product variant.";
-      if (formData.category && !categories.some((item) => getOptionKey(item) === String(formData.category))) {
-        nextErrors.category = "Select a valid category.";
-      }
-      if (formData.subCategory && !subCategories.some((item) => getOptionKey(item) === String(formData.subCategory))) {
-        nextErrors.subCategory = "This subcategory is not associated with the selected category.";
-      }
-      if (formData.product && !products.some((item) => getOptionKey(item) === String(formData.product))) {
-        nextErrors.product = "This product is not associated with the selected subcategory.";
-      }
-      if (formData.productVariant && !variants.some((item) => getOptionKey(item) === String(formData.productVariant))) {
-        nextErrors.productVariant = "This variant is not associated with the selected product.";
-      }
-    }
-    if (!productionMethod) nextErrors.classification = "Select one production / farming method.";
-    if (isGiTagged) {
-      if (!String(formData.giName || "").trim()) nextErrors.giName = "Enter GI name.";
-      if (!String(formData.giCertificateNumber || "").trim()) nextErrors.giCertificateNumber = "Enter GI certificate number.";
-    }
-    if (isOrganic) {
-      if (!String(formData.organicCertificationBody || "").trim()) nextErrors.organicCertificationBody = "Select organic certification body.";
-      if (String(formData.organicCertificationBody || "").trim() === "OTHER" && !String(formData.organicCertificationBodyOther || "").trim()) {
-        nextErrors.organicCertificationBodyOther = "Specify certification body.";
-      }
-      if (!String(formData.organicCertificateNumber || "").trim()) nextErrors.organicCertificateNumber = "Enter organic certificate number.";
-      if (!String(formData.organicCertificateValidFrom || "").trim()) nextErrors.organicCertificateValidFrom = "Select organic valid from date.";
-      if (!String(formData.organicCertificateValidTo || "").trim()) nextErrors.organicCertificateValidTo = "Select organic valid to date.";
-      const fromTs = Date.parse(String(formData.organicCertificateValidFrom || ""));
-      const toTs = Date.parse(String(formData.organicCertificateValidTo || ""));
-      if (Number.isFinite(fromTs) && Number.isFinite(toTs) && toTs < fromTs) {
-        nextErrors.organicCertificateValidTo = "Valid to date cannot be before valid from date.";
-      }
-      const qty = Number(formData.organicCertifiedQuantity || 0);
-      if (!Number.isFinite(qty) || qty <= 0) nextErrors.organicCertifiedQuantity = "Enter certified quantity greater than zero.";
-      if (!String(formData.organicCertifiedQuantityUnit || "").trim()) nextErrors.organicCertifiedQuantityUnit = "Select certified quantity unit.";
-      if (!String(formData.organicCertificationScope || "").trim()) nextErrors.organicCertificationScope = "Select certification scope.";
-    }
-    if (!formData.rate) nextErrors.rate = "Enter price per KG.";
-    if (!formData.unit) nextErrors.unit = "Select a unit.";
-    if (!formData.locationSource) nextErrors.locationSource = "Select a location source.";
-    if (formData.locationSource === "WAREHOUSE" && !formData.warehouseId) nextErrors.warehouseId = "Select a warehouse.";
-    if (formData.locationSource === "OFFICE_ADDRESS" && !String(formData.officeAddress || "").trim()) nextErrors.officeAddress = "Enter office address.";
-    if (!isAssociateUser && !formData.associate) nextErrors.associate = "Select an associate.";
-    if (!isAssociateUser && isOperatorUser && formData.associate && !resolvedCompanyId) {
-      nextErrors.associate = "Selected associate is not linked to a company.";
-    }
+    const nextErrors = validateRateWizardLaunch({
+      form: formData, fixedVariantId, categories, subCategories, products, variants,
+      productionMethod, isAssociateUser, isOperatorUser, resolvedCompanyId,
+    });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
-      setStep(getStepForErrors(Object.keys(nextErrors)));
+      setStep(stepForRateWizardErrors(Object.keys(nextErrors)));
       showToastMessage({ type: "error", message: "Fix highlighted fields before launching listing.", position: "top-right" });
       return false;
     }
     return true;
-  };
-
-  const normalizeClassificationPayload = () => ({
-    isConventional: isConventional,
-    isNatural: isNatural,
-    isOrganic: isOrganic,
-    isIpmQuality: isIpmQuality,
-    isOrganicCertified: isOrganic,
-    organicCertificationBody: isOrganic ? String(formData.organicCertificationBody || "").trim() : "",
-    organicCertificationBodyOther: isOrganic ? String(formData.organicCertificationBodyOther || "").trim() : "",
-    organicCertificateNumber: isOrganic ? String(formData.organicCertificateNumber || "").trim() : "",
-    organicCertificateValidFrom: isOrganic ? String(formData.organicCertificateValidFrom || "").trim() : "",
-    organicCertificateValidTo: isOrganic ? String(formData.organicCertificateValidTo || "").trim() : "",
-    organicCertifiedQuantity: isOrganic ? Number(formData.organicCertifiedQuantity || 0) : 0,
-    organicCertifiedQuantityUnit: isOrganic ? String(formData.organicCertifiedQuantityUnit || "KG").trim() : "KG",
-    organicCertificationScope: isOrganic ? String(formData.organicCertificationScope || "NPOP").trim() : "NPOP",
-    organicCertificateDocumentUrl: isOrganic ? String(formData.organicCertificateDocumentUrl || "").trim() : "",
-    isGiTagged: isGiTagged,
-    giName: isGiTagged ? String(formData.giName || "").trim() : "",
-    giCertificateNumber: isGiTagged ? String(formData.giCertificateNumber || "").trim() : "",
-    giDocumentUrl: isGiTagged ? String(formData.giDocumentUrl || "").trim() : "",
-  });
-
-  const mapBackendErrorToFields = (message: string): Record<string, string> => {
-    const msg = String(message || "").toLowerCase();
-    const mapped: Record<string, string> = {};
-    if (msg.includes("organic certification body")) mapped.organicCertificationBody = "Select a valid organic certification body.";
-    if (msg.includes("specify organic certification body")) mapped.organicCertificationBodyOther = "Specify certification body.";
-    if (msg.includes("organic certificate number")) mapped.organicCertificateNumber = "Enter organic certificate number.";
-    if (msg.includes("organic certificate validity")) {
-      mapped.organicCertificateValidFrom = "Provide valid certification dates.";
-      mapped.organicCertificateValidTo = "Provide valid certification dates.";
-    }
-    if (msg.includes("valid to date")) mapped.organicCertificateValidTo = "Valid to date cannot be before valid from date.";
-    if (msg.includes("organic certified quantity")) mapped.organicCertifiedQuantity = "Certified quantity must be greater than zero.";
-    if (msg.includes("gi details")) {
-      mapped.giName = "GI details are required.";
-      mapped.giCertificateNumber = "GI details are required.";
-    }
-    if (msg.includes("production / farming method")) {
-      mapped.classification = "Select exactly one production / farming method.";
-    }
-    if (msg.includes("warehouse is required")) mapped.warehouseId = "Select a warehouse.";
-    if (msg.includes("office address is required")) mapped.officeAddress = "Enter office address.";
-    if (msg.includes("selected associate is not linked to a company")) mapped.associate = "Selected associate is not linked to a company.";
-    if (msg.includes("select a location source")) mapped.locationSource = "Select a location source.";
-    if (msg.includes("subcategory is no longer associated")) mapped.subCategory = "Select a subcategory associated with this category.";
-    if (msg.includes("product is no longer associated")) mapped.product = "Select a product associated with this subcategory.";
-    if (msg.includes("variant is no longer associated")) mapped.productVariant = "Select a variant associated with this product.";
-    return mapped;
   };
 
   return (

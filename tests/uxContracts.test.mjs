@@ -406,7 +406,7 @@ test("dashboard discovery uses Trade Listings terminology", () => {
 });
 
 test("marketplace rates are revealed explicitly and past enquiries warn buyers", () => {
-  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
   const access = read("../src/utils/dashboardAccess.ts");
   assert.equal(rates.includes("Reveal Rate"), true);
   assert.equal(rates.includes("Previous listed price"), true);
@@ -419,7 +419,7 @@ test("marketplace rates are revealed explicitly and past enquiries warn buyers",
 });
 
 test("marketplace enquiry is available for foreign listings while owners manage their own", () => {
-  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
   assert.equal(rates.includes("item.isMarketplaceView &&\n                          !item.isOwnedByViewer &&\n                          (isAssociateUser || isAdminUser)"), true);
   assert.equal(rates.includes("Manage listing"), true);
   assert.equal(rates.includes("isAssociateUser && !item?.isOwnedByViewer"), true);
@@ -432,7 +432,7 @@ test("trade listings refresh active views and exclude owned live marketplace row
   const marketplace = read("../src/app/dashboard/marketplace/page.tsx");
   const product = read("../src/app/dashboard/product/page.tsx");
   const query = read("../src/components/queryComponent.tsx");
-  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
   assert.equal(marketplace.includes("isLive: true, excludeOwned: true"), true);
   assert.equal(marketplace.includes('isActive={currentTable === "marketplace-live"}'), true);
   assert.equal(product.includes('isActive={currentTable === "mine"}'), true);
@@ -443,7 +443,7 @@ test("trade listings refresh active views and exclude owned live marketplace row
 });
 
 test("trade listings allow authorized users to add stock even when inventory exists", () => {
-  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
 
   assert.equal(rates.includes("+ Add Stock"), true);
   assert.doesNotMatch(
@@ -456,7 +456,7 @@ test("trade listings allow authorized users to add stock even when inventory exi
 });
 
 test("past marketplace listings show last-live age to admins only", () => {
-  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
 
   assert.equal(rates.includes("lastLiveDateRaw"), true);
   assert.equal(rates.includes("Last live {label}"), true);
@@ -468,7 +468,7 @@ test("past marketplace listings show last-live age to admins only", () => {
 });
 
 test("listing deletion uses a stable non-dismissible confirmation modal", () => {
-  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
   const deletion = read("../src/components/CurdTable/delete.tsx");
   assert.equal(rates.includes("const [pendingDeletion, setPendingDeletion]"), true);
   assert.equal(rates.includes("onPress={() => setPendingDeletion(item)}"), true);
@@ -505,7 +505,8 @@ test("variant rate wizard Commodity Directory CTA opens Commodity Directory", ()
 });
 
 test("published variant rates are status-only and expose a one-hour delete window", () => {
-  const listing = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const listing = read("../src/features/catalog/rates/VariantRateWorkspace.tsx")
+    + read("../src/features/catalog/rates/constants.ts");
   const inventory = read("../src/components/dashboard/Inventory/InventoryList.tsx");
 
   assert.match(listing, /LISTING_DELETE_WINDOW_MS = 60 \* 60 \* 1000/);
@@ -569,7 +570,7 @@ test("variant rate classification is written atomically and hierarchy remains ne
 });
 
 test("catalog grid cards respond to their container without compressing controls", () => {
-  const variantRate = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const variantRate = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
   const globals = read("../src/app/globals.css");
 
   assert.equal(variantRate.includes('viewMode === "grid"\n                          ? "catalog-responsive-grid"'), true);

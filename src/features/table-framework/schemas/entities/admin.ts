@@ -1,0 +1,66 @@
+import { fetchDependentOptions } from "../../../../utils/fetchDependentOptions";
+import type { TableSchema } from "../../types";
+
+export const adminSchema = [
+    {
+      label: "Name",
+      type: "text",
+      filterType: "text",
+      key: "name",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Email",
+      type: "email",
+      filterType: "text",
+      key: "email",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Password",
+      type: "password",
+      key: "password",
+      inForm: true,
+      inTable: false,
+      inEdit: false,
+      required: true,
+    },
+    {
+      label: "Last Seen",
+      type: "dateTime",
+      key: "lastSeenAt",
+      inForm: false,
+      inEdit: false,
+      inTable: true,
+      emptyValue: "Never",
+    },
+    {
+      label: "Last Login",
+      type: "dateTime",
+      key: "lastLoginAt",
+      inForm: false,
+      inEdit: false,
+      inTable: true,
+      emptyValue: "Never",
+    },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ] satisfies TableSchema;

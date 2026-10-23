@@ -19,8 +19,9 @@ import {
   Divider,
 } from "@nextui-org/react";
 import { IoFilterOutline, IoTrashOutline } from "react-icons/io5";
-import { FiPackage, FiMapPin, FiDollarSign, FiSearch } from "react-icons/fi";
+import { FiPackage, FiMapPin, FiDollarSign, FiRefreshCw, FiSearch } from "react-icons/fi";
 import { FormField } from "@/data/interface-data";
+import { normalizeApiError } from "@/core/api/apiErrors";
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -68,6 +69,19 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>({});
+  const [optionErrors, setOptionErrors] = useState<Record<string, string>>({});
+
+  const loadFieldOptions = useCallback(async (field: FormField, dependencyValue = "") => {
+    if (!field.dynamicValuesFn) return;
+    setOptionErrors((previous) => ({ ...previous, [field.key]: "" }));
+    try {
+      const result = await field.dynamicValuesFn(dependencyValue);
+      setDynamicOptions((previous) => ({ ...previous, [field.key]: result }));
+    } catch (error: unknown) {
+      const normalized = normalizeApiError(error, `Could not load ${field.label.toLowerCase()} options.`);
+      setOptionErrors((previous) => ({ ...previous, [field.key]: normalized.message }));
+    }
+  }, []);
 
   // Group fields into their respective sections
   const groupedFields = useMemo(() => {
@@ -91,19 +105,14 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
     const loadRootOptions = async () => {
       for (const field of formFields) {
         if (field.dynamicValuesFn && !field.dependsOn) {
-          try {
-            const result = await field.dynamicValuesFn("");
-            setDynamicOptions(prev => ({ ...prev, [field.key]: result }));
-          } catch (err) {
-            console.error(`Error loading root options for ${field.key}:`, err);
-          }
+          await loadFieldOptions(field);
         } else if (field.values) {
           setDynamicOptions(prev => ({ ...prev, [field.key]: field.values || [] }));
         }
       }
     };
     if (isOpen) loadRootOptions();
-  }, [formFields, isOpen]);
+  }, [formFields, isOpen, loadFieldOptions]);
 
   // Handle dependency fetching - optimized to track specific dependency changes
   useEffect(() => {
@@ -117,14 +126,16 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         if (dependencyValue && (!Array.isArray(dependencyValue) || dependencyValue.length > 0)) {
           // Note: fetchDependentOptions has its own internal cache (react-query)
           // so calling it frequently is relatively safe, but still good to be careful.
-          field.dynamicValuesFn(dependencyValue).then(result => {
+          setOptionErrors((previous) => ({ ...previous, [field.key]: "" }));
+          field.dynamicValuesFn(String(dependencyValue)).then(result => {
             setDynamicOptions(prev => {
               // Only update if options actually changed to avoid re-renders
               if (JSON.stringify(prev[field.key]) === JSON.stringify(result)) return prev;
               return { ...prev, [field.key]: result };
             });
-          }).catch(err => {
-            console.error(`Error fetching dependent options for ${field.key}:`, err);
+          }).catch((error: unknown) => {
+            const normalized = normalizeApiError(error, `Could not load ${field.label.toLowerCase()} options.`);
+            setOptionErrors((previous) => ({ ...previous, [field.key]: normalized.message }));
           });
         } else {
           setDynamicOptions(prev => {
@@ -186,6 +197,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         const isDisabled = field.dependsOn && (!dependsOnValue || (Array.isArray(dependsOnValue) && dependsOnValue.length === 0));
 
         return (
+          <div className="space-y-1">
           <Select
             label={label}
             variant="flat"
@@ -208,6 +220,21 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
               </SelectItem>
             ))}
           </Select>
+          {optionErrors[key] && (
+            <div className="flex items-center justify-between gap-2 px-1 text-xs text-danger" role="alert">
+              <span>{optionErrors[key]}</span>
+              <Button
+                size="sm"
+                variant="light"
+                color="danger"
+                startContent={<FiRefreshCw />}
+                onPress={() => loadFieldOptions(field, field.dependsOn ? String(filters[field.dependsOn] || "") : "")}
+              >
+                Retry
+              </Button>
+            </div>
+          )}
+          </div>
         );
       case "date":
         return (

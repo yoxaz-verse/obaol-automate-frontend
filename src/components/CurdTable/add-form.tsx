@@ -140,17 +140,26 @@ const AddForm: React.FC<AddFormProps> = ({
           return { key: field.key, options };
         });
 
-      const results = await Promise.all(fetchOptionsPromises);
+      const results = await Promise.allSettled(fetchOptionsPromises);
 
       const optionsMap: Record<string, any[]> = {};
-      results.forEach(({ key, options }) => {
-        optionsMap[key] = options;
+      let firstError: unknown;
+      results.forEach((result) => {
+        if (result.status === "fulfilled") optionsMap[result.value.key] = result.value.options;
+        else firstError ??= result.reason;
       });
 
       setDynamicOptions((prev) => ({
         ...prev,
         ...optionsMap,
       }));
+      if (firstError) {
+        showToastMessage({
+          type: "error",
+          message: normalizeApiError(firstError, "Some form options could not be loaded. Reopen the form to retry.").message,
+          position: "top-right",
+        });
+      }
     };
 
     preloadDynamicSelectOptions();
@@ -287,11 +296,10 @@ const AddForm: React.FC<AddFormProps> = ({
       }
       // Proceed with form submission
       addItem.mutate(uploadFormData);
-    } catch (error: any) {
-      console.error("Submission error:", error);
+    } catch (error: unknown) {
       showToastMessage({
         type: "error",
-        message: "An error occurred during submission",
+        message: normalizeApiError(error, "An error occurred during submission").message,
         position: "top-right",
       });
       setLoading(false);

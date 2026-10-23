@@ -16,7 +16,7 @@ test("sorts past marketplace listings by newest last-live date first", () => {
 
 test("uses the marketplace sort for the displayed query and every prefetched page", () => {
   const source = readFileSync(
-    "src/components/dashboard/Catalog/variant-rate.tsx",
+    "src/features/catalog/rates/VariantRateWorkspace.tsx",
     "utf8",
   );
   assert.equal(

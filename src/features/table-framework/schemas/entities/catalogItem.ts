@@ -1,0 +1,85 @@
+import { fetchDependentOptions } from "../../../../utils/fetchDependentOptions";
+import type { TableSchema } from "../../types";
+
+export const catalogItemSchema = [
+    {
+      label: "Custom Title",
+      type: "text",
+      key: "customTitle",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Product",
+      type: "text",
+      key: "product",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Variant",
+      type: "text",
+      key: "productVariant",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Classification",
+      type: "multiselect",
+      filterType: "multiselect",
+      key: "classifications",
+      values: [
+        { key: "conventional", value: "Conventional" },
+        { key: "natural", value: "Natural" },
+        { key: "organic", value: "Organic" },
+        { key: "ipm", value: "IPM" },
+        { key: "gi-tag", value: "GI Tag" },
+      ],
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Final Price (per KG)",
+      type: "currency",
+      key: "rate",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Commission",
+      type: "currency",
+      key: "commission",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Quantity (MT)",
+      type: "text",
+      key: "quantity",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Live",
+      type: "boolean",
+      key: "isLive",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+    {
+      label: "Last Live Date",
+      type: "date",
+      key: "lastLiveDate",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ] satisfies TableSchema;

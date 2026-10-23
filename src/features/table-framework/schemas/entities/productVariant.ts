@@ -1,0 +1,78 @@
+import { fetchDependentOptions } from "../../../../utils/fetchDependentOptions";
+import type { TableSchema } from "../../types";
+
+export const productVariantSchema = [
+    {
+      label: "Variant Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inEdit: true,
+      inTable: false,
+    },
+    {
+      label: "Description",
+      type: "textarea",
+      key: "description",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+    {
+      label: "Available",
+      type: "boolean",
+      key: "isAvailable",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+    {
+      label: "Created By",
+      type: "text",
+      key: "createdBy",
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Live",
+      type: "boolean",
+      key: "isLive",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+    // {
+    //   label: "Admin",
+    //   type: "select",
+    //   key: "admin",
+    //   values: [],
+    //   inForm: false,
+    //   inTable: false,
+    // },
+    {
+      label: "Product",
+      type: "select",
+      filterType: "multiselect",
+      key: "product",
+      dependsOn: "subCategory",
+      values: [],
+      dynamicValuesFn: (subCategoryId: string) => fetchDependentOptions("product", "subCategory", subCategoryId),
+      inForm: false,
+      inTable: false,
+      inEdit: true,
+    },
+    {
+      label: "Created At",
+      type: "text",
+      key: "createdAt",
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ] satisfies TableSchema;

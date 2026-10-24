@@ -1,4 +1,4 @@
-export type ImportReservationStatus = "PENDING" | "APPROVED" | "LOCKED" | "REJECTED" | "CANCELLED" | "ACCEPTED";
+export type ImportReservationStatus = "PENDING" | "APPROVED" | "LOCKED" | "REJECTED" | "CANCELLED" | "ACCEPTED" | "EXPIRED";
 
 export type ImportReservationPresentation = {
   label: string;
@@ -36,6 +36,11 @@ const PRESENTATION_BY_STATUS: Record<ImportReservationStatus, ImportReservationP
     label: "Cancelled",
     description: "This reservation request was cancelled and is no longer active.",
     tone: "neutral",
+  },
+  EXPIRED: {
+    label: "Expired",
+    description: "The importer did not respond within 15 days. This reservation has expired and the quantity has been released.",
+    tone: "danger",
   },
 };
 

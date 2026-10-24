@@ -1,6 +1,7 @@
 export type ApiFieldErrors = Record<string, string>;
 
 export type NormalizedApiError = {
+  code?: string;
   message: string;
   fieldErrors: ApiFieldErrors;
   status?: number;
@@ -23,7 +24,7 @@ export const normalizeApiError = (error: unknown, fallback = "Something went wro
   const candidate = error as {
     code?: string;
     message?: unknown;
-    response?: { status?: number; data?: { message?: unknown; error?: unknown; errors?: unknown } };
+    response?: { status?: number; data?: { code?: unknown; message?: unknown; error?: unknown; errors?: unknown } };
   } | null;
   const response = candidate?.response;
   const data = response?.data;
@@ -35,6 +36,7 @@ export const normalizeApiError = (error: unknown, fallback = "Something went wro
     || fallback;
 
   return {
+    code: readMessage(data?.code) || undefined,
     message,
     fieldErrors: normalizeFieldErrors(data?.errors),
     status: response?.status,

@@ -613,6 +613,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
               variant="underlined"
               color="warning"
               classNames={{
+                base: "import-workspace-tabs",
                 tabList: "gap-12 relative rounded-none p-0",
                 cursor: "bg-warning w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--nextui-warning),0.4)]",
                 tab: "max-w-fit px-4 h-14",
@@ -1641,10 +1642,16 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                   content: "text-[10px] font-black uppercase tracking-widest text-white"
                                 }}
                               >
-                                {resolveReservationStatus(reservation)}
+                                {getImportReservationPresentation(resolveReservationStatus(reservation)).label}
                               </Chip>
                             </div>
                           </div>
+
+                          {resolveReservationStatus(reservation) === "EXPIRED" && (
+                            <div className="rounded-xl border border-danger-500/20 bg-danger-500/10 px-4 py-3 text-xs font-medium leading-relaxed text-danger-300">
+                              {getImportReservationPresentation("EXPIRED").description}
+                            </div>
+                          )}
 
                           {/* Footer Actions Overlay */}
                           {resolveReservationStatus(reservation) === "PENDING" && (

@@ -417,11 +417,11 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
               <FiLock />
               <span className="text-xs font-black uppercase tracking-[.2em]">Sealed product offers</span>
             </div>
-            <h1 className="text-3xl font-black">{mode === "buyer" ? "My Buying Requests" : "Bidding"}</h1>
+            <h1 className="text-3xl font-black">{mode === "buyer" ? "Buying Requests" : "Buyer Requests"}</h1>
             <p className="mt-1 max-w-2xl text-sm text-default-500">
               {mode === "buyer"
                 ? "Create and manage sealed buying requests, compare offers after closing, and select a winning seller."
-                : "Discover product opportunities and participate with a confidential offer linked to your company’s trade listing."}
+                : "Find product requests created by buyers and submit a confidential price offer from your company."}
             </p>
           </div>
           {mode === "buyer" && canBuy && (
@@ -453,11 +453,11 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
       )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        {mode === "seller" ? <Tabs selectedKey={sellerView} onSelectionChange={(key) => setSellerView(String(key) as SellerView)} color="warning" variant="underlined" aria-label="Seller bidding views">
-          <Tab key="available" title="Available" />
-          <Tab key="participating" title="Participating" />
-          <Tab key="history" title="History" />
-        </Tabs> : <div className="text-sm font-semibold text-default-500">Buyer workspace</div>}
+        {mode === "seller" ? <Tabs selectedKey={sellerView} onSelectionChange={(key) => setSellerView(String(key) as SellerView)} color="warning" variant="underlined" aria-label="Buying request offer views">
+          <Tab key="available" title="Open" />
+          <Tab key="participating" title="My Offers" />
+          <Tab key="history" title="Closed" />
+        </Tabs> : <div className="text-sm font-semibold text-default-500">Buyer requests</div>}
         <Button isIconOnly variant="light" aria-label="Refresh" onPress={() => refresh()}>
           <FiRefreshCw />
         </Button>

@@ -1,14 +1,14 @@
 export type AdminWorkflowGroup =
-  | "Buyer / Seeking"
-  | "Seller / Providing"
-  | "Shared / Execution"
+  | "Buying"
+  | "Selling"
+  | "Trade"
   | "Labs"
   | "Packaging"
   | "Warehouse";
 
 export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup; links: string[] }> = [
   {
-    label: "Buyer / Seeking",
+    label: "Buying",
     links: [
       "/dashboard/marketplace",
       "/dashboard/bidding/my",
@@ -17,7 +17,7 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
     ],
   },
   {
-    label: "Seller / Providing",
+    label: "Selling",
     links: [
       "/dashboard/product",
       "/dashboard/bidding",
@@ -26,7 +26,7 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
     ],
   },
   {
-    label: "Shared / Execution",
+    label: "Trade",
     links: [
       "/dashboard/enquiries",
       "/dashboard/sample-requests",

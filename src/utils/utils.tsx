@@ -66,12 +66,12 @@ export const sidebarOptions = [
     link: "/dashboard/enquiries",
   },
   {
-    name: "Bidding",
+    name: "Buyer Requests",
     icon: <RiAuctionLine />,
     link: "/dashboard/bidding",
   },
   {
-    name: "My Buying Requests",
+    name: "Buying Requests",
     icon: <RiAuctionLine />,
     link: "/dashboard/bidding/my",
   },
@@ -81,12 +81,12 @@ export const sidebarOptions = [
     link: "/dashboard/sample-requests",
   },
   {
-    name: "My Trade Listings", //Translate
+    name: "My Listings", //Translate
     icon: <AiOutlineProduct />,
     link: "/dashboard/product",
   },
   {
-    name: "Trade Listings",
+    name: "Browse Listings",
     icon: <LuStore />,
     link: "/dashboard/marketplace",
   },
@@ -103,7 +103,7 @@ export const sidebarOptions = [
   { name: "My Import Listings", icon: <LuShip />, link: "/dashboard/imports/my-listings" },
   { name: "Import Reservations", icon: <FiClipboard />, link: "/dashboard/imports/reservations" },
   {
-    name: "Commodity Directory", //Translate
+    name: "Commodity Catalog", //Translate
     icon: <GiBookAura />,
     link: "/dashboard/catalog",
   },

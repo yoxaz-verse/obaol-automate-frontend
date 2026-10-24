@@ -10,7 +10,7 @@ export type CompanyFunctionRoleContext = {
 export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinition[] = [
   { slug: "buyer", name: "Buyer", description: "Find products available on OBAOL and manage the steps from enquiry to order.", actions: [
     { label: "Browse live trade listings", href: "/dashboard/marketplace", description: "See products that are currently listed on the marketplace.", primary: true },
-    { label: "My Buying Requests", href: "/dashboard/bidding/my", description: "Create sealed buying requests and choose a seller after bidding closes." },
+    { label: "Buying requests", href: "/dashboard/bidding/my", description: "Tell sellers what you need, compare their confidential offers, and choose a seller." },
     { label: "Browse commodity catalog", href: "/dashboard/catalog", description: "Explore commodities available through OBAOL." },
     { label: "Manage enquiries", href: "/dashboard/enquiries", description: "Review and follow up on product enquiries." },
     { label: "Sample requests", href: "/dashboard/sample-requests", description: "Request and track product samples." },
@@ -18,7 +18,7 @@ export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinit
   ] },
   { slug: "seller", name: "Seller", description: "List products for buyers and manage your active selling activity on OBAOL.", actions: [
     { label: "Start selling", href: "/dashboard/product", description: "Create a trade listing for a product you want to sell.", primary: true },
-    { label: "Bidding", href: "/dashboard/bidding", description: "Find product buying requests and submit sealed offers." },
+    { label: "Buyer requests", href: "/dashboard/bidding", description: "Find products buyers need and submit a confidential price offer." },
     { label: "Manage my trade listings", href: "/dashboard/product", description: "Review and update your existing product listings." },
     { label: "View live trade listings", href: "/dashboard/marketplace", description: "See products that are currently live on the marketplace." },
     { label: "Manage inventory", href: "/dashboard/inventory", description: "Keep product stock and availability up to date." },

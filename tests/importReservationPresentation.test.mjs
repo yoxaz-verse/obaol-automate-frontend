@@ -16,6 +16,11 @@ test("reservation lifecycle states use clear customer-facing language", () => {
   assert.equal(getImportReservationPresentation("LOCKED").label, "Enquiry created");
   assert.equal(getImportReservationPresentation("REJECTED").label, "Not approved");
   assert.equal(getImportReservationPresentation("CANCELLED").label, "Cancelled");
+  assert.deepEqual(getImportReservationPresentation("EXPIRED"), {
+    label: "Expired",
+    description: "The importer did not respond within 15 days. This reservation has expired and the quantity has been released.",
+    tone: "danger",
+  });
 });
 
 test("reservation presentation handles legacy and missing values safely", () => {
@@ -29,13 +34,18 @@ test("reservation presentation handles legacy and missing values safely", () => 
 
 test("import reservation workspace exposes lifecycle actions and an opportunity empty state", () => {
   const source = readFileSync("src/app/dashboard/imports/page.tsx", "utf8");
+  const globalStyles = readFileSync("src/app/globals.css", "utf8");
   assert.match(source, /status === "PENDING"/);
   assert.match(source, /status === "APPROVED" \|\| status === "ACCEPTED"/);
   assert.match(source, /status === "LOCKED"/);
+  assert.match(source, /getImportReservationPresentation\(resolveReservationStatus\(reservation\)\)/);
   assert.match(source, /Lock reservation & create enquiry/);
   assert.match(source, /No import reservations yet/);
   assert.match(source, /href="\/dashboard\/imports"/);
   assert.match(source, /Reserved Quantity/);
   assert.match(source, /Expected Arrival/);
   assert.match(source, /Requested On/);
+  assert.match(source, /base: "import-workspace-tabs"/);
+  assert.match(globalStyles, /\.import-workspace-tabs \[role="tab"\].*focus-visible/);
+  assert.match(globalStyles, /box-shadow: inset 0 0 0 2px rgba\(207, 152, 60, 0\.72\) !important/);
 });

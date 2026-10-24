@@ -441,6 +441,14 @@ canvas {
     outline: none;
     box-shadow: inset 0 0 0 2px rgba(207, 152, 60, 0.72) !important;
   }
+
+  /* Keep import-tab keyboard focus contained inside the tab. The dashboard's
+     outer blue focus shadow is clipped by the tab strip and reads as detached
+     vertical lines. */
+  [data-dashboard-shell] .import-workspace-tabs [role="tab"]:is(:focus-visible, [data-focus-visible="true"]) {
+    outline: none !important;
+    box-shadow: inset 0 0 0 2px rgba(207, 152, 60, 0.72) !important;
+  }
 }
 
 [data-dashboard-content] > * {

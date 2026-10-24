@@ -406,7 +406,12 @@ test("dashboard discovery uses Trade Listings terminology", () => {
 });
 
 test("marketplace rates are revealed explicitly and past enquiries warn buyers", () => {
-  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
+  const rates = [
+    read("../src/features/catalog/rates/VariantRateWorkspace.tsx"),
+    read("../src/features/catalog/rates/enquiry/CreateEnquiryButton.tsx"),
+    read("../src/features/catalog/rates/enquiry/EnquirySuccess.tsx"),
+    read("../src/features/catalog/rates/MarketplacePrice.tsx"),
+  ].join("\n");
   const access = read("../src/utils/dashboardAccess.ts");
   assert.equal(rates.includes("Reveal Rate"), true);
   assert.equal(rates.includes("Previous listed price"), true);
@@ -419,11 +424,14 @@ test("marketplace rates are revealed explicitly and past enquiries warn buyers",
 });
 
 test("marketplace enquiry is available for foreign listings while owners manage their own", () => {
-  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
+  const rates = [
+    read("../src/features/catalog/rates/VariantRateWorkspace.tsx"),
+    read("../src/features/catalog/rates/enquiry/CreateEnquiryButton.tsx"),
+  ].join("\n");
   assert.equal(rates.includes("item.isMarketplaceView &&\n                          !item.isOwnedByViewer &&\n                          (isAssociateUser || isAdminUser)"), true);
   assert.equal(rates.includes("Manage listing"), true);
-  assert.equal(rates.includes("isAssociateUser && !item?.isOwnedByViewer"), true);
-  assert.equal(rates.includes('{variantRate?.isLive ? "Enquire" : "Check Current Price"}'), true);
+  assert.equal(rates.includes("isAssociateUser && !Boolean(item.isOwnedByViewer)"), true);
+  assert.match(rates, /variantRate\??\.isLive \? "Enquire" : "Check Current Price"/);
   assert.equal(rates.includes("canCreateMarketplaceEnquiry ? (\n                                    <CreateEnquiryButton"), true);
   assert.equal(rates.includes("variantRate={item}\n                                      compact"), true);
 });
@@ -443,7 +451,10 @@ test("trade listings refresh active views and exclude owned live marketplace row
 });
 
 test("trade listings allow authorized users to add stock even when inventory exists", () => {
-  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
+  const rates = [
+    read("../src/features/catalog/rates/VariantRateWorkspace.tsx"),
+    read("../src/features/catalog/rates/InventoryEditorDialog.tsx"),
+  ].join("\n");
 
   assert.equal(rates.includes("+ Add Stock"), true);
   assert.doesNotMatch(
@@ -456,7 +467,10 @@ test("trade listings allow authorized users to add stock even when inventory exi
 });
 
 test("past marketplace listings show last-live age to admins only", () => {
-  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
+  const rates = [
+    read("../src/features/catalog/rates/VariantRateWorkspace.tsx"),
+    read("../src/features/catalog/rates/ListingFreshness.tsx"),
+  ].join("\n");
 
   assert.equal(rates.includes("lastLiveDateRaw"), true);
   assert.equal(rates.includes("Last live {label}"), true);
@@ -570,7 +584,10 @@ test("variant rate classification is written atomically and hierarchy remains ne
 });
 
 test("catalog grid cards respond to their container without compressing controls", () => {
-  const variantRate = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
+  const variantRate = [
+    read("../src/features/catalog/rates/VariantRateWorkspace.tsx"),
+    read("../src/features/catalog/rates/enquiry/CreateEnquiryButton.tsx"),
+  ].join("\n");
   const globals = read("../src/app/globals.css");
 
   assert.equal(variantRate.includes('viewMode === "grid"\n                          ? "catalog-responsive-grid"'), true);

@@ -10,8 +10,9 @@ test("normalizes API messages without replacing backend content", () => {
 });
 
 test("normalizes alternate API errors and structured field messages", () => {
-  const result = normalizeApiError({ response: { status: 409, data: { error: "Account conflict", errors: { email: "This email is already in use.", password: ["Too short.", "Try another password."] } } } });
+  const result = normalizeApiError({ response: { status: 409, data: { code: "ACCOUNT_CONFLICT", error: "Account conflict", errors: { email: "This email is already in use.", password: ["Too short.", "Try another password."] } } } });
   assert.equal(result.message, "Account conflict");
+  assert.equal(result.code, "ACCOUNT_CONFLICT");
   assert.deepEqual(result.fieldErrors, { email: "This email is already in use.", password: "Too short. Try another password." });
 });
 

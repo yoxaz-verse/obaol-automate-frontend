@@ -147,20 +147,20 @@ test("Associate desktop and mobile navigation share common and governed sidebar 
 
 test("Admin sidebar groups operational routes by workflow without duplicates", () => {
   assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.map((group) => group.label), [
-    "Buyer / Seeking",
-    "Seller / Providing",
-    "Shared / Execution",
+    "Buying",
+    "Selling",
+    "Trade",
     "Labs",
     "Packaging",
     "Warehouse",
   ]);
-  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Buyer / Seeking")?.links, [
+  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Buying")?.links, [
     "/dashboard/marketplace",
     "/dashboard/bidding/my",
     "/dashboard/imports",
     "/dashboard/catalog",
   ]);
-  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Seller / Providing")?.links, [
+  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Selling")?.links, [
     "/dashboard/product",
     "/dashboard/bidding",
     "/dashboard/imports/my-listings",

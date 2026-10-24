@@ -54,41 +54,44 @@ export default function AssociateDashboard({
     enabled: model.showFunctions && Boolean(associateCompanyId),
   });
   const isSeeking = perspective === "sought";
-  const perspectiveAccent = isSeeking
-    ? "border-blue-500/30 bg-blue-500/5 dark:border-blue-400/25"
-    : "border-emerald-500/30 bg-emerald-500/5 dark:border-emerald-400/25";
-  const perspectiveText = isSeeking ? "text-blue-600 dark:text-blue-300" : "text-emerald-600 dark:text-emerald-300";
-  const perspectiveButton = isSeeking
-    ? "bg-blue-600 text-white hover:bg-blue-700"
-    : "bg-emerald-600 text-white hover:bg-emerald-700";
+  const perspectiveAccent = "border-obaol-500/30 bg-obaol-500/5 dark:border-obaol-400/25";
+  const perspectiveText = "text-obaol-700 dark:text-obaol-300";
+  const perspectiveButton = "bg-obaol-500 text-obaol-950 hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500/40";
+  const activePerspectiveTab = "bg-obaol-500 text-obaol-950 shadow-sm hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500/40";
 
   return (
     <div className="space-y-6">
       <section aria-label="Dashboard perspective controls" className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-          <div role="tablist" aria-label="Dashboard perspective" className="inline-flex rounded-xl border border-default-200 bg-default-100 p-1">
-            <Button
-              role="tab"
-              aria-selected={perspective === "provided"}
-              isDisabled={!hasProvided}
-              size="sm"
-              variant="light"
-              className={`min-w-28 font-semibold ${perspective === "provided" ? "bg-emerald-600 text-white hover:bg-emerald-700" : ""}`}
-              onPress={() => onPerspectiveChange("provided")}
-            >
-              Providing
-            </Button>
-            <Button
-              role="tab"
-              aria-selected={perspective === "sought"}
-              isDisabled={!hasSought}
-              size="sm"
-              variant="light"
-              className={`min-w-28 font-semibold ${perspective === "sought" ? "bg-blue-600 text-white hover:bg-blue-700" : ""}`}
-              onPress={() => onPerspectiveChange("sought")}
-            >
-              Seeking
-            </Button>
+          <div className="flex min-w-0 flex-col items-stretch gap-2 sm:items-start">
+            <div role="tablist" aria-label="Dashboard perspective" aria-describedby="dashboard-perspective-help" className="inline-flex rounded-xl border border-default-200 bg-default-100 p-1">
+              <Button
+                role="tab"
+                aria-selected={perspective === "provided"}
+                isDisabled={!hasProvided}
+                size="sm"
+                variant="light"
+                className={`min-w-28 font-semibold ${perspective === "provided" ? activePerspectiveTab : ""}`}
+                onPress={() => onPerspectiveChange("provided")}
+              >
+                Providing
+              </Button>
+              <Button
+                role="tab"
+                aria-selected={perspective === "sought"}
+                isDisabled={!hasSought}
+                size="sm"
+                variant="light"
+                className={`min-w-28 font-semibold ${perspective === "sought" ? activePerspectiveTab : ""}`}
+                onPress={() => onPerspectiveChange("sought")}
+              >
+                Seeking
+              </Button>
+            </div>
+            <p id="dashboard-perspective-help" className="max-w-full text-xs leading-5 text-default-500">
+              <span className="font-semibold text-foreground">Providing:</span> what your company offers <span aria-hidden="true">·</span>{" "}
+              <span className="font-semibold text-foreground">Seeking:</span> what your company needs
+            </p>
           </div>
           {(!hasProvided || !hasSought) && <Button size="sm" variant="light" className="font-semibold text-primary sm:justify-end" onPress={() => router.push("/dashboard/company")}>Configure missing profile</Button>}
         </div>
@@ -127,7 +130,7 @@ export default function AssociateDashboard({
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="text-xl font-black text-foreground">{definition.name}</h3>
                             {fn.priorityRank ? <span className="rounded-full bg-content2 px-2.5 py-1 text-xs font-semibold text-default-600">Priority {fn.priorityRank}</span> : null}
-                            <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${isSeeking ? "bg-blue-500/15 text-blue-700 dark:text-blue-300" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"}`}>{context.perspectiveLabel}</span>
+                            <span className="rounded-full bg-obaol-500/15 px-2.5 py-1 text-xs font-bold text-obaol-700 dark:text-obaol-300">{context.perspectiveLabel}</span>
                           </div>
                           <p className={`mt-2 text-sm font-semibold ${perspectiveText}`}>{context.roleLabel}</p>
                           <p className="mt-1 text-sm leading-6 text-default-600">{context.explanation}</p>

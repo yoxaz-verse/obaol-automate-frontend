@@ -219,8 +219,16 @@ test("rejected associate receives an explicit login rejection", async ({ page })
 
 test("BOTH associate focus persists across reloads", async ({ page }) => {
   await login(page, accounts[2]);
+  const perspectiveTabs = page.getByRole("tablist", { name: "Dashboard perspective" });
+  await expect(perspectiveTabs.getByRole("tab", { name: "Providing", exact: true })).toBeVisible();
+  await expect(perspectiveTabs.getByRole("tab", { name: "Seeking", exact: true })).toBeVisible();
+  await expect(page.getByText("Providing: what your company offers · Seeking: what your company needs", { exact: true })).toBeVisible();
+  await perspectiveTabs.getByRole("tab", { name: "Seeking", exact: true }).click();
+  await expect(perspectiveTabs.getByRole("tab", { name: "Seeking", exact: true })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("heading", { name: "What you are seeking", exact: true })).toBeVisible();
   await page.getByRole("tab", { name: "Providing", exact: true }).click();
   await expect(page.getByRole("tab", { name: "Providing", exact: true })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("heading", { name: "What you provide", exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("tab", { name: "Providing", exact: true })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByText(/selling enquir(?:y|ies)/i)).toBeVisible();

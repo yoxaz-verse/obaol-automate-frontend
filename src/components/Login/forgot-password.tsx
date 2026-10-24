@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button, Input, Card, CardBody, CardHeader } from "@nextui-org/react";
-import { IoArrowBack, IoMail, IoLockClosed } from "react-icons/io5";
+import { IoArrowBack, IoEye, IoEyeOff, IoMail, IoLockClosed } from "react-icons/io5";
 import { postData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
 import { useRouter } from "next/navigation";
@@ -27,6 +27,8 @@ const ForgotPasswordComponent = ({ role, prefill = "" }: IForgotPasswordProps) =
     const [otp, setOtp] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
@@ -271,8 +273,19 @@ const ForgotPasswordComponent = ({ role, prefill = "" }: IForgotPasswordProps) =
                                         label="New Password"
                                         placeholder="Min. 8 Characters"
                                         labelPlacement="outside"
-                                        type="password"
+                                        type={showNewPassword ? "text" : "password"}
                                         startContent={<IoLockClosed className="text-default-400 mr-1" size={18} />}
+                                        endContent={
+                                            <button
+                                                type="button"
+                                                aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+                                                aria-pressed={showNewPassword}
+                                                onClick={() => setShowNewPassword((visible) => !visible)}
+                                                className="rounded-lg p-1 text-default-400 transition-colors hover:text-obaol-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 dark:hover:text-obaol-300"
+                                            >
+                                                {showNewPassword ? <IoEyeOff className="text-xl" /> : <IoEye className="text-xl" />}
+                                            </button>
+                                        }
                                         value={newPassword}
                                         onValueChange={setNewPassword}
                                         isRequired
@@ -283,8 +296,19 @@ const ForgotPasswordComponent = ({ role, prefill = "" }: IForgotPasswordProps) =
                                         label="Confirm Password"
                                         placeholder="Repeat Password"
                                         labelPlacement="outside"
-                                        type="password"
+                                        type={showConfirmPassword ? "text" : "password"}
                                         startContent={<IoLockClosed className="text-default-400 mr-1" size={18} />}
+                                        endContent={
+                                            <button
+                                                type="button"
+                                                aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                                                aria-pressed={showConfirmPassword}
+                                                onClick={() => setShowConfirmPassword((visible) => !visible)}
+                                                className="rounded-lg p-1 text-default-400 transition-colors hover:text-obaol-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 dark:hover:text-obaol-300"
+                                            >
+                                                {showConfirmPassword ? <IoEyeOff className="text-xl" /> : <IoEye className="text-xl" />}
+                                            </button>
+                                        }
                                         value={confirmPassword}
                                         onValueChange={setConfirmPassword}
                                         isRequired

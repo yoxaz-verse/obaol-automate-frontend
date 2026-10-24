@@ -2078,7 +2078,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               duration: 0.4,
                               ease: "easeOut",
                             }}
-                            className="catalog-grid-card group relative flex min-w-0 flex-col justify-between bg-white dark:bg-content1/60 border border-amber-100/80 dark:border-white/10 rounded-3xl overflow-hidden shadow-[0_4px_18px_rgba(95,65,25,0.05)] hover:border-amber-200 dark:hover:border-white/20 hover:shadow-[0_12px_28px_rgba(95,65,25,0.11)] transition-all duration-300"
+                            className="catalog-grid-card group relative flex min-w-0 flex-col justify-between border border-amber-100/80 bg-white shadow-[0_4px_18px_rgba(95,65,25,0.05)] transition-all duration-300 hover:border-amber-200 hover:shadow-[0_12px_28px_rgba(95,65,25,0.11)] dark:border-white/10 dark:bg-[#12100d] dark:shadow-[0_8px_28px_rgba(0,0,0,0.28)] dark:hover:border-obaol-500/35 dark:hover:shadow-[0_12px_34px_rgba(0,0,0,0.4)] rounded-3xl overflow-hidden"
                           >
                             {/* Top Accent Line */}
                             <div
@@ -2119,13 +2119,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               {/* Product Details */}
                               <div className="flex flex-col gap-1 mt-1">
                                 <h4
-                                  className="text-sm sm:text-lg font-black text-foreground leading-tight line-clamp-2"
+                                  className="text-sm sm:text-lg font-black text-slate-900 dark:text-white leading-tight line-clamp-2"
                                   title={toDisplayText(item.product, "Product")}
                                 >
                                   {toDisplayText(item.product, "Product")}
                                 </h4>
                                 <p
-                                  className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
+                                  className="text-[10px] sm:text-xs font-semibold text-obaol-600 dark:text-obaol-300 uppercase tracking-widest truncate"
                                   title={toDisplayText(
                                     item.productVariant,
                                     "Variant",
@@ -2140,10 +2140,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   <div className="flex items-center gap-1.5 mt-2 overflow-hidden">
                                     <FiUser
                                       size={12}
-                                      className="text-default-400 shrink-0"
+                                      className="text-default-400 dark:text-white/45 shrink-0"
                                     />
                                     <div
-                                      className="truncate text-xs sm:text-sm text-default-600"
+                                      className="truncate text-xs sm:text-sm text-default-600 dark:text-white/70"
                                       title={toDisplayText(
                                         item.associate,
                                         "N/A",
@@ -2155,18 +2155,18 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 )}
                               </div>
 
-                              <Divider className="my-1 bg-amber-100/80 dark:bg-white/10" />
+                              <Divider className="my-1 bg-amber-100/80 dark:bg-white/15" />
 
                               {/* Price & Quantity Area */}
                               <div className="catalog-card-pricing flex min-w-0 justify-between items-end gap-3">
                                 <div className="flex min-w-0 flex-col gap-1">
-                                  <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
+                                  <span className="text-[8px] sm:text-[10px] font-bold text-default-400 dark:text-white/50 uppercase tracking-widest">
                                     {isMarketplaceView && !isLive ? "Previous listed price" : "Final Price"}
                                   </span>
                                   {marketplacePrice(item)}
                                 </div>
                                 <div className="catalog-card-stock flex min-w-0 flex-col items-end gap-1">
-                                  <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
+                                  <span className="text-[8px] sm:text-[10px] font-bold text-default-400 dark:text-white/50 uppercase tracking-widest">
                                     Stock
                                   </span>
                                   <div className="flex flex-col items-end gap-1">
@@ -2196,12 +2196,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                             {/* Actions Footer */}
                             <div
-                              className="p-2 sm:p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-white dark:from-amber-950/20 dark:via-content2/50 dark:to-content1/40 border-t border-amber-100/80 dark:border-white/10 flex flex-col gap-2 mt-auto"
+                              className="p-2 sm:p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-white dark:from-[#21190f] dark:via-[#191510] dark:to-[#12100d] border-t border-amber-100/80 dark:border-white/10 flex flex-col gap-2 mt-auto"
                               onClick={(event) => event.stopPropagation()}
                             >
                               {canManageRow(item) && (
-                                <div className="catalog-card-status-row flex w-full items-center justify-between gap-3 rounded-xl border border-amber-200/70 bg-white/70 px-3 py-2 dark:border-white/10 dark:bg-content1/50">
-                                  <span className="text-[9px] font-black uppercase tracking-widest text-default-500">
+                                <div className="catalog-card-status-row flex w-full items-center justify-between gap-3 rounded-xl border border-amber-200/70 bg-white/70 px-3 py-2 dark:border-white/10 dark:bg-white/[0.055]">
+                                  <span className="text-[9px] font-black uppercase tracking-widest text-default-500 dark:text-white/55">
                                     Listing status
                                   </span>
                                   <LiveStatusToggle

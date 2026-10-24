@@ -313,7 +313,15 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
             <form onSubmit={passwordSignIn} className="space-y-3">
               <label htmlFor={passwordId} className="block text-xs font-bold text-slate-700 dark:text-white/70">Password</label>
               <div className="relative"><input id={passwordId} className={`${fieldClass} pr-12`} type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} autoFocus required /><button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((value) => !value)} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10">{showPassword ? <FiEyeOff /> : <FiEye />}</button></div>
-              <label className="flex min-h-10 items-center gap-2 text-xs font-semibold text-slate-600 dark:text-white/60"><input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-4 w-4 accent-obaol-500" /> Keep me signed in on this device</label>
+              <div className="flex min-h-10 flex-wrap items-center justify-between gap-3">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-white/60"><input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-4 w-4 accent-obaol-500" /> Keep me signed in on this device</label>
+                <Link
+                  href={`/auth/forgot-password?prefill=${encodeURIComponent(email.trim())}`}
+                  className="text-xs font-bold text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 transition-colors hover:text-obaol-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 dark:text-obaol-300 dark:hover:text-obaol-200"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <button className={primaryClass} disabled={isBusy || !password} type="submit">{busy === "password" ? "Signing in…" : "Sign in with password"}</button>
             </form>
             <button className={secondaryClass} type="button" disabled={isBusy} onClick={sendLoginOtp}><FiMail /> Sign in with email code</button>

@@ -44,6 +44,20 @@ test("the unified flow does not call the account-enumerating email status endpoi
   assert.equal(authUtils.includes('ACCOUNT_EXISTS: "An account already exists for this email. Please sign in instead."'), true);
 });
 
+test("unified password recovery preserves email and requires a public account role", () => {
+  const unified = read("../src/components/Auth/UnifiedAuthFlow.tsx");
+  const forgotPassword = read("../src/components/Login/forgot-password.tsx");
+  const forgotPasswordPage = read("../src/app/auth/forgot-password/page.tsx");
+
+  assert.equal(unified.includes('/auth/forgot-password?prefill=${encodeURIComponent(email.trim())}'), true);
+  assert.equal(unified.includes("Forgot password?"), true);
+  assert.equal(forgotPasswordPage.includes("prefill={prefill}"), true);
+  assert.equal(forgotPassword.includes('useState<PasswordResetRole | "">(explicitRole || "")'), true);
+  assert.equal(forgotPassword.includes('(["Associate", "Operator"] as PasswordResetRole[])'), true);
+  assert.equal(forgotPassword.includes("isDisabled={!selectedRole || !email.trim()}"), true);
+  assert.equal(forgotPassword.includes('new URLSearchParams({ mode: "signin" })'), true);
+});
+
 test("staff fallback explains the redirect and carries the trusted reason into role sign-in", () => {
   const entry = read("../src/components/Auth/AuthEntry.tsx");
 

@@ -1,11 +1,13 @@
 import ForgotPasswordComponent from "@/components/Login/forgot-password";
 import Image from "next/image";
 
-type PageProps = { searchParams?: { role?: string | string[] } };
+type PageProps = { searchParams?: { role?: string | string[]; prefill?: string | string[] } };
 
 export default function ForgotPasswordPage({ searchParams }: PageProps) {
     const roleValue = searchParams?.role;
-    const role = (Array.isArray(roleValue) ? roleValue[0] : roleValue) || "Customer";
+    const role = Array.isArray(roleValue) ? roleValue[0] : roleValue;
+    const prefillValue = searchParams?.prefill;
+    const prefill = (Array.isArray(prefillValue) ? prefillValue[0] : prefillValue) || "";
 
     return (
         <div className="relative flex min-h-screen min-h-[100dvh] w-full flex-col items-center justify-center overflow-hidden bg-background p-0 m-0">
@@ -21,7 +23,7 @@ export default function ForgotPasswordPage({ searchParams }: PageProps) {
                     alt="Obaol"
                     className="mb-8 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
                 />
-                <ForgotPasswordComponent role={role} />
+                <ForgotPasswordComponent role={role} prefill={prefill} />
             </div>
         </div>
     );

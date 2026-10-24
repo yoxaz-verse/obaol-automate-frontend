@@ -18,7 +18,42 @@ test("unified sign-in is responsive, accessible, and preserves email", async ({ 
   await page.getByTestId("auth-submit").click();
   await expect(page.locator("input[autocomplete='current-password']")).toBeFocused();
   await expect(page.getByRole("button", { name: "Sign in with email code" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Forgot password?" })).toBeVisible();
   await expect(page.getByText(/does not reveal whether an email is registered/i)).toBeVisible();
+});
+
+test("forgot-password entry preserves email and requires a public account type", async ({ page }) => {
+  await page.goto("/auth");
+  await page.getByLabel("Email address").fill("member+reset@example.com");
+  await page.getByTestId("auth-submit").click();
+  await page.getByRole("link", { name: "Forgot password?" }).click();
+
+  await expect(page).toHaveURL(/\/auth\/forgot-password\?prefill=member%2Breset%40example(?:\.|%2E)com/);
+  await expect(page.getByLabel("Email Address")).toHaveValue("member+reset@example.com");
+  await expect(page.getByRole("radio", { name: "Associate" })).not.toBeChecked();
+  await expect(page.getByRole("radio", { name: "Operator" })).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Send OTP" })).toBeDisabled();
+});
+
+test("forgot-password sends the selected public role", async ({ page }) => {
+  await page.route(/\/auth\/forgot-password$/, async (route) => {
+    expect(route.request().postDataJSON()).toEqual({ email: "operator@example.com", role: "Operator" });
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true }) });
+  });
+
+  await page.goto("/auth/forgot-password?prefill=operator%40example.com");
+  await page.getByRole("radio", { name: "Operator" }).check();
+  await page.getByRole("button", { name: "Send OTP" }).click();
+  await expect(page.getByText("operator@example.com")).toBeVisible();
+});
+
+test("explicit password-reset roles remain locked to legacy account flows", async ({ page }) => {
+  await page.goto("/auth/forgot-password?role=CustomerSupport&prefill=support%40example.com");
+  await expect(page.getByText("CustomerSupport Account")).toBeVisible();
+  await expect(page.getByRole("radio", { name: "Associate" })).toHaveCount(0);
+  await expect(page.getByRole("radio", { name: "Operator" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Back to sign in" }).click();
+  await expect(page).toHaveURL(/\/auth\/customer-support$/);
 });
 
 test("legacy public auth URLs redirect into the unified flow with safe context", async ({ page }) => {

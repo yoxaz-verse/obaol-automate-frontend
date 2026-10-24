@@ -8,28 +8,41 @@ import { showToastMessage } from "@/utils/utils";
 import { useRouter } from "next/navigation";
 import { InputOtp } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getSignInPathForRole } from "@/utils/authRoleRoutes";
+import { getPasswordResetRole, getSignInPathForRole } from "@/utils/authRoleRoutes";
+import type { PasswordResetRole } from "@/utils/authRoleRoutes";
 
 type ForgotPasswordStep = "REQUEST" | "VERIFY" | "RESET";
 
 interface IForgotPasswordProps {
-    role: string;
+    role?: string;
+    prefill?: string;
 }
 
-const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
+const ForgotPasswordComponent = ({ role, prefill = "" }: IForgotPasswordProps) => {
+    const hasExplicitRole = Boolean(role);
+    const explicitRole = hasExplicitRole ? getPasswordResetRole(role || "") : null;
     const [step, setStep] = useState<ForgotPasswordStep>("REQUEST");
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(prefill);
+    const [selectedRole, setSelectedRole] = useState<PasswordResetRole | "">(explicitRole || "");
     const [otp, setOtp] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
+    const getReturnPath = () => {
+        if (hasExplicitRole && explicitRole) return getSignInPathForRole(explicitRole);
+        const params = new URLSearchParams({ mode: "signin" });
+        if (email.trim()) params.set("prefill", email.trim());
+        return `/auth?${params.toString()}`;
+    };
+
     const handleRequestOtp = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!selectedRole) return;
         setIsLoading(true);
         try {
-            await postData("/auth/forgot-password", { email, role }, {});
+            await postData("/auth/forgot-password", { email: email.trim(), role: selectedRole }, {});
             showToastMessage({ type: "success", message: "OTP sent to your email", position: "top-right" });
             setStep("VERIFY");
         } catch (error: any) {
@@ -58,13 +71,13 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
         setIsLoading(true);
         try {
             await postData("/auth/reset-password", {
-                email,
-                role,
+                email: email.trim(),
+                role: selectedRole,
                 code: otp,
                 newPassword
             }, {});
             showToastMessage({ type: "success", message: "Password reset successful", position: "top-right" });
-            router.replace(getSignInPathForRole(role));
+            router.replace(getReturnPath());
         } catch (error: any) {
             showToastMessage({
                 type: "error",
@@ -101,7 +114,8 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                             radius="full"
                             size="sm"
                             className="border border-divider bg-content2/50 backdrop-blur-sm transition-all hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300"
-                            onClick={() => step === "REQUEST" ? router.push(getSignInPathForRole(role)) : setStep(step === "VERIFY" ? "REQUEST" : "VERIFY")}
+                            aria-label={step === "REQUEST" ? "Back to sign in" : "Back to previous step"}
+                            onClick={() => step === "REQUEST" ? router.push(getReturnPath()) : setStep(step === "VERIFY" ? "REQUEST" : "VERIFY")}
                         >
                             <IoArrowBack className="text-base" />
                         </Button>
@@ -111,7 +125,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                             </h4>
                             <div className="flex items-center gap-2 mt-2">
                                 <span className="h-1 w-1 animate-pulse rounded-full bg-obaol-500" />
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.3em]">{role} Account</p>
+                                <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.3em]">{selectedRole ? `${selectedRole} Account` : "Secure account recovery"}</p>
                             </div>
                         </div>
                         <div className="w-10 h-10" />
@@ -134,6 +148,31 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                         Enter your email and we will send a one-time code.
                                     </p>
                                 </div>
+                                {!hasExplicitRole && (
+                                    <fieldset className="space-y-3">
+                                        <legend className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400">
+                                            Account type
+                                        </legend>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {(["Associate", "Operator"] as PasswordResetRole[]).map((accountRole) => (
+                                                <label
+                                                    key={accountRole}
+                                                    className={`flex min-h-12 cursor-pointer items-center justify-center rounded-2xl border px-3 text-xs font-bold transition-all ${selectedRole === accountRole ? "border-obaol-500 bg-obaol-500/10 text-obaol-700 ring-2 ring-obaol-500/15 dark:text-obaol-300" : "border-divider bg-content1 text-default-500 hover:border-obaol-500/50"}`}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="password-reset-role"
+                                                        value={accountRole}
+                                                        checked={selectedRole === accountRole}
+                                                        onChange={() => setSelectedRole(accountRole)}
+                                                        className="sr-only"
+                                                    />
+                                                    {accountRole}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </fieldset>
+                                )}
                                 <Input
                                     label="Email Address"
                                     placeholder="name@example.com"
@@ -150,6 +189,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                     color="warning"
                                     className="h-12 w-full rounded-2xl bg-obaol-500 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10 transition-all hover:scale-[1.02] hover:bg-obaol-400 active:scale-[0.98]"
                                     isLoading={isLoading}
+                                    isDisabled={!selectedRole || !email.trim()}
                                 >
                                     Send OTP
                                 </Button>

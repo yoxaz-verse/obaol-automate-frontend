@@ -31,10 +31,12 @@ import { notificationRoutes } from "@/core/api/apiRoutes";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSoundEffect } from "@/context/SoundContext";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
+import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
 
 const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => {
   const { logout, user } = useContext(AuthContext);
   const router = useRouter();
+  const { navigate, pendingPath, prefetch } = useDashboardNavigation();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openMobileNavigationGroup, setOpenMobileNavigationGroup] = useState<string | null>(null);
@@ -291,10 +293,14 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                          {group.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
                                            <button
                                              key={opt.name}
-                                             onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)) { router.push(opt.link); setIsMobileMenuOpen(false); } }}
+                                             onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)) { navigate(opt.link); setIsMobileMenuOpen(false); } }}
+                                             onMouseEnter={() => prefetch(opt.link)}
+                                             onFocus={() => prefetch(opt.link)}
+                                             onTouchStart={() => prefetch(opt.link)}
                                              disabled={isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)}
                                              aria-label={isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? `${opt.name}, coming soon` : opt.name}
                                              aria-current={isDashboardRouteActive(pathname, opt.link) && !isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? "page" : undefined}
+                                             aria-busy={pendingPath === opt.link || undefined}
                                              className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? "cursor-not-allowed text-default-400 opacity-55" : isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                            >
                                              <span className="text-lg">{opt.icon}</span>
@@ -311,10 +317,14 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                }) : sec.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
                                  <button
                                    key={opt.name}
-                                   onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)) { router.push(opt.link); setIsMobileMenuOpen(false); } }}
+                                   onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)) { navigate(opt.link); setIsMobileMenuOpen(false); } }}
+                                   onMouseEnter={() => prefetch(opt.link)}
+                                   onFocus={() => prefetch(opt.link)}
+                                   onTouchStart={() => prefetch(opt.link)}
                                    disabled={isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)}
                                    aria-label={isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? `${opt.name}, coming soon` : opt.name}
                                    aria-current={isDashboardRouteActive(pathname, opt.link) && !isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? "page" : undefined}
+                                   aria-busy={pendingPath === opt.link || undefined}
                                    className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) ? "cursor-not-allowed text-default-400 opacity-55" : isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                  >
                                    <span className="text-lg">{opt.icon}</span>
@@ -463,7 +473,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 <DropdownItem 
                   key="profile" 
                   startContent={<FiUser size={16} className="text-obaol-600 dark:text-obaol-300" />}
-                  onClick={() => router.push("/dashboard/profile")}
+                  onClick={() => navigate("/dashboard/profile")}
                   className="data-[hover=true]:bg-obaol-500/10 data-[hover=true]:text-obaol-700 dark:data-[hover=true]:text-obaol-300"
                   textValue="Profile"
                 >

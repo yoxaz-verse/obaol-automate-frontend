@@ -26,7 +26,8 @@ import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { DEFAULT_STALE_TIME, extractList, useImportReservations, useImportsList } from "@/core/data";
 import Title from "@/components/titles";
-import InlineLoader from "@/components/ui/InlineLoader";
+import { DashboardGridSkeleton } from "@/components/ui/DashboardSkeleton";
+import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
 import { showToastMessage } from "@/utils/utils";
 import { useCompanyAccess } from "@/utils/companyAccess";
 import { getDashboardRouteLabel } from "@/utils/dashboardAccess";
@@ -72,6 +73,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
   const { user } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { navigate, prefetch } = useDashboardNavigation();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const roleLower = String(user?.role || "").toLowerCase();
@@ -168,6 +170,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
   const {
     data: importsResponse,
     isLoading: importsLoading,
+    isError: importsError,
+    refetch: refetchImports,
   } = useImportsList(
     {
       mine: activeTab === "mine",
@@ -179,6 +183,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
   const {
     data: reservationsResponse,
     isLoading: reservationsLoading,
+    isError: reservationsError,
+    refetch: refetchReservations,
   } = useImportReservations(
     {
       mine: activeTab === "reservations",
@@ -609,7 +615,12 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
             <Tabs
               aria-label="Import tabs"
               selectedKey={activeTab}
-              onSelectionChange={(key) => router.push(key === "mine" ? "/dashboard/imports/my-listings" : key === "reservations" ? "/dashboard/imports/reservations" : "/dashboard/imports")}
+              onSelectionChange={(key) => navigate(key === "mine" ? "/dashboard/imports/my-listings" : key === "reservations" ? "/dashboard/imports/reservations" : "/dashboard/imports")}
+              onMouseEnter={() => {
+                prefetch("/dashboard/imports");
+                prefetch("/dashboard/imports/my-listings");
+                prefetch("/dashboard/imports/reservations");
+              }}
               variant="underlined"
               color="warning"
               classNames={{
@@ -629,18 +640,32 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
 
           <AnimatePresence mode="wait">
             {activeTab !== "reservations" && importsLoading && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20">
-                <InlineLoader message="Loading listings..." />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <DashboardGridSkeleton />
               </motion.div>
             )}
 
             {activeTab === "reservations" && reservationsLoading && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20">
-                <InlineLoader message={`Loading ${reservationPageLabel.toLowerCase()}...`} />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <DashboardGridSkeleton cards={4} />
               </motion.div>
             )}
 
-            {activeTab !== "reservations" && !importsLoading && (
+            {activeTab !== "reservations" && importsError && !importsLoading && (
+              <div role="alert" className="rounded-2xl border border-danger-500/25 bg-danger-500/10 p-6 text-sm text-danger-700 dark:text-danger-300">
+                <p className="font-semibold">We could not load these import listings.</p>
+                <Button className="mt-4" size="sm" variant="bordered" color="danger" onPress={() => void refetchImports()}>Try again</Button>
+              </div>
+            )}
+
+            {activeTab === "reservations" && reservationsError && !reservationsLoading && (
+              <div role="alert" className="rounded-2xl border border-danger-500/25 bg-danger-500/10 p-6 text-sm text-danger-700 dark:text-danger-300">
+                <p className="font-semibold">We could not load {reservationPageLabel.toLowerCase()}.</p>
+                <Button className="mt-4" size="sm" variant="bordered" color="danger" onPress={() => void refetchReservations()}>Try again</Button>
+              </div>
+            )}
+
+            {activeTab !== "reservations" && !importsLoading && !importsError && (
               <motion.div 
                 key={activeTab}
                 initial={{ opacity: 0, x: 20 }}
@@ -839,7 +864,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
               </motion.div>
             )}
 
-            {activeTab === "reservations" && !reservationsLoading && (
+            {activeTab === "reservations" && !reservationsLoading && !reservationsError && (
               <motion.div 
                 key="reservations"
                 initial={{ opacity: 0 }}

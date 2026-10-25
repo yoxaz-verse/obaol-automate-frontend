@@ -2,18 +2,20 @@
 
 import React, { useContext } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { FiMoreHorizontal } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { getDashboardBottomNavigation } from "@/utils/dashboardNav";
 import { isDashboardRouteActive } from "@/utils/dashboardAccess";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
+import DashboardLink from "@/components/dashboard/DashboardLink";
+import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
 
 const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolean }) => {
   const pathname = usePathname();
   const { user } = useContext(AuthContext);
   const governance = useSidebarGovernance();
+  const { pendingPath } = useDashboardNavigation();
   const optionsByPath = new Map(sidebarOptions.map((option) => [option.link, option]));
   const routes = getDashboardBottomNavigation({
     role: user?.role,
@@ -41,19 +43,20 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
           if (!option) return null;
           const isActive = isDashboardRouteActive(pathname, route.path);
           return (
-            <Link
+            <DashboardLink
               key={route.path}
               href={route.path}
               aria-current={isActive ? "page" : undefined}
               aria-label={route.label}
+              aria-busy={pendingPath === route.path || undefined}
               className={`relative min-w-0 min-h-11 flex flex-col items-center justify-center gap-1 rounded-xl px-1 transition-colors ${
                 isActive ? "text-obaol-700 dark:text-obaol-300" : "text-default-500 hover:text-foreground"
               }`}
             >
               {isActive && <span aria-hidden="true" className="absolute top-0 w-8 h-0.5 rounded-full bg-obaol-500" />}
-              <span aria-hidden="true" className={isActive ? "scale-110" : "opacity-80"}>{React.cloneElement(option.icon as React.ReactElement, { size: 19 })}</span>
+              <span aria-hidden="true" className={isActive ? "scale-110" : "opacity-80"}>{pendingPath === route.path ? <span className="block h-5 w-5 animate-spin rounded-full border-2 border-obaol-500/30 border-t-obaol-500" /> : React.cloneElement(option.icon as React.ReactElement, { size: 19 })}</span>
               <span className="w-full truncate text-center text-[10px] font-bold leading-none">{route.label === "Dashboard" ? "Home" : route.label}</span>
-            </Link>
+            </DashboardLink>
           );
         })}
         <button

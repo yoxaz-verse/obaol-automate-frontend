@@ -3,16 +3,16 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Input, Listbox, ListboxItem, Kbd } from "@nextui-org/react";
 import { LuSearch, LuArrowRight, LuLayers } from "react-icons/lu";
-import { useRouter } from "next/navigation";
 import { sidebarOptions } from "@/utils/utils";
 import AuthContext from "@/context/AuthContext";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
+import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
 
 export default function GlobalSearch() {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
+  const { navigate, pendingPath, prefetch } = useDashboardNavigation();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useContext(AuthContext);
@@ -62,7 +62,7 @@ export default function GlobalSearch() {
   }, []);
 
   const handleSelect = (link: string) => {
-    router.push(link);
+    navigate(link);
     setIsOpen(false);
     setQuery("");
   };
@@ -101,8 +101,12 @@ export default function GlobalSearch() {
                  <button
                    key={option.link}
                    onClick={() => handleSelect(option.link)}
+                   onMouseEnter={() => prefetch(option.link)}
+                   onFocus={() => prefetch(option.link)}
+                   onTouchStart={() => prefetch(option.link)}
                    disabled={isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages)}
                    aria-label={isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages) ? `${option.name}, coming soon` : option.name}
+                   aria-busy={pendingPath === option.link || undefined}
                    className="w-full flex items-center justify-between p-4 rounded-2xl border border-transparent hover:border-obaol-500/25 hover:bg-obaol-500/5 focus:border-obaol-500/35 focus:bg-obaol-500/5 group transition-all text-left outline-none ring-0 disabled:cursor-not-allowed disabled:opacity-55"
                  >
                    <div className="flex flex-col">

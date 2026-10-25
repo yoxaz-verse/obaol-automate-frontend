@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useContext, useState, useTransition } from "react";
-import { FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { useRouter, usePathname } from "next/navigation";
+import React, { useContext, useState } from "react";
+import { FiChevronDown, FiChevronLeft, FiChevronRight, FiLoader } from "react-icons/fi";
+import { usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
@@ -11,10 +11,12 @@ import Image from "next/image";
 import { Button, Tooltip } from "@nextui-org/react";
 import { useSoundEffect } from "@/context/SoundContext";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { notificationRoutes, supportChatRoutes } from "@/core/api/apiRoutes";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
+import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
+import { importReservationsQueryOptions, importsQueryOptions } from "@/core/data/useImports";
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -23,11 +25,10 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboardingLocked = false }) => {
-    const router = useRouter();
     const pathname = usePathname();
     const { user } = useContext(AuthContext);
-    const [, startTransition] = useTransition();
-    const [pendingLink, setPendingLink] = useState<string | null>(null);
+    const { pendingPath, navigate, prefetch } = useDashboardNavigation();
+    const queryClient = useQueryClient();
     const [openNavigationGroup, setOpenNavigationGroup] = useState<string | null>(null);
     const governance = useSidebarGovernance();
     const governedPages = governance.isAssociate ? governance.resolved : undefined;
@@ -38,7 +39,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
         governedPages,
     );
-    const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
+    const capabilities = React.useMemo(
+        () => [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
+        [user?.providedCapabilities, user?.soughtCapabilities],
+    );
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
     const sidebarSections = getDashboardSidebarSections(
         filteredOptions as any[],
@@ -65,6 +69,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         .find((group) => group.links.some((link) => isDashboardRouteActive(pathname, link)));
 
     const { play } = useSoundEffect();
+    const warmDestination = React.useCallback((path: string) => {
+        prefetch(path);
+        if (path === "/dashboard/imports") {
+            void queryClient.prefetchQuery(importsQueryOptions({ mine: false, limit: 20 }));
+        } else if (path === "/dashboard/imports/my-listings") {
+            void queryClient.prefetchQuery(importsQueryOptions({ mine: true, limit: 20 }));
+        } else if (path === "/dashboard/imports/reservations") {
+            void queryClient.prefetchQuery(importReservationsQueryOptions({ mine: true, listingId: undefined, limit: 20 }));
+        }
+    }, [prefetch, queryClient]);
 
     const { data: unreadSummaryData } = useQuery({
         queryKey: ["notifications", "unread-summary"],
@@ -105,18 +119,29 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         if (pathname === optionLink) return;
 
         play("nav");
-        setPendingLink(optionLink);
-        startTransition(() => {
-            router.push(optionLink);
-        });
+        navigate(optionLink);
     };
 
-    // Reset pending link when pathname matches
     React.useEffect(() => {
-        if (pathname === pendingLink || pathname.startsWith(pendingLink + "/")) {
-            setPendingLink(null);
-        }
-    }, [pathname, pendingLink]);
+        const paths = filteredOptions
+            .filter((option) => !isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages))
+            .map((option) => option.link)
+            .filter((path) => path !== pathname);
+        let cancelled = false;
+        let index = 0;
+        let timer: number | undefined;
+        const warmNext = () => {
+            if (cancelled || index >= paths.length) return;
+            warmDestination(paths[index++]);
+            timer = window.setTimeout(warmNext, 180);
+        };
+        const idle = window.setTimeout(warmNext, 700);
+        return () => {
+            cancelled = true;
+            window.clearTimeout(idle);
+            if (timer) window.clearTimeout(timer);
+        };
+    }, [capabilities, filteredOptions, governedPages, pathname, user?.role, warmDestination]);
 
     const activeNavigationGroupLabel = activeNavigationGroup?.label;
     React.useEffect(() => {
@@ -129,11 +154,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         const badgeCount = Number(dotMap[opt.link] || 0);
         const isDisabled = isOnboardingLocked || isComingSoon;
         const showSupportOnline = opt.link === "/dashboard/customer-support" && Boolean(supportAvailability?.online);
+        const isPending = pendingPath === opt.link;
 
         return (
             <button
                 key={opt.name}
                 onClick={(e) => handleOptionClick(e, opt.link)}
+                onMouseEnter={() => !isDisabled && warmDestination(opt.link)}
+                onFocus={() => !isDisabled && warmDestination(opt.link)}
+                onTouchStart={() => !isDisabled && warmDestination(opt.link)}
                 disabled={isDisabled}
                 title={isCollapsed && isComingSoon ? `${opt.name} — Coming soon` : undefined}
                 className={`w-full group relative flex items-center h-10 rounded-xl border border-transparent outline-none ring-0 transition-all duration-300 ${
@@ -143,13 +172,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 } ${isCollapsed ? "justify-center" : `${nested ? "pl-6 pr-3" : "px-3"} gap-3`} ${isDisabled ? "cursor-not-allowed opacity-50 hover:bg-transparent hover:text-default-500" : ""}`}
                 aria-disabled={isDisabled}
                 aria-current={isActive ? "page" : undefined}
+                aria-busy={isPending || undefined}
                 aria-label={isComingSoon ? `${opt.name}, coming soon` : opt.name}
             >
                 {isActive && (
                     <div className="absolute left-0 w-[2.5px] h-5 bg-obaol-500 rounded-r-full shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
                 )}
                 <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-obaol-700 dark:text-obaol-300 scale-110" : !isDisabled ? "group-hover:scale-110 group-hover:text-obaol-500" : ""}`}>
-                    {opt.icon}
+                    {isPending ? <FiLoader className="animate-spin" aria-hidden="true" /> : opt.icon}
                 </div>
                 {!isCollapsed && (
                     <span className="truncate text-[12px] font-semibold tabular-nums">
@@ -209,7 +239,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 className={`relative px-6 py-10 flex cursor-pointer group ${isCollapsed ? "justify-center" : "gap-4 items-center"} ${isOnboardingLocked ? "cursor-not-allowed opacity-70" : ""}`}
                 onClick={() => {
                     if (isOnboardingLocked) return;
-                    router.push("/dashboard");
+                    navigate("/dashboard");
                 }}
             >
                 <div className="relative group-hover:scale-110 transition-transform duration-500">

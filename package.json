@@ -11,6 +11,7 @@
     "check:health": "node scripts/code-health.mjs src --check",
     "metrics:assets": "node scripts/audit-public-assets.mjs",
     "start": "next start",
+    "warmup": "node scripts/warm-dashboard.mjs",
     "lint": "next lint",
     "test:access": "NODE_OPTIONS=--disable-warning=MODULE_TYPELESS_PACKAGE_JSON node --experimental-strip-types --test tests/dashboardAccess.test.mjs",
     "test:unit": "NODE_OPTIONS=--disable-warning=MODULE_TYPELESS_PACKAGE_JSON node --experimental-strip-types --test tests/*.test.mjs",

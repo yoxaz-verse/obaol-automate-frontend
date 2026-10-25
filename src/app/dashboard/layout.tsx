@@ -19,6 +19,8 @@ import DashboardContextBar from "@/components/dashboard/DashboardContextBar";
 import CompanyApprovalBanner from "@/components/dashboard/CompanyApprovalBanner";
 import LiveNotificationSubscriber from "@/components/dashboard/LiveNotificationSubscriber";
 import { SidebarGovernanceProvider, useSidebarGovernance } from "@/hooks/useSidebarGovernance";
+import { DashboardNavigationProvider, useDashboardNavigation } from "@/context/DashboardNavigationContext";
+import DashboardNavigationProgress from "@/components/dashboard/DashboardNavigationProgress";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -75,6 +77,7 @@ function DashboardLayoutContent({
 
   const { user, loading } = useContext(AuthContext);
   const governance = useSidebarGovernance();
+  const { isNavigating, navigate } = useDashboardNavigation();
   const roleLower = String(user?.role || "").toLowerCase();
   const isOperatorFamily = roleLower === "operator" || roleLower === "team";
   const isAssociate = roleLower === "associate";
@@ -174,12 +177,12 @@ function DashboardLayoutContent({
       if (!route || !canAccessDashboardRoute({ path: route, role: user?.role }) || isComingSoonDashboardNavigation(route, user?.role, capabilities, governance.isAssociate ? governance.resolved : undefined)) return;
 
       event.preventDefault();
-      router.push(route);
+      navigate(route);
     };
 
     window.addEventListener("keydown", handler, { capture: true });
     return () => window.removeEventListener("keydown", handler, { capture: true } as any);
-  }, [router, user?.providedCapabilities, user?.role, user?.soughtCapabilities, governance.isAssociate, governance.resolved]);
+  }, [navigate, user?.providedCapabilities, user?.role, user?.soughtCapabilities, governance.isAssociate, governance.resolved]);
 
   if (!isMounted || loading) {
     return (
@@ -191,6 +194,7 @@ function DashboardLayoutContent({
 
   return (
     <section data-dashboard-shell className="w-full min-w-0 h-[100dvh] max-h-[100dvh] flex overflow-hidden db-bg relative">
+      <DashboardNavigationProgress />
       <PrivateRoute pathname={pathname}>
         <LiveNotificationSubscriber userId={user?.id} />
         <DashboardEnhancements />
@@ -224,7 +228,17 @@ function DashboardLayoutContent({
                 ) : null}
                 <DashboardContextBar />
                 <CompanyApprovalBanner />
-                {children}
+                <div className="relative" aria-busy={isNavigating || undefined}>
+                  {children}
+                  {isNavigating ? (
+                    <div className="pointer-events-none absolute inset-0 z-40 flex min-h-[12rem] items-start justify-center rounded-2xl bg-background/35 pt-8 backdrop-blur-[1px]" role="status" aria-live="polite">
+                      <div className="flex items-center gap-2 rounded-full border db-border-strong db-panel px-4 py-2 text-sm font-semibold text-foreground shadow-lg">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-obaol-500/30 border-t-obaol-500" aria-hidden="true" />
+                        Opening page…
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
@@ -242,9 +256,11 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthenticatedProviders>
-      <SidebarGovernanceProvider>
-        <DashboardLayoutContent>{children}</DashboardLayoutContent>
-      </SidebarGovernanceProvider>
+      <DashboardNavigationProvider>
+        <SidebarGovernanceProvider>
+          <DashboardLayoutContent>{children}</DashboardLayoutContent>
+        </SidebarGovernanceProvider>
+      </DashboardNavigationProvider>
     </AuthenticatedProviders>
   );
 }

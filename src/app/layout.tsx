@@ -4,7 +4,6 @@ import "react-toastify/dist/ReactToastify.css";
 import PublicPageScope from "@/components/public/PublicPageScope";
 import type { Metadata } from "next";
 import { PublicProviders } from "./public-provider";
-import TopLoader from "@/components/ui/TopLoader";
 import { BASE_URL, DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, GEO_KEYWORDS, PRIMARY_MARKET, SITE_NAME } from "@/utils/seo";
 import AnalyticsTracker from "@/components/ui/AnalyticsTracker";
 import { Suspense } from "react";
@@ -173,7 +172,6 @@ export default function RootLayout({
       <body style={{ overflowX: "hidden" }}>
         <a className="skip-link" href="#main-content">Skip to main content</a>
         <PublicProviders>
-          <TopLoader />
           <div id="main-content" tabIndex={-1}><PublicPageScope>{children}</PublicPageScope></div>
         </PublicProviders>
         <script

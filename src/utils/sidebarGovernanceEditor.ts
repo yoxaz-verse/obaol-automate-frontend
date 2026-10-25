@@ -8,7 +8,7 @@ export type FunctionAssignment = {
 };
 export type AssignmentPanelPlacement = Exclude<SidebarPlacement, "BOTH">;
 export type AssignmentPanelStatus = SidebarPageStatus | "MIXED";
-export type GovernanceSection = "SEEKING" | "PROVIDING" | "OTHER_SERVICES";
+export type GovernanceSection = "IMPORTANT" | "SEEKING" | "PROVIDING" | "OTHER_SERVICES";
 export type GovernanceFunctionRow = { _id: string; name: string; slug: string };
 export type GovernanceRouteRow = { id: string; path: string; label: string; position?: "TOP" | "BOTTOM" };
 export type AssignmentMatrix = Record<string, Record<string, FunctionAssignment>>;
@@ -38,8 +38,9 @@ export const assignmentPanelPlacements: AssignmentPanelPlacement[] = [
 
 export const assignmentAppearsInPanel = (
   assignment: FunctionAssignment,
-  placement: AssignmentPanelPlacement,
+  placement: AssignmentPanelPlacement | GovernanceSection,
 ): boolean => assignment.placement === placement
+  || (placement === "IMPORTANT" && assignment.placement === "BOTH")
   || (assignment.placement === "BOTH" && (placement === "SEEKING" || placement === "PROVIDING"));
 
 export const getAssignmentPanelState = (
@@ -135,7 +136,7 @@ export const createAssignmentMatrix = (
 export const compileGovernanceMappings = (matrix: AssignmentMatrix, sectionOrder: SectionOrder): SidebarGovernanceMapping[] => Object.entries(matrix).flatMap(([routePath, assignments]) => (
   Object.values(assignments).map((assignment) => {
     const status = assignment.placement === "UNASSIGNED" ? "HIDDEN" : assignment.status;
-    const orderSection = assignment.placement === "BOTH" ? "SEEKING" : assignment.placement;
+    const orderSection = assignment.placement === "BOTH" ? "IMPORTANT" : assignment.placement;
     const order = orderSection === "UNASSIGNED" ? 0 : Math.max(0, sectionOrder[orderSection].indexOf(routePath));
     return { functionSlug: assignment.functionSlug, routePath, placement: assignment.placement, status, order };
   })

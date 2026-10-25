@@ -11,15 +11,15 @@ export type SidebarGovernanceMapping = {
 
 export type SidebarGovernanceSnapshot = {
   revision: number;
-  resolutionVersion: 1 | 2;
+  resolutionVersion: 1 | 2 | 3;
   updatedAt?: string;
-  sectionOrder: Record<"SEEKING" | "PROVIDING" | "OTHER_SERVICES", string[]>;
+  sectionOrder: Record<"IMPORTANT" | "SEEKING" | "PROVIDING" | "OTHER_SERVICES", string[]>;
   mappings: SidebarGovernanceMapping[];
 };
 
 export type ResolvedSidebarPage = {
   routePath: string;
-  placement: "SEEKING" | "PROVIDING" | "OTHER_SERVICES";
+  placement: "IMPORTANT" | "SEEKING" | "PROVIDING" | "OTHER_SERVICES";
   status: SidebarPageStatus;
   order: number;
 };

@@ -94,6 +94,37 @@ test("v2 resolves seeking and providing against their own company perspectives",
   assert.deepEqual(resolved.filter((item) => item.routePath === "/dashboard/orders").map((item) => item.placement).sort(), ["PROVIDING", "SEEKING"]);
 });
 
+test("v3 promotes a route resolved on both sides into Important once", () => {
+  const sectionOrder = {
+    IMPORTANT: ["/dashboard/sample-requests", "/dashboard/enquiries", "/dashboard/orders"],
+    SEEKING: [],
+    PROVIDING: [],
+    OTHER_SERVICES: [],
+  };
+  const resolved = resolveSidebarGovernance([
+    row("buyer", "/dashboard/sample-requests", "SEEKING", "COMING_SOON", 8),
+    row("testing", "/dashboard/sample-requests", "PROVIDING", "LIVE", 4),
+    row("buyer", "/dashboard/enquiries", "BOTH", "COMING_SOON", 0),
+    row("packaging", "/dashboard/orders", "BOTH", "LIVE", 2),
+  ], ["testing", "buyer"], ["buyer", "packaging"], { resolutionVersion: 3, sectionOrder });
+  assert.deepEqual(resolved.map(({ routePath, placement, status }) => ({ routePath, placement, status })), [
+    { routePath: "/dashboard/sample-requests", placement: "IMPORTANT", status: "LIVE" },
+    { routePath: "/dashboard/enquiries", placement: "IMPORTANT", status: "COMING_SOON" },
+    { routePath: "/dashboard/orders", placement: "SEEKING", status: "LIVE" },
+  ]);
+});
+
+test("v3 requires both sides to be visible before promotion", () => {
+  const resolved = resolveSidebarGovernance([
+    row("buyer", "/dashboard/sample-requests", "SEEKING", "LIVE", 1),
+    row("seller", "/dashboard/sample-requests", "PROVIDING", "HIDDEN", 2),
+  ], ["seller"], ["buyer"], { resolutionVersion: 3 });
+  assert.deepEqual(resolved.map(({ placement, status }) => ({ placement, status })), [
+    { placement: "SEEKING", status: "LIVE" },
+    { placement: "PROVIDING", status: "HIDDEN" },
+  ]);
+});
+
 test("v2 does not activate a work rule from the wrong perspective and uses global section order", () => {
   const resolved = resolveSidebarGovernance([
     row("buyer", "/dashboard/bidding", "SEEKING", "LIVE", 0),
@@ -118,7 +149,7 @@ test("admin editor exposes four assignment panels including Unassigned", async (
   assert.match(source, /Intentionally omitted from associate navigation/);
   assert.match(source, /aria-pressed=\{active\}/);
   assert.match(source, /Mixed statuses/);
-  assert.match(source, /\["SEEKING", "PROVIDING", "OTHER_SERVICES"\]/);
+  assert.match(source, /\["IMPORTANT", "SEEKING", "PROVIDING", "OTHER_SERVICES"\]/);
   assert.doesNotMatch(source, /Other Services \(legacy\)/);
   assert.doesNotMatch(source, /<table/);
 });
@@ -132,7 +163,7 @@ test("keyed editor reducer updates one page and compiles a complete matrix", () 
     { _id: "1", slug: "buyer", name: "Buyer" },
     { _id: "2", slug: "seller", name: "Seller" },
   ];
-  const order = { SEEKING: routes.map((item) => item.path), PROVIDING: routes.map((item) => item.path), OTHER_SERVICES: routes.map((item) => item.path) };
+  const order = { IMPORTANT: routes.map((item) => item.path), SEEKING: routes.map((item) => item.path), PROVIDING: routes.map((item) => item.path), OTHER_SERVICES: routes.map((item) => item.path) };
   const matrix = createAssignmentMatrix(routes, functions, [row("buyer", "/dashboard/marketplace", "SEEKING", "LIVE")]);
   let state = createSidebarGovernanceEditorState(matrix, order, 7);
   state = sidebarGovernanceEditorReducer(state, { type: "TOGGLE_FUNCTION", routePath: "/dashboard/orders", functionSlug: "seller", placement: "PROVIDING" });

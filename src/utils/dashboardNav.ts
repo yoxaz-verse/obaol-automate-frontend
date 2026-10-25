@@ -46,7 +46,7 @@ export const isComingSoonDashboardNavigation = (
 };
 
 export type DashboardNavSection = {
-  label: DashboardSection | DashboardTaskGroup | "Home" | "Common" | "Seeking" | "Providing" | "Other Services" | "Coming Soon" | "Business Workflows";
+  label: DashboardSection | DashboardTaskGroup | "Home" | "Common" | "Important" | "Seeking" | "Providing" | "Other Services" | "Coming Soon" | "Business Workflows";
   links: string[];
   groups?: Array<{ label: DashboardNavGroup | AdminWorkflowGroup; links: string[] }>;
 };
@@ -108,12 +108,12 @@ export const getDashboardSidebarSections = (
   if (normalizedRole === "associate") {
     if (governedPages) {
       const visible = governedPages.filter((row) => row.status !== "HIDDEN" && optionMap.has(row.routePath));
-      const links = (placement: "SEEKING" | "PROVIDING" | "OTHER_SERVICES") => visible
+      const links = (placement: "IMPORTANT" | "SEEKING" | "PROVIDING" | "OTHER_SERVICES") => visible
         .filter((row) => row.placement === placement)
-        .sort((a, b) => a.order - b.order)
         .map((row) => row.routePath);
       return [
         { label: "Home", links: SIDEBAR_HOME_ROUTES.filter((path) => optionMap.has(path)) },
+        { label: "Important", links: links("IMPORTANT") },
         { label: "Seeking", links: links("SEEKING") },
         { label: "Providing", links: links("PROVIDING") },
         { label: "Other Services", links: links("OTHER_SERVICES") },

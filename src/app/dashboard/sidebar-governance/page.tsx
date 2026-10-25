@@ -23,7 +23,7 @@ import { SectionOrderEditor, SidebarGovernancePreview } from "@/components/sideb
 import { ConflictBanner, PublishDialog, RevisionStatus } from "@/components/sidebar-governance/RevisionAndPublish";
 import type { SidebarGovernanceAdminPayload } from "@/components/sidebar-governance/types";
 
-const emptyOrder = { SEEKING: [], PROVIDING: [], OTHER_SERVICES: [] };
+const emptyOrder = { IMPORTANT: [], SEEKING: [], PROVIDING: [], OTHER_SERVICES: [] };
 const emptyState = createSidebarGovernanceEditorState({}, emptyOrder, -1);
 
 export default function SidebarGovernancePage() {
@@ -60,7 +60,7 @@ export default function SidebarGovernancePage() {
       published: config.published ? { revision: config.published.revision, resolutionVersion: config.published.resolutionVersion, updatedAt: config.published.updatedAt } : current.config.published,
     },
   } : current);
-  const draftPayload = () => ({ mappings, sectionOrder: editor.sectionOrder, fallbackStatusByRoute: Object.fromEntries((query.data?.routes || []).map((route) => [route.path, "HIDDEN"])), resolutionVersion: 2, expectedDraftRevision: editor.draftRevision });
+  const draftPayload = () => ({ mappings, sectionOrder: editor.sectionOrder, fallbackStatusByRoute: Object.fromEntries((query.data?.routes || []).map((route) => [route.path, "HIDDEN"])), resolutionVersion: 3, expectedDraftRevision: editor.draftRevision });
   const handleError = (error: any, fallback: string) => {
     const payload = error?.response?.data;
     if (error?.response?.status === 409) setConflict(payload?.message || "Another administrator changed this revision.");

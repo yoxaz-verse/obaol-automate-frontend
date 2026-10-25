@@ -8,7 +8,7 @@ import { resolveSidebarGovernance } from "@/utils/sidebarGovernance";
 import { assignmentAppearsInPanel, type AssignmentMatrix, type GovernanceFunctionRow, type GovernanceRouteRow, type GovernanceSection, type SectionOrder } from "@/utils/sidebarGovernanceEditor";
 import { governanceSectionLabels } from "./types";
 
-const sections: GovernanceSection[] = ["SEEKING", "PROVIDING", "OTHER_SERVICES"];
+const sections: GovernanceSection[] = ["IMPORTANT", "SEEKING", "PROVIDING", "OTHER_SERVICES"];
 
 export function SectionOrderEditor({ routes, matrix, sectionOrder, onChange }: {
   routes: GovernanceRouteRow[];
@@ -16,10 +16,18 @@ export function SectionOrderEditor({ routes, matrix, sectionOrder, onChange }: {
   sectionOrder: SectionOrder;
   onChange: (section: GovernanceSection, order: string[]) => void;
 }) {
-  const [activeSection, setActiveSection] = useState<GovernanceSection>("SEEKING");
+  const [activeSection, setActiveSection] = useState<GovernanceSection>("IMPORTANT");
   const [showInactive, setShowInactive] = useState(false);
   const routeMap = useMemo(() => new Map(routes.map((route) => [route.path, route])), [routes]);
-  const activePaths = useMemo(() => new Set(routes.filter((route) => Object.values(matrix[route.path] || {}).some((assignment) => assignment.status !== "HIDDEN" && assignmentAppearsInPanel(assignment, activeSection))).map((route) => route.path)), [activeSection, matrix, routes]);
+  const activePaths = useMemo(() => new Set(routes.filter((route) => {
+    const visible = Object.values(matrix[route.path] || {}).filter((assignment) => assignment.status !== "HIDDEN");
+    if (activeSection === "IMPORTANT") {
+      const seeking = visible.some((assignment) => assignment.placement === "SEEKING" || assignment.placement === "BOTH");
+      const providing = visible.some((assignment) => assignment.placement === "PROVIDING" || assignment.placement === "BOTH");
+      return seeking && providing;
+    }
+    return visible.some((assignment) => assignmentAppearsInPanel(assignment, activeSection));
+  }).map((route) => route.path)), [activeSection, matrix, routes]);
   const fullOrder = sectionOrder[activeSection];
   const visibleOrder = showInactive ? fullOrder : fullOrder.filter((path) => activePaths.has(path));
   const move = (visibleIndex: number, offset: number) => {
@@ -47,7 +55,7 @@ export function SidebarGovernancePreview({ mappings, sectionOrder, functions, ro
   const [sought, setSought] = useState<string[]>([]);
   const [provided, setProvided] = useState<string[]>([]);
   const routeMap = useMemo(() => new Map(routes.map((route) => [route.path, route])), [routes]);
-  const rows = useMemo(() => resolveSidebarGovernance(mappings, provided, sought, { resolutionVersion: 2, sectionOrder }).filter((row) => row.status !== "HIDDEN"), [mappings, provided, sectionOrder, sought]);
+  const rows = useMemo(() => resolveSidebarGovernance(mappings, provided, sought, { resolutionVersion: 3, sectionOrder }).filter((row) => row.status !== "HIDDEN"), [mappings, provided, sectionOrder, sought]);
   const toggle = (side: "sought" | "provided", slug: string) => { const setter = side === "sought" ? setSought : setProvided; setter((current) => current.includes(slug) ? current.filter((value) => value !== slug) : [...current, slug]); };
   return <Card className="h-fit xl:sticky xl:top-24"><CardBody className="gap-4"><div className="flex items-center gap-2"><FiEye /><h2 className="font-bold">Preview</h2></div><div className="flex gap-2"><Button size="sm" variant={device === "desktop" ? "solid" : "flat"} onPress={() => setDevice("desktop")}>Desktop</Button><Button size="sm" variant={device === "mobile" ? "solid" : "flat"} onPress={() => setDevice("mobile")}>Mobile</Button></div>{(["sought", "provided"] as const).map((side) => <fieldset key={side}><legend className="mb-2 text-[10px] font-black uppercase tracking-wider text-default-400">{side === "sought" ? "Seeking functions" : "Providing functions"}</legend><div className="flex flex-wrap gap-1">{functions.map((fn) => { const active = (side === "sought" ? sought : provided).includes(fn.slug); return <button key={fn.slug} type="button" aria-pressed={active} onClick={() => toggle(side, fn.slug)} className={`rounded-full border px-2 py-1 text-[10px] transition-colors ${active ? "border-obaol-500 bg-obaol-500/15 font-bold text-obaol-700 dark:text-obaol-300" : "border-default-200 text-default-500 hover:border-obaol-500/40"}`}>{fn.name}</button>; })}</div></fieldset>)}<div className={`rounded-xl border border-default-200 bg-background p-3 ${device === "mobile" ? "mx-auto max-w-[230px]" : "w-full"}`}><PreviewSection title="Home · always available" routes={commonRoutes.filter((route) => route.position === "TOP")} />{sections.map((section) => { const sectionRows = rows.filter((row) => row.placement === section); return sectionRows.length ? <PreviewSection key={section} title={governanceSectionLabels[section]} routes={sectionRows.map((row) => ({ path: row.routePath, label: routeMap.get(row.routePath)?.label || row.routePath, status: row.status }))} /> : null; })}<PreviewSection title="Common · always available" routes={commonRoutes.filter((route) => route.position === "BOTTOM")} /></div></CardBody></Card>;
 }

@@ -12,6 +12,7 @@ export type SidebarGovernanceAdminPayload = {
 };
 
 export const governanceSectionLabels: Record<GovernanceSection, string> = {
+  IMPORTANT: "Important",
   SEEKING: "Seeking",
   PROVIDING: "Providing",
   OTHER_SERVICES: "Other Services",

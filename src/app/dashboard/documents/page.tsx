@@ -167,7 +167,7 @@ export default function DocumentsPage() {
   return (
     <section className="">
       <Title title="Documents" visuallyHidden />
-      {roleLower === "associate" && <div className="mx-4 md:mx-10 mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="text-xl font-semibold">Pure Documents</h2><p className="text-sm text-default-500">Create company quotations and invoices, manage customers, and share documents.</p></div><Link href="/dashboard/commercial-documents" className="rounded-xl bg-primary px-5 py-3 text-white font-semibold">Open workspace</Link></div>}
+      {roleLower === "associate" && <div className="mx-4 md:mx-10 mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="text-xl font-semibold">Document Studio</h2><p className="text-sm text-default-500">Create, brand, share, and track eight professional business document formats.</p></div><Link href="/dashboard/commercial-documents" className="rounded-xl bg-primary px-5 py-3 text-white font-semibold">Open studio</Link></div>}
 
       <div className="mx-4 md:mx-10 mb-10 flex flex-col gap-8">
         <div className="rounded-[2rem] border border-foreground/5 bg-foreground/[0.02] backdrop-blur-3xl p-8 shadow-sm">

@@ -34,7 +34,7 @@ test("capability filtering keeps shared content and removes unrelated workflows"
 });
 
 test("search covers page names, routes, steps, and troubleshooting", () => {
-  assert.ok(searchAssociateGuideTopics(associateGuideTopics, "Pure Documents").some((topic) => topic.id === "commercial-documents-reference"));
+  assert.ok(searchAssociateGuideTopics(associateGuideTopics, "Document Studio").some((topic) => topic.id === "commercial-documents-reference"));
   assert.ok(searchAssociateGuideTopics(associateGuideTopics, "Create trade listing").some((topic) => topic.id === "publish-listing"));
   assert.ok(searchAssociateGuideTopics(associateGuideTopics, "locked company data").some((topic) => topic.id === "company-reference"));
   assert.equal(searchAssociateGuideTopics(associateGuideTopics, "not-a-real-guide-term").length, 0);

@@ -179,7 +179,7 @@ export const sidebarOptions = [
     link: "/dashboard/documents",
   },
   {
-    name: "Pure Documents",
+    name: "Document Studio",
     icon: <FiFileText />,
     link: "/dashboard/commercial-documents",
   },

@@ -81,7 +81,8 @@ const resolveTextColor = (value?: string) => {
 const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
   const header = (
     <div className="space-y-1 text-xs">
-      <div className="text-[10px]  tracking-widest opacity-80">OBAOL Supreme</div>
+      {data?.seller?.logo ? <img src={data.seller.logo} alt="Company logo" className="mb-2 h-8 w-auto object-contain" /> : null}
+      <div className="text-[10px] tracking-widest opacity-80">{data?.seller?.name || "OBAOL"}</div>
       <div className="text-lg font-semibold">{docLabel}</div>
       <div className="text-xs opacity-85">{data?.documentNumber || "Draft"}</div>
       <div className="text-xs opacity-85">{data?.docDate || "-"}</div>
@@ -126,11 +127,11 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
           <tbody>
             {items.slice(0, 10).map((item: any, idx: number) => (
               <tr key={idx} className="border-b border-default-100">
-                <td className="py-1">{item?.productName || "-"}</td>
+                <td className="py-1">{item?.productName || item?.description || "-"}</td>
                 <td className="py-1">{item?.productVariantName || "-"}</td>
-                <td className="py-1 text-right">{fmt(item?.quantityMT)} MT</td>
-                <td className="py-1 text-right">{fmt(item?.ratePerKg)}</td>
-                <td className="py-1 text-right">{fmt(item?.amount)}</td>
+                <td className="py-1 text-right">{fmt(item?.quantity || item?.quantityMT)} {item?.unit || "MT"}</td>
+                <td className="py-1 text-right">{fmt(item?.unitPrice || item?.ratePerKg)}</td>
+                <td className="py-1 text-right">{fmt(item?.total || item?.amount)}</td>
               </tr>
             ))}
           </tbody>
@@ -163,11 +164,13 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
   }
 
   if (block.type === "CERTIFICATE") {
-    return <div className="text-xs">Certificate details for {docLabel} will render here with live document data.</div>;
+    const details = data?.documentData || {};
+    return <div className="space-y-4 text-xs"><div className="grid grid-cols-3 gap-3"><div><b>Commodity</b><br />{details.commodity || "-"}</div><div><b>Sample ID</b><br />{details.sampleId || "-"}</div><div><b>Batch / lot</b><br />{details.batchLot || "-"}</div></div><table className="w-full border-collapse"><thead><tr>{["Parameter", "Result", "Unit", "Method", "Limit"].map(label => <th key={label} className="border p-2 text-left">{label}</th>)}</tr></thead><tbody>{(details.tests || []).map((row: any, index: number) => <tr key={index}>{["parameter", "result", "unit", "method", "limit"].map(key => <td key={key} className="border p-2">{row[key] || "-"}</td>)}</tr>)}</tbody></table><p><b>Conclusion:</b> {details.conclusion || "-"}</p><p className="pt-8 text-right"><b>{details.authorizedSignatory || "Authorized signatory"}</b></p></div>;
   }
 
   if (block.type === "SHIPPING") {
-    return <div className="text-xs">Shipping details for {docLabel} will render here with live document data.</div>;
+    const details = data?.documentData || {};
+    return <div className="space-y-3 text-xs"><p><b>Shipment reference:</b> {details.shipmentReference || "-"}</p><table className="w-full border-collapse"><thead><tr>{["Description", "Package", "Count", "Gross", "Net", "Dimensions", "Marks"].map(label => <th key={label} className="border p-2 text-left">{label}</th>)}</tr></thead><tbody>{(details.packages || []).map((row: any, index: number) => <tr key={index}>{["description", "packageType", "packageCount", "grossWeight", "netWeight", "dimensions", "marks"].map(key => <td key={key} className="border p-2">{row[key] || "-"}</td>)}</tr>)}</tbody></table></div>;
   }
 
   return <div className="text-xs">{block.label}</div>;

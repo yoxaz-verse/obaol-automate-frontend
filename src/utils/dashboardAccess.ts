@@ -71,9 +71,9 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/orders/:id", label: "Order details", section: "Trade", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/orders", journeyStage: "execute" },
   { path: "/dashboard/documents", label: "Documents", section: "Trade", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, journeyStage: "execute" },
   { path: "/dashboard/documents/:id", label: "Document details", section: "Trade", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/documents", journeyStage: "execute" },
-  { path: "/dashboard/commercial-documents", label: "Pure Documents", section: "Trade", roles: ["associate"], nav: true, searchable: true, journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
-  { path: "/dashboard/commercial-documents/new", label: "New quotation or invoice", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
-  { path: "/dashboard/commercial-documents/:id", label: "Quotation or invoice", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/commercial-documents", label: "Document Studio", section: "Trade", roles: ["associate"], nav: true, searchable: true, journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/commercial-documents/new", label: "Create document", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/commercial-documents/:id", label: "Document", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
 
   { path: "/dashboard/imports", label: "Import Opportunities", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/imports/my-listings", label: "My Import Listings", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },

@@ -16,7 +16,7 @@ export const formatLastLiveDate = (value: unknown) => {
     return (
       <div className="flex items-center gap-2">
         <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-obaol-500 shadow-[0_0_12px_rgba(207,152,60,0.8)]" />
-        <span className="text-[10px] font-black uppercase italic tracking-[0.1em] text-obaol-500">Today</span>
+        <span className="text-[10px] font-black  italic tracking-[0.1em] text-obaol-500">Today</span>
       </div>
     );
   }
@@ -31,7 +31,7 @@ export const LastLiveAgeBadge = ({ value }: { value: unknown }) => {
   return (
     <span
       aria-label={`Last live ${label}`}
-      className="inline-flex w-fit items-center rounded-full border border-amber-200/70 bg-amber-50/80 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300"
+      className="inline-flex w-fit items-center rounded-full border border-amber-200/70 bg-amber-50/80 px-2 py-0.5 text-[8px] font-black  tracking-wider text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300"
     >
       Last live {label}
     </span>

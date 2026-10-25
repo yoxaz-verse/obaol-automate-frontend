@@ -509,7 +509,7 @@ export default function CompanyWorkspacePage() {
   };
   const renderApprovedProfile = (title: string, ids: string[], priorities: string[]) => (
     <div>
-      <h3 className="mb-3 text-xs font-black uppercase tracking-widest text-default-500">{title}</h3>
+      <h3 className="mb-3 text-xs font-black  tracking-widest text-default-500">{title}</h3>
       {ids.length ? <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {[...ids].sort((a, b) => {
           const ai = priorities.indexOf(a); const bi = priorities.indexOf(b);
@@ -526,7 +526,7 @@ export default function CompanyWorkspacePage() {
     const ids = kind === "provided" ? requestedProvidedIds : requestedSoughtIds;
     const priorities = kind === "provided" ? requestedProvidedPriorities : requestedSoughtPriorities;
     return <section className="rounded-2xl border border-default-200 p-4">
-      <h3 className="text-xs font-black uppercase tracking-widest">What your company {kind === "provided" ? "provides" : "is seeking"}</h3>
+      <h3 className="text-xs font-black  tracking-widest">What your company {kind === "provided" ? "provides" : "is seeking"}</h3>
       <p className="mt-1 text-xs text-default-500">Select 1–6 categories. Your first three selections become priorities automatically.</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {capabilityOptions.map((capability: any) => {
@@ -542,7 +542,7 @@ export default function CompanyWorkspacePage() {
           </button>;
         })}
       </div>
-      <div className="mt-4 rounded-xl bg-default-50/50 p-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Top priorities</p>{priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => <div key={`${kind}-${id}`} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><span className="text-sm font-semibold"><b className="mr-2 text-primary-600">P{index + 1}</b>{capabilityById.get(id)?.name || "Selected category"}</span><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(kind, id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === priorities.length - 1} onPress={() => moveRequestedPriority(kind, id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">Select a category to create the priority order.</p>}</div>
+      <div className="mt-4 rounded-xl bg-default-50/50 p-3"><p className="text-[10px] font-black  tracking-[0.18em] text-default-400">Top priorities</p>{priorities.length ? <div className="mt-2 space-y-2">{priorities.map((id, index) => <div key={`${kind}-${id}`} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><span className="text-sm font-semibold"><b className="mr-2 text-primary-600">P{index + 1}</b>{capabilityById.get(id)?.name || "Selected category"}</span><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(kind, id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === priorities.length - 1} onPress={() => moveRequestedPriority(kind, id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">Select a category to create the priority order.</p>}</div>
     </section>;
   };
   const operatorAssignedCompanies = useMemo(
@@ -642,13 +642,13 @@ export default function CompanyWorkspacePage() {
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
              <div>
-               <h1 className="text-2xl font-black tracking-tight text-foreground uppercase italic underline decoration-primary-500/30">Operator <span className="text-primary-500">Workspace</span></h1>
-               <p className="text-xs text-default-500 font-medium tracking-wider uppercase opacity-60">Manage assigned identities and onboard new associates & companies</p>
+               <h1 className="text-2xl font-black tracking-tight text-foreground  italic underline decoration-primary-500/30">Operator <span className="text-primary-500">Workspace</span></h1>
+               <p className="text-xs text-default-500 font-medium tracking-wider  opacity-60">Manage assigned identities and onboard new associates & companies</p>
              </div>
              <Button 
                color="primary" 
                radius="full"
-               className="font-black uppercase text-[11px] tracking-widest px-8 h-11 bg-primary-600 shadow-xl shadow-primary-500/20 hover:scale-[1.02] active:scale-95 transition-all text-white italic"
+               className="font-black  text-[11px] tracking-widest px-8 h-11 bg-primary-600 shadow-xl shadow-primary-500/20 hover:scale-[1.02] active:scale-95 transition-all text-white italic"
                onPress={() => setIsOnboardModalOpen(true)}
              >
                Onboard Associate + Company
@@ -666,8 +666,8 @@ export default function CompanyWorkspacePage() {
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-1.5 h-8 bg-primary-500 rounded-full shadow-[0_0_15px_rgba(0,111,238,0.5)]" />
                 <div>
-                  <h2 className="text-xl font-black italic uppercase tracking-tighter">Assigned <span className="text-primary-500">Entities</span></h2>
-                  <p className="text-[10px] text-default-500 font-bold tracking-widest uppercase">Currently authorized under your operator protocol</p>
+                  <h2 className="text-xl font-black italic  tracking-tighter">Assigned <span className="text-primary-500">Entities</span></h2>
+                  <p className="text-[10px] text-default-500 font-bold tracking-widest ">Currently authorized under your operator protocol</p>
                 </div>
               </div>
             {operatorAssignedCompaniesQuery.isLoading ? (
@@ -1011,7 +1011,7 @@ export default function CompanyWorkspacePage() {
                           {(["provided", "sought"] as const).map((kind) => {
                             const ids = report?.payload?.[kind === "provided" ? "requestedProvidedFunctionIds" : "requestedSoughtFunctionIds"] || [];
                             const priorities = (report?.payload?.[kind === "provided" ? "requestedProvidedFunctionPriorities" : "requestedSoughtFunctionPriorities"] || []).map(String);
-                            return <div key={`${report?._id}-${kind}`}><span className="mr-2 text-[10px] font-black uppercase text-default-400">{kind}</span><span className="inline-flex flex-wrap gap-1">{ids.map((id: string) => { const priority = priorities.indexOf(String(id)); return <Chip key={`${report?._id}-${kind}-${id}`} size="sm" color={priority >= 0 ? "warning" : "primary"} variant="flat">{capabilityById.get(String(id))?.name || "Company category"}{priority >= 0 ? ` · P${priority + 1}` : ""}</Chip>; })}</span></div>;
+                            return <div key={`${report?._id}-${kind}`}><span className="mr-2 text-[10px] font-black  text-default-400">{kind}</span><span className="inline-flex flex-wrap gap-1">{ids.map((id: string) => { const priority = priorities.indexOf(String(id)); return <Chip key={`${report?._id}-${kind}-${id}`} size="sm" color={priority >= 0 ? "warning" : "primary"} variant="flat">{capabilityById.get(String(id))?.name || "Company category"}{priority >= 0 ? ` · P${priority + 1}` : ""}</Chip>; })}</span></div>;
                           })}
                         </div>
                       ) : <div className="flex flex-wrap gap-1">

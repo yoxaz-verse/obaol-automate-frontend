@@ -301,7 +301,7 @@ export default function WarehouseLocationPage() {
   const textareaBaseClass =
     "bg-black/[0.03] dark:bg-white/[0.04] border db-border-subtle rounded-2xl hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus-within:bg-black/[0.06] dark:focus-within:bg-white/[0.10] focus-within:border-obaol-400/70 focus-within:ring-2 focus-within:ring-obaol-500/30 transition-all p-4";
   const fieldLabelClass = "text-default-500 dark:text-white/70 font-semibold";
-  const fieldInputClass = "text-foreground font-bold uppercase text-sm placeholder:text-default-400 dark:placeholder:text-white/35";
+  const fieldInputClass = "text-foreground font-bold  text-sm placeholder:text-default-400 dark:placeholder:text-white/35";
   const selectPopoverClass = "db-panel border db-border-subtle rounded-2xl";
 
   return (
@@ -311,7 +311,7 @@ export default function WarehouseLocationPage() {
         <Title title="Warehouse Location" visuallyHidden />
         <Button 
           variant="flat" 
-          className="db-subtle text-foreground font-bold uppercase tracking-widest text-[10px] rounded-xl px-6 h-10 border db-border-subtle"
+          className="db-subtle text-foreground font-bold  tracking-widest text-[10px] rounded-xl px-6 h-10 border db-border-subtle"
           onPress={() => router.push("/dashboard/warehouses")}
         >
           Back to Asset Registry
@@ -324,8 +324,8 @@ export default function WarehouseLocationPage() {
             <div className="flex items-center gap-4">
               <div className="w-1 h-3 bg-obaol-500 rounded-full" />
               <div>
-                <h2 className="text-xl font-bold text-foreground uppercase tracking-tight">Pin Warehouse Location</h2>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-default-400 mt-1">
+                <h2 className="text-xl font-bold text-foreground  tracking-tight">Pin Warehouse Location</h2>
+                <p className="text-[10px] font-bold  tracking-widest text-default-400 mt-1">
                   Global Coordinate Synchronization
                 </p>
               </div>
@@ -333,7 +333,7 @@ export default function WarehouseLocationPage() {
           </CardHeader>
           <CardBody className="px-6 pb-6 space-y-4">
             {form.location && (
-              <div className="text-[10px] font-bold uppercase tracking-widest text-default-500 dark:text-white/50 flex flex-wrap gap-x-2 gap-y-1">
+              <div className="text-[10px] font-bold  tracking-widest text-default-500 dark:text-white/50 flex flex-wrap gap-x-2 gap-y-1">
                 <span className="text-obaol-500">Detected Node:</span> {locationLabel}
                 {form.location.district && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.district}</>}
                 {form.location.pincode && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.pincode}</>}
@@ -363,14 +363,14 @@ export default function WarehouseLocationPage() {
             <div className="flex items-center gap-4">
               <div className="w-1 h-3 bg-primary-500 rounded-full" />
               <div>
-                <h2 className="text-xl font-bold text-foreground uppercase tracking-tight">Warehouse Parameters</h2>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-default-400 mt-1">Entity Asset Configuration</p>
+                <h2 className="text-xl font-bold text-foreground  tracking-tight">Warehouse Parameters</h2>
+                <p className="text-[10px] font-bold  tracking-widest text-default-400 mt-1">Entity Asset Configuration</p>
               </div>
             </div>
           </CardHeader>
           <CardBody className="px-6 pb-6 space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Warehouse Profile</label>
+              <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Warehouse Profile</label>
               <Input
                 label="Full Commercial Name"
                 variant="flat"
@@ -412,7 +412,7 @@ export default function WarehouseLocationPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Operational Category</label>
+              <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Operational Category</label>
               <Select
                 label="Classification"
                 variant="flat"
@@ -421,7 +421,7 @@ export default function WarehouseLocationPage() {
                 classNames={{
                   trigger: fieldBaseClass,
                   label: fieldLabelClass,
-                  value: "text-foreground font-bold uppercase text-xs",
+                  value: "text-foreground font-bold  text-xs",
                   popoverContent: selectPopoverClass,
                 }}
                 popoverProps={{ shouldCloseOnBlur: false }}
@@ -434,7 +434,7 @@ export default function WarehouseLocationPage() {
             </div>
             {isAdmin && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Management Entity</label>
+                <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Management Entity</label>
                 <Select
                   label="Associate Company"
                   variant="flat"
@@ -445,7 +445,7 @@ export default function WarehouseLocationPage() {
                   classNames={{
                     trigger: fieldBaseClass,
                     label: fieldLabelClass,
-                    value: "text-foreground font-bold uppercase text-xs",
+                    value: "text-foreground font-bold  text-xs",
                     popoverContent: selectPopoverClass,
                   }}
                   popoverProps={{ shouldCloseOnBlur: false }}
@@ -460,7 +460,7 @@ export default function WarehouseLocationPage() {
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Logistics Permissions</label>
+              <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Logistics Permissions</label>
               <Select
                 label="Allowed Commodities"
                 variant="flat"
@@ -470,7 +470,7 @@ export default function WarehouseLocationPage() {
                 classNames={{
                   trigger: fieldBaseClass,
                   label: fieldLabelClass,
-                  value: "text-foreground font-bold uppercase text-xs",
+                  value: "text-foreground font-bold  text-xs",
                   popoverContent: selectPopoverClass,
                 }}
                 popoverProps={{ shouldCloseOnBlur: false }}
@@ -482,7 +482,7 @@ export default function WarehouseLocationPage() {
               </Select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Spatial Identity</label>
+              <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Spatial Identity</label>
               <Textarea
                 label="Physical Address"
                 variant="flat"
@@ -519,13 +519,13 @@ export default function WarehouseLocationPage() {
             </div>
             {form.location && (
               <div className="flex flex-wrap gap-2 px-1">
-                {form.location.city && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold uppercase text-[9px] border db-border-subtle">{form.location.city}</Chip>}
-                {form.location.district && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold uppercase text-[9px] border db-border-subtle">{form.location.district}</Chip>}
-                {form.location.state && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold uppercase text-[9px] border db-border-subtle">{form.location.state}</Chip>}
+                {form.location.city && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold  text-[9px] border db-border-subtle">{form.location.city}</Chip>}
+                {form.location.district && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold  text-[9px] border db-border-subtle">{form.location.district}</Chip>}
+                {form.location.state && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold  text-[9px] border db-border-subtle">{form.location.state}</Chip>}
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Infrastructure Capacity</label>
+              <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Infrastructure Capacity</label>
               <Input
                 label="Total Mission Volume (MT)"
                 variant="flat"
@@ -542,8 +542,8 @@ export default function WarehouseLocationPage() {
             </div>
             <div className="flex items-center justify-between px-2 py-4 rounded-2xl db-subtle border db-border-subtle">
               <div>
-                <p className="text-xs font-bold text-foreground uppercase tracking-wider">List for Rental</p>
-                <p className="text-[10px] text-default-400 uppercase tracking-widest mt-1">Open node to associate network</p>
+                <p className="text-xs font-bold text-foreground  tracking-wider">List for Rental</p>
+                <p className="text-[10px] text-default-400  tracking-widest mt-1">Open node to associate network</p>
               </div>
               <Switch
                 isSelected={form.listingType === "RENTAL" && form.isRentalActive}
@@ -559,8 +559,8 @@ export default function WarehouseLocationPage() {
             </div>
             <div className="flex items-center justify-between px-2 py-4 rounded-2xl db-subtle border db-border-subtle">
               <div>
-                <p className="text-xs font-bold text-foreground uppercase tracking-wider">Active Status</p>
-                <p className="text-[10px] text-default-400 uppercase tracking-widest mt-1">Ready for operational deployment</p>
+                <p className="text-xs font-bold text-foreground  tracking-wider">Active Status</p>
+                <p className="text-[10px] text-default-400  tracking-widest mt-1">Ready for operational deployment</p>
               </div>
               <Switch
                 isSelected={form.isActive}
@@ -576,7 +576,7 @@ export default function WarehouseLocationPage() {
               </div>
               <Button
                 color="warning"
-                className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
+                className="h-12 rounded-2xl font-bold  tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
                 isDisabled={!form.name.trim() || !form.contactPhone.trim() || !form.location}
                 isLoading={createMutation.isPending}
                 onPress={() => createMutation.mutate(form)}

@@ -136,10 +136,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 onClick={(e) => handleOptionClick(e, opt.link)}
                 disabled={isDisabled}
                 title={isCollapsed && isComingSoon ? `${opt.name} — Coming soon` : undefined}
-                className={`w-full group relative flex items-center h-10 rounded-xl transition-all duration-300 ${
+                className={`w-full group relative flex items-center h-10 rounded-xl border border-transparent outline-none ring-0 transition-all duration-300 ${
                     isActive
-                    ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-200 font-bold shadow-sm"
-                    : "text-default-500 hover:text-foreground hover:db-inset"
+                    ? "border-obaol-500/25 bg-obaol-500/10 text-obaol-700 dark:text-obaol-200 font-bold shadow-sm"
+                    : "text-default-500 hover:border-obaol-500/20 hover:text-foreground hover:db-inset"
                 } ${isCollapsed ? "justify-center" : `${nested ? "pl-6 pr-3" : "px-3"} gap-3`} ${isDisabled ? "cursor-not-allowed opacity-50 hover:bg-transparent hover:text-default-500" : ""}`}
                 aria-disabled={isDisabled}
                 aria-current={isActive ? "page" : undefined}
@@ -152,12 +152,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                     {opt.icon}
                 </div>
                 {!isCollapsed && (
-                    <span className="text-[11px] tracking-[0.15em] uppercase font-black tabular-nums truncate">
+                    <span className="truncate text-[12px] font-semibold tabular-nums">
                         {opt.name}
                     </span>
                 )}
                 {!isCollapsed && isComingSoon && (
-                    <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-obaol-700 dark:text-obaol-300">
+                    <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black  tracking-[0.12em] text-obaol-700 dark:text-obaol-300">
                         Coming soon
                     </span>
                 )}
@@ -199,7 +199,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 type="button"
                 aria-label={isCollapsed ? "Expand navigation" : "Collapse navigation"}
                 onClick={() => { play("toggle"); setIsCollapsed(!isCollapsed); }}
-                className="absolute -right-4 top-[84px] w-8 h-8 rounded-xl db-panel border db-border-strong flex items-center justify-center text-default-400 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/50 transition-all shadow-lg z-50 group"
+                className="absolute -right-4 top-[84px] z-50 flex h-8 w-8 items-center justify-center rounded-xl border db-border-strong db-panel text-default-400 outline-none ring-0 shadow-lg transition-all hover:border-obaol-500/50 hover:text-obaol-700 dark:hover:text-obaol-300 group"
             >
                 {isCollapsed ? <FiChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" /> : <FiChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />}
             </button>
@@ -222,7 +222,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 {!isCollapsed && (
                     <div className="flex flex-col">
                         <span className="font-black text-lg tracking-[0.25em] text-foreground leading-none">OBAOL</span>
-                        <span className="mt-2 text-[8px] font-bold uppercase tracking-[0.3em] text-obaol-700 dark:text-obaol-300/70">Trade workspace</span>
+                        <span className="mt-2 text-[8px] font-bold  tracking-[0.3em] text-obaol-700 dark:text-obaol-300/70">Trade workspace</span>
                     </div>
                 )}
             </div>
@@ -231,7 +231,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             <div className="flex-1 min-h-0 px-4 space-y-0.5 overflow-y-auto overscroll-contain no-scrollbar pb-10">
                 {isOnboardingLocked && !isCollapsed && (
                     <div className="mx-2 mb-2 rounded-xl border border-obaol-500/20 bg-obaol-500/10 px-3 py-2">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
+                        <p className="text-[10px] font-semibold text-obaol-700 dark:text-obaol-300">
                             Complete onboarding to unlock navigation
                         </p>
                     </div>
@@ -249,7 +249,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                                     type="button"
                                     aria-expanded={isOpen}
                                     onClick={() => setOpenNavigationGroup(isOpen ? null : row.label)}
-                                    className={`w-full h-9 px-3 flex items-center justify-between rounded-xl text-[9px] font-black uppercase tracking-[0.18em] transition-colors ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300" : "text-default-400 hover:text-foreground hover:db-inset"}`}
+                                    className={`flex h-9 w-full items-center justify-between rounded-xl border border-transparent px-3 text-[11px] font-semibold outline-none ring-0 transition-colors ${hasActiveLink ? "border-obaol-500/20 text-obaol-700 dark:text-obaol-300" : "text-default-400 hover:border-obaol-500/20 hover:text-foreground hover:db-inset"}`}
                                 >
                                     <span className="truncate">{row.label}</span>
                                     <FiChevronDown size={13} className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
@@ -267,7 +267,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                         <div key={`${row.label}-${idx}`} className={`${isCollapsed ? "" : "pt-5"} space-y-2`}>
                             {!isCollapsed && row.label && (
                                 <div className="px-3 flex items-center gap-3">
-                                    <span className="text-[10px] font-semibold text-default-500 uppercase tracking-[0.12em]">{row.label}</span>
+                                    <span className="text-[11px] font-semibold text-default-500">{row.label}</span>
                                     <div className="flex-1 h-[1px] bg-gradient-to-r from-default-200 dark:from-white/5 to-transparent" />
                                 </div>
                             )}

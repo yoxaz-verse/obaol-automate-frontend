@@ -269,22 +269,22 @@ function HierarchyBranch({
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="truncate text-[13px] font-black uppercase tracking-tight text-foreground leading-tight">{toName(node.name)}</p>
+              <p className="truncate text-[13px] font-black  tracking-tight text-foreground leading-tight">{toName(node.name)}</p>
               <div className="mt-3 flex items-center gap-4">
                 <div className="flex items-center gap-1.5 opacity-40">
                   <FiUsers size={11} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">{String(node.attributes?.teamSize || node.__meta.teamSize || 0)} NODES</span>
+                  <span className="text-[9px] font-black  tracking-widest">{String(node.attributes?.teamSize || node.__meta.teamSize || 0)} NODES</span>
                 </div>
                 {node.__meta.totalCommission > 0 && (
                   <div className="flex items-center gap-1.5 text-primary-500">
                     <FiZap size={11} />
-                    <span className="text-[9px] font-black uppercase tracking-widest leading-none">{formatCommission(Number(node.__meta.totalCommission || 0))}</span>
+                    <span className="text-[9px] font-black  tracking-widest leading-none">{formatCommission(Number(node.__meta.totalCommission || 0))}</span>
                   </div>
                 )}
               </div>
             </div>
             <div className="shrink-0 flex flex-col items-end gap-1">
-              <span className="rounded bg-black/5 dark:bg-white/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-default-500 leading-none">
+              <span className="rounded bg-black/5 dark:bg-white/10 px-1.5 py-0.5 text-[9px] font-black  tracking-widest text-default-500 leading-none">
                 {String(node.attributes?.level || `L${node.__meta.level}`)}
               </span>
             </div>
@@ -748,20 +748,20 @@ export default function OperatorHierarchyPage() {
             <div className="w-8 h-8 rounded-xl bg-primary-500 text-white flex items-center justify-center">
               <FiTarget size={18} />
             </div>
-            <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter">Operator Network</h1>
+            <h1 className="text-3xl font-black text-foreground  tracking-tighter">Operator Network</h1>
           </div>
-          <p className="text-sm font-bold text-default-400 uppercase tracking-widest max-w-xl">
+          <p className="text-sm font-bold text-default-400  tracking-widest max-w-xl">
             Visual leadership structure for mentor chain, direct team, and growth visibility.
           </p>
         </div>
 
         {isAdmin && (
           <div className="min-w-[280px]">
-            <p className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 ml-1">Network Inspector</p>
+            <p className="text-[10px] font-black  tracking-widest text-default-400 mb-2 ml-1">Network Inspector</p>
             <select
               value={selectedOperatorId}
               onChange={(event) => setSelectedOperatorId(String(event.target.value || ""))}
-              className="w-full h-12 rounded-[1rem] border border-divider bg-content1/50 backdrop-blur-md px-4 text-xs font-black uppercase tracking-wider text-foreground hover:border-primary-500/50 transition-colors cursor-pointer outline-none"
+              className="w-full h-12 rounded-[1rem] border border-divider bg-content1/50 backdrop-blur-md px-4 text-xs font-black  tracking-wider text-foreground hover:border-primary-500/50 transition-colors cursor-pointer outline-none"
             >
               {operatorOptions.length === 0 ? <option value="">No operators found</option> : null}
               {operatorOptions.map((option: any) => (
@@ -788,9 +788,9 @@ export default function OperatorHierarchyPage() {
                 {card.icon}
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-0.5">{card.label}</p>
-                <p className="text-base font-black text-foreground truncate leading-tight uppercase tracking-tighter">{card.value}</p>
-                <p className="text-[8px] font-bold text-default-300 uppercase tracking-widest mt-1">{card.sub}</p>
+                <p className="text-[9px] font-black  tracking-widest text-default-400 mb-0.5">{card.label}</p>
+                <p className="text-base font-black text-foreground truncate leading-tight  tracking-tighter">{card.value}</p>
+                <p className="text-[8px] font-bold text-default-300  tracking-widest mt-1">{card.sub}</p>
               </div>
             </CardBody>
           </Card>
@@ -802,17 +802,17 @@ export default function OperatorHierarchyPage() {
           {/* Diagnostic Hub Header */}
           <div className="absolute top-6 left-6 z-40 bg-content1 border border-divider p-4 rounded-xl shadow-xl space-y-4 pointer-events-auto backdrop-blur-md max-w-[240px]">
             <div>
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 leading-none mb-1.5">Network Telemetry</h3>
-              <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest leading-relaxed">Direct Pointer Control • Multi-Axis Scaling</p>
+              <h3 className="text-[10px] font-black  tracking-[0.2em] text-primary-500 leading-none mb-1.5">Network Telemetry</h3>
+              <p className="text-[9px] font-bold text-default-400  tracking-widest leading-relaxed">Direct Pointer Control • Multi-Axis Scaling</p>
             </div>
             <div className="flex items-center gap-4 pt-3 border-t border-divider">
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded bg-primary-500" />
-                <span className="text-[8px] font-black uppercase tracking-widest text-default-400">SELF</span>
+                <span className="text-[8px] font-black  tracking-widest text-default-400">SELF</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded bg-success-500" />
-                <span className="text-[8px] font-black uppercase tracking-widest text-default-400">TEAM</span>
+                <span className="text-[8px] font-black  tracking-widest text-default-400">TEAM</span>
               </div>
             </div>
           </div>
@@ -890,8 +890,8 @@ export default function OperatorHierarchyPage() {
             >
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-primary-500 mb-1">Node Inspector</h3>
-                  <p className="text-xl font-black text-foreground tracking-tight uppercase">Agent Intelligence</p>
+                  <h3 className="text-sm font-black  tracking-[0.2em] text-primary-500 mb-1">Node Inspector</h3>
+                  <p className="text-xl font-black text-foreground tracking-tight ">Agent Intelligence</p>
                 </div>
                 <Button isIconOnly size="md" variant="light" radius="full" className="hover:bg-default-100" onPress={() => setSelectedMeta(null)}>
                   <FiX size={20} />
@@ -903,54 +903,54 @@ export default function OperatorHierarchyPage() {
                   <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-3xl font-black shadow-xl mb-4 border-4 border-white/10">
                     {toName(selectedNodeFromTree?.name || selectedNode.id).charAt(0).toUpperCase()}
                   </div>
-                  <h4 className="text-lg font-black text-foreground uppercase tracking-tight">{toName(selectedNodeFromTree?.name || selectedNode.id)}</h4>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mt-1">
+                  <h4 className="text-lg font-black text-foreground  tracking-tight">{toName(selectedNodeFromTree?.name || selectedNode.id)}</h4>
+                  <span className="text-[10px] font-black  tracking-[0.2em] text-default-400 mt-1">
                     Ranked L{Math.max(1, selectedNode.level || 1)} Operative
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl border border-divider bg-default-50/50">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-1">Network Mentor</p>
-                    <p className="font-black text-foreground uppercase truncate">{toName(selectedNode.mentorName || "-")}</p>
+                    <p className="text-[10px] font-black  tracking-widest text-default-400 mb-1">Network Mentor</p>
+                    <p className="font-black text-foreground  truncate">{toName(selectedNode.mentorName || "-")}</p>
                   </div>
                   <div className="p-4 rounded-2xl border border-divider bg-default-50/50">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-1">Direct Force</p>
-                    <p className="font-black text-foreground uppercase truncate">{toNumber(selectedNode.teamSize)} Nodes</p>
+                    <p className="text-[10px] font-black  tracking-widest text-default-400 mb-1">Direct Force</p>
+                    <p className="font-black text-foreground  truncate">{toNumber(selectedNode.teamSize)} Nodes</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h5 className="text-[10px] font-black uppercase tracking-[0.25em] text-primary-500 border-b border-divider pb-2">Yield Telemetry</h5>
+                  <h5 className="text-[10px] font-black  tracking-[0.25em] text-primary-500 border-b border-divider pb-2">Yield Telemetry</h5>
 
                   {selectedSummaryQuery.isFetching ? (
                     <div className="rounded-2xl border border-divider p-6 text-default-500 flex flex-col items-center gap-3 animate-pulse">
                       <FiRefreshCw className="animate-spin text-primary" size={24} />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Synchronizing...</span>
+                      <span className="text-[10px] font-black  tracking-widest">Synchronizing...</span>
                     </div>
                   ) : hasRestrictedMetrics ? (
                     <div className="rounded-2xl border border-obaol-500/20 bg-obaol-500/5 p-6 text-center space-y-2">
                       <FiShield className="mx-auto text-obaol-500" size={24} />
-                      <p className="text-[10px] font-black text-obaol-600 uppercase tracking-widest">Access Restricted</p>
+                      <p className="text-[10px] font-black text-obaol-600  tracking-widest">Access Restricted</p>
                       <p className="text-[11px] font-medium text-default-500 leading-relaxed">Financial metrics are isolated for nodes outside your immediate leadership scope.</p>
                     </div>
                   ) : selectedSummaryQuery.isError ? (
                     <div className="rounded-2xl border border-danger-500/20 bg-danger-500/5 p-6 text-center">
-                      <p className="text-[10px] font-black text-danger-600 uppercase">Telemetry Link Failed</p>
+                      <p className="text-[10px] font-black text-danger-600 ">Telemetry Link Failed</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-4 rounded-2xl border border-divider/50 bg-success-500/5 group hover:border-success-500/30 transition-all">
                         <div className="flex items-center gap-3 text-success-600">
                           <FiZap size={18} />
-                          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Total Earnings</span>
+                          <span className="text-[10px] font-black  tracking-widest leading-none">Total Earnings</span>
                         </div>
                         <span className="text-lg font-black text-success-700 tracking-tighter">{formatRate(Number(selectedSummary.totalEarnings || 0))}</span>
                       </div>
                       <div className="flex justify-between items-center p-4 rounded-2xl border border-divider/50 bg-primary-500/5 group hover:border-primary-500/30 transition-all">
                         <div className="flex items-center gap-3 text-primary-600">
                           <FiBriefcase size={18} />
-                          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Closed Trades</span>
+                          <span className="text-[10px] font-black  tracking-widest leading-none">Closed Trades</span>
                         </div>
                         <span className="text-lg font-black text-primary-700 tracking-tighter">{toNumber(selectedSummary.dealsClosed)} UNIT</span>
                       </div>
@@ -961,7 +961,7 @@ export default function OperatorHierarchyPage() {
 
               <div className="mt-auto pt-8">
                 <Button
-                  className="w-full h-14 rounded-2xl font-black text-sm uppercase tracking-widest bg-foreground text-background shadow-xl hover:-translate-y-1 transition-all"
+                  className="w-full h-14 rounded-2xl font-black text-sm  tracking-widest bg-foreground text-background shadow-xl hover:-translate-y-1 transition-all"
                   onPress={() => setSelectedMeta(null)}
                 >
                   Mission Complete

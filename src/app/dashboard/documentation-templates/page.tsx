@@ -265,7 +265,7 @@ export default function DocumentationTemplatesPage() {
           <div className="space-y-4">
             <Card>
               <CardBody className="space-y-2">
-                <div className="text-xs font-black uppercase tracking-wider text-default-500">Block Library</div>
+                <div className="text-xs font-black  tracking-wider text-default-500">Block Library</div>
                 {(localLayout?.blocks || []).map((block: any) => (
                   <button
                     key={block.id}
@@ -284,7 +284,7 @@ export default function DocumentationTemplatesPage() {
 
             <Card>
               <CardBody className="space-y-2">
-                <div className="text-xs font-black uppercase tracking-wider text-default-500">Element Toolbox</div>
+                <div className="text-xs font-black  tracking-wider text-default-500">Element Toolbox</div>
                 <div className="grid grid-cols-2 gap-2">
                   {["TEXT", "IMAGE", "SHAPE", "LINE", "TABLE", "SIGNATURE", "MANUAL_INPUT"].map((type) => (
                     <Button key={type} size="sm" variant="flat" onPress={() => addElement(type)} isDisabled={!draft}>{type}</Button>
@@ -295,7 +295,7 @@ export default function DocumentationTemplatesPage() {
 
             <Card>
               <CardBody className="space-y-2">
-                <div className="text-xs font-black uppercase tracking-wider text-default-500">Layers</div>
+                <div className="text-xs font-black  tracking-wider text-default-500">Layers</div>
                 {(layerItems || []).map((layer: any) => (
                   <button
                     key={`${layer.kind}-${layer.id}`}
@@ -353,7 +353,7 @@ export default function DocumentationTemplatesPage() {
 
           <Card>
             <CardBody className="space-y-3">
-              <div className="text-xs font-black uppercase tracking-wider text-default-500">Properties</div>
+              <div className="text-xs font-black  tracking-wider text-default-500">Properties</div>
               {!selectedAny ? (
                 <div className="text-xs text-default-500">Select a block or element to edit its properties.</div>
               ) : (
@@ -399,7 +399,7 @@ export default function DocumentationTemplatesPage() {
               )}
 
               <div className="pt-3 mt-2 border-t border-default-200/50 space-y-2">
-                <div className="text-xs font-black uppercase tracking-wider text-default-500">Letterhead</div>
+                <div className="text-xs font-black  tracking-wider text-default-500">Letterhead</div>
                 <Switch isSelected={letterheadEnabled} onValueChange={setLetterheadEnabled}>Enable Letterhead</Switch>
                 <Select size="sm" label="Preset" selectedKeys={selectedLetterheadId ? [selectedLetterheadId] : []} onSelectionChange={(keys) => setSelectedLetterheadId(String(Array.from(keys)[0] || ""))}>
                   {letterheadRows.map((row: any) => (

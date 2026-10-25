@@ -58,8 +58,8 @@ function AdminDashboardPanel() {
       <div className="flex items-center gap-4 mb-8">
         <div className="w-2 h-8 bg-obaol-500 rounded-full" />
         <div>
-          <h3 className="text-2xl font-black text-foreground tracking-tighter uppercase">Platform Command Overview</h3>
-          <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-0.5">High-level System Metrics & Global Assets</p>
+          <h3 className="text-2xl font-black text-foreground tracking-tighter ">Platform Command Overview</h3>
+          <p className="text-[10px] font-bold text-default-400  tracking-[0.2em] mt-0.5">High-level System Metrics & Global Assets</p>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -109,8 +109,8 @@ function AssociateDashboardPanel({ userId }: { userId: string }) {
       <div className="flex items-center gap-4 mb-8">
         <div className="w-2 h-8 bg-orange-500 rounded-full" />
         <div>
-          <h3 className="text-2xl font-black text-foreground tracking-tighter uppercase">My Trading Ecosystem</h3>
-          <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-0.5">Commercial Performance & Listing Reach</p>
+          <h3 className="text-2xl font-black text-foreground tracking-tighter ">My Trading Ecosystem</h3>
+          <p className="text-[10px] font-bold text-default-400  tracking-[0.2em] mt-0.5">Commercial Performance & Listing Reach</p>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -171,8 +171,8 @@ function OperatorDashboardPanel({ userId }: { userId: string }) {
       <div className="flex items-center gap-4 mb-8">
         <div className="w-2 h-8 bg-primary-500 rounded-full" />
         <div>
-          <h3 className="text-2xl font-black text-foreground tracking-tighter uppercase">My Operational Matrix</h3>
-          <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-0.5">Functional Performance & Action Logs</p>
+          <h3 className="text-2xl font-black text-foreground tracking-tighter ">My Operational Matrix</h3>
+          <p className="text-[10px] font-bold text-default-400  tracking-[0.2em] mt-0.5">Functional Performance & Action Logs</p>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -393,8 +393,8 @@ function PasskeySecurityPanel() {
           <FiKey />
         </div>
         <div>
-          <h3 className="text-sm font-black uppercase tracking-[0.16em] text-foreground">Passkeys</h3>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-default-400">Password plus email OTP required</p>
+          <h3 className="text-sm font-black  tracking-[0.16em] text-foreground">Passkeys</h3>
+          <p className="text-[10px] font-semibold  tracking-[0.12em] text-default-400">Password plus email OTP required</p>
         </div>
       </CardHeader>
       <CardBody className="gap-4 px-5 pb-5">
@@ -448,7 +448,7 @@ function PasskeySecurityPanel() {
             <div key={passkey.credentialId} className="flex items-center justify-between gap-3 rounded-xl border border-default-200 px-3 py-3 dark:border-white/10">
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-foreground">{passkey.deviceLabel || "Passkey"}</p>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-default-400">
+                <p className="text-[10px] font-semibold  tracking-[0.12em] text-default-400">
                   {passkey.lastUsedAt ? `Last used ${formatDate(passkey.lastUsedAt)}` : `Created ${formatDate(passkey.createdAt)}`}
                 </p>
               </div>

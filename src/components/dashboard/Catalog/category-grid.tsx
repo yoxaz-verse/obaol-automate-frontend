@@ -135,7 +135,7 @@ export default function CategoryGrid({
 
                                 {counts && (
                                     <div className="w-full pt-2.5 sm:pt-3 border-t border-foreground/5 flex items-center justify-between gap-2">
-                                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.16em] text-default-400 line-clamp-1">
+                                        <span className="text-[9px] sm:text-[10px] font-black  tracking-[0.16em] text-default-400 line-clamp-1">
                                             Collection
                                         </span>
                                         {count > 0 && (

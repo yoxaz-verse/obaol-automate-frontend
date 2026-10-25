@@ -223,7 +223,7 @@ const SelectModal: React.FC<SelectModalProps> = ({
                     value={commission.toString()}
                     startContent={
                       <div className="pointer-events-none flex items-center">
-                        <span className="text-default-400 text-xs font-semibold uppercase">
+                        <span className="text-default-400 text-xs font-semibold ">
                           {selectedCurrency.toUpperCase()}
                         </span>
                       </div>

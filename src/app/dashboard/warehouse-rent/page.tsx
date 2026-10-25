@@ -259,7 +259,7 @@ export default function WarehouseRentPage() {
       return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl">
           <FiLoader className="animate-spin text-orange-500 mb-4" size={24} />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">Initializing_Nodes...</span>
+          <span className="text-[10px] font-black  tracking-[0.2em] text-default-500 font-mono">Initializing_Nodes...</span>
           {isWarehouseLoadSlow ? (
             <div className="mt-4 flex flex-col items-center gap-3">
               <span className="text-[11px] text-default-400">Still loading. You can retry now.</span>
@@ -275,7 +275,7 @@ export default function WarehouseRentPage() {
     if (isWarehousesError) {
       return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-danger-500/30 rounded-3xl text-center px-6">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-danger-300 font-mono">{warehousesErrorMessage}</span>
+          <span className="text-[10px] font-black  tracking-[0.2em] text-danger-300 font-mono">{warehousesErrorMessage}</span>
         </motion.div>
       );
     }
@@ -283,7 +283,7 @@ export default function WarehouseRentPage() {
     if (filteredWarehouses.length === 0) {
       return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl text-center px-6">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">No_Available_Capacity_Detected</span>
+          <span className="text-[10px] font-black  tracking-[0.2em] text-default-500 font-mono">No_Available_Capacity_Detected</span>
         </motion.div>
       );
     }
@@ -309,7 +309,7 @@ export default function WarehouseRentPage() {
                   </div>
                 </div>
               </div>
-              <Chip size="sm" variant="flat" className="border border-default-200 bg-default-100 px-2 text-[10px] font-bold uppercase tracking-wide" color="warning">
+              <Chip size="sm" variant="flat" className="border border-default-200 bg-default-100 px-2 text-[10px] font-bold  tracking-wide" color="warning">
                 Available
               </Chip>
             </div>
@@ -364,7 +364,7 @@ export default function WarehouseRentPage() {
           <div className="space-y-1">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-orange-500 mb-2">
               <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.8)]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">Operations_Terminal</span>
+              <span className="text-[10px] font-black  tracking-[0.3em] font-mono">Operations_Terminal</span>
             </motion.div>
             <Title title="Warehouse Contact Directory" visuallyHidden />
             <p className="text-sm text-default-400 max-w-xl">
@@ -374,7 +374,7 @@ export default function WarehouseRentPage() {
           {canAdd ? (
             <Button
               color="warning"
-              className="h-11 px-6 font-black uppercase tracking-widest text-[11px] rounded-xl"
+              className="h-11 px-6 font-black  tracking-widest text-[11px] rounded-xl"
               startContent={<LuPlus size={16} />}
               onPress={() => router.push("/dashboard/warehouses/location")}
             >
@@ -396,7 +396,7 @@ export default function WarehouseRentPage() {
                   size="sm"
                   variant={isSelected ? "solid" : "light"}
                   color={isSelected ? "warning" : "default"}
-                  className="h-10 px-4 rounded-lg font-black uppercase tracking-widest text-[10px] whitespace-nowrap"
+                  className="h-10 px-4 rounded-lg font-black  tracking-widest text-[10px] whitespace-nowrap"
                   startContent={option.icon}
                   onPress={() => setViewMode(option.key)}
                 >
@@ -406,7 +406,7 @@ export default function WarehouseRentPage() {
             })}
           </div>
           <div className="flex items-center justify-between lg:justify-end gap-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.3em] text-default-400 font-mono">Node_Catalog</h2>
+            <h2 className="text-xs font-black  tracking-[0.3em] text-default-400 font-mono">Node_Catalog</h2>
             <span className="text-[10px] font-mono text-orange-500/60">{filteredWarehouses.length} Nodes Found</span>
           </div>
         </div>
@@ -428,7 +428,7 @@ export default function WarehouseRentPage() {
                 <div className="flex flex-col lg:flex-row gap-4">
                   {needsCompanySelect ? (
                     <div className="flex-1">
-                      <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">Trade Entity</div>
+                      <div className="text-[10px] font-black  tracking-widest text-default-400 mb-2 font-mono">Trade Entity</div>
                       <Select
                         variant="bordered"
                         classNames={{
@@ -453,7 +453,7 @@ export default function WarehouseRentPage() {
                   ) : null}
 
                   <div className="flex-1">
-                    <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">Strategic Location</div>
+                    <div className="text-[10px] font-black  tracking-widest text-default-400 mb-2 font-mono">Strategic Location</div>
                     <Input
                       placeholder="Search city, district, or state"
                       variant="bordered"
@@ -475,12 +475,12 @@ export default function WarehouseRentPage() {
                   </div>
 
                   <div className="flex items-end gap-2 pb-[1px]">
-                    <Button color="warning" className="h-12 px-8 font-black uppercase tracking-widest text-xs rounded-xl" isLoading={isSearchingLocation} onPress={handleLocationSearch}>
+                    <Button color="warning" className="h-12 px-8 font-black  tracking-widest text-xs rounded-xl" isLoading={isSearchingLocation} onPress={handleLocationSearch}>
                       Search
                     </Button>
                     <Button
                       variant="bordered"
-                      className="h-12 px-6 border-default-300 hover:bg-default-100 font-black uppercase tracking-widest text-xs rounded-xl"
+                      className="h-12 px-6 border-default-300 hover:bg-default-100 font-black  tracking-widest text-xs rounded-xl"
                       onPress={() => {
                         setLocationQuery("");
                         setSearchPoint(null);

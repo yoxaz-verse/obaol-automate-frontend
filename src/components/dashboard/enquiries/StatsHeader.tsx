@@ -34,7 +34,7 @@ const StatsHeader: React.FC<StatsHeaderProps> = ({ data }) => {
         <Card className="border border-slate-200/90 dark:border-white/10 bg-content1 rounded-2xl shadow-sm hover:shadow-md transition-all">
             <CardBody className="flex flex-row items-center justify-between p-4 px-5">
                 <div className="min-w-0 flex-1">
-                    <p className="text-default-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">
+                    <p className="text-default-500 text-[10px] sm:text-xs font-bold  tracking-wider mb-1 truncate">
                         {title}
                     </p>
                     <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">

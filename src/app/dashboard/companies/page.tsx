@@ -730,9 +730,9 @@ export default function CompanyProductPage() {
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-obaol-500/10 border border-obaol-500/20">
                 <LuSettings className="text-obaol-500" size={12} />
-                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-obaol-500">Configuration</span>
+                <span className="text-[9px] font-black  tracking-[0.25em] text-obaol-500">Configuration</span>
               </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">
+              <p className="text-[10px] font-black  tracking-[0.25em] text-default-500">
                 {dashboardCopy(obaolCompanyId ? "PROTOCOL_SYNCHRONIZED" : "MAPPING_REQUIRED")}
                 {toName(obaolCompany, "") ? ` | Active company: ${toName(obaolCompany, "")}` : ""}
               </p>
@@ -742,7 +742,7 @@ export default function CompanyProductPage() {
                 obaolCompanyId ? "bg-success-500/10 border-success-500/20" : "bg-obaol-500/10 border-obaol-500/20"
               }`}>
                 <div className={`w-2 h-2 rounded-full ${obaolCompanyId ? "bg-success-500" : "bg-obaol-500"}`} />
-                <span className={`text-[10px] font-black uppercase tracking-widest ${obaolCompanyId ? "text-success-500" : "text-obaol-500"}`}>
+                <span className={`text-[10px] font-black  tracking-widest ${obaolCompanyId ? "text-success-500" : "text-obaol-500"}`}>
                   {obaolCompanyId ? "Live" : "Pending"}
                 </span>
               </div>
@@ -792,15 +792,15 @@ export default function CompanyProductPage() {
                 }}
                 classNames={{
                   trigger: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-obaol-500/50 transition-all h-14 rounded-2xl shadow-sm",
-                  label: "text-[10px] font-black uppercase tracking-[0.3em] text-default-400 mb-3 ml-1",
-                  value: "text-sm font-black text-foreground uppercase tracking-widest",
+                  label: "text-[10px] font-black  tracking-[0.3em] text-default-400 mb-3 ml-1",
+                  value: "text-sm font-black text-foreground  tracking-widest",
                   base: "max-w-full"
                 }}
                 renderValue={(items) => {
                   return items.map((item) => (
                     <div key={item.key} className="flex items-center gap-3">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-sm font-black uppercase italic tracking-tighter">{toName(item.data, "Unnamed")}</span>
+                      <span className="text-sm font-black  italic tracking-tighter">{toName(item.data, "Unnamed")}</span>
                     </div>
                   ));
                 }}
@@ -819,7 +819,7 @@ export default function CompanyProductPage() {
                           <LuBox size={18} />
                         </div>
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[12px] font-black uppercase italic tracking-tighter leading-tight">{cName}</span>
+                          <span className="text-[12px] font-black  italic tracking-tighter leading-tight">{cName}</span>
                           <span className="text-[9px] font-bold text-default-500 dark:text-default-400 lowercase tracking-[0.1em] opacity-60">{cEmail}</span>
                         </div>
                       </div>
@@ -829,7 +829,7 @@ export default function CompanyProductPage() {
               </Select>
 
               <Button
-                className="h-14 px-10 rounded-2xl bg-obaol-500 text-black font-black uppercase tracking-[0.25em] italic text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(207,152,60,0.2)] hover:shadow-obaol-500/40"
+                className="h-14 px-10 rounded-2xl bg-obaol-500 text-black font-black  tracking-[0.25em] italic text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(207,152,60,0.2)] hover:shadow-obaol-500/40"
                 isLoading={obaolConfigMutation.isPending}
                 isDisabled={!selectedObaolCompanyId}
                 onPress={() => obaolConfigMutation.mutate(selectedObaolCompanyId)}
@@ -840,7 +840,7 @@ export default function CompanyProductPage() {
             </div>
             <div className="mt-5 flex items-center justify-center gap-4 opacity-50">
               <LuTerminal className="text-default-400" size={12} />
-              <p className="text-[9px] font-black text-default-400 uppercase tracking-[0.3em] italic">
+              <p className="text-[9px] font-black text-default-400  tracking-[0.3em] italic">
                 {dashboardCopy("SECURE_CONFIG_CHAIN_V4_2")} | {dashboardCopy("OBAOL_SYSTEM_CORE")}
               </p>
             </div>
@@ -853,10 +853,10 @@ export default function CompanyProductPage() {
       <div className="relative space-y-8">
         {hasMetricsError ? (
           <div className="rounded-2xl border border-danger-500/30 bg-danger-500/10 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-wider text-danger-600">
+            <p className="text-xs font-bold  tracking-wider text-danger-600">
               Some summary metrics could not be loaded.
             </p>
-            <Button size="sm" radius="full" color="danger" variant="flat" onPress={retryCompanyQueries} className="font-black uppercase tracking-wider text-[10px]">
+            <Button size="sm" radius="full" color="danger" variant="flat" onPress={retryCompanyQueries} className="font-black  tracking-wider text-[10px]">
               Retry Metrics
             </Button>
           </div>
@@ -865,18 +865,18 @@ export default function CompanyProductPage() {
           <Card className="border border-divider bg-content1/50 rounded-[1.75rem] p-4 md:p-5 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">Operator Allocation</p>
-                <p className="text-xs font-bold text-default-400 uppercase tracking-wider">Assigned vs Unassigned</p>
+                <p className="text-[10px] font-black  tracking-[0.3em] text-default-500">Operator Allocation</p>
+                <p className="text-xs font-bold text-default-400  tracking-wider">Assigned vs Unassigned</p>
               </div>
               <LuUsers className="text-primary-500/70" size={18} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-success-500/20 bg-success-500/10 p-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600">Assigned</p>
+                <p className="text-[9px] font-black  tracking-[0.2em] text-success-600">Assigned</p>
                 <p className="text-2xl font-black text-success-500">{assignedCount}</p>
               </div>
               <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/10 p-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-600">Unassigned</p>
+                <p className="text-[9px] font-black  tracking-[0.2em] text-obaol-600">Unassigned</p>
                 <p className="text-2xl font-black text-obaol-500">{unassignedCount}</p>
               </div>
             </div>
@@ -884,18 +884,18 @@ export default function CompanyProductPage() {
           <Card className="border border-divider bg-content1/50 rounded-[1.75rem] p-4 md:p-5 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">Live Products Status</p>
-                <p className="text-xs font-bold text-default-400 uppercase tracking-wider">Companies with live products</p>
+                <p className="text-[10px] font-black  tracking-[0.3em] text-default-500">Live Products Status</p>
+                <p className="text-xs font-bold text-default-400  tracking-wider">Companies with live products</p>
               </div>
               <LuGlobe className="text-obaol-500/70" size={18} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-success-500/20 bg-success-500/10 p-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600">Live Products</p>
+                <p className="text-[9px] font-black  tracking-[0.2em] text-success-600">Live Products</p>
                 <p className="text-2xl font-black text-success-500">{liveCount}</p>
               </div>
               <div className="rounded-xl border border-danger-500/20 bg-danger-500/10 p-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-danger-600">No Live Products</p>
+                <p className="text-[9px] font-black  tracking-[0.2em] text-danger-600">No Live Products</p>
                 <p className="text-2xl font-black text-danger-500">{notLiveCount}</p>
               </div>
             </div>
@@ -906,9 +906,9 @@ export default function CompanyProductPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-4">
               <div className="w-1 h-6 bg-obaol-500 rounded-full shadow-[0_0_12px_rgba(207,152,60,0.5)]" />
-              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-foreground italic">Company <span className="text-default-400">Directory</span></h2>
+              <h2 className="text-xl md:text-2xl font-black  tracking-tight text-foreground italic">Company <span className="text-default-400">Directory</span></h2>
             </div>
-            <p className="text-[10px] font-bold text-default-500 uppercase tracking-widest opacity-80">
+            <p className="text-[10px] font-bold text-default-500  tracking-widest opacity-80">
               Search companies by name, email, or phone.
             </p>
           </div>
@@ -933,7 +933,7 @@ export default function CompanyProductPage() {
               variant="shadow"
               radius="full"
               onPress={() => setIsOnboardModalOpen(true)}
-              className="h-12 px-8 font-black uppercase text-[10px] tracking-tighter italic bg-gradient-to-tr from-primary-600 to-primary-400 shadow-[0_10px_40px_-10px_rgba(0,111,238,0.5)]"
+              className="h-12 px-8 font-black  text-[10px] tracking-tighter italic bg-gradient-to-tr from-primary-600 to-primary-400 shadow-[0_10px_40px_-10px_rgba(0,111,238,0.5)]"
               startContent={<LuPlus size={16} />}
             >
               Add New Associate + Company
@@ -945,11 +945,11 @@ export default function CompanyProductPage() {
           {isAdmin ? (
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Assignment Filter</p>
+                <p className="text-[10px] font-black  tracking-[0.25em] text-default-500">Assignment Filter</p>
                 {companiesQuery.isFetching ? (
                   <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/20 bg-obaol-500/10 px-3 py-1">
                     <Spinner size="sm" color="warning" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-600">
+                    <span className="text-[9px] font-black  tracking-[0.2em] text-obaol-600">
                       Refreshing directory
                     </span>
                   </div>
@@ -967,7 +967,7 @@ export default function CompanyProductPage() {
                     radius="full"
                     variant={assignmentFilter === item.key ? "solid" : "flat"}
                     color={assignmentFilter === item.key ? "primary" : "default"}
-                    className="font-black uppercase tracking-wider text-[10px]"
+                    className="font-black  tracking-wider text-[10px]"
                     isDisabled={companiesQuery.isFetching}
                     onPress={() => {
                       setAssignmentFilter(item.key as "all" | "assigned" | "unassigned");
@@ -982,9 +982,9 @@ export default function CompanyProductPage() {
           ) : null}
           <div className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Live Product Filter</p>
+              <p className="text-[10px] font-black  tracking-[0.25em] text-default-500">Live Product Filter</p>
               {companiesQuery.isFetching ? (
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-500/80">
+                <p className="text-[9px] font-black  tracking-[0.2em] text-obaol-500/80">
                   Applying filters...
                 </p>
               ) : null}
@@ -1001,7 +1001,7 @@ export default function CompanyProductPage() {
                   radius="full"
                   variant={liveProductFilter === item.key ? "solid" : "flat"}
                   color={liveProductFilter === item.key ? "secondary" : "default"}
-                  className="font-black uppercase tracking-wider text-[10px]"
+                  className="font-black  tracking-wider text-[10px]"
                   isDisabled={companiesQuery.isFetching}
                   onPress={() => {
                     setLiveProductFilter(item.key as "all" | "live" | "not_live");
@@ -1026,32 +1026,32 @@ export default function CompanyProductPage() {
               {companiesQuery.isLoading ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-6">
                   <div className="w-12 h-12 border-2 border-obaol-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(207,152,60,0.2)]" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-500/60 animate-pulse">Loading companies...</p>
+                  <p className="text-[10px] font-black  tracking-[0.3em] text-obaol-500/60 animate-pulse">Loading companies...</p>
                 </div>
               ) : companiesQuery.isError ? (
                 <div className="py-16 px-6 text-center bg-danger-500/5 rounded-[2.5rem] border border-danger-500/30 space-y-4">
                   <LuSearch className="mx-auto text-danger-400 mb-1" size={32} />
-                  <p className="text-danger-600 text-sm font-black uppercase tracking-widest">Could not load companies</p>
+                  <p className="text-danger-600 text-sm font-black  tracking-widest">Could not load companies</p>
                   <p className="text-default-500 text-xs font-semibold">{directoryErrorMessage}</p>
-                  <Button size="sm" radius="full" color="danger" onPress={retryCompanyQueries} className="font-black uppercase tracking-wider text-[10px]">
+                  <Button size="sm" radius="full" color="danger" onPress={retryCompanyQueries} className="font-black  tracking-wider text-[10px]">
                     Retry
                   </Button>
                 </div>
               ) : directoryRows.length === 0 ? (
                 <div className="py-24 text-center bg-content1/20 rounded-[2.5rem] border border-dashed border-divider">
                   <LuSearch className="mx-auto text-default-300 mb-4" size={32} />
-                  <p className="text-default-500 text-sm font-black uppercase tracking-widest opacity-60">{companyEmptyStateMessage}</p>
+                  <p className="text-default-500 text-sm font-black  tracking-widest opacity-60">{companyEmptyStateMessage}</p>
                 </div>
               ) : (
                 <div className="relative">
                   <div className={`space-y-6 transition-opacity duration-200 ${companiesQuery.isFetching ? "opacity-45 pointer-events-none select-none" : ""}`}>
                   <div className="flex items-center gap-4 px-2">
                     <LuUsers className="text-obaol-500/50" size={14} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">
+                    <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">
                       {directoryTotalCount} companies found
                     </span>
                     {companiesQuery.isFetching ? (
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-500/70">
+                      <span className="text-[9px] font-black  tracking-[0.2em] text-obaol-500/70">
                         Refreshing...
                       </span>
                     ) : null}
@@ -1083,21 +1083,21 @@ export default function CompanyProductPage() {
                               {initials(name)}
                             </div>
                             <div className="grow flex flex-col min-w-0 pt-1">
-                              <span className="text-base font-black text-foreground leading-tight line-clamp-2 group-hover:text-obaol-600 transition-colors uppercase tracking-tight italic">
+                              <span className="text-base font-black text-foreground leading-tight line-clamp-2 group-hover:text-obaol-600 transition-colors  tracking-tight italic">
                                 {name}
                               </span>
-                              <span className="text-[10px] font-black text-default-500 uppercase tracking-widest mt-2 bg-default-100 dark:bg-white/5 w-fit px-2 py-0.5 rounded-lg border border-divider">
+                              <span className="text-[10px] font-black text-default-500  tracking-widest mt-2 bg-default-100 dark:bg-white/5 w-fit px-2 py-0.5 rounded-lg border border-divider">
                                 {company?.providedCapabilities?.length ? `${company.providedCapabilities.length} capabilities` : "Capabilities pending"}
                               </span>
                             </div>
                           </div>
                           
                           <div className="space-y-2 mt-auto">
-                            <div className="flex items-center gap-3 text-[10px] text-default-500 font-black uppercase tracking-widest truncate">
+                            <div className="flex items-center gap-3 text-[10px] text-default-500 font-black  tracking-widest truncate">
                               <LuGlobe size={14} className="shrink-0 text-obaol-500/40" />
                               {toText(company?.email, "Not available")}
                             </div>
-                            <div className="flex items-center gap-3 text-[10px] text-default-500 font-black uppercase tracking-widest">
+                            <div className="flex items-center gap-3 text-[10px] text-default-500 font-black  tracking-widest">
                               <LuPhone size={14} className="shrink-0 text-primary-500/40" />
                               {toText(company?.phone, "Not available")}
                             </div>
@@ -1106,7 +1106,7 @@ export default function CompanyProductPage() {
                                 size="sm"
                                 variant="flat"
                                 color={companyIsAssigned ? "success" : "warning"}
-                                className="text-[9px] font-black uppercase tracking-wider"
+                                className="text-[9px] font-black  tracking-wider"
                               >
                                 {companyIsAssigned ? "Assigned" : "Unassigned"}
                               </Chip>
@@ -1114,7 +1114,7 @@ export default function CompanyProductPage() {
                                 size="sm"
                                 variant="flat"
                                 color={companyIsLive ? "success" : "danger"}
-                                className="text-[9px] font-black uppercase tracking-wider"
+                                className="text-[9px] font-black  tracking-wider"
                               >
                                 {companyIsLive ? "Live Products" : "No Live Products"}
                               </Chip>
@@ -1122,7 +1122,7 @@ export default function CompanyProductPage() {
                           </div>
 
                           <div className="pt-4 border-t border-divider flex items-center justify-between">
-                            <span className="text-[9px] font-black text-obaol-500 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
+                            <span className="text-[9px] font-black text-obaol-500  tracking-[0.2em] opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
                               Open details
                             </span>
                             <div className="w-8 h-8 rounded-xl bg-default-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-obaol-500 group-hover:text-black transition-all">
@@ -1134,7 +1134,7 @@ export default function CompanyProductPage() {
                     })}
                   </div>
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-divider/70 bg-content1/30 px-4 py-3">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500">
+                    <p className="text-[10px] font-black  tracking-[0.2em] text-default-500">
                       Page {directoryCurrentPage} of {directoryTotalPages}
                     </p>
                     <div className="flex items-center gap-2">
@@ -1161,7 +1161,7 @@ export default function CompanyProductPage() {
                     <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[2.5rem] bg-background/40 backdrop-blur-[2px]">
                       <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-obaol-500/20 bg-content1/90 px-6 py-5 shadow-2xl">
                         <div className="w-10 h-10 border-2 border-obaol-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(207,152,60,0.15)]" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-600">
+                        <p className="text-[10px] font-black  tracking-[0.3em] text-obaol-600">
                           Updating company directory
                         </p>
                         <p className="text-[10px] font-bold text-default-500 text-center">
@@ -1190,9 +1190,9 @@ export default function CompanyProductPage() {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-1.5 bg-obaol-500 rounded-full shadow-[0_0_12px_rgba(255,193,7,0.6)]" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.4em] text-obaol-600 dark:text-obaol-500 italic">Company Details</span>
+                      <span className="text-[11px] font-black  tracking-[0.4em] text-obaol-600 dark:text-obaol-500 italic">Company Details</span>
                     </div>
-                    <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground uppercase italic">{selectedCompanyName}</h3>
+                    <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground  italic">{selectedCompanyName}</h3>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-4">
@@ -1203,7 +1203,7 @@ export default function CompanyProductPage() {
                         : "border-obaol-500/10 bg-obaol-500/5 text-obaol-600 dark:text-obaol-400"
                     }`}>
                       <div className={`w-1 h-3 rounded-full ${selectedCompany.isWebsiteLive ? "bg-success-500/30" : "bg-obaol-500/30"}`} />
-                      <span className="text-[9px] font-black uppercase tracking-[0.25em]">
+                      <span className="text-[9px] font-black  tracking-[0.25em]">
                         {selectedCompany.isWebsiteLive ? "Website Active" : "Internal Sync Only"}
                       </span>
                     </div>
@@ -1214,7 +1214,7 @@ export default function CompanyProductPage() {
               {selectedCompanyQuery.isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
                   <div className="w-10 h-10 border-2 border-warning border-t-transparent rounded-full animate-spin" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Loading company details...</p>
+                  <p className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Loading company details...</p>
                 </div>
               ) : !selectedCompany ? (
                 <div className="py-20 text-center">
@@ -1227,11 +1227,11 @@ export default function CompanyProductPage() {
                       <div className="space-y-6">
                         <div className="flex items-center gap-3 mb-2">
                           <LuGlobe className="text-obaol-500" size={16} />
-                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Contact Information</span>
+                          <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Contact Information</span>
                         </div>
                         <div className="space-y-5">
                           <div className="flex flex-col">
-                            <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Email</span>
+                            <span className="text-[9px] font-black  text-default-500 tracking-[0.2em] mb-1 opacity-60">Email</span>
                             {selectedCompanyEmail !== "Not available" ? (
                               <a href={`mailto:${selectedCompanyEmail}`} className="inline-flex items-center gap-2 text-sm font-black text-foreground break-all tracking-tight hover:text-obaol-500 hover:underline">
                                 <LuMail size={14} className="shrink-0" />
@@ -1242,7 +1242,7 @@ export default function CompanyProductPage() {
                             )}
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Phone</span>
+                            <span className="text-[9px] font-black  text-default-500 tracking-[0.2em] mb-1 opacity-60">Phone</span>
                             {selectedCompanyPhone !== "Not available" ? (
                               <a href={`tel:${selectedCompanyPhone.replace(/[^\d+]/g, "")}`} className="inline-flex items-center gap-2 text-sm font-black text-foreground tracking-tight hover:text-obaol-500 hover:underline">
                                 <LuPhone size={14} className="shrink-0" />
@@ -1253,7 +1253,7 @@ export default function CompanyProductPage() {
                             )}
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Address</span>
+                            <span className="text-[9px] font-black  text-default-500 tracking-[0.2em] mb-1 opacity-60">Address</span>
                             <p className="text-[11px] font-bold text-default-500 dark:text-default-400 leading-relaxed">{selectedCompanyAddress}</p>
                           </div>
                         </div>
@@ -1265,7 +1265,7 @@ export default function CompanyProductPage() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <LuUser className="text-primary-500" size={16} />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Execution Proxy</span>
+                            <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Execution Proxy</span>
                           </div>
                           {isAdmin ? (
                             <Button
@@ -1279,21 +1279,21 @@ export default function CompanyProductPage() {
                           ) : null}
                         </div>
                         <div className="space-y-2">
-                          <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Assigned Operator</p>
+                          <p className="text-[9px] font-black  text-default-500 tracking-[0.2em] opacity-60">Assigned Operator</p>
                           <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyAssignedOperatorName}</p>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Joined On</p>
+                          <p className="text-[9px] font-black  text-default-500 tracking-[0.2em] opacity-60">Joined On</p>
                           <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyJoinedOn}</p>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Last Live Date</p>
+                            <p className="text-[9px] font-black  text-default-500 tracking-[0.2em] opacity-60">Last Live Date</p>
                             <Chip
                               size="sm"
                               variant="flat"
                               color={selectedCompanyStatsQuery.isLoading ? "warning" : selectedCompanyLiveProductCount > 0 ? "success" : "default"}
-                              className="text-[8px] font-black uppercase tracking-wider"
+                              className="text-[8px] font-black  tracking-wider"
                             >
                               {selectedCompanyStatsQuery.isLoading ? "Syncing" : `${selectedCompanyLiveProductCount} Live`}
                             </Chip>
@@ -1301,13 +1301,13 @@ export default function CompanyProductPage() {
                           <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyLastLiveAt}</p>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Mission Profile</p>
+                          <p className="text-[9px] font-black  text-default-500 tracking-[0.2em] opacity-60">Mission Profile</p>
                           <p className="text-[11px] font-bold text-default-500 dark:text-default-400 leading-relaxed">
                             {selectedCompanyDescription}
                           </p>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Strategic Narrative</p>
+                          <p className="text-[9px] font-black  text-default-500 tracking-[0.2em] opacity-60">Strategic Narrative</p>
                           <p className="text-[11px] font-bold text-default-500 dark:text-default-400 leading-relaxed">
                             {selectedCompanyAbout}
                           </p>
@@ -1331,7 +1331,7 @@ export default function CompanyProductPage() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <LuTag className="text-secondary-500" size={16} />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Sector Affiliations</span>
+                            <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Sector Affiliations</span>
                           </div>
                           {canManageSelectedCompanyInterests ? (
                             <Button
@@ -1379,7 +1379,7 @@ export default function CompanyProductPage() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <LuUsers className="text-obaol-500" size={16} />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Personnel Network</span>
+                            <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Personnel Network</span>
                           </div>
                           <Chip size="sm" color="primary" variant="flat">
                             {associatesTotal || associates.length} Associates
@@ -1456,7 +1456,7 @@ export default function CompanyProductPage() {
                         variant="underlined"
                         classNames={{
                           tabList: "gap-6 border-b border-divider/60",
-                          tab: "text-[10px] font-black uppercase tracking-[0.2em]",
+                          tab: "text-[10px] font-black  tracking-[0.2em]",
                         }}
                       >
                         <Tab key="catalog" title="Catalog">
@@ -1565,7 +1565,7 @@ export default function CompanyProductPage() {
           <ModalHeader className="pb-1 text-lg font-bold">Assign Operator</ModalHeader>
           <ModalBody className="py-4 space-y-4">
             <div className="rounded-2xl border border-default-200/60 bg-default-50 p-3.5 space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-default-400">Target Company</p>
+              <p className="text-[10px] font-bold  tracking-wider text-default-400">Target Company</p>
               <p className="text-sm font-bold text-foreground">{selectedCompanyName || "—"}</p>
               <p className="text-[11px] text-default-500 mt-0.5">
                 Choose an approved active operator for this company.

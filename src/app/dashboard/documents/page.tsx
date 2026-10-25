@@ -174,7 +174,7 @@ export default function DocumentsPage() {
           <div className="flex items-center justify-between gap-6 flex-wrap mb-6">
             <div className="flex flex-col gap-1">
                <h3 className="text-xl font-bold text-foreground">Compliance Gateway</h3>
-               <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest opacity-60">Required documentation by trade stage.</p>
+               <p className="text-[10px] font-semibold text-default-400  tracking-widest opacity-60">Required documentation by trade stage.</p>
             </div>
             <div className="flex gap-4 flex-wrap">
               <Select
@@ -210,8 +210,8 @@ export default function DocumentsPage() {
               {stageRules.map((rule: any) => (
                 <div key={rule._id} className="flex items-center justify-between gap-4 border border-foreground/5 rounded-2xl px-5 py-4 bg-foreground/[0.01] hover:bg-foreground/[0.03] transition-colors">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-bold text-foreground uppercase tracking-tight">{rule.docType.replace(/_/g, " ")}</span>
-                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest opacity-60">
+                    <span className="text-sm font-bold text-foreground  tracking-tight">{rule.docType.replace(/_/g, " ")}</span>
+                    <span className="text-[9px] font-bold text-default-400  tracking-widest opacity-60">
                       {rule.responsibleRole} • {rule.actionType} • {rule.visibility}
                     </span>
                   </div>
@@ -220,7 +220,7 @@ export default function DocumentsPage() {
                       size="sm"
                       variant="flat"
                       color="primary"
-                      className="h-8 rounded-lg font-bold uppercase tracking-wider text-[9px] px-4"
+                      className="h-8 rounded-lg font-bold  tracking-wider text-[9px] px-4"
                       onPress={() => {
                         setCreateMode(rule.actionType === "UPLOAD" ? "UPLOAD" : "CREATE");
                         setCreateType(rule.docType);
@@ -245,7 +245,7 @@ export default function DocumentsPage() {
               tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40 flex-nowrap overflow-x-auto no-scrollbar",
               cursor: "bg-primary w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-primary-rgb),0.3)]",
               tab: "max-w-fit px-4 h-12 transition-all duration-300",
-              tabContent: "font-bold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary"
+              tabContent: "font-bold  tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary"
             }}
           >
             {TYPE_TABS.map((tab) => (
@@ -253,7 +253,7 @@ export default function DocumentsPage() {
             ))}
           </Tabs>
           {canManage && (
-            <Button color="primary" className="h-11 rounded-xl font-bold uppercase tracking-wider text-[11px] px-6" onPress={() => setCreateOpen(true)}>
+            <Button color="primary" className="h-11 rounded-xl font-bold  tracking-wider text-[11px] px-6" onPress={() => setCreateOpen(true)}>
               Initialize Document
             </Button>
           )}
@@ -301,8 +301,8 @@ export default function DocumentsPage() {
         </div>
 
         <div className="rounded-[2.5rem] border border-foreground/5 bg-foreground/[0.01] overflow-hidden">
-          <table className="w-full text-[11px] font-bold uppercase tracking-tight">
-            <thead className="text-[9px] font-bold uppercase tracking-[0.2em] text-default-400 border-b border-foreground/5 bg-foreground/[0.02]">
+          <table className="w-full text-[11px] font-bold  tracking-tight">
+            <thead className="text-[9px] font-bold  tracking-[0.2em] text-default-400 border-b border-foreground/5 bg-foreground/[0.02]">
               <tr>
                 <th className="text-left px-8 py-5">Document ID</th>
                 <th className="text-left px-8 py-5">Classification</th>

@@ -298,7 +298,7 @@ const Dashboard: NextPage = () => {
       <CardHeader className="px-8 pt-8">
         <div className="flex flex-col gap-1">
           <h4 className="font-bold text-foreground">Task Overview</h4>
-          <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest opacity-60">Management priorities and pending actions.</p>
+          <p className="text-[10px] font-semibold text-default-400  tracking-widest opacity-60">Management priorities and pending actions.</p>
         </div>
       </CardHeader>
       <Divider className="my-4 mx-8 w-auto opacity-50" />
@@ -307,7 +307,7 @@ const Dashboard: NextPage = () => {
            <div key={item.label} className="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border db-border-subtle rounded-2xl p-4 db-inset hover:db-subtle transition-all">
              <div className="min-w-0">
                <div className="flex items-center gap-3">
-                 <span className="text-sm font-black text-foreground uppercase tracking-tight">{item.label}</span>
+                 <span className="text-sm font-black text-foreground  tracking-tight">{item.label}</span>
                  <Chip size="sm" variant="flat" color={item.color} className="font-bold border-none h-6 db-inset">
                    {item.value}
                  </Chip>
@@ -318,7 +318,7 @@ const Dashboard: NextPage = () => {
                size="sm"
                variant="flat"
                color={item.color}
-               className="h-9 min-w-24 rounded-xl font-bold uppercase tracking-wider text-[10px] border db-border-subtle shadow-sm"
+               className="h-9 min-w-24 rounded-xl font-bold  tracking-wider text-[10px] border db-border-subtle shadow-sm"
                endContent={<LuChevronRight className="w-3.5 h-3.5" />}
                onPress={() => router.push(item.route)}
              >
@@ -387,12 +387,12 @@ const Dashboard: NextPage = () => {
           activityFeed.map((item) => (
             <div key={`${item.type}-${item.id}`} className="text-sm flex items-center justify-between gap-4 p-2 rounded-xl border border-transparent hover:db-border-subtle hover:db-inset transition-all group">
               <div className="min-w-0">
-                <div className="font-bold text-foreground uppercase tracking-tight group-hover:text-primary transition-colors">
+                <div className="font-bold text-foreground  tracking-tight group-hover:text-primary transition-colors">
                   {item.type} <span className="text-[10px] text-default-400 ml-1 font-medium">{String(item.id || "").slice(-6).toUpperCase()}</span>
                 </div>
-                <div className="text-[10px] text-default-500 uppercase tracking-widest font-bold opacity-60">{dashboardCopy(item.status || "")}</div>
+                <div className="text-[10px] text-default-500  tracking-widest font-bold opacity-60">{dashboardCopy(item.status || "")}</div>
               </div>
-              <span className="text-[9px] font-bold text-default-400 db-inset px-2 py-1 rounded-md uppercase tracking-widest whitespace-nowrap">
+              <span className="text-[9px] font-bold text-default-400 db-inset px-2 py-1 rounded-md  tracking-widest whitespace-nowrap">
                 {new Date(item.at).toLocaleDateString()}
               </span>
             </div>
@@ -465,7 +465,7 @@ const Dashboard: NextPage = () => {
       <Card className="border border-obaol-500/20 bg-obaol-500/5 rounded-[1.5rem] shadow-none">
         <CardBody className="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-1">
-            <h4 className="text-sm font-black text-foreground uppercase tracking-widest">Unassigned Companies</h4>
+            <h4 className="text-sm font-black text-foreground  tracking-widest">Unassigned Companies</h4>
             <p className="text-xs text-default-500">
               {Number(systemMetrics.unassignedCompanies || 0).toLocaleString()} companies currently have no operator mapped.
             </p>
@@ -473,7 +473,7 @@ const Dashboard: NextPage = () => {
           <Button
             color="warning"
             variant="flat"
-            className="font-black uppercase tracking-[0.2em] text-[10px]"
+            className="font-black  tracking-[0.2em] text-[10px]"
             endContent={<LuArrowRight className="w-3.5 h-3.5" />}
             onPress={() => router.push("/dashboard/companies")}
           >
@@ -642,9 +642,9 @@ const Dashboard: NextPage = () => {
            <CardHeader className="px-8 pt-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                 <h4 className="font-black text-foreground uppercase tracking-widest text-[11px]">Ongoing Enquiries</h4>
+                 <h4 className="font-black text-foreground  tracking-widest text-[11px]">Ongoing Enquiries</h4>
               </div>
-              <Button size="sm" variant="light" className="text-[10px] font-bold uppercase tracking-widest" onPress={() => router.push("/dashboard/enquiries")}>
+              <Button size="sm" variant="light" className="text-[10px] font-bold  tracking-widest" onPress={() => router.push("/dashboard/enquiries")}>
                  View all
               </Button>
            </CardHeader>
@@ -659,25 +659,25 @@ const Dashboard: NextPage = () => {
                                 {String(item._id).slice(-2).toUpperCase()}
                              </div>
                              <div>
-                                <div className="text-[11px] font-black uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">
+                                <div className="text-[11px] font-black  tracking-widest text-foreground group-hover:text-primary transition-colors">
                                    Enquiry #{String(item._id).slice(-6).toUpperCase()}
                                 </div>
-                                <div className="text-[10px] text-default-400 font-bold uppercase tracking-tight mt-0.5">
+                                <div className="text-[10px] text-default-400 font-bold  tracking-tight mt-0.5">
                                    {item.buyerAssociateId?.name || "Anonymous Buyer"}
                                 </div>
                              </div>
                           </div>
                           <div className="flex items-center gap-6 mt-4 md:mt-0">
                              <div className="flex flex-col items-end">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-default-400">Status</span>
-                                 <Chip size="sm" variant="flat" color="primary" className="h-6 font-bold uppercase text-[9px] border-none bg-primary/10">
+                                <span className="text-[9px] font-black  tracking-widest text-default-400">Status</span>
+                                 <Chip size="sm" variant="flat" color="primary" className="h-6 font-bold  text-[9px] border-none bg-primary/10">
                                    {dashboardCopy(String(item.status || ""))}
                                 </Chip>
                              </div>
                              <Button 
                                 size="sm" 
                                 variant="flat" 
-                                className="h-9 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px] border db-border-subtle"
+                                className="h-9 px-6 rounded-xl font-bold  tracking-widest text-[10px] border db-border-subtle"
                                 onPress={() => {
                                   const targetId = String(item?._id || item?.id || "").trim();
                                   if (!isValidObjectId(targetId)) return;
@@ -715,7 +715,7 @@ const Dashboard: NextPage = () => {
           <CardBody className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-6 pb-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h5 className="text-sm font-semibold text-foreground uppercase tracking-tight">Company Finder</h5>
+                <h5 className="text-sm font-semibold text-foreground  tracking-tight">Company Finder</h5>
                 <span className="text-xs text-default-500 font-bold">{directoryCompanies.length} total</span>
               </div>
               <input
@@ -730,20 +730,20 @@ const Dashboard: NextPage = () => {
                     matchedCompanies.slice(0, 6).map((item: any) => (
                       <div key={item?._id} className="flex items-center justify-between rounded-xl border db-border-subtle db-panel px-3 py-2.5 text-xs text-default-600 hover:border-primary/30 transition-colors">
                         <span className="font-bold text-foreground">{item?.name}</span>
-                        <span className="text-[10px] uppercase font-black text-default-400">ID: {String(item?._id || "").slice(-6)}</span>
+                        <span className="text-[10px]  font-black text-default-400">ID: {String(item?._id || "").slice(-6)}</span>
                       </div>
                     ))
                   ) : (
                     <p className="text-xs text-default-500 italic">No companies found for that search.</p>
                   )
                 ) : (
-                  <p className="text-[10px] text-default-400 uppercase font-black tracking-widest">Awaiting input...</p>
+                  <p className="text-[10px] text-default-400  font-black tracking-widest">Awaiting input...</p>
                 )}
               </div>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h5 className="text-sm font-semibold text-foreground uppercase tracking-tight">Associate Finder</h5>
+                <h5 className="text-sm font-semibold text-foreground  tracking-tight">Associate Finder</h5>
                 <span className="text-xs text-default-500 font-bold">{directoryAssociates.length} total</span>
               </div>
               <input
@@ -765,7 +765,7 @@ const Dashboard: NextPage = () => {
                     <p className="text-xs text-default-500 italic">No associates found for that search.</p>
                   )
                 ) : (
-                  <p className="text-[10px] text-default-400 uppercase font-black tracking-widest">Awaiting input...</p>
+                  <p className="text-[10px] text-default-400  font-black tracking-widest">Awaiting input...</p>
                 )}
               </div>
             </div>

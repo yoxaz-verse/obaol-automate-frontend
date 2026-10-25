@@ -19,7 +19,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ title, metric, trend, icon, f
             <CardBody className="gap-3.5 p-5">
                 <div className="flex justify-between items-start">
                     <div className="flex flex-col gap-1">
-                        <span className="text-default-500 text-[11px] font-bold uppercase tracking-wider">{title}</span>
+                        <span className="text-default-500 text-[11px] font-bold  tracking-wider">{title}</span>
                         <div className="flex items-baseline gap-2 mt-0.5">
                             <span className="text-3xl font-black tracking-tight text-foreground">{metric}</span>
                             {trend && (

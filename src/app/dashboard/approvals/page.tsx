@@ -173,7 +173,7 @@ function OnboardingApprovalQueue() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <Title title="ApprovalsHub" visuallyHidden />
-          <p className="text-[12px] font-bold text-default-400 uppercase tracking-[0.3em] opacity-70">
+          <p className="text-[12px] font-bold text-default-400  tracking-[0.3em] opacity-70">
             Onboarding Verification & Entity Authorization Protocol
           </p>
         </div>
@@ -182,7 +182,7 @@ function OnboardingApprovalQueue() {
             as={Link}
             href="/dashboard/users?tab=associate"
             variant="flat"
-            className="h-10 rounded-xl bg-foreground/5 px-4 text-[10px] font-bold uppercase tracking-widest"
+            className="h-10 rounded-xl bg-foreground/5 px-4 text-[10px] font-bold  tracking-widest"
             startContent={<LuUserCheck size={16} />}
             endContent={<LuArrowUpRight size={14} />}
           >
@@ -192,7 +192,7 @@ function OnboardingApprovalQueue() {
             as={Link}
             href="/dashboard/companies"
             variant="flat"
-            className="h-10 rounded-xl bg-foreground/5 px-4 text-[10px] font-bold uppercase tracking-widest"
+            className="h-10 rounded-xl bg-foreground/5 px-4 text-[10px] font-bold  tracking-widest"
             startContent={<LuBuilding2 size={16} />}
             endContent={<LuArrowUpRight size={14} />}
           >
@@ -214,7 +214,7 @@ function OnboardingApprovalQueue() {
             tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40",
             cursor: "bg-obaol-500 w-full h-[3px] rounded-t-full",
             tab: "max-w-fit px-4 h-14 transition-all duration-300 hover:opacity-100",
-            tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-obaol-700 dark:group-data-[selected=true]:text-obaol-300 group-data-[selected=true]:scale-105 transition-all"
+            tabContent: "font-semibold  tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-obaol-700 dark:group-data-[selected=true]:text-obaol-300 group-data-[selected=true]:scale-105 transition-all"
           }}
         >
           <Tab
@@ -255,7 +255,7 @@ function OnboardingApprovalQueue() {
               setSearch(value);
               setPage(1);
             }}
-            label={<span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Search Parameter</span>}
+            label={<span className="text-[10px] font-bold  tracking-widest text-default-400">Search Parameter</span>}
             placeholder={
               tab === "associates"
                 ? "Name, email, phone..."
@@ -273,7 +273,7 @@ function OnboardingApprovalQueue() {
         </div>
         <div className="md:col-span-3">
           <Select
-            label={<span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Classification</span>}
+            label={<span className="text-[10px] font-bold  tracking-widest text-default-400">Classification</span>}
             labelPlacement="outside"
             selectedKeys={[status]}
             onSelectionChange={(keys) => {
@@ -299,7 +299,7 @@ function OnboardingApprovalQueue() {
           <Textarea
             value={notes}
             onValueChange={setNotes}
-            label={<span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Decision Telemetry (Optional)</span>}
+            label={<span className="text-[10px] font-bold  tracking-widest text-default-400">Decision Telemetry (Optional)</span>}
             labelPlacement="outside"
             placeholder="Technical justification or feedback for this authorization action..."
             minRows={1}
@@ -321,7 +321,7 @@ function OnboardingApprovalQueue() {
           <div className="p-16 text-center">
             <div className="flex flex-col items-center gap-4 opacity-30">
               <LuClipboardCheck size={48} />
-              <p className="text-xs font-bold uppercase tracking-[0.2em]">Zero Records Detected</p>
+              <p className="text-xs font-bold  tracking-[0.2em]">Zero Records Detected</p>
             </div>
           </div>
         ) : (
@@ -329,18 +329,18 @@ function OnboardingApprovalQueue() {
             <table className="w-full min-w-[1000px] text-left border-collapse">
               <thead>
                 <tr className="bg-foreground/[0.03]">
-                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest">Entity / Identity</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest">Contact Framework</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest">Entity / Identity</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest">Contact Framework</th>
                   {tab === "associates" ? (
-                    <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest">Affiliation</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest">Affiliation</th>
                   ) : tab === "companies" ? (
-                    <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest">GST Matrix</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest">GST Matrix</th>
                   ) : (
-                    <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest">Tier / Designation</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest">Tier / Designation</th>
                   )}
-                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-center">Protocol Status</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-center">Approval Timeline</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-right pr-10">Actions</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest text-center">Protocol Status</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest text-center">Approval Timeline</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest text-right pr-10">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -369,7 +369,7 @@ function OnboardingApprovalQueue() {
                           </div>
                           <div className="flex flex-col">
                             <span className="font-bold text-sm tracking-tight text-foreground/90">{row.name || "-"}</span>
-                            <span className="text-[10px] font-bold text-default-400 uppercase tracking-wider mt-0.5 select-none">ID: {row._id.slice(-6)}</span>
+                            <span className="text-[10px] font-bold text-default-400  tracking-wider mt-0.5 select-none">ID: {row._id.slice(-6)}</span>
                           </div>
                         </div>
                       </td>
@@ -404,7 +404,7 @@ function OnboardingApprovalQueue() {
                           <div className="flex flex-col gap-0.5">
                             <span className="text-xs font-bold text-foreground/80">{row.jobRole?.name || "-"}</span>
                             {row.jobType?.name && (
-                              <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest">{row.jobType?.name}</span>
+                              <span className="text-[10px] font-bold text-default-400  tracking-widest">{row.jobType?.name}</span>
                             )}
                           </div>
                         )}
@@ -412,7 +412,7 @@ function OnboardingApprovalQueue() {
                       <td className="px-6 py-5 text-center">
                         <Chip
                           size="sm"
-                          className={`font-black uppercase text-[9px] tracking-widest h-6 px-3 border-none bg-${formatStatusColor(row.registrationStatus)}-500/10 text-${formatStatusColor(row.registrationStatus)}-600`}
+                          className={`font-black  text-[9px] tracking-widest h-6 px-3 border-none bg-${formatStatusColor(row.registrationStatus)}-500/10 text-${formatStatusColor(row.registrationStatus)}-600`}
                         >
                           {toTitleCase(row.registrationStatus || "PENDING_REVIEW")}
                         </Chip>
@@ -483,7 +483,7 @@ function OnboardingApprovalQueue() {
 
       <div className="flex items-center justify-between gap-6 bg-foreground/[0.02] p-6 rounded-[2rem] border border-foreground/5 backdrop-blur-xl">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-default-400 opacity-60">System Registry Meta</span>
+          <span className="text-[10px] font-bold  tracking-widest text-default-400 opacity-60">System Registry Meta</span>
           <div className="text-xs font-bold text-default-500">
             Page {meta.page} of {meta.pages} <span className="mx-2 text-default-300">|</span> Total Entities: {meta.total}
             <span className="mx-2 text-default-300">|</span> Newest approvals first
@@ -493,7 +493,7 @@ function OnboardingApprovalQueue() {
           <Button
             size="sm"
             variant="flat"
-            className="h-10 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest bg-foreground/5 hover:bg-foreground/10"
+            className="h-10 px-6 rounded-xl font-bold  text-[10px] tracking-widest bg-foreground/5 hover:bg-foreground/10"
             startContent={<LuChevronLeft size={16} />}
             isDisabled={meta.page <= 1 || listQuery.isLoading}
             onPress={() => setPage((prev) => Math.max(1, prev - 1))}
@@ -503,7 +503,7 @@ function OnboardingApprovalQueue() {
           <Button
             size="sm"
             variant="flat"
-            className="h-10 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest bg-foreground/5 hover:bg-foreground/10"
+            className="h-10 px-6 rounded-xl font-bold  text-[10px] tracking-widest bg-foreground/5 hover:bg-foreground/10"
             endContent={<LuChevronRight size={16} />}
             isDisabled={meta.page >= meta.pages || listQuery.isLoading}
             onPress={() => setPage((prev) => Math.min(meta.pages || 1, prev + 1))}
@@ -572,7 +572,7 @@ export default function ApprovalsPage() {
 
   return <main className="w-full min-w-0 space-y-6 p-6 md:p-10">
     <header className="rounded-3xl border border-warning-300/30 bg-content1 p-6 shadow-sm">
-      <p className="text-[10px] font-bold uppercase tracking-[.3em] text-warning-600">Governance workspace</p>
+      <p className="text-[10px] font-bold  tracking-[.3em] text-warning-600">Governance workspace</p>
       <h1 className="mt-2 text-3xl font-black text-foreground">Approvals</h1>
       <p className="mt-2 max-w-3xl text-sm text-default-500">Review registration, capability, laboratory, catalog, and service publication requests in their proper workflow.</p>
     </header>

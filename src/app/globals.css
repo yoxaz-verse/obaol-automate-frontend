@@ -431,12 +431,17 @@ canvas {
     filter: none !important;
   }
 
-  [data-dashboard-shell] :focus-visible {
-    box-shadow: 0 0 0 2px var(--db-focus) !important;
+  /* Dashboard controls use their existing border/background states for
+     interaction feedback. Suppress browser and component-library focus rings,
+     which otherwise appear as detached blue rectangles around rounded UI. */
+  [data-dashboard-shell]
+    :where(:focus-visible, [data-focus-visible="true"], [data-focus="true"]) {
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
   }
 
-  /* Keep add actions visibly focused without the clipped blue ring reading as
-     a second button behind the control. */
+  /* Keep add actions visibly focused within their own bounds. */
   [data-dashboard-shell] .dashboard-add-button:focus-visible {
     outline: none;
     box-shadow: inset 0 0 0 2px rgba(207, 152, 60, 0.72) !important;

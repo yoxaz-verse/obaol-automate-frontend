@@ -169,7 +169,7 @@ const CommodityPicker = ({
             }`}
           >
             <span className="min-w-0 flex-1">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-default-400 dark:text-default-500">
+              <span className="block text-[10px] font-bold  tracking-wider text-default-400 dark:text-default-500">
                 {label}
               </span>
               <span className={`block truncate text-sm ${selected ? "font-semibold text-foreground" : "font-normal text-default-400"}`}>
@@ -942,11 +942,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const themeField = {
     base: "text-foreground",
-    label: "font-black uppercase text-[9px] sm:text-[10px] tracking-[0.14em] sm:tracking-[0.2em] text-default-400 mb-1.5 sm:mb-2 ml-1",
+    label: "font-black  text-[9px] sm:text-[10px] tracking-[0.14em] sm:tracking-[0.2em] text-default-400 mb-1.5 sm:mb-2 ml-1",
     trigger: "rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[open=true]:border-obaol-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-12 sm:h-14",
     inputWrapper: "rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[focus=true]:border-obaol-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-12 sm:h-14",
     innerWrapper: "text-foreground",
-    value: "text-foreground font-black uppercase text-[10px] sm:text-[11px] tracking-[0.08em] sm:tracking-widest !text-foreground",
+    value: "text-foreground font-black  text-[10px] sm:text-[11px] tracking-[0.08em] sm:tracking-widest !text-foreground",
     input: "text-foreground placeholder:text-default-300 font-bold text-xs sm:text-sm !text-foreground",
     selectorIcon: "text-default-500",
     popoverContent: "bg-background border border-default-200 shadow-2xl rounded-2xl sm:rounded-3xl p-2 backdrop-blur-3xl !text-foreground",
@@ -1089,7 +1089,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1.5 sm:gap-2">
-          <div className="flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.4em] text-obaol-400">
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs  tracking-[0.18em] sm:tracking-[0.4em] text-obaol-400">
             Trade Mission • Step {step} of 4
           </div>
           <div className="flex items-center gap-2.5 sm:gap-3">
@@ -1114,11 +1114,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 <p className="text-xs sm:text-sm text-default-500 mb-4 sm:mb-6">{isLive ? "Your product is now live in the trade network." : "Your listing is saved offline and can be made live when you are ready."}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-content2 border border-default-200 rounded-2xl p-4 text-left">
                   <div>
-                    <p className="text-xs uppercase text-default-400">Rate</p>
+                    <p className="text-xs  text-default-400">Rate</p>
                     <p className="text-lg font-bold text-foreground">{formData.rate || "--"} / {formData.unit || "KG"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase text-default-400">Location</p>
+                    <p className="text-xs  text-default-400">Location</p>
                     <p className="text-lg font-bold text-foreground">
                       {formData.locationSource === "WAREHOUSE"
                         ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "--")
@@ -1126,7 +1126,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase text-default-400">Status</p>
+                    <p className="text-xs  text-default-400">Status</p>
                     <p className="text-lg font-bold text-foreground">{isLive ? "Live" : "Draft"}</p>
                   </div>
                 </div>
@@ -1190,11 +1190,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-3">
-                          <button type="button" onClick={() => { window.sessionStorage.setItem(CATALOG_WIZARD_DRAFT_KEY, JSON.stringify(formData)); router.push("/dashboard/catalog/additions?returnTo=/dashboard/product"); }} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-obaol-300 hover:text-obaol-200 underline underline-offset-4">
+                          <button type="button" onClick={() => { window.sessionStorage.setItem(CATALOG_WIZARD_DRAFT_KEY, JSON.stringify(formData)); router.push("/dashboard/catalog/additions?returnTo=/dashboard/product"); }} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold  tracking-wide text-obaol-300 hover:text-obaol-200 underline underline-offset-4">
                             Manage My Catalog Additions
                             <FiArrowRight size={14} />
                           </button>
-                          <button type="button" onClick={goToGlobalCatalog} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-default-500 hover:text-foreground underline underline-offset-4">
+                          <button type="button" onClick={goToGlobalCatalog} className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold  tracking-wide text-default-500 hover:text-foreground underline underline-offset-4">
                             Go to Commodity Directory
                           </button>
                         </div>
@@ -1264,7 +1264,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
                           {isOrganic && (
                             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 mb-2">
+                              <p className="text-[10px] font-black  tracking-[0.2em] text-emerald-300 mb-2">
                                 Organic Certification (India Focus)
                               </p>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
@@ -1279,7 +1279,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                                   errorMessage={errors.organicCertificationBody}
                                 >
                                   {ORGANIC_CERT_BODIES.map((item) => (
-                                    <SelectItem key={item.key} textValue={item.value} className="uppercase text-foreground dark:text-white font-black">
+                                    <SelectItem key={item.key} textValue={item.value} className=" text-foreground dark:text-white font-black">
                                       {item.value}
                                     </SelectItem>
                                   ))}
@@ -1344,9 +1344,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                                   isInvalid={!!errors.organicCertifiedQuantityUnit}
                                   errorMessage={errors.organicCertifiedQuantityUnit}
                                 >
-                                  <SelectItem key="KG" className="uppercase text-foreground dark:text-white font-black">KG</SelectItem>
-                                  <SelectItem key="MT" className="uppercase text-foreground dark:text-white font-black">Metric Ton (MT)</SelectItem>
-                                  <SelectItem key="Quintal" className="uppercase text-foreground dark:text-white font-black">Quintal</SelectItem>
+                                  <SelectItem key="KG" className=" text-foreground dark:text-white font-black">KG</SelectItem>
+                                  <SelectItem key="MT" className=" text-foreground dark:text-white font-black">Metric Ton (MT)</SelectItem>
+                                  <SelectItem key="Quintal" className=" text-foreground dark:text-white font-black">Quintal</SelectItem>
                                 </Select>
                                 <Select
                                   variant="bordered"
@@ -1359,7 +1359,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                                   errorMessage={errors.organicCertificationScope}
                                 >
                                   {ORGANIC_SCOPES.map((item) => (
-                                    <SelectItem key={item.key} textValue={item.value} className="uppercase text-foreground dark:text-white font-black">
+                                    <SelectItem key={item.key} textValue={item.value} className=" text-foreground dark:text-white font-black">
                                       {item.value}
                                     </SelectItem>
                                   ))}
@@ -1420,7 +1420,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                     {!isAssociateUser && (
                       <Select variant="bordered" label="Associate" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.associate ? [formData.associate] : []} onSelectionChange={(keys) => setValue("associate", Array.from(keys)[0])} isInvalid={!!errors.associate} errorMessage={errors.associate}>
                         {associates.map((item) => (
-                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item) || item.email} className="uppercase text-foreground dark:text-white font-black">
+                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item) || item.email} className=" text-foreground dark:text-white font-black">
                             {getOptionLabel(item) || item.email}
                           </SelectItem>
                         ))}
@@ -1453,8 +1453,8 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       isInvalid={!!errors.locationSource}
                       errorMessage={errors.locationSource}
                     >
-                      <SelectItem key="WAREHOUSE" className="uppercase text-foreground dark:text-white font-black">Warehouse</SelectItem>
-                      <SelectItem key="OFFICE_ADDRESS" className="uppercase text-foreground dark:text-white font-black">Office Address</SelectItem>
+                      <SelectItem key="WAREHOUSE" className=" text-foreground dark:text-white font-black">Warehouse</SelectItem>
+                      <SelectItem key="OFFICE_ADDRESS" className=" text-foreground dark:text-white font-black">Office Address</SelectItem>
                     </Select>
                     {formData.locationSource === "WAREHOUSE" ? (
                       <Select
@@ -1469,7 +1469,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         errorMessage={errors.warehouseId}
                       >
                         {warehouses.map((item) => (
-                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
+                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className=" text-foreground dark:text-white font-black">
                             {getOptionLabel(item)}
                           </SelectItem>
                         ))}
@@ -1505,17 +1505,17 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                   <div className="grid grid-cols-1 gap-4">
                     <div className="rounded-xl sm:rounded-2xl border border-default-200 bg-content2 p-4 sm:p-5 text-sm text-foreground">
                       <div className="border-b border-default-200 pb-4">
-                        <div className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-default-400">Product</div>
+                        <div className="text-[10px] sm:text-xs font-bold  tracking-[0.18em] text-default-400">Product</div>
                         <h4 className="mt-1 text-xl sm:text-2xl font-black text-foreground capitalize">{listingProductName}</h4>
                         <p className="mt-1 text-xs sm:text-sm text-default-500">Review your trade mission before launch.</p>
                       </div>
                       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <div className="text-xs uppercase text-default-400">Rate</div>
+                          <div className="text-xs  text-default-400">Rate</div>
                           <div className="text-lg font-bold text-foreground">{formData.rate || "--"} / {formData.unit || "KG"}</div>
                         </div>
                         <div>
-                          <div className="text-xs uppercase text-default-400">Location</div>
+                          <div className="text-xs  text-default-400">Location</div>
                           <div className="text-lg font-bold text-foreground">
                             {formData.locationSource === "WAREHOUSE"
                               ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "--")
@@ -1523,38 +1523,38 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs uppercase text-default-400">Commission</div>
+                          <div className="text-xs  text-default-400">Commission</div>
                           <div className="text-lg font-bold text-obaol-500">{computedCommission.toFixed(2)}</div>
                         </div>
                         <div>
-                          <div className="text-xs uppercase text-default-400">Price After Commission</div>
+                          <div className="text-xs  text-default-400">Price After Commission</div>
                           <div className="text-lg font-bold text-success-500">{(rateValue + computedCommission).toFixed(2)}</div>
                         </div>
                         <div className="md:col-span-2">
-                          <div className="text-xs uppercase text-default-400">Classification</div>
+                          <div className="text-xs  text-default-400">Classification</div>
                           <div className="flex flex-wrap gap-2 mt-1">
                             {isConventional && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-400/50 dark:border-slate-500/50 bg-slate-500/15 text-slate-800 dark:text-slate-100">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black  tracking-wider border border-slate-400/50 dark:border-slate-500/50 bg-slate-500/15 text-slate-800 dark:text-slate-100">
                                 Conventional
                               </span>
                             )}
                             {isNatural && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black  tracking-wider border border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-400">
                                 Natural
                               </span>
                             )}
                             {isOrganic && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black  tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
                                 Organic
                               </span>
                             )}
                             {isIpmQuality && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-700 dark:text-sky-300">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black  tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-700 dark:text-sky-300">
                                 IPM
                               </span>
                             )}
                             {isGiTagged && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black  tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300">
                                 GI Tag
                               </span>
                             )}

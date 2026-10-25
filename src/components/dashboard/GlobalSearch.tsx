@@ -76,10 +76,10 @@ export default function GlobalSearch() {
           setQuery(val);
           setIsOpen(val.length > 0);
         }}
-        placeholder="Quick Navigator..."
+        placeholder="Search dashboard..."
         startContent={<LuSearch className="text-default-400 group-hover:text-primary transition-colors" size={16} />}
         endContent={
-          <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-md bg-foreground/[0.05] border border-foreground/10 text-[9px] font-black text-default-400 uppercase tracking-tighter">
+          <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-md bg-foreground/[0.05] border border-foreground/10 text-[9px] font-black text-default-400  tracking-tighter">
             <span className="opacity-50">CMD</span>
             <span>K</span>
           </div>
@@ -88,13 +88,13 @@ export default function GlobalSearch() {
         radius="full"
         className="w-full"
         classNames={{
-          input: "text-sm font-medium",
-          inputWrapper: "h-11 border-foreground/5 bg-foreground/[0.02] hover:bg-foreground/[0.05] hover:border-foreground/10 transition-all duration-300 shadow-none px-4",
+          input: "text-sm font-medium outline-none",
+          inputWrapper: "h-11 border db-border-strong bg-foreground/[0.02] hover:bg-foreground/[0.05] hover:border-obaol-500/45 group-data-[focus=true]:border-obaol-500/60 group-data-[focus=true]:ring-0 group-data-[focus=true]:shadow-none transition-all duration-300 shadow-none px-4",
         }}
       />
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-[100] mt-2 w-full overflow-hidden rounded-3xl border border-divider/50 bg-background/95 p-2 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute left-0 top-full z-[100] mt-2 w-full overflow-hidden rounded-3xl border db-border-strong bg-background/95 p-2 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-200">
            {filteredOptions.length > 0 ? (
             <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                {filteredOptions.slice(0, 6).map((option) => (
@@ -103,18 +103,18 @@ export default function GlobalSearch() {
                    onClick={() => handleSelect(option.link)}
                    disabled={isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages)}
                    aria-label={isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages) ? `${option.name}, coming soon` : option.name}
-                   className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-primary/5 group transition-all text-left outline-none focus:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-55"
+                   className="w-full flex items-center justify-between p-4 rounded-2xl border border-transparent hover:border-obaol-500/25 hover:bg-obaol-500/5 focus:border-obaol-500/35 focus:bg-obaol-500/5 group transition-all text-left outline-none ring-0 disabled:cursor-not-allowed disabled:opacity-55"
                  >
                    <div className="flex flex-col">
-                     <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                     <span className="text-sm font-bold text-foreground group-hover:text-obaol-700 dark:group-hover:text-obaol-300 transition-colors">
                        {option.name}
                      </span>
-                     <span className="text-[10px] text-default-400 font-medium uppercase tracking-widest leading-none mt-1">
-                       Redirection: {option.link.replace("/dashboard/", "").replace("-", " ")}
+                     <span className="mt-1 text-[10px] font-medium leading-none text-default-400">
+                       Opens {option.name}
                      </span>
                    </div>
                    {isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages) ? (
-                     <span className="rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-obaol-700 dark:text-obaol-300">Coming soon</span>
+                     <span className="rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-1 text-[8px] font-black  tracking-wider text-obaol-700 dark:text-obaol-300">Coming soon</span>
                    ) : (
                      <LuArrowRight size={14} className="text-default-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
                    )}

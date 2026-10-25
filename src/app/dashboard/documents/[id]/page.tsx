@@ -131,7 +131,7 @@ export default function DocumentDetailPage() {
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="OBAOL" className="h-12 w-auto" />
             <div>
-              <div className="text-xl font-semibold uppercase tracking-wide">{docTypeLabel}</div>
+              <div className="text-xl font-semibold  tracking-wide">{docTypeLabel}</div>
               <div className="text-xs text-default-500">OBAOL Supreme</div>
             </div>
           </div>

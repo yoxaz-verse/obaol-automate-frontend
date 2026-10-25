@@ -832,7 +832,7 @@ const InventoryList: React.FC = () => {
                                                                         <LuBoxes size={34} />
                                                                     </div>
 
-                                                                    <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/30 bg-obaol-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300 mb-3">
+                                                                    <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/30 bg-obaol-500/10 px-3 py-1 text-xs font-bold  tracking-wider text-obaol-700 dark:text-obaol-300 mb-3">
                                                                         <span className="h-2 w-2 rounded-full bg-obaol-500 animate-pulse" />
                                                                         Physical Stock Management
                                                                     </div>
@@ -847,7 +847,7 @@ const InventoryList: React.FC = () => {
 
                                                                     <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-left w-full">
                                                                         <div className="group rounded-2xl border border-default-200/60 bg-background/60 p-4 transition-all duration-200 hover:border-obaol-500/40 hover:shadow-md">
-                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs uppercase tracking-wider mb-1.5">
+                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs  tracking-wider mb-1.5">
                                                                                 <LuPackageCheck size={16} className="shrink-0" /> Stock Visibility
                                                                             </div>
                                                                             <p className="text-xs text-default-500 leading-relaxed font-normal">
@@ -856,7 +856,7 @@ const InventoryList: React.FC = () => {
                                                                         </div>
 
                                                                         <div className="group rounded-2xl border border-default-200/60 bg-background/60 p-4 transition-all duration-200 hover:border-obaol-500/40 hover:shadow-md">
-                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs uppercase tracking-wider mb-1.5">
+                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs  tracking-wider mb-1.5">
                                                                                 <LuTags size={16} className="shrink-0" /> Trade Integration
                                                                             </div>
                                                                             <p className="text-xs text-default-500 leading-relaxed font-normal">
@@ -865,7 +865,7 @@ const InventoryList: React.FC = () => {
                                                                         </div>
 
                                                                         <div className="group rounded-2xl border border-default-200/60 bg-background/60 p-4 transition-all duration-200 hover:border-obaol-500/40 hover:shadow-md">
-                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs uppercase tracking-wider mb-1.5">
+                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs  tracking-wider mb-1.5">
                                                                                 <LuWarehouse size={16} className="shrink-0" /> Order Allocation
                                                                             </div>
                                                                             <p className="text-xs text-default-500 leading-relaxed font-normal">
@@ -975,7 +975,7 @@ const InventoryList: React.FC = () => {
                                                                 </Tooltip>
                                                             ) : (
                                                                 <div className="flex items-center gap-1">
-                                                                    <span className="mr-1 text-[9px] font-bold uppercase tracking-wider text-default-400">
+                                                                    <span className="mr-1 text-[9px] font-bold  tracking-wider text-default-400">
                                                                         Price locked
                                                                     </span>
                                                                     <Tooltip
@@ -1084,7 +1084,7 @@ const InventoryList: React.FC = () => {
                                                 </div>
                                                 <div>
                                                     <h3 className="text-lg font-black tracking-tight text-foreground">Add Stock</h3>
-                                                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Update inventory quantity (MT)</p>
+                                                    <p className="text-xs text-default-400 font-bold  tracking-widest mt-0.5">Update inventory quantity (MT)</p>
                                                 </div>
                                             </div>
                                         </ModalHeader>
@@ -1093,7 +1093,7 @@ const InventoryList: React.FC = () => {
                                             {selectedInventory && (
                                                 <div className="p-3 bg-default-100/50 rounded-xl border border-divider/30 flex justify-between items-center gap-3">
                                                     <div className="flex flex-col gap-0.5 min-w-0">
-                                                        <span className="text-[10px] font-black text-default-400 uppercase tracking-widest">Product</span>
+                                                        <span className="text-[10px] font-black text-default-400  tracking-widest">Product</span>
                                                         <span className="text-sm font-bold text-foreground truncate">
                                                             {selectedInventory?.product || selectedInventory?.productName || "—"}
                                                         </span>
@@ -1120,7 +1120,7 @@ const InventoryList: React.FC = () => {
                                                 }
                                                 description="Enter the quantity to add in Metric Tonnes."
                                                 classNames={{
-                                                    label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                    label: "text-xs font-bold text-default-500  tracking-wider",
                                                 }}
                                             />
                                             {/* Info note */}
@@ -1342,7 +1342,7 @@ const InventoryList: React.FC = () => {
                                                     <h3 className="text-lg font-black tracking-tight text-foreground">
                                                         New Trade Enquiry
                                                     </h3>
-                                                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">
+                                                    <p className="text-xs text-default-400 font-bold  tracking-widest mt-0.5">
                                                         Direct Inventory Protocol
                                                     </p>
                                                 </div>
@@ -1352,7 +1352,7 @@ const InventoryList: React.FC = () => {
                                             {selectedEnquiryInventory && (
                                                 <div className="p-3.5 bg-default-100/60 rounded-2xl border border-divider/30 flex items-center justify-between gap-3 shadow-sm">
                                                     <div className="flex flex-col gap-1 min-w-0">
-                                                        <span className="text-[10px] font-black text-default-400 uppercase tracking-widest">
+                                                        <span className="text-[10px] font-black text-default-400  tracking-widest">
                                                             Target Inventory Item
                                                         </span>
                                                         <span className="text-base font-black text-foreground truncate">
@@ -1380,7 +1380,7 @@ const InventoryList: React.FC = () => {
                                                     variant="bordered"
                                                     description="Specify which associate is initiating this enquiry."
                                                     classNames={{
-                                                        label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                        label: "text-xs font-bold text-default-500  tracking-wider",
                                                     }}
                                                 >
                                                     {buyerOptions.map((opt: any) => {
@@ -1411,7 +1411,7 @@ const InventoryList: React.FC = () => {
                                                     variant="bordered"
                                                     startContent={<span className="text-default-400 text-xs font-bold">MT</span>}
                                                     classNames={{
-                                                        label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                        label: "text-xs font-bold text-default-500  tracking-wider",
                                                     }}
                                                 />
 
@@ -1423,7 +1423,7 @@ const InventoryList: React.FC = () => {
                                                     onSelectionChange={(keys) => setEnquiryIncotermId(String(Array.from(keys)[0] || ""))}
                                                     variant="bordered"
                                                     classNames={{
-                                                        label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                        label: "text-xs font-bold text-default-500  tracking-wider",
                                                     }}
                                                 >
                                                     {incotermOptions.map((inco: any) => {
@@ -1448,7 +1448,7 @@ const InventoryList: React.FC = () => {
                                                 isInvalid={Boolean(enquiryNotesViolation)}
                                                 errorMessage={enquiryNotesViolation?.message}
                                                 classNames={{
-                                                    label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                    label: "text-xs font-bold text-default-500  tracking-wider",
                                                 }}
                                             />
 

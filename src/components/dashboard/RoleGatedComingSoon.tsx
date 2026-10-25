@@ -70,7 +70,7 @@ function ComingSoonState({ feature }: { feature: ComingSoonFeature }) {
           </span>
         </div>
 
-        <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.28em] text-primary">
+        <p className="mb-3 text-[11px] font-bold  tracking-[0.28em] text-primary">
           {content.eyebrow}
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -80,7 +80,7 @@ function ComingSoonState({ feature }: { feature: ComingSoonFeature }) {
           {content.description}
         </p>
 
-        <div className="mx-auto mt-9 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+        <div className="mx-auto mt-9 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-[10px] font-bold  tracking-[0.2em] text-primary">
           <span className="h-1.5 w-1.5 rounded-full bg-primary" />
           In development
         </div>

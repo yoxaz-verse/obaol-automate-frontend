@@ -38,15 +38,15 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
               <FiPackage size={20} />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-obaol-500 opacity-80">Product Record</span>
+              <span className="text-[10px] font-black  tracking-[0.4em] text-obaol-500 opacity-80">Product Record</span>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest">Active in Catalog</span>
+                <span className="text-[10px] font-bold text-default-400  tracking-widest">Active in Catalog</span>
               </div>
             </div>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mb-3 leading-tight uppercase break-words text-left">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mb-3 leading-tight  break-words text-left">
             {product.name}
           </h2>
 
@@ -105,8 +105,8 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                 <div className="flex items-center gap-4 text-left">
                   <div className="w-1 h-8 bg-obaol-500 rounded-full" />
                   <div>
-                    <h3 className="text-2xl font-black text-foreground tracking-tight uppercase">Product Variants</h3>
-                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Specifications & Real-time Market Rates</p>
+                    <h3 className="text-2xl font-black text-foreground tracking-tight ">Product Variants</h3>
+                    <p className="text-xs text-default-400 font-bold  tracking-widest mt-0.5">Specifications & Real-time Market Rates</p>
                   </div>
                 </div>
                 {productVariantFormFields && user?.role !== "Associate" && (
@@ -152,8 +152,8 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                           title={
                             <div className="flex items-center justify-between w-full">
                               <div className="flex flex-col">
-                                <span className="text-base sm:text-lg font-black uppercase tracking-tight break-words">{variant.name}</span>
-                                {isAdded && <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest mt-0.5">Active in my catalog</span>}
+                                <span className="text-base sm:text-lg font-black  tracking-tight break-words">{variant.name}</span>
+                                {isAdded && <span className="text-[10px] font-black text-orange-500  tracking-widest mt-0.5">Active in my catalog</span>}
                               </div>
                               {isAdded && (
                                 <div className="hidden sm:flex items-center gap-2.5 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-obaol-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-black border border-orange-500/20 shadow-xl shadow-orange-500/5 transition-all">
@@ -184,7 +184,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                                       <div className="h-[1px] flex-1 bg-gradient-to-r from-obaol-500/50 to-transparent" />
                                       <div className="flex items-center gap-2">
                                         <FiCheckCircle className="text-obaol-500" size={14} />
-                                        <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-obaol-500">Proprietary Assets</h4>
+                                        <h4 className="text-[11px] font-black  tracking-[0.3em] text-obaol-500">Proprietary Assets</h4>
                                       </div>
                                     </div>
                                     <div className="bg-content1/40 border border-divider/50 rounded-2xl p-2 sm:p-4 backdrop-blur-md shadow-inner text-left overflow-hidden">
@@ -205,7 +205,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                                     <div className="h-[1px] flex-1 bg-gradient-to-r from-default-300/30 to-transparent" />
                                     <div className="flex items-center gap-2">
                                       <FiGrid className="text-default-400" size={14} />
-                                      <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Global Liquidity</h4>
+                                      <h4 className="text-[11px] font-black  tracking-[0.3em] text-default-400">Global Liquidity</h4>
                                     </div>
                                   </div>
                                   <div className="bg-foreground/[0.01] border border-divider/20 rounded-2xl p-2 sm:p-4 backdrop-blur-sm text-left overflow-hidden">
@@ -223,7 +223,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                                 <div className="flex items-center gap-4 mb-8 text-left">
                                   <div className="h-[1px] flex-1 bg-gradient-to-r from-obaol-500/50 to-transparent" />
                                   <div className="flex items-center gap-2">
-                                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-obaol-500">Unified Rate Ledger</h4>
+                                    <h4 className="text-[11px] font-black  tracking-[0.3em] text-obaol-500">Unified Rate Ledger</h4>
                                   </div>
                                 </div>
                                 <div className="bg-foreground/[0.01] border border-divider/50 rounded-2xl p-2 sm:p-4 shadow-inner overflow-hidden text-left">
@@ -239,7 +239,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                               <div className="mt-12 pt-10 border-t border-divider/30 flex flex-col sm:flex-row items-center justify-between gap-6">
                                 <div className="flex items-center gap-3 text-default-400/60 bg-default-100/30 px-5 py-2 rounded-full border border-divider/20 text-left">
                                   <FiInfo size={16} />
-                                  <p className="text-[11px] font-black uppercase tracking-[0.2em]">Administrative Shell — Variant {variant._id.slice(-6).toUpperCase()}</p>
+                                  <p className="text-[11px] font-black  tracking-[0.2em]">Administrative Shell — Variant {variant._id.slice(-6).toUpperCase()}</p>
                                 </div>
                                 <div className="flex gap-4 items-center bg-foreground/[0.04] p-2.5 rounded-[2rem] border border-divider/40 backdrop-blur-sm shadow-xl">
                                   <EditModal
@@ -283,7 +283,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
         </div>
       </div>
       <div>
-        <h3 className="text-3xl font-black text-foreground tracking-tight uppercase">Operational Deadlock</h3>
+        <h3 className="text-3xl font-black text-foreground tracking-tight ">Operational Deadlock</h3>
         <p className="text-default-400 text-sm max-w-[320px] leading-relaxed mt-2 font-medium">Select a commodity from the master catalog system to initialize the detailed variant registry.</p>
       </div>
     </div>

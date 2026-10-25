@@ -2314,7 +2314,7 @@ export default function EnquiryDetailsPage() {
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Responsible party:</strong> {nextResponsibleParty}</p>
             </section>
             {isReadOnlyAfterConversion && (
-                <div className="w-full rounded-3xl border border-success-500/20 bg-success-500/5 px-6 py-4 text-success-600 text-xs font-black uppercase tracking-widest">
+                <div className="w-full rounded-3xl border border-success-500/20 bg-success-500/5 px-6 py-4 text-success-600 text-xs font-black  tracking-widest">
                     Enquiry is converted and locked. All responsibility and execution details are read-only.
                 </div>
             )}
@@ -2338,9 +2338,9 @@ export default function EnquiryDetailsPage() {
             <div className={isCancelled ? "opacity-60 pointer-events-none flex flex-col gap-10" : "flex flex-col gap-10"}>
                 <div className={`w-full rounded-3xl border px-5 py-4 ${classificationTheme.shellClass} ${classificationTheme.shellBorderClass}`}>
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-default-500">Classification Signal</span>
+                        <span className="text-[10px] font-black  tracking-widest text-default-500">Classification Signal</span>
                         {classificationBadges.map((badge) => (
-                            <span key={badge.key} className={`px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}>
+                            <span key={badge.key} className={`px-2 py-0.5 rounded-full border text-[9px] font-black  tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}>
                                 {React.createElement(classificationIcon(badge.key), { size: 10 })}
                                 {badge.label}
                             </span>
@@ -2384,7 +2384,7 @@ export default function EnquiryDetailsPage() {
                                             <LuAnchor size={20} className="group-hover:rotate-12 transition-transform duration-500" />
                                         </div>
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-obaol-600/70">Import workflow</span>
+                                            <span className="text-[10px] font-black  tracking-[0.2em] text-obaol-600/70">Import workflow</span>
                                             <p className="text-[11px] font-bold text-foreground opacity-90 leading-tight pr-4">Inventory reservation does not apply to this import enquiry. Choose <span className="text-obaol-600">Port Pickup</span> or <span className="text-obaol-600">OBAOL Service</span> to continue.</p>
                                         </div>
                                     </div>
@@ -2398,7 +2398,7 @@ export default function EnquiryDetailsPage() {
                                 <Chip
                                     size="sm"
                                     variant="flat"
-                                    className={`font-black uppercase tracking-[0.2em] border-none h-6 w-fit ${
+                                    className={`font-black  tracking-[0.2em] border-none h-6 w-fit ${
                                         handlerOperatorId
                                             ? "bg-success-500/15 text-success-600"
                                             : "bg-danger-500/15 text-danger-600"
@@ -2410,7 +2410,7 @@ export default function EnquiryDetailsPage() {
                             {isImportEnquiry && (
                                 <div className="w-full md:w-[280px] group">
                                     <Select
-                                        label={<span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 group-hover:text-obaol-500 transition-colors">Logistics Strategy</span>}
+                                        label={<span className="text-[10px] font-black  tracking-[0.2em] text-default-400 group-hover:text-obaol-500 transition-colors">Logistics Strategy</span>}
                                         labelPlacement="outside"
                                         placeholder="Select Framework..."
                                         selectedKeys={importDeliveryMode ? [importDeliveryMode] : []}
@@ -2423,7 +2423,7 @@ export default function EnquiryDetailsPage() {
                                         isDisabled={updateImportDeliveryModeMutation.isPending || isReadOnlyAfterConversion}
                                         classNames={{
                                             trigger: "h-14 bg-background border border-divider/50 hover:border-obaol-500/50 shadow-none rounded-2xl transition-all group-data-[selected=true]:bg-obaol-500/5",
-                                            value: "font-black text-sm uppercase tracking-wider text-foreground",
+                                            value: "font-black text-sm  tracking-wider text-foreground",
                                             label: "mb-2"
                                         }}
                                         startContent={<LuNavigation size={18} className="text-obaol-500 mr-1" />}
@@ -2452,7 +2452,7 @@ export default function EnquiryDetailsPage() {
                                         </SelectItem>
                                     </Select>
                                     {!importDeliveryMode && (
-                                        <div className="flex items-center gap-1.5 text-[9px] text-obaol-600 font-black uppercase tracking-widest mt-3 ml-1 animate-pulse">
+                                        <div className="flex items-center gap-1.5 text-[9px] text-obaol-600 font-black  tracking-widest mt-3 ml-1 animate-pulse">
                                             <FiAlertCircle size={10} />
                                             Deployment required
                                         </div>
@@ -2463,7 +2463,7 @@ export default function EnquiryDetailsPage() {
                             {!isSystemAdmin && !isOperatorUser && (
                                 <div className="flex flex-col gap-2.5 p-3.5 bg-default-50/50 rounded-2xl border border-default-200/50 items-end text-right min-w-[220px]">
                                     <div className="flex items-center gap-2 mb-0.5">
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-default-400">Your Support Point</span>
+                                        <span className="text-[9px] font-black  tracking-widest text-default-400">Your Support Point</span>
                                         <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
                                     </div>
 
@@ -2479,7 +2479,7 @@ export default function EnquiryDetailsPage() {
                                             <div className="flex flex-col gap-2.5 items-end">
                                                 {op && (
                                                     <div className="flex flex-col items-end gap-0.5">
-                                                        <span className="text-xs font-black text-primary-600 dark:text-primary-400 uppercase tracking-tight">{op.name}</span>
+                                                        <span className="text-xs font-black text-primary-600 dark:text-primary-400  tracking-tight">{op.name}</span>
                                                         <div className="flex flex-col items-end gap-0 text-right">
                                                             {op.email && <span className="text-[10px] text-default-500 font-bold">{op.email}</span>}
                                                             {op.phone && <span className="text-[10px] text-default-400 font-medium">{op.phone}</span>}
@@ -2490,8 +2490,8 @@ export default function EnquiryDetailsPage() {
                                                 <div className="flex flex-col items-end gap-1.5">
                                                     {op && <div className="w-16 h-px bg-default-200/50 mb-0.5" />}
                                                     <div className="flex flex-col items-end gap-0.5">
-                                                        {!op && <span className="text-[11px] font-black text-foreground uppercase tracking-tight mb-1">OBAOL Desk</span>}
-                                                        {op && <span className="text-[8px] font-bold text-default-400 uppercase tracking-tighter">Escalation Desk</span>}
+                                                        {!op && <span className="text-[11px] font-black text-foreground  tracking-tight mb-1">OBAOL Desk</span>}
+                                                        {op && <span className="text-[8px] font-bold text-default-400  tracking-tighter">Escalation Desk</span>}
                                                         {(() => {
                                                             const enquiryIdShort = enquiryId.slice(-6).toUpperCase();
                                                             const orderIdShort = (enquiry as any)?.order?._id || (enquiry as any)?.order || null;
@@ -2539,7 +2539,7 @@ export default function EnquiryDetailsPage() {
                     <CardBody className="px-4 md:px-6 py-6 md:py-10">
                         {/* Status Stepper */}
                         {workflowStageOptions.length === 0 ? (
-                            <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/5 px-4 py-3 text-xs font-bold text-obaol-600 uppercase tracking-widest">
+                            <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/5 px-4 py-3 text-xs font-bold text-obaol-600  tracking-widest">
                                 No flow rules configured for enquiries. Configure Flow Rules to unlock stages and actions.
                             </div>
                         ) : (
@@ -2561,7 +2561,7 @@ export default function EnquiryDetailsPage() {
                                     return (
                                         <React.Fragment key={step}>
                                             <div
-                                                className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${isCurrent
+                                                className={`px-3 py-1.5 rounded-full text-[11px] font-black  tracking-wider border ${isCurrent
                                                     ? workflowBlocker === "SELLER"
                                                         ? "bg-warning text-black border-warning"
                                                         : "bg-primary text-white border-primary"
@@ -2582,11 +2582,11 @@ export default function EnquiryDetailsPage() {
                         )}
                         <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-left">
                             <div className="flex items-center justify-between gap-2">
-                                <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">Current Progress</span>
+                                <span className="text-[10px]  font-black tracking-widest text-primary-600">Current Progress</span>
                                 {isCancelled && <Chip size="sm" color="danger" variant="flat">Cancelled</Chip>}
                             </div>
                             <p className="text-sm font-medium text-default-700 mt-1">{waitingMessage}</p>
-                            <div className="mt-2 flex flex-wrap items-center gap-3 text-[9px] font-black uppercase tracking-widest">
+                            <div className="mt-2 flex flex-wrap items-center gap-3 text-[9px] font-black  tracking-widest">
                                 <span className="inline-flex items-center gap-1.5 text-primary-600">
                                     <span className="w-2 h-2 rounded-full bg-primary" />
                                     Buyer Pending
@@ -2599,11 +2599,11 @@ export default function EnquiryDetailsPage() {
                             {latestConfirmedRevisionRound && latestConfirmedDecisionRows.length > 0 && (
                                 <div className="mt-3 rounded-xl border border-success-500/25 bg-success-500/[0.06] px-3 py-3">
                                     <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <div className="text-[9px] font-black uppercase tracking-widest text-success-700 dark:text-success-300">
+                                        <div className="text-[9px] font-black  tracking-widest text-success-700 dark:text-success-300">
                                             Revision Decision Summary
                                         </div>
                                         {latestConfirmedAtLabel && (
-                                            <div className="text-[9px] font-bold text-success-700/80 dark:text-success-300/80 uppercase tracking-wider">
+                                            <div className="text-[9px] font-bold text-success-700/80 dark:text-success-300/80  tracking-wider">
                                                 Confirmed: {latestConfirmedAtLabel}
                                             </div>
                                         )}
@@ -2615,10 +2615,10 @@ export default function EnquiryDetailsPage() {
                                         {latestConfirmedDecisionRows.map((row) => (
                                             <div key={`revision-decision-${row.key}`} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2 rounded-lg bg-white/50 dark:bg-black/20 border border-success-500/15">
                                                 <div className="flex flex-col gap-0.5">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-default-500">{row.label}</span>
+                                                    <span className="text-[10px] font-black  tracking-widest text-default-500">{row.label}</span>
                                                     <span className="text-sm font-black text-foreground">{row.value}</span>
                                                 </div>
-                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black  tracking-widest border ${
                                                     row.source === "Counter Accepted"
                                                         ? "bg-obaol-500/10 border-obaol-500/25 text-obaol-700 dark:text-obaol-300"
                                                         : "bg-success-500/10 border-success-500/25 text-success-700 dark:text-success-300"
@@ -2632,7 +2632,7 @@ export default function EnquiryDetailsPage() {
                             )}
                             {revisionItems.length > 0 && (
                                 <div className="mt-3 rounded-xl border border-default-200/60 bg-default-100/40 px-3 py-2">
-                                    <div className="text-[9px] font-black uppercase tracking-widest text-default-500">
+                                    <div className="text-[9px] font-black  tracking-widest text-default-500">
                                         Revision Acknowledged
                                     </div>
                                     {revisionAcknowledgedLabels.length > 0 ? (
@@ -2640,7 +2640,7 @@ export default function EnquiryDetailsPage() {
                                             {revisionAcknowledgedLabels.map((label: string, idx: number) => (
                                                 <span
                                                     key={`revision-ack-${label}-${idx}`}
-                                                    className="px-2 py-0.5 rounded-full bg-success-500/10 border border-success-500/20 text-[9px] font-black uppercase tracking-widest text-success-600"
+                                                    className="px-2 py-0.5 rounded-full bg-success-500/10 border border-success-500/20 text-[9px] font-black  tracking-widest text-success-600"
                                                 >
                                                     {label}
                                                 </span>
@@ -2657,16 +2657,16 @@ export default function EnquiryDetailsPage() {
 
                         <div className="mt-4 rounded-2xl border border-default-200/50 bg-foreground/[0.02] px-4 py-3">
                             <div className="flex items-center justify-between gap-2 mb-2">
-                                <span className="text-[10px] uppercase font-black tracking-widest text-default-500">Stage Actions</span>
+                                <span className="text-[10px]  font-black tracking-widest text-default-500">Stage Actions</span>
                                 <span className="text-[10px] font-bold text-default-400">{String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}</span>
                             </div>
                             {normalizedStageKey === "QUOTATION_REVISION" ? (
                                 <div className="text-xs text-default-500">
                                     <div className="font-semibold text-default-600">Stage actions for this step:</div>
                                     <div className="mt-1 flex flex-wrap gap-2">
-                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold uppercase tracking-widest">Submit Revision (Buyer)</span>
-                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold uppercase tracking-widest">Save Reply (Supplier)</span>
-                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold uppercase tracking-widest">Confirm Revision (Buyer)</span>
+                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold  tracking-widest">Submit Revision (Buyer)</span>
+                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold  tracking-widest">Save Reply (Supplier)</span>
+                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold  tracking-widest">Confirm Revision (Buyer)</span>
                                     </div>
                                     <div className="mt-1">Use the revision panel below to perform these actions.</div>
                                 </div>
@@ -2680,7 +2680,7 @@ export default function EnquiryDetailsPage() {
                                                 size="sm"
                                                 color="primary"
                                                 variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
-                                                className="font-bold px-4 rounded-xl h-9 text-[10px] tracking-widest uppercase"
+                                                className="font-bold px-4 rounded-xl h-9 text-[10px] tracking-widest "
                                                 isDisabled={!canPerformAction || Boolean(actionStatus[actionKey]) || isConvertingOrder}
                                                 onPress={() => handleActionPress(actionKey)}
                                                 isLoading={isActionLoading(actionKey)}
@@ -2690,7 +2690,7 @@ export default function EnquiryDetailsPage() {
                                                     : actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
                                             </Button>
                                             {isSystemAdmin && actionByLabelText && (
-                                                <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                <span className="text-[9px] font-bold text-default-400  tracking-widest">
                                                     Action by: {actionByLabelText}
                                                 </span>
                                             )}
@@ -2713,7 +2713,7 @@ export default function EnquiryDetailsPage() {
                                             size="sm"
                                             color="primary"
                                             variant="shadow"
-                                            className="font-black uppercase tracking-widest text-[10px]"
+                                            className="font-black  tracking-widest text-[10px]"
                                             onPress={scrollToDocumentationChecklist}
                                         >
                                             Go to Documentation
@@ -2722,7 +2722,7 @@ export default function EnquiryDetailsPage() {
                                 </div>
                             )}
                             {draftQuotationError && (
-                                <div className="mt-3 rounded-xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200 uppercase tracking-wide">
+                                <div className="mt-3 rounded-xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200  tracking-wide">
                                     {draftQuotationError}
                                 </div>
                             )}
@@ -2737,7 +2737,7 @@ export default function EnquiryDetailsPage() {
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.4)]" />
-                                            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-default-500 dark:text-default-400">Negotiation Loop</span>
+                                            <span className="text-[10px]  font-black tracking-[0.2em] text-default-500 dark:text-default-400">Negotiation Loop</span>
                                         </div>
                                         <h3 className="text-lg font-black text-foreground tracking-tighter inline-flex items-center gap-2">
                                             <FiEdit3 className="text-obaol-500" size={20} />
@@ -2745,12 +2745,12 @@ export default function EnquiryDetailsPage() {
                                         </h3>
                                     </div>
                                     {revisionItems.length > 0 && (
-                                        <div className="px-4 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary-600 dark:text-primary-300 text-[10px] font-black uppercase tracking-widest">
+                                        <div className="px-4 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary-600 dark:text-primary-300 text-[10px] font-black  tracking-widest">
                                             {revisionRoleStatus}
                                         </div>
                                     )}
                                     {revisionBuyerConfirmedAt && (
-                                        <div className="px-4 py-2 rounded-2xl bg-success-500/10 border border-success-500/20 text-success-600 dark:text-success-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                        <div className="px-4 py-2 rounded-2xl bg-success-500/10 border border-success-500/20 text-success-600 dark:text-success-400 text-[10px] font-black  tracking-widest flex items-center gap-2">
                                             <FiCheckCircle size={14} />
                                             Negotiation Finalized
                                         </div>
@@ -2770,7 +2770,7 @@ export default function EnquiryDetailsPage() {
                                                     </div>
                                                     <div className="flex flex-col items-start gap-1">
                                                         <span className="text-sm font-black text-foreground tracking-tight">Rate Revision</span>
-                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold uppercase tracking-widest text-left leading-none">Buyer Target Pricing</span>
+                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold  tracking-widest text-left leading-none">Buyer Target Pricing</span>
                                                     </div>
                                                 </button>
 
@@ -2783,7 +2783,7 @@ export default function EnquiryDetailsPage() {
                                                     </div>
                                                     <div className="flex flex-col items-start gap-1">
                                                         <span className="text-sm font-black text-foreground tracking-tight">Payment Terms</span>
-                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold uppercase tracking-widest text-left leading-none">Framework Adjustments</span>
+                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold  tracking-widest text-left leading-none">Framework Adjustments</span>
                                                     </div>
                                                 </button>
 
@@ -2796,7 +2796,7 @@ export default function EnquiryDetailsPage() {
                                                     </div>
                                                     <div className="flex flex-col items-start gap-1">
                                                         <span className="text-sm font-black text-foreground tracking-tight">Timeline Shift</span>
-                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold uppercase tracking-widest text-left leading-none">Logistics Milestone</span>
+                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold  tracking-widest text-left leading-none">Logistics Milestone</span>
                                                     </div>
                                                 </button>
                                             </div>
@@ -2812,7 +2812,7 @@ export default function EnquiryDetailsPage() {
                                                             value={clarificationRate}
                                                             onValueChange={setClarificationRate}
                                                             classNames={{
-                                                                label: "font-black uppercase text-[10px] tracking-widest text-primary mb-1 pl-1",
+                                                                label: "font-black  text-[10px] tracking-widest text-primary mb-1 pl-1",
                                                                 inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-primary transition-all h-14 shadow-inner",
                                                                 input: "font-black text-sm",
                                                             }}
@@ -2824,7 +2824,7 @@ export default function EnquiryDetailsPage() {
                                                                 <div className="absolute top-0 left-0 w-1 h-full bg-obaol-500/50 rounded-l-2xl" />
                                                                 <div className="flex flex-col gap-1 min-w-0">
                                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-obaol-600 dark:text-obaol-400">
+                                                                        <span className="text-[9px] font-black  tracking-[0.3em] text-obaol-600 dark:text-obaol-400">
                                                                             SUPPLIER ASKING RATE
                                                                         </span>
                                                                         <span className="text-sm font-black text-obaol-600 dark:text-obaol-300">
@@ -2869,9 +2869,9 @@ export default function EnquiryDetailsPage() {
                                                                 setClarificationDeliveryMode((value as any) || "");
                                                             }}
                                                             classNames={{
-                                                                label: "font-black uppercase text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
+                                                                label: "font-black  text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
                                                                 trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-14 shadow-inner",
-                                                                value: "font-black text-xs uppercase"
+                                                                value: "font-black text-xs "
                                                             }}
                                                         >
                                                             <SelectItem key="DELIVER_TO_LOCATION">DELIVER TO LOCATION</SelectItem>
@@ -2884,9 +2884,9 @@ export default function EnquiryDetailsPage() {
                                                             value={clarificationDeliveryDate}
                                                             onValueChange={setClarificationDeliveryDate}
                                                             classNames={{
-                                                                label: "font-black uppercase text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
+                                                                label: "font-black  text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
                                                                 inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-14 shadow-inner",
-                                                                input: "font-black text-xs uppercase"
+                                                                input: "font-black text-xs "
                                                             }}
                                                         />
                                                     </div>
@@ -2903,7 +2903,7 @@ export default function EnquiryDetailsPage() {
                                                                 setClarificationPaymentTermId(value || "");
                                                             }}
                                                             classNames={{
-                                                                label: "font-black uppercase text-[10px] tracking-widest text-success-600 mb-1 pl-1",
+                                                                label: "font-black  text-[10px] tracking-widest text-success-600 mb-1 pl-1",
                                                                 trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-success transition-all h-14 shadow-inner",
                                                                 value: "font-black text-xs",
                                                             }}
@@ -2915,7 +2915,7 @@ export default function EnquiryDetailsPage() {
                                                             ))}
                                                         </Select>
                                                         {clarificationReasonPayment && !clarificationPaymentTermId && (
-                                                            <div className="mt-1 text-[10px] font-bold text-obaol-600 uppercase tracking-wide">
+                                                            <div className="mt-1 text-[10px] font-bold text-obaol-600  tracking-wide">
                                                                 Select a payment term to submit this revision.
                                                             </div>
                                                         )}
@@ -2932,7 +2932,7 @@ export default function EnquiryDetailsPage() {
                                                             classNames={{ wrapper: "rounded-lg" }}
                                                         />
                                                         <span
-                                                            className="text-xs font-black text-foreground uppercase tracking-tight italic cursor-pointer select-none"
+                                                            className="text-xs font-black text-foreground  tracking-tight italic cursor-pointer select-none"
                                                             onClick={() => setClarificationCommunicated(!clarificationCommunicated)}
                                                         >
                                                             Revision Details Confirmed
@@ -2945,7 +2945,7 @@ export default function EnquiryDetailsPage() {
                                                         I have informed the supplier about this revision through secure channels.
                                                     </p>
                                                     {!clarificationCommunicated && (
-                                                        <span className="text-[9px] font-black text-obaol-600 uppercase tracking-widest ml-8 animate-pulse mt-1 inline-flex items-center gap-2">
+                                                        <span className="text-[9px] font-black text-obaol-600  tracking-widest ml-8 animate-pulse mt-1 inline-flex items-center gap-2">
                                                             <FiAlertCircle size={10} />
                                                             Protocol confirmation required
                                                         </span>
@@ -2957,7 +2957,7 @@ export default function EnquiryDetailsPage() {
                                                         <Button
                                                             size="lg"
                                                             color="primary"
-                                                            className="px-10 h-12 rounded-xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                                            className="px-10 h-12 rounded-xl font-black  tracking-[0.2em] text-xs shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
                                                             isLoading={revisionRequestMutation.isPending}
                                                             isDisabled={
                                                                 !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
@@ -2974,14 +2974,14 @@ export default function EnquiryDetailsPage() {
                                                             size="lg"
                                                             color="warning"
                                                             variant="shadow"
-                                                            className="px-8 h-12 rounded-xl font-black uppercase tracking-[0.22em] text-xs shadow-xl shadow-warning/30 text-black hover:scale-[1.03] active:scale-95 transition-all"
+                                                            className="px-8 h-12 rounded-xl font-black  tracking-[0.22em] text-xs shadow-xl shadow-warning/30 text-black hover:scale-[1.03] active:scale-95 transition-all"
                                                             isDisabled={applyActionMutation.isPending}
                                                             onPress={() => applyActionMutation.mutate({ actionKey: "REVISION_SKIPPED" })}
                                                         >
                                                             Skip Revision
                                                         </Button>
                                                     </div>
-                                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest mr-2">
+                                                    <span className="text-[9px] font-bold text-default-400  tracking-widest mr-2">
                                                         Action by: Buyer
                                                     </span>
                                                 </div>
@@ -3014,12 +3014,12 @@ export default function EnquiryDetailsPage() {
                                                                         {itemKey === "RATE" ? <FiTrendingDown size={20} /> : itemKey === "DELIVERY_TIMELINE" ? <LuClock size={20} /> : <FiPercent size={20} />}
                                                                     </div>
                                                                     <div className="flex flex-col">
-                                                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 dark:text-default-400 leading-none mb-1">{itemLabel}</span>
+                                                                        <span className="text-[10px] font-black  tracking-[0.2em] text-default-500 dark:text-default-400 leading-none mb-1">{itemLabel}</span>
                                                                         <span className="text-base font-black text-foreground tracking-tighter">Buyer Request</span>
                                                                     </div>
                                                                 </div>
                                                                 {(item.supplierAcknowledged || item.supplierCounterRate !== null || item.supplierCounterPaymentTermId || (item.supplierCounterDeliveryMode && item.supplierCounterDeliveryDate)) && (
-                                                                    <div className="px-3 py-1 rounded-full bg-success-500/10 border border-success-500/20 text-success-600 text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-1.5">
+                                                                    <div className="px-3 py-1 rounded-full bg-success-500/10 border border-success-500/20 text-success-600 text-[9px] font-black  tracking-widest inline-flex items-center gap-1.5">
                                                                         <LuCheck size={12} />
                                                                         {item?.supplierReplyStatus === "COUNTERED" ? "Counter Suggested by Seller" : "Accepted by Seller"}
                                                                     </div>
@@ -3027,7 +3027,7 @@ export default function EnquiryDetailsPage() {
                                                             </div>
 
                                                             <div className="p-4 rounded-2xl bg-default-100/50 border border-divider/50 flex flex-col gap-2">
-                                                                <span className="text-[10px] font-bold text-default-500 dark:text-default-400 uppercase tracking-widest leading-none">Specifications</span>
+                                                                <span className="text-[10px] font-bold text-default-500 dark:text-default-400  tracking-widest leading-none">Specifications</span>
                                                                 {itemKey === "RATE" && (
                                                                     <div className="text-sm font-black text-foreground">Requested Rate: <span className="text-primary italic">{formatRate(item.buyerRate)}</span></div>
                                                                 )}
@@ -3061,13 +3061,13 @@ export default function EnquiryDetailsPage() {
                                                                 <div className="mt-2 flex flex-col gap-4 p-4 rounded-2xl bg-white dark:bg-black/40 border border-primary/20 shadow-lg shadow-primary/5">
                                                                     {itemKey === "RATE" ? (
                                                                         <div className="flex flex-col gap-3">
-                                                                            <div className="text-[10px] font-black uppercase tracking-widest text-default-500">Rate Response</div>
+                                                                            <div className="text-[10px] font-black  tracking-widest text-default-500">Rate Response</div>
                                                                             <div className="flex flex-wrap gap-2">
                                                                                 <Button
                                                                                     size="sm"
                                                                                     variant={reply.acknowledged && !reply.counterRate ? "solid" : "flat"}
                                                                                     color="success"
-                                                                                className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                className="font-black  tracking-widest text-[10px] px-4 h-8 rounded-xl"
                                                                                 onPress={() => {
                                                                                     setRevisionReplies((prev) => {
                                                                                         const existing = prev.find((r) => r.key === itemKey);
@@ -3083,7 +3083,7 @@ export default function EnquiryDetailsPage() {
                                                                                     size="sm"
                                                                                     variant={reply.counterRate ? "solid" : "flat"}
                                                                                     color="warning"
-                                                                                className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                className="font-black  tracking-widest text-[10px] px-4 h-8 rounded-xl"
                                                                                 onPress={() => {
                                                                                     setRevisionReplies((prev) => {
                                                                                         const existing = prev.find((r) => r.key === itemKey);
@@ -3112,7 +3112,7 @@ export default function EnquiryDetailsPage() {
                                                                                     setRevisionConfirmError("");
                                                                                 }}
                                                                                 classNames={{
-                                                                                    label: "font-black uppercase text-[10px] tracking-widest text-default-400 group-focus-within/input:text-primary transition-colors",
+                                                                                    label: "font-black  text-[10px] tracking-widest text-default-400 group-focus-within/input:text-primary transition-colors",
                                                                                     inputWrapper: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-10 shadow-inner group-focus-within/input:border-primary",
                                                                                     input: "font-black text-sm"
                                                                                 }}
@@ -3120,13 +3120,13 @@ export default function EnquiryDetailsPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <div className="flex flex-col gap-3">
-                                                                            <div className="text-[10px] font-black uppercase tracking-widest text-default-500">Supplier Response</div>
+                                                                            <div className="text-[10px] font-black  tracking-widest text-default-500">Supplier Response</div>
                                                                             <div className="flex flex-wrap gap-2">
                                                                                 <Button
                                                                                     size="sm"
                                                                                     variant={reply.acknowledged && ((itemKey === "PAYMENT_TERMS" && !reply.counterPaymentTermId) || (itemKey === "DELIVERY_TIMELINE" && !reply.counterDeliveryMode && !reply.counterDeliveryDate)) ? "solid" : "flat"}
                                                                                     color="success"
-                                                                                    className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                    className="font-black  tracking-widest text-[10px] px-4 h-8 rounded-xl"
                                                                                     onPress={() => {
                                                                                         setRevisionReplies((prev) => {
                                                                                             const existing = prev.find((r) => r.key === itemKey);
@@ -3144,7 +3144,7 @@ export default function EnquiryDetailsPage() {
                                                                                     size="sm"
                                                                                     variant={(itemKey === "PAYMENT_TERMS" && Boolean(reply.counterPaymentTermId)) || (itemKey === "DELIVERY_TIMELINE" && Boolean(reply.counterDeliveryMode || reply.counterDeliveryDate)) ? "solid" : "flat"}
                                                                                     color="warning"
-                                                                                    className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                    className="font-black  tracking-widest text-[10px] px-4 h-8 rounded-xl"
                                                                                     onPress={() => {
                                                                                         setRevisionReplies((prev) => {
                                                                                             const existing = prev.find((r) => r.key === itemKey);
@@ -3230,14 +3230,14 @@ export default function EnquiryDetailsPage() {
 
                                             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-default-100/30 border border-default-200/50 mt-4">
                                                 <div className="flex flex-col gap-0.5">
-                                                    <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400">Negotiation Status</span>
+                                                    <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400">Negotiation Status</span>
                                                     {!allRevisionAcknowledged ? (
-                                                        <div className="flex items-center gap-1.5 text-obaol-600 font-bold text-[10px] italic uppercase tracking-tight">
+                                                        <div className="flex items-center gap-1.5 text-obaol-600 font-bold text-[10px] italic  tracking-tight">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-obaol-500 animate-pulse" />
                                                             Waiting for supplier response
                                                         </div>
                                                     ) : (
-                                                        <div className="flex items-center gap-1.5 text-success-600 font-bold text-[10px] italic uppercase tracking-tight">
+                                                        <div className="flex items-center gap-1.5 text-success-600 font-bold text-[10px] italic  tracking-tight">
                                                             <FiCheckCircle size={14} />
                                                             All parameters responded
                                                         </div>
@@ -3251,7 +3251,7 @@ export default function EnquiryDetailsPage() {
                                                                 size="sm"
                                                                 color="primary"
                                                                 variant="shadow"
-                                                                className="px-6 h-10 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all outline-none"
+                                                                className="px-6 h-10 rounded-xl font-black  tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all outline-none"
                                                                 isLoading={revisionReplyMutation.isPending}
                                                                 isDisabled={!hasAnySupplierReplyDraft}
                                                                 onPress={() => revisionReplyMutation.mutate()}
@@ -3259,7 +3259,7 @@ export default function EnquiryDetailsPage() {
                                                             >
                                                                 Confirm Revision
                                                             </Button>
-                                                            <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Action by: Seller</span>
+                                                            <span className="text-[8px] font-bold text-default-400  tracking-widest mr-1">Action by: Seller</span>
                                                         </div>
                                                     )}
 
@@ -3268,7 +3268,7 @@ export default function EnquiryDetailsPage() {
                                                             <Button
                                                                 size="sm"
                                                                 color="success"
-                                                                className="px-6 h-10 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-success/20 text-white hover:scale-[1.02] active:scale-95 transition-all outline-none"
+                                                                className="px-6 h-10 rounded-xl font-black  tracking-widest text-[10px] shadow-lg shadow-success/20 text-white hover:scale-[1.02] active:scale-95 transition-all outline-none"
                                                                 isDisabled={revisionItems.length > 0 && !allRevisionAcknowledged}
                                                                 isLoading={applyActionMutation.isPending}
                                                                 onPress={() => applyActionMutation.mutate({ actionKey: "REVISION_CONFIRMED" })}
@@ -3276,7 +3276,7 @@ export default function EnquiryDetailsPage() {
                                                             >
                                                                 Authorize Revision
                                                             </Button>
-                                                            <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Action by: Buyer</span>
+                                                            <span className="text-[8px] font-bold text-default-400  tracking-widest mr-1">Action by: Buyer</span>
                                                         </div>
                                                     )}
                                                     {canBuyerRevision && (
@@ -3285,13 +3285,13 @@ export default function EnquiryDetailsPage() {
                                                                 size="sm"
                                                                 color="default"
                                                                 variant="flat"
-                                                                className="px-6 h-10 rounded-xl font-black uppercase tracking-widest text-[10px]"
+                                                                className="px-6 h-10 rounded-xl font-black  tracking-widest text-[10px]"
                                                                 isDisabled={applyActionMutation.isPending}
                                                                 onPress={() => applyActionMutation.mutate({ actionKey: "REVISION_SKIPPED" })}
                                                             >
                                                                 Proceed Without Revision
                                                             </Button>
-                                                            <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Action by: Buyer</span>
+                                                            <span className="text-[8px] font-bold text-default-400  tracking-widest mr-1">Action by: Buyer</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -3315,7 +3315,7 @@ export default function EnquiryDetailsPage() {
                         <div className="flex flex-wrap items-center justify-between gap-3 w-full">
                             <div className="flex flex-col gap-1">
                                 <span className="font-bold text-base tracking-tight">Documentation Checklist</span>
-                                <span className="text-[9px] uppercase font-black tracking-widest text-default-400">
+                                <span className="text-[9px]  font-black tracking-widest text-default-400">
                                     Stage: {String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}
                                 </span>
                             </div>
@@ -3324,7 +3324,7 @@ export default function EnquiryDetailsPage() {
                                     size="sm"
                                     color="primary"
                                     variant="flat"
-                                    className="font-black text-[9px] uppercase tracking-widest h-8 px-4 rounded-lg"
+                                    className="font-black text-[9px]  tracking-widest h-8 px-4 rounded-lg"
                                     isLoading={createDocMutation.isPending}
                                     onPress={() => createDocMutation.mutate(fallbackProformaRule)}
                                 >
@@ -3349,11 +3349,11 @@ export default function EnquiryDetailsPage() {
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="font-bold text-xs tracking-tight text-foreground group-hover:text-primary transition-colors">{rule.docType}</span>
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-default-400">{rule.responsibleRole}</span>
+                                                    <span className="text-[9px] font-black  tracking-widest text-default-400">{rule.responsibleRole}</span>
                                                     <div className="w-1 h-1 rounded-full bg-default-300" />
-                                                    <span className="text-[9px] font-bold text-default-500 uppercase tracking-tight">{actionTypeLabel}</span>
+                                                    <span className="text-[9px] font-bold text-default-500  tracking-tight">{actionTypeLabel}</span>
                                                 </div>
-                                                <span className="text-[8px] font-bold uppercase tracking-widest text-default-400">
+                                                <span className="text-[8px] font-bold  tracking-widest text-default-400">
                                                     Seller ↔ OBAOL / OBAOL ↔ Buyer
                                                 </span>
                                             </div>
@@ -3362,7 +3362,7 @@ export default function EnquiryDetailsPage() {
                                                     size="sm" 
                                                     variant="dot" 
                                                     color={hasDoc ? "success" : actionTypeKey === "UPLOAD" ? "primary" : "secondary"}
-                                                    className="font-black uppercase text-[8px] tracking-[0.1em] h-5 border-none bg-transparent"
+                                                    className="font-black  text-[8px] tracking-[0.1em] h-5 border-none bg-transparent"
                                                 >
                                                     {hasDoc
                                                         ? "ARCHIVED"
@@ -3378,7 +3378,7 @@ export default function EnquiryDetailsPage() {
                                                         size="sm"
                                                         variant="flat"
                                                         color="primary"
-                                                        className="font-black text-[9px] uppercase tracking-widest h-8 px-4 rounded-lg"
+                                                        className="font-black text-[9px]  tracking-widest h-8 px-4 rounded-lg"
                                                         onPress={() => {
                                                             setDocActionRule(rule);
                                                             setDocActionOpen(true);
@@ -3403,7 +3403,7 @@ export default function EnquiryDetailsPage() {
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,0,0,0.1)]" />
-                                <span className="text-[10px] uppercase font-black tracking-[0.2em] text-default-500 dark:text-default-400">Document Vault</span>
+                                <span className="text-[10px]  font-black tracking-[0.2em] text-default-500 dark:text-default-400">Document Vault</span>
                             </div>
                             <h3 className="text-lg font-black text-foreground tracking-tighter inline-flex items-center gap-2">
                                 <LuFileText className="text-primary" size={20} />
@@ -3411,7 +3411,7 @@ export default function EnquiryDetailsPage() {
                             </h3>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="px-3 py-1.5 rounded-xl bg-white/10 dark:bg-black/20 border border-divider/50 text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                            <div className="px-3 py-1.5 rounded-xl bg-white/10 dark:bg-black/20 border border-divider/50 text-[9px] font-black  tracking-widest flex items-center gap-2">
                                 <LuHistory size={12} className="text-default-400" />
                                 {sortedEnquiryDocs.length} Active Records
                             </div>
@@ -3423,7 +3423,7 @@ export default function EnquiryDetailsPage() {
                                 <div className="w-16 h-16 rounded-[1.5rem] bg-default-100 flex items-center justify-center text-default-400 mb-4 opacity-50">
                                     <LuFileText size={32} />
                                 </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-default-400">No records found</p>
+                                <p className="text-[10px] font-black  tracking-widest text-default-400">No records found</p>
                                 <p className="text-xs text-default-300 font-bold mt-1 italic">Initiate trade actions to generate documents.</p>
                             </div>
                         ) : (
@@ -3446,19 +3446,19 @@ export default function EnquiryDetailsPage() {
                                                     {typeKey === "LETTER_OF_INTENT" ? <FiFileText size={20} /> : typeKey === "QUOTATION" ? <LuFileCheck size={20} /> : <LuFileText size={20} />}
                                                 </div>
                                                 <div className="flex flex-col gap-0.5 truncate">
-                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-500 dark:text-default-400 leading-none mb-0.5">{isDraft ? "Draft Version" : "Finalized Record"}</span>
+                                                    <span className="text-[9px] font-black  tracking-[0.2em] text-default-500 dark:text-default-400 leading-none mb-0.5">{isDraft ? "Draft Version" : "Finalized Record"}</span>
                                                     <span className="text-sm font-black text-foreground tracking-tighter truncate group-hover:text-primary transition-colors">{label}</span>
                                                     <div className="flex items-center gap-2 mt-0.5">
-                                                        <div className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border transition-colors ${isSent ? "bg-success-500/10 border-success-500/20 text-success-600" : "bg-default-400/10 border-default-400/20 text-default-400"}`}>
+                                                        <div className={`px-1.5 py-0.5 rounded-md text-[8px] font-black  tracking-widest border transition-colors ${isSent ? "bg-success-500/10 border-success-500/20 text-success-600" : "bg-default-400/10 border-default-400/20 text-default-400"}`}>
                                                             {status}
                                                         </div>
                                                         {audienceLabel && (
-                                                            <div className="px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border border-primary/20 text-primary/80 bg-primary/10">
+                                                            <div className="px-1.5 py-0.5 rounded-md text-[8px] font-black  tracking-widest border border-primary/20 text-primary/80 bg-primary/10">
                                                                 {audienceLabel}
                                                             </div>
                                                         )}
                                                         {createdAt && (
-                                                            <div className="flex items-center gap-1 text-[8px] font-bold text-default-400 uppercase tracking-widest">
+                                                            <div className="flex items-center gap-1 text-[8px] font-bold text-default-400  tracking-widest">
                                                                 <LuClock size={9} />
                                                                 {createdAt}
                                                             </div>
@@ -3492,16 +3492,16 @@ export default function EnquiryDetailsPage() {
                         <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-4 md:px-6 pt-4 md:pt-5 pb-0">
                             <div className="flex flex-col gap-1">
                                 <span className="font-bold text-lg">Market State</span>
-                                <span className="text-[10px] uppercase font-black tracking-wider text-default-400">Live product tracking</span>
+                                <span className="text-[10px]  font-black tracking-wider text-default-400">Live product tracking</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 {liveRate ? (
                                     isLive ? (
-                                        <span className="flex items-center gap-1.5 text-success text-xs font-black uppercase tracking-widest bg-success/10 px-3 py-1 rounded-full">
+                                        <span className="flex items-center gap-1.5 text-success text-xs font-black  tracking-widest bg-success/10 px-3 py-1 rounded-full">
                                             <span className="w-2 h-2 rounded-full bg-success animate-pulse" /> LIVE
                                         </span>
                                     ) : (
-                                        <span className="flex items-center gap-1.5 text-danger text-xs font-black uppercase tracking-widest bg-danger/10 px-3 py-1 rounded-full">
+                                        <span className="flex items-center gap-1.5 text-danger text-xs font-black  tracking-widest bg-danger/10 px-3 py-1 rounded-full">
                                             <span className="w-2 h-2 rounded-full bg-danger" /> OFF MARKET
                                         </span>
                                     )
@@ -3515,14 +3515,14 @@ export default function EnquiryDetailsPage() {
                             <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 p-6 rounded-3xl border border-divider bg-content1/50">
                                 {/* Enquiry Rate */}
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Enquiry Rate</span>
+                                    <span className="text-[10px]  font-black tracking-widest text-default-400">Enquiry Rate</span>
                                     <span className="font-black text-xl text-primary">{formatRate(netRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
                                     <span className="text-xs text-default-400">At time of enquiry</span>
                                 </div>
 
                                 {/* Current Market Rate */}
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Current Rate</span>
+                                    <span className="text-[10px]  font-black tracking-widest text-default-400">Current Rate</span>
                                     {liveRate ? (
                                         <span className="font-black text-xl text-foreground">{formatRate(liveNetRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
                                     ) : (
@@ -3533,7 +3533,7 @@ export default function EnquiryDetailsPage() {
 
                                 {/* Price Delta */}
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Price Change</span>
+                                    <span className="text-[10px]  font-black tracking-widest text-default-400">Price Change</span>
                                     {liveRate ? (
                                         <span className={`flex items-center gap-1.5 font-black text-xl ${priceDelta > 0 ? "text-danger" : priceDelta < 0 ? "text-success" : "text-default-500"}`}>
                                             {priceDelta > 0 ? <FiTrendingUp size={18} /> : priceDelta < 0 ? <FiTrendingDown size={18} /> : null}
@@ -3546,7 +3546,7 @@ export default function EnquiryDetailsPage() {
 
                                 {/* Stock Availability */}
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Stock Status</span>
+                                    <span className="text-[10px]  font-black tracking-widest text-default-400">Stock Status</span>
                                     {liveRate ? (
                                         isLive ? (
                                             <span className="flex items-center gap-1.5 font-bold text-success">
@@ -3589,13 +3589,13 @@ export default function EnquiryDetailsPage() {
                     {/* Parties Involved */}
                     {(canSeeBuyerSide || canSeeSupplierSide || isMediator) && (
                         <Card className="md:col-span-1 border border-divider bg-content1/50">
-                            <CardHeader className="font-semibold text-base px-6 pt-6 uppercase tracking-wider text-default-400">Parties Involved</CardHeader>
+                            <CardHeader className="font-semibold text-base px-6 pt-6  tracking-wider text-default-400">Parties Involved</CardHeader>
                             <Divider className="my-1" />
                             <CardBody className="flex flex-col gap-4 px-6 pb-6">
                                 <div className="grid grid-cols-1 gap-3">
                                     {(canSeeBuyerSide || canSeeBoth || isMediator) && (
                                         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex flex-col gap-1">
-                                            <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">Buyer</span>
+                                            <span className="text-[10px]  font-black tracking-widest text-primary-600">Buyer</span>
                                             <span className="font-semibold text-base">{buyerAssociateName}</span>
                                             <span className={`text-xs font-semibold ${buyerPresence.online ? "text-success-600" : "text-default-500"}`}>
                                                 {buyerPresence.online ? "Online" : `Last seen ${buyerPresence.lastSeenLabel}`}
@@ -3611,7 +3611,7 @@ export default function EnquiryDetailsPage() {
                                             )}
                                             {dealCloserOperatorAssigned && dealCloserOperatorObj && (
                                                 <div className="mt-2 pt-2 border-t border-primary/20 flex flex-col gap-1">
-                                                    <span className="text-[9px] uppercase font-black tracking-widest text-primary-500">Buyer Operator</span>
+                                                    <span className="text-[9px]  font-black tracking-widest text-primary-500">Buyer Operator</span>
                                                     <span className="text-xs font-semibold text-default-700">
                                                         {dealCloserOperatorObj?.name || dealCloserOperatorObj?.firstName || "Assigned"}
                                                     </span>
@@ -3627,7 +3627,7 @@ export default function EnquiryDetailsPage() {
                                     )}
                                     {(canSeeSupplierSide || canSeeBoth || isMediator) && (
                                         <div className="rounded-xl border border-success/20 bg-success/5 p-3 flex flex-col gap-1">
-                                            <span className="text-[10px] uppercase font-black tracking-widest text-success-700">Supplier</span>
+                                            <span className="text-[10px]  font-black tracking-widest text-success-700">Supplier</span>
                                             <span className="font-semibold text-base">{sellerAssociateName}</span>
                                             <span className={`text-xs font-semibold ${sellerPresence.online ? "text-success-600" : "text-default-500"}`}>
                                                 {sellerPresence.online ? "Online" : `Last seen ${sellerPresence.lastSeenLabel}`}
@@ -3643,7 +3643,7 @@ export default function EnquiryDetailsPage() {
                                             )}
                                             {supplierOperatorAssigned && supplierOperatorObj && (
                                                 <div className="mt-2 pt-2 border-t border-success/20 flex flex-col gap-1">
-                                                    <span className="text-[9px] uppercase font-black tracking-widest text-success-700">Supplier Operator</span>
+                                                    <span className="text-[9px]  font-black tracking-widest text-success-700">Supplier Operator</span>
                                                     <span className="text-xs font-semibold text-default-700">
                                                         {supplierOperatorObj?.name || supplierOperatorObj?.firstName || "Assigned"}
                                                     </span>
@@ -3682,28 +3682,28 @@ export default function EnquiryDetailsPage() {
                         <Divider className="my-1" />
                         <CardBody className="flex flex-col gap-4 md:gap-5 px-6 pb-6">
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Product</span>
+                                <span className="text-[10px]  font-bold text-default-400">Product</span>
                                 <span className="font-semibold text-lg">{enquiry.productId?.name || "N/A"}</span>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Rate / KG</span>
+                                <span className="text-[10px]  font-bold text-default-400">Rate / KG</span>
                                 <span className="font-bold text-success text-xl">{formatRate(netRate)}</span>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Quantity</span>
+                                <span className="text-[10px]  font-bold text-default-400">Quantity</span>
                                 <span className="font-bold text-lg">{Number(enquiry.quantity || 0).toLocaleString("en-IN")} Ton</span>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Preferred Incoterm</span>
+                                <span className="text-[10px]  font-bold text-default-400">Preferred Incoterm</span>
                                 <span className="text-sm font-semibold text-default-700">{preferredIncoterm || "Not specified"}</span>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Payment Term</span>
+                                <span className="text-[10px]  font-bold text-default-400">Payment Term</span>
                                 <span className="text-sm font-semibold text-default-700">{paymentTermLabel || "Not specified"}</span>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Buyer Specification</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Buyer Specification</span>
                                     {String(specificationTextRaw || "").trim() && <span className="text-[10px] font-bold text-primary-600">{tradeInputLabel(tradeInputAttribution.specifications)}</span>}
                                 </div>
                                 {isBuyer ? (
@@ -3744,7 +3744,7 @@ export default function EnquiryDetailsPage() {
                             </div>
                             {specChangeHistory.length > 0 && (
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Specification Updates</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Specification Updates</span>
                                     <div className="text-xs text-default-600 space-y-1">
                                         {specChangeHistory.slice(-3).reverse().map((h: any, idx: number) => (
                                             <p key={idx}>
@@ -3761,7 +3761,7 @@ export default function EnquiryDetailsPage() {
                     <Card className="md:col-span-1 border border-divider bg-success-50/20">
                         <CardHeader className="flex flex-col items-start gap-1 px-6 pt-6 pb-2">
                             <span className="font-bold text-lg">Pricing Scenario</span>
-                            <span className="text-[10px] uppercase font-black tracking-wider text-success-600">Excludes GST & Transportation</span>
+                            <span className="text-[10px]  font-black tracking-wider text-success-600">Excludes GST & Transportation</span>
                         </CardHeader>
                         <Divider />
                         <CardBody className="px-6 pb-6 pt-4">
@@ -3788,11 +3788,11 @@ export default function EnquiryDetailsPage() {
                                     )}
                                     <div className="w-full h-[1px] bg-default-200 mt-1 mb-0.5" />
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Net EXW Rate / KG</span>
+                                        <span className="text-[10px]  font-black tracking-widest text-default-400">Net EXW Rate / KG</span>
                                         <span className="font-black text-lg text-primary">{formatRate(netRate)}</span>
                                     </div>
                                     <div className="mt-4 p-4 bg-white/60 dark:bg-slate-900/40 rounded-xl border border-success/20 flex flex-col gap-1">
-                                        <span className="text-[10px] uppercase font-black text-success-600 tracking-widest">Calculated Trade Volume</span>
+                                        <span className="text-[10px]  font-black text-success-600 tracking-widest">Calculated Trade Volume</span>
                                         <span className="font-black text-2xl text-success-700 dark:text-success-400 tracking-tight">
                                             {convertRate(tradeVolume)}
                                         </span>
@@ -3810,11 +3810,11 @@ export default function EnquiryDetailsPage() {
                             ) : (
                                 <div className="flex flex-col gap-4">
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-[10px] uppercase font-bold text-default-400">Net Rate / KG</span>
+                                        <span className="text-[10px]  font-bold text-default-400">Net Rate / KG</span>
                                         <span className="font-black text-xl text-primary">{formatRate(netRate)}</span>
                                     </div>
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-[10px] uppercase font-bold text-default-400">Total Trade Volume</span>
+                                        <span className="text-[10px]  font-bold text-default-400">Total Trade Volume</span>
                                         <span className="font-black text-2xl text-success-600 tracking-tight">{convertRate(tradeVolume)}</span>
                                         <span className="text-xs text-default-400">{quantity} Ton ({quantityKg.toLocaleString("en-IN")} KG) × {formatRate(netRate)}/KG</span>
                                     </div>
@@ -3835,7 +3835,7 @@ export default function EnquiryDetailsPage() {
                                     <div className="flex flex-col gap-1">
                                          <div className="flex items-center gap-2 justify-center md:justify-start">
                                             <div className="w-1.5 h-1.5 bg-obaol-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.5)]" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-600 opacity-80">Logistics Profile</span>
+                                            <span className="text-[10px] font-black  tracking-[0.3em] text-obaol-600 opacity-80">Logistics Profile</span>
                                          </div>
                                         <h3 className="text-2xl font-bold tracking-tight text-foreground">Port Pickup Protocol</h3>
                                     </div>
@@ -3843,13 +3843,13 @@ export default function EnquiryDetailsPage() {
                                         Responsibility events and inland transport segments are <span className="text-foreground font-bold">automatically decoupled</span> for port-delivery frameworks. The mission transition point is established at the port of arrival.
                                     </p>
                                     <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                                        <div className="px-4 py-2 rounded-xl bg-foreground/5 border border-foreground/5 text-[10px] font-bold uppercase tracking-wider text-default-500">
+                                        <div className="px-4 py-2 rounded-xl bg-foreground/5 border border-foreground/5 text-[10px] font-bold  tracking-wider text-default-500">
                                             Arrival Handling Only
                                         </div>
-                                        <div className="px-4 py-2 rounded-xl bg-foreground/5 border border-foreground/5 text-[10px] font-bold uppercase tracking-wider text-default-500">
+                                        <div className="px-4 py-2 rounded-xl bg-foreground/5 border border-foreground/5 text-[10px] font-bold  tracking-wider text-default-500">
                                             No Inland Reservation
                                         </div>
-                                        <div className="px-4 py-2 rounded-xl bg-primary/5 border border-primary/10 text-[10px] font-bold uppercase tracking-wider text-primary-600 cursor-pointer hover:bg-primary/10 transition-colors"
+                                        <div className="px-4 py-2 rounded-xl bg-primary/5 border border-primary/10 text-[10px] font-bold  tracking-wider text-primary-600 cursor-pointer hover:bg-primary/10 transition-colors"
                                              onClick={() => {
                                                  setImportDeliveryMode("OBAOL_SERVICE");
                                                  updateImportDeliveryModeMutation.mutate("OBAOL_SERVICE");
@@ -3866,7 +3866,7 @@ export default function EnquiryDetailsPage() {
                             {!hasResponsibilitiesFinalized && workflowStage === "PROFORMA_ISSUED" && (
                                 <div className="flex items-center gap-3 px-6 pt-5 pb-0">
                                     <div className="w-2 h-2 rounded-full bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.35em] text-obaol-600 dark:text-obaol-400">
+                                    <span className="text-[10px] font-black  tracking-[0.35em] text-obaol-600 dark:text-obaol-400">
                                         ACTION REQUIRED — Finalize Responsibilities
                                     </span>
                                     <div className="flex-1 h-px bg-gradient-to-r from-obaol-500/30 to-transparent" />
@@ -3964,7 +3964,7 @@ export default function EnquiryDetailsPage() {
                         <Divider className="my-2" />
                         <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
                             <div className="flex flex-col gap-2">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Supply Ownership Operator</span>
+                                <span className="text-[10px]  font-bold text-default-400">Supply Ownership Operator</span>
                                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                                     <div className={`w-2 h-2 rounded-full ${supplierOperatorAssigned ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
                                     <span className={supplierOperatorAssigned ? "text-primary" : "text-default-500"}>
@@ -3973,7 +3973,7 @@ export default function EnquiryDetailsPage() {
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Legal Closer Operator</span>
+                                <span className="text-[10px]  font-bold text-default-400">Legal Closer Operator</span>
                                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                                     <div className={`w-2 h-2 rounded-full ${dealCloserOperatorAssigned ? "bg-obaol-500 animate-pulse" : "bg-default-400"}`} />
                                     <span className={dealCloserOperatorAssigned ? "text-obaol-500" : "text-default-500"}>
@@ -3982,7 +3982,7 @@ export default function EnquiryDetailsPage() {
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Handler Operator</span>
+                                <span className="text-[10px]  font-bold text-default-400">Handler Operator</span>
                                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                                     <div className={`w-2 h-2 rounded-full ${handlerOperatorAssigned ? "bg-primary-500 animate-pulse" : "bg-default-400"}`} />
                                     <span className={handlerOperatorAssigned ? "text-primary" : "text-default-500"}>
@@ -3992,7 +3992,7 @@ export default function EnquiryDetailsPage() {
                             </div>
                             {isAssignmentAdmin && (
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Supplier Ownership Operator</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Supplier Ownership Operator</span>
                                     <Select
                                         size="sm"
                                         selectedKeys={selectedSupplierOperatorId ? [selectedSupplierOperatorId] : []}
@@ -4014,7 +4014,7 @@ export default function EnquiryDetailsPage() {
                             )}
                             {isAssignmentAdmin && (
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Deal Closer Operator</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Deal Closer Operator</span>
                                     <Select
                                         size="sm"
                                         selectedKeys={selectedDealCloserOperatorId ? [selectedDealCloserOperatorId] : []}
@@ -4036,7 +4036,7 @@ export default function EnquiryDetailsPage() {
                             )}
                             {isAssignmentAdmin && (
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Handler Operator</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Handler Operator</span>
                                     <Select
                                         size="sm"
                                         selectedKeys={selectedHandlerOperatorId ? [selectedHandlerOperatorId] : []}
@@ -4058,7 +4058,7 @@ export default function EnquiryDetailsPage() {
                             )}
                             {!isSystemAdmin && isOperatorUser && !handlerOperatorId && (supplierOperatorId === String(user?.id || "") || dealCloserOperatorId === String(user?.id || "")) && (
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Handler Volunteer</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Handler Volunteer</span>
                                     <Button
                                         size="sm"
                                         color="primary"
@@ -4073,7 +4073,7 @@ export default function EnquiryDetailsPage() {
                             )}
                             {hasPendingHandlerRequest && (
                                 <div className="flex flex-col gap-2 rounded-lg border border-obaol-500/30 bg-obaol-500/5 px-3 py-2">
-                                    <span className="text-[10px] uppercase font-black tracking-widest text-warning-600">Pending Handler Request</span>
+                                    <span className="text-[10px]  font-black tracking-widest text-warning-600">Pending Handler Request</span>
                                     <span className="text-xs font-semibold text-default-700">
                                         {pendingHandlerOperatorName}
                                         {pendingHandlerRequestedAt ? ` • ${dayjs(pendingHandlerRequestedAt).format("DD MMM YYYY, hh:mm A")}` : ""}
@@ -4112,7 +4112,7 @@ export default function EnquiryDetailsPage() {
                                         size="lg"
                                         color={updateOperatorRolesMutation.isSuccess ? "success" : "secondary"}
                                         variant={updateOperatorRolesMutation.isSuccess ? "flat" : "solid"}
-                                        className={`h-12 rounded-xl font-black uppercase tracking-[0.2em] text-[10px] transition-all duration-500 ${
+                                        className={`h-12 rounded-xl font-black  tracking-[0.2em] text-[10px] transition-all duration-500 ${
                                             updateOperatorRolesMutation.isSuccess 
                                             ? "bg-success-500/10 text-success shadow-[0_0_20px_rgba(34,197,94,0.1)] border border-success-500/20" 
                                             : "shadow-xl shadow-secondary/20"
@@ -4128,14 +4128,14 @@ export default function EnquiryDetailsPage() {
                                     {updateOperatorRolesMutation.isSuccess && (
                                         <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-success-500/5 border border-success-500/10 self-start animate-in fade-in slide-in-from-left-2 duration-500">
                                             <div className="w-1 h-1 bg-success rounded-full animate-pulse" />
-                                            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-success-600 italic">MISSION_SUCCESS // SYSTEM_SYNCED</span>
+                                            <span className="text-[9px] font-black  tracking-[0.3em] text-success-600 italic">MISSION_SUCCESS // SYSTEM_SYNCED</span>
                                         </div>
                                     )}
                                 </div>
                             )}
                             {enquiry.supplierCommitUntil && (
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Supplier Commit Until</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Supplier Commit Until</span>
                                     <span className="text-sm font-medium text-default-600">
                                         {dayjs(enquiry.supplierCommitUntil).format("DD MMM YYYY")}
                                     </span>
@@ -4143,7 +4143,7 @@ export default function EnquiryDetailsPage() {
                             )}
                             {isSeller && (
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Set Commit Until Date</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Set Commit Until Date</span>
                                     <div className="flex gap-2 items-center">
                                         <Input
                                             type="date"
@@ -4168,7 +4168,7 @@ export default function EnquiryDetailsPage() {
                             )}
                             {enquiry.mediatorAssociateId && (
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Mediator</span>
+                                    <span className="text-[10px]  font-bold text-default-400">Mediator</span>
                                     <span className="font-medium text-obaol-600">{enquiry.mediatorAssociateId?.name || "N/A"}</span>
                                 </div>
                             )}
@@ -4188,7 +4188,7 @@ export default function EnquiryDetailsPage() {
                     <div className="flex flex-col gap-2 text-center md:text-left relative z-10">
                         <div className="flex items-center gap-3 justify-center md:justify-start">
                              <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(var(--heroui-primary-rgb),0.5)]" />
-                             <span className="text-[10px] font-bold tracking-widest uppercase text-primary">Readiness Protocol</span>
+                             <span className="text-[10px] font-bold tracking-widest  text-primary">Readiness Protocol</span>
                         </div>
                         <h2 className="text-3xl font-bold tracking-tight leading-none text-foreground">Finalize & Execute</h2>
                         <p className="text-default-500 text-[11px] font-medium max-w-md opacity-80 decoration-transparent">Review performance parameters and logistics framework before authorizing mission-critical execution.</p>
@@ -4203,11 +4203,11 @@ export default function EnquiryDetailsPage() {
                                             <Tooltip
                                                 content={
                                                     <div className="px-5 py-4 rounded-3xl bg-content1 shadow-2xl border border-divider">
-                                                        <div className="text-[10px] font-bold uppercase tracking-widest mb-4 text-default-400">Readiness Gap Analysis</div>
+                                                        <div className="text-[10px] font-bold  tracking-widest mb-4 text-default-400">Readiness Gap Analysis</div>
                                                         <ul className="flex flex-col gap-3">
-                                                            {!hasFullResponsibilityPlan && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold uppercase tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Ownership Allocation</li>}
-                                                            {!hasExecutionContext && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold uppercase tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Logistics Context</li>}
-                                                            {!hasPackagingSpecifications && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold uppercase tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Packaging Specs</li>}
+                                                            {!hasFullResponsibilityPlan && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold  tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Ownership Allocation</li>}
+                                                            {!hasExecutionContext && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold  tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Logistics Context</li>}
+                                                            {!hasPackagingSpecifications && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold  tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Packaging Specs</li>}
                                                         </ul>
                                                     </div>
                                                 }
@@ -4219,7 +4219,7 @@ export default function EnquiryDetailsPage() {
                                                 <div className="w-full sm:w-auto">
                                                     <Button
                                                         color="warning"
-                                                        className="w-full sm:w-auto font-bold px-10 rounded-2xl h-14 text-[11px] tracking-widest uppercase bg-warning text-black shadow-xl"
+                                                        className="w-full sm:w-auto font-bold px-10 rounded-2xl h-14 text-[11px] tracking-widest  bg-warning text-black shadow-xl"
                                                         isLoading={finalizeResponsibilitiesMutation.isPending}
                                                         isDisabled={isReadOnlyAfterConversion || !hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
                                                         onPress={() => onFinalizeOpen()}
@@ -4233,7 +4233,7 @@ export default function EnquiryDetailsPage() {
                                         <Button
                                             color="default"
                                             variant="light"
-                                            className="w-full sm:w-auto font-black px-0 py-0 h-auto text-[9px] tracking-[0.25em] uppercase text-default-400 hover:text-danger-500 hover:underline transition-all opacity-40 hover:opacity-100 italic bg-transparent shadow-none"
+                                            className="w-full sm:w-auto font-black px-0 py-0 h-auto text-[9px] tracking-[0.25em]  text-default-400 hover:text-danger-500 hover:underline transition-all opacity-40 hover:opacity-100 italic bg-transparent shadow-none"
                                             onPress={() => updateStatusMutation.mutate("CANCELLED")}
                                             isLoading={updateStatusMutation.isPending}
                                         >
@@ -4251,7 +4251,7 @@ export default function EnquiryDetailsPage() {
                                             size="sm"
                                             color="primary"
                                             variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
-                                            className="font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest uppercase"
+                                            className="font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest "
                                             isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
                                             onPress={() => handleActionPress(actionKey)}
                                             isLoading={applyActionMutation.isPending && pendingActionKey === actionKey}
@@ -4259,7 +4259,7 @@ export default function EnquiryDetailsPage() {
                                             {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
                                         </Button>
                                         {isSystemAdmin && actionByLabelText && (
-                                            <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                            <span className="text-[9px] font-bold text-default-400  tracking-widest">
                                                 Action by: {actionByLabelText}
                                             </span>
                                         )}
@@ -4268,20 +4268,20 @@ export default function EnquiryDetailsPage() {
                             </div>
                         )}
                         {normalizedStatus === "CONVERTED" && (
-                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-success-500/10 bg-success-500/5 text-success-600 text-[10px] font-bold uppercase tracking-widest">
+                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-success-500/10 bg-success-500/5 text-success-600 text-[10px] font-bold  tracking-widest">
                                 <LuCheck size={14} />
                                 Mission Finalized • Order Active
                             </div>
                         )}
                         {normalizedStatus === "CLOSED" && (
-                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-default-500/10 bg-default-500/5 text-default-600 text-[10px] font-bold uppercase tracking-widest">
+                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-default-500/10 bg-default-500/5 text-default-600 text-[10px] font-bold  tracking-widest">
                                 Enquiry Closed • Termination Successful
                             </div>
                         )}
                         
                         {!isAdmin && (enquiry as any)?.order && normalizedStatus !== "CONVERTED" && normalizedStatus !== "CLOSED" && (
                             <Button
-                                className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-wider uppercase bg-success text-success-foreground shadow-lg shadow-success-500/20"
+                                className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-wider  bg-success text-success-foreground shadow-lg shadow-success-500/20"
                                 onPress={() => router.push(`/dashboard/orders/${(enquiry as any).order}`)}
                                 startContent={<LuTruck size={18} />}
                             >
@@ -4290,7 +4290,7 @@ export default function EnquiryDetailsPage() {
                         )}
                         {(normalizedStatus === "CONVERTED" || normalizedStatus === "CLOSED") && (
                             <Button
-                                className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-wider uppercase bg-success text-success-foreground shadow-lg shadow-success-500/20"
+                                className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-wider  bg-success text-success-foreground shadow-lg shadow-success-500/20"
                                 isDisabled={!enquiryOrderId}
                                 onPress={() => enquiryOrderId && router.push(`/dashboard/orders/${enquiryOrderId}`)}
                                 startContent={<LuTruck size={18} />}
@@ -4312,16 +4312,16 @@ export default function EnquiryDetailsPage() {
                         {(onClose) => (
                             <>
                                 <ModalHeader className="flex flex-col gap-1">
-                                    <span className="text-sm font-black uppercase tracking-widest text-default-400">Confirm Responsibility Finalization</span>
+                                    <span className="text-sm font-black  tracking-widest text-default-400">Confirm Responsibility Finalization</span>
                                     <span className="text-lg font-black">Review responsibilities before locking</span>
                                 </ModalHeader>
                                 <ModalBody className="flex flex-col gap-4 py-6">
-                                        <div className="rounded-2xl border border-obaol-500/30 bg-obaol-500/10 px-4 py-3 text-[11px] font-bold text-obaol-600 uppercase tracking-widest">
+                                        <div className="rounded-2xl border border-obaol-500/30 bg-obaol-500/10 px-4 py-3 text-[11px] font-bold text-obaol-600  tracking-widest">
                                             Finalizing will create execution tasks and move this enquiry into the Execution Panel.
                                         </div>
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-3 rounded-full bg-primary shadow-[0_0_10px_rgba(0,0,0,0.2)] dark:shadow-[0_0_10px_rgba(255,255,255,0.1)]" />
-                                            <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Global Trade Terms</span>
+                                            <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Global Trade Terms</span>
                                         </div>
                                         <div className="grid grid-cols-1 gap-2">
                                             { [
@@ -4336,7 +4336,7 @@ export default function EnquiryDetailsPage() {
                                                     <div key={term.label} className="flex justify-between items-center rounded-xl bg-white/40 dark:bg-black/40 border border-default-200/50 px-4 py-2.5 shadow-sm">
                                                         <div className="flex items-center gap-2.5">
                                                             {term.icon}
-                                                            <span className="text-default-500 dark:text-default-400 font-bold uppercase text-[9px] tracking-widest">{term.label}</span>
+                                                            <span className="text-default-500 dark:text-default-400 font-bold  text-[9px] tracking-widest">{term.label}</span>
                                                         </div>
                                                         <span className={`font-black text-sm tracking-tight ${isMissing ? "text-danger-500 animate-pulse" : "text-foreground"}`}>
                                                             {term.value}
@@ -4349,7 +4349,7 @@ export default function EnquiryDetailsPage() {
                                     <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5">
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-3 rounded-full bg-success-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
-                                            <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Packaging Specifications</span>
+                                            <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Packaging Specifications</span>
                                         </div>
                                         <div className={`p-4 rounded-xl border text-xs font-bold italic whitespace-pre-line leading-relaxed shadow-sm ${!responsibilitySummary.packagingSpecs || responsibilitySummary.packagingSpecs.includes("No specifications") 
                                             ? "bg-danger-500/5 border-danger-500/20 text-danger-500" 
@@ -4361,7 +4361,7 @@ export default function EnquiryDetailsPage() {
                                     <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5">
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-3 rounded-full bg-obaol-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
-                                            <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Responsibility Matrix</span>
+                                            <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Responsibility Matrix</span>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                             {responsibilitySummary.listItems.map((item) => {
@@ -4386,7 +4386,7 @@ export default function EnquiryDetailsPage() {
  
                                                 return (
                                                     <div key={item.label} className="flex flex-col gap-1.5 p-3 rounded-xl border border-default-200 bg-white/60 dark:bg-black/40 shadow-sm">
-                                                        <span className="text-[9px] font-black uppercase tracking-widest text-default-500 dark:text-default-400 leading-none">{item.label}</span>
+                                                        <span className="text-[9px] font-black  tracking-widest text-default-500 dark:text-default-400 leading-none">{item.label}</span>
                                                         <div className={`flex items-center gap-2 px-2.5 py-1 rounded-lg w-fit ${badgeStyles}`}>
                                                             {icon}
                                                             <span className={`text-[10px] font-black tracking-wider ${ownerKey === "not set" ? "text-danger-500" : ""}`}>{label}</span>
@@ -4433,7 +4433,7 @@ export default function EnquiryDetailsPage() {
                         {(onClose) => (
                             <>
                                 <ModalHeader className="flex flex-col gap-1">
-                                    <span className="text-sm font-black uppercase tracking-widest text-default-400">Revision Checklist</span>
+                                    <span className="text-sm font-black  tracking-widest text-default-400">Revision Checklist</span>
                                     <span className="text-lg font-black">Request quotation revision</span>
                                 </ModalHeader>
                                 <ModalBody className="flex flex-col gap-4">
@@ -4732,7 +4732,7 @@ export default function EnquiryDetailsPage() {
                                 )}
 
                                 {selectedInventory && !isAddingNewInventory && (
-                                    <div className="text-[10px] text-default-400 uppercase font-black px-1">
+                                    <div className="text-[10px] text-default-400  font-black px-1">
                                         Current Stock: {selectedInventory.availableQty} MT available • {selectedInventory.reservedQty} MT reserved • {selectedInventory.quantity} MT total
                                     </div>
                                 )}
@@ -4796,7 +4796,7 @@ export default function EnquiryDetailsPage() {
                                             </div>
                                         </div>
                                         <div className="flex flex-col gap-0.5">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/80 leading-none">COMMAND SEQUENCE INITIATED</span>
+                                            <span className="text-[10px] font-black  tracking-[0.4em] text-primary/80 leading-none">COMMAND SEQUENCE INITIATED</span>
                                             <span className="text-3xl font-black tracking-tight text-white italic leading-none mt-1">Convert to Order</span>
                                         </div>
                                     </div>
@@ -4807,20 +4807,20 @@ export default function EnquiryDetailsPage() {
                                         <div className="mt-1 bg-primary/10 p-1.5 rounded-lg border border-primary/20">
                                             <FiInfo className="text-primary" size={20} />
                                         </div>
-                                        <p className="text-[11px] font-bold text-default-300 dark:text-default-400 leading-relaxed uppercase tracking-wide">
+                                        <p className="text-[11px] font-bold text-default-300 dark:text-default-400 leading-relaxed  tracking-wide">
                                             WARNING: PROCEEDING WITH CONVERSION WILL LOCK ALL TRADE PARAMETERS. 
                                             THIS ACTION SYNCHRONIZES RESPONSIBILITIES AND FINALIZES THE EXECUTION PROTOCOL.
                                         </p>
                                     </div>
                                     {conversionError && (
-                                        <div className="mb-6 rounded-2xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200 uppercase tracking-wide">
+                                        <div className="mb-6 rounded-2xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200  tracking-wide">
                                             {conversionError}
                                         </div>
                                     )}
 
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(0,112,243,0.5)]" />
-                                        <span className="text-[11px] uppercase font-black tracking-[0.25em] text-white/50 italic">FINAL_RESPONSIBILITY_MATRIX</span>
+                                        <span className="text-[11px]  font-black tracking-[0.25em] text-white/50 italic">FINAL_RESPONSIBILITY_MATRIX</span>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
@@ -4844,13 +4844,13 @@ export default function EnquiryDetailsPage() {
                                                     <div className="text-primary/50 group-hover:text-primary transition-colors bg-black/40 p-2 rounded-xl border border-white/5 shadow-inner">
                                                         {item.icon}
                                                     </div>
-                                                    <span className="text-[10px] font-black text-default-200 uppercase tracking-widest">{item.label}</span>
+                                                    <span className="text-[10px] font-black text-default-200  tracking-widest">{item.label}</span>
                                                 </div>
                                                 <Chip 
                                                     size="sm" 
                                                     variant="flat" 
                                                     color={item.value === "obaol" ? "primary" : item.value === "buyer" ? "success" : "warning"}
-                                                    className="font-black uppercase text-[8px] tracking-[0.2em] h-6 px-3 bg-opacity-20 border border-current/20 shadow-lg"
+                                                    className="font-black  text-[8px] tracking-[0.2em] h-6 px-3 bg-opacity-20 border border-current/20 shadow-lg"
                                                 >
                                                     {item.value || "PENDING"}
                                                 </Chip>
@@ -4862,7 +4862,7 @@ export default function EnquiryDetailsPage() {
                                         <div className="mb-10">
                                             <div className="flex items-center gap-3 mb-4">
                                                 <div className="w-1.5 h-6 bg-success-500 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
-                                                <span className="text-[11px] uppercase font-black tracking-[0.25em] text-white/50 italic">PACKAGING_SPECIFICATIONS</span>
+                                                <span className="text-[11px]  font-black tracking-[0.25em] text-white/50 italic">PACKAGING_SPECIFICATIONS</span>
                                             </div>
                                             <div className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 text-[11px] font-bold text-default-300 italic whitespace-pre-line leading-relaxed shadow-inner">
                                                 {packagingSpecifications}
@@ -4873,7 +4873,7 @@ export default function EnquiryDetailsPage() {
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-1.5 h-6 bg-obaol-500 rounded-full shadow-[0_0_15px_rgba(207,152,60,0.5)]" />
-                                            <span className="text-[11px] uppercase font-black tracking-[0.25em] text-white/50 italic">ORDER_CONTEXT_METADATA</span>
+                                            <span className="text-[11px]  font-black tracking-[0.25em] text-white/50 italic">ORDER_CONTEXT_METADATA</span>
                                         </div>
                                         <Textarea
                                             label="Initial Notes"
@@ -4896,7 +4896,7 @@ export default function EnquiryDetailsPage() {
                                     <Button 
                                         variant="light" 
                                         onPress={onClose}
-                                        className="px-8 h-8 rounded-full font-black uppercase text-[9px] tracking-[0.3em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                                        className="px-8 h-8 rounded-full font-black  text-[9px] tracking-[0.3em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
                                     >
                                         Close
                                     </Button>
@@ -4904,7 +4904,7 @@ export default function EnquiryDetailsPage() {
                                         <Button
                                             variant="flat"
                                             onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${enquiryId}`, "_blank")}
-                                            className="flex-1 max-w-[240px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest text-obaol-600 border border-obaol-500/30 bg-obaol-500/10 hover:bg-obaol-500/20 shadow-xl shadow-obaol-500/5"
+                                            className="flex-1 max-w-[240px] h-14 rounded-2xl font-black  text-[10px] tracking-widest text-obaol-600 border border-obaol-500/30 bg-obaol-500/10 hover:bg-obaol-500/20 shadow-xl shadow-obaol-500/5"
                                         >
                                             Open Execution Panel
                                         </Button>
@@ -4954,7 +4954,7 @@ export default function EnquiryDetailsPage() {
                                             }}
                                             isLoading={applyActionMutation.isPending || isConvertingOrder}
                                             isDisabled={Boolean(conversionNoteViolation)}
-                                            className="flex-1 max-w-[320px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
+                                            className="flex-1 max-w-[320px] h-14 rounded-2xl font-black  text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
                                             startContent={!applyActionMutation.isPending && !isConvertingOrder && <FiCheckCircle size={16} />}
                                         >
                                             {isConvertingOrder ? "Converting..." : "ESTABLISH_ORDER_PROTOCOL"}
@@ -4985,10 +4985,10 @@ export default function EnquiryDetailsPage() {
                                     {String(docActionRule?.actionType || "") === "UPLOAD" ? <FiPackage size={22} /> : <FiPlus size={22} />}
                                 </div>
                                 <div className="flex flex-col gap-0.5">
-                                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-obaol-500/80 leading-none italic">
+                                    <span className="text-[9px] font-black  tracking-[0.4em] text-obaol-500/80 leading-none italic">
                                         {String(docActionRule?.actionType || "EXECUTION") === "UPLOAD" ? "UPLOAD_SEQUENCE" : "GENERATION_REQUEST"}
                                     </span>
-                                    <span className="text-xl font-black tracking-tight text-white uppercase italic leading-none mt-1">
+                                    <span className="text-xl font-black tracking-tight text-white  italic leading-none mt-1">
                                         {docActionRule ? `${docActionRule.docType.replaceAll('_', ' ')}` : "EXECUTION_DOCUMENT"}
                                     </span>
                                 </div>
@@ -4999,7 +4999,7 @@ export default function EnquiryDetailsPage() {
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 mb-2">
                                         <div className="w-1.5 h-4 bg-obaol-500 rounded-full" />
-                                        <span className="text-[10px] uppercase font-black tracking-[0.2em] text-white/40">Resource Target</span>
+                                        <span className="text-[10px]  font-black tracking-[0.2em] text-white/40">Resource Target</span>
                                     </div>
                                     <Input
                                         label="TACTICAL FILE URL"
@@ -5020,7 +5020,7 @@ export default function EnquiryDetailsPage() {
                                     <div className="mt-1 bg-obaol-500/10 p-1.5 rounded-lg">
                                         <FiInfo className="text-obaol-500" size={18} />
                                     </div>
-                                    <p className="text-[11px] font-bold text-default-400 leading-relaxed uppercase tracking-wide">
+                                    <p className="text-[11px] font-bold text-default-400 leading-relaxed  tracking-wide">
                                         Initiating automated generation protocol for {docActionRule?.docType?.replaceAll('_', ' ')}. 
                                         The document will be constructed based on current trade parameters and responsibility matrix.
                                     </p>
@@ -5030,12 +5030,12 @@ export default function EnquiryDetailsPage() {
                             <div className="mt-6 flex items-center justify-between p-4 rounded-xl bg-black/40 border border-white/5">
                                 <div className="flex items-center gap-3">
                                     <LuUser className="text-default-500" size={14} />
-                                    <span className="text-[10px] font-black text-default-400 uppercase tracking-widest leading-none">Authority Protocol</span>
+                                    <span className="text-[10px] font-black text-default-400  tracking-widest leading-none">Authority Protocol</span>
                                 </div>
                                 <Chip 
                                     size="sm" 
                                     variant="flat" 
-                                    className="font-black uppercase text-[8px] tracking-[0.2em] h-5 bg-obaol-500/10 text-obaol-500 border border-obaol-500/20"
+                                    className="font-black  text-[8px] tracking-[0.2em] h-5 bg-obaol-500/10 text-obaol-500 border border-obaol-500/20"
                                 >
                                     {docActionRule?.responsibleRole ? docActionRule.responsibleRole : "AUTH_PENDING"}
                                 </Chip>
@@ -5046,7 +5046,7 @@ export default function EnquiryDetailsPage() {
                                 variant="light" 
                                 onPress={() => setDocActionOpen(false)}
                                 isDisabled={createDocMutation.isPending}
-                                className="px-6 h-10 rounded-xl font-black uppercase text-[9px] tracking-[0.3em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                                className="px-6 h-10 rounded-xl font-black  text-[9px] tracking-[0.3em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
                             >
                                 ABORT
                             </Button>
@@ -5056,7 +5056,7 @@ export default function EnquiryDetailsPage() {
                                 onPress={() => createDocMutation.mutate(undefined)}
                                 isLoading={createDocMutation.isPending}
                                 isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
-                                className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(207,152,60,0.2)] bg-gradient-to-r from-obaol-500 to-obaol-600 hover:scale-[1.02] active:scale-95 transition-all"
+                                className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-widest shadow-[0_0_20px_rgba(207,152,60,0.2)] bg-gradient-to-r from-obaol-500 to-obaol-600 hover:scale-[1.02] active:scale-95 transition-all"
                             >
                                 {String(docActionRule?.actionType || "") === "UPLOAD" ? "UPLOAD_FILE" : "EXECUTE_INITIATION"}
                             </Button>
@@ -5073,11 +5073,11 @@ export default function EnquiryDetailsPage() {
                     <ModalContent>
                         <ModalHeader className="flex flex-col gap-1">
                             {DOC_TYPE_LABELS[String(docViewerDoc?.type || "").toUpperCase()] || String(docViewerDoc?.type || "Document").replaceAll("_", " ")}
-                            <span className="text-[10px] uppercase font-black tracking-widest text-default-400">
+                            <span className="text-[10px]  font-black tracking-widest text-default-400">
                                 {docViewerDoc?.documentNumber || "Draft Preview"}
                             </span>
                             {getDocAudienceLabel(docViewerDoc) && (
-                                <span className="text-[9px] uppercase font-black tracking-widest text-primary/80">
+                                <span className="text-[9px]  font-black tracking-widest text-primary/80">
                                     {getDocAudienceLabel(docViewerDoc)}
                                 </span>
                             )}

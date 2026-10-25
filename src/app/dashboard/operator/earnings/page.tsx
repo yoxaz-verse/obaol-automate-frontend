@@ -179,7 +179,7 @@ export default function OperatorEarningsPage() {
       {isAdmin ? (
         <Card className="border border-default-200/80">
           <CardBody className="gap-2">
-            <p className="text-xs uppercase tracking-wide text-default-500">Select Operator</p>
+            <p className="text-xs  tracking-wide text-default-500">Select Operator</p>
             <AdminOperatorPicker
               selectedOperatorId={selectedOperatorId}
               onSelectionChange={(operatorId) => {
@@ -200,25 +200,25 @@ export default function OperatorEarningsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Total Commission Earned</p>
+            <p className="text-xs  tracking-wide text-default-500">Total Commission Earned</p>
             <p className="text-2xl font-semibold text-foreground">{formatRate(Number(summary.totalEarnings || 0))}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">This Month Earnings</p>
+            <p className="text-xs  tracking-wide text-default-500">This Month Earnings</p>
             <p className="text-2xl font-semibold text-foreground">{formatRate(Number(summary.monthlyEarnings || 0))}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Deals Closed</p>
+            <p className="text-xs  tracking-wide text-default-500">Deals Closed</p>
             <p className="text-2xl font-semibold text-foreground">{toNumber(summary.dealsClosed)}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Leadership Earnings</p>
+            <p className="text-xs  tracking-wide text-default-500">Leadership Earnings</p>
             <p className="text-2xl font-semibold text-foreground">{formatRate(Number(leadershipEarnings))}</p>
           </CardBody>
         </Card>

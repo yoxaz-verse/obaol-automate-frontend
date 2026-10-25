@@ -187,7 +187,7 @@ export default function OrdersPage() {
                                                     tabList: "gap-5 sm:gap-8 relative rounded-none p-0 border-b border-divider/40",
                                                     cursor: "bg-warning w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(255,193,7,0.2)]",
                                                     tab: "max-w-fit px-2.5 sm:px-4 h-11 sm:h-14 transition-all duration-300 hover:opacity-100",
-                                                    tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning group-data-[selected=true]:scale-105 transition-transform"
+                                                    tabContent: "font-semibold  tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning group-data-[selected=true]:scale-105 transition-transform"
                                                 }}
                                             >
                                                 <Tab key="internal" title="Orders" />
@@ -215,7 +215,7 @@ export default function OrdersPage() {
                                                 tabList: "gap-4 sm:gap-6 relative rounded-none p-0 border-b border-divider/40",
                                                 cursor: "bg-warning w-full h-[2.5px] rounded-t-full",
                                                 tab: "max-w-fit px-2.5 sm:px-4 h-8 sm:h-10 transition-all duration-300",
-                                                tabContent: "font-semibold uppercase tracking-wider text-[10px] text-default-500 group-data-[selected=true]:text-warning"
+                                                tabContent: "font-semibold  tracking-wider text-[10px] text-default-500 group-data-[selected=true]:text-warning"
                                             }}
                                         >
                                             <Tab key="All" title="All Orders" />
@@ -287,8 +287,8 @@ export default function OrdersPage() {
                                                             {step.icon}
                                                         </div>
                                                         <div className="flex flex-col items-center text-center">
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-foreground leading-tight">{step.label}</span>
-                                                            <span className="text-[9px] text-default-400 font-bold uppercase tracking-tight mt-0.5">{step.sub}</span>
+                                                            <span className="text-[10px] font-black  tracking-widest text-foreground leading-tight">{step.label}</span>
+                                                            <span className="text-[9px] text-default-400 font-bold  tracking-tight mt-0.5">{step.sub}</span>
                                                         </div>
                                                         {idx < 3 && (
                                                             <div className="hidden sm:block absolute top-6 left-[calc(50%+30px)] w-[calc(100%-60px)] h-[2px] bg-gradient-to-r from-divider to-transparent" />
@@ -316,7 +316,7 @@ export default function OrdersPage() {
                                         <>
                                             <ModalHeader className="flex flex-col gap-1 pt-6 px-6">
                                                 <h3 className="text-xl font-black tracking-tight">Create New Order</h3>
-                                                <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Find a product to get started</p>
+                                                <p className="text-xs text-default-400 font-bold  tracking-widest mt-0.5">Find a product to get started</p>
                                             </ModalHeader>
                                             <ModalBody className="py-6 px-6 gap-4">
                                                 <div
@@ -355,7 +355,7 @@ export default function OrdersPage() {
 
                                                 <div className="mt-2 p-3 bg-primary/5 rounded-xl border border-primary/10">
                                                     <p className="text-[10px] text-primary-600 font-medium leading-relaxed">
-                                                        <span className="font-bold uppercase tracking-wide mr-1">Process Flow:</span>
+                                                        <span className="font-bold  tracking-wide mr-1">Process Flow:</span>
                                                         Select a product → Create Enquiry → Finalize Terms → Order Generated
                                                     </p>
                                                 </div>

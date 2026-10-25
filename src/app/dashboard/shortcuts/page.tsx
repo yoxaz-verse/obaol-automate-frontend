@@ -28,8 +28,8 @@ export default function ShortcutsPage() {
             <FiInfo size={20} />
           </div>
           <div>
-            <h2 className="text-2xl font-black uppercase tracking-wide">Keyboard Shortcuts</h2>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-default-400">Dashboard Navigation</p>
+            <h2 className="text-2xl font-black  tracking-wide">Keyboard Shortcuts</h2>
+            <p className="text-[10px] font-bold  tracking-[0.3em] text-default-400">Dashboard Navigation</p>
           </div>
         </CardHeader>
         <Divider />
@@ -42,7 +42,7 @@ export default function ShortcutsPage() {
                   <div key={action} className="flex items-center justify-between rounded-2xl border border-default-200/50 bg-content2/30 p-4">
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-foreground">{label}</span>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400">Cmd/Ctrl + {key}</span>
+                      <span className="text-[10px] font-black  tracking-[0.2em] text-default-400">Cmd/Ctrl + {key}</span>
                     </div>
                     <select
                       value={key}
@@ -58,7 +58,7 @@ export default function ShortcutsPage() {
                         setShortcutConfig(next);
                         saveShortcuts(next as any);
                       }}
-                      className="rounded-xl border border-default-200/60 bg-content1/60 px-3 py-2 text-xs font-black uppercase tracking-widest"
+                      className="rounded-xl border border-default-200/60 bg-content1/60 px-3 py-2 text-xs font-black  tracking-widest"
                     >
                       {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => (
                         <option key={letter} value={letter}>{letter}</option>
@@ -86,7 +86,7 @@ export default function ShortcutsPage() {
                   saveShortcuts(DEFAULT_SHORTCUTS);
                   setShortcutError("");
                 }}
-                className="w-full rounded-2xl border border-obaol-500/30 bg-obaol-500/10 px-4 py-3 text-xs font-black uppercase tracking-[0.3em] text-obaol-600 hover:bg-obaol-500/20 transition"
+                className="w-full rounded-2xl border border-obaol-500/30 bg-obaol-500/10 px-4 py-3 text-xs font-black  tracking-[0.3em] text-obaol-600 hover:bg-obaol-500/20 transition"
               >
                 Reset to Defaults
               </button>

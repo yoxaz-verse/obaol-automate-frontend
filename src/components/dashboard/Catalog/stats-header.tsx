@@ -30,7 +30,7 @@ export const StatsHeader: React.FC<StatsHeaderProps> = ({
                             <FiCheckCircle size={28} />
                         </div>
                         <div className="flex flex-col">
-                            <p className="text-success-700 font-semibold text-sm uppercase tracking-wider">My Catalog</p>
+                            <p className="text-success-700 font-semibold text-sm  tracking-wider">My Catalog</p>
                             <div className="flex items-baseline gap-2">
                                 <h2 className="text-3xl font-bold text-foreground">
                                     {isLoading ? "..." : myCatalogCount}

@@ -123,7 +123,7 @@ export default function DocumentTemplatePreview({
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-xs uppercase tracking-[0.3em] text-default-400 font-black">Template Preview</div>
+          <div className="text-xs  tracking-[0.3em] text-default-400 font-black">Template Preview</div>
           <div className="text-lg font-semibold text-foreground">{docLabel}</div>
         </div>
         {String(actionType || "").toUpperCase() === "UPLOAD" && (

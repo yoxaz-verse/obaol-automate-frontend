@@ -174,7 +174,7 @@ export default function AssociateDashboard({
       {!isLoading && model.attentionAction && <Card className="border border-warning-500/30 bg-warning-500/10 shadow-none">
         <CardBody className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-widest text-default-500">{model.attentionAction.eyebrow}</p>
+            <p className="text-xs font-bold  tracking-widest text-default-500">{model.attentionAction.eyebrow}</p>
             <h2 className="mt-1 text-xl font-black tracking-tight text-foreground sm:text-2xl">{model.attentionAction.title}</h2>
             <p className="mt-2 text-sm leading-6 text-default-600">{model.attentionAction.description}</p>
           </div>

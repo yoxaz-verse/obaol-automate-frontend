@@ -130,7 +130,7 @@ export default function PendingEngagementActions({ user }: Props) {
 
   return (
     <div className="mt-6 rounded-[1.5rem] border border-success-500/20 bg-success-500/8 p-5">
-      <p className="text-xs font-black uppercase tracking-[0.16em] text-success-500">
+      <p className="text-xs font-black  tracking-[0.16em] text-success-500">
         You can add now.
       </p>
       <p className="mt-2 text-[11px] font-semibold text-default-400">
@@ -138,17 +138,17 @@ export default function PendingEngagementActions({ user }: Props) {
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         {canSupplier && (
-          <Button className="bg-obaol-500 text-obaol-950 font-bold uppercase tracking-[0.12em]" onPress={() => setSupplierOpen(true)}>
+          <Button className="bg-obaol-500 text-obaol-950 font-bold  tracking-[0.12em]" onPress={() => setSupplierOpen(true)}>
             List Your Products
           </Button>
         )}
         {canLab && (
-          <Button className="bg-success-600 text-white font-black uppercase tracking-[0.12em]" onPress={() => setLabOpen(true)}>
+          <Button className="bg-success-600 text-white font-black  tracking-[0.12em]" onPress={() => setLabOpen(true)}>
             Add Lab Details
           </Button>
         )}
         {canWarehouse && (
-          <Button className="bg-primary-600 text-white font-black uppercase tracking-[0.12em]" onPress={() => setWarehouseOpen(true)}>
+          <Button className="bg-primary-600 text-white font-black  tracking-[0.12em]" onPress={() => setWarehouseOpen(true)}>
             Add Warehouse Details
           </Button>
         )}

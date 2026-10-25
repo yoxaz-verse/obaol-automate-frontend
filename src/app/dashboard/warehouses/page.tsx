@@ -68,7 +68,7 @@ function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label:
             <CardBody className="flex flex-row items-center gap-4 p-4">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${color}`}>{icon}</div>
                 <div>
-                    <p className="text-[10px] uppercase tracking-widest text-default-400 font-bold">{label}</p>
+                    <p className="text-[10px]  tracking-widest text-default-400 font-bold">{label}</p>
                     <p className="text-xl font-black text-foreground leading-tight">{value}</p>
                 </div>
             </CardBody>
@@ -80,7 +80,7 @@ function EmptyState({ icon, title, description }: { icon: React.ReactNode; title
     return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-16 h-16 rounded-2xl bg-default-100 flex items-center justify-center text-3xl text-default-400 mb-4">{icon}</div>
-            <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-2">{title}</h3>
+            <h3 className="text-sm font-black text-foreground  tracking-widest mb-2">{title}</h3>
             <p className="text-xs text-default-400 max-w-xs leading-relaxed">{description}</p>
         </div>
     );
@@ -235,7 +235,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground uppercase leading-tight">
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground  leading-tight">
                         Warehouse <span className="text-obaol-500">Management</span>
                     </h1>
                     <p className="text-xs text-default-400 mt-1 font-medium">
@@ -295,7 +295,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                 color="warning"
                 classNames={{
                     tabList: "gap-4 border-b border-default-200 w-full",
-                    tab: "text-xs font-bold uppercase tracking-widest pb-3",
+                    tab: "text-xs font-bold  tracking-widest pb-3",
                     cursor: "bg-obaol-500",
                 }}
             >
@@ -315,16 +315,16 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                                         </div>
                                                         <div className="min-w-0">
                                                             <h3 className="font-black text-sm text-foreground tracking-tight truncate">{wh.name}</h3>
-                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">Capacity · {wh.totalCapacity ?? 0} MT</p>
+                                                            <p className="text-[10px] text-default-400 font-medium  tracking-widest">Capacity · {wh.totalCapacity ?? 0} MT</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 flex-shrink-0">
                                                         {wh.listingType === "RENTAL" && wh.isRentalActive && (
-                                                            <Chip size="sm" variant="flat" color="warning" className="text-[9px] font-bold uppercase tracking-wide">
+                                                            <Chip size="sm" variant="flat" color="warning" className="text-[9px] font-bold  tracking-wide">
                                                                 Rental
                                                             </Chip>
                                                         )}
-                                                        <Chip size="sm" variant="flat" color={wh.isActive ? "success" : "default"} className="text-[9px] font-bold uppercase tracking-wide">
+                                                        <Chip size="sm" variant="flat" color={wh.isActive ? "success" : "default"} className="text-[9px] font-bold  tracking-wide">
                                                             {wh.isActive ? "Active" : "Inactive"}
                                                         </Chip>
                                                         <button
@@ -352,7 +352,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                                     {Array.isArray(wh.allowedCategoryIds) && wh.allowedCategoryIds.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 pt-1">
                                                             {wh.allowedCategoryIds.map((catId) => (
-                                                                <Chip key={catId} size="sm" variant="flat" className="text-[9px] font-bold uppercase tracking-wide">
+                                                                <Chip key={catId} size="sm" variant="flat" className="text-[9px] font-bold  tracking-wide">
                                                                     {categoryNameMap.get(String(catId)) || "Category"}
                                                                 </Chip>
                                                             ))}
@@ -423,7 +423,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                                     </p>
                                                 </div>
                                                 <div className="text-right">
-                                                    <Chip size="sm" variant="flat" color={c.status === "paid" ? "success" : c.status === "pending" ? "warning" : "default"} className="text-[9px] font-bold uppercase">
+                                                    <Chip size="sm" variant="flat" color={c.status === "paid" ? "success" : c.status === "pending" ? "warning" : "default"} className="text-[9px] font-bold ">
                                                         {c.status || "Draft"}
                                                     </Chip>
                                                     {c.amount && <p className="text-xs font-black text-foreground mt-1">{formatRate(Number(c.amount))}</p>}
@@ -473,31 +473,31 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                 }}
                                 classNames={{ 
                                   trigger: "h-11 min-h-[44px] bg-default-100/60 border-default-200",
-                                  value: "text-xs font-black uppercase tracking-tight"
+                                  value: "text-xs font-black  tracking-tight"
                                 }}
                             >
                                 <SelectItem key="GENERAL" textValue="General Warehouse">
                                     <div className="flex items-center gap-3">
                                         <LuWarehouse className="text-default-400" />
-                                        <span className="text-xs font-bold uppercase tracking-tight">General Warehouse</span>
+                                        <span className="text-xs font-bold  tracking-tight">General Warehouse</span>
                                     </div>
                                 </SelectItem>
                                 <SelectItem key="COLD_STORAGE" textValue="Cold Storage">
                                     <div className="flex items-center gap-3">
                                         <LuWarehouse className="text-info-500" />
-                                        <span className="text-xs font-bold uppercase tracking-tight">Cold Storage</span>
+                                        <span className="text-xs font-bold  tracking-tight">Cold Storage</span>
                                     </div>
                                 </SelectItem>
                                 <SelectItem key="BONDED" textValue="Bonded Warehouse">
                                     <div className="flex items-center gap-3">
                                         <LuWarehouse className="text-obaol-500" />
-                                        <span className="text-xs font-bold uppercase tracking-tight">Bonded Warehouse</span>
+                                        <span className="text-xs font-bold  tracking-tight">Bonded Warehouse</span>
                                     </div>
                                 </SelectItem>
                                 <SelectItem key="AGRO" textValue="Agro Warehouse">
                                     <div className="flex items-center gap-3">
                                         <LuWarehouse className="text-success-500" />
-                                        <span className="text-xs font-bold uppercase tracking-tight">Agro Warehouse</span>
+                                        <span className="text-xs font-bold  tracking-tight">Agro Warehouse</span>
                                     </div>
                                 </SelectItem>
                             </Select>
@@ -618,7 +618,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                 }}
                                 classNames={{ 
                                   trigger: "h-11 min-h-[44px] bg-default-100/60 border-default-200",
-                                  value: "text-xs font-black uppercase tracking-tight"
+                                  value: "text-xs font-black  tracking-tight"
                                 }}
                             >
                                 {warehouses.filter(w => w.isActive).map(wh => (
@@ -626,8 +626,8 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                         <div className="flex items-center gap-3">
                                             <BsBoxes className="text-obaol-500" />
                                             <div className="flex flex-col">
-                                                <span className="text-xs font-black uppercase italic tracking-tighter leading-tight">{wh.name}</span>
-                                                <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest opacity-60">ID: {wh._id.slice(-6)}</span>
+                                                <span className="text-xs font-black  italic tracking-tighter leading-tight">{wh.name}</span>
+                                                <span className="text-[9px] font-bold text-default-400  tracking-widest opacity-60">ID: {wh._id.slice(-6)}</span>
                                             </div>
                                         </div>
                                     </SelectItem>

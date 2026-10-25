@@ -37,7 +37,7 @@ const StatCard = ({
     borderClass: string;
 }) => (
     <div className={`rounded-2xl border p-3 sm:p-4 shadow-sm ${themeClass} ${borderClass}`}>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-default-400">{label}</p>
+        <p className="text-[10px] font-bold  tracking-widest text-default-400">{label}</p>
         <p className="mt-1 text-xl sm:text-2xl font-black tracking-tight text-foreground">{value}</p>
     </div>
 );
@@ -212,7 +212,7 @@ export default function MarketplacePage() {
                                     tabList: "gap-2 md:gap-6 relative rounded-none p-0 border-b border-divider/30 min-w-max",
                                     cursor: "bg-obaol-500 w-full h-[2px] rounded-t-full",
                                     tab: "max-w-fit px-2 md:px-2 h-10 md:h-11",
-                                    tabContent: "font-semibold uppercase tracking-wider text-[9px] md:text-[10px] text-default-400 transition-all whitespace-nowrap group-data-[selected=true]:text-obaol-500"
+                                    tabContent: "font-semibold  tracking-wider text-[9px] md:text-[10px] text-default-400 transition-all whitespace-nowrap group-data-[selected=true]:text-obaol-500"
                                 }}
                             >
                                 <TabAny
@@ -243,7 +243,7 @@ export default function MarketplacePage() {
                         <div className="flex w-full gap-4">
                             <div className="w-full min-w-0 pb-10">
                                 <div className="mb-2 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-default-500">
+                                    <div className="text-[10px] font-bold  tracking-wider text-default-500">
                                         Trade Listings
                                     </div>
                                     {canAddOwnRate && (
@@ -252,7 +252,7 @@ export default function MarketplacePage() {
                                             onPress={() => router.push("/dashboard/product")}
                                             variant="flat"
                                             color="warning"
-                                            className="font-black tracking-widest px-4 md:px-5 h-9 md:h-10 rounded-xl uppercase text-[10px] md:text-[11px]"
+                                            className="font-black tracking-widest px-4 md:px-5 h-9 md:h-10 rounded-xl  text-[10px] md:text-[11px]"
                                             startContent={<FiPlus size={16} />}
                                         >
                                             Create trade listing
@@ -273,7 +273,7 @@ export default function MarketplacePage() {
                                         tabList: "gap-4 md:gap-10 relative rounded-none p-0 border-b border-divider/40",
                                         cursor: "bg-primary w-full h-[2px] md:h-[3px] rounded-t-full md:shadow-[0_-1px_10px_rgba(var(--heroui-primary-rgb),0.2)]",
                                         tab: "max-w-fit px-3 md:px-4 h-11 md:h-14 transition-all duration-300 hover:opacity-100",
-                                        tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary group-data-[selected=true]:scale-105 transition-transform"
+                                        tabContent: "font-semibold  tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary group-data-[selected=true]:scale-105 transition-transform"
                                     }}
                                 >
                                     <TabAny key={"marketplace-live"} title="Today’s Live">

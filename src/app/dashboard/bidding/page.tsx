@@ -393,7 +393,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   const variantSearchPending = variantSearch.trim() !== debouncedVariantSearch || productVariantsQuery.isFetching;
 
   const themeField = {
-    label: "font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-default-500 mb-1",
+    label: "font-bold text-[10px] sm:text-[11px]  tracking-wider text-default-500 mb-1",
     inputWrapper:
       "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[focus=true]:border-warning-500 data-[focus=true]:ring-2 data-[focus=true]:ring-warning-500/20 transition-all border shadow-none",
     trigger:
@@ -401,7 +401,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   };
 
   const textareaThemeField = {
-    label: "font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-default-500 mb-1",
+    label: "font-bold text-[10px] sm:text-[11px]  tracking-wider text-default-500 mb-1",
     inputWrapper:
       "py-3 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[focus=true]:border-warning-500 data-[focus=true]:ring-2 data-[focus=true]:ring-warning-500/20 transition-all border shadow-none",
   };
@@ -415,7 +415,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
           <div>
             <div className="mb-2 flex items-center gap-2 text-warning-600">
               <FiLock />
-              <span className="text-xs font-black uppercase tracking-[.2em]">Sealed product offers</span>
+              <span className="text-xs font-black  tracking-[.2em]">Sealed product offers</span>
             </div>
             <h1 className="text-3xl font-black">{mode === "buyer" ? "Buying Requests" : "Buyer Requests"}</h1>
             <p className="mt-1 max-w-2xl text-sm text-default-500">
@@ -494,7 +494,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
             <article key={item._id} className="rounded-3xl border border-divider bg-content1 p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-warning-600">
+                  <p className="text-xs font-bold  tracking-widest text-warning-600">
                     {item.product?.name || "Product requirement"}
                   </p>
                   <h2 className="mt-1 text-xl font-black">{item.title}</h2>
@@ -678,7 +678,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
           {(onClose) => (
             <form onSubmit={handleCreateSubmit} className="contents">
               <ModalHeader className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-warning-500">
+                <div className="flex items-center gap-2 text-xs font-black  tracking-[0.2em] text-warning-500">
                   <FiLock size={13} />
                   <span>Sealed Procurement</span>
                 </div>
@@ -765,7 +765,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                       <AutocompleteItem key={p.id} textValue={p.name}>
                         <div className="flex items-center justify-between py-0.5">
                           <span className="text-sm font-semibold text-foreground">{p.name}</span>
-                          {p.category && <span className="text-[11px] uppercase tracking-wider text-default-400">{p.category}</span>}
+                          {p.category && <span className="text-[11px]  tracking-wider text-default-400">{p.category}</span>}
                         </div>
                       </AutocompleteItem>
                     )}
@@ -984,7 +984,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
           {(onClose) => (
             <form onSubmit={handleSubmitOffer} className="contents">
               <ModalHeader className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-warning-500">
+                <div className="flex items-center gap-2 text-xs font-black  tracking-[0.2em] text-warning-500">
                   <FiLock size={13} />
                   <span>Confidential Offer</span>
                 </div>

@@ -201,14 +201,14 @@ const ResponsibilityEventForm: React.FC<Props> = ({
     <Card className="lg:col-span-3 order-12 border border-divider bg-content1/50">
       <CardHeader className="px-6 pt-6 pb-0 flex flex-col items-start gap-1">
         <span className="font-bold text-lg tracking-tight whitespace-nowrap">Responsibility Event</span>
-        <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Execution Ownership Allocation</span>
+        <span className="text-[10px]  font-black tracking-widest text-default-400">Execution Ownership Allocation</span>
       </CardHeader>
       <Divider className="mt-4" />
       <CardBody className="flex flex-col gap-10 px-6 py-6 transition-all duration-300">
         <div className="flex flex-col gap-4 p-5 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/60 to-white dark:from-default-100/5 dark:to-transparent shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Trade Terms</span>
+              <span className="text-[10px]  font-black tracking-widest text-default-400">Trade Terms</span>
               <span className="text-base font-black text-foreground">Incoterms & Payment</span>
             </div>
             {showSaveTermsButton && (
@@ -244,7 +244,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 setSelectedIncotermId((arr[0] as string) || "");
               }}
               isDisabled={!canEditResponsibilityPlan || isReadOnlyAfterConversion}
-              classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+              classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
               startContent={<LuAnchor size={16} className="text-primary/70" />}
             >
               {incotermOptions.map((item: any) => (
@@ -264,7 +264,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 setSelectedPaymentTermId((arr[0] as string) || "");
               }}
               isDisabled={!canEditResponsibilityPlan || isReadOnlyAfterConversion}
-              classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+              classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
               startContent={<LuFileCheck size={16} className="text-success/70" />}
             >
               {(filteredPaymentTerms.length > 0 ? filteredPaymentTerms : paymentTermOptions).map((item: any) => (
@@ -276,7 +276,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
           </div>
           {selectedPaymentTerm && Array.isArray(selectedPaymentTerm?.milestones) && selectedPaymentTerm.milestones.length > 0 && (
             <div className="mt-3 rounded-2xl border border-default-200/60 bg-background/60 p-3">
-              <div className="text-[10px] uppercase font-black tracking-widest text-default-400 mb-2">Payment Framework Milestones</div>
+              <div className="text-[10px]  font-black tracking-widest text-default-400 mb-2">Payment Framework Milestones</div>
               <div className="flex flex-col gap-2">
                 {selectedPaymentTerm.milestones.map((milestone: any, idx: number) => (
                   <div
@@ -284,7 +284,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                     className="flex items-center justify-between gap-3 rounded-xl border border-divider px-3 py-2 bg-background/40"
                   >
                     <div className="flex flex-col">
-                      <span className="text-xs font-black text-foreground uppercase tracking-tight">{milestone.label}</span>
+                      <span className="text-xs font-black text-foreground  tracking-tight">{milestone.label}</span>
                       <span className="text-[11px] text-default-500">
                         {String(milestone.triggerType || "").toUpperCase() === "STAGE"
                           ? `Stage: ${String(milestone.triggerValue || "").replaceAll("_", " ")}`
@@ -310,7 +310,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 <LuNavigation className="text-primary" size={20} />
                 Execution Context
               </h3>
-              <p className="text-xs text-default-500 font-bold tracking-tight uppercase opacity-70">Logistics Parameters & Trade Type</p>
+              <p className="text-xs text-default-500 font-bold tracking-tight  opacity-70">Logistics Parameters & Trade Type</p>
             </div>
             <div className="bg-default-200/50 dark:bg-black/40 p-1.5 rounded-2xl gap-1.5 border border-default-300/40 flex self-start md:self-center shadow-inner md:mr-4">
               {["DOMESTIC", "INTERNATIONAL"].map((type) => {
@@ -331,7 +331,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                       }
                     }}
                     disabled={!canToggle}
-                    className={`px-6 h-9 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${isSelected
+                    className={`px-6 h-9 rounded-xl text-[10px] font-black  tracking-[0.15em] transition-all duration-300 ${isSelected
                       ? "bg-white dark:bg-default-200 text-primary shadow-xl scale-[1.05] z-10 ring-1 ring-black/5"
                       : "text-default-500 hover:text-default-700 hover:bg-white/40 dark:hover:bg-default-200/20"
                       } ${!canToggle ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}`}
@@ -353,7 +353,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         <LuMapPin size={20} />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Origin</span>
+                        <span className="text-[9px] font-black  tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Origin</span>
                         <span className="text-base font-black text-foreground tracking-tighter">Ship From</span>
                       </div>
                     </div>
@@ -362,7 +362,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         size="sm"
                         label="State"
                         variant="bordered"
-                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
                         selectedKeys={executionContext.originState ? [executionContext.originState] : []}
                         onSelectionChange={(keys) => {
                           const arr = Array.from(keys as Set<string>);
@@ -383,7 +383,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         size="sm"
                         label="District"
                         variant="bordered"
-                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
                         selectedKeys={executionContext.originDistrict ? [executionContext.originDistrict] : []}
                         onSelectionChange={(keys) => {
                           const arr = Array.from(keys as Set<string>);
@@ -405,7 +405,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         <LuNavigation size={20} />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Destination</span>
+                        <span className="text-[9px] font-black  tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Destination</span>
                         <span className="text-base font-black text-foreground tracking-tighter">Ship To</span>
                       </div>
                     </div>
@@ -414,7 +414,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         size="sm"
                         label="State"
                         variant="bordered"
-                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
                         selectedKeys={executionContext.destinationState ? [executionContext.destinationState] : []}
                         onSelectionChange={(keys) => {
                           const arr = Array.from(keys as Set<string>);
@@ -435,7 +435,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         size="sm"
                         label="District"
                         variant="bordered"
-                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
                         selectedKeys={executionContext.destinationDistrict ? [executionContext.destinationDistrict] : []}
                         onSelectionChange={(keys) => {
                           const arr = Array.from(keys as Set<string>);
@@ -460,7 +460,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         <LuMapPin size={20} />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Origin Country</span>
+                        <span className="text-[9px] font-black  tracking-[0.2em] text-default-400 leading-none mb-1">Origin Country</span>
                         <span className="text-base font-black text-foreground tracking-tighter">Ship From</span>
                       </div>
                     </div>
@@ -469,7 +469,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         size="sm"
                         label="Country"
                         variant="bordered"
-                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
                         selectedKeys={executionContext.originCountry ? [executionContext.originCountry] : []}
                         onSelectionChange={(keys) => {
                           const arr = Array.from(keys as Set<string>);
@@ -490,7 +490,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         size="sm"
                         label="Port of Origin"
                         variant="bordered"
-                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
                         selectedKeys={executionContext.originPort ? [executionContext.originPort] : []}
                         onSelectionChange={(keys) => {
                           const arr = Array.from(keys as Set<string>);
@@ -513,7 +513,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         <LuNavigation size={20} />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Destination Country</span>
+                        <span className="text-[9px] font-black  tracking-[0.2em] text-default-400 leading-none mb-1">Destination Country</span>
                         <span className="text-base font-black text-foreground tracking-tighter">Ship To</span>
                       </div>
                     </div>
@@ -522,7 +522,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         size="sm"
                         label="Country"
                         variant="bordered"
-                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
                         selectedKeys={executionContext.destinationCountry ? [executionContext.destinationCountry] : []}
                         onSelectionChange={(keys) => {
                           const arr = Array.from(keys as Set<string>);
@@ -543,7 +543,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         size="sm"
                         label="Port of Arrival"
                         variant="bordered"
-                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
                         selectedKeys={executionContext.destinationPort ? [executionContext.destinationPort] : []}
                         onSelectionChange={(keys) => {
                           const arr = Array.from(keys as Set<string>);
@@ -576,8 +576,8 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         {React.cloneElement(field.icon, { size: 18 })}
                       </div>
                       <div className="flex flex-col min-w-0">
-                        <span className="text-[10px] font-black text-foreground/90 uppercase tracking-widest leading-none mb-1">{field.label}</span>
-                        <span className="text-[8px] text-default-400 font-bold uppercase tracking-tighter opacity-70">Step Owner Selection</span>
+                        <span className="text-[10px] font-black text-foreground/90  tracking-widest leading-none mb-1">{field.label}</span>
+                        <span className="text-[8px] text-default-400 font-bold  tracking-tighter opacity-70">Step Owner Selection</span>
                       </div>
                     </div>
 
@@ -594,7 +594,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                               }
                             }}
                             disabled={!canSelect}
-                            className={`relative flex-1 flex items-center justify-center gap-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 z-10
+                            className={`relative flex-1 flex items-center justify-center gap-1.5 rounded-xl text-[9px] font-black  tracking-[0.1em] transition-all duration-300 z-10
                               ${isSelected ? "text-white" : "text-default-400 hover:text-default-700"}
                               ${!canSelect && !isSelected ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
                             `}
@@ -625,7 +625,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
           <div className="flex flex-col gap-4 p-4 rounded-2xl border border-default-200/60 bg-default-50/40 dark:bg-default-100/5">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col">
-                <span className="text-xs font-black uppercase tracking-widest text-foreground">Inland Transportation Segments</span>
+                <span className="text-xs font-black  tracking-widest text-foreground">Inland Transportation Segments</span>
                 <span className="text-[11px] text-default-500 font-semibold">Add each inland leg that should run on this order.</span>
               </div>
               {inlandTransportSegments.length > 0 && (
@@ -715,7 +715,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 <LuPackage size={20} />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Product Specs</span>
+                <span className="text-[10px] font-black  tracking-[0.2em] text-default-400 leading-none mb-1">Product Specs</span>
                 <span className="text-base font-black text-foreground tracking-tighter">Packaging Detail</span>
               </div>
               {packagingSpecifications.trim() && (
@@ -745,7 +745,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                   <LuActivity size={20} />
                 </div>
-                <span className="text-sm font-black uppercase tracking-widest text-foreground">Route Notes</span>
+                <span className="text-sm font-black  tracking-widest text-foreground">Route Notes</span>
                 {String(executionContext.routeNotes || "").trim() && (
                   <span className="ml-auto text-[10px] font-bold text-primary-600">{attributionLabel("routeNotes")}</span>
                 )}
@@ -774,7 +774,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                     <FiAlertCircle size={24} className="animate-pulse" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-danger-500">Prerequisite</span>
+                    <span className="text-[10px] font-bold  tracking-widest text-danger-500">Prerequisite</span>
                     <p className="text-[11px] font-semibold text-foreground opacity-80 leading-tight tracking-tight italic">Packaging specs required for order generation.</p>
                   </div>
                 </div>
@@ -786,7 +786,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                     <FiInfo size={24} />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-obaol-500">Deployment Context</span>
+                    <span className="text-[10px] font-bold  tracking-wider text-obaol-500">Deployment Context</span>
                     <p className="text-[11px] font-medium text-foreground opacity-80 leading-tight tracking-tight italic">Cross-border logistics and port handling protocols will be enforced.</p>
                   </div>
                 </div>
@@ -800,7 +800,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         <Button
                           fullWidth
                           size="lg"
-                          className={`h-16 rounded-[1.5rem] font-bold uppercase tracking-widest text-[11px] shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${!isResponsibilityEventChanged && responsibilitySavedAt ? "bg-success text-white" : "bg-foreground text-background"}`}
+                          className={`h-16 rounded-[1.5rem] font-bold  tracking-widest text-[11px] shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${!isResponsibilityEventChanged && responsibilitySavedAt ? "bg-success text-white" : "bg-foreground text-background"}`}
                           isLoading={Boolean(savingFramework)}
                           isDisabled={Boolean(packagingDisclosureError || routeNotesDisclosureError) || (!isResponsibilityEventChanged && !!responsibilitySavedAt) || isReadOnlyAfterConversion}
                           onPress={() => onSaveFramework()}
@@ -810,7 +810,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         </Button>
                         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-foreground/[0.03] border border-foreground/5">
                            <div className={`w-1.5 h-1.5 rounded-full ${isResponsibilityEventChanged ? "bg-obaol-500 animate-pulse" : "bg-success"}`} />
-                           <span className={`text-[9px] font-bold uppercase tracking-widest italic leading-none ${isResponsibilityEventChanged ? "text-default-400" : "text-success"}`}>
+                           <span className={`text-[9px] font-bold  tracking-widest italic leading-none ${isResponsibilityEventChanged ? "text-default-400" : "text-success"}`}>
                              {isResponsibilityEventChanged ? "Awaiting Synchronization" : "Workspace Synchronized"}
                            </span>
                         </div>
@@ -826,7 +826,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                           onPress={() => onFinalize()}
                           isLoading={Boolean(finalizeLoading)}
                           isDisabled={isReadOnlyAfterConversion || Boolean(packagingDisclosureError || routeNotesDisclosureError)}
-                          className={`h-16 rounded-[1.75rem] font-black uppercase tracking-[0.4em] text-[11px] italic transition-all duration-500 relative overflow-hidden group/btn
+                          className={`h-16 rounded-[1.75rem] font-black  tracking-[0.4em] text-[11px] italic transition-all duration-500 relative overflow-hidden group/btn
                             ${isReadOnlyAfterConversion 
                               ? "bg-success/10 text-success border border-success/30 shadow-[0_0_25px_rgba(34,197,94,0.15)]" 
                               : "bg-obaol-500 text-black shadow-[0_15px_45px_rgba(234,179,8,0.3)] hover:shadow-obaol-500/60 hover:-translate-y-1 hover:scale-[1.02]"
@@ -845,7 +845,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                   <div className="flex flex-col items-center gap-2 mt-4">
                     <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-foreground/[0.04] border border-white/5 shadow-inner">
                        <div className={`w-1.5 h-1.5 rounded-full ${isReadOnlyAfterConversion ? "bg-success animate-pulse" : "bg-obaol-500 animate-pulse"} shadow-[0_0_8px_rgba(234,179,8,0.5)]`} />
-                       <span className="text-[9px] font-black uppercase tracking-[0.5em] text-white/40 italic">
+                       <span className="text-[9px] font-black  tracking-[0.5em] text-white/40 italic">
                           {finalizeLoading || savingFramework
                             ? "PARSING PROTOCOL..."
                             : isReadOnlyAfterConversion
@@ -854,7 +854,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                        </span>
                     </div>
                     {responsibilitySavedAt && (
-                       <span className="text-[8px] font-bold uppercase tracking-widest text-default-400 opacity-50">
+                       <span className="text-[8px] font-bold  tracking-widest text-default-400 opacity-50">
                           LOGGED AT // {dayjs(responsibilitySavedAt).format("HH:mm:ss")}
                        </span>
                     )}

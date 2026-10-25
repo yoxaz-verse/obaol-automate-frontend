@@ -292,7 +292,7 @@ export default function SampleRequestDetailPage() {
       <section className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-warning border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-semibold uppercase tracking-widest text-default-400">Establishing Data Link...</p>
+          <p className="text-sm font-semibold  tracking-widest text-default-400">Establishing Data Link...</p>
         </div>
       </section>
     );
@@ -392,10 +392,10 @@ export default function SampleRequestDetailPage() {
                <LuChevronLeft size={16} />
              </Button>
              <div className="w-1.5 h-1.5 bg-warning rounded-full" />
-             <span className="text-[10px] font-bold tracking-widest uppercase text-warning">Sample Procurement</span>
+             <span className="text-[10px] font-bold tracking-widest  text-warning">Sample Procurement</span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{productName} • {variantName}</h1>
-          <p className="text-default-500 text-xs font-medium uppercase tracking-[0.15em] opacity-80">
+          <p className="text-default-500 text-xs font-medium  tracking-[0.15em] opacity-80">
             Internal Sample Management Flow
           </p>
         </div>
@@ -404,7 +404,7 @@ export default function SampleRequestDetailPage() {
            <Chip 
              variant="flat" 
              color={statusColor(status)}
-             className="h-10 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px] border border-current/10"
+             className="h-10 px-6 rounded-xl font-bold  tracking-widest text-[10px] border border-current/10"
            >
              {statusLabel}
            </Chip>
@@ -422,8 +422,8 @@ export default function SampleRequestDetailPage() {
                     <LuUser size={24} />
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400 block mb-0.5">Request Owner</span>
-                    <p className="text-sm font-bold uppercase tracking-tight">{buyerDisplay || "—"}</p>
+                    <span className="text-[10px] font-bold  tracking-widest text-default-400 block mb-0.5">Request Owner</span>
+                    <p className="text-sm font-bold  tracking-tight">{buyerDisplay || "—"}</p>
                   </div>
                 </div>
 
@@ -433,8 +433,8 @@ export default function SampleRequestDetailPage() {
                       <LuBuilding2 size={24} />
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400 block mb-0.5">Supplier</span>
-                      <p className="text-sm font-bold uppercase tracking-tight">{supplierDisplay || "—"}</p>
+                      <span className="text-[10px] font-bold  tracking-widest text-default-400 block mb-0.5">Supplier</span>
+                      <p className="text-sm font-bold  tracking-tight">{supplierDisplay || "—"}</p>
                     </div>
                   </div>
                 )}
@@ -442,35 +442,35 @@ export default function SampleRequestDetailPage() {
 
               <div className="flex flex-col gap-6 p-6 rounded-[2rem] bg-foreground/[0.03] border border-foreground/5 justify-center">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Requested Quantity</span>
+                  <span className="text-[10px] font-bold  tracking-widest text-default-400">Requested Quantity</span>
                   <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
                   <span className="text-xl font-bold text-foreground">{request?.requestedSampleQtyKg || 0} KG</span>
                 </div>
                 
                 {request?.supplierPrice && (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Quote Rate</span>
+                    <span className="text-[10px] font-bold  tracking-widest text-default-400">Quote Rate</span>
                     <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
                     <span className="text-xl font-bold text-warning">{request.supplierPrice} <span className="text-[10px] text-default-400">/KG</span></span>
                   </div>
                 )}
                 {request?.supplierPrice && (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Sample Payment Term</span>
+                    <span className="text-[10px] font-bold  tracking-widest text-default-400">Sample Payment Term</span>
                     <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
                     <span className="text-sm font-bold text-foreground">{samplePaymentTermLabel}</span>
                   </div>
                 )}
                 {request?.paymentMode && (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Payment Mode</span>
+                    <span className="text-[10px] font-bold  tracking-widest text-default-400">Payment Mode</span>
                     <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
                     <span className="text-sm font-bold text-foreground">{paymentModeLabel}</span>
                   </div>
                 )}
                 {String(request?.paymentMode || "").toUpperCase() === "ONLINE" && request?.onlinePaymentMethod && (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Online Method</span>
+                    <span className="text-[10px] font-bold  tracking-widest text-default-400">Online Method</span>
                     <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
                     <span className="text-sm font-bold text-foreground">{onlinePaymentMethodLabel}</span>
                   </div>
@@ -485,8 +485,8 @@ export default function SampleRequestDetailPage() {
                     <LuTruck size={20} />
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary block mb-0.5">Logistics Tracking</span>
-                    <p className="text-sm font-bold uppercase">{request.courierAgencyName || "Standard Courier"} • {request.courierTrackingNumber}</p>
+                    <span className="text-[10px] font-bold  tracking-widest text-primary block mb-0.5">Logistics Tracking</span>
+                    <p className="text-sm font-bold ">{request.courierAgencyName || "Standard Courier"} • {request.courierTrackingNumber}</p>
                   </div>
                 </div>
                 {receiptFileUrl && (
@@ -508,7 +508,7 @@ export default function SampleRequestDetailPage() {
           <div className="px-4">
              <div className="flex items-center gap-3 mb-8">
                 <LuClock size={18} className="text-warning" />
-                <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Execution Timeline</h3>
+                <h3 className="text-sm font-bold  tracking-widest text-foreground">Execution Timeline</h3>
              </div>
 
              <div className="relative flex flex-col gap-8 ml-3 border-l-2 border-divider/40">
@@ -525,12 +525,12 @@ export default function SampleRequestDetailPage() {
                       
                       <div className="flex flex-col gap-1 transition-all duration-300 group-hover:translate-x-1">
                         <div className="flex items-center gap-3">
-                           <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? "text-foreground" : "text-default-400"}`}>
+                           <span className={`text-[11px] font-bold  tracking-widest ${isActive ? "text-foreground" : "text-default-400"}`}>
                              {stage.label}
                            </span>
                            {isCurrent && <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />}
                         </div>
-                        <span className="text-[10px] font-medium text-default-400 uppercase tracking-widest">
+                        <span className="text-[10px] font-medium text-default-400  tracking-widest">
                           {isActive ? formatDate(stage.dateValue) : "Awaiting Progression"}
                         </span>
                       </div>
@@ -550,8 +550,8 @@ export default function SampleRequestDetailPage() {
                   <LuActivity className="group-hover:animate-pulse" size={20} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-foreground">Operational Protocol</h3>
-                  <p className="text-[9px] font-black text-default-400 uppercase tracking-widest mt-1 italic">Tactical Fulfillment Sequence</p>
+                  <h3 className="text-sm font-black  tracking-[0.2em] text-foreground">Operational Protocol</h3>
+                  <p className="text-[9px] font-black text-default-400  tracking-widest mt-1 italic">Tactical Fulfillment Sequence</p>
                 </div>
               </div>
             </div>
@@ -561,13 +561,13 @@ export default function SampleRequestDetailPage() {
                 {status === "REQUESTED" && canSupplier && (
                   <div className="space-y-4">
                      <div className="p-5 rounded-2xl bg-obaol-500/5 border border-obaol-500/10 mb-2">
-                        <p className="text-[11px] font-bold text-obaol-200/80 uppercase tracking-widest leading-relaxed">
+                        <p className="text-[11px] font-bold text-obaol-200/80  tracking-widest leading-relaxed">
                           Awaiting Quote Submission. Tactical parameter input required for procurement link.
                         </p>
                      </div>
                      <Button 
                        fullWidth
-                       className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                       className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                        onPress={() => {
                          setSamplePaymentTerm(request?.samplePaymentTerm || "ADVANCE");
                          setQuoteModalOpen(true);
@@ -582,13 +582,13 @@ export default function SampleRequestDetailPage() {
                 {status === "QUOTED" && canBuyer && (
                   <div className="flex flex-col gap-4">
                     <div className="p-5 rounded-2xl bg-primary-500/5 border border-primary-500/10 mb-2">
-                       <p className="text-[11px] font-bold text-primary-200/80 uppercase tracking-widest leading-relaxed">
+                       <p className="text-[11px] font-bold text-primary-200/80  tracking-widest leading-relaxed">
                          Quote received. Awaiting Associate Authorization to proceed with procurement.
                        </p>
                     </div>
                     <Button 
                       fullWidth
-                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-success-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                      className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-white bg-success-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                       onPress={() => decisionMutation.mutate("ACCEPT")}
                       startContent={<LuCheck size={18} />}
                     >
@@ -597,7 +597,7 @@ export default function SampleRequestDetailPage() {
                     <Button 
                       fullWidth
                       variant="flat"
-                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-danger-500 bg-danger-500/10 hover:bg-danger-500/20 border-none transition-all"
+                      className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-danger-500 bg-danger-500/10 hover:bg-danger-500/20 border-none transition-all"
                       onPress={() => decisionMutation.mutate("REJECT")}
                       startContent={<LuX size={18} />}
                     >
@@ -609,7 +609,7 @@ export default function SampleRequestDetailPage() {
                 {status === "ACCEPTED" && canBuyer && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-white bg-primary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => {
                       setPaymentMode("");
                       setOnlinePaymentMethod("");
@@ -623,7 +623,7 @@ export default function SampleRequestDetailPage() {
 
                 {status === "PAYMENT_RECEIVED" && canBuyer && !canSupplier && (
                   <div className="p-5 rounded-2xl bg-primary-500/5 border border-primary-500/10">
-                    <p className="text-[11px] font-bold text-primary-200/80 uppercase tracking-widest leading-relaxed">
+                    <p className="text-[11px] font-bold text-primary-200/80  tracking-widest leading-relaxed">
                       Payment recorded ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). Supplier will now continue with packaging protocol.
                     </p>
                   </div>
@@ -632,13 +632,13 @@ export default function SampleRequestDetailPage() {
                 {status === "PAYMENT_RECEIVED" && canSupplier && (
                   <div className="space-y-4">
                     <div className="p-5 rounded-2xl bg-obaol-500/5 border border-obaol-500/10">
-                      <p className="text-[11px] font-bold text-obaol-200/80 uppercase tracking-widest leading-relaxed">
+                      <p className="text-[11px] font-bold text-obaol-200/80  tracking-widest leading-relaxed">
                         Buyer payment received ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). Next step: initiate packaging protocol.
                       </p>
                     </div>
                     <Button 
                       fullWidth
-                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                      className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                       onPress={() => packagingStartMutation.mutate()}
                       startContent={<LuPackageOpen size={18} />}
                     >
@@ -650,7 +650,7 @@ export default function SampleRequestDetailPage() {
                 {status === "PREPARING_PACKAGING" && canSupplier && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => packagedMutation.mutate()}
                     startContent={<LuPackage size={18} />}
                   >
@@ -661,7 +661,7 @@ export default function SampleRequestDetailPage() {
                 {status === "PACKAGED" && canSupplier && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-white bg-primary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => setCourierModalOpen(true)}
                     startContent={<LuTruck size={18} />}
                   >
@@ -672,7 +672,7 @@ export default function SampleRequestDetailPage() {
                 {status === "COURIER_SUBMITTED" && canSupplier && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-secondary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-white bg-secondary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => inTransitMutation.mutate()}
                     startContent={<LuMapPin size={18} />}
                   >
@@ -683,7 +683,7 @@ export default function SampleRequestDetailPage() {
                 {status === "IN_TRANSIT" && canBuyer && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-success-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black  tracking-[0.2em] text-[11px] text-white bg-success-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => setReceiptModalOpen(true)}
                     startContent={<LuCheck size={18} />}
                   >
@@ -695,10 +695,10 @@ export default function SampleRequestDetailPage() {
                   <div className="flex flex-col items-center gap-4 py-10 text-center bg-foreground/[0.03] rounded-[2rem] border border-divider/40">
                     <LuClock size={32} className="text-default-500 animate-[spin_10s_linear_infinite]" />
                     <div>
-                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">
+                       <p className="text-[10px] font-black  tracking-[0.3em] text-default-500">
                          Logistics Hold
                        </p>
-                       <p className="text-[9px] font-bold text-default-400/60 uppercase tracking-widest mt-2 px-10 leading-loose italic">
+                       <p className="text-[9px] font-bold text-default-400/60  tracking-widest mt-2 px-10 leading-loose italic">
                          Waiting for buyer authorization at the destination terminal.
                        </p>
                     </div>
@@ -711,8 +711,8 @@ export default function SampleRequestDetailPage() {
                        <LuX size={32} />
                     </div>
                     <div>
-                       <p className="text-xs font-black uppercase tracking-[0.3em] text-danger-500">Flow Terminated</p>
-                       <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest mt-2">Operational inhibitors detected.</p>
+                       <p className="text-xs font-black  tracking-[0.3em] text-danger-500">Flow Terminated</p>
+                       <p className="text-[9px] font-bold text-default-400  tracking-widest mt-2">Operational inhibitors detected.</p>
                     </div>
                   </div>
                 )}
@@ -723,8 +723,8 @@ export default function SampleRequestDetailPage() {
                        <LuCheck size={32} />
                     </div>
                     <div>
-                       <p className="text-xs font-black uppercase tracking-[0.3em] text-success-500">Mission Complete</p>
-                       <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest mt-2">Delivery handshake successful.</p>
+                       <p className="text-xs font-black  tracking-[0.3em] text-success-500">Mission Complete</p>
+                       <p className="text-[9px] font-bold text-default-400  tracking-widest mt-2">Delivery handshake successful.</p>
                     </div>
                   </div>
                 )}
@@ -733,7 +733,7 @@ export default function SampleRequestDetailPage() {
           </Card>
 
            <div className="mt-6 flex justify-center">
-              <p className="text-[9px] font-bold text-default-400 uppercase tracking-[0.3em] opacity-40">Obaol Core Telemetry // {id.slice(-8).toUpperCase()}</p>
+              <p className="text-[9px] font-bold text-default-400  tracking-[0.3em] opacity-40">Obaol Core Telemetry // {id.slice(-8).toUpperCase()}</p>
            </div>
         </div>
       </div>
@@ -760,9 +760,9 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-6 px-8">
                  <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-warning rounded-full shadow-[0_0_10px_rgba(207,152,60,0.5)]" />
-                    <span className="text-xl font-black uppercase italic tracking-tight text-white">Project Quote Initiation</span>
+                    <span className="text-xl font-black  italic tracking-tight text-white">Project Quote Initiation</span>
                  </div>
-                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-obaol-500/60 mt-1 italic">Tactical Parameter Selection</p>
+                 <p className="text-[10px] font-black  tracking-[0.25em] text-obaol-500/60 mt-1 italic">Tactical Parameter Selection</p>
               </ModalHeader>
               <ModalBody className="px-8 py-8">
                 <div className="space-y-10">
@@ -776,7 +776,7 @@ export default function SampleRequestDetailPage() {
                     onChange={(e) => setQuoteMinQty(e.target.value)}
                     classNames={{
                       inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                      label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                      label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
                       input: "text-sm font-bold text-white"
                     }}
                   />
@@ -790,7 +790,7 @@ export default function SampleRequestDetailPage() {
                     onChange={(e) => setQuotePrice(e.target.value)}
                     classNames={{
                       inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                      label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                      label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
                       input: "text-sm font-bold text-white text-warning"
                     }}
                   />
@@ -805,12 +805,12 @@ export default function SampleRequestDetailPage() {
                     }}
                     classNames={{
                       trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                      label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                      label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
                       popoverContent: "bg-[#0E0D0A] border border-white/10",
                     }}
                   >
-                    <SelectItem key="ADVANCE" className="text-white font-bold text-xs uppercase tracking-widest">Advance</SelectItem>
-                    <SelectItem key="COURIER_CHARGES" className="text-white font-bold text-xs uppercase tracking-widest">Courier Charges</SelectItem>
+                    <SelectItem key="ADVANCE" className="text-white font-bold text-xs  tracking-widest">Advance</SelectItem>
+                    <SelectItem key="COURIER_CHARGES" className="text-white font-bold text-xs  tracking-widest">Courier Charges</SelectItem>
                   </Select>
                 </div>
               </ModalBody>
@@ -818,7 +818,7 @@ export default function SampleRequestDetailPage() {
                 <Button 
                    variant="light" 
                    onPress={onClose}
-                   className="px-8 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest text-white/40 hover:text-white"
+                   className="px-8 h-12 rounded-xl font-black  text-[10px] tracking-widest text-white/40 hover:text-white"
                 >
                    Abort
                 </Button>
@@ -827,7 +827,7 @@ export default function SampleRequestDetailPage() {
                    variant="shadow"
                    onPress={() => quoteMutation.mutate()} 
                    isDisabled={!quoteMinQty || !quotePrice}
-                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.15em] shadow-[0_0_30px_rgba(207,152,60,0.2)] bg-gradient-to-r from-warning to-obaol-600"
+                   className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-[0.15em] shadow-[0_0_30px_rgba(207,152,60,0.2)] bg-gradient-to-r from-warning to-obaol-600"
                 >
                    Execute Submission
                 </Button>
@@ -856,9 +856,9 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-8 px-10">
                  <div className="flex items-center gap-3">
                     <LuWallet className="text-primary" size={24} />
-                    <span className="text-xl font-black uppercase italic tracking-tight text-white">Payment Confirmation</span>
+                    <span className="text-xl font-black  italic tracking-tight text-white">Payment Confirmation</span>
                  </div>
-                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/60 mt-1 italic">Select Payment Type</p>
+                 <p className="text-[10px] font-black  tracking-[0.25em] text-primary/60 mt-1 italic">Select Payment Type</p>
               </ModalHeader>
               <ModalBody className="gap-8 px-10 pb-10">
                 <Select
@@ -873,12 +873,12 @@ export default function SampleRequestDetailPage() {
                   }}
                   classNames={{
                     trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                    label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                    label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
                     popoverContent: "bg-[#0E0D0A] border border-white/10",
                   }}
                 >
-                  <SelectItem key="CASH" className="text-white font-bold text-xs uppercase tracking-widest">Cash</SelectItem>
-                  <SelectItem key="ONLINE" className="text-white font-bold text-xs uppercase tracking-widest">Online</SelectItem>
+                  <SelectItem key="CASH" className="text-white font-bold text-xs  tracking-widest">Cash</SelectItem>
+                  <SelectItem key="ONLINE" className="text-white font-bold text-xs  tracking-widest">Online</SelectItem>
                 </Select>
 
                 {paymentMode === "ONLINE" && (
@@ -893,12 +893,12 @@ export default function SampleRequestDetailPage() {
                     }}
                     classNames={{
                       trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                      label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                      label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
                       popoverContent: "bg-[#0E0D0A] border border-white/10",
                     }}
                   >
-                    <SelectItem key="GPAY" className="text-white font-bold text-xs uppercase tracking-widest">GPay</SelectItem>
-                    <SelectItem key="CARD" className="text-white font-bold text-xs uppercase tracking-widest">Card</SelectItem>
+                    <SelectItem key="GPAY" className="text-white font-bold text-xs  tracking-widest">GPay</SelectItem>
+                    <SelectItem key="CARD" className="text-white font-bold text-xs  tracking-widest">Card</SelectItem>
                   </Select>
                 )}
               </ModalBody>
@@ -906,7 +906,7 @@ export default function SampleRequestDetailPage() {
                 <Button 
                    variant="light" 
                    onPress={onClose}
-                   className="px-8 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest text-white/40 hover:text-white"
+                   className="px-8 h-12 rounded-xl font-black  text-[10px] tracking-widest text-white/40 hover:text-white"
                 >
                    Abort
                 </Button>
@@ -915,7 +915,7 @@ export default function SampleRequestDetailPage() {
                    variant="shadow"
                    onPress={() => paymentMutation.mutate()}
                    isDisabled={!paymentMode || (paymentMode === "ONLINE" && !onlinePaymentMethod)}
-                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600"
+                   className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600"
                 >
                    Confirm Payment
                 </Button>
@@ -944,9 +944,9 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-8 px-10">
                  <div className="flex items-center gap-3">
                     <LuTruck className="text-primary" size={24} />
-                    <span className="text-xl font-black uppercase italic tracking-tight text-white">Logistics Protocol</span>
+                    <span className="text-xl font-black  italic tracking-tight text-white">Logistics Protocol</span>
                  </div>
-                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/60 mt-1 italic">Submit Distribution Data</p>
+                 <p className="text-[10px] font-black  tracking-[0.25em] text-primary/60 mt-1 italic">Submit Distribution Data</p>
               </ModalHeader>
               <ModalBody className="gap-10 px-10 pb-10">
                 <Input
@@ -958,7 +958,7 @@ export default function SampleRequestDetailPage() {
                   onChange={(e) => setCourierAgencyName(e.target.value)}
                   classNames={{
                     inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                    label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                    label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
                     input: "text-sm font-bold text-white text-primary"
                   }}
                 />
@@ -971,7 +971,7 @@ export default function SampleRequestDetailPage() {
                   onChange={(e) => setCourierTrackingNumber(e.target.value)}
                   classNames={{
                     inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                    label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                    label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
                     input: "text-sm font-bold text-white"
                   }}
                 />
@@ -980,7 +980,7 @@ export default function SampleRequestDetailPage() {
                 <Button 
                    variant="light" 
                    onPress={onClose}
-                   className="px-8 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest text-white/40 hover:text-white"
+                   className="px-8 h-12 rounded-xl font-black  text-[10px] tracking-widest text-white/40 hover:text-white"
                 >
                    Abort
                 </Button>
@@ -989,7 +989,7 @@ export default function SampleRequestDetailPage() {
                    variant="shadow"
                    onPress={() => courierSubmitMutation.mutate()} 
                    isDisabled={!courierTrackingNumber}
-                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600"
+                   className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600"
                 >
                    Finalize Segment
                 </Button>
@@ -1018,13 +1018,13 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-8 px-10">
                  <div className="flex items-center gap-3">
                     <LuCheck className="text-success" size={24} />
-                    <span className="text-xl font-black uppercase italic tracking-tight text-white">Delivery Acceptance</span>
+                    <span className="text-xl font-black  italic tracking-tight text-white">Delivery Acceptance</span>
                  </div>
-                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-success-500/60 mt-1 italic">Confirmation Phase</p>
+                 <p className="text-[10px] font-black  tracking-[0.25em] text-success-500/60 mt-1 italic">Confirmation Phase</p>
               </ModalHeader>
               <ModalBody className="gap-6 px-10 pb-10">
                 <div className="p-6 rounded-[1.5rem] bg-white/[0.02] border border-white/5 space-y-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40 block">Resource Verification</span>
+                  <span className="text-[10px] font-black  tracking-widest text-white/40 block">Resource Verification</span>
                   <p className="text-[10px] font-medium text-default-400 italic">No file required for this step.</p>
                 </div>
               </ModalBody>
@@ -1032,7 +1032,7 @@ export default function SampleRequestDetailPage() {
                 <Button 
                    variant="light" 
                    onPress={onClose}
-                   className="px-8 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest text-white/40"
+                   className="px-8 h-12 rounded-xl font-black  text-[10px] tracking-widest text-white/40"
                 >
                    Close
                 </Button>
@@ -1040,7 +1040,7 @@ export default function SampleRequestDetailPage() {
                    color="success" 
                    variant="shadow"
                    onPress={() => receiptMutation.mutate()}
-                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.15em] text-white bg-gradient-to-r from-success to-success-600 shadow-[0_0_30px_rgba(34,197,94,0.2)]"
+                   className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-[0.15em] text-white bg-gradient-to-r from-success to-success-600 shadow-[0_0_30px_rgba(34,197,94,0.2)]"
                 >
                    Accept Sequence
                 </Button>

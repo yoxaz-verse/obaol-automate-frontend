@@ -81,7 +81,7 @@ const resolveTextColor = (value?: string) => {
 const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
   const header = (
     <div className="space-y-1 text-xs">
-      <div className="text-[10px] uppercase tracking-widest opacity-80">OBAOL Supreme</div>
+      <div className="text-[10px]  tracking-widest opacity-80">OBAOL Supreme</div>
       <div className="text-lg font-semibold">{docLabel}</div>
       <div className="text-xs opacity-85">{data?.documentNumber || "Draft"}</div>
       <div className="text-xs opacity-85">{data?.docDate || "-"}</div>

@@ -98,7 +98,7 @@ export default function CompanyFunctionPanel({ name, slug, priorityRank, metrics
               </Chip>
             ) : null}
           </div>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-default-400">{slug}</span>
+          <span className="text-[10px]  tracking-[0.2em] text-default-400">{slug}</span>
         </div>
         <Chip size="sm" variant="flat" color="primary">
           {metrics.total} Total

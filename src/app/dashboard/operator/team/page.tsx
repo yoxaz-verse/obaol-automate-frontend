@@ -296,7 +296,7 @@ export default function OperatorTeamPage() {
       {isAdmin ? (
         <Card className="border border-default-200/80">
           <CardBody className="gap-2">
-            <p className="text-xs uppercase tracking-wide text-default-500">Select Operator</p>
+            <p className="text-xs  tracking-wide text-default-500">Select Operator</p>
             <AdminOperatorPicker
               selectedOperatorId={selectedOperatorId}
               onSelectionChange={(operatorId) => {
@@ -317,7 +317,7 @@ export default function OperatorTeamPage() {
       <Card className="border border-default-200/80">
         <CardBody className="gap-3">
           <div className="flex flex-col gap-1">
-            <p className="text-xs uppercase tracking-wide text-default-500">Referral Code</p>
+            <p className="text-xs  tracking-wide text-default-500">Referral Code</p>
             <p className="text-lg font-semibold text-foreground">{referralCode || "Not available yet"}</p>
             <p className="text-xs text-default-500">Invite operators to join your team using this code.</p>
           </div>
@@ -356,25 +356,25 @@ export default function OperatorTeamPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Total Downline</p>
+            <p className="text-xs  tracking-wide text-default-500">Total Downline</p>
             <p className="text-2xl font-semibold text-foreground">{totalDownline}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Direct Team Members</p>
+            <p className="text-xs  tracking-wide text-default-500">Direct Team Members</p>
             <p className="text-2xl font-semibold text-foreground">{enrichedRows.length}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Total Team Earnings</p>
+            <p className="text-xs  tracking-wide text-default-500">Total Team Earnings</p>
             <p className="text-2xl font-semibold text-foreground">{formatRate(Number(totalTeamEarnings))}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Total Deals Closed</p>
+            <p className="text-xs  tracking-wide text-default-500">Total Deals Closed</p>
             <p className="text-2xl font-semibold text-foreground">{isDealsLoading ? "..." : totalDealsClosed}</p>
           </CardBody>
         </Card>

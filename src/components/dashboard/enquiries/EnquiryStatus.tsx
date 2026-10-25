@@ -31,7 +31,7 @@ const EnquiryStatus: React.FC<EnquiryStatusProps> = ({ status }) => {
                     style={{ backgroundColor: config.color, boxShadow: `0 0 8px ${config.color}` }}
                 />
                 <span
-                    className="text-[11px] font-bold uppercase tracking-wider"
+                    className="text-[11px] font-bold  tracking-wider"
                     style={{ color: config.color }}
                 >
                     {config.label}

@@ -111,7 +111,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                 {product}
                             </h4>
                             <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-                                <span className="text-[9px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest bg-foreground/[0.03] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg border border-foreground/5 leading-none">
+                                <span className="text-[9px] sm:text-[10px] font-bold text-default-400  tracking-widest bg-foreground/[0.03] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg border border-foreground/5 leading-none">
                                     {variant}
                                 </span>
                             </div>
@@ -119,7 +119,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                 {classificationBadges.map((badge) => (
                                     <span
                                         key={badge.key}
-                                        className={`px-1.5 sm:px-2 py-0.5 rounded-full border text-[8px] sm:text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 leading-none ${classificationBadgeClass(badge.key)}`}
+                                        className={`px-1.5 sm:px-2 py-0.5 rounded-full border text-[8px] sm:text-[9px] font-black  tracking-wider inline-flex items-center gap-1 leading-none ${classificationBadgeClass(badge.key)}`}
                                     >
                                         {React.createElement(classificationIcon(badge.key), { size: 10 })}
                                         {badge.label}
@@ -150,7 +150,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                         <span className="text-[10px] font-bold font-mono">B</span>
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-0 opacity-60 leading-tight">Buyer Assignment</p>
+                                        <p className="text-[8px] font-bold text-default-400  tracking-widest mb-0 opacity-60 leading-tight">Buyer Assignment</p>
                                         <p className="text-[11px] sm:text-xs font-bold text-foreground truncate leading-tight">{buyerName}</p>
                                     </div>
                                 </div>
@@ -160,7 +160,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                         <span className="text-[10px] font-bold font-mono">S</span>
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-0 opacity-60 leading-tight">Seller Assignment</p>
+                                        <p className="text-[8px] font-bold text-default-400  tracking-widest mb-0 opacity-60 leading-tight">Seller Assignment</p>
                                         <p className="text-[11px] sm:text-xs font-bold text-foreground truncate leading-tight">{sellerName}</p>
                                     </div>
                                 </div>
@@ -169,7 +169,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                             <div className="flex items-center gap-2.5 sm:gap-3">
                                 <Avatar radius="lg" size="md" name={isBuying ? sellerName[0] : buyerName[0]} className={`${isBuying ? "bg-warning-500/10 text-warning-600" : "bg-primary/10 text-primary"} font-bold border border-foreground/5 shadow-sm rounded-xl`} />
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-0.5 sm:mb-1 opacity-60 leading-tight">Counterparty Node</p>
+                                    <p className="text-[8px] font-bold text-default-400  tracking-widest mb-0.5 sm:mb-1 opacity-60 leading-tight">Counterparty Node</p>
                                     <p className="text-[11px] sm:text-xs font-bold text-foreground truncate leading-tight">{isBuying ? sellerName : buyerName}</p>
                                     <p className="text-[8px] sm:text-[9px] font-semibold text-default-400 truncate mt-0.5 sm:mt-1 opacity-80 leading-tight">{isBuying ? sellerCompany : buyerCompany}</p>
                                 </div>
@@ -184,7 +184,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                 <div className="w-[18px] h-[18px] sm:w-5 sm:h-5 rounded bg-foreground text-background flex items-center justify-center">
                                     <LuBriefcase size={10} />
                                 </div>
-                                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground leading-none">Execution Streams</span>
+                                <span className="text-[9px] sm:text-[10px] font-bold  tracking-widest text-foreground leading-none">Execution Streams</span>
                             </div>
                             <span className="text-[8px] font-bold text-primary px-1.5 sm:px-2 py-0.5 bg-primary/10 rounded-full border border-primary/20 leading-none">
                                 {respCount}/4 Operational
@@ -205,11 +205,11 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                             <div className="text-default-400 group-hover/task:text-primary transition-colors">
                                                 {task.icon}
                                             </div>
-                                            <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-default-400 opacity-80 min-w-[44px] sm:min-w-[50px] leading-none">{task.label}</span>
+                                            <span className="text-[8px] sm:text-[9px] font-bold  tracking-widest text-default-400 opacity-80 min-w-[44px] sm:min-w-[50px] leading-none">{task.label}</span>
                                         </div>
                                         <div className="flex items-center gap-1.5 sm:gap-2">
                                             {owner && <div className="w-1 h-1 rounded-full bg-success-500 animate-pulse" />}
-                                            <span className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-wide leading-none ${owner ? "text-foreground" : "text-default-300 italic"}`}>
+                                            <span className={`text-[8px] sm:text-[9px] font-bold  tracking-wide leading-none ${owner ? "text-foreground" : "text-default-300 italic"}`}>
                                                 {owner ? (ownerLabelMap[owner] || owner) : "Scheduled"}
                                             </span>
                                         </div>

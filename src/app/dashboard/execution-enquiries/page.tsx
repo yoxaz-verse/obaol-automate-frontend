@@ -307,7 +307,7 @@ export default function ExecutionEnquiriesPage() {
   const SectionLoader = () => (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
       <div className="w-12 h-12 border-2 border-obaol-500/20 border-t-obaol-500 rounded-full animate-spin" />
-      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-obaol-500 animate-pulse">Syncing Tactical Data</p>
+      <p className="text-[10px] font-black  tracking-[0.4em] text-obaol-500 animate-pulse">Syncing Tactical Data</p>
     </div>
   );
 
@@ -321,8 +321,8 @@ export default function ExecutionEnquiriesPage() {
               <FiGlobe className="text-2xl" />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">Agro Trading Ecosystem</h1>
-              <p className="text-xs font-bold text-default-500 mt-2 uppercase tracking-widest opacity-80">Autonomous Service Routing & Logistics Terminal</p>
+              <h1 className="text-3xl font-black text-foreground  tracking-tighter leading-none">Agro Trading Ecosystem</h1>
+              <p className="text-xs font-bold text-default-500 mt-2  tracking-widest opacity-80">Autonomous Service Routing & Logistics Terminal</p>
             </div>
           </div>
 
@@ -331,7 +331,7 @@ export default function ExecutionEnquiriesPage() {
               size="sm"
               variant={activeTab === "deal-execution" ? "solid" : "light"}
               color={activeTab === "deal-execution" ? "warning" : "default"}
-              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "deal-execution" ? "shadow-lg shadow-obaol-500/20" : "opacity-60"}`}
+              className={`font-black  tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "deal-execution" ? "shadow-lg shadow-obaol-500/20" : "opacity-60"}`}
               onPress={() => setActiveTab("deal-execution")}
             >
               <FiActivity className="mr-2" /> Deal Execution
@@ -340,7 +340,7 @@ export default function ExecutionEnquiriesPage() {
               size="sm"
               variant={activeTab === "execution-bidding" ? "solid" : "light"}
               color={activeTab === "execution-bidding" ? "warning" : "default"}
-              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "execution-bidding" ? "shadow-lg shadow-obaol-500/20" : "opacity-60"}`}
+              className={`font-black  tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "execution-bidding" ? "shadow-lg shadow-obaol-500/20" : "opacity-60"}`}
               onPress={() => setActiveTab("execution-bidding")}
             >
               <FiZap className="mr-2" /> Execution Bidding
@@ -387,27 +387,27 @@ export default function ExecutionEnquiriesPage() {
                     <div className="flex items-center gap-5">
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-xs font-black uppercase tracking-widest text-obaol-600 bg-obaol-500/10 px-2 py-0.5 rounded-md">
+                          <span className="text-xs font-black  tracking-widest text-obaol-600 bg-obaol-500/10 px-2 py-0.5 rounded-md">
                             Anchor
                           </span>
                           <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
                           {(enq.workflowStage || enq.status) && (
                             <div className="flex flex-wrap gap-2 ml-2">
                               {enq.workflowStage && (
-                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
+                                <span className="text-[9px] font-black  tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
                                   {String(enq.workflowStage).replaceAll("_", " ")}
                                 </span>
                               )}
                               {enq.status && (
-                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
+                                <span className="text-[9px] font-black  tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
                                   {String(enq.status)}
                                 </span>
                               )}
                             </div>
                           )}
                         </div>
-                        <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none">{enq.product}</h2>
-                        <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500 uppercase tracking-widest">
+                        <h2 className="text-2xl font-black text-foreground  tracking-tighter leading-none">{enq.product}</h2>
+                        <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500  tracking-widest">
                           <span className="opacity-60">{enq.variant}</span>
                           <span className="w-1 h-1 rounded-full bg-divider" />
                           <span className="text-obaol-500/80">{enq.tasks.length} Active Nodes</span>
@@ -417,13 +417,13 @@ export default function ExecutionEnquiriesPage() {
 
                     <div className="flex items-center gap-10">
                       <div className="hidden lg:flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Origin</span>
-                        <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.seller}</span>
+                        <span className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-1">Origin</span>
+                        <span className="text-sm font-black text-foreground  tracking-tight">{enq.seller}</span>
                       </div>
                       <div className="w-px h-10 bg-divider hidden lg:block" />
                       <div className="flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Destination</span>
-                        <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.buyer}</span>
+                        <span className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-1">Destination</span>
+                        <span className="text-sm font-black text-foreground  tracking-tight">{enq.buyer}</span>
                       </div>
                     </div>
                   </div>
@@ -454,18 +454,18 @@ export default function ExecutionEnquiriesPage() {
                               })()}
                             </div>
                             <div className="min-w-0">
-                              <h4 className="text-sm font-black text-foreground tracking-tight uppercase leading-none mb-1">{String(task.type || "").replaceAll("_", " ")}</h4>
+                              <h4 className="text-sm font-black text-foreground tracking-tight  leading-none mb-1">{String(task.type || "").replaceAll("_", " ")}</h4>
                               <div className="flex items-center gap-2">
-                                <span className={`text-xs font-black uppercase tracking-widest ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500 opacity-60"}`}>{task.status || "IDLE"}</span>
+                                <span className={`text-xs font-black  tracking-widest ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500 opacity-60"}`}>{task.status || "IDLE"}</span>
                                 {task.committedProvider && (
                                   <>
                                     <span className="text-xs text-default-400">•</span>
-                                    <span className="text-xs font-black text-foreground/70 uppercase truncate">{getName(task.committedProvider)}</span>
+                                    <span className="text-xs font-black text-foreground/70  truncate">{getName(task.committedProvider)}</span>
                                   </>
                                 )}
                               </div>
                               {task.details && Object.keys(task.details).some(k => task.details[k]) && (
-                                <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-default-500 uppercase tracking-tight">
+                                <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-default-500  tracking-tight">
                                   {task.details.routeNotes && <span>Route: {task.details.routeNotes}</span>}
                                   {task.details.packagingSpecifications && <span>Pkg: {task.details.packagingSpecifications}</span>}
                                   {task.details.fromDistrict && <span>From: {task.details.fromDistrict}</span>}
@@ -476,8 +476,8 @@ export default function ExecutionEnquiriesPage() {
 
                           <div className="flex items-center gap-3">
                             <div className="flex flex-col text-right">
-                              <span className="text-[10px] font-black text-default-400 uppercase tracking-widest">State</span>
-                              <span className={`text-xs font-black uppercase ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500"}`}>{task.status === "COMPLETED" ? "Verified" : "Syncing"}</span>
+                              <span className="text-[10px] font-black text-default-400  tracking-widest">State</span>
+                              <span className={`text-xs font-black  ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500"}`}>{task.status === "COMPLETED" ? "Verified" : "Syncing"}</span>
                             </div>
                           </div>
                         </div>
@@ -492,8 +492,8 @@ export default function ExecutionEnquiriesPage() {
               <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
                 <FiCompass className="text-4xl animate-spin-slow" />
                 <div className="text-center">
-                  <h3 className="text-sm font-black uppercase tracking-widest">Void Detected</h3>
-                  <p className="font-black text-default-500 uppercase text-xs tracking-widest mt-2">All deal ecosystems are currently dormant or filtered.</p>
+                  <h3 className="text-sm font-black  tracking-widest">Void Detected</h3>
+                  <p className="font-black text-default-500  text-xs tracking-widest mt-2">All deal ecosystems are currently dormant or filtered.</p>
                 </div>
               </div>
             )}
@@ -510,8 +510,8 @@ export default function ExecutionEnquiriesPage() {
             {/* Execution Bids */}
             <div className="hidden">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-black uppercase tracking-widest text-obaol-500">Execution Bids</h2>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400">
+                <h2 className="text-sm font-black  tracking-widest text-obaol-500">Execution Bids</h2>
+                <span className="text-[10px] font-black  tracking-[0.3em] text-default-400">
                   OPEN TASKS
                 </span>
               </div>
@@ -528,27 +528,27 @@ export default function ExecutionEnquiriesPage() {
                       <div className="flex items-center gap-5">
                         <div>
                         <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-xs font-black uppercase tracking-widest text-obaol-600 bg-obaol-500/10 px-2 py-0.5 rounded-md">
+                          <span className="text-xs font-black  tracking-widest text-obaol-600 bg-obaol-500/10 px-2 py-0.5 rounded-md">
                             Anchor
                           </span>
                           <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
                           {(enq.workflowStage || enq.status) && (
                             <div className="flex flex-wrap gap-2 ml-2">
                               {enq.workflowStage && (
-                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
+                                <span className="text-[9px] font-black  tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
                                   {String(enq.workflowStage).replaceAll("_", " ")}
                                 </span>
                               )}
                               {enq.status && (
-                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
+                                <span className="text-[9px] font-black  tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
                                   {String(enq.status)}
                                 </span>
                               )}
                             </div>
                           )}
                         </div>
-                          <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none">{enq.product}</h2>
-                          <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500 uppercase tracking-widest">
+                          <h2 className="text-2xl font-black text-foreground  tracking-tighter leading-none">{enq.product}</h2>
+                          <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500  tracking-widest">
                             <span className="opacity-60">{enq.variant}</span>
                             <span className="w-1 h-1 rounded-full bg-divider" />
                             <span className="text-obaol-500/80">{enq.tasks.length} Open Nodes</span>
@@ -557,19 +557,19 @@ export default function ExecutionEnquiriesPage() {
                       </div>
                     <div className="flex items-center gap-10">
                       <div className="hidden lg:flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Origin</span>
-                        <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.seller}</span>
+                        <span className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-1">Origin</span>
+                        <span className="text-sm font-black text-foreground  tracking-tight">{enq.seller}</span>
                       </div>
                       <div className="w-px h-10 bg-divider hidden lg:block" />
                       <div className="flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Destination</span>
-                        <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.buyer}</span>
+                        <span className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-1">Destination</span>
+                        <span className="text-sm font-black text-foreground  tracking-tight">{enq.buyer}</span>
                       </div>
                     </div>
                   </div>
 
                   {buildRouteSummary(enq.tasks) && (
-                    <div className="mb-6 text-[10px] font-black uppercase tracking-widest text-default-500/80">
+                    <div className="mb-6 text-[10px] font-black  tracking-widest text-default-500/80">
                       {buildRouteSummary(enq.tasks)}
                     </div>
                   )}
@@ -615,18 +615,18 @@ export default function ExecutionEnquiriesPage() {
                                     })()}
                                   </div>
                                   <div className="min-w-0">
-                                    <h4 className="text-sm font-black text-foreground tracking-tight uppercase leading-none mb-1">{String(task.type || "").replaceAll("_", " ")}</h4>
+                                    <h4 className="text-sm font-black text-foreground tracking-tight  leading-none mb-1">{String(task.type || "").replaceAll("_", " ")}</h4>
                                     <div className="flex items-center gap-2">
-                                      <span className="text-xs font-black uppercase tracking-widest text-warning-500 opacity-60">{task.status || "OPEN"}</span>
+                                      <span className="text-xs font-black  tracking-widest text-warning-500 opacity-60">{task.status || "OPEN"}</span>
                                       {task.committedProvider && (
                                         <>
                                           <span className="text-xs text-default-400">•</span>
-                                          <span className="text-xs font-black text-foreground/70 uppercase truncate">{getName(task.committedProvider)}</span>
+                                          <span className="text-xs font-black text-foreground/70  truncate">{getName(task.committedProvider)}</span>
                                         </>
                                       )}
                                     </div>
                                     {task.details && Object.keys(task.details).some((k: any) => task.details[k]) && (
-                                      <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-default-500 uppercase tracking-tight">
+                                      <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-default-500  tracking-tight">
                                         {task.details.packagingSpecifications && <span>Pkg: {task.details.packagingSpecifications}</span>}
                                       </div>
                                     )}
@@ -638,10 +638,10 @@ export default function ExecutionEnquiriesPage() {
                                     if (flowConf?.biddingEndAtOrderStage) {
                                       return (
                                         <div className="flex flex-col items-end">
-                                          <span className="text-[9px] font-black text-obaol-600/80 uppercase tracking-[0.2em] mb-1.5 flex items-center gap-1">
+                                          <span className="text-[9px] font-black text-obaol-600/80  tracking-[0.2em] mb-1.5 flex items-center gap-1">
                                             <FiZap size={10} className={task.status === "OPEN" ? "animate-pulse" : ""} /> Bidding Closes At
                                           </span>
-                                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md border leading-none tracking-tight ${task.status === "OPEN" ? "text-warning-700 bg-warning-500/20 border-warning-500/30 shadow-sm" : "text-default-500 bg-default-100 border-divider"
+                                          <span className={`text-[10px] font-black  px-2 py-0.5 rounded-md border leading-none tracking-tight ${task.status === "OPEN" ? "text-warning-700 bg-warning-500/20 border-warning-500/30 shadow-sm" : "text-default-500 bg-default-100 border-divider"
                                             }`}>
                                             {String(flowConf.biddingEndAtOrderStage).replaceAll("_", " ")}
                                           </span>
@@ -650,8 +650,8 @@ export default function ExecutionEnquiriesPage() {
                                     }
                                     return (
                                       <div className="flex flex-col items-end">
-                                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${task.status === "OPEN" ? "text-warning-500" : "text-default-400"}`}>Bidding Status</span>
-                                        <span className={`text-[10px] font-black uppercase ${task.status === "OPEN" ? "text-warning-600" : "text-default-500"}`}>{task.status === "OPEN" ? "IN PROCESS" : "CLOSED"}</span>
+                                        <span className={`text-[10px] font-black  tracking-[0.2em] mb-1 ${task.status === "OPEN" ? "text-warning-500" : "text-default-400"}`}>Bidding Status</span>
+                                        <span className={`text-[10px] font-black  ${task.status === "OPEN" ? "text-warning-600" : "text-default-500"}`}>{task.status === "OPEN" ? "IN PROCESS" : "CLOSED"}</span>
                                       </div>
                                     );
                                   })()}
@@ -663,7 +663,7 @@ export default function ExecutionEnquiriesPage() {
                                   <div className="overflow-x-auto scrollbar-hide mb-2 border-b border-default-200/30 pb-2">
                                     <table className="w-full min-w-[360px] text-[10px]">
                                       <thead>
-                                        <tr className="text-default-400 font-black uppercase tracking-tight">
+                                        <tr className="text-default-400 font-black  tracking-tight">
                                           <th className="text-left py-0.5">Entity</th>
                                           <th className="text-left py-0.5">Quote</th>
                                           <th className="text-left py-0.5">Note</th>
@@ -688,7 +688,7 @@ export default function ExecutionEnquiriesPage() {
                                   </div>
                                 )}
                                 {canViewBidDetails && bids.length === 0 && (
-                                  <div className="text-[10px] font-black uppercase tracking-widest text-default-400 px-2 py-2">
+                                  <div className="text-[10px] font-black  tracking-widest text-default-400 px-2 py-2">
                                     No bids yet
                                   </div>
                                 )}
@@ -738,7 +738,7 @@ export default function ExecutionEnquiriesPage() {
                                                       <FiPackage size={14} />
                                                    </div>
                                                    <div className="flex flex-col">
-                                                      <span className="text-[11px] font-black uppercase italic tracking-tighter leading-tight">{companyName}</span>
+                                                      <span className="text-[11px] font-black  italic tracking-tighter leading-tight">{companyName}</span>
                                                       <span className="text-[8px] font-bold text-default-400 lowercase tracking-widest opacity-60">id_{companyId.slice(-6)}</span>
                                                    </div>
                                                 </div>
@@ -772,7 +772,7 @@ export default function ExecutionEnquiriesPage() {
                                       />
                                       <Button
                                         color="warning"
-                                        className="h-8 min-w-0 px-4 text-[10px] font-black uppercase tracking-widest"
+                                        className="h-8 min-w-0 px-4 text-[10px] font-black  tracking-widest"
                                         isDisabled={!canBid || (isAdmin && !selectedExecutionBidProvider[key])}
                                         isLoading={bidLoadingKey === key}
                                         onPress={async () => {
@@ -811,7 +811,7 @@ export default function ExecutionEnquiriesPage() {
                                     </div>
                                   </div>
                                   {bidErrorMap[key] && (
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-danger-500 px-2 mt-1">
+                                    <div className="text-[10px] font-black  tracking-widest text-danger-500 px-2 mt-1">
                                       {bidErrorMap[key]}
                                     </div>
                                   )}
@@ -858,7 +858,7 @@ export default function ExecutionEnquiriesPage() {
                                                       <FiShield size={14} />
                                                    </div>
                                                    <div className="flex flex-col">
-                                                      <span className="text-[11px] font-black uppercase italic tracking-tighter leading-tight">{companyName}</span>
+                                                      <span className="text-[11px] font-black  italic tracking-tighter leading-tight">{companyName}</span>
                                                       <span className="text-[8px] font-bold text-default-400 lowercase tracking-widest opacity-60">id_{companyId.slice(-6)}</span>
                                                    </div>
                                                 </div>
@@ -870,7 +870,7 @@ export default function ExecutionEnquiriesPage() {
                                       <div className="flex items-center sm:w-auto w-full justify-end">
                                         <Button
                                           color="success"
-                                          className="h-8 min-w-0 px-6 text-[10px] font-black uppercase text-white shadow-md shadow-success-500/20 tracking-widest"
+                                          className="h-8 min-w-0 px-6 text-[10px] font-black  text-white shadow-md shadow-success-500/20 tracking-widest"
                                           isDisabled={commitOptions.length > 0 ? !selectedExecutionCommitProvider[key] : false}
                                           isLoading={commitLoadingKey === key}
                                           onPress={async () => {
@@ -904,7 +904,7 @@ export default function ExecutionEnquiriesPage() {
               ))}
 
             {!dealsLoading && enquiriesWithOpenTasks.length === 0 && (
-              <div className="text-center font-bold uppercase tracking-widest text-xs text-default-500 py-12">
+              <div className="text-center font-bold  tracking-widest text-xs text-default-500 py-12">
                 No open execution bids right now.
               </div>
             )}

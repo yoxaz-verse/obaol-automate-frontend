@@ -43,7 +43,7 @@ export default function AssociateReferralsPage() {
       </div>
 
       <Card className="border border-primary-200/60"><CardBody className="gap-3">
-        <p className="text-xs uppercase tracking-wider text-default-500">Your company referral code</p>
+        <p className="text-xs  tracking-wider text-default-500">Your company referral code</p>
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-2xl font-black tracking-[0.18em]">{code || "—"}</span>
           <Button size="sm" variant="flat" startContent={<FiCopy />} isDisabled={!code} onPress={() => copy(code, "Code")}>Copy code</Button>

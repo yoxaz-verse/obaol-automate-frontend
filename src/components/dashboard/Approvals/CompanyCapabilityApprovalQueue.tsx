@@ -31,7 +31,7 @@ export default function CompanyCapabilityApprovalQueue() {
     onSuccess: () => { client.invalidateQueries({ queryKey: ["company-capability-approvals"] }); showToastMessage({ type: "success", message: "Capability request reviewed." }); },
     onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Unable to review request." }),
   });
-  const renderProfile = (title: string, ids: any[], priorities: any[]) => <div className="rounded-xl bg-default-100/70 p-4"><p className="mb-2 text-xs font-bold uppercase tracking-wider text-default-500">{title}</p><div className="flex flex-wrap gap-2">{(ids || []).map((id: any) => { const value = String(id); const priority = (priorities || []).map(String).indexOf(value); return <Chip key={value} size="sm" color={priority >= 0 ? "warning" : "default"} variant="flat">{names.get(value) || "Company category"}{priority >= 0 ? ` · P${priority + 1}` : ""}</Chip>; })}</div></div>;
+  const renderProfile = (title: string, ids: any[], priorities: any[]) => <div className="rounded-xl bg-default-100/70 p-4"><p className="mb-2 text-xs font-bold  tracking-wider text-default-500">{title}</p><div className="flex flex-wrap gap-2">{(ids || []).map((id: any) => { const value = String(id); const priority = (priorities || []).map(String).indexOf(value); return <Chip key={value} size="sm" color={priority >= 0 ? "warning" : "default"} variant="flat">{names.get(value) || "Company category"}{priority >= 0 ? ` · P${priority + 1}` : ""}</Chip>; })}</div></div>;
 
   return <section className="space-y-5">
     <div className="flex flex-col gap-3 md:flex-row md:items-end">

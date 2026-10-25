@@ -410,7 +410,7 @@ function ProductSection({
                   <div className="flex flex-col gap-1">
                     <span className="text-sm font-bold tracking-wide text-foreground/90 group-hover:text-foreground transition-colors">{p.name}</span>
                     {myCount > 0 && (
-                      <span className="text-[9px] text-orange-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                      <span className="text-[9px] text-orange-500 font-bold  tracking-widest flex items-center gap-1.5">
                         <span className="w-1 h-1 rounded-full bg-orange-500" />
                         In My Catalog ({myCount})
                       </span>

@@ -44,7 +44,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
             <Card className="h-full bg-content1 border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md overflow-hidden group rounded-[2rem] transition-all duration-300 hover:border-obaol-500/40">
                 <CardHeader className="flex flex-col items-start px-6 pt-6 pb-2 gap-3">
                     <div className="flex flex-row justify-between w-full items-center gap-4">
-                        <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full ${
+                        <span className={`text-[8px] font-black  tracking-[0.2em] px-2.5 py-1 rounded-full ${
                             data.type === "Buying" ? "bg-warning-500/10 text-warning-600" :
                             data.type === "Selling" ? "bg-emerald-500/10 text-emerald-600" :
                             "bg-orange-500/10 text-orange-600"
@@ -53,7 +53,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                         </span>
                         <div className="flex items-center gap-2 db-muted">
                            <FiClock size={11} className="opacity-50" />
-                           <span className="text-[10px] font-black tracking-widest uppercase">{date}</span>
+                           <span className="text-[10px] font-black tracking-widest ">{date}</span>
                         </div>
                     </div>
                     <div className="w-full">
@@ -61,7 +61,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                             {productName}
                         </h4>
                         {variantName && (
-                            <span className="text-[10px] font-bold db-muted uppercase tracking-widest mt-1 block opacity-70">
+                            <span className="text-[10px] font-bold db-muted  tracking-widest mt-1 block opacity-70">
                                 {variantName}
                             </span>
                         )}
@@ -69,7 +69,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                             {classificationBadges.map((badge) => (
                                 <span
                                     key={badge.key}
-                                    className={`px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}
+                                    className={`px-2 py-0.5 rounded-full border text-[9px] font-black  tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}
                                 >
                                     {React.createElement(classificationIcon(badge.key), { size: 10 })}
                                     {badge.label}
@@ -85,10 +85,10 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                             <FiUser size={18} className="text-obaol-700 dark:text-obaol-300" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h5 className="text-[10px] font-black text-foreground uppercase tracking-wider truncate">
+                            <h5 className="text-[10px] font-black text-foreground  tracking-wider truncate">
                                 {clientName || "Unknown Client"}
                             </h5>
-                            <p className="text-[9px] font-bold db-muted uppercase tracking-widest truncate mt-0.5">
+                            <p className="text-[9px] font-bold db-muted  tracking-widest truncate mt-0.5">
                                 {companyName || "Verified Associate"}
                             </p>
                         </div>
@@ -98,7 +98,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                     <div className="bg-default-100/70 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/10 rounded-2xl p-4 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-0.5">
-                                <span className="text-[8px] font-black uppercase tracking-widest db-muted">Target Rate</span>
+                                <span className="text-[8px] font-black  tracking-widest db-muted">Target Rate</span>
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-lg font-black text-foreground tracking-tighter">
                                         {formatRate(data.rate || 0)}
@@ -107,8 +107,8 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                                 </div>
                             </div>
                             <div className="flex flex-col gap-0.5 items-end text-right">
-                                 <span className="text-[8px] font-black uppercase tracking-widest db-muted">Mission Volume</span>
-                                 <span className="text-xs font-black text-foreground uppercase tracking-tight">
+                                 <span className="text-[8px] font-black  tracking-widest db-muted">Mission Volume</span>
+                                 <span className="text-xs font-black text-foreground  tracking-tight">
                                     {quantity || "TBD"}
                                  </span>
                             </div>
@@ -118,13 +118,13 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                             <div className="flex flex-wrap gap-2 pt-3 border-t db-border-subtle">
                                 {data.adminCommission !== undefined && (
                                     <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-obaol-500/10 border border-obaol-500/20">
-                                        <span className="text-[7px] font-bold text-obaol-700 dark:text-obaol-300 uppercase">OBAOL</span>
+                                        <span className="text-[7px] font-bold text-obaol-700 dark:text-obaol-300 ">OBAOL</span>
                                         <span className="text-[9px] font-bold text-obaol-700 dark:text-obaol-300">+{formatRate(data.adminCommission)}</span>
                                     </div>
                                 )}
                                 {data.mediatorCommission !== undefined && data.type === "Mediated" && (
                                     <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                                        <span className="text-[7px] font-black text-emerald-600 uppercase">MED</span>
+                                        <span className="text-[7px] font-black text-emerald-600 ">MED</span>
                                         <span className="text-[9px] font-black text-emerald-700">+{formatRate(data.mediatorCommission)}</span>
                                     </div>
                                 )}
@@ -132,7 +132,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between text-[9px] font-black db-muted uppercase tracking-[0.15em] px-1">
+                    <div className="flex items-center justify-between text-[9px] font-black db-muted  tracking-[0.15em] px-1">
                         <div className="flex items-center gap-2.5">
                              <FiMapPin size={12} className="text-obaol-600/70 dark:text-obaol-300/70" />
                              <span>{data.portName || "Pending Port"}</span>
@@ -151,14 +151,14 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                                 <>
                                     <Button
                                         variant="flat"
-                                        className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-secondary/10 hover:text-secondary hover:border-secondary/20 border border-transparent transition-all uppercase"
+                                        className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-secondary/10 hover:text-secondary hover:border-secondary/20 border border-transparent transition-all "
                                         onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.supplierPhone}`; }}
                                     >
                                         Supplier
                                     </Button>
                                     <Button
                                         variant="flat"
-                                        className="flex-1 font-bold text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/20 border border-transparent transition-all uppercase"
+                                        className="flex-1 font-bold text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/20 border border-transparent transition-all "
                                         onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.buyerPhone}`; }}
                                     >
                                         Buyer
@@ -167,7 +167,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                             ) : (
                                 <Button
                                     variant="flat"
-                                    className="w-full font-bold text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/20 border border-transparent transition-all uppercase"
+                                    className="w-full font-bold text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/20 border border-transparent transition-all "
                                     onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.operatorPhone}`; }}
                                 >
                                     View Enquiry Details

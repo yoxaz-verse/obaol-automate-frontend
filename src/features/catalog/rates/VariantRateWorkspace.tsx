@@ -282,7 +282,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
     canDeleteRate(item, roleLower, listingPolicyNow, LISTING_DELETE_WINDOW_MS);
 
   const lockedListingMessage = (
-    <span className="max-w-40 text-right text-[9px] font-bold uppercase tracking-wider text-default-400">
+    <span className="max-w-40 text-right text-[9px] font-bold  tracking-wider text-default-400">
       Listing locked — only status can be changed
     </span>
   );
@@ -780,7 +780,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         className={`w-1.5 h-1.5 rounded-full ${effectiveIsLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-danger-500/40"}`}
                       />
                       <span
-                        className={`text-[10px] font-black uppercase tracking-widest ${effectiveIsLive ? "text-success-400" : "text-default-400"}`}
+                        className={`text-[10px] font-black  tracking-widest ${effectiveIsLive ? "text-success-400" : "text-default-400"}`}
                       >
                         {effectiveIsLive ? "LIVE" : "OFFLINE"}
                       </span>
@@ -790,19 +790,19 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 associate: (
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-foreground uppercase tracking-tight line-clamp-1">
+                      <span className="font-bold text-foreground  tracking-tight line-clamp-1">
                         {toDisplayText(
                           item.associateCompany?.name,
                           isOwner ? "My Company" : "OBAOL",
                         )}
                       </span>
                       {isMarketplace && isOwner && (
-                        <span className="rounded-full border border-obaol-500/30 bg-obaol-500/10 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-obaol-500">
+                        <span className="rounded-full border border-obaol-500/30 bg-obaol-500/10 px-1.5 py-0.5 text-[8px] font-black  tracking-wider text-obaol-500">
                           Your listing
                         </span>
                       )}
                     </div>
-                    <span className="text-[9px] text-default-400 uppercase tracking-widest">
+                    <span className="text-[9px] text-default-400  tracking-widest">
                       ID:{" "}
                       {String(
                         item.associate?._id || item.associate || "---",
@@ -830,7 +830,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     {productClassifications.map((label) => (
                       <span
                         key={`${item._id}-${label}`}
-                        className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${classificationTone(label)}`}
+                        className={`px-2 py-0.5 rounded-full text-[9px] font-black  tracking-wider border ${classificationTone(label)}`}
                       >
                         {label}
                       </span>
@@ -882,7 +882,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       <span className="font-bold text-foreground">
                         {quantityValue}
                       </span>
-                      <span className="text-[9px] text-default-400 uppercase">
+                      <span className="text-[9px] text-default-400 ">
                         {item.quantityUnit || "MT"}
                       </span>
                     </div>
@@ -967,7 +967,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       (label) => (
                         <span
                           key={`${item._id}-${label}`}
-                          className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${classificationTone(label)}`}
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-black  tracking-wider border ${classificationTone(label)}`}
                         >
                           {label}
                         </span>
@@ -1036,7 +1036,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     {extractClassifications(item.variantRate).map((label) => (
                       <span
                         key={`${item._id}-${label}`}
-                        className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${classificationTone(label)}`}
+                        className={`px-2 py-0.5 rounded-full text-[9px] font-black  tracking-wider border ${classificationTone(label)}`}
                       >
                         {label}
                       </span>
@@ -1115,7 +1115,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               onPress={() => setWizardOpen(true)}
                               variant="shadow"
                               color="warning"
-                              className="font-black tracking-widest px-3 sm:px-5 h-10 rounded-xl uppercase text-[9px] sm:text-[11px] shadow-obaol-500/30"
+                              className="font-black tracking-widest px-3 sm:px-5 h-10 rounded-xl  text-[9px] sm:text-[11px] shadow-obaol-500/30"
                               startContent={
                                 <FiPlus size={14} className="sm:w-4 sm:h-4" />
                               }
@@ -1158,7 +1158,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         onPress={() => setWizardOpen(true)}
                         variant="shadow"
                         color="warning"
-                        className="font-black tracking-widest px-5 h-10 rounded-xl uppercase text-[11px] shadow-obaol-500/30"
+                        className="font-black tracking-widest px-5 h-10 rounded-xl  text-[11px] shadow-obaol-500/30"
                         startContent={<FiPlus size={16} />}
                       >
                         List your product
@@ -1224,7 +1224,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       <FiSearch size={40} strokeWidth={1.5} />
                     </div>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black text-foreground tracking-tight uppercase">
+                  <h3 className="text-lg sm:text-xl font-black text-foreground tracking-tight ">
                     No Matching Trade Listings
                   </h3>
                   <p className="text-default-500 max-w-[360px] mt-2 mb-6 text-xs sm:text-sm font-medium">
@@ -1254,7 +1254,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       <FiPlus size={16} strokeWidth={3} />
                     </div>
                   </div>
-                  <h3 className="text-xl font-black text-foreground tracking-tight uppercase">
+                  <h3 className="text-xl font-black text-foreground tracking-tight ">
                     Your Catalog is Empty
                   </h3>
                   <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
@@ -1266,7 +1266,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     color="warning"
                     variant="shadow"
                     size="lg"
-                    className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-obaol-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all text-black"
+                    className="font-black px-10 rounded-2xl h-14 text-sm  tracking-widest shadow-obaol-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all text-black"
                     onPress={() => router.push("/dashboard/marketplace")}
                     startContent={<FiShoppingBag size={20} strokeWidth={2.5} />}
                   >
@@ -1286,7 +1286,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       <FiPlus size={16} strokeWidth={3} />
                     </div>
                   </div>
-                  <h3 className="text-xl font-black text-foreground tracking-tight uppercase">
+                  <h3 className="text-xl font-black text-foreground tracking-tight ">
                     No Live Trade Listings Available
                   </h3>
                   <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
@@ -1297,7 +1297,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     color="primary"
                     variant="shadow"
                     size="lg"
-                    className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-primary-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all"
+                    className="font-black px-10 rounded-2xl h-14 text-sm  tracking-widest shadow-primary-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all"
                     onPress={() => router.push("/dashboard/product")}
                     startContent={<FiPlusCircle size={20} strokeWidth={2.5} />}
                   >
@@ -1316,7 +1316,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       <FiInfo size={16} strokeWidth={3} />
                     </div>
                   </div>
-                  <h3 className="text-xl font-black text-foreground tracking-tight uppercase">
+                  <h3 className="text-xl font-black text-foreground tracking-tight ">
                     No Products Live
                   </h3>
                   <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
@@ -1332,7 +1332,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   <div className="mb-6 rounded-[2rem] border border-divider bg-content2 p-6 text-default-400 shadow-xl">
                     <FiRefreshCw size={46} strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-xl font-black uppercase tracking-tight text-foreground">
+                  <h3 className="text-xl font-black  tracking-tight text-foreground">
                     No Recent Past Listings
                   </h3>
                   <p className="mt-2 max-w-[390px] text-sm leading-relaxed text-default-500">
@@ -1353,7 +1353,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     </div>
                   </div>
 
-                  <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tight uppercase max-w-md">
+                  <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tight  max-w-md">
                     List Your First Trade Product
                   </h3>
                   <p className="text-default-500 max-w-[420px] mt-2 mb-8 text-xs sm:text-sm leading-relaxed font-medium">
@@ -1368,7 +1368,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         color="warning"
                         variant="shadow"
                         size="lg"
-                        className="font-black px-8 sm:px-10 rounded-2xl h-14 text-xs sm:text-sm uppercase tracking-widest shadow-obaol-500/30 shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all text-black bg-gradient-to-r from-amber-400 via-obaol-500 to-amber-500"
+                        className="font-black px-8 sm:px-10 rounded-2xl h-14 text-xs sm:text-sm  tracking-widest shadow-obaol-500/30 shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all text-black bg-gradient-to-r from-amber-400 via-obaol-500 to-amber-500"
                         onPress={() => setWizardOpen(true)}
                         startContent={<FiPlus size={20} strokeWidth={2.5} />}
                       >
@@ -1381,7 +1381,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         color="warning"
                         variant="shadow"
                         size="lg"
-                        className="font-black px-8 sm:px-10 rounded-2xl h-14 text-xs sm:text-sm uppercase tracking-widest shadow-obaol-500/30 shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all text-black bg-gradient-to-r from-amber-400 via-obaol-500 to-amber-500"
+                        className="font-black px-8 sm:px-10 rounded-2xl h-14 text-xs sm:text-sm  tracking-widest shadow-obaol-500/30 shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all text-black bg-gradient-to-r from-amber-400 via-obaol-500 to-amber-500"
                         onPress={() => router.push("/dashboard/profile")}
                         startContent={<FiArrowRight size={20} strokeWidth={2.5} />}
                       >
@@ -1391,7 +1391,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         color="default"
                         variant="flat"
                         size="lg"
-                        className="font-bold px-6 rounded-2xl h-14 text-xs uppercase tracking-wider text-default-600"
+                        className="font-bold px-6 rounded-2xl h-14 text-xs  tracking-wider text-default-600"
                         onPress={() => router.push("/dashboard/marketplace")}
                         startContent={<FiShoppingBag size={18} />}
                       >
@@ -1441,7 +1441,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 <div className="flex flex-col gap-4">
                   {/* View Toggle Header */}
                   <div className="dashboard-companion-safe-actions flex justify-between items-center bg-content1/30 px-4 py-2 rounded-2xl border border-white/5 backdrop-blur-md mb-2">
-                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest">
+                    <p className="text-xs font-bold text-default-500  tracking-widest">
                       {finalTableData.length} Items
                     </p>
                     <div className="flex items-center gap-1 bg-black/20 p-1 rounded-xl">
@@ -1508,7 +1508,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     <div className="w-full overflow-x-auto rounded-3xl border border-white/5 bg-content1/60 backdrop-blur-2xl shadow-lg pb-2">
                       <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
-                          <tr className="border-b border-white/5 bg-black/20 text-[10px] text-default-500 font-bold uppercase tracking-widest">
+                          <tr className="border-b border-white/5 bg-black/20 text-[10px] text-default-500 font-bold  tracking-widest">
                             <th className="py-4 px-6 w-32">Status / Class</th>
                             <th className="py-4 px-6">Product & Variant</th>
                             <th className="py-4 px-6">Rate</th>
@@ -1660,7 +1660,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       item.liveStatus
                                     ) : (
                                       <span
-                                        className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full w-fit ${isLive ? "text-success-600 bg-success-500/10" : "text-default-400 bg-foreground/5"}`}
+                                        className={`text-[9px] font-bold  tracking-widest px-2 py-0.5 rounded-full w-fit ${isLive ? "text-success-600 bg-success-500/10" : "text-default-400 bg-foreground/5"}`}
                                       >
                                         {isLive ? "● Live" : "○ Off"}
                                       </span>
@@ -1687,7 +1687,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       {toDisplayText(item.product, "Product")}
                                     </h4>
                                     <p
-                                      className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
+                                      className="text-[10px] sm:text-xs font-semibold text-obaol-500  tracking-widest truncate"
                                       title={toDisplayText(
                                         item.productVariant,
                                         "Variant",
@@ -1915,7 +1915,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     item.liveStatus
                                   ) : (
                                     <span
-                                      className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full w-fit ${isLive ? "text-success-600 bg-success-500/10" : "text-default-400 bg-foreground/5"}`}
+                                      className={`text-[9px] font-bold  tracking-widest px-2 py-0.5 rounded-full w-fit ${isLive ? "text-success-600 bg-success-500/10" : "text-default-400 bg-foreground/5"}`}
                                     >
                                       {isLive ? "● Live" : "○ Off"}
                                     </span>
@@ -1946,7 +1946,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     {toDisplayText(item.product, "Product")}
                                   </h4>
                                   <p
-                                    className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
+                                    className="text-[10px] sm:text-xs font-semibold text-obaol-500  tracking-widest truncate"
                                     title={toDisplayText(
                                       item.productVariant,
                                       "Variant",
@@ -1982,14 +1982,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               <div className="flex flex-col sm:flex-row flex-wrap md:flex-nowrap items-start sm:items-center gap-4 md:gap-6 shrink-0 justify-between md:justify-end w-full md:w-auto">
                                 <div className="flex items-center gap-6">
                                   <div className="flex flex-col gap-1">
-                                    <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-default-400  tracking-widest">
                                       {isMarketplaceView && !isLive ? "Previous listed price" : "Final Price"}
                                     </span>
                                     {marketplacePrice(item)}
                                   </div>
 
                                   <div className="flex flex-col items-end gap-1 shrink-0 w-20">
-                                    <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-default-400  tracking-widest">
                                       Stock
                                     </span>
                                     {item.inventoryQty ? (
@@ -2042,7 +2042,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     {toDisplayText(item.product, "Product")}
                                   </span>
                                   <span className="hidden sm:inline text-default-500 text-xs">/</span>
-                                  <span className="text-[10px] font-semibold text-obaol-500 uppercase tracking-widest truncate max-w-[200px]">
+                                  <span className="text-[10px] font-semibold text-obaol-500  tracking-widest truncate max-w-[200px]">
                                     {toDisplayText(item.productVariant, "Variant")}
                                   </span>
                                 </div>
@@ -2097,7 +2097,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     item.liveStatus
                                   ) : (
                                     <span
-                                      className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${isLive ? "text-success-600 bg-success-500/10" : "text-default-400 bg-foreground/5"}`}
+                                      className={`text-[9px] font-bold  tracking-widest px-2 py-0.5 rounded-full ${isLive ? "text-success-600 bg-success-500/10" : "text-default-400 bg-foreground/5"}`}
                                     >
                                       {isLive ? "● Live" : "○ Off"}
                                     </span>
@@ -2126,7 +2126,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   {toDisplayText(item.product, "Product")}
                                 </h4>
                                 <p
-                                  className="text-[10px] sm:text-xs font-semibold text-obaol-600 dark:text-obaol-300 uppercase tracking-widest truncate"
+                                  className="text-[10px] sm:text-xs font-semibold text-obaol-600 dark:text-obaol-300  tracking-widest truncate"
                                   title={toDisplayText(
                                     item.productVariant,
                                     "Variant",
@@ -2161,13 +2161,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               {/* Price & Quantity Area */}
                               <div className="catalog-card-pricing grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3 gap-y-3">
                                 <div className="flex min-w-0 flex-col gap-1">
-                                  <span className="text-[8px] sm:text-[10px] font-bold text-default-400 dark:text-white/50 uppercase tracking-widest">
+                                  <span className="text-[8px] sm:text-[10px] font-bold text-default-400 dark:text-white/50  tracking-widest">
                                     {isMarketplaceView && !isLive ? "Previous listed price" : "Final Price"}
                                   </span>
                                   {marketplacePrice(item)}
                                 </div>
                                 <div className="catalog-card-stock flex min-w-0 flex-col items-end gap-1">
-                                  <span className="text-[8px] sm:text-[10px] font-bold text-default-400 dark:text-white/50 uppercase tracking-widest">
+                                  <span className="text-[8px] sm:text-[10px] font-bold text-default-400 dark:text-white/50  tracking-widest">
                                     Stock
                                   </span>
                                   <div className="flex flex-col items-end gap-1">
@@ -2202,7 +2202,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             >
                               {canManageRow(item) && (
                                 <div className="catalog-card-status-row flex w-full items-center justify-between gap-3 rounded-xl border border-amber-200/70 bg-white/70 px-3 py-2 dark:border-white/10 dark:bg-white/[0.055]">
-                                  <span className="text-[9px] font-black uppercase tracking-widest text-default-500 dark:text-white/55">
+                                  <span className="text-[9px] font-black  tracking-widest text-default-500 dark:text-white/55">
                                     Listing status
                                   </span>
                                   <LiveStatusToggle
@@ -2242,7 +2242,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       compact
                                     />
                                   ) : !canManageRow(item) ? (
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-default-400">
+                                    <span className="text-[9px] font-black  tracking-widest text-default-400">
                                       {isLive ? "Live" : "Offline"}
                                     </span>
                                   ) : null}
@@ -2263,13 +2263,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     <div className="w-full space-y-3 p-4">
                                       <div className="grid grid-cols-2 gap-3 border-b border-divider pb-3">
                                         <div className="min-w-0">
-                                          <p className="text-[9px] font-black uppercase tracking-widest text-default-400">Stock</p>
+                                          <p className="text-[9px] font-black  tracking-widest text-default-400">Stock</p>
                                           <p className="truncate text-sm font-bold text-foreground" title={toDisplayText(item.inventoryQty || item.quantity, "—")}>
                                             {item.inventoryQty || item.quantity || "—"}
                                           </p>
                                         </div>
                                         <div className="min-w-0 text-right">
-                                          <p className="text-[9px] font-black uppercase tracking-widest text-default-400">Location</p>
+                                          <p className="text-[9px] font-black  tracking-widest text-default-400">Location</p>
                                           <p className="truncate text-sm font-bold text-foreground" title={toDisplayText(item.location, "—")}>
                                             {item.location && item.location !== "--" ? item.location : "—"}
                                           </p>

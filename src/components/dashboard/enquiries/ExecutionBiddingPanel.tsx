@@ -172,7 +172,7 @@ function OperatorActions({ item }: { item: ExecutionBidOpportunity }) {
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-xl border border-divider">
         <table className="w-full min-w-[560px] text-left text-sm">
-          <thead className="bg-default-100 text-xs uppercase text-default-500"><tr><th className="p-3">Provider</th><th className="p-3">Amount</th><th className="p-3">Note</th><th className="p-3">Status</th><th className="p-3">Action</th></tr></thead>
+          <thead className="bg-default-100 text-xs  text-default-500"><tr><th className="p-3">Provider</th><th className="p-3">Amount</th><th className="p-3">Note</th><th className="p-3">Status</th><th className="p-3">Action</th></tr></thead>
           <tbody>{bids.length ? bids.map((bid) => <tr key={companyId(bid.company)} className="border-t border-divider">
             <td className="p-3 font-semibold">{companyName(bid.company)}</td><td className="p-3 font-bold text-warning-600">{bid.amount}</td><td className="max-w-[240px] p-3 text-default-500">{bid.note || "—"}</td><td className="p-3">{humanize(bid.status)}</td>
             <td className="p-3"><Button size="sm" color="success" variant="flat" isDisabled={item.phase !== "OPEN" || bid.status !== "SUBMITTED"} onPress={() => setAwardBid(bid)}>Select winner</Button></td>

@@ -29,7 +29,7 @@ const MetricCard = ({ title, value, icon: Icon, colorClass }: any) => (
   <Card className="bg-content1 border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md transition-all rounded-2xl group">
     <CardBody className="p-5 flex flex-row items-center justify-between gap-4">
       <div>
-        <p className="text-[11px] uppercase tracking-wider text-default-500 font-bold mb-1 group-hover:text-default-600 transition-colors">{title}</p>
+        <p className="text-[11px]  tracking-wider text-default-500 font-bold mb-1 group-hover:text-default-600 transition-colors">{title}</p>
         <p className="text-3xl font-black text-foreground">{value}</p>
       </div>
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-default-100/70 border border-slate-200/60 dark:border-white/10 ${colorClass}`}>
@@ -216,7 +216,7 @@ export default function OperatorOverviewPage() {
                     <FiUser size={26} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-widest text-default-400 font-bold mb-1">Operator</p>
+                    <p className="text-xs  tracking-widest text-default-400 font-bold mb-1">Operator</p>
                     <p className="text-base sm:text-lg font-semibold text-foreground leading-tight truncate">{operator?.name || "-"}</p>
                     <p className="text-xs text-default-500 mt-0.5 truncate">{operator?.email || "-"}</p>
                   </div>
@@ -227,7 +227,7 @@ export default function OperatorOverviewPage() {
                     <FiCalendar size={26} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-widest text-default-400 font-bold mb-1">Joined On</p>
+                    <p className="text-xs  tracking-widest text-default-400 font-bold mb-1">Joined On</p>
                     <p className="text-base sm:text-lg font-semibold text-foreground leading-tight truncate">{joinedOn ? dayjs(joinedOn).format("DD MMM YYYY") : "N/A"}</p>
                     <p className="text-xs text-default-500 mt-0.5 truncate">
                       {joinedOn ? `${dayjs().diff(dayjs(joinedOn), "day")} days on platform` : "No join data"}
@@ -240,7 +240,7 @@ export default function OperatorOverviewPage() {
                     <FiActivity size={26} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-widest text-default-400 font-bold mb-1">Status</p>
+                    <p className="text-xs  tracking-widest text-default-400 font-bold mb-1">Status</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Chip size="sm" color={operator?.isActive ? "success" : "default"} variant="dot" className="border-none px-0">
                         <span className="text-base font-semibold text-foreground">{operator?.isActive ? "Active" : "Inactive"}</span>
@@ -255,7 +255,7 @@ export default function OperatorOverviewPage() {
                     <FiClock size={26} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-widest text-default-400 font-bold mb-1">Last Seen</p>
+                    <p className="text-xs  tracking-widest text-default-400 font-bold mb-1">Last Seen</p>
                     <p className="text-base sm:text-lg font-semibold text-foreground leading-tight truncate">
                       {operator?.lastSeenAt ? dayjs(operator.lastSeenAt).format("DD MMM YYYY") : "Not available"}
                     </p>
@@ -280,7 +280,7 @@ export default function OperatorOverviewPage() {
           <div className="mb-8 mt-4">
             <div className="flex items-center gap-3 mb-5 px-1">
               <div className="h-px bg-default-200/50 flex-grow"></div>
-              <h3 className="text-sm font-bold uppercase tracking-widest text-default-400 shrink-0">Enquiry Pipeline Breakdown</h3>
+              <h3 className="text-sm font-bold  tracking-widest text-default-400 shrink-0">Enquiry Pipeline Breakdown</h3>
               <div className="h-px bg-default-200/50 flex-grow"></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
@@ -315,10 +315,10 @@ export default function OperatorOverviewPage() {
                 <table className="w-full text-sm text-left">
                   <thead className="bg-default-100/40 text-default-500 border-b border-default-200/20">
                     <tr>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Company</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs text-center">Products</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs text-center">Live Products</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs text-right">Action</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">Company</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs text-center">Products</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs text-center">Live Products</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-default-200/20">
@@ -343,7 +343,7 @@ export default function OperatorOverviewPage() {
                           </Chip>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <span className="text-xs font-bold text-primary group-hover:text-primary-400 transition-colors uppercase tracking-widest flex items-center justify-end gap-1">
+                          <span className="text-xs font-bold text-primary group-hover:text-primary-400 transition-colors  tracking-widest flex items-center justify-end gap-1">
                             Open <FiActivity size={12} className="opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-5px] group-hover:translate-x-0 transform" />
                           </span>
                         </td>
@@ -387,13 +387,13 @@ export default function OperatorOverviewPage() {
                 <table className="w-full text-sm text-left">
                   <thead className="bg-default-100/40 text-default-500 border-b border-default-200/20">
                     <tr>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">ID</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Company</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Status</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Portfolio Owner</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">DC</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Handler</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Created</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">ID</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">Company</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">Status</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">Portfolio Owner</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">DC</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">Handler</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">Created</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-default-200/20">
@@ -410,7 +410,7 @@ export default function OperatorOverviewPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-foreground font-medium">{enquiry?.company?.name || "N/A"}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <Chip size="sm" variant="flat" color={enquiry?.status === 'OPEN' ? 'primary' : enquiry?.status === 'CLOSED' ? 'success' : 'default'} className="uppercase text-xs font-bold tracking-wider">
+                          <Chip size="sm" variant="flat" color={enquiry?.status === 'OPEN' ? 'primary' : enquiry?.status === 'CLOSED' ? 'success' : 'default'} className=" text-xs font-bold tracking-wider">
                             {enquiry?.status || "N/A"}
                           </Chip>
                         </td>
@@ -460,9 +460,9 @@ export default function OperatorOverviewPage() {
                 <table className="w-full text-sm text-left">
                   <thead className="bg-default-100/40 text-default-500 border-b border-default-200/20">
                     <tr>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Product Name</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs text-center">Enquiries Handled</th>
-                      <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs text-right">Last Handled Date</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs">Product Name</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs text-center">Enquiries Handled</th>
+                      <th className="px-6 py-4 font-semibold  tracking-wider text-xs text-right">Last Handled Date</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-default-200/20">

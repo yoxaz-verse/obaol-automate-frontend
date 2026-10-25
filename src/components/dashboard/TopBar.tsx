@@ -259,8 +259,8 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                         <div className="flex items-center gap-3">
                           <Image src="/logo.png" width={28} height={28} alt="Logo" />
                           <div>
-                            <p className="font-black text-xs tracking-widest uppercase">OBAOL</p>
-                            <p className="text-[9px] font-bold text-obaol-700 uppercase tracking-widest dark:text-obaol-300">Supreme</p>
+                            <p className="font-black text-xs tracking-widest ">OBAOL</p>
+                            <p className="text-[9px] font-bold text-obaol-700  tracking-widest dark:text-obaol-300">Supreme</p>
                           </div>
                         </div>
                         <button aria-label="Close Menu" onClick={() => setIsMobileMenuOpen(false)} className="touch-target rounded-full bg-default-100 flex items-center justify-center">
@@ -270,7 +270,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                       <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(1rem+var(--safe-bottom))] space-y-6">
                         {mobileSections.map((sec) => (
                            <div key={sec.label}>
-                             <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-3 px-3">{sec.label}</p>
+                             <p className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-3 px-3">{sec.label}</p>
                              <div className="space-y-1">
                                {sec.groups ? sec.groups.map((group) => {
                                  const isOpen = openMobileNavigationGroup === group.label;
@@ -281,7 +281,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                        type="button"
                                        aria-expanded={isOpen}
                                        onClick={() => setOpenMobileNavigationGroup(isOpen ? null : group.label)}
-                                       className={`w-full min-h-11 flex items-center justify-between px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.16em] transition-all ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300 bg-obaol-500/5" : "text-default-500 hover:db-inset"}`}
+                                       className={`w-full min-h-11 flex items-center justify-between px-4 py-2.5 rounded-xl text-[10px] font-black  tracking-[0.16em] transition-all ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300 bg-obaol-500/5" : "text-default-500 hover:db-inset"}`}
                                      >
                                        <span>{group.label}</span>
                                        <FiChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
@@ -300,7 +300,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                              <span className="text-lg">{opt.icon}</span>
                                              <span className="text-sm">{opt.name}</span>
                                              {isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) && (
-                                               <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-obaol-700 dark:text-obaol-300">Coming soon</span>
+                                               <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black  tracking-[0.12em] text-obaol-700 dark:text-obaol-300">Coming soon</span>
                                              )}
                                            </button>
                                          ))}
@@ -320,7 +320,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                    <span className="text-lg">{opt.icon}</span>
                                    <span className="text-sm">{opt.name}</span>
                                    {isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages) && (
-                                     <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-obaol-700 dark:text-obaol-300">Coming soon</span>
+                                     <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black  tracking-[0.12em] text-obaol-700 dark:text-obaol-300">Coming soon</span>
                                    )}
                                  </button>
                                  ))}
@@ -372,7 +372,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
         {isOnboardingLocked ? (
           <div className="flex items-center gap-3">
             <div className="px-4 py-2 rounded-2xl border border-warning-500/30 bg-warning-500/10">
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-warning-600">Onboarding Locked</span>
+              <span className="text-[10px] font-black  tracking-[0.25em] text-warning-600">Onboarding Locked</span>
             </div>
             <Button
               size="sm"
@@ -432,13 +432,13 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
               {...({ placement: "bottom-end", className: "p-0" } as any)}
             >
               <DropdownTrigger>
-                <button className="group flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-gradient-to-br from-obaol-500/10 to-black/[0.02] dark:to-white/5 border border-obaol-500/20 hover:border-obaol-500/40 transition-all outline-none">
+                <button className="group flex items-center gap-3 rounded-2xl border border-obaol-500/25 bg-gradient-to-br from-obaol-500/10 to-black/[0.02] p-1.5 pr-4 outline-none ring-0 transition-all hover:border-obaol-500/50 dark:to-white/5">
                   <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-obaol-400 to-obaol-600 flex items-center justify-center text-obaol-950 text-xs font-bold group-hover:scale-105 transition-transform">
                     {username?.slice(0, 1).toUpperCase()}
                   </div>
                   <div className="flex flex-col items-start sr-only sm:not-sr-only">
-                    <span className="text-[10px] font-black text-foreground uppercase tracking-wider leading-none mb-1">{username?.split('@')[0]}</span>
-                    <span className="text-[8px] font-bold text-obaol-700 dark:text-obaol-300 uppercase tracking-widest leading-none opacity-80">{displayRole}</span>
+                    <span className="mb-1 text-[11px] font-bold leading-none text-foreground">{username?.split('@')[0]}</span>
+                    <span className="text-[9px] font-semibold leading-none text-obaol-700 opacity-80 dark:text-obaol-300">{displayRole}</span>
                   </div>
                 </button>
               </DropdownTrigger>
@@ -447,7 +447,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                   "aria-label": "Tactical Profile Options", 
                   className: "w-80 p-2 db-panel backdrop-blur-2xl border db-border-subtle rounded-[1.5rem]", 
                   itemClasses: { 
-                    base: "rounded-xl py-3 px-4 transition-all duration-300",
+                    base: "rounded-xl border border-transparent py-3 px-4 outline-none ring-0 transition-all duration-300 data-[focus=true]:border-obaol-500/30 data-[focus=true]:bg-obaol-500/5 data-[focus-visible=true]:outline-none data-[focus-visible=true]:ring-0",
                     title: "text-sm font-bold text-default-700 dark:text-default-200",
                     description: "text-[10px] text-default-400 font-medium"
                   } 
@@ -464,8 +464,8 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                       {username?.slice(0, 1).toUpperCase()}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-black text-foreground uppercase tracking-wider">{username?.split('@')[0]}</span>
-                      <span className="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">{displayRole}</span>
+                      <span className="text-sm font-bold text-foreground">{username?.split('@')[0]}</span>
+                      <span className="mt-1 text-[10px] font-semibold text-obaol-700 dark:text-obaol-300">{displayRole}</span>
                     </div>
                   </div>
                 </DropdownItem>
@@ -475,26 +475,26 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                   startContent={<FiUser size={16} className="text-obaol-600 dark:text-obaol-300" />}
                   onClick={() => router.push("/dashboard/profile")}
                   className="data-[hover=true]:bg-obaol-500/10 data-[hover=true]:text-obaol-700 dark:data-[hover=true]:text-obaol-300"
-                  textValue="Account Master Control"
+                  textValue="Profile"
                 >
-                   <span className="font-bold tracking-tight">Management Portal</span>
+                   <span className="font-bold">Profile</span>
                 </DropdownItem>
 
-                <DropdownItem key="lang" isReadOnly closeOnSelect={false} textValue="System Linguistics">
+                <DropdownItem key="lang" isReadOnly closeOnSelect={false} textValue="Language">
                    <div className="flex items-center justify-between gap-4 py-1">
                      <div className="flex items-center gap-2">
                        <FiGlobe size={16} className="text-primary-500" />
-                       <span className="text-xs font-black uppercase tracking-widest dark:text-white/60">Node Language</span>
+                       <span className="text-xs font-semibold dark:text-white/60">Language</span>
                      </div>
                      <LanguageSwitcher />
                    </div>
                 </DropdownItem>
 
-                <DropdownItem key="appearance" isReadOnly closeOnSelect={false} textValue="Visual Telemetry">
+                <DropdownItem key="appearance" isReadOnly closeOnSelect={false} textValue="Theme">
                    <div className="flex items-center justify-between gap-4 py-1">
                      <div className="flex items-center gap-2">
                        <FiSettings size={16} className="text-success-500" />
-                       <span className="text-xs font-black uppercase tracking-widest dark:text-white/60">System Theme</span>
+                       <span className="text-xs font-semibold dark:text-white/60">Theme</span>
                      </div>
                      <ThemeSwitcher />
                    </div>
@@ -504,10 +504,10 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                    key="logout" 
                    className="mt-4 bg-danger-500/5 hover:bg-danger-500 text-danger-500 hover:text-white transition-all group" 
                    onClick={async () => { await logout(); router.push("/auth"); }}
-                   textValue="Terminate Session"
+                   textValue="Sign out"
                    startContent={<FiLogOut size={16} className="group-hover:translate-x-0.5 transition-transform" />}
                 >
-                   <span className="font-black uppercase tracking-widest text-[11px]">Terminate Session</span>
+                   <span className="text-[12px] font-semibold">Sign out</span>
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>

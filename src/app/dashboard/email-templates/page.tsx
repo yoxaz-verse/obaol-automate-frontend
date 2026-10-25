@@ -220,11 +220,11 @@ export default function EmailTemplatesPage() {
           <CardHeader className="font-semibold">Live Preview</CardHeader>
           <CardBody>
             <div className="rounded-xl border border-default-300 bg-content2 p-4">
-              <div className="text-xs uppercase tracking-wider text-default-500 mb-1">Subject</div>
+              <div className="text-xs  tracking-wider text-default-500 mb-1">Subject</div>
               <div className="font-semibold mb-3">{previewSubject}</div>
-              <div className="text-xs uppercase tracking-wider text-default-500 mb-1">Text</div>
+              <div className="text-xs  tracking-wider text-default-500 mb-1">Text</div>
               <pre className="whitespace-pre-wrap text-sm mb-3">{previewText}</pre>
-              <div className="text-xs uppercase tracking-wider text-default-500 mb-1">HTML</div>
+              <div className="text-xs  tracking-wider text-default-500 mb-1">HTML</div>
               <div className="rounded-lg border border-default-300 bg-white p-3 text-black" dangerouslySetInnerHTML={{ __html: previewHtml }} />
             </div>
           </CardBody>

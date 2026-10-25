@@ -50,7 +50,7 @@ function PasswordPanel() {
       <Input label="Confirm new password" labelPlacement="outside" type="password" autoComplete="new-password" variant="bordered" value={confirmPassword} onValueChange={setConfirmPassword} />
       <Input label="Email OTP" labelPlacement="outside" inputMode="numeric" placeholder="000000" variant="bordered" value={otpCode} onValueChange={(v) => setOtpCode(v.replace(/\D/g, "").slice(0, 6))} />
       <div className="flex items-end gap-2"><Button variant="flat" isLoading={sending} onPress={sendOtp}>Send OTP</Button><Button color="warning" isLoading={busy} isDisabled={!currentPassword || !validPassword || newPassword !== confirmPassword || otpCode.length !== 6} onPress={submit}>Change password</Button></div>
-      <p className="text-xs db-muted sm:col-span-2">Use at least 8 characters, one uppercase letter, and one number. Changing it signs out every other device.</p>
+      <p className="text-xs db-muted sm:col-span-2">Use at least 8 characters, one  letter, and one number. Changing it signs out every other device.</p>
       {status && <p role="status" className="rounded-xl border db-border-subtle px-3 py-2 text-sm sm:col-span-2">{status}</p>}
     </div>
   </DashboardPanel>;

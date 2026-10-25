@@ -491,7 +491,7 @@ export default function ExternalOrderCreatePage() {
         >
           <Button
             variant="flat"
-            className="font-black uppercase text-[10px] tracking-[0.2em] h-12 px-6 rounded-2xl bg-foreground/5"
+            className="font-black  text-[10px] tracking-[0.2em] h-12 px-6 rounded-2xl bg-foreground/5"
             startContent={<LuChevronLeft size={16} />}
             onPress={() => router.push("/dashboard/external-orders")}
           >
@@ -499,7 +499,7 @@ export default function ExternalOrderCreatePage() {
           </Button>
           <div className="flex items-center gap-3 px-4 py-2 bg-foreground/[0.03] rounded-full border border-foreground/5">
              <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse" />
-             <span className="text-[9px] font-black text-default-400 uppercase tracking-widest italic">
+             <span className="text-[9px] font-black text-default-400  tracking-widest italic">
                 OPERATIONAL MODE // {user?.role || "OPERATOR"}
              </span>
           </div>
@@ -508,8 +508,8 @@ export default function ExternalOrderCreatePage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-              <h3 className="text-[11px] font-black text-obaol-500 uppercase tracking-[0.4em] italic mb-1">Initiation Mode</h3>
-              <p className="text-2xl font-black text-foreground uppercase tracking-tight italic">CHOOSE EXECUTION PATH</p>
+              <h3 className="text-[11px] font-black text-obaol-500  tracking-[0.4em] italic mb-1">Initiation Mode</h3>
+              <p className="text-2xl font-black text-foreground  tracking-tight italic">CHOOSE EXECUTION PATH</p>
             </CardHeader>
             <CardBody className="px-10 pb-10">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -540,11 +540,11 @@ export default function ExternalOrderCreatePage() {
                         <div className="absolute top-0 right-0 w-24 h-24 bg-obaol-500/10 blur-[40px] rounded-full -mr-8 -mt-8" />
                       )}
                       <div className="flex flex-col gap-2">
-                        <span className="text-[9px] font-black text-default-400 uppercase tracking-widest">MODE</span>
-                        <div className={`text-xl font-black uppercase tracking-tight italic transition-colors ${selected ? "text-obaol-500" : "text-foreground"}`}>
+                        <span className="text-[9px] font-black text-default-400  tracking-widest">MODE</span>
+                        <div className={`text-xl font-black  tracking-tight italic transition-colors ${selected ? "text-obaol-500" : "text-foreground"}`}>
                           {mode.title}
                         </div>
-                        <p className="text-[10px] font-bold text-default-500 uppercase mt-2 leading-relaxed opacity-60">
+                        <p className="text-[10px] font-bold text-default-500  mt-2 leading-relaxed opacity-60">
                           {mode.desc}
                         </p>
                       </div>
@@ -564,17 +564,17 @@ export default function ExternalOrderCreatePage() {
                   <LuFileCheck size={28} />
                 </div>
                 <div className="max-w-2xl flex flex-col gap-3">
-                  <div className="text-2xl font-black text-foreground uppercase tracking-tight italic">
+                  <div className="text-2xl font-black text-foreground  tracking-tight italic">
                     DOCUMENTATION WORKFLOW
                   </div>
-                  <p className="text-[11px] font-bold text-default-500 uppercase tracking-widest leading-relaxed opacity-80">
+                  <p className="text-[11px] font-bold text-default-500  tracking-widest leading-relaxed opacity-80">
                     Start from the inquiry pipeline to generate documentation and approvals before creating the final order.
                   </p>
                 </div>
                 <Button
                   color="warning"
                   variant="shadow"
-                  className="font-black px-16 h-14 rounded-[2.5rem] text-[12px] tracking-[0.4em] uppercase italic transition-all duration-500 
+                  className="font-black px-16 h-14 rounded-[2.5rem] text-[12px] tracking-[0.4em] italic transition-all duration-500
                     bg-obaol-500 text-black hover:scale-[1.03] active:scale-95
                     shadow-[0_20px_60px_rgba(207,152,60,0.4)] hover:shadow-obaol-500/60
                     disabled:bg-foreground/5 disabled:text-default-400 disabled:shadow-none"
@@ -585,7 +585,7 @@ export default function ExternalOrderCreatePage() {
                   GO TO TRADE LISTINGS
                 </Button>
                 {!canStartDocumentationFlow && (
-                  <div className="text-[9px] font-black uppercase tracking-[0.35em] text-danger-500/80 text-center italic">
+                  <div className="text-[9px] font-black  tracking-[0.35em] text-danger-500/80 text-center italic">
                     Reveal buyer & seller to proceed
                   </div>
                 )}
@@ -601,8 +601,8 @@ export default function ExternalOrderCreatePage() {
         >
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-              <h3 className="text-[11px] font-black text-obaol-500 uppercase tracking-[0.4em] italic mb-1">Trade Role Selection</h3>
-              <p className="text-2xl font-black text-foreground uppercase tracking-tight italic">HOW DO YOU PARTICIPATE?</p>
+              <h3 className="text-[11px] font-black text-obaol-500  tracking-[0.4em] italic mb-1">Trade Role Selection</h3>
+              <p className="text-2xl font-black text-foreground  tracking-tight italic">HOW DO YOU PARTICIPATE?</p>
             </CardHeader>
             <CardBody className="px-10 pb-10">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -629,10 +629,10 @@ export default function ExternalOrderCreatePage() {
                         <role.icon size={24} />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-black text-default-400 uppercase tracking-widest">{role.sub}</span>
-                        <div className={`text-xl font-black uppercase tracking-tight italic transition-colors ${selected ? "text-obaol-500" : "text-foreground"}`}>{role.id}</div>
+                        <span className="text-[9px] font-black text-default-400  tracking-widest">{role.sub}</span>
+                        <div className={`text-xl font-black  tracking-tight italic transition-colors ${selected ? "text-obaol-500" : "text-foreground"}`}>{role.id}</div>
                       </div>
-                      <p className="text-[10px] font-bold text-default-500 uppercase mt-4 leading-relaxed opacity-60">
+                      <p className="text-[10px] font-bold text-default-500  mt-4 leading-relaxed opacity-60">
                          {role.id === "BUYER" ? "Primary asset acquirer and capital dispatch node." : role.id === "SELLER" ? "Asset origin and supply chain fulfillment entity." : "Cross-border operational facilitation and logistics oversight."}
                       </p>
                     </button>
@@ -647,12 +647,12 @@ export default function ExternalOrderCreatePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] h-full overflow-hidden">
               <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-                 <h3 className="text-[10px] font-black text-obaol-500 uppercase tracking-[0.3em] italic mb-1">Identity Module</h3>
-                 <p className="text-xl font-black text-foreground uppercase tracking-tight italic">BUYER DETAILS</p>
+                 <h3 className="text-[10px] font-black text-obaol-500  tracking-[0.3em] italic mb-1">Identity Module</h3>
+                 <p className="text-xl font-black text-foreground  tracking-tight italic">BUYER DETAILS</p>
               </CardHeader>
               <CardBody className="px-10 pb-10 flex flex-col gap-8">
                 <div className="flex flex-col gap-3">
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-default-400 ml-1">LINK ASSOCIATE COMPANY</span>
+                  <span className="text-[9px] font-black  tracking-[0.3em] text-default-400 ml-1">LINK ASSOCIATE COMPANY</span>
                   <CompanySearch
                     defaultSelected={buyerCompany?._id || null}
                     isDisabled={buyerUndisclosed}
@@ -666,7 +666,7 @@ export default function ExternalOrderCreatePage() {
                       href={buyerPreviewUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[9px] font-black uppercase tracking-[0.35em] text-obaol-500/80 hover:text-obaol-400 transition-colors ml-1"
+                      className="text-[9px] font-black  tracking-[0.35em] text-obaol-500/80 hover:text-obaol-400 transition-colors ml-1"
                     >
                       OPEN_ASSOCIATE_SITE
                     </a>
@@ -675,7 +675,7 @@ export default function ExternalOrderCreatePage() {
                 <Switch
                   isSelected={buyerUndisclosed}
                   onValueChange={setBuyerUndisclosed}
-                  classNames={{ label: "text-[10px] font-black uppercase tracking-widest text-default-400" }}
+                  classNames={{ label: "text-[10px] font-black  tracking-widest text-default-400" }}
                 >
                   UNDISCLOSED ENTITY
                 </Switch>
@@ -696,9 +696,9 @@ export default function ExternalOrderCreatePage() {
                       size="lg"
                       labelPlacement="outside"
                       classNames={{
-                        input: "font-bold text-xs uppercase tracking-widest",
+                        input: "font-bold text-xs  tracking-widest",
                         inputWrapper: "h-14 bg-foreground/5 hover:bg-foreground/10 border-none rounded-2xl transition-all",
-                        label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2"
+                        label: "text-[9px] font-black  tracking-[0.3em] mb-3 ml-2"
                       }}
                       startContent={<field.icon className="text-obaol-500/50 mr-2" size={16} />}
                     />
@@ -711,12 +711,12 @@ export default function ExternalOrderCreatePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] h-full overflow-hidden">
               <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-                 <h3 className="text-[10px] font-black text-obaol-500 uppercase tracking-[0.3em] italic mb-1">Identity Module</h3>
-                 <p className="text-xl font-black text-foreground uppercase tracking-tight italic">SELLER DETAILS</p>
+                 <h3 className="text-[10px] font-black text-obaol-500  tracking-[0.3em] italic mb-1">Identity Module</h3>
+                 <p className="text-xl font-black text-foreground  tracking-tight italic">SELLER DETAILS</p>
               </CardHeader>
               <CardBody className="px-10 pb-10 flex flex-col gap-8">
                 <div className="flex flex-col gap-3">
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-default-400 ml-1">LINK ASSOCIATE COMPANY</span>
+                  <span className="text-[9px] font-black  tracking-[0.3em] text-default-400 ml-1">LINK ASSOCIATE COMPANY</span>
                   <CompanySearch
                     defaultSelected={sellerCompany?._id || null}
                     isDisabled={sellerUndisclosed}
@@ -730,7 +730,7 @@ export default function ExternalOrderCreatePage() {
                       href={sellerPreviewUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[9px] font-black uppercase tracking-[0.35em] text-obaol-500/80 hover:text-obaol-400 transition-colors ml-1"
+                      className="text-[9px] font-black  tracking-[0.35em] text-obaol-500/80 hover:text-obaol-400 transition-colors ml-1"
                     >
                       OPEN_ASSOCIATE_SITE
                     </a>
@@ -739,7 +739,7 @@ export default function ExternalOrderCreatePage() {
                 <Switch
                   isSelected={sellerUndisclosed}
                   onValueChange={setSellerUndisclosed}
-                  classNames={{ label: "text-[10px] font-black uppercase tracking-widest text-default-400" }}
+                  classNames={{ label: "text-[10px] font-black  tracking-widest text-default-400" }}
                 >
                   UNDISCLOSED ENTITY
                 </Switch>
@@ -760,9 +760,9 @@ export default function ExternalOrderCreatePage() {
                       size="lg"
                       labelPlacement="outside"
                       classNames={{
-                        input: "font-bold text-xs uppercase tracking-widest",
+                        input: "font-bold text-xs  tracking-widest",
                         inputWrapper: "h-14 bg-foreground/5 hover:bg-foreground/10 border-none rounded-2xl transition-all",
-                        label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2"
+                        label: "text-[9px] font-black  tracking-[0.3em] mb-3 ml-2"
                       }}
                       startContent={<field.icon className="text-obaol-500/50 mr-2" size={16} />}
                     />
@@ -776,8 +776,8 @@ export default function ExternalOrderCreatePage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-               <h3 className="text-[10px] font-black text-obaol-500 uppercase tracking-[0.3em] italic mb-1">Cargo Manifest</h3>
-               <p className="text-xl font-black text-foreground uppercase tracking-tight italic">PRODUCT PARAMETERS</p>
+               <h3 className="text-[10px] font-black text-obaol-500  tracking-[0.3em] italic mb-1">Cargo Manifest</h3>
+               <p className="text-xl font-black text-foreground  tracking-tight italic">PRODUCT PARAMETERS</p>
             </CardHeader>
             <CardBody className="px-10 pb-10">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -787,7 +787,7 @@ export default function ExternalOrderCreatePage() {
                   value={externalProduct.name}
                   onValueChange={(value) => setExternalProduct((prev) => ({ ...prev, name: value }))}
                   variant="flat" size="lg" labelPlacement="outside"
-                  classNames={{ input: "font-bold text-xs uppercase tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2" }}
+                  classNames={{ input: "font-bold text-xs  tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black  tracking-[0.3em] mb-3 ml-2" }}
                   startContent={<LuPackage className="text-obaol-500/50 mr-2" size={16} />}
                 />
                 <Input
@@ -796,7 +796,7 @@ export default function ExternalOrderCreatePage() {
                   value={externalProduct.variant}
                   onValueChange={(value) => setExternalProduct((prev) => ({ ...prev, variant: value }))}
                   variant="flat" size="lg" labelPlacement="outside"
-                  classNames={{ input: "font-bold text-xs uppercase tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2" }}
+                  classNames={{ input: "font-bold text-xs  tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black  tracking-[0.3em] mb-3 ml-2" }}
                   startContent={<LuTag className="text-obaol-500/50 mr-2" size={16} />}
                 />
                 <Input
@@ -806,7 +806,7 @@ export default function ExternalOrderCreatePage() {
                   value={externalProduct.quantity}
                   onValueChange={(value) => setExternalProduct((prev) => ({ ...prev, quantity: value }))}
                   variant="flat" size="lg" labelPlacement="outside"
-                  classNames={{ input: "font-bold text-xs uppercase tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2" }}
+                  classNames={{ input: "font-bold text-xs  tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black  tracking-[0.3em] mb-3 ml-2" }}
                 />
                 <Select
                   label="METRIC UNIT"
@@ -818,10 +818,10 @@ export default function ExternalOrderCreatePage() {
                     const arr = Array.from(keys as Set<string>);
                     setExternalProduct((prev) => ({ ...prev, unit: (arr[0] as string) || "MT" }));
                   }}
-                  classNames={{ trigger: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2", value: "font-bold text-xs uppercase tracking-widest" }}
+                  classNames={{ trigger: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black  tracking-[0.3em] mb-3 ml-2", value: "font-bold text-xs  tracking-widest" }}
                 >
                   {["MT", "KG", "TON", "BAG", "BOX"].map((unit) => (
-                    <SelectItem key={unit} value={unit} className="font-bold uppercase text-[10px] tracking-widest">{unit}</SelectItem>
+                    <SelectItem key={unit} value={unit} className="font-bold  text-[10px] tracking-widest">{unit}</SelectItem>
                   ))}
                 </Select>
               </div>
@@ -882,8 +882,8 @@ export default function ExternalOrderCreatePage() {
                    <div className="absolute inset-0 bg-obaol-500 blur-2xl opacity-30 animate-pulse" />
                 </div>
                 <div className="flex flex-col gap-3">
-                  <div className="text-2xl font-black text-foreground uppercase tracking-tight italic leading-none">INITIALIZE EXTERNAL ORDER</div>
-                  <p className="text-[10px] font-bold text-default-500 uppercase tracking-widest leading-relaxed opacity-80">
+                  <div className="text-2xl font-black text-foreground  tracking-tight italic leading-none">INITIALIZE EXTERNAL ORDER</div>
+                  <p className="text-[10px] font-bold text-default-500  tracking-widest leading-relaxed opacity-80">
                     Routing this transaction through the global execution matrix. All responsibility mappings will be encoded into the core ledger upon initialization.
                   </p>
                   
@@ -893,7 +893,7 @@ export default function ExternalOrderCreatePage() {
                         key={item.key} 
                         size="sm" 
                         variant="flat" 
-                        className={`font-black uppercase text-[8px] tracking-[0.2em] h-7 px-3 border border-current transition-all duration-500 rounded-lg ${item.ok ? "bg-success-500/5 text-success-500/60" : "bg-danger-500/10 text-danger-500 animate-pulse"}`}
+                        className={`font-black  text-[8px] tracking-[0.2em] h-7 px-3 border border-current transition-all duration-500 rounded-lg ${item.ok ? "bg-success-500/5 text-success-500/60" : "bg-danger-500/10 text-danger-500 animate-pulse"}`}
                         startContent={item.ok ? <LuCheck size={10} className="mr-1" /> : <div className="w-1.5 h-1.5 rounded-full bg-danger-500 mr-2" />}
                       >
                         {item.label}
@@ -905,14 +905,14 @@ export default function ExternalOrderCreatePage() {
               
               <div className="flex flex-col gap-4 w-full xl:w-auto">
                 {submitError && (
-                  <div className="px-4 py-3 bg-danger-500/10 border border-danger-500/20 rounded-xl text-danger-500 text-[10px] font-black uppercase tracking-widest text-center italic">
+                  <div className="px-4 py-3 bg-danger-500/10 border border-danger-500/20 rounded-xl text-danger-500 text-[10px] font-black  tracking-widest text-center italic">
                     {submitError}
                   </div>
                 )}
                 <Button
                   color="warning"
                   variant="shadow"
-                  className="font-black px-16 h-16 rounded-[2.5rem] text-[13px] tracking-[0.4em] uppercase italic transition-all duration-500 
+                  className="font-black px-16 h-16 rounded-[2.5rem] text-[13px] tracking-[0.4em] italic transition-all duration-500
                     bg-obaol-500 text-black hover:scale-[1.03] active:scale-95
                     shadow-[0_20px_60px_rgba(207,152,60,0.4)] hover:shadow-obaol-500/60
                     disabled:bg-foreground/5 disabled:text-default-400 disabled:shadow-none"
@@ -924,7 +924,7 @@ export default function ExternalOrderCreatePage() {
                   {submitting ? "REDIRECTING..." : "DEPLOY MISSION ORCHESTRATION"}
                 </Button>
                 {submitting && (
-                  <div className="text-[9px] font-black uppercase tracking-[0.35em] text-default-400 text-center italic">
+                  <div className="text-[9px] font-black  tracking-[0.35em] text-default-400 text-center italic">
                     Redirecting to order view
                   </div>
                 )}

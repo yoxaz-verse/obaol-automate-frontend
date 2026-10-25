@@ -20,7 +20,7 @@ export const RequestSampleButton = ({ variantRate }: RequestSampleButtonProps) =
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <Tooltip content={<span className="px-1 text-[10px] font-black uppercase tracking-widest">Request Sample Protocol</span>} closeDelay={0}>
+      <Tooltip content={<span className="px-1 text-[10px] font-black  tracking-widest">Request Sample Protocol</span>} closeDelay={0}>
         <Button isIconOnly size="sm" variant="flat" color={sample.cooldown.active ? "success" : "warning"} onPress={disclosure.onOpen} isDisabled={sample.cooldown.active} aria-label={sample.cooldown.label} className={`${LISTING_ACTION_CLASS} p-0 ${sample.cooldown.active ? "opacity-60" : ""}`}>
           <LuBox size={22} className={sample.cooldown.active ? "text-success-600/80" : "text-obaol-600/80"} />
         </Button>
@@ -31,7 +31,7 @@ export const RequestSampleButton = ({ variantRate }: RequestSampleButtonProps) =
             <>
               <ModalHeader className="flex gap-3 border-b border-divider/50 px-8 pb-4">
                 <div className="rounded-2xl bg-orange-500/10 p-2.5 text-orange-500"><FiPackage size={22} /></div>
-                <div><h3 className="text-xl font-black uppercase tracking-tight">Request Sample</h3><p className="text-[10px] font-bold uppercase tracking-widest text-default-400">Logistics Protocol & Sample Dispatch</p></div>
+                <div><h3 className="text-xl font-black  tracking-tight">Request Sample</h3><p className="text-[10px] font-bold  tracking-widest text-default-400">Logistics Protocol & Sample Dispatch</p></div>
               </ModalHeader>
               <ModalBody className="flex flex-col gap-6 overflow-y-auto px-8 py-8">
                 {!sample.success && sample.cooldown.active && <CooldownWarning label={sample.cooldown.label} />}

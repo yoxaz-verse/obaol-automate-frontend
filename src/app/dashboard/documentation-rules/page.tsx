@@ -201,7 +201,7 @@ export default function DocumentationRulesPage() {
 
           <div className="rounded-xl border border-default-200/70 bg-content1/95 overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-xs uppercase text-default-500 border-b border-default-200/60">
+              <thead className="text-xs  text-default-500 border-b border-default-200/60">
                 <tr>
                   <th className="text-left px-4 py-3">Doc Type</th>
                   <th className="text-left px-4 py-3">Stage</th>
@@ -228,7 +228,7 @@ export default function DocumentationRulesPage() {
                     >
                       <td className="px-4 py-3">
                         <div className="font-bold text-default-700">{rule.docType}</div>
-                        <div className="text-[10px] text-default-400 uppercase tracking-tight">{rule.visibility} Visibility</div>
+                        <div className="text-[10px] text-default-400  tracking-tight">{rule.visibility} Visibility</div>
                       </td>
                       <td className="px-4 py-3 border-l border-default-200/20">
                         <div className="text-[11px] font-black text-secondary-500">{rule.stageType}</div>
@@ -272,7 +272,7 @@ export default function DocumentationRulesPage() {
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 bg-primary rounded-full" />
               <div>
-                <h3 className="font-black text-sm uppercase tracking-wider">Stage Preview</h3>
+                <h3 className="font-black text-sm  tracking-wider">Stage Preview</h3>
                 <p className="text-xs text-default-500">Documentation requirements by step</p>
               </div>
             </div>

@@ -23,11 +23,11 @@ const OrderStatus: React.FC<OrderStatusProps> = ({ status }) => {
     return (
         <div className="flex flex-col gap-2 w-full">
             <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-bold uppercase tracking-widest ${config.textColor}`}>
+                <span className={`text-[10px] font-bold  tracking-widest ${config.textColor}`}>
                     {config.label}
                 </span>
                 {config.step > 0 && config.step < 6 && (
-                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-wider bg-foreground/5 px-3 py-1 rounded-lg border border-foreground/5">
+                    <span className="text-[9px] font-bold text-default-400  tracking-wider bg-foreground/5 px-3 py-1 rounded-lg border border-foreground/5">
                         Stage {config.step} / 6
                     </span>
                 )}

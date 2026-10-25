@@ -571,7 +571,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="w-2 h-2 bg-obaol-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
                   <div className="absolute -inset-1 bg-obaol-500/20 rounded-full blur-sm" />
                 </div>
-                <span className="text-[11px] font-black tracking-[0.25em] uppercase text-obaol-600 dark:text-obaol-500">Imports to India</span>
+                <span className="text-[11px] font-black tracking-[0.25em]  text-obaol-600 dark:text-obaol-500">Imports to India</span>
                 <div className="h-4 w-px bg-obaol-500/30 mx-1" />
                 <div className="flex items-center gap-2 text-[9px] font-black text-obaol-600 bg-obaol-500/10 px-2.5 py-0.5 rounded-lg border border-obaol-500/10">
                   <span className="tracking-tighter italic">INBOUND</span>
@@ -595,7 +595,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
           {canCreate && activeTab === "mine" && (
              <Button 
                 size="md"
-                className="h-11 rounded-xl font-bold uppercase tracking-wider text-[11px] bg-warning text-black shadow-md hover:scale-105 active:scale-95 transition-all px-8"
+                className="h-11 rounded-xl font-bold  tracking-wider text-[11px] bg-warning text-black shadow-md hover:scale-105 active:scale-95 transition-all px-8"
                 onClick={() => setCreateOpen(true)}
                 startContent={<FiPlus size={18} />}
              >
@@ -617,7 +617,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                 tabList: "gap-12 relative rounded-none p-0",
                 cursor: "bg-warning w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--nextui-warning),0.4)]",
                 tab: "max-w-fit px-4 h-14",
-                tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning group-data-[selected=true]:scale-105 transition-transform"
+                tabContent: "font-semibold  tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning group-data-[selected=true]:scale-105 transition-transform"
               }}
             >
               <Tab key="all" title="Import Opportunities" />
@@ -659,17 +659,17 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                       <CardHeader className="flex flex-col gap-4 p-8 pb-4">
                         <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                           <div className="flex min-w-0 flex-col gap-1.5">
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-obaol-500">Import Details</span>
-                            <h4 className="line-clamp-2 break-words text-lg font-bold uppercase tracking-tight text-foreground">
+                            <span className="text-[9px] font-bold  tracking-wider text-obaol-500">Import Details</span>
+                            <h4 className="line-clamp-2 break-words text-lg font-bold  tracking-tight text-foreground">
                               {listing.commodityName}
                             </h4>
                           </div>
                           <div className="flex shrink-0 flex-col items-end gap-2">
                              <div className="flex max-w-[9rem] items-center gap-2 rounded-full border border-obaol-500/20 bg-obaol-500/10 px-3 py-1 shadow-sm">
                                 <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-obaol-500" />
-                                <span className="truncate text-[9px] font-bold uppercase tracking-widest text-warning-500">{listing.status}</span>
+                                <span className="truncate text-[9px] font-bold  tracking-widest text-warning-500">{listing.status}</span>
                                 <div className="h-2.5 w-px bg-obaol-500/30 mx-0.5" />
-                                <span className="text-[8px] font-black text-obaol-600 dark:text-obaol-500 uppercase tracking-tighter italic">IND</span>
+                                <span className="text-[8px] font-black text-obaol-600 dark:text-obaol-500  tracking-tighter italic">IND</span>
                              </div>
                           </div>
                         </div>
@@ -677,13 +677,13 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         <div className="grid w-full grid-cols-1 gap-3 text-default-400 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                            <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-foreground/5 bg-foreground/[0.03] px-3 py-1.5 shadow-sm">
                              <LuMapPin size={12} className="shrink-0 text-obaol-500/50" />
-                             <span className="min-w-0 flex-1 truncate text-[9px] font-black uppercase tracking-[0.2em]">{listing.portName || "Port TBD"}</span>
+                             <span className="min-w-0 flex-1 truncate text-[9px] font-black  tracking-[0.2em]">{listing.portName || "Port TBD"}</span>
                              <div className="h-1 w-1 shrink-0 rounded-full bg-obaol-500/30" />
-                             <span className="shrink-0 text-[8px] font-black uppercase tracking-tighter text-obaol-600/60">IND</span>
+                             <span className="shrink-0 text-[8px] font-black  tracking-tighter text-obaol-600/60">IND</span>
                            </div>
                            <div className="flex shrink-0 items-center gap-2">
                              <LuClock size={14} className="shrink-0 text-obaol-500/50" />
-                             <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-widest">
+                             <span className="whitespace-nowrap text-[10px] font-bold  tracking-widest">
                                 ETA {listing.expectedArrivalDate ? new Date(listing.expectedArrivalDate).toLocaleDateString() : "TBD"}
                              </span>
                            </div>
@@ -705,7 +705,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                              return (
                                 <div className={`relative z-10 flex max-w-full items-center justify-start gap-3 rounded-2xl border px-4 py-2 ${config.bg} ${config.border}`}>
                                   <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${config.color.replace('text', 'bg')}`} />
-                                  <span className={`min-w-0 text-[10px] font-bold uppercase tracking-widest ${config.color}`}>{config.label}</span>
+                                  <span className={`min-w-0 text-[10px] font-bold  tracking-widest ${config.color}`}>{config.label}</span>
                                 </div>
                               );
                           })()}
@@ -713,19 +713,19 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
 
                         <div className="grid grid-cols-2 gap-8">
                            <div className="flex flex-col gap-2">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-default-400">Total Quantity</span>
+                              <span className="text-[9px] font-bold  tracking-wider text-default-400">Total Quantity</span>
                               <div className="flex items-baseline gap-1.5">
                                 <span className="text-lg font-bold text-foreground">{listing.totalQuantity}</span>
                                 <span className="text-[10px] font-bold text-default-500">{listing.quantityUnit}</span>
                               </div>
                            </div>
                            <div className="flex flex-col gap-2 items-end">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-default-400">Rate</span>
+                              <span className="text-[9px] font-bold  tracking-wider text-default-400">Rate</span>
                               <div className="flex items-baseline gap-1.5 justify-end">
                                 <span className="text-lg font-bold text-obaol-500 tracking-tighter">
                                   {getDisplayPrice(listing)}
                                 </span>
-                                <span className="text-[10px] font-bold text-default-500 uppercase">/{listing.priceUnit}</span>
+                                <span className="text-[10px] font-bold text-default-500 ">/{listing.priceUnit}</span>
                               </div>
                            </div>
                         </div>
@@ -737,8 +737,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                 <FiBriefcase size={16} className="text-default-400" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <span className="text-[9px] font-bold uppercase tracking-wider text-default-400 block mb-0.5">Importer</span>
-                                <p className="break-words text-xs font-bold uppercase">{listing.importerCompanyId?.name || "Confidential"}</p>
+                                <span className="text-[9px] font-bold  tracking-wider text-default-400 block mb-0.5">Importer</span>
+                                <p className="break-words text-xs font-bold ">{listing.importerCompanyId?.name || "Confidential"}</p>
                               </div>
                             </div>
                           )}
@@ -748,7 +748,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                <Button
                                  fullWidth
                                  isDisabled={isTerminalListing(listing)}
-                                 className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background shadow-md hover:scale-[1.02] active:scale-95 transition-all"
+                                 className="h-10 rounded-xl font-bold  tracking-widest text-[10px] bg-foreground text-background shadow-md hover:scale-[1.02] active:scale-95 transition-all"
                                  onClick={() => {
                                    setSelectedListing(listing);
                                    setReserveOpen(true);
@@ -767,7 +767,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                               {canEditListing(listing) && (
                                  <Button
                                    variant="flat"
-                                   className="h-10 rounded-xl font-bold uppercase tracking-[0.1em] text-[9px] bg-foreground/5 hover:bg-foreground/10"
+                                   className="h-10 rounded-xl font-bold  tracking-[0.1em] text-[9px] bg-foreground/5 hover:bg-foreground/10"
                                    onClick={() => {
                                      setSelectedListing(listing);
                                      const productId = listing?.productVariant?.product?._id || listing?.productId || "";
@@ -799,7 +799,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                               {canSyncReserves(listing) && (
                                 <Button
                                   variant="flat"
-                                  className="h-10 rounded-xl font-bold uppercase tracking-[0.1em] text-[9px] bg-foreground/5 hover:bg-foreground/10"
+                                  className="h-10 rounded-xl font-bold  tracking-[0.1em] text-[9px] bg-foreground/5 hover:bg-foreground/10"
                                   onClick={() => {
                                     setSelectedListing(listing);
                                     setManageOpen(true);
@@ -819,7 +819,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                    variant="bordered"
                                    isLoading={closeMutation.isPending && closingListingId === listing._id}
                                    isDisabled={closeMutation.isPending}
-                                   className="h-8 px-3 rounded-lg font-semibold uppercase tracking-wider text-[9px] border-danger-500/30 text-danger-400 bg-transparent hover:bg-danger-500/10"
+                                   className="h-8 px-3 rounded-lg font-semibold  tracking-wider text-[9px] border-danger-500/30 text-danger-400 bg-transparent hover:bg-danger-500/10"
                                    onClick={() => {
                                      if (confirm("Are you sure you want to close this listing?")) {
                                        setClosingListingId(listing._id);
@@ -862,7 +862,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         <CardHeader className="flex flex-col items-stretch gap-4 p-6 pb-3 sm:p-7 sm:pb-3">
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
-                              <span className="mb-1 block text-[9px] font-bold uppercase tracking-[0.2em] text-obaol-600 dark:text-obaol-400">Import Reservation</span>
+                              <span className="mb-1 block text-[9px] font-bold  tracking-[0.2em] text-obaol-600 dark:text-obaol-400">Import Reservation</span>
                               <h4 className="break-words text-lg font-bold leading-snug tracking-tight text-foreground">
                                 {listing.commodityName || "Product not available"}
                               </h4>
@@ -870,7 +870,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                 <p className="mt-1 text-xs font-semibold text-default-500">Variant: {variantName}</p>
                               )}
                             </div>
-                            <span className={`w-fit shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-widest ${reservationToneClasses(presentation.tone)}`}>
+                            <span className={`w-fit shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-black  tracking-widest ${reservationToneClasses(presentation.tone)}`}>
                               {presentation.label}
                             </span>
                           </div>
@@ -882,26 +882,26 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         <CardBody className="gap-5 px-6 pb-6 pt-3 sm:px-7 sm:pb-7">
                           <div className="grid grid-cols-2 gap-x-5 gap-y-5 rounded-2xl border border-foreground/5 bg-foreground/[0.03] p-5">
                             <div className="flex min-w-0 flex-col gap-1">
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Reserved Quantity</span>
+                              <span className="text-[9px] font-bold  tracking-widest text-default-400">Reserved Quantity</span>
                               <div className="flex items-baseline gap-1.5">
                                 <span className="text-xl font-bold text-foreground">{reservation.quantityRequested ?? "Not available"}</span>
-                                {reservation.quantityRequested != null && <span className="text-[10px] font-bold uppercase text-default-500">{listing.quantityUnit || "MT"}</span>}
+                                {reservation.quantityRequested != null && <span className="text-[10px] font-bold  text-default-500">{listing.quantityUnit || "MT"}</span>}
                               </div>
                             </div>
                             <div className="flex min-w-0 flex-col items-end gap-1 text-right">
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Expected Arrival</span>
+                              <span className="text-[9px] font-bold  tracking-widest text-default-400">Expected Arrival</span>
                               <span className="text-xs font-bold text-foreground">{formatImportReservationDate(listing.expectedArrivalDate)}</span>
                             </div>
                             <div className="col-span-2 h-px bg-divider/50" />
                             <div className="flex min-w-0 flex-col gap-1">
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Destination Port</span>
+                              <span className="text-[9px] font-bold  tracking-widest text-default-400">Destination Port</span>
                               <span className="flex items-center gap-1.5 text-xs font-bold text-foreground">
                                 <LuMapPin size={13} className="shrink-0 text-obaol-500" />
                                 <span className="truncate">{listing.portName || listing.portId?.name || "Not available"}</span>
                               </span>
                             </div>
                             <div className="flex min-w-0 flex-col items-end gap-1 text-right">
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-default-400">Requested On</span>
+                              <span className="text-[9px] font-bold  tracking-widest text-default-400">Requested On</span>
                               <span className="text-xs font-bold text-foreground">{formatImportReservationDate(reservation.requestedAt || reservation.createdAt)}</span>
                             </div>
                           </div>
@@ -912,7 +912,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                 <FiUser size={15} className="text-default-400" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <span className="block text-[9px] font-bold uppercase tracking-widest text-default-400">Importer</span>
+                                <span className="block text-[9px] font-bold  tracking-widest text-default-400">Importer</span>
                                 <p className="truncate text-xs font-bold text-foreground">{listing.importerCompanyId?.name || "Not available"}</p>
                               </div>
                             </div>
@@ -921,7 +921,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         {status === "PENDING" && (
                           <div className="grid grid-cols-2 gap-3 mt-2">
                              <Button
-                               className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background shadow-md hover:scale-[1.02] active:scale-95 transition-all"
+                               className="h-10 rounded-xl font-bold  tracking-widest text-[10px] bg-foreground text-background shadow-md hover:scale-[1.02] active:scale-95 transition-all"
                                onClick={() => {
                                  setSelectedReservation(reservation);
                                  setEditReservationQty(String(reservation.quantityRequested || ""));
@@ -934,7 +934,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                             <Button
                               variant="flat"
                               color="danger"
-                              className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] border border-danger-500/20"
+                              className="h-10 rounded-xl font-bold  tracking-widest text-[10px] border border-danger-500/20"
                               isLoading={cancelReservationMutation.isPending}
                               onClick={() =>
                                 cancelReservationMutation.mutate({
@@ -953,7 +953,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                            <div className="flex flex-col gap-3">
                               <Button
                                 fullWidth
-                                className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background shadow-md transition-all active:scale-95"
+                                className="h-10 rounded-xl font-bold  tracking-widest text-[10px] bg-foreground text-background shadow-md transition-all active:scale-95"
                                 onPress={() => lockReservationMutation.mutate({
                                    listingId: String(reservation.listingId?._id || reservation.listingId || ""),
                                    reservationId: reservation._id
@@ -972,7 +972,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           <div className="flex flex-col gap-3">
                             <Button
                               fullWidth
-                              className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background shadow-md transition-all active:scale-95"
+                              className="h-10 rounded-xl font-bold  tracking-widest text-[10px] bg-foreground text-background shadow-md transition-all active:scale-95"
                               isLoading={redirectingEnquiryId === reservation._id}
                               onPress={() => {
                                 const linked = reservation?.linkedEnquiryId;
@@ -1035,8 +1035,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-obaol-500 font-bold">Inception Phase</span>
-                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Create Import Listing</h3>
+                <span className="text-[10px]  tracking-[0.2em] text-obaol-500 font-bold">Inception Phase</span>
+                <h3 className="text-xl font-bold text-white  tracking-tight">Create Import Listing</h3>
               </ModalHeader>
               <ModalBody className="gap-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
                 <div className="space-y-8">
@@ -1044,7 +1044,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Mission Parameters</span>
+                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Mission Parameters</span>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4">
@@ -1060,7 +1060,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
-                            value: "text-white font-bold uppercase text-xs",
+                            value: "text-white font-bold  text-xs",
                             popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
@@ -1085,7 +1085,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
-                            value: "text-white font-bold uppercase text-xs",
+                            value: "text-white font-bold  text-xs",
                             popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
@@ -1108,7 +1108,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors disabled:opacity-30",
                             label: "text-default-400 font-medium",
-                            value: "text-white font-bold uppercase text-xs",
+                            value: "text-white font-bold  text-xs",
                             popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
@@ -1127,7 +1127,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Operational Capacity</span>
+                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Operational Capacity</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1142,7 +1142,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors flex-1",
                             label: "text-default-400 font-medium",
-                            input: "text-white font-bold uppercase text-sm"
+                            input: "text-white font-bold  text-sm"
                           }}
                         />
                         <Select
@@ -1156,7 +1156,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl w-24 hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
-                            value: "text-white font-bold uppercase text-xs"
+                            value: "text-white font-bold  text-xs"
                           }}
                         >
                           <SelectItem key="MT" value="MT" className="text-white">MT</SelectItem>
@@ -1175,7 +1175,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors flex-1",
                             label: "text-default-400 font-medium",
-                            input: "text-white font-bold uppercase text-sm"
+                            input: "text-white font-bold  text-sm"
                           }}
                         />
                         <Select
@@ -1189,7 +1189,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl w-28 hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
-                            value: "text-white font-bold uppercase text-xs"
+                            value: "text-white font-bold  text-xs"
                           }}
                         >
                           <SelectItem key="KG" value="KG" className="text-white">/ KG</SelectItem>
@@ -1209,7 +1209,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          input: "text-white font-bold uppercase text-sm"
+                          input: "text-white font-bold  text-sm"
                         }}
                       />
                     )}
@@ -1219,7 +1219,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Logistics Initialization</span>
+                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Logistics Initialization</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1232,7 +1232,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          input: "text-white font-bold uppercase text-sm [color-scheme:dark]"
+                          input: "text-white font-bold  text-sm [color-scheme:dark]"
                         }}
                       />
                       <Input
@@ -1245,7 +1245,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          input: "text-white font-bold uppercase text-sm"
+                          input: "text-white font-bold  text-sm"
                         }}
                       />
                     </div>
@@ -1262,7 +1262,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          value: "text-white font-bold uppercase text-xs",
+                          value: "text-white font-bold  text-xs",
                           popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                         }}
                         popoverProps={{ shouldCloseOnBlur: false }}
@@ -1283,7 +1283,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          input: "text-white font-bold uppercase text-sm placeholder:text-white/20"
+                          input: "text-white font-bold  text-sm placeholder:text-white/20"
                         }}
                       />
                     )}
@@ -1293,14 +1293,14 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
               <ModalFooter className="gap-3">
                 <Button 
                   variant="flat" 
-                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
+                  className="h-12 rounded-2xl font-bold  tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
                   onClick={onClose}
                 >
                   Cancel
                 </Button>
                 <Button
                   color="warning"
-                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
+                  className="h-12 rounded-2xl font-bold  tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
                   isLoading={createMutation.isPending}
                   isDisabled={!createForm.productId || !createForm.productVariant}
                   onClick={() =>
@@ -1356,8 +1356,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-obaol-500 font-bold">Inventory Control</span>
-                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Reserve Quantity</h3>
+                <span className="text-[10px]  tracking-[0.2em] text-obaol-500 font-bold">Inventory Control</span>
+                <h3 className="text-xl font-bold text-white  tracking-tight">Reserve Quantity</h3>
               </ModalHeader>
               <ModalBody className="gap-6">
                 {reserveStatus !== "success" ? (
@@ -1365,7 +1365,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                     <div className="flex flex-col gap-6">
                       {reserveNeedsCompany && (
                         <div className="flex flex-col gap-2">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Target Entity</label>
+                          <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Target Entity</label>
                           <Select
                             label="Select Buyer Company"
                             variant="flat"
@@ -1379,7 +1379,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                             classNames={{
                               trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                               label: "text-default-400 font-medium",
-                              value: "text-white font-bold uppercase text-xs",
+                              value: "text-white font-bold  text-xs",
                               popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                             }}
                             popoverProps={{ shouldCloseOnBlur: false }}
@@ -1394,7 +1394,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                       )}
 
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Mission Volume</label>
+                        <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Mission Volume</label>
                         <Input
                           label="Allocation (MT)"
                           type="number"
@@ -1409,7 +1409,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors data-[focus=true]:border-obaol-500/50",
                             label: "text-default-400 font-medium",
-                            input: "text-white font-bold uppercase text-sm placeholder:text-white/20",
+                            input: "text-white font-bold  text-sm placeholder:text-white/20",
                           }}
                         />
                       </div>
@@ -1418,7 +1418,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                     <div className="p-6 rounded-[2rem] bg-obaol-500/5 border border-obaol-500/10 flex flex-col gap-2">
                       <div className="flex items-center gap-2">
                         <FiPackage size={14} className="text-obaol-500" />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-obaol-500">Available Infrastructure</span>
+                        <span className="text-[10px] font-bold  tracking-[0.1em] text-obaol-500">Available Infrastructure</span>
                       </div>
                       <p className="text-xs text-default-300 font-medium leading-relaxed">
                         Secure up to <span className="text-white font-bold">{maxReservableQty} MT</span> for this shipment. 
@@ -1435,7 +1435,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                     <div className="w-16 h-16 rounded-full bg-success-500/10 border border-success-500/20 flex items-center justify-center text-success-500 mb-2">
                       <LuCheck size={32} />
                     </div>
-                    <h4 className="text-lg font-bold text-white uppercase tracking-tight">Reserve Request Initialized</h4>
+                    <h4 className="text-lg font-bold text-white  tracking-tight">Reserve Request Initialized</h4>
                     <p className="text-xs text-default-400 max-w-[280px]">
                       Your reservation request has been submitted. You can track its review status in &quot;{reservationPageLabel}&quot;.
                     </p>
@@ -1449,7 +1449,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                     className="flex items-center gap-2 px-4 py-3 rounded-xl bg-danger-500/5 border border-danger-500/10"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-danger-500 animate-pulse" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-danger-500">
+                    <span className="text-[10px] font-bold  tracking-wider text-danger-500">
                       {reserveFeedback}
                     </span>
                   </motion.div>
@@ -1458,7 +1458,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
               <ModalFooter className="gap-3">
                 <Button 
                   variant="flat" 
-                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
+                  className="h-12 rounded-2xl font-bold  tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
                   onClick={onClose}
                 >
                   {reserveStatus === "success" ? "Back to Imports" : "Cancel"}
@@ -1466,7 +1466,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                 {reserveStatus !== "success" && (
                   <Button
                     color="warning"
-                    className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
+                    className="h-12 rounded-2xl font-bold  tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
                     isLoading={reserveMutation.isPending}
                     isDisabled={
                       !reserveQty ||
@@ -1532,7 +1532,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                 </Button>
                 <Button
                   color="warning"
-                  className="h-10 rounded-xl font-bold uppercase text-[11px]"
+                  className="h-10 rounded-xl font-bold  text-[11px]"
                   isLoading={editReservationMutation.isPending}
                   isDisabled={!editReservationQty || Number(editReservationQty) <= 0 || !selectedReservation}
                   onClick={() => {
@@ -1572,8 +1572,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-obaol-500 font-bold">Logistics Oversight</span>
-                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Manage Reservations</h3>
+                <span className="text-[10px]  tracking-[0.2em] text-obaol-500 font-bold">Logistics Oversight</span>
+                <h3 className="text-xl font-bold text-white  tracking-tight">Manage Reservations</h3>
               </ModalHeader>
               <ModalBody className="gap-4">
                 {reservations.length === 0 && (
@@ -1601,17 +1601,17 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                 <FiBriefcase size={20} />
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-white font-bold text-lg leading-tight uppercase tracking-tight">
+                                <span className="text-white font-bold text-lg leading-tight  tracking-tight">
                                   {reservation.buyerCompanyId?.name || "Independent Buyer"}
                                 </span>
                                 <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">
+                                  <span className="text-[10px] font-bold  tracking-widest text-default-400">
                                     {reservation.listingId?.commodityName || "Export Order"}
                                   </span>
                                   <div className="w-1 h-1 rounded-full bg-white/10" />
                                   <div className="flex items-center gap-1.5 text-default-500">
                                     <FiCalendar size={12} className="text-obaol-500/50" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest">
+                                    <span className="text-[10px] font-bold  tracking-widest">
                                       {reservation.listingId?.expectedArrivalDate
                                         ? `ETA ${new Date(reservation.listingId.expectedArrivalDate).toLocaleDateString()}`
                                         : "NO ETA SET"}
@@ -1625,9 +1625,9 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                               <div className="text-right">
                                 <div className="flex items-center justify-end gap-2">
                                   <span className="text-2xl font-black text-white">{reservation.quantityRequested}</span>
-                                  <span className="text-xs font-bold text-obaol-500 uppercase tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-lg border border-obaol-500/20">MT</span>
+                                  <span className="text-xs font-bold text-obaol-500  tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-lg border border-obaol-500/20">MT</span>
                                 </div>
-                                <span className="text-[9px] font-bold text-default-500 uppercase tracking-[0.2em]">Allocated Volume</span>
+                                <span className="text-[9px] font-bold text-default-500  tracking-[0.2em]">Allocated Volume</span>
                               </div>
                               <Chip 
                                 size="sm" 
@@ -1639,7 +1639,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                   <FiX size={10} className="text-danger-500" />
                                 }
                                 classNames={{
-                                  content: "text-[10px] font-black uppercase tracking-widest text-white"
+                                  content: "text-[10px] font-black  tracking-widest text-white"
                                 }}
                               >
                                 {getImportReservationPresentation(resolveReservationStatus(reservation)).label}
@@ -1659,7 +1659,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                               <Button
                                 size="sm"
                                 color="warning"
-                                className="h-10 rounded-xl font-bold uppercase text-[10px] tracking-widest flex-1 bg-obaol-500 text-black shadow-lg shadow-obaol-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                className="h-10 rounded-xl font-bold  text-[10px] tracking-widest flex-1 bg-obaol-500 text-black shadow-lg shadow-obaol-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                 isLoading={acceptMutation.isPending && pendingReservationId === reservation._id}
                                 isDisabled={(acceptMutation.isPending || rejectMutation.isPending) && pendingReservationId === reservation._id}
                                 onClick={() => {
@@ -1674,7 +1674,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                               <Button
                                 size="sm"
                                 variant="flat"
-                                className="h-10 rounded-xl font-bold uppercase text-[10px] tracking-widest px-6 bg-white/5 text-default-400 hover:text-white hover:bg-danger-500/20 active:scale-95 transition-all"
+                                className="h-10 rounded-xl font-bold  text-[10px] tracking-widest px-6 bg-white/5 text-default-400 hover:text-white hover:bg-danger-500/20 active:scale-95 transition-all"
                                 isLoading={rejectMutation.isPending && pendingReservationId === reservation._id}
                                 isDisabled={(acceptMutation.isPending || rejectMutation.isPending) && pendingReservationId === reservation._id}
                                 onClick={() => {
@@ -1694,7 +1694,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                               <Button
                                 size="sm"
                                 color="success"
-                                className="h-10 rounded-xl font-black uppercase text-[10px] tracking-widest bg-success-500 text-black shadow-lg shadow-success-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                className="h-10 rounded-xl font-black  text-[10px] tracking-widest bg-success-500 text-black shadow-lg shadow-success-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                 isLoading={lockReservationMutation.isPending && pendingReservationId === reservation._id}
                                 isDisabled={lockReservationMutation.isPending && pendingReservationId === reservation._id}
                                 onPress={() =>
@@ -1715,7 +1715,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                 <motion.div 
                                   initial={{ opacity: 0, height: 0 }}
                                   animate={{ opacity: 1, height: "auto" }}
-                                  className="text-[10px] font-bold text-danger-400 uppercase bg-danger-400/5 p-2 rounded-lg border border-danger-400/10"
+                                  className="text-[10px] font-bold text-danger-400  bg-danger-400/5 p-2 rounded-lg border border-danger-400/10"
                                 >
                                   {lockErrorById[reservation._id]}
                                 </motion.div>
@@ -1727,7 +1727,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                             <motion.div 
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: "auto" }}
-                              className="text-[10px] font-bold text-danger-400 uppercase bg-danger-400/5 p-2 rounded-lg border border-danger-400/10"
+                              className="text-[10px] font-bold text-danger-400  bg-danger-400/5 p-2 rounded-lg border border-danger-400/10"
                             >
                               {actionErrorById[reservation._id]}
                             </motion.div>
@@ -1741,7 +1741,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
               <ModalFooter className="gap-3">
                 <Button 
                   variant="flat" 
-                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
+                  className="h-12 rounded-2xl font-bold  tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
                   onClick={onClose}
                 >
                   Close Control Panel
@@ -1772,8 +1772,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-obaol-500 font-bold">Node Configuration</span>
-                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Edit Import Listing</h3>
+                <span className="text-[10px]  tracking-[0.2em] text-obaol-500 font-bold">Node Configuration</span>
+                <h3 className="text-xl font-bold text-white  tracking-tight">Edit Import Listing</h3>
               </ModalHeader>
               <ModalBody className="gap-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
                 <div className="space-y-8">
@@ -1781,7 +1781,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Mission Identity</span>
+                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Mission Identity</span>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1793,7 +1793,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl opacity-50",
                           label: "text-default-400 font-medium",
-                          value: "text-white font-bold uppercase text-xs"
+                          value: "text-white font-bold  text-xs"
                         }}
                       >
                         {products.map((product: any) => (
@@ -1810,7 +1810,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl opacity-50",
                           label: "text-default-400 font-medium",
-                          value: "text-white font-bold uppercase text-xs"
+                          value: "text-white font-bold  text-xs"
                         }}
                       >
                         {variants.map((variant: any) => (
@@ -1826,7 +1826,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Operational Parameters</span>
+                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Operational Parameters</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1840,7 +1840,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors flex-1",
                             label: "text-default-400 font-medium",
-                            input: "text-white font-bold uppercase text-sm"
+                            input: "text-white font-bold  text-sm"
                           }}
                         />
                         <Select
@@ -1854,7 +1854,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl w-24 hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
-                            value: "text-white font-bold uppercase text-xs"
+                            value: "text-white font-bold  text-xs"
                           }}
                         >
                           <SelectItem key="MT" value="MT" className="text-white">MT</SelectItem>
@@ -1872,7 +1872,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors flex-1",
                             label: "text-default-400 font-medium",
-                            input: "text-white font-bold uppercase text-sm"
+                            input: "text-white font-bold  text-sm"
                           }}
                         />
                         <Select
@@ -1886,7 +1886,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           classNames={{
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl w-28 hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
-                            value: "text-white font-bold uppercase text-xs"
+                            value: "text-white font-bold  text-xs"
                           }}
                         >
                           <SelectItem key="KG" value="KG" className="text-white">/ KG</SelectItem>
@@ -1905,7 +1905,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          input: "text-white font-bold uppercase text-sm"
+                          input: "text-white font-bold  text-sm"
                         }}
                       />
                     )}
@@ -1915,7 +1915,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Supply Chain Control</span>
+                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Supply Chain Control</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1928,7 +1928,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          input: "text-white font-bold uppercase text-sm [color-scheme:dark]"
+                          input: "text-white font-bold  text-sm [color-scheme:dark]"
                         }}
                       />
                       <Input
@@ -1940,7 +1940,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          input: "text-white font-bold uppercase text-sm"
+                          input: "text-white font-bold  text-sm"
                         }}
                       />
                     </div>
@@ -1957,7 +1957,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          value: "text-white font-bold uppercase text-xs",
+                          value: "text-white font-bold  text-xs",
                           popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                         }}
                         popoverProps={{ shouldCloseOnBlur: false }}
@@ -1977,7 +1977,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
-                          input: "text-white font-bold uppercase text-sm placeholder:text-white/20"
+                          input: "text-white font-bold  text-sm placeholder:text-white/20"
                         }}
                       />
                     )}
@@ -1987,14 +1987,14 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
               <ModalFooter className="gap-3">
                 <Button 
                   variant="flat" 
-                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
+                  className="h-12 rounded-2xl font-bold  tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
                   onClick={onClose}
                 >
                   Cancel
                 </Button>
                 <Button
                   color="warning"
-                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
+                  className="h-12 rounded-2xl font-bold  tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
                   isLoading={editMutation.isPending}
                   onClick={() => {
                     if (!selectedListing?._id) return;

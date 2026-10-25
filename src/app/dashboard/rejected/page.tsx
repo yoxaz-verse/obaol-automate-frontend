@@ -40,7 +40,7 @@ export default function RejectedPage() {
               <LuShieldOff size={22} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-danger-400">Account review complete</p>
+              <p className="text-[10px] font-black  tracking-[0.3em] text-danger-400">Account review complete</p>
               <h1 className="text-3xl md:text-4xl font-black text-foreground mt-2">Your account needs attention</h1>
             </div>
           </div>
@@ -54,7 +54,7 @@ export default function RejectedPage() {
             <div className="mt-6 rounded-2xl border border-danger-500/30 bg-danger-500/10 p-4">
               <div className="flex items-center gap-3 text-danger-300">
                 <LuAlertTriangle size={16} />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Rejection Note</span>
+                <span className="text-[10px] font-black  tracking-[0.2em]">Rejection Note</span>
               </div>
               <p className="mt-2 text-xs text-danger-200 leading-relaxed">{rejectionReason}</p>
             </div>
@@ -62,13 +62,13 @@ export default function RejectedPage() {
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-300">Account type</span>
+              <span className="text-[10px] font-black  tracking-[0.2em] text-default-300">Account type</span>
               <p className="mt-2 text-xs text-default-400">{roleLabel}</p>
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
               <div className="flex items-center gap-3 text-default-300">
                 <LuMail size={16} />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Support Email</span>
+                <span className="text-[10px] font-black  tracking-[0.2em]">Support Email</span>
               </div>
               <p className="mt-2 text-xs text-default-400">info@support.obaol.com</p>
             </div>

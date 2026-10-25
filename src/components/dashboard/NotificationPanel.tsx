@@ -110,7 +110,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
         <button
           onClick={() => markAllMutation.mutate()}
           disabled={markAllMutation.isPending || notifications.every((x) => x.isRead)}
-          className="text-[11px] font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300 hover:opacity-70 transition-opacity disabled:opacity-30"
+          className="text-[11px] font-bold  tracking-wider text-obaol-700 dark:text-obaol-300 hover:opacity-70 transition-opacity disabled:opacity-30"
         >
           Mark all read
         </button>
@@ -137,7 +137,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
               return (
                 <div key={bucket} className="space-y-2">
                   <div className="flex items-center gap-3 px-2 mb-3">
-                     <span className="text-[9px] font-black text-default-400 uppercase tracking-[0.25em] whitespace-nowrap">{bucket}</span>
+                     <span className="text-[9px] font-black text-default-400  tracking-[0.25em] whitespace-nowrap">{bucket}</span>
                      <div className="flex-1 h-[1px] bg-gradient-to-r from-default-200 dark:from-white/5 to-transparent" />
                   </div>
                   {items.map((item) => (
@@ -174,10 +174,10 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
                            ) : null}
                            <div className="mt-4 flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-obaol-700 dark:text-obaol-300 uppercase tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-obaol-700 dark:text-obaol-300  tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-full">
                                    {item.type.split('_').join(' ')}
                                 </span>
-                                <span className="text-[9px] font-black text-default-400 uppercase tracking-widest tabular-nums flex items-center gap-1">
+                                <span className="text-[9px] font-black text-default-400  tracking-widest tabular-nums flex items-center gap-1">
                                    <FiClock size={10} className="stroke-[2.5px]" />
                                    {dayjs(item.createdAt).fromNow()}
                                 </span>
@@ -198,13 +198,13 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
       <div className="px-6 py-5 border-t border-default-200/50 dark:border-white/5 flex items-center justify-between bg-default-50/30 dark:bg-black/20">
         <button
           onClick={() => { router.push("/dashboard/notifications"); onClose?.(); }}
-          className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#1F2937] dark:text-white hover:text-obaol-700 dark:hover:text-obaol-300 transition-colors"
+          className="text-[10px] font-bold  tracking-[0.2em] text-[#1F2937] dark:text-white hover:text-obaol-700 dark:hover:text-obaol-300 transition-colors"
         >
           View all notifications
         </button>
         <button 
            onClick={onClose}
-           className="px-4 py-2 rounded-xl bg-default-100 dark:bg-white/10 text-[10px] font-black uppercase tracking-widest text-[#1F2937] dark:text-white hover:bg-default-200 dark:hover:bg-white/20 transition-all"
+           className="px-4 py-2 rounded-xl bg-default-100 dark:bg-white/10 text-[10px] font-black  tracking-widest text-[#1F2937] dark:text-white hover:bg-default-200 dark:hover:bg-white/20 transition-all"
         >
            Close
         </button>

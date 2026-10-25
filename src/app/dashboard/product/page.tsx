@@ -114,7 +114,7 @@ export default function Product() {
                 tabList: "gap-10 relative rounded-none p-0 border-b border-divider/40 flex-nowrap overflow-x-auto no-scrollbar bg-transparent",
                 cursor: "bg-obaol-500 w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(207,152,60,0.4)]",
                 tab: "max-w-fit px-2 h-14 transition-all duration-300",
-                tabContent: "font-black uppercase tracking-widest text-[11px] text-default-400 group-data-[selected=true]:text-obaol-500 group-data-[selected=true]:scale-110 transition-transform"
+                tabContent: "font-black  tracking-widest text-[11px] text-default-400 group-data-[selected=true]:text-obaol-500 group-data-[selected=true]:scale-110 transition-transform"
               }}
             >
               {isAssociate ? (

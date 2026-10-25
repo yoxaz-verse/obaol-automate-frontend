@@ -20,7 +20,7 @@ interface Props {
 }
 
 const selectedKey = (keys: "all" | Set<React.Key>) => String(Array.from(keys === "all" ? [] : keys)[0] || "");
-const selectClasses = { label: "text-[10px] font-black uppercase tracking-widest text-default-400 mb-1.5", trigger: "h-12 rounded-2xl border-divider/50 hover:border-primary" };
+const selectClasses = { label: "text-[10px] font-black  tracking-widest text-default-400 mb-1.5", trigger: "h-12 rounded-2xl border-divider/50 hover:border-primary" };
 
 export const SampleRequestFields = ({ form, includeBuyer, states, districts, divisions, pincodes, divisionsLoading, pincodesLoading, queryError, retry, update, selectState, selectDistrict, selectDivision }: Props) => (
   <>
@@ -32,7 +32,7 @@ export const SampleRequestFields = ({ form, includeBuyer, states, districts, div
     )}
     {includeBuyer && (
       <div className="rounded-3xl border border-divider/50 bg-foreground/[0.03] p-5">
-        <h4 className="mb-2 ml-1 text-[10px] font-black uppercase tracking-[0.2em] text-default-400">Buyer Associate Selection</h4>
+        <h4 className="mb-2 ml-1 text-[10px] font-black  tracking-[0.2em] text-default-400">Buyer Associate Selection</h4>
         <AssociateSearch
           onSelect={(associate) => { update("buyerAssociateId", associate?._id || ""); update("buyerAssociateName", associate?.name || ""); }}
           onSearchChange={(name) => update("buyerAssociateName", name)}

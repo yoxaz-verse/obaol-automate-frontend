@@ -118,7 +118,7 @@ export default function CustomerSupportPage() {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3 max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-obaol-400/30 bg-obaol-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-obaol-400/30 bg-obaol-500/10 px-3.5 py-1 text-xs font-bold  tracking-wider text-obaol-700 dark:text-obaol-300">
               <span className="h-2 w-2 rounded-full bg-default-400" />
               Fallback Contact Directory
             </div>
@@ -263,7 +263,7 @@ export default function CustomerSupportPage() {
                         size="sm"
                         color={contact.isActive ? "success" : "default"}
                         variant="flat"
-                        className="font-bold text-[10px] uppercase"
+                        className="font-bold text-[10px] "
                       >
                         {contact.isActive ? "Active" : "Inactive"}
                       </Chip>

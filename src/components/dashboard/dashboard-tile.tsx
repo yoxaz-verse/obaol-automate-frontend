@@ -29,7 +29,7 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
         <Card className="db-panel shadow-none border db-border-subtle h-full">
           <CardBody className="flex flex-col items-center justify-center py-6">
             <span className="mb-2 text-4xl font-bold text-obaol-700 dark:text-obaol-300">{data}</span>
-            <span className="text-sm font-medium text-default-500 uppercase tracking-wider text-center">
+            <span className="text-sm font-medium text-default-500  tracking-wider text-center">
               {heading}
             </span>
           </CardBody>
@@ -43,10 +43,10 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-obaol-500/10 flex items-center justify-center text-obaol-700 dark:text-obaol-300 text-xl sm:text-2xl group-hover:bg-obaol-500 group-hover:text-obaol-950 transition-all duration-300 shadow-inner group-hover:shadow-obaol-500/40">
               {data.icon}
             </div>
-            <div className="font-bold text-foreground text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-center line-clamp-1 px-1 mt-1 transition-all group-hover:text-obaol-700 dark:group-hover:text-obaol-300">
+            <div className="font-bold text-foreground text-[9px] sm:text-[10px]  tracking-[0.15em] text-center line-clamp-1 px-1 mt-1 transition-all group-hover:text-obaol-700 dark:group-hover:text-obaol-300">
               {data.name}
             </div>
-            <div className="px-3 py-1 db-inset rounded-full text-[8px] sm:text-[9px] text-default-400 group-hover:bg-obaol-500 group-hover:text-obaol-950 transition-all uppercase tracking-[0.2em] font-bold border border-transparent">
+            <div className="px-3 py-1 db-inset rounded-full text-[8px] sm:text-[9px] text-default-400 group-hover:bg-obaol-500 group-hover:text-obaol-950 transition-all  tracking-[0.2em] font-bold border border-transparent">
               View
             </div>
           </Link>
@@ -57,7 +57,7 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
       return (
         <Card className="db-panel shadow-none border db-border-subtle h-full">
           <CardHeader className="justify-center pb-0 pt-4">
-            <span className="text-sm font-medium text-default-500 uppercase tracking-wider text-center">{heading}</span>
+            <span className="text-sm font-medium text-default-500  tracking-wider text-center">{heading}</span>
           </CardHeader>
           <CardBody className="items-center justify-center py-4 overflow-hidden">
             <CircularProgress

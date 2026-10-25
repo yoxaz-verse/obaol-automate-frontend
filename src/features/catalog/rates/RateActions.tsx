@@ -46,7 +46,7 @@ export function LiveStatusToggle({
   const label = selected ? "Live" : "Not live";
   return (
     <div className={layout === "inline" ? "flex min-w-0 items-center gap-3" : "flex min-w-[60px] flex-col items-center gap-1"}>
-      {layout === "inline" && <p className={`m-0 text-[10px] font-black uppercase tracking-widest ${selected ? "text-success-600" : "text-danger-500"}`}>{label}</p>}
+      {layout === "inline" && <p className={`m-0 text-[10px] font-black  tracking-widest ${selected ? "text-success-600" : "text-danger-500"}`}>{label}</p>}
       <Switch
         size="sm"
         color="success"

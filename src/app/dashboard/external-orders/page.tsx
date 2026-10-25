@@ -82,7 +82,7 @@ export default function ExternalOrdersPage() {
                                                 size="sm"
                                                 variant="flat"
                                                 color="warning"
-                                                className="h-9 rounded-xl font-bold uppercase tracking-wider text-[10px] px-5"
+                                                className="h-9 rounded-xl font-bold  tracking-wider text-[10px] px-5"
                                                 isLoading={demoLoading}
                                                 onPress={async () => {
                                                     setDemoLoading(true);
@@ -111,7 +111,7 @@ export default function ExternalOrdersPage() {
                                                 size="sm"
                                                 variant="light"
                                                 color="default"
-                                                className="h-9 rounded-xl font-bold uppercase tracking-wider text-[10px] px-5 opacity-60"
+                                                className="h-9 rounded-xl font-bold  tracking-wider text-[10px] px-5 opacity-60"
                                                 isLoading={demoClearing}
                                                 onPress={async () => {
                                                     setDemoClearing(true);
@@ -153,7 +153,7 @@ export default function ExternalOrdersPage() {
                                                     tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40",
                                                     cursor: "bg-warning w-full h-[2.5px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-obaol-rgb),0.3)]",
                                                     tab: "max-w-fit px-4 h-11 transition-all duration-300",
-                                                    tabContent: "font-bold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning"
+                                                    tabContent: "font-bold  tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning"
                                                 }}
                                             >
                                                 <Tab key="All" title="All Orders" />
@@ -167,7 +167,7 @@ export default function ExternalOrdersPage() {
                                                 <Button
                                                     size="sm"
                                                     color="warning"
-                                                    className="h-11 rounded-xl font-bold uppercase tracking-wider text-[11px] px-6 shadow-xl shadow-warning/20"
+                                                    className="h-11 rounded-xl font-bold  tracking-wider text-[11px] px-6 shadow-xl shadow-warning/20"
                                                     isLoading={isRedirecting}
                                                     onPress={handleCreateNew}
                                                 >
@@ -237,8 +237,8 @@ export default function ExternalOrdersPage() {
                                                             {step.icon}
                                                         </div>
                                                         <div className="flex flex-col items-center text-center">
-                                                            <span className="text-[11px] font-bold uppercase tracking-widest text-foreground leading-tight">{step.label}</span>
-                                                            <span className="text-[10px] text-default-400 font-semibold uppercase tracking-tight mt-1 opacity-60">{step.sub}</span>
+                                                            <span className="text-[11px] font-bold  tracking-widest text-foreground leading-tight">{step.label}</span>
+                                                            <span className="text-[10px] text-default-400 font-semibold  tracking-tight mt-1 opacity-60">{step.sub}</span>
                                                         </div>
                                                         {idx < 3 && (
                                                             <div className="hidden sm:block absolute top-7 left-[calc(50%+35px)] w-[calc(100%-70px)] h-[1px] bg-gradient-to-r from-foreground/5 to-transparent" />
@@ -250,7 +250,7 @@ export default function ExternalOrdersPage() {
                                             {canCreateExternal && (
                                                 <Button
                                                     color="warning"
-                                                    className="font-bold px-12 h-14 rounded-2xl shadow-2xl shadow-warning/20 text-sm tracking-widest uppercase hover:scale-105 active:scale-95 transition-all text-black"
+                                                    className="font-bold px-12 h-14 rounded-2xl shadow-2xl shadow-warning/20 text-sm tracking-widest  hover:scale-105 active:scale-95 transition-all text-black"
                                                     isLoading={isRedirecting}
                                                     onPress={handleCreateNew}
                                                     endContent={!isRedirecting && <LuArrowRight className="ml-2" />}

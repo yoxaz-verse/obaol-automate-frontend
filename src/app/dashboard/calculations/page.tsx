@@ -91,7 +91,7 @@ export default function CalculationsPage() {
 
       <div className="mx-2 md:mx-6 mb-6">
         <div className="mb-5 rounded-2xl border border-default-200/60 bg-content1/95 p-5">
-          <p className="text-[10px] font-black uppercase tracking-[0.35em] text-default-400">
+          <p className="text-[10px] font-black  tracking-[0.35em] text-default-400">
             Calculation Control Panel
           </p>
           <h2 className="text-base font-semibold text-foreground">
@@ -148,7 +148,7 @@ export default function CalculationsPage() {
           <CardBody className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="rounded-xl border border-default-200/60 bg-content1/70 p-4">
-                <div className="text-xs uppercase tracking-widest text-default-400">Variant Rate Commission</div>
+                <div className="text-xs  tracking-widest text-default-400">Variant Rate Commission</div>
                 <Input
                   label="Sample Rate"
                   type="number"
@@ -160,7 +160,7 @@ export default function CalculationsPage() {
                 </div>
               </div>
               <div className="rounded-xl border border-default-200/60 bg-content1/70 p-4">
-                <div className="text-xs uppercase tracking-widest text-default-400">GST Tax</div>
+                <div className="text-xs  tracking-widest text-default-400">GST Tax</div>
                 <Input
                   label="Subtotal"
                   type="number"
@@ -179,7 +179,7 @@ export default function CalculationsPage() {
                 </div>
               </div>
               <div className="rounded-xl border border-default-200/60 bg-content1/70 p-4">
-                <div className="text-xs uppercase tracking-widest text-default-400">Warehouse Charge</div>
+                <div className="text-xs  tracking-widest text-default-400">Warehouse Charge</div>
                 <Input
                   label="Quantity"
                   type="number"

@@ -27,10 +27,10 @@ export default function PendingApprovalPage() {
         </p>
 
         <dl className="mt-8 grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-default-200 bg-background p-5"><dt className="text-xs font-bold uppercase tracking-wider text-default-500">Current status</dt><dd className="mt-2 font-semibold">Waiting for review</dd></div>
-          <div className="rounded-2xl border border-default-200 bg-background p-5"><dt className="text-xs font-bold uppercase tracking-wider text-default-500">Submitted</dt><dd className="mt-2 font-semibold">{submittedAt && !Number.isNaN(submittedAt.getTime()) ? submittedAt.toLocaleString() : "Submission received"}</dd></div>
-          <div className="rounded-2xl border border-default-200 bg-background p-5"><dt className="text-xs font-bold uppercase tracking-wider text-default-500">What happens next</dt><dd className="mt-2 text-sm leading-6 text-foreground/70">The review team will approve the account or contact you if more information is required.</dd></div>
-          <div className="rounded-2xl border border-default-200 bg-background p-5"><dt className="text-xs font-bold uppercase tracking-wider text-default-500">Need help?</dt><dd className="mt-2 text-sm"><a className="font-semibold text-warning-600" href={`mailto:${ONBOARDING_SUPPORT_EMAIL}`}>{ONBOARDING_SUPPORT_EMAIL}</a></dd></div>
+          <div className="rounded-2xl border border-default-200 bg-background p-5"><dt className="text-xs font-bold  tracking-wider text-default-500">Current status</dt><dd className="mt-2 font-semibold">Waiting for review</dd></div>
+          <div className="rounded-2xl border border-default-200 bg-background p-5"><dt className="text-xs font-bold  tracking-wider text-default-500">Submitted</dt><dd className="mt-2 font-semibold">{submittedAt && !Number.isNaN(submittedAt.getTime()) ? submittedAt.toLocaleString() : "Submission received"}</dd></div>
+          <div className="rounded-2xl border border-default-200 bg-background p-5"><dt className="text-xs font-bold  tracking-wider text-default-500">What happens next</dt><dd className="mt-2 text-sm leading-6 text-foreground/70">The review team will approve the account or contact you if more information is required.</dd></div>
+          <div className="rounded-2xl border border-default-200 bg-background p-5"><dt className="text-xs font-bold  tracking-wider text-default-500">Need help?</dt><dd className="mt-2 text-sm"><a className="font-semibold text-warning-600" href={`mailto:${ONBOARDING_SUPPORT_EMAIL}`}>{ONBOARDING_SUPPORT_EMAIL}</a></dd></div>
         </dl>
 
         <div className="mt-8 flex flex-wrap items-center gap-3">

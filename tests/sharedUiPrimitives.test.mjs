@@ -36,7 +36,7 @@ test("shared state components use one server-compatible renderer", () => {
 test("the first route batch adopts shared headers and states", () => {
   const routes = [
     "src/app/dashboard/reports/page.tsx",
-    "src/app/dashboard/commercial-documents/page.tsx",
+    "src/app/dashboard/documentation/page.tsx",
     "src/app/dashboard/quality-labs/page.tsx",
     "src/app/dashboard/quality-labs/execution/page.tsx",
     "src/app/dashboard/catalog/additions/page.tsx",

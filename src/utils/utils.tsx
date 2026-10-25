@@ -174,14 +174,9 @@ export const sidebarOptions = [
     link: "/dashboard/external-orders",
   },
   {
-    name: "Documents",
+    name: "Documentation",
     icon: <FiFileText />,
-    link: "/dashboard/documents",
-  },
-  {
-    name: "Document Studio",
-    icon: <FiFileText />,
-    link: "/dashboard/commercial-documents",
+    link: "/dashboard/documentation",
   },
   {
     name: "Documentation Rules",

@@ -31,7 +31,6 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
       "/dashboard/enquiries",
       "/dashboard/sample-requests",
       "/dashboard/orders",
-      "/dashboard/documents",
       "/dashboard/imports/reservations",
       "/dashboard/external-orders",
       "/dashboard/execution-enquiries",

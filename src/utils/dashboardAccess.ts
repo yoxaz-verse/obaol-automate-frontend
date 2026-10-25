@@ -2,6 +2,7 @@ export type DashboardRole = "admin" | "associate" | "operator" | "team" | "custo
 export type DashboardSection =
   | "Overview"
   | "Trade"
+  | "Documentation"
   | "Products"
   | "Services"
   | "Warehouse"
@@ -74,6 +75,8 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/commercial-documents", label: "Document Studio", section: "Trade", roles: ["associate"], nav: true, searchable: true, journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
   { path: "/dashboard/commercial-documents/new", label: "Create document", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
   { path: "/dashboard/commercial-documents/:id", label: "Document", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/documentation", label: "Documentation", section: "Documentation", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, journeyStage: "execute", description: "Create, upload, verify, organize, and securely share trade documents." },
+  { path: "/dashboard/documentation/:id", label: "Document", section: "Documentation", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/documentation", journeyStage: "execute" },
 
   { path: "/dashboard/imports", label: "Import Opportunities", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/imports/my-listings", label: "My Import Listings", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true },
@@ -143,6 +146,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
 const journeyStageBySection: Record<DashboardSection, DashboardJourneyStage> = {
   Overview: "overview",
   Trade: "execute",
+  Documentation: "execute",
   Products: "discover",
   Services: "service",
   Warehouse: "service",

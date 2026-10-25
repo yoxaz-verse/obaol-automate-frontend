@@ -103,15 +103,15 @@ test("warehouse navigation is live for all associates and available cards expose
 
 test("documents workspace is live for every authenticated dashboard user", () => {
   const documentsLayout = read("../src/app/dashboard/documents/layout.tsx");
-  const documentsPage = read("../src/app/dashboard/documents/page.tsx");
+  const documentsPage = read("../src/app/dashboard/documentation/page.tsx");
   const externalOrdersLayout = read("../src/app/dashboard/external-orders/layout.tsx");
   const warehouseBookingLayout = read("../src/app/dashboard/warehouse-rent/layout.tsx");
 
   assert.equal(documentsLayout.includes("RoleGatedComingSoon"), false);
   assert.equal(documentsLayout.includes("return <>{children}</>"), true);
-  assert.equal(documentsPage.includes("Compliance Gateway"), true);
-  assert.equal(documentsPage.includes('roleLower === "associate"'), true);
-  assert.equal(documentsPage.includes('roleLower === "admin" || roleLower === "operator" || roleLower === "team"'), true);
+  assert.equal(documentsPage.includes("Documentation workspace"), true);
+  assert.equal(documentsPage.includes('role === "associate"'), true);
+  assert.equal(documentsPage.includes('role === "admin"'), true);
   assert.equal(externalOrdersLayout.includes('<RoleGatedComingSoon feature="external-orders">'), true);
   assert.equal(warehouseBookingLayout.includes('<RoleGatedComingSoon feature="warehouse-booking">'), true);
 });

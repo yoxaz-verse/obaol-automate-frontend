@@ -59,6 +59,7 @@ const ASSOCIATE_EXECUTE_PATHS = [
   "/dashboard/commercial-documents",
   "/dashboard/execution-enquiries",
 ];
+const DOCUMENTATION_PATHS = ["/dashboard/documentation"];
 
 const ASSOCIATE_OTHER_SERVICE_PATHS = new Set([
   "/dashboard/imports",
@@ -153,6 +154,7 @@ export const getDashboardSidebarSections = (
       { label: "Seeking", links: seekingLinks },
       { label: "Providing", links: providingLinks },
       { label: "Execute", links: ASSOCIATE_EXECUTE_PATHS.filter((path) => accessiblePathSet.has(path) && !COMING_SOON_NAV_PATHS.has(path)) },
+      { label: "Documentation", links: DOCUMENTATION_PATHS.filter((path) => accessiblePathSet.has(path)) },
       {
         label: "Other Services",
         links: accessibleRoutes
@@ -193,6 +195,7 @@ export const getDashboardSidebarSections = (
         links: workflowGroups.flatMap((group) => group.links),
         groups: workflowGroups,
       },
+      { label: "Documentation", links: DOCUMENTATION_PATHS.filter((path) => availableLinks.has(path)) },
       {
         label: "Operations/Admin",
         links: adminRoutes.map((route) => route.path),
@@ -205,6 +208,7 @@ export const getDashboardSidebarSections = (
   const sectionOrder: DashboardSection[] = [
     "Overview",
     "Trade",
+    "Documentation",
     "Products",
     "Services",
     "Warehouse",

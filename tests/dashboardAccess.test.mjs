@@ -138,7 +138,7 @@ test("Associate desktop and mobile navigation share common and governed sidebar 
   assert.match(navigation, /SIDEBAR_HOME_ROUTES\.filter/);
   assert.match(navigation, /SIDEBAR_UTILITY_ROUTES\.filter/);
   assert.match(navigation, /links\("OTHER_SERVICES"\)/);
-  assert.match(readFileSync("src/utils/utils.tsx", "utf8"), /link: "\/dashboard\/commercial-documents"/);
+  assert.match(readFileSync("src/utils/utils.tsx", "utf8"), /link: "\/dashboard\/documentation"/);
   for (const source of [desktop, mobile]) {
     assert.match(source, /user\?\.providedCapabilities \|\| \[\]/);
     assert.match(source, /user\?\.soughtCapabilities \|\| \[\]/);
@@ -174,6 +174,7 @@ test("Admin sidebar groups operational routes by workflow without duplicates", (
   const groupedLinks = DASHBOARD_ADMIN_WORKFLOW_GROUPS.flatMap((group) => group.links);
   const expectedOperationalLinks = getAccessibleDashboardRoutes({ role: "Admin" })
     .filter((route) => ["Trade", "Products", "Services", "Warehouse"].includes(route.section) || route.path === "/dashboard/inventory")
+    .filter((route) => !["/dashboard/documents", "/dashboard/commercial-documents"].includes(route.path))
     .map((route) => route.path);
   assert.equal(new Set(groupedLinks).size, groupedLinks.length);
   assert.deepEqual(new Set(groupedLinks), new Set(expectedOperationalLinks));

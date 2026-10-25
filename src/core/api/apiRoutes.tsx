@@ -570,6 +570,12 @@ export const apiRoutes = {
     getOne: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     update: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     email: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/email`,
+    summary: `${BASE_PATHS.TRADE_DOCUMENT}/summary`,
+    upload: `${BASE_PATHS.TRADE_DOCUMENT}/upload`,
+    extraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}`,
+    confirmExtraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}/confirm`,
+    retryExtraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}/retry`,
+    file: (id: string) => `/api/v1/web${BASE_PATHS.TRADE_DOCUMENT}/${id}/file`,
   },
   documentTemplates: {
     list: `${BASE_PATHS.DOCUMENT_TEMPLATE}`,

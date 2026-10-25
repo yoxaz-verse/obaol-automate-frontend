@@ -2158,7 +2158,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               <Divider className="my-1 bg-amber-100/80 dark:bg-white/15" />
 
                               {/* Price & Quantity Area */}
-                              <div className="catalog-card-pricing flex min-w-0 justify-between items-end gap-3">
+                              <div className="catalog-card-pricing grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3 gap-y-2">
                                 <div className="flex min-w-0 flex-col gap-1">
                                   <span className="text-[8px] sm:text-[10px] font-bold text-default-400 dark:text-white/50 uppercase tracking-widest">
                                     {isMarketplaceView && !isLive ? "Previous listed price" : "Final Price"}
@@ -2179,18 +2179,18 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                         {item.quantity}
                                       </div>
                                     )}
-                                    {shouldShowAssociateDetails &&
-                                      item.location &&
-                                      item.location !== "--" && (
-                                        <span
-                                          className="text-[8px] sm:text-[10px] text-default-500 truncate max-w-[60px] sm:max-w-[100px]"
-                                          title={item.location}
-                                        >
-                                          📍 {item.location}
-                                        </span>
-                                      )}
                                   </div>
                                 </div>
+                                {shouldShowAssociateDetails &&
+                                  item.location &&
+                                  item.location !== "--" && (
+                                    <span
+                                      className="catalog-card-location col-span-2 block min-w-0 max-w-full truncate text-[8px] text-default-500 sm:text-[10px]"
+                                      title={item.location}
+                                    >
+                                      📍 {item.location}
+                                    </span>
+                                  )}
                               </div>
                             </div>
 

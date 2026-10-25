@@ -597,11 +597,14 @@ test("catalog grid cards respond to their container without compressing controls
   assert.equal(variantRate.includes("w-10 min-w-10 max-w-10 shrink-0"), true);
   assert.equal(variantRate.includes("w-full min-w-0 gap-1 px-2 text-[9px] tracking-normal"), true);
   assert.equal(variantRate.includes("catalog-card-status-row"), true);
+  assert.equal(variantRate.includes("grid-cols-[minmax(0,1fr)_auto]"), true);
+  assert.equal(variantRate.includes("catalog-card-location col-span-2 block min-w-0 max-w-full truncate"), true);
   assert.equal(variantRate.includes("Listing status"), true);
   assert.equal(variantRate.includes('layout="inline"'), true);
   assert.equal(variantRate.includes("More options for"), true);
   assert.equal(globals.includes("repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr))"), true);
   assert.equal(globals.includes("@container catalog-card (max-width: 15rem)"), true);
   assert.equal(globals.includes(".catalog-card-standard-actions"), true);
+  assert.equal(globals.includes(".catalog-card-location"), true);
   assert.equal(globals.includes(".catalog-card-status-row"), true);
 });

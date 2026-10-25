@@ -662,6 +662,7 @@ a {
   }
 
   .catalog-card-stock,
+  .catalog-card-location,
   .catalog-card-standard-actions {
     display: none;
   }

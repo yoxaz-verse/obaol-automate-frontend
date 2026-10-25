@@ -38,6 +38,43 @@ test("mobile primary navigation keeps labels visible and exposes the complete me
   assert.equal(bottomNav.includes("isDashboardRouteActive"), true);
 });
 
+test("dashboard context breadcrumbs contain only real navigation destinations", () => {
+  const contextBar = read("../src/components/dashboard/DashboardContextBar.tsx");
+
+  assert.equal(contextBar.includes('>Dashboard</Link>'), true);
+  assert.equal(contextBar.includes("getDashboardRouteLabel(parentRoute.path, user?.role)"), true);
+  assert.equal(contextBar.includes('parentRoute.path !== "/dashboard"'), true);
+  assert.equal(contextBar.includes("route.taskGroup"), false);
+  assert.equal(contextBar.includes("route.section"), false);
+  assert.equal(contextBar.includes(">Overview</Link>"), false);
+  assert.equal(contextBar.includes("roleLabel"), false);
+  assert.equal(contextBar.includes("Company associate"), false);
+  assert.equal(contextBar.includes("Help for this page"), true);
+});
+
+test("desktop top bar keeps clocks and exposes identity only in the profile control", () => {
+  const topBar = read("../src/components/dashboard/TopBar.tsx");
+
+  assert.equal(topBar.includes("{/* Desktop Identity */}"), false);
+  assert.equal(topBar.includes("{displayRole} · Online"), false);
+  assert.equal(topBar.includes("Local time"), true);
+  assert.equal(topBar.includes(">UTC</span>"), true);
+  assert.equal(topBar.includes("username?.split('@')[0]"), true);
+  assert.equal(topBar.includes("{/* Profile Command Center */}"), true);
+});
+
+test("settings pages rely on the shared context breadcrumb", () => {
+  for (const path of [
+    "../src/app/dashboard/settings/page.tsx",
+    "../src/app/dashboard/profile/page.tsx",
+    "../src/app/dashboard/security/page.tsx",
+    "../src/app/dashboard/shortcuts/page.tsx",
+  ]) {
+    const page = read(path);
+    assert.equal(page.includes("breadcrumbs={"), false, `${path} still declares a duplicate breadcrumb`);
+  }
+});
+
 test("customer support exposes normalized call and WhatsApp actions", () => {
   const page = read("../src/app/dashboard/customer-support/page.tsx");
   const links = read("../src/core/api/supportContacts.ts");

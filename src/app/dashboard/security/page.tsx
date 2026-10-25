@@ -85,5 +85,5 @@ function DevicesPanel() {
 }
 
 export default function SecurityPage() {
-  return <DashboardPage className="py-3 sm:py-5"><PageHeader title="Password & Security" description="Manage your password, passkeys, and signed-in devices." breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Settings", href: "/dashboard/settings" }, { label: "Password & Security" }]} /><div className="flex flex-col gap-6"><div className="flex items-center gap-3 rounded-2xl border db-border-subtle db-panel p-4"><FiShield className="text-obaol-600" size={24} /><p className="text-sm db-muted">Security changes are protected with your current password and a one-time code sent to your registered email.</p></div><PasswordPanel /><PasskeysPanel /><DevicesPanel /></div></DashboardPage>;
+  return <DashboardPage className="py-3 sm:py-5"><PageHeader title="Password & Security" description="Manage your password, passkeys, and signed-in devices." /><div className="flex flex-col gap-6"><div className="flex items-center gap-3 rounded-2xl border db-border-subtle db-panel p-4"><FiShield className="text-obaol-600" size={24} /><p className="text-sm db-muted">Security changes are protected with your current password and a one-time code sent to your registered email.</p></div><PasswordPanel /><PasskeysPanel /><DevicesPanel /></div></DashboardPage>;
 }

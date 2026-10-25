@@ -462,7 +462,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                 onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, category: Array.from(keys)[0] as any }))}
                                 popoverProps={{
                                   classNames: {
-                                    content: "bg-content1/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                    content: "bg-content1/95 dark:bg-content1/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
                                   },
                                   offset: 8
                                 }}
@@ -607,7 +607,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                 onSelectionChange={(keys) => setMovementForm(f => ({ ...f, warehouseId: Array.from(keys)[0] as string }))}
                                 popoverProps={{
                                   classNames: {
-                                    content: "bg-content1/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                    content: "bg-content1/95 dark:bg-content1/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
                                   },
                                   offset: 8
                                 }}

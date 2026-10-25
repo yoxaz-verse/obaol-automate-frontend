@@ -710,7 +710,7 @@ export default function ExecutionEnquiriesPage() {
                                           }
                                           popoverProps={{
                                             classNames: {
-                                              content: "bg-content1/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                              content: "bg-content1/95 dark:bg-content1/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
                                             },
                                             offset: 8
                                           }}
@@ -830,7 +830,7 @@ export default function ExecutionEnquiriesPage() {
                                           }
                                           popoverProps={{
                                             classNames: {
-                                              content: "bg-content1/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                              content: "bg-content1/95 dark:bg-content1/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
                                             },
                                             offset: 8
                                           }}

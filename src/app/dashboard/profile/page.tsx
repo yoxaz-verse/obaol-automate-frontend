@@ -495,7 +495,6 @@ export default function ProfilePage() {
       <PageHeader
         title="Profile"
         description="Manage your personal account details, company information, and verification."
-        breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Settings", href: "/dashboard/settings" }, { label: "Profile" }]}
       />
       <QueryComponent
         api={`${apiRoutesByRole[roleKey]}/${user?.id}`}

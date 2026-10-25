@@ -113,7 +113,7 @@ const getOwnerStyles = (owner: string) => {
     case "obaol":
       return "bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]";
     default:
-      return "bg-white text-primary";
+      return "bg-content1 text-primary";
   }
 };
 
@@ -332,7 +332,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                     }}
                     disabled={!canToggle}
                     className={`px-6 h-9 rounded-xl text-[10px] font-black  tracking-[0.15em] transition-all duration-300 ${isSelected
-                      ? "bg-white dark:bg-default-200 text-primary shadow-xl scale-[1.05] z-10 ring-1 ring-black/5"
+                      ? "bg-content1 dark:bg-default-200 text-primary shadow-xl scale-[1.05] z-10 ring-1 ring-black/5"
                       : "text-default-500 hover:text-default-700 hover:bg-white/40 dark:hover:bg-default-200/20"
                       } ${!canToggle ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}`}
                   >
@@ -734,7 +734,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               errorMessage={packagingDisclosureError}
               classNames={{
                 input: "text-base font-medium",
-                inputWrapper: "bg-white/80 dark:bg-black/40 border border-default-200/50 hover:bg-white focus-within:bg-white shadow-sm transition-all rounded-2xl p-4 h-auto"
+                inputWrapper: "bg-white/80 dark:bg-black/40 border border-default-200/50 hover:bg-content1 focus-within:bg-content1 shadow-sm transition-all rounded-2xl p-4 h-auto"
               }}
             />
           </div>

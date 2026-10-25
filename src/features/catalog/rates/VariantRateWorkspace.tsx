@@ -2079,7 +2079,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               duration: 0.4,
                               ease: "easeOut",
                             }}
-                            className="catalog-grid-card group relative flex min-w-0 flex-col justify-between border border-amber-100/80 bg-white shadow-[0_4px_18px_rgba(95,65,25,0.05)] transition-all duration-300 hover:border-amber-200 hover:shadow-[0_12px_28px_rgba(95,65,25,0.11)] dark:border-white/10 dark:bg-[#12100d] dark:shadow-[0_8px_28px_rgba(0,0,0,0.28)] dark:hover:border-obaol-500/35 dark:hover:shadow-[0_12px_34px_rgba(0,0,0,0.4)] rounded-3xl overflow-hidden"
+                            className="catalog-grid-card db-panel group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-3xl border db-border-subtle shadow-[var(--db-shadow-card)] transition-all duration-300 hover:border-obaol-500/35"
                           >
                             {/* Top Accent Line */}
                             <div
@@ -2197,11 +2197,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                             {/* Actions Footer */}
                             <div
-                              className="p-2 sm:p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-white dark:from-[#21190f] dark:via-[#191510] dark:to-[#12100d] border-t border-amber-100/80 dark:border-white/10 flex flex-col gap-2 mt-auto"
+                              className="db-subtle mt-auto flex flex-col gap-2 border-t db-border-subtle p-2 sm:p-3"
                               onClick={(event) => event.stopPropagation()}
                             >
                               {canManageRow(item) && (
-                                <div className="catalog-card-status-row flex w-full items-center justify-between gap-3 rounded-xl border border-amber-200/70 bg-white/70 px-3 py-2 dark:border-white/10 dark:bg-white/[0.055]">
+                                <div className="catalog-card-status-row db-inset flex w-full items-center justify-between gap-3 rounded-xl border db-border-subtle px-3 py-2">
                                   <span className="text-[9px] font-black  tracking-widest text-default-500 dark:text-white/55">
                                     Listing status
                                   </span>

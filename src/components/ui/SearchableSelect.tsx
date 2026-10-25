@@ -192,7 +192,7 @@ export default function SearchableSelect({
                           value.includes(option.key) ? "border-success-500 bg-success-500 text-white" : "border-default-400"
                         }`}
                       >
-                        {value.includes(option.key) && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                        {value.includes(option.key) && <span className="h-1.5 w-1.5 rounded-full bg-content1" />}
                       </span>
                     )}
                     <span className="min-w-0 flex-1">

@@ -655,7 +655,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
                   >
-                    <Card className="rounded-[2.5rem] bg-white dark:bg-[#090806] border border-default-300 dark:border-white/20 shadow-none overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full">
+                    <Card className="rounded-[2.5rem] bg-content1 dark:bg-content1 border border-default-300 dark:border-white/20 shadow-none overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full">
                       <CardHeader className="flex flex-col gap-4 p-8 pb-4">
                         <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                           <div className="flex min-w-0 flex-col gap-1.5">
@@ -858,7 +858,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
                     >
-                      <Card className="h-full overflow-hidden rounded-[2rem] border border-default-300 bg-white shadow-none transition-all duration-300 hover:border-obaol-500/40 dark:border-white/15 dark:bg-[#090806]">
+                      <Card className="h-full overflow-hidden rounded-[2rem] border border-default-300 bg-content1 shadow-none transition-all duration-300 hover:border-obaol-500/40 dark:border-white/15 dark:bg-content1">
                         <CardHeader className="flex flex-col items-stretch gap-4 p-6 pb-3 sm:p-7 sm:pb-3">
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
@@ -1023,8 +1023,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
         classNames={{
-          backdrop: "bg-[#090806]/80 backdrop-blur-sm",
-          base: "border border-white/10 bg-[#090806] rounded-[2.5rem] shadow-2xl",
+          backdrop: "db-overlay backdrop-blur-sm",
+          base: "border border-white/10 bg-content1 rounded-[2.5rem] shadow-2xl",
           header: "border-b border-white/5 p-8",
           footer: "border-t border-white/5 p-8",
           body: "p-8",
@@ -1344,8 +1344,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
         classNames={{
-          backdrop: "bg-[#090806]/80 backdrop-blur-sm",
-          base: "border border-white/10 bg-[#090806] rounded-[2.5rem] shadow-2xl",
+          backdrop: "db-overlay backdrop-blur-sm",
+          base: "border border-white/10 bg-content1 rounded-[2.5rem] shadow-2xl",
           header: "border-b border-white/5 p-8",
           footer: "border-t border-white/5 p-8",
           body: "p-8",
@@ -1560,8 +1560,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
         classNames={{
-          backdrop: "bg-[#090806]/80 backdrop-blur-sm",
-          base: "border border-white/10 bg-[#090806] rounded-[2.5rem] shadow-2xl overflow-hidden",
+          backdrop: "db-overlay backdrop-blur-sm",
+          base: "border border-white/10 bg-content1 rounded-[2.5rem] shadow-2xl overflow-hidden",
           header: "border-b border-white/5 p-8",
           footer: "border-t border-white/5 p-8",
           body: "p-8",
@@ -1760,8 +1760,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
         classNames={{
-          backdrop: "bg-[#090806]/80 backdrop-blur-sm",
-          base: "border border-white/10 bg-[#090806] rounded-[2.5rem] shadow-2xl",
+          backdrop: "db-overlay backdrop-blur-sm",
+          base: "border border-white/10 bg-content1 rounded-[2.5rem] shadow-2xl",
           header: "border-b border-white/5 p-8",
           footer: "border-t border-white/5 p-8",
           body: "p-8",

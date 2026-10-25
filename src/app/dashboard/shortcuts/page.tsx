@@ -20,7 +20,6 @@ export default function ShortcutsPage() {
       <PageHeader
         title="Keyboard Shortcuts"
         description="Customize the quick commands used to navigate your dashboard."
-        breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Settings", href: "/dashboard/settings" }, { label: "Keyboard Shortcuts" }]}
       />
       <Card className="border border-default-200/60 bg-content1/70 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
         <CardHeader className="flex items-center gap-4 p-8">

@@ -233,7 +233,7 @@ export default function ExternalOrdersPage() {
                                                     { icon: <LuCheck size={22} />, label: "Closure", sub: "Final Manifest" }
                                                 ].map((step, idx) => (
                                                     <div key={idx} className="flex flex-col items-center gap-4 relative z-10">
-                                                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-foreground/[0.05] flex items-center justify-center text-default-400 border border-foreground/5 transition-all duration-300 group-hover:border-warning/40 group-hover:text-warning shadow-sm">
+                                                        <div className="w-14 h-14 rounded-2xl bg-content1 dark:bg-foreground/[0.05] flex items-center justify-center text-default-400 border border-foreground/5 transition-all duration-300 group-hover:border-warning/40 group-hover:text-warning shadow-sm">
                                                             {step.icon}
                                                         </div>
                                                         <div className="flex flex-col items-center text-center">

@@ -806,7 +806,7 @@ export default function SampleRequestDetailPage() {
                     classNames={{
                       trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
                       label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
-                      popoverContent: "bg-[#0E0D0A] border border-white/10",
+                      popoverContent: "db-panel border db-border-strong text-foreground",
                     }}
                   >
                     <SelectItem key="ADVANCE" className="text-white font-bold text-xs  tracking-widest">Advance</SelectItem>
@@ -874,7 +874,7 @@ export default function SampleRequestDetailPage() {
                   classNames={{
                     trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
                     label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
-                    popoverContent: "bg-[#0E0D0A] border border-white/10",
+                    popoverContent: "db-panel border db-border-strong text-foreground",
                   }}
                 >
                   <SelectItem key="CASH" className="text-white font-bold text-xs  tracking-widest">Cash</SelectItem>
@@ -894,7 +894,7 @@ export default function SampleRequestDetailPage() {
                     classNames={{
                       trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
                       label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
-                      popoverContent: "bg-[#0E0D0A] border border-white/10",
+                      popoverContent: "db-panel border db-border-strong text-foreground",
                     }}
                   >
                     <SelectItem key="GPAY" className="text-white font-bold text-xs  tracking-widest">GPay</SelectItem>

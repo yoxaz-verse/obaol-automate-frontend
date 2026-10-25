@@ -473,7 +473,7 @@ export default function OnboardingModal({
       backdrop="blur"
       isDismissable={false}
       classNames={{
-        base: "bg-[#0E0D0A]/95 border border-divider/50 shadow-2xl rounded-[2rem] max-h-[calc(100vh-2rem)] flex flex-col",
+        base: "db-panel flex max-h-[calc(100vh-2rem)] flex-col rounded-[2rem] border db-border-strong shadow-2xl",
         header: "border-b border-divider/50 py-6 px-6 md:px-10 shrink-0",
         body: "py-6 px-6 md:px-10 overflow-y-auto flex-1",
         footer: "border-t border-divider/50 py-6 px-6 md:px-10 shrink-0",

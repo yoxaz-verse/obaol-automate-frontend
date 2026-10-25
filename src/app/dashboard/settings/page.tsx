@@ -58,7 +58,6 @@ export default function SettingsPage() {
       <PageHeader
         title="Settings"
         description="Manage your account preferences and personalize your OBAOL workspace."
-        breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Settings" }]}
       />
 
       <DashboardPanel className="overflow-hidden">

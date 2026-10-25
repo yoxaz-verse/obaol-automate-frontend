@@ -336,20 +336,10 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
             )}
           </div>
 
-          {/* Desktop Identity */}
-          <div className="hidden md:flex flex-col gap-0.5 shrink-0 px-4 xl:px-6">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-              <span className="text-xs font-bold text-foreground truncate max-w-[140px]">{username?.split('@')[0]}</span>
-            </div>
-            <div className="flex items-center gap-2">
-               <span className="text-[11px] font-medium text-obaol-700 dark:text-obaol-300">{displayRole} · Online</span>
-            </div>
-          </div>
         </div>
 
         {/* Telemetry Group: Global Synchronization */}
-        <div className="hidden lg:flex items-center gap-6 xl:gap-8 shrink-0 h-12 pl-4 xl:pl-6 border-l border-default-200/60 dark:border-white/10">
+        <div className="hidden h-12 shrink-0 items-center gap-6 md:flex xl:gap-8">
            <div className="flex flex-col justify-center">
               <span className="text-[12px] font-black text-foreground tracking-[0.12em] tabular-nums flex items-center gap-1.5">
                 <span className="w-1 h-3 bg-obaol-500/50 rounded-full shadow-[0_0_8px_rgba(207,152,60,0.25)]" />

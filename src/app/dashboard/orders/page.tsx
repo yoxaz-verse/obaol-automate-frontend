@@ -283,7 +283,7 @@ export default function OrdersPage() {
                                                     { icon: <FiCheckCircle size={18} />, label: "Execute", sub: "Order Live" }
                                                 ].map((step, idx) => (
                                                     <div key={idx} className="flex flex-col items-center gap-3 relative z-10">
-                                                        <div className="w-12 h-12 rounded-2xl bg-white dark:bg-default-100 flex items-center justify-center text-default-400 border border-divider transition-all duration-300 group-hover:border-primary/50 group-hover:text-primary shadow-sm">
+                                                        <div className="w-12 h-12 rounded-2xl bg-content1 dark:bg-default-100 flex items-center justify-center text-default-400 border border-divider transition-all duration-300 group-hover:border-primary/50 group-hover:text-primary shadow-sm">
                                                             {step.icon}
                                                         </div>
                                                         <div className="flex flex-col items-center text-center">

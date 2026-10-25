@@ -3058,7 +3058,7 @@ export default function EnquiryDetailsPage() {
                                                             </div>
 
                                                             {canSupplierRevision && (
-                                                                <div className="mt-2 flex flex-col gap-4 p-4 rounded-2xl bg-white dark:bg-black/40 border border-primary/20 shadow-lg shadow-primary/5">
+                                                                <div className="mt-2 flex flex-col gap-4 p-4 rounded-2xl bg-content1 dark:bg-black/40 border border-primary/20 shadow-lg shadow-primary/5">
                                                                     {itemKey === "RATE" ? (
                                                                         <div className="flex flex-col gap-3">
                                                                             <div className="text-[10px] font-black  tracking-widest text-default-500">Rate Response</div>
@@ -4777,7 +4777,7 @@ export default function EnquiryDetailsPage() {
                     backdrop="blur"
                     scrollBehavior="inside"
                     classNames={{
-                        base: "bg-[#090806] dark:bg-[#090806] border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] max-h-[92vh]",
+                        base: "bg-content1 dark:bg-content1 border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] max-h-[92vh]",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-xl",
                         closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",
@@ -4972,7 +4972,7 @@ export default function EnquiryDetailsPage() {
                     isDismissable={false}
                     isKeyboardDismissDisabled
                     classNames={{
-                        base: "bg-black/90 dark:bg-[#0E0D0A]/95 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
+                        base: "bg-black/90 dark:bg-content1/95 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-2xl",
                         closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",

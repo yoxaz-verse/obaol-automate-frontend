@@ -974,7 +974,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
         scrollBehavior="inside"
         backdrop="blur"
         classNames={{
-          base: "border border-default-200 bg-background/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl shadow-2xl rounded-3xl",
+          base: "border border-default-200 bg-background/95 dark:bg-content1/95 backdrop-blur-2xl shadow-2xl rounded-3xl",
           header: "border-b border-default-100 px-6 py-5",
           body: "px-6 py-5",
           footer: "border-t border-default-100 px-6 py-4",

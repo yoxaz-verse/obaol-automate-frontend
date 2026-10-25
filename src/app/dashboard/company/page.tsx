@@ -661,7 +661,7 @@ export default function CompanyWorkspacePage() {
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-            <div className="rounded-2xl border border-divider/50 bg-[#0E0D0A]/50 backdrop-blur-xl p-6 shadow-2xl relative overflow-hidden group/list">
+            <div className="db-panel group/list relative overflow-hidden rounded-2xl border db-border-subtle p-6 shadow-2xl backdrop-blur-xl">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] -z-10 group-hover/list:bg-primary-500/10 transition-all duration-1000" />
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-1.5 h-8 bg-primary-500 rounded-full shadow-[0_0_15px_rgba(0,111,238,0.5)]" />

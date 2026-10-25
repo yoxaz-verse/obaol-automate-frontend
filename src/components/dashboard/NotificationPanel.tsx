@@ -95,15 +95,15 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
       animate={panelMotion.animate}
       exit={panelMotion.exit}
       transition={panelMotion.transition}
-      className="w-[420px] max-w-[calc(100vw-24px)] rounded-[24px] border border-default-300 dark:border-white/20 ring-1 ring-black/5 dark:ring-white/10 bg-white/95 dark:bg-[#0E0D0A]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-black backdrop-blur-3xl overflow-hidden"
+      className="db-panel w-[420px] max-w-[calc(100vw-24px)] overflow-hidden rounded-[24px] border db-border-strong shadow-[var(--db-shadow-card)] backdrop-blur-3xl"
     >
-      <div className="flex items-center justify-between px-6 py-5 border-b border-default-200/50 dark:border-white/5 bg-default-50/50 dark:bg-white/5">
+      <div className="db-subtle flex items-center justify-between border-b db-border-subtle px-6 py-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-[14px] bg-obaol-500/10 flex items-center justify-center text-obaol-700 dark:text-obaol-300">
              <FiBell size={20} className={notifications.filter(n => !n.isRead).length > 0 ? "animate-wiggle" : ""} />
           </div>
           <div className="flex flex-col">
-             <p className="text-sm font-semibold text-[#1F2937] dark:text-white">Notifications</p>
+             <p className="text-sm font-semibold text-foreground">Notifications</p>
              <p className="mt-1 text-xs db-muted">Workspace updates</p>
           </div>
         </div>

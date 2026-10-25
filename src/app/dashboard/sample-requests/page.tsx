@@ -198,7 +198,7 @@ export default function SampleRequestsPage() {
                    transition={{ delay: idx * 0.05 }}
                    className="h-full"
                 >
-                  <Card className="bg-white dark:bg-[#090806] border border-default-300 dark:border-white/20 shadow-none rounded-[2rem] overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full flex flex-col">
+                  <Card className="bg-content1 dark:bg-content1 border border-default-300 dark:border-white/20 shadow-none rounded-[2rem] overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full flex flex-col">
                     <CardBody className="p-0 flex flex-col h-full">
                       <div className="p-6 pb-4 flex flex-col gap-3">
                         <div className="flex items-start justify-between w-full">

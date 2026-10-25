@@ -31,6 +31,9 @@
   --app-focus: #1677ff;
   --db-overlay: rgba(15, 23, 42, 0.08);
   --db-overlay-soft: rgba(15, 23, 42, 0.04);
+  --db-hover: rgba(15, 23, 42, 0.045);
+  --db-selected: rgba(207, 152, 60, 0.12);
+  --db-disabled: rgba(100, 116, 139, 0.42);
   --db-shadow: 0 2px 6px -2px rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
   --db-shadow-card: 0 2px 6px -2px rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
   --db-content-width: 1440px;
@@ -73,6 +76,9 @@
   --db-focus: rgba(22, 119, 255, 0.38);
   --db-overlay: rgba(15, 23, 42, 0.08);
   --db-overlay-soft: rgba(15, 23, 42, 0.04);
+  --db-hover: rgba(15, 23, 42, 0.045);
+  --db-selected: rgba(207, 152, 60, 0.12);
+  --db-disabled: rgba(100, 116, 139, 0.42);
   --db-shadow: 0 2px 6px -2px rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
   --db-shadow-card: 0 2px 6px -2px rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
 }
@@ -81,18 +87,21 @@
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 9, 8, 6;
   --background-end-rgb: 9, 8, 6;
-  --db-bg: #090806;
-  --db-shell: rgba(14, 13, 10, 0.95);
-  --db-panel: rgba(18, 16, 12, 0.98);
-  --db-subtle: rgba(20, 18, 14, 0.92);
-  --db-inset: rgba(28, 25, 20, 0.85);
+  --db-bg: #090b0f;
+  --db-shell: rgba(14, 17, 22, 0.97);
+  --db-panel: rgba(20, 24, 31, 0.98);
+  --db-subtle: rgba(25, 30, 38, 0.94);
+  --db-inset: rgba(31, 37, 46, 0.9);
   --db-border-subtle: rgba(255, 255, 255, 0.12);
   --db-border-strong: rgba(255, 255, 255, 0.22);
   --db-muted: rgba(226, 232, 240, 0.66);
   --db-muted-strong: rgba(241, 245, 249, 0.9);
   --db-focus: rgba(59, 130, 246, 0.46);
-  --db-overlay: rgba(9, 8, 6, 0.62);
-  --db-overlay-soft: rgba(9, 8, 6, 0.38);
+  --db-overlay: rgba(3, 5, 8, 0.7);
+  --db-overlay-soft: rgba(3, 5, 8, 0.46);
+  --db-hover: rgba(255, 255, 255, 0.055);
+  --db-selected: rgba(207, 152, 60, 0.16);
+  --db-disabled: rgba(161, 161, 170, 0.42);
   --db-shadow: 0 2px 8px -3px rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
   --db-shadow-card: 0 2px 8px -3px rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
 }
@@ -368,6 +377,23 @@ canvas {
 
   .db-overlay-soft {
     background: var(--db-overlay-soft);
+  }
+
+  .db-hover {
+    background: var(--db-hover);
+  }
+
+  .db-selected {
+    background: var(--db-selected);
+  }
+
+  .db-disabled {
+    color: var(--db-disabled);
+  }
+
+  .db-paper {
+    background: #fff;
+    color: #0f172a;
   }
 
   .db-focus {

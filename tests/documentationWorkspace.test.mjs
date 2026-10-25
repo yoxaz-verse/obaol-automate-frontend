@@ -12,8 +12,9 @@ test("unified documentation workspace exposes the complete trade operations cata
 
 test("documentation provides one workspace and legacy redirects", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
-  assert.match(workspace, /Overview/);
-  assert.match(workspace, /Library/);
+  const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");
+  assert.match(workspaceUi, /Overview/);
+  assert.match(workspaceUi, /Library/);
   assert.match(workspace, /Create or upload/);
   assert.match(workspace, /Requirements/);
   assert.match(workspace, /Recipients/);
@@ -23,7 +24,23 @@ test("documentation provides one workspace and legacy redirects", () => {
 
 test("uploaded documents require an extraction review before completion", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
+  const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");
   assert.match(workspace, /Confirm review and keep as draft/);
   assert.match(workspace, /REVIEW_REQUIRED/);
-  assert.match(workspace, /application\/pdf,image\/png,image\/jpeg/);
+  assert.match(workspaceUi, /application\/pdf,image\/png,image\/jpeg/);
+});
+
+test("documentation views are URL-backed and configuration remains admin-only", () => {
+  const workspace = read("src/app/dashboard/documentation/page.tsx");
+  assert.match(workspace, /useSearchParams/);
+  assert.match(workspace, /next\.set\("view", nextView\)/);
+  assert.match(workspace, /requestedView !== "configuration" \|\| isAdmin/);
+});
+
+test("document detail uses the shared lifecycle, status, and dashboard components", () => {
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  assert.match(detail, /LifecycleTracker/);
+  assert.match(detail, /DashboardStatusBadge/);
+  assert.match(detail, /Structured data/);
+  assert.match(detail, /Secure recipient invitation/);
 });

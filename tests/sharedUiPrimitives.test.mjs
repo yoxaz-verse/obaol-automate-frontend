@@ -44,7 +44,7 @@ test("the first route batch adopts shared headers and states", () => {
   ].map(read);
 
   for (const source of routes) assert.match(source, /<PageHeader/);
-  assert.equal(routes.filter((source) => /<EmptyState/.test(source)).length, routes.length);
+  assert.equal(routes.filter((source) => /<(?:Dashboard)?EmptyState/.test(source)).length, routes.length);
   assert.equal(routes.filter((source) => /<LoadingState/.test(source)).length, routes.length);
   assert.doesNotMatch(routes.at(-1), /<h1/);
 });

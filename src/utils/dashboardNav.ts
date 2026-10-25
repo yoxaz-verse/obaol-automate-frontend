@@ -28,7 +28,6 @@ type SidebarOption = {
 
 const COMING_SOON_NAV_PATH_ORDER = [
   "/dashboard/documents",
-  "/dashboard/commercial-documents",
   "/dashboard/external-orders",
 ] as const;
 
@@ -56,7 +55,7 @@ const ASSOCIATE_EXECUTE_PATHS = [
   "/dashboard/sample-requests",
   "/dashboard/orders",
   "/dashboard/documents",
-  "/dashboard/commercial-documents",
+  "/dashboard/documentation",
   "/dashboard/execution-enquiries",
 ];
 const DOCUMENTATION_PATHS = ["/dashboard/documentation"];

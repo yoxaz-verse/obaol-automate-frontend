@@ -50,6 +50,9 @@ test("detail routes keep their parent navigation item active", () => {
   assert.equal(isDashboardRouteActive("/dashboard/enquiries/507f1f77bcf86cd799439011", "/dashboard/enquiries"), true);
   assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard/orders"), true);
   assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard"), false);
+  assert.equal(isDashboardRouteActive("/dashboard/documentation/new", "/dashboard/documentation"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/documentation/507f1f77bcf86cd799439011", "/dashboard/documentation"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/commercial-documents", "/dashboard/documentation"), true);
 });
 
 test("settings owns account subpages while notifications stays independently active", () => {
@@ -190,12 +193,12 @@ test("Admin sidebar places Organization below Operations/Admin", () => {
   assert.ok(organizationIndex > operationsIndex);
 });
 
-test("Associate coming-soon navigation is ordered, disabled, and does not change direct route access", () => {
+test("Associate coming-soon navigation excludes the legacy Document Studio entry without changing direct route access", () => {
   const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
   const documents = navigation.indexOf('"/dashboard/documents"');
-  const pureDocuments = navigation.indexOf('"/dashboard/commercial-documents"');
   const externalOrders = navigation.indexOf('"/dashboard/external-orders"');
-  assert.ok(documents >= 0 && documents < pureDocuments && pureDocuments < externalOrders);
+  assert.ok(documents >= 0 && documents < externalOrders);
+  assert.equal(navigation.includes('"/dashboard/commercial-documents"'), false);
   assert.match(navigation, /normalizeDashboardRole\(role\) !== "admin" && COMING_SOON_NAV_PATHS\.has\(path\)/);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/commercial-documents", role: "Associate" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/documents", role: "Associate" }), true);

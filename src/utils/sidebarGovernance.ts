@@ -22,6 +22,12 @@ export const SIDEBAR_UTILITY_ROUTES = [
   "/dashboard/customer-support",
 ] as const;
 const STATUS_WEIGHT: Record<SidebarPageStatus, number> = { HIDDEN: 0, COMING_SOON: 1, LIVE: 2 };
+export const DOCUMENTATION_ROUTE = "/dashboard/documentation";
+export const LEGACY_DOCUMENT_STUDIO_ROUTE = "/dashboard/commercial-documents";
+export const canonicalizeSidebarRoutePath = (value: unknown) => {
+  const routePath = String(value || "").trim();
+  return routePath === LEGACY_DOCUMENT_STUDIO_ROUTE ? DOCUMENTATION_ROUTE : routePath;
+};
 
 const normalizeSlug = (value: unknown) => String(value || "").trim().toLowerCase().replace(/_/g, "-");
 
@@ -36,7 +42,8 @@ export const resolveSidebarGovernance = (
   const functions = new Set([...provided, ...sought]);
   const resolved = new Map<string, ResolvedSidebarPage>();
 
-  (mappings || []).filter((row) => functions.has(normalizeSlug(row.functionSlug))).forEach((row) => {
+  (mappings || []).filter((row) => functions.has(normalizeSlug(row.functionSlug))).forEach((input) => {
+    const row = { ...input, routePath: canonicalizeSidebarRoutePath(input.routePath) };
     if ((SIDEBAR_COMMON_ROUTES as readonly string[]).includes(row.routePath) || row.placement === "UNASSIGNED") return;
     const slug = normalizeSlug(row.functionSlug);
     const placements: Array<"SEEKING" | "PROVIDING" | "OTHER_SERVICES"> = Number(options?.resolutionVersion || 1) >= 2
@@ -85,14 +92,14 @@ export const resolveSidebarGovernance = (
       if (options?.resolutionVersion === 2) {
         const sectionRank = { SEEKING: 0, PROVIDING: 1, OTHER_SERVICES: 2 } as const;
         if (a.placement !== b.placement) return sectionRank[a.placement] - sectionRank[b.placement];
-        const order = options.sectionOrder?.[a.placement] || [];
+        const order = (options.sectionOrder?.[a.placement] || []).map(canonicalizeSidebarRoutePath);
         const aIndex = order.indexOf(a.routePath);
         const bIndex = order.indexOf(b.routePath);
         if (aIndex !== bIndex) return (aIndex < 0 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex < 0 ? Number.MAX_SAFE_INTEGER : bIndex);
       } else if (options?.resolutionVersion === 3) {
         const sectionRank = { IMPORTANT: 0, SEEKING: 1, PROVIDING: 2, OTHER_SERVICES: 3 } as const;
         if (a.placement !== b.placement) return sectionRank[a.placement] - sectionRank[b.placement];
-        const order = options.sectionOrder?.[a.placement] || [];
+        const order = (options.sectionOrder?.[a.placement] || []).map(canonicalizeSidebarRoutePath);
         const aIndex = order.indexOf(a.routePath);
         const bIndex = order.indexOf(b.routePath);
         if (aIndex !== bIndex) return (aIndex < 0 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex < 0 ? Number.MAX_SAFE_INTEGER : bIndex);
@@ -102,8 +109,9 @@ export const resolveSidebarGovernance = (
 };
 
 export const getGovernedRouteStatus = (resolved: ResolvedSidebarPage[], path: string): SidebarPageStatus => {
-  if (SIDEBAR_RECOVERY_ROUTES.has(path)) return "LIVE";
-  const rows = resolved.filter((row) => row.routePath === path);
+  const canonicalPath = canonicalizeSidebarRoutePath(path);
+  if (SIDEBAR_RECOVERY_ROUTES.has(canonicalPath)) return "LIVE";
+  const rows = resolved.filter((row) => canonicalizeSidebarRoutePath(row.routePath) === canonicalPath);
   if (!rows.length) return "HIDDEN";
   return rows.reduce<SidebarPageStatus>((best, row) => STATUS_WEIGHT[row.status] > STATUS_WEIGHT[best] ? row.status : best, "HIDDEN");
 };
@@ -118,16 +126,17 @@ export const indexResolvedSidebarGovernance = (resolved: ResolvedSidebarPage[]) 
   const statusByRoute = new Map<string, SidebarPageStatus>();
 
   resolved.forEach((row) => {
-    sections[row.placement].push(row);
-    const current = statusByRoute.get(row.routePath) || "HIDDEN";
-    if (STATUS_WEIGHT[row.status] > STATUS_WEIGHT[current]) statusByRoute.set(row.routePath, row.status);
+    const canonicalRow = { ...row, routePath: canonicalizeSidebarRoutePath(row.routePath) };
+    sections[row.placement].push(canonicalRow);
+    const current = statusByRoute.get(canonicalRow.routePath) || "HIDDEN";
+    if (STATUS_WEIGHT[row.status] > STATUS_WEIGHT[current]) statusByRoute.set(canonicalRow.routePath, row.status);
   });
 
   return {
     sections,
     statusByRoute,
-    getRouteStatus: (path: string): SidebarPageStatus => SIDEBAR_RECOVERY_ROUTES.has(path)
+    getRouteStatus: (path: string): SidebarPageStatus => SIDEBAR_RECOVERY_ROUTES.has(canonicalizeSidebarRoutePath(path))
       ? "LIVE"
-      : statusByRoute.get(path) || "HIDDEN",
+      : statusByRoute.get(canonicalizeSidebarRoutePath(path)) || "HIDDEN",
   };
 };

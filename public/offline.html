@@ -13,9 +13,10 @@
     .network{position:fixed;inset:0;width:100%;height:100%;color:var(--accent);opacity:.14;pointer-events:none}
     main{position:relative;width:min(100%,520px);overflow:hidden;border:1px solid var(--border);border-radius:28px;background:var(--surface);padding:clamp(28px,6vw,48px);text-align:center;box-shadow:var(--shadow);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
     main::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
-    .brand{display:inline-flex;align-items:center;justify-content:center;width:132px;min-height:58px;margin-bottom:28px;padding:9px 15px;border:1px solid var(--border);border-radius:14px;background:var(--solid)}
+    .offline-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;justify-content:center;width:132px;min-height:58px;padding:9px 15px;border:1px solid var(--border);border-radius:14px;background:var(--solid)}
     .brand img{display:block;width:100%;height:40px;object-fit:contain}
-    .status{display:inline-flex;align-items:center;gap:8px;min-height:32px;margin:0 0 18px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--accent) 36%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--accent) 10%,transparent);color:color-mix(in srgb,var(--accent) 72%,var(--text));font-size:12px;font-weight:750;letter-spacing:.06em;text-transform:uppercase}
+    .status{display:flex;align-items:center;gap:8px;min-height:32px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--accent) 36%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--accent) 10%,transparent);color:color-mix(in srgb,var(--accent) 72%,var(--text));font-size:12px;font-weight:750;letter-spacing:.06em;text-transform:uppercase}
     .status-dot{width:8px;height:8px;flex:none;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px color-mix(in srgb,currentColor 14%,transparent)}
     h1{margin:0;font-size:clamp(32px,8vw,46px);line-height:1.08;letter-spacing:-.045em;text-wrap:balance}
     .lead{max-width:38ch;margin:18px auto 0;color:var(--muted);font-size:clamp(15px,3vw,17px);line-height:1.7;text-wrap:pretty}
@@ -25,7 +26,7 @@
     button:hover{background:var(--accent-hover);box-shadow:0 14px 30px -15px rgba(148,99,28,.9)}button:active{transform:translateY(1px)}button:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:3px}button:disabled{cursor:wait;opacity:.72}
     .feedback{min-height:21px;margin:10px 0 -7px;color:var(--muted);font-size:13px;line-height:1.6}.status.connected{border-color:color-mix(in srgb,var(--success) 45%,var(--border));background:color-mix(in srgb,var(--success) 10%,transparent);color:var(--success)}
     @media(prefers-color-scheme:dark){:root{--bg:#111412;--surface:rgba(25,29,26,.9);--solid:#0e0d0a;--inset:#222721;--text:#f3f1e9;--muted:#b0b8b0;--border:#343b33;--accent-hover:#e3b866;--success:#8ed3a8;--shadow:0 30px 90px -38px rgba(0,0,0,.9)}body{background:radial-gradient(circle at 15% 18%,rgba(207,152,60,.13),transparent 30rem),radial-gradient(circle at 88% 80%,rgba(142,211,168,.07),transparent 28rem),var(--bg)}}
-    @media(max-width:480px){main{border-radius:22px}.brand{margin-bottom:24px}.privacy{padding:13px 14px}}
+    @media(max-width:480px){main{border-radius:22px}.offline-header{margin-bottom:18px}.privacy{padding:13px 14px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
   </style>
 </head>
@@ -35,8 +36,10 @@
     <g fill="currentColor"><circle cx="190" cy="105" r="4"/><circle cx="374" cy="217" r="4"/><circle cx="564" cy="125" r="4"/><circle cx="786" cy="251" r="4"/><circle cx="1010" cy="119" r="4"/><circle cx="170" cy="540" r="4"/><circle cx="366" cy="658" r="4"/><circle cx="569" cy="556" r="4"/><circle cx="765" cy="652" r="4"/><circle cx="1001" cy="525" r="4"/></g>
   </svg>
   <main aria-labelledby="offline-title">
-    <div class="brand"><img src="/logo.png" alt="OBAOL"></div>
-    <div id="connection-status" class="status" role="status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="status-label">Connection interrupted</span></div>
+    <div class="offline-header">
+      <div class="brand"><img src="/logo.png" alt="OBAOL"></div>
+      <div id="connection-status" class="status" role="status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="status-label">Connection interrupted</span></div>
+    </div>
     <h1 id="offline-title">You’re offline</h1>
     <p class="lead">Reconnect to continue working in your OBAOL workspace. We’ll bring you back automatically as soon as your connection returns.</p>
     <div class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg><span>Your private company and transaction data is never stored for offline use.</span></div>

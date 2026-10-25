@@ -47,6 +47,17 @@ test("multi-function conflicts use the most available status and lowest equal-st
   assert.equal(resolved.find((item) => item.routePath === "/dashboard/quality-labs")?.order, 3);
 });
 
+test("legacy Document Studio governance immediately resolves to Documentation", () => {
+  const resolved = resolveSidebarGovernance([
+    row("buyer", "/dashboard/commercial-documents", "SEEKING", "COMING_SOON", 8),
+    row("buyer", "/dashboard/documentation", "PROVIDING", "LIVE", 2),
+  ], ["buyer"], ["buyer"], { resolutionVersion: 3 });
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/commercial-documents"), false);
+  assert.deepEqual(resolved, [{ routePath: "/dashboard/documentation", placement: "IMPORTANT", status: "LIVE", order: 2 }]);
+  assert.equal(getGovernedRouteStatus(resolved, "/dashboard/documentation"), "LIVE");
+  assert.equal(getGovernedRouteStatus(resolved, "/dashboard/commercial-documents"), "LIVE");
+});
+
 test("unmapped routes fail closed while recovery routes remain live", () => {
   assert.equal(getGovernedRouteStatus([], "/dashboard/product"), "HIDDEN");
   assert.equal(getGovernedRouteStatus([], "/dashboard"), "LIVE");

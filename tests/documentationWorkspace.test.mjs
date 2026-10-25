@@ -44,3 +44,25 @@ test("document detail uses the shared lifecycle, status, and dashboard component
   assert.match(detail, /Structured data/);
   assert.match(detail, /Secure recipient invitation/);
 });
+
+test("document creator is canonical, guided, and preserves the legacy URL", () => {
+  const canonical = read("src/app/dashboard/documentation/new/page.tsx");
+  const creator = read("src/components/dashboard/Documentation/DocumentCreator.tsx");
+  const legacy = read("src/app/dashboard/commercial-documents/new/page.tsx");
+  assert.match(canonical, /DocumentCreator/);
+  assert.match(legacy, /dashboard\/documentation\/new/);
+  assert.match(legacy, /searchParams/);
+  for (const section of ["Document setup", "Parties", "Terms and notes", "Review draft"]) assert.match(creator, new RegExp(section));
+  assert.match(creator, /beforeunload/);
+  assert.match(creator, /Save draft/);
+});
+
+test("purpose-built creator configuration covers every studio document type", () => {
+  const studio = read("src/components/dashboard/CommercialDocuments/documentStudio.ts");
+  const config = read("src/components/dashboard/Documentation/documentCreatorConfig.ts");
+  const typeBlock = studio.match(/DOCUMENT_STUDIO_TYPES\s*=\s*\[([\s\S]*?)\]\s*as const/)?.[1] || "";
+  const types = [...typeBlock.matchAll(/"([A-Z_]+)"/g)].map(match => match[1]);
+  assert.ok(types.length >= 20);
+  for (const type of types) assert.match(config, new RegExp(`\\b${type}:`), `missing creator config for ${type}`);
+  for (const kind of ["commercial", "packing", "logistics", "customs", "quality", "payment"]) assert.match(config, new RegExp(`"${kind}"`));
+});

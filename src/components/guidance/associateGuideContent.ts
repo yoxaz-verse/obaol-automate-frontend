@@ -179,7 +179,7 @@ export const associateGuideTopics: AssociateGuideTopic[] = [
     ["sample-requests-reference", "Sample Requests", "/dashboard/sample-requests", "Track sample creation, dispatch, evaluation, and approval.", ["buyer", "seller"]],
     ["orders-reference", "Orders", "/dashboard/orders", "Track confirmed trades through execution milestones and delivery.", ["buyer", "seller"]],
     ["documents-reference", "Documents", "/dashboard/documents", "Upload and review compliance and shipment documents linked to trade records.", ["buyer", "seller"]],
-    ["commercial-documents-reference", "Document Studio", "/dashboard/commercial-documents", "Create, share, and track standalone business documents.", ["buyer", "seller"]],
+    ["commercial-documents-reference", "Documentation", "/dashboard/documentation", "Create, upload, share, and track trade documents.", ["buyer", "seller"]],
     ["execution-reference", "Execution Panel", "/dashboard/execution-enquiries", "Monitor active execution work and company-specific operational responsibilities.", ["buyer", "seller", "service"]],
     ["imports-reference", "Imports to India", "/dashboard/imports", "Coordinate import requests, shipment context, and compliance progress.", ["buyer", "seller", "service"]],
     ["external-orders-reference", "External Orders", "/dashboard/external-orders", "Record and track an order that originated outside OBAOL.", ["buyer", "seller", "service"]],

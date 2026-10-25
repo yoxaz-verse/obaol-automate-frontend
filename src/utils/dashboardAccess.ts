@@ -72,9 +72,10 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/orders/:id", label: "Order details", section: "Trade", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/orders", journeyStage: "execute" },
   { path: "/dashboard/documents", label: "Documents", section: "Trade", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, journeyStage: "execute" },
   { path: "/dashboard/documents/:id", label: "Document details", section: "Trade", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/documents", journeyStage: "execute" },
-  { path: "/dashboard/commercial-documents", label: "Document Studio", section: "Trade", roles: ["associate"], nav: true, searchable: true, journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
-  { path: "/dashboard/commercial-documents/new", label: "Create document", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
-  { path: "/dashboard/commercial-documents/:id", label: "Document", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/commercial-documents", label: "Documentation", section: "Documentation", roles: ["associate"], journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/commercial-documents/new", label: "Create document", section: "Documentation", roles: ["associate"], breadcrumbParent: "/dashboard/documentation", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/documentation/new", label: "Create document", section: "Trade", roles: ["associate"], breadcrumbParent: "/dashboard/documentation", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/commercial-documents/:id", label: "Document", section: "Documentation", roles: ["associate"], breadcrumbParent: "/dashboard/documentation", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
   { path: "/dashboard/documentation", label: "Documentation", section: "Documentation", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, journeyStage: "execute", description: "Create, upload, verify, organize, and securely share trade documents." },
   { path: "/dashboard/documentation/:id", label: "Document", section: "Documentation", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/documentation", journeyStage: "execute" },
 
@@ -165,7 +166,7 @@ const navIconByPath: Record<string, string> = {
   "/dashboard/sample-requests": "samples",
   "/dashboard/orders": "orders",
   "/dashboard/documents": "documents",
-  "/dashboard/commercial-documents": "documents",
+  "/dashboard/documentation": "documents",
   "/dashboard/inventory": "inventory",
   "/dashboard/warehouses": "warehouse",
   "/dashboard/execution-enquiries": "execution",
@@ -188,7 +189,7 @@ const defaultTaskGroup = (route: DashboardRouteInput): DashboardTaskGroup => {
   if (route.path === "/dashboard") return "Home";
   if (route.path === "/dashboard/marketplace") return "Buy";
   if (["/dashboard/product", "/dashboard/inventory", "/dashboard/warehouses"].includes(route.path)) return "Sell";
-  if (["/dashboard/enquiries", "/dashboard/sample-requests", "/dashboard/orders", "/dashboard/documents", "/dashboard/commercial-documents"].includes(route.path)) return "Execute";
+  if (["/dashboard/enquiries", "/dashboard/sample-requests", "/dashboard/orders", "/dashboard/documents", "/dashboard/documentation"].includes(route.path)) return "Execute";
   if (route.section === "Services") return "Services";
   if (route.section === "Operations/Admin") return "Operations/Admin";
   return "Company & Account";
@@ -263,6 +264,7 @@ export const getDashboardRoute = (path: string) => {
 export const isDashboardRouteActive = (pathname: string, routePath: string) => {
   const current = getDashboardRoute(pathname);
   if (!current) return false;
+  if (routePath === "/dashboard/documentation" && current.path.startsWith("/dashboard/commercial-documents")) return true;
   if (routePath === "/dashboard") return current.path === "/dashboard";
   return current.path === routePath || current.activeParent === routePath || current.breadcrumbParent === routePath;
 };

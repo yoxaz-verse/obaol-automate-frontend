@@ -51,7 +51,7 @@ export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinit
   { slug: "finance-risk", name: "Finance & Insurance", description: "Review the existing payment, order, and commercial-document workflows.", actions: [
     { label: "Payments", href: "/dashboard/payments", description: "Review payment activity available in OBAOL.", primary: true },
     { label: "Orders", href: "/dashboard/orders", description: "Review commercial status by order." },
-    { label: "Commercial documents", href: "/dashboard/commercial-documents", description: "Manage invoices and related trade documents." },
+    { label: "Documentation", href: "/dashboard/documentation", description: "Create, upload, and manage trade documents." },
   ] },
   { slug: "importing-to-india", name: "Importing into India", description: "Manage inbound imports to India using the current shipment and trade workflows.", actions: [
     { label: "Import Opportunities", href: "/dashboard/imports", description: "Browse incoming import listings and reserve available quantities.", primary: true },

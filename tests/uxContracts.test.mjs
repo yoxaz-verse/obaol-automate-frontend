@@ -598,7 +598,10 @@ test("catalog grid cards respond to their container without compressing controls
   assert.equal(variantRate.includes("w-full min-w-0 gap-1 px-2 text-[9px] tracking-normal"), true);
   assert.equal(variantRate.includes("catalog-card-status-row"), true);
   assert.equal(variantRate.includes("grid-cols-[minmax(0,1fr)_auto]"), true);
-  assert.equal(variantRate.includes("catalog-card-location col-span-2 block min-w-0 max-w-full truncate"), true);
+  assert.equal(variantRate.includes("catalog-card-location col-span-2 block min-w-0 max-w-full truncate pt-1"), true);
+  assert.equal((variantRate.match(/catalog-empty-icon-stage/g) || []).length, 4);
+  assert.equal((variantRate.match(/catalog-empty-icon-badge/g) || []).length, 4);
+  assert.equal((variantRate.match(/dashboard-companion-safe-actions/g) || []).length >= 2, true);
   assert.equal(variantRate.includes("Listing status"), true);
   assert.equal(variantRate.includes('layout="inline"'), true);
   assert.equal(variantRate.includes("More options for"), true);
@@ -606,5 +609,9 @@ test("catalog grid cards respond to their container without compressing controls
   assert.equal(globals.includes("@container catalog-card (max-width: 15rem)"), true);
   assert.equal(globals.includes(".catalog-card-standard-actions"), true);
   assert.equal(globals.includes(".catalog-card-location"), true);
+  assert.equal(globals.includes(".catalog-empty-icon-stage"), true);
+  assert.equal(globals.includes(".catalog-empty-icon-badge"), true);
+  assert.equal(globals.includes("@media (min-width: 1024px)"), true);
+  assert.equal(globals.includes(".dashboard-companion-safe-actions"), true);
   assert.equal(globals.includes(".catalog-card-status-row"), true);
 });

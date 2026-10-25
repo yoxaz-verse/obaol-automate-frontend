@@ -33,6 +33,7 @@ export interface DynamicFilterProps {
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
   actionElement?: React.ReactNode;
+  className?: string;
 }
 
 // Logical grouping for variantRate and similar product tables
@@ -65,6 +66,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   onSearchChange,
   searchPlaceholder = "Search records...",
   actionElement,
+  className,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filters, setFilters] = useState<Record<string, any>>({});
@@ -269,7 +271,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   const activeFiltersCount = Object.keys(filters).length;
 
   return (
-    <div className="relative">
+    <div className={["relative", className].filter(Boolean).join(" ")}>
       {/* Active Filter Chips */}
       {activeFiltersCount > 0 && (
         <div className="mb-4 flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2">

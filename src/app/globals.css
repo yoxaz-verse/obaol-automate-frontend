@@ -656,6 +656,27 @@ a {
   container-type: inline-size;
 }
 
+.catalog-empty-icon-stage {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  margin-bottom: 2rem;
+}
+
+.catalog-empty-icon-badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  transform: translate(30%, 30%);
+}
+
+@media (min-width: 1024px) {
+  .dashboard-companion-safe-actions {
+    padding-inline-end: clamp(6.5rem, 8vw, 8rem);
+  }
+}
+
 @container catalog-card (max-width: 15rem) {
   .catalog-card-pricing {
     align-items: flex-start;

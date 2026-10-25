@@ -1097,6 +1097,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 {!hideBuiltInFilters && (
                   <div className="w-full sm:flex-1">
                     <DynamicFilter
+                      className="dashboard-companion-safe-actions"
                       currentTable={"variantRate"}
                       formFields={filterVariantRateFormFields}
                       onApply={handleFiltersUpdate}
@@ -1218,7 +1219,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
             <section className="w-full">
               {finalTableData.length === 0 && Boolean(search?.trim()) ? (
                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2.5rem] border border-white/5 shadow-inner my-4">
-                  <div className="relative mb-6">
+                  <div className="catalog-empty-icon-stage">
                     <div className="p-5 bg-content2/80 border border-divider rounded-[2rem] text-default-400 shadow-xl">
                       <FiSearch size={40} strokeWidth={1.5} />
                     </div>
@@ -1249,7 +1250,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-obaol-500 shadow-xl">
                       <FiShoppingBag size={48} strokeWidth={1.5} />
                     </div>
-                    <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
+                    <div className="catalog-empty-icon-badge p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
                       <FiPlus size={16} strokeWidth={3} />
                     </div>
                   </div>
@@ -1276,12 +1277,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 isMarketplaceView &&
                 canAddOwnRate ? (
                 <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-inner">
-                  <div className="relative mb-6">
+                  <div className="catalog-empty-icon-stage">
                     <div className="absolute inset-0 bg-primary-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
                     <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-primary-500 shadow-xl">
                       <FiPackage size={48} strokeWidth={1.5} />
                     </div>
-                    <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
+                    <div className="catalog-empty-icon-badge p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
                       <FiPlus size={16} strokeWidth={3} />
                     </div>
                   </div>
@@ -1306,12 +1307,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
               ) : finalTableData.length === 0 &&
                 additionalParams?.isLive === true ? (
                 <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-inner">
-                  <div className="relative mb-6">
+                  <div className="catalog-empty-icon-stage">
                     <div className="absolute inset-0 bg-obaol-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
                     <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-obaol-500 shadow-xl">
                       <FiShoppingBag size={48} strokeWidth={1.5} />
                     </div>
-                    <div className="absolute -bottom-2 -right-2 p-2 bg-default-100 text-default-400 rounded-full border-4 border-background shadow-lg">
+                    <div className="catalog-empty-icon-badge p-2 bg-default-100 text-default-400 rounded-full border-4 border-background shadow-lg">
                       <FiInfo size={16} strokeWidth={3} />
                     </div>
                   </div>
@@ -1342,12 +1343,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 <div className="relative w-full flex flex-col items-center justify-center py-16 sm:py-20 px-6 text-center bg-gradient-to-b from-content1/80 via-content1/40 to-content1/10 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 dark:border-white/5 shadow-2xl overflow-hidden my-2 group">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-obaol-500/10 dark:bg-obaol-500/15 blur-3xl rounded-full pointer-events-none scale-125 transition-all duration-700 group-hover:scale-150" />
                   
-                  <div className="relative mb-6">
+                  <div className="catalog-empty-icon-stage">
                     <div className="absolute inset-0 bg-obaol-500/20 blur-xl rounded-full scale-125 animate-pulse" />
                     <div className="relative p-6 sm:p-7 bg-content2/80 border border-white/10 rounded-[2.5rem] text-obaol-500 shadow-2xl backdrop-blur-md">
                       <FiPackage size={48} strokeWidth={1.5} className="sm:w-14 sm:h-14" />
                     </div>
-                    <div className="absolute -bottom-2 -right-2 p-2.5 bg-gradient-to-tr from-obaol-500 to-amber-400 text-black rounded-full border-4 border-background shadow-lg">
+                    <div className="catalog-empty-icon-badge p-2.5 bg-gradient-to-tr from-obaol-500 to-amber-400 text-black rounded-full border-4 border-background shadow-lg">
                       <FiPlus size={18} strokeWidth={3} />
                     </div>
                   </div>
@@ -1439,7 +1440,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               ) : (
                 <div className="flex flex-col gap-4">
                   {/* View Toggle Header */}
-                  <div className="flex justify-between items-center bg-content1/30 px-4 py-2 rounded-2xl border border-white/5 backdrop-blur-md mb-2">
+                  <div className="dashboard-companion-safe-actions flex justify-between items-center bg-content1/30 px-4 py-2 rounded-2xl border border-white/5 backdrop-blur-md mb-2">
                     <p className="text-xs font-bold text-default-500 uppercase tracking-widest">
                       {finalTableData.length} Items
                     </p>
@@ -2158,7 +2159,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               <Divider className="my-1 bg-amber-100/80 dark:bg-white/15" />
 
                               {/* Price & Quantity Area */}
-                              <div className="catalog-card-pricing grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3 gap-y-2">
+                              <div className="catalog-card-pricing grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3 gap-y-3">
                                 <div className="flex min-w-0 flex-col gap-1">
                                   <span className="text-[8px] sm:text-[10px] font-bold text-default-400 dark:text-white/50 uppercase tracking-widest">
                                     {isMarketplaceView && !isLive ? "Previous listed price" : "Final Price"}
@@ -2185,7 +2186,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   item.location &&
                                   item.location !== "--" && (
                                     <span
-                                      className="catalog-card-location col-span-2 block min-w-0 max-w-full truncate text-[8px] text-default-500 sm:text-[10px]"
+                                      className="catalog-card-location col-span-2 block min-w-0 max-w-full truncate pt-1 text-[8px] leading-4 text-default-500 sm:text-[10px]"
                                       title={item.location}
                                     >
                                       📍 {item.location}

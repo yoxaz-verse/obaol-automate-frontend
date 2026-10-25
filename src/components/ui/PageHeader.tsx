@@ -52,7 +52,7 @@ export default function PageHeader({
           {description && <p className="mt-2 max-w-2xl text-sm leading-6 db-muted md:text-base">{description}</p>}
         </div>
         {(actions || primaryAction || secondaryAction) && (
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="dashboard-companion-safe-actions flex flex-wrap items-center gap-3">
             {actions ?? secondaryAction}
             {primaryAction && (
               <Link href={primaryAction.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-5 py-2.5 text-sm font-bold text-obaol-950 outline-none transition hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2">

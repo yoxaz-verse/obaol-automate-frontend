@@ -13,6 +13,7 @@ test("the shared page header supports actions, breadcrumbs, and compatibility pr
   assert.match(source, /aria-current="page"/);
   assert.match(source, /variant\?: "panel" \| "plain"/);
   assert.match(source, /eyebrowTone\?: "brand" \| "success" \| "warning" \| "danger"/);
+  assert.match(source, /dashboard-companion-safe-actions/);
 });
 
 test("shared state components use one server-compatible renderer", () => {

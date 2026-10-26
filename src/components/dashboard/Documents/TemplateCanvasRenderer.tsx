@@ -66,10 +66,10 @@ type Props = {
   onBlockMove?: (id: string, nextX: number, nextY: number) => void;
 };
 
-const fmt = (n: any) => {
+const fmt = (n: any, currency = "INR") => {
   const value = Number(n || 0);
   if (!Number.isFinite(value)) return "0";
-  return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(value);
+  return new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 };
 
 const isValidHexColor = (value: string) => /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(String(value || "").trim());
@@ -130,8 +130,8 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
                 <td className="py-1">{item?.productName || item?.description || "-"}</td>
                 <td className="py-1">{item?.productVariantName || "-"}</td>
                 <td className="py-1 text-right">{fmt(item?.quantity || item?.quantityMT)} {item?.unit || "MT"}</td>
-                <td className="py-1 text-right">{fmt(item?.unitPrice || item?.ratePerKg)}</td>
-                <td className="py-1 text-right">{fmt(item?.total || item?.amount)}</td>
+                <td className="py-1 text-right">{fmt(item?.unitPrice || item?.ratePerKg, data?.totals?.currency)}</td>
+                <td className="py-1 text-right">{fmt(item?.total || item?.amount, data?.totals?.currency)}</td>
               </tr>
             ))}
           </tbody>
@@ -144,10 +144,10 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
     const totals = data?.totals || {};
     return (
       <div className="space-y-1 text-xs">
-        <div className="flex justify-between"><span>Subtotal</span><span>{fmt(totals?.subtotal)}</span></div>
-        <div className="flex justify-between"><span>Commission</span><span>{fmt(totals?.commissionTotal)}</span></div>
-        <div className="flex justify-between"><span>Tax</span><span>{fmt(totals?.taxAmount)}</span></div>
-        <div className="flex justify-between font-semibold"><span>Total</span><span>{fmt(totals?.grandTotal)}</span></div>
+        <div className="flex justify-between"><span>Subtotal</span><span>{fmt(totals?.subtotal, totals?.currency)}</span></div>
+        <div className="flex justify-between"><span>Commission</span><span>{fmt(totals?.commissionTotal, totals?.currency)}</span></div>
+        <div className="flex justify-between"><span>Tax</span><span>{fmt(totals?.taxAmount, totals?.currency)}</span></div>
+        <div className="flex justify-between font-semibold"><span>Total</span><span>{fmt(totals?.grandTotal, totals?.currency)}</span></div>
       </div>
     );
   }
@@ -156,9 +156,10 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
     const terms = data?.terms || {};
     return (
       <div className="space-y-2 text-xs">
-        <div><span className="font-semibold">Payment:</span> {terms?.paymentTerms || "-"}</div>
-        <div><span className="font-semibold">Delivery:</span> {terms?.deliveryTerms || "-"}</div>
-        <div><span className="font-semibold">Notes:</span> {terms?.notes || "-"}</div>
+        <div className="whitespace-pre-line"><span className="font-semibold">Payment:</span> {terms?.paymentTerms || "-"}</div>
+        <div className="whitespace-pre-line"><span className="font-semibold">Delivery:</span> {terms?.deliveryTerms || "-"}</div>
+        <div className="whitespace-pre-line"><span className="font-semibold">Terms and conditions:</span> {terms?.termsAndConditions || "-"}</div>
+        <div className="whitespace-pre-line"><span className="font-semibold">Recipient notes:</span> {terms?.notes || "-"}</div>
       </div>
     );
   }

@@ -559,6 +559,9 @@ export const apiRoutes = {
   },
   commercialDocuments: {
     list: `${BASE_PATHS.TRADE_DOCUMENT}`, customers: `${BASE_PATHS.TRADE_DOCUMENT}/customers`,
+    recipientDirectory: `${BASE_PATHS.TRADE_DOCUMENT}/recipient-directory`,
+    createCustomer: `${BASE_PATHS.TRADE_DOCUMENT}/customers`,
+    updateCustomer: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/customers/${id}`,
     create: `${BASE_PATHS.TRADE_DOCUMENT}`, getOne: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     update: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`, action: (id: string, action: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/${action}`,
     share: (token: string) => `${BASE_PATHS.TRADE_DOCUMENT}/share/${token}`,

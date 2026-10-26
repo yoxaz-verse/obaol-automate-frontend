@@ -17,7 +17,7 @@ test("documentation provides one workspace and legacy redirects", () => {
   assert.match(workspaceUi, /Library/);
   assert.match(workspace, /Create or upload/);
   assert.match(workspace, /Requirements/);
-  assert.match(workspace, /Recipients/);
+  assert.match(workspaceUi, /Recipients/);
   assert.match(read("src/app/dashboard/documents/page.tsx"), /redirect\("\/dashboard\/documentation"\)/);
   assert.match(read("src/app/dashboard/commercial-documents/page.tsx"), /redirect\("\/dashboard\/documentation"\)/);
 });
@@ -35,6 +35,19 @@ test("documentation views are URL-backed and configuration remains admin-only", 
   assert.match(workspace, /useSearchParams/);
   assert.match(workspace, /next\.set\("view", nextView\)/);
   assert.match(workspace, /requestedView !== "configuration" \|\| isAdmin/);
+});
+
+test("creation workflows are compact, URL-backed, and immediately actionable", () => {
+  const workspace = read("src/app/dashboard/documentation/page.tsx");
+  assert.match(workspace, /type CreateMode = "create" \| "upload"/);
+  assert.match(workspace, /params\.get\("mode"\)/);
+  assert.match(workspace, /role="tablist"/);
+  assert.match(workspace, /Create from OBAOL/);
+  assert.match(workspace, /Upload existing document/);
+  assert.match(workspace, /documentation-create-workflow/);
+  assert.match(workspace, /Open guided creator/);
+  assert.match(workspace, /Upload and extract/);
+  assert.doesNotMatch(workspace, /Start upload/);
 });
 
 test("document detail uses the shared lifecycle, status, and dashboard components", () => {
@@ -65,4 +78,29 @@ test("purpose-built creator configuration covers every studio document type", ()
   assert.ok(types.length >= 20);
   for (const type of types) assert.match(config, new RegExp(`\\b${type}:`), `missing creator config for ${type}`);
   for (const kind of ["commercial", "packing", "logistics", "customs", "quality", "payment"]) assert.match(config, new RegExp(`"${kind}"`));
+});
+
+test("recipient management is connected to the creator and remains company-private", () => {
+  const manager = read("src/components/dashboard/Documentation/RecipientManager.tsx");
+  const creator = read("src/components/dashboard/Documentation/DocumentCreator.tsx");
+  const routes = read("src/core/api/apiRoutes.tsx");
+  for (const role of ["BUYER", "SELLER", "BOTH"]) assert.match(manager, new RegExp(role));
+  assert.match(manager, /Import referred company/);
+  assert.match(manager, /Add recipient/);
+  assert.match(creator, /Manage recipients/);
+  assert.match(creator, /setCustomerId\(row\._id\)/);
+  assert.match(routes, /recipient-directory/);
+});
+
+test("manual terms and Indian document-money formatting are shared across document surfaces", () => {
+  const creator = read("src/components/dashboard/Documentation/DocumentCreator.tsx");
+  const money = read("src/components/dashboard/Documentation/documentMoney.ts");
+  const sheet = read("src/components/dashboard/CommercialDocuments/DocumentSheet.tsx");
+  const preview = read("src/components/dashboard/Documents/TemplateCanvasRenderer.tsx");
+  assert.match(creator, /termsAndConditions/);
+  assert.match(creator, /Terms and conditions/);
+  assert.match(money, /"en-IN"/);
+  assert.match(money, /minimumFractionDigits: 2/);
+  assert.match(sheet, /formatDocumentMoney/);
+  assert.match(preview, /termsAndConditions/);
 });

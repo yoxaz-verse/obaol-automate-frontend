@@ -21,6 +21,7 @@ import LiveNotificationSubscriber from "@/components/dashboard/LiveNotificationS
 import { SidebarGovernanceProvider, useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { DashboardNavigationProvider, useDashboardNavigation } from "@/context/DashboardNavigationContext";
 import DashboardNavigationProgress from "@/components/dashboard/DashboardNavigationProgress";
+import DashboardNavigationQuote from "@/components/dashboard/DashboardNavigationQuote";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -232,10 +233,7 @@ function DashboardLayoutContent({
                   {children}
                   {isNavigating ? (
                     <div className="pointer-events-none absolute inset-0 z-40 flex min-h-[12rem] items-start justify-center rounded-2xl bg-background/35 pt-8 backdrop-blur-[1px]" role="status" aria-live="polite">
-                      <div className="flex items-center gap-2 rounded-full border db-border-strong db-panel px-4 py-2 text-sm font-semibold text-foreground shadow-lg">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-obaol-500/30 border-t-obaol-500" aria-hidden="true" />
-                        Opening page…
-                      </div>
+                      <DashboardNavigationQuote />
                     </div>
                   ) : null}
                 </div>

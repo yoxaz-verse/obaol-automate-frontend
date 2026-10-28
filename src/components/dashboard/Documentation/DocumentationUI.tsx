@@ -93,12 +93,13 @@ export function ProgressTimeline({ status }: { status?: string }) {
   })}</ol>;
 }
 
-export function LifecycleTracker({ status }: { status?: string }) {
+export function LifecycleTracker({ status, invitationActive = false, invitationExpired = false }: { status?: string; invitationActive?: boolean; invitationExpired?: boolean }) {
   const normalized = String(status || "DRAFT").toUpperCase();
-  const outcome = ["ACCEPTED", "REJECTED", "CANCELLED"].includes(normalized) ? normalized : "DECISION";
-  const steps = ["DRAFT", "SENT", outcome];
-  const current = normalized === "DRAFT" ? 0 : normalized === "SENT" ? 1 : 2;
-  return <ol className="flex items-center" aria-label="Document lifecycle">{steps.map((step, index) => <li key={step} className="flex flex-1 items-center last:flex-none"><span className={join("inline-flex min-h-9 items-center rounded-full border px-3 text-xs font-bold", index < current && "border-success-500/30 bg-success-500/10 text-success-600", index === current && "border-obaol-500 bg-obaol-500/15 text-obaol-700 dark:text-obaol-300", index > current && "border-[var(--db-border-subtle)] db-inset db-muted")}>{index < current ? <FiCheckCircle className="mr-1.5" /> : null}{humanize(step)}</span>{index < steps.length - 1 && <span aria-hidden="true" className={join("mx-2 h-px flex-1", index < current ? "bg-success-500/50" : "bg-default-200")} />}</li>)}</ol>;
+  const terminal = ["ACCEPTED", "REJECTED", "CANCELLED"].includes(normalized) ? normalized : "DECISION";
+  const responseState = normalized === "SENT" && invitationExpired ? "EXPIRED" : invitationActive && normalized === "SENT" ? "AWAITING_RESPONSE" : terminal;
+  const steps = ["DRAFT", "ISSUED", responseState];
+  const current = normalized === "DRAFT" ? 0 : normalized === "SENT" ? invitationActive || invitationExpired ? 2 : 1 : 2;
+  return <ol className="grid min-w-0 gap-2 sm:flex sm:items-center" aria-label="Document lifecycle">{steps.map((step, index) => <li key={`${step}-${index}`} className="flex min-w-0 items-center sm:flex-1 sm:last:flex-none"><span className={join("inline-flex min-h-9 max-w-full items-center rounded-full border px-3 text-left text-xs font-bold leading-4", index < current && "border-success-500/30 bg-success-500/10 text-success-600", index === current && "border-obaol-500 bg-obaol-500/15 text-obaol-700 dark:text-obaol-300", index > current && "border-[var(--db-border-subtle)] db-inset db-muted")}>{index < current ? <FiCheckCircle className="mr-1.5 shrink-0" /> : null}<span className="break-words">{humanize(step)}</span></span>{index < steps.length - 1 && <span aria-hidden="true" className={join("mx-2 hidden h-px min-w-4 flex-1 sm:block", index < current ? "bg-success-500/50" : "bg-default-200")} />}</li>)}</ol>;
 }
 
 export function InlineNotice({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "warning" | "danger" | "success" }) {

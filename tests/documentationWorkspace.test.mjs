@@ -126,3 +126,21 @@ test("document preview and sharing use dynamic published templates and canonical
   assert.match(api, /selectTemplate/);
   assert.match(api, /available/);
 });
+
+test("document decisions, governed conversion, and public invitation safety are actionable", () => {
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  const shared = read("src/app/documents/share/[token]/page.tsx");
+  const conversions = read("src/app/dashboard/documentation-conversions/page.tsx");
+  assert.match(detail, /Issue document/);
+  assert.match(detail, /Share document/);
+  assert.match(detail, /safeInvitationUrl/);
+  assert.match(detail, /Create operational order/);
+  assert.match(detail, /executionContext/);
+  assert.match(detail, /responsibilities/);
+  assert.match(shared, /Verify recipient email/);
+  assert.match(shared, /decisionToken/);
+  assert.match(shared, /Accept quotation/);
+  assert.match(shared, /Reject quotation/);
+  assert.match(conversions, /sourceStatuses/);
+  assert.match(conversions, /selectionMode="multiple"/);
+});

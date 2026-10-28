@@ -13,6 +13,7 @@ export type PageHeaderProps = {
   variant?: "panel" | "plain";
   eyebrowTone?: "brand" | "success" | "warning" | "danger";
   className?: string;
+  translateTitle?: boolean;
 };
 
 export default function PageHeader({
@@ -26,6 +27,7 @@ export default function PageHeader({
   variant = "panel",
   eyebrowTone = "brand",
   className,
+  translateTitle = true,
 }: PageHeaderProps) {
   const eyebrowToneClass = {
     brand: "text-obaol-700 dark:text-obaol-300",
@@ -45,14 +47,14 @@ export default function PageHeader({
           ))}
         </nav>
       )}
-      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="min-w-0 max-w-3xl">
           {eyebrow && <p className={`mb-2 text-xs font-bold uppercase tracking-[0.16em] ${eyebrowToneClass}`}>{eyebrow}</p>}
-          <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{title}</h1>
+          <h1 className={`${translateTitle ? "" : "notranslate"} break-words text-2xl font-bold tracking-tight text-foreground md:text-3xl`} translate={translateTitle ? undefined : "no"}>{title}</h1>
           {description && <p className="mt-2 max-w-2xl text-sm leading-6 db-muted md:text-base">{description}</p>}
         </div>
         {(actions || primaryAction || secondaryAction) && (
-          <div className="dashboard-companion-safe-actions flex flex-wrap items-center gap-3">
+          <div className="dashboard-companion-safe-actions flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             {actions ?? secondaryAction}
             {primaryAction && (
               <Link href={primaryAction.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-5 py-2.5 text-sm font-bold text-obaol-950 outline-none transition hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2">

@@ -122,6 +122,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/sidebar-governance", label: "Sidebar Governance", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/payments", label: "Payment Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/documentation-rules", label: "Documentation Rules", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/documentation-conversions", label: "Document Conversions", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true, description: "Configure type-aware document and operational-order conversion actions." },
   { path: "/dashboard/documentation-preview", label: "Documentation Preview", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/documentation-templates", label: "Documentation Templates", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/email-templates", label: "Email Templates", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },

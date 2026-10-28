@@ -66,6 +66,7 @@ const BASE_PATHS = {
   DOCUMENT_TYPE: "/document-types",
   LETTERHEAD_PRESET: "/letterhead-presets",
   DOCUMENT_RULE: "/document-rules",
+  DOCUMENT_CONVERSION_RULE: "/document-conversion-rules",
   ENQUIRY_RULE: "/enquiry-rules",
   ORDER_RULE: "/order-rules",
   FLOW_RULE: "/flow-rules",
@@ -615,6 +616,13 @@ export const apiRoutes = {
     seed: `${BASE_PATHS.DOCUMENT_RULE}/seed`,
     update: (id: string) => `${BASE_PATHS.DOCUMENT_RULE}/${id}`,
     delete: (id: string) => `${BASE_PATHS.DOCUMENT_RULE}/${id}`,
+  },
+  documentConversionRules: {
+    list: `${BASE_PATHS.DOCUMENT_CONVERSION_RULE}`,
+    create: `${BASE_PATHS.DOCUMENT_CONVERSION_RULE}`,
+    update: (id: string) => `${BASE_PATHS.DOCUMENT_CONVERSION_RULE}/${id}`,
+    delete: (id: string) => `${BASE_PATHS.DOCUMENT_CONVERSION_RULE}/${id}`,
+    convert: (documentId: string, ruleId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${documentId}/conversions/${ruleId}`,
   },
   flowRules: {
     list: `${BASE_PATHS.FLOW_RULE}`,

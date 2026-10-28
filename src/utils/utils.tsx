@@ -184,14 +184,9 @@ export const sidebarOptions = [
     link: "/dashboard/documentation-rules",
   },
   {
-    name: "Documentation Preview",
-    icon: <FiEye />,
-    link: "/dashboard/documentation-preview",
-  },
-  {
-    name: "Documentation Templates",
+    name: "Template Studio",
     icon: <FiLayers />,
-    link: "/dashboard/documentation-templates",
+    link: "/dashboard/documentation-template-studio",
   },
   {
     name: "Payment Rules",

@@ -51,6 +51,12 @@ const nextConfig = {
     optimizeCss: true,
   },
   pageExtensions: ["ts", "tsx", "mdx"],
+  async redirects() {
+    return [
+      { source: "/dashboard/documentation-preview", destination: "/dashboard/documentation-template-studio", permanent: false },
+      { source: "/dashboard/documentation-templates", destination: "/dashboard/documentation-template-studio", permanent: false },
+    ];
+  },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
     const configuredOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;

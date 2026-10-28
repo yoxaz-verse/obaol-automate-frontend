@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useContext } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -115,6 +115,8 @@ const getCompanyPreviewUrl = (company: AssociateCompany | null) => {
 
 export default function ExternalOrderCreatePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromDocumentation = searchParams.get("source") === "documentation";
   const { user } = useContext(AuthContext);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>("");
@@ -127,7 +129,7 @@ export default function ExternalOrderCreatePage() {
   const [externalSeller, setExternalSeller] = useState({ name: "", email: "", phone: "" });
   const [buyerCompany, setBuyerCompany] = useState<AssociateCompany | null>(null);
   const [sellerCompany, setSellerCompany] = useState<AssociateCompany | null>(null);
-  const [initiationMode, setInitiationMode] = useState<"DIRECT" | "DOCS">("DIRECT");
+  const initiationMode: "DIRECT" = "DIRECT";
   const [externalProduct, setExternalProduct] = useState({ name: "", variant: "", quantity: "", unit: "MT" });
   const [externalTradeType, setExternalTradeType] = useState<"DOMESTIC" | "INTERNATIONAL">("DOMESTIC");
 
@@ -465,7 +467,9 @@ export default function ExternalOrderCreatePage() {
         message: "External order created successfully.",
         position: "top-right",
       });
-      router.push(orderId ? `/dashboard/orders/${orderId}` : "/dashboard/external-orders");
+      router.push(orderId
+        ? (fromDocumentation ? `/dashboard/documentation?view=requirements&process=ORDER&order=${orderId}` : `/dashboard/orders/${orderId}`)
+        : "/dashboard/external-orders");
     } catch (error: any) {
       const message = error?.response?.data?.message || error?.message || "Unable to create external order.";
       setSubmitError(message);
@@ -505,7 +509,7 @@ export default function ExternalOrderCreatePage() {
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div className="hidden" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
               <h3 className="text-[11px] font-black text-obaol-500  tracking-[0.4em] italic mb-1">Initiation Mode</h3>
@@ -534,7 +538,7 @@ export default function ExternalOrderCreatePage() {
                           ? "border-obaol-500/30 bg-obaol-500/10 shadow-[0_0_40px_rgba(207,152,60,0.1)]"
                           : "border-foreground/5 bg-foreground/[0.02] hover:bg-foreground/[0.05] hover:border-foreground/10"
                       }`}
-                      onClick={() => setInitiationMode(mode.key as "DIRECT" | "DOCS")}
+                      onClick={() => undefined}
                     >
                       {selected && (
                         <div className="absolute top-0 right-0 w-24 h-24 bg-obaol-500/10 blur-[40px] rounded-full -mr-8 -mt-8" />
@@ -556,7 +560,7 @@ export default function ExternalOrderCreatePage() {
           </Card>
         </motion.div>
 
-        {initiationMode === "DOCS" ? (
+        {false ? (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
               <CardBody className="px-12 py-12 flex flex-col items-center text-center gap-6">

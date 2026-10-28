@@ -51,6 +51,9 @@ export default function DocumentationTemplatesPage() {
   const [templateDescription, setTemplateDescription] = useState("");
   const [visualStyle, setVisualStyle] = useState("CUSTOM");
   const [makeDefault, setMakeDefault] = useState(false);
+  const [workspaceMode, setWorkspaceMode] = useState<"EDIT" | "PREVIEW" | "SPLIT">("EDIT");
+  const [leftOpen, setLeftOpen] = useState(true), [rightOpen, setRightOpen] = useState(true);
+  const [zoom, setZoom] = useState(0.78);
 
   const documentTypesQuery = useQuery({
     queryKey: ["document-types"],
@@ -116,6 +119,7 @@ export default function DocumentationTemplatesPage() {
     onSuccess: () => {
       showToastMessage({ type: "success", message: "Draft created.", position: "top-right" });
       queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] });
+      queryClient.invalidateQueries({ queryKey: ["document-templates-available"] });
     },
     onError: (error: any) => {
       showToastMessage({ type: "error", message: error?.response?.data?.message || "Failed to create draft.", position: "top-right" });
@@ -138,6 +142,7 @@ export default function DocumentationTemplatesPage() {
     onSuccess: () => {
       showToastMessage({ type: "success", message: "Draft saved.", position: "top-right" });
       queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] });
+      queryClient.invalidateQueries({ queryKey: ["document-templates-available"] });
     },
     onError: (error: any) => {
       showToastMessage({ type: "error", message: error?.response?.data?.message || "Failed to save draft.", position: "top-right" });
@@ -160,9 +165,10 @@ export default function DocumentationTemplatesPage() {
     },
   });
 
-  const duplicateMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.duplicate(id), {}), onSuccess: () => { showToastMessage({ type: "success", message: "Published template copied into a new draft.", position: "top-right" }); queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] }); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not duplicate template.", position: "top-right" }) });
-  const defaultMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.setDefault(id), {}), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] }) });
-  const deactivateMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.deactivate(id), {}), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] }), onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not deactivate template.", position: "top-right" }) });
+  const refreshTemplateQueries = () => { queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] }); queryClient.invalidateQueries({ queryKey: ["document-templates-available"] }); };
+  const duplicateMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.duplicate(id), {}), onSuccess: () => { showToastMessage({ type: "success", message: "Published template copied into a new draft.", position: "top-right" }); refreshTemplateQueries(); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not duplicate template.", position: "top-right" }) });
+  const defaultMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.setDefault(id), {}), onSuccess: refreshTemplateQueries });
+  const deactivateMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.deactivate(id), {}), onSuccess: refreshTemplateQueries, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not deactivate template.", position: "top-right" }) });
 
   const seedMutation = useMutation({
     mutationFn: () => postData(`${apiRoutes.documentTemplates.seed}?force=true`, {}),
@@ -240,12 +246,12 @@ export default function DocumentationTemplatesPage() {
   }, [localLayout]);
 
   return (
-    <section>
-      <Title title="Documentation Templates" visuallyHidden />
-      <div className="mx-2 md:mx-6 mb-6 flex flex-col gap-4">
+    <section className="min-h-[calc(100vh-7rem)]">
+      <Title title="Template Studio" visuallyHidden />
+      <div className="mx-2 mb-6 flex flex-col gap-4 md:mx-4">
         {(documentTypesQuery.isLoading || templatesQuery.isLoading) && <div role="status" className="rounded-xl border border-default-200 p-4 text-sm text-default-500">Loading document configuration…</div>}
         {(documentTypesQuery.isError || templatesQuery.isError || letterheadQuery.isError) && <div role="alert" className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">Documentation configuration could not be loaded. Retry before editing or publishing.</div>}
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-3">
+        <div className="sticky top-0 z-40 grid grid-cols-1 gap-3 rounded-2xl border border-default-200 bg-background/95 p-3 shadow-sm backdrop-blur-xl xl:grid-cols-[minmax(0,1fr)_auto]">
           <div className="flex flex-wrap items-center gap-3">
             <Select size="sm" selectedKeys={[documentType]} onSelectionChange={(keys) => setDocumentType(String(Array.from(keys)[0] || "LOI"))} className="w-[260px]" label="Document Type">
               {docTypeOptions.map((type: string) => (<SelectItem key={type}>{type}</SelectItem>))}
@@ -269,6 +275,9 @@ export default function DocumentationTemplatesPage() {
             <Button variant="flat" onPress={() => seedMutation.mutate()} isLoading={seedMutation.isPending}>Restore Presets</Button>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="flex rounded-xl bg-default-100 p-1">{(["EDIT", "PREVIEW", "SPLIT"] as const).map(mode => <Button key={mode} size="sm" variant={workspaceMode === mode ? "solid" : "light"} color={workspaceMode === mode ? "primary" : "default"} onPress={() => setWorkspaceMode(mode)}>{mode[0] + mode.slice(1).toLowerCase()}</Button>)}</div>
+            <Button size="sm" variant="flat" onPress={() => setLeftOpen(value => !value)}>{leftOpen ? "Hide" : "Show"} components</Button>
+            <Button size="sm" variant="flat" onPress={() => setRightOpen(value => !value)}>{rightOpen ? "Hide" : "Show"} properties</Button>
             <Select size="sm" selectedKeys={[publishStage]} onSelectionChange={(keys) => setPublishStage(String(Array.from(keys)[0] || "LIVE"))} className="w-[120px]" label="Stage">
               {STAGE_OPTIONS.map((s) => (<SelectItem key={s}>{s}</SelectItem>))}
             </Select>
@@ -284,17 +293,18 @@ export default function DocumentationTemplatesPage() {
 
         <div className="text-xs text-default-500">Draft: {draft?._id ? "Yes" : "No"} • Preview: {preview?._id ? `v${preview.version}` : "None"} • Live: {live?._id ? `v${live.version}` : "None"}</div>
 
-        <Card>
-          <CardBody className="space-y-4">
+        <details className="rounded-2xl border border-default-200 bg-content1">
+          <summary className="cursor-pointer list-none px-5 py-4 font-bold">Template & version drawer <span className="ml-2 text-xs font-normal text-default-500">{publishedTemplates.length} published</span></summary>
+          <div className="space-y-4 border-t border-default-200 p-4">
             <div><h2 className="text-lg font-bold">Published template catalog</h2><p className="text-sm text-default-500">Users see these templates on the document Preview tab. A published version remains immutable.</p></div>
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{publishedTemplates.map((row: any) => <div key={row._id} className="rounded-xl border border-default-200 p-4"><div className="flex justify-between gap-3"><div><strong>{row.name || row.visualStyle}</strong><p className="text-xs text-default-500">{String(row.visualStyle || "CUSTOM").replaceAll("_", " ")} · v{row.version}</p></div>{row.isDefault && <span className="h-fit rounded-full bg-primary/15 px-2 py-1 text-[10px] font-bold text-primary">DEFAULT</span>}</div><p className="mt-2 line-clamp-2 text-xs text-default-500">{row.description || "No description"}</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" variant="flat" onPress={() => duplicateMutation.mutate(String(row._id))}>Duplicate</Button>{!row.isDefault && <Button size="sm" variant="flat" color="primary" onPress={() => defaultMutation.mutate(String(row._id))}>Make default</Button>}{!row.isDefault && <Button size="sm" variant="light" color="danger" onPress={() => deactivateMutation.mutate(String(row._id))}>Deactivate</Button>}</div></div>)}</div>
-          </CardBody>
-        </Card>
+          </div>
+        </details>
 
         {draft && <Card><CardBody className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"><Input label="Template name" value={templateName} onChange={(event) => setTemplateName(event.target.value)} /><Input label="Description" value={templateDescription} onChange={(event) => setTemplateDescription(event.target.value)} /><Select label="Visual style" selectedKeys={[visualStyle]} onSelectionChange={(keys) => setVisualStyle(String(Array.from(keys)[0] || "CUSTOM"))}>{["CLASSIC", "MODERN", "COMPACT", "CUSTOM"].map(value => <SelectItem key={value}>{value}</SelectItem>)}</Select><Switch isSelected={makeDefault} onValueChange={setMakeDefault}>Make default when published</Switch></CardBody></Card>}
 
-        <div className="grid grid-cols-1 xl:grid-cols-[260px_minmax(0,1fr)_320px] gap-4">
-          <div className="space-y-4">
+        <div className={`grid grid-cols-1 gap-4 ${leftOpen && rightOpen ? "xl:grid-cols-[240px_minmax(0,1fr)_300px]" : leftOpen ? "xl:grid-cols-[240px_minmax(0,1fr)]" : rightOpen ? "xl:grid-cols-[minmax(0,1fr)_300px]" : "xl:grid-cols-1"}`}>
+          {leftOpen && <div className="space-y-4 xl:max-h-[calc(100vh-12rem)] xl:overflow-y-auto">
             <Card>
               <CardBody className="space-y-2">
                 <div className="text-xs font-black  tracking-wider text-default-500">Block Library</div>
@@ -348,11 +358,13 @@ export default function DocumentationTemplatesPage() {
                 ))}
               </CardBody>
             </Card>
-          </div>
+          </div>}
 
-          <div>
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-default-200 bg-default-100/50">
+            <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-default-200 bg-background/90 p-2 backdrop-blur"><span className="px-2 text-xs font-bold text-default-500">{workspaceMode === "EDIT" ? "Editable canvas" : workspaceMode === "PREVIEW" ? "Published output preview" : "Draft and output"}</span><div className="flex items-center gap-1"><Button size="sm" variant="light" onPress={() => setZoom(value => Math.max(.4, value - .1))}>−</Button><Button size="sm" variant="flat" onPress={() => setZoom(.78)}>{Math.round(zoom * 100)}%</Button><Button size="sm" variant="light" onPress={() => setZoom(value => Math.min(1.4, value + .1))}>+</Button><Button size="sm" variant="light" onPress={() => setZoom(.6)}>Fit</Button></div></div>
+            <div className={`overflow-auto p-4 ${workspaceMode === "SPLIT" ? "grid gap-4 2xl:grid-cols-2" : ""}`}>
             {localLayout ? (
-              <TemplateCanvasRenderer
+              <div style={{ transform: `scale(${zoom})`, transformOrigin: "top center", marginBottom: `${Math.max(0, (zoom - 1) * 1123)}px` }}><TemplateCanvasRenderer
                 layoutSchema={localLayout}
                 docLabel={documentType.replaceAll("_", " ")}
                 data={{
@@ -370,20 +382,22 @@ export default function DocumentationTemplatesPage() {
                   },
                   manualInput: {},
                 }}
-                editable={Boolean(draft)}
+                editable={Boolean(draft) && workspaceMode !== "PREVIEW"}
                 selectedBlockId={selectedBlockId}
                 onSelectBlock={(id) => {
                   setSelectedBlockId(id);
                   setSelectedElementId(null);
                 }}
                 onBlockMove={moveBlock}
-              />
+              /></div>
             ) : (
               <Card><CardBody className="text-sm text-default-500">No template found yet.</CardBody></Card>
             )}
+            {workspaceMode === "SPLIT" && localLayout && <div style={{ transform: `scale(${zoom})`, transformOrigin: "top center" }}><TemplateCanvasRenderer layoutSchema={localLayout} docLabel={`${documentType.replaceAll("_", " ")} Preview`} data={{ documentNumber: "PREVIEW-0001", docDate: new Date().toLocaleDateString(), buyer: { name: "Buyer Co" }, seller: { name: "Seller Co" }, lineItems: [], totals: {}, terms: {} }} editable={false} /></div>}
+            </div>
           </div>
 
-          <Card>
+          {rightOpen && <Card className="xl:max-h-[calc(100vh-12rem)] xl:overflow-y-auto">
             <CardBody className="space-y-3">
               <div className="text-xs font-black  tracking-wider text-default-500">Properties</div>
               {!selectedAny ? (
@@ -442,7 +456,7 @@ export default function DocumentationTemplatesPage() {
                 <Input size="sm" label="Watermark" value={letterheadWatermark} onChange={(e) => setLetterheadWatermark(e.target.value)} />
               </div>
             </CardBody>
-          </Card>
+          </Card>}
         </div>
       </div>
     </section>

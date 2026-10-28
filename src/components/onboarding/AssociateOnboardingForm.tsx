@@ -118,6 +118,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const referralParam = String(searchParams?.get("ref") || "").trim().toUpperCase();
+  const referralInvitationToken = String(searchParams?.get("invite") || "").trim().toLowerCase();
   const AutocompleteAny = Autocomplete as any;
   const { user, refreshUser } = useContext(AuthContext);
   const isOnboarding = mode === "onboarding";
@@ -1177,6 +1178,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         associateDivision: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? formData.associateDivision : undefined,
         associatePincodeEntry: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? (formData.associatePincodeEntry || undefined) : undefined,
         referralCode: formData.referralCode.trim() || undefined,
+        referralInvitationToken: referralInvitationToken || undefined,
       };
 
       if (isNewCompany) {

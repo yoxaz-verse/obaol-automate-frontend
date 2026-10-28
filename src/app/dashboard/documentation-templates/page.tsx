@@ -47,6 +47,10 @@ export default function DocumentationTemplatesPage() {
   const [selectedLetterheadId, setSelectedLetterheadId] = useState<string>("");
   const [letterheadFirstPageOnly, setLetterheadFirstPageOnly] = useState<boolean>(true);
   const [letterheadWatermark, setLetterheadWatermark] = useState<string>("");
+  const [templateName, setTemplateName] = useState("Custom Template");
+  const [templateDescription, setTemplateDescription] = useState("");
+  const [visualStyle, setVisualStyle] = useState("CUSTOM");
+  const [makeDefault, setMakeDefault] = useState(false);
 
   const documentTypesQuery = useQuery({
     queryKey: ["document-types"],
@@ -66,6 +70,7 @@ export default function DocumentationTemplatesPage() {
       ...(scope === "COMPANY_OVERRIDE" && companyId ? { companyId } : {}),
     }),
   });
+  const variablesQuery = useQuery({ queryKey: ["document-template-variables", documentType], queryFn: () => getData(apiRoutes.documentTemplates.variables, { documentType }) });
 
   const docTypeRows = Array.isArray(documentTypesQuery.data?.data?.data) ? documentTypesQuery.data.data.data : [];
   const docTypeOptions = docTypeRows.length > 0 ? docTypeRows.map((r: any) => String(r?.slug || "")) : DEFAULT_DOC_TYPES;
@@ -80,9 +85,13 @@ export default function DocumentationTemplatesPage() {
   const draft = current?.draft || null;
   const preview = current?.preview || null;
   const live = current?.live || null;
+  const baseTemplate = useMemo(() => draft || preview || live || null, [draft, preview, live]);
+  const publishedTemplates = (current?.all || []).filter((row: any) => row.stage === "LIVE" && row.status === "PUBLISHED" && row.isActive !== false).sort((a: any, b: any) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0));
+  const variableGroups = Array.isArray(variablesQuery.data?.data?.data) ? variablesQuery.data.data.data : [];
+  const variableOptions = variableGroups.flatMap((group: any) => (group.variables || []).map((token: string) => ({ token, group: group.group })));
 
   React.useEffect(() => {
-    const base = draft || preview || live || null;
+    const base = baseTemplate;
     setLocalLayout(base?.layoutSchema || null);
     setSelectedBlockId(null);
     setSelectedElementId(null);
@@ -90,12 +99,18 @@ export default function DocumentationTemplatesPage() {
     setSelectedLetterheadId(String(base?.letterheadConfig?.presetId || ""));
     setLetterheadFirstPageOnly(base?.letterheadConfig?.firstPageOnly !== false);
     setLetterheadWatermark(String(base?.letterheadConfig?.watermark || ""));
-  }, [draft?._id, preview?._id, live?._id, documentType, scope, companyId]);
+    setTemplateName(String(base?.name || "Custom Template"));
+    setTemplateDescription(String(base?.description || ""));
+    setVisualStyle(String(base?.visualStyle || "CUSTOM"));
+  }, [baseTemplate, documentType, scope, companyId]);
 
   const createDraftMutation = useMutation({
     mutationFn: () => postData(apiRoutes.documentTemplates.create, {
       documentType,
       scope,
+      name: templateName,
+      description: templateDescription,
+      visualStyle,
       ...(scope === "COMPANY_OVERRIDE" && companyId ? { companyId } : {}),
     }),
     onSuccess: () => {
@@ -110,6 +125,9 @@ export default function DocumentationTemplatesPage() {
   const saveDraftMutation = useMutation({
     mutationFn: () => patchData(apiRoutes.documentTemplates.update(draft?._id), {
       layoutSchema: localLayout,
+      name: templateName,
+      description: templateDescription,
+      visualStyle,
       letterheadConfig: {
         enabled: letterheadEnabled,
         presetId: selectedLetterheadId || null,
@@ -130,6 +148,7 @@ export default function DocumentationTemplatesPage() {
     mutationFn: () => postData(apiRoutes.documentTemplates.publish(draft?._id), {
       stage: publishStage,
       activationMode,
+      isDefault: makeDefault,
       ...(activationMode === "SCHEDULED" && activationAt ? { activationAt } : {}),
     }),
     onSuccess: () => {
@@ -140,6 +159,10 @@ export default function DocumentationTemplatesPage() {
       showToastMessage({ type: "error", message: error?.response?.data?.message || "Failed to publish template.", position: "top-right" });
     },
   });
+
+  const duplicateMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.duplicate(id), {}), onSuccess: () => { showToastMessage({ type: "success", message: "Published template copied into a new draft.", position: "top-right" }); queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] }); }, onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not duplicate template.", position: "top-right" }) });
+  const defaultMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.setDefault(id), {}), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] }) });
+  const deactivateMutation = useMutation({ mutationFn: (id: string) => postData(apiRoutes.documentTemplates.deactivate(id), {}), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["document-templates", documentType, scope, companyId] }), onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not deactivate template.", position: "top-right" }) });
 
   const seedMutation = useMutation({
     mutationFn: () => postData(`${apiRoutes.documentTemplates.seed}?force=true`, {}),
@@ -260,6 +283,15 @@ export default function DocumentationTemplatesPage() {
         </div>
 
         <div className="text-xs text-default-500">Draft: {draft?._id ? "Yes" : "No"} • Preview: {preview?._id ? `v${preview.version}` : "None"} • Live: {live?._id ? `v${live.version}` : "None"}</div>
+
+        <Card>
+          <CardBody className="space-y-4">
+            <div><h2 className="text-lg font-bold">Published template catalog</h2><p className="text-sm text-default-500">Users see these templates on the document Preview tab. A published version remains immutable.</p></div>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{publishedTemplates.map((row: any) => <div key={row._id} className="rounded-xl border border-default-200 p-4"><div className="flex justify-between gap-3"><div><strong>{row.name || row.visualStyle}</strong><p className="text-xs text-default-500">{String(row.visualStyle || "CUSTOM").replaceAll("_", " ")} · v{row.version}</p></div>{row.isDefault && <span className="h-fit rounded-full bg-primary/15 px-2 py-1 text-[10px] font-bold text-primary">DEFAULT</span>}</div><p className="mt-2 line-clamp-2 text-xs text-default-500">{row.description || "No description"}</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" variant="flat" onPress={() => duplicateMutation.mutate(String(row._id))}>Duplicate</Button>{!row.isDefault && <Button size="sm" variant="flat" color="primary" onPress={() => defaultMutation.mutate(String(row._id))}>Make default</Button>}{!row.isDefault && <Button size="sm" variant="light" color="danger" onPress={() => deactivateMutation.mutate(String(row._id))}>Deactivate</Button>}</div></div>)}</div>
+          </CardBody>
+        </Card>
+
+        {draft && <Card><CardBody className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"><Input label="Template name" value={templateName} onChange={(event) => setTemplateName(event.target.value)} /><Input label="Description" value={templateDescription} onChange={(event) => setTemplateDescription(event.target.value)} /><Select label="Visual style" selectedKeys={[visualStyle]} onSelectionChange={(keys) => setVisualStyle(String(Array.from(keys)[0] || "CUSTOM"))}>{["CLASSIC", "MODERN", "COMPACT", "CUSTOM"].map(value => <SelectItem key={value}>{value}</SelectItem>)}</Select><Switch isSelected={makeDefault} onValueChange={setMakeDefault}>Make default when published</Switch></CardBody></Card>}
 
         <div className="grid grid-cols-1 xl:grid-cols-[260px_minmax(0,1fr)_320px] gap-4">
           <div className="space-y-4">
@@ -383,7 +415,7 @@ export default function DocumentationTemplatesPage() {
                         <SelectItem key="MANUAL_FIELD">MANUAL_FIELD</SelectItem>
                       </Select>
                       {String(selectedElement?.binding?.bindingType || "SYSTEM_TOKEN") === "SYSTEM_TOKEN" ? (
-                        <Input size="sm" label="Token" placeholder="enquiry.productName" value={String(selectedElement?.binding?.token || "")} onChange={(e) => updateSelected({ binding: { ...(selectedElement?.binding || {}), token: e.target.value } })} />
+                        <Select size="sm" label="Document variable" placeholder="Choose a supported variable" selectedKeys={selectedElement?.binding?.token ? [String(selectedElement.binding.token)] : []} onSelectionChange={(keys) => updateSelected({ binding: { ...(selectedElement?.binding || {}), token: String(Array.from(keys)[0] || "") } })}>{variableOptions.map((option: any) => <SelectItem key={option.token} textValue={`${option.group}: ${option.token}`}>{option.group} · {option.token}</SelectItem>)}</Select>
                       ) : (
                         <>
                           <Input size="sm" label="Manual Field Key" placeholder="legalNoticeTitle" value={String(selectedElement?.binding?.fieldKey || "")} onChange={(e) => updateSelected({ binding: { ...(selectedElement?.binding || {}), fieldKey: e.target.value } })} />

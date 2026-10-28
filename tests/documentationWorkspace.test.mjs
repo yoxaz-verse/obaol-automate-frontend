@@ -104,3 +104,21 @@ test("manual terms and Indian document-money formatting are shared across docume
   assert.match(sheet, /formatDocumentMoney/);
   assert.match(preview, /termsAndConditions/);
 });
+
+test("document preview and sharing use dynamic published templates and canonical rendering", () => {
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  const shared = read("src/app/documents/share/[token]/page.tsx");
+  const admin = read("src/app/dashboard/documentation-templates/page.tsx");
+  const api = read("src/core/api/apiRoutes.tsx");
+  assert.match(detail, /Document template/);
+  assert.match(detail, /selectedTemplateId/);
+  assert.match(detail, /srcDoc/);
+  assert.match(detail, /admin-published template/);
+  assert.match(shared, /\/render/);
+  assert.match(shared, /srcDoc/);
+  assert.match(admin, /Published template catalog/);
+  assert.match(admin, /Make default/);
+  assert.match(admin, /Document variable/);
+  assert.match(api, /selectTemplate/);
+  assert.match(api, /available/);
+});

@@ -34,12 +34,16 @@ const DOC_TYPES = [
 export default function DocumentationPreviewPage() {
   const [docType, setDocType] = useState<string>("QUOTATION");
   const [selectedEnquiryId, setSelectedEnquiryId] = useState<string>("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
 
   const enquiriesQuery = useQuery({
     queryKey: ["documentation-preview-enquiries"],
     queryFn: () => getData(apiRoutes.enquiry.getAll, { page: 1, limit: 200, sort: "createdAt:desc" }),
   });
   const enquiries = useMemo(() => extractList(enquiriesQuery.data), [enquiriesQuery.data]);
+  const templatesQuery = useQuery({ queryKey: ["documentation-preview-templates", docType], queryFn: () => getData(apiRoutes.documentTemplates.available, { documentType: docType }) });
+  const templates = useMemo(() => Array.isArray(templatesQuery.data?.data?.data) ? templatesQuery.data.data.data : [], [templatesQuery.data]);
+  React.useEffect(() => { setSelectedTemplateId(String(templates.find((row: any) => row.isDefault)?._id || templates[0]?._id || "")); }, [docType, templates]);
 
   const { data: selectedEnquiry } = useQuery({
     queryKey: ["documentation-preview-enquiry", selectedEnquiryId],
@@ -57,6 +61,16 @@ export default function DocumentationPreviewPage() {
         {enquiriesQuery.isError && <div role="alert" className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">Enquiries could not be loaded. Retry before previewing live document data.</div>}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
+            <Select
+              size="sm"
+              selectedKeys={selectedTemplateId ? [selectedTemplateId] : []}
+              onSelectionChange={(keys) => setSelectedTemplateId(String(Array.from(keys)[0] || ""))}
+              label="Published Template"
+              className="min-w-[240px]"
+              placeholder="Choose template"
+            >
+              {templates.map((row: any) => <SelectItem key={String(row._id)}>{`${row.name || row.visualStyle} · v${row.version}`}</SelectItem>)}
+            </Select>
             <Select
               size="sm"
               selectedKeys={[docType]}
@@ -104,7 +118,7 @@ export default function DocumentationPreviewPage() {
               {selectedEnquiryId && !selectedEnquiry ? (
                 <div className="h-full min-h-[1020px] flex items-center justify-center text-sm text-default-500">Loading selected enquiry…</div>
               ) : selectedEnquiry ? (
-                <DocumentTemplatePreview docType={docType} enquiry={selectedEnquiry} />
+                <DocumentTemplatePreview docType={docType} enquiry={selectedEnquiry} templateId={selectedTemplateId} canonical />
               ) : (
                 <div className="h-full min-h-[1020px] flex items-center justify-center text-sm text-default-500">
                   Select an enquiry to preview real document data.

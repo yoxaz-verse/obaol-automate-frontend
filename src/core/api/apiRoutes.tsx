@@ -578,6 +578,8 @@ export const apiRoutes = {
     extraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}`,
     confirmExtraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}/confirm`,
     retryExtraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}/retry`,
+    selectTemplate: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/template`,
+    render: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/render`,
     file: (id: string) => `/api/v1/web${BASE_PATHS.TRADE_DOCUMENT}/${id}/file`,
   },
   documentTemplates: {
@@ -589,6 +591,11 @@ export const apiRoutes = {
     seed: `${BASE_PATHS.DOCUMENT_TEMPLATE}/seed`,
     preview: `${BASE_PATHS.DOCUMENT_TEMPLATE}/preview`,
     generate: `${BASE_PATHS.DOCUMENT_TEMPLATE}/generate`,
+    available: `${BASE_PATHS.DOCUMENT_TEMPLATE}/available`,
+    variables: `${BASE_PATHS.DOCUMENT_TEMPLATE}/variables`,
+    duplicate: (id: string) => `${BASE_PATHS.DOCUMENT_TEMPLATE}/${id}/duplicate`,
+    setDefault: (id: string) => `${BASE_PATHS.DOCUMENT_TEMPLATE}/${id}/default`,
+    deactivate: (id: string) => `${BASE_PATHS.DOCUMENT_TEMPLATE}/${id}/deactivate`,
   },
   documentTypes: {
     list: `${BASE_PATHS.DOCUMENT_TYPE}`,
@@ -682,6 +689,7 @@ export const apiRoutes = {
   associateReferrals: {
     dashboard: "/associate-referrals/me",
     companyDashboard: (companyId: string) => `/associate-referrals/company/${companyId}`,
+    invitations: "/associate-referrals/invitations",
   },
   organizationReports: organizationReportRoutes,
   companyCapabilityChangeRequests: companyCapabilityChangeRequestRoutes,

@@ -20,9 +20,9 @@ type MissionStage = {
 };
 
 const MISSION_STAGES: MissionStage[] = [
-    { title: "INITIALIZING PROTOCOL",   icon: LuScan,        status: "AGRO SOURCE VALIDATED" },
-    { title: "LOGISTICS SYNC",          icon: LuTruck,       status: "FLEET ORCHESTRATION ACTIVE" },
-    { title: "FINALIZING ECOSYSTEM",    icon: LuShieldCheck, status: "MISSION PARAMETERS LOCKED" },
+    { title: "Initializing Protocol", icon: LuScan, status: "Agro Source Validated" },
+    { title: "Logistics Sync", icon: LuTruck, status: "Fleet Orchestration Active" },
+    { title: "Finalizing Ecosystem", icon: LuShieldCheck, status: "Mission Parameters Locked" },
 ];
 
 const INTERVAL_MS = 2400;
@@ -32,7 +32,7 @@ export default function BrandedLoader({
   className = "",
   variant = "default",
   size = "md",
-  message = "INITIALIZING SYSTEM",
+  message = "Initializing System",
 }: BrandedLoaderProps) {
   const sizeMap = {
     sm: { frame: "w-[120px] h-[120px]", logo: 32, iconSize: 18 },
@@ -143,13 +143,13 @@ export default function BrandedLoader({
           className="flex flex-col items-center text-center gap-2 px-8 w-full"
           style={{ opacity: textVisible ? 1 : 0, transition: "opacity 0.3s ease" }}
         >
-          <p className="text-[10px] font-bold uppercase leading-none tracking-[0.45em] text-obaol-700 dark:text-obaol-300">
+          <p className="text-[10px] font-bold leading-none tracking-[0.45em] text-obaol-700 dark:text-obaol-300">
             {active.title}
           </p>
-          <h3 className="text-base font-black text-foreground uppercase tracking-tight leading-snug mt-1 min-h-[1.4em]">
+          <h3 className="text-base font-black text-foreground tracking-tight leading-snug mt-1 min-h-[1.4em]">
             {active.status}
           </h3>
-          <div className="flex items-center gap-2 mt-3 text-[9px] font-bold text-default-400 tracking-[0.3em] uppercase">
+          <div className="flex items-center gap-2 mt-3 text-[9px] font-bold text-default-400 tracking-[0.3em]">
             <LuNetwork className="shrink-0 text-obaol-500/60" size={12} />
             {message}
           </div>
@@ -175,8 +175,8 @@ export default function BrandedLoader({
           ))}
         </div>
 
-        <span className="mt-6 text-[8px] font-black text-default-400/50 uppercase tracking-[0.4em] italic">
-          OBAOL MISSION CONTROL // STATUS NORMAL
+        <span className="mt-6 text-[8px] font-black text-default-400/50 tracking-[0.4em] italic">
+          OBAOL Mission Control // Status Normal
         </span>
       </div>
     </div>

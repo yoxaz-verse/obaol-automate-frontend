@@ -61,6 +61,13 @@ function DashboardLayoutContent({
     setNavigationNotice(new URLSearchParams(window.location.search).get("navigation"));
   }, [pathname]);
 
+  // The dashboard scrolls inside its own container, so Next.js cannot restore
+  // its position when routes change. Always start a newly opened page at the top.
+  useEffect(() => {
+    const scrollContainer = document.querySelector<HTMLElement>("[data-dashboard-scroll]");
+    scrollContainer?.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+
   // Load state on mount
   useEffect(() => {
     const savedState = localStorage.getItem("sidebarCollapsed");

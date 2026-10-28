@@ -6,7 +6,7 @@ import { Chip, Input, Card, CardBody, Divider } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { LuUser, LuPackage, LuMapPin, LuArrowRight, LuSearch, LuActivity, LuBox, LuLayoutGrid } from "react-icons/lu";
+import { LuUser, LuPackage, LuMapPin, LuArrowRight, LuSearch, LuActivity, LuBox } from "react-icons/lu";
 
 import Title from "@/components/titles";
 import AuthContext from "@/context/AuthContext";
@@ -152,14 +152,6 @@ export default function SampleRequestsPage() {
                    startContent={<LuBox size={20} />}
                 >
                    OPEN TRADE LISTINGS
-                </Button>
-                <Button 
-                   variant="flat" 
-                   className="font-black h-14 px-10 rounded-[1.5rem] text-[11px] tracking-widest  bg-foreground/5 border border-foreground/5 transition-all hover:bg-foreground/10 hover:border-foreground/10"
-                   onPress={() => router.push("/dashboard/catalog")}
-                   startContent={<LuLayoutGrid size={20} />}
-                >
-                   BROWSE_CATALOG
                 </Button>
              </div>
           </div>

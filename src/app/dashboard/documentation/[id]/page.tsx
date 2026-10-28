@@ -9,7 +9,6 @@ import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import instance from "@/core/api/axiosInstance";
 import { apiRoutes } from "@/core/api/apiRoutes";
-import UnifiedDocumentView from "@/components/dashboard/CommercialDocuments/UnifiedDocumentView";
 import { formatActivity } from "@/components/dashboard/CommercialDocuments/documentStudio";
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingState from "@/components/ui/LoadingState";
@@ -27,8 +26,11 @@ export default function DocumentationDetail() {
   const query = useQuery({ queryKey: ["documentation-document", key], queryFn: async () => (await getData(apiRoutes.tradeDocuments.getOne(key))).data.data, enabled: Boolean(key) });
   const revisions = useQuery({ queryKey: ["documentation-revisions", key], queryFn: async () => (await getData(`${apiRoutes.tradeDocuments.getOne(key)}/revisions`)).data.data || [], enabled: Boolean(key) && canOwn });
   const doc = query.data;
+  const templates = useQuery({ queryKey: ["documentation-templates", doc?.type, doc?.ownerCompanyId], queryFn: async () => (await getData(apiRoutes.documentTemplates.available, { documentType: doc.type, ...(doc.ownerCompanyId ? { companyId: doc.ownerCompanyId } : {}) })).data.data || [], enabled: Boolean(doc?.type) });
+  const rendered = useQuery({ queryKey: ["documentation-render", key, doc?.selectedTemplateId, doc?.selectedTemplateVersion], queryFn: async () => (await instance.get(apiRoutes.tradeDocuments.render(key), { responseType: "text" })).data, enabled: Boolean(key && doc) });
   async function action(name: string, body: any = {}) { setBusy(true); setError(""); try { const result = await postData(`${apiRoutes.tradeDocuments.getOne(key)}/${name}`, body); if (result.data.inviteUrl) setInviteUrl(result.data.inviteUrl); await client.invalidateQueries({ queryKey: ["documentation-document", key] }); if (["revise", "to-invoice"].includes(name)) router.push(`/dashboard/documentation/${result.data.data._id}`); } catch (e: any) { setError(e?.response?.data?.message || "Action failed."); } finally { setBusy(false); } }
   async function verify(value: "VERIFIED" | "REJECTED") { setBusy(true); setError(""); try { await patchData(apiRoutes.tradeDocuments.update(key), { verifiedStatus: value }); await client.invalidateQueries({ queryKey: ["documentation-document", key] }); } catch (e: any) { setError(e?.response?.data?.message || "Verification failed."); } finally { setBusy(false); } }
+  async function selectTemplate(templateId: string) { setBusy(true); setError(""); try { await patchData(apiRoutes.tradeDocuments.selectTemplate(key), { templateId }); await client.invalidateQueries({ queryKey: ["documentation-document", key] }); await client.invalidateQueries({ queryKey: ["documentation-render", key] }); } catch (e: any) { setError(e?.response?.data?.message || "The template could not be selected."); } finally { setBusy(false); } }
   async function downloadPdf() { setError(""); try { const response = await instance.get(apiRoutes.commercialDocuments.pdf(key), { responseType: "blob" }); const url = URL.createObjectURL(response.data); const link = document.createElement("a"); link.href = url; link.download = `${doc?.documentNumber || "document"}.pdf`; link.click(); URL.revokeObjectURL(url); } catch { setError("The PDF could not be downloaded."); } }
   async function copyInvite() { if (!inviteUrl) return; await navigator.clipboard.writeText(inviteUrl); setCopied(true); window.setTimeout(() => setCopied(false), 1800); }
 
@@ -39,7 +41,7 @@ export default function DocumentationDetail() {
     {error && <InlineNotice tone="danger">{error}</InlineNotice>}
     <DashboardPanel className="p-5"><div className="grid gap-5 lg:grid-cols-[1fr_auto]"><LifecycleTracker status={doc.status} /><div className="flex flex-wrap items-center gap-2"><StatusBadge value={doc.status} /><StatusBadge value={doc.verifiedStatus} verification /><DashboardStatusBadge tone="neutral">Revision {doc.revision || 1}</DashboardStatusBadge><DashboardStatusBadge tone="neutral">{doc.sourceMode === "UPLOADED" ? "Uploaded" : "Created in OBAOL"}</DashboardStatusBadge></div></div>{canVerify && doc.sourceMode === "UPLOADED" && <div className="mt-5 flex flex-wrap gap-2 border-t border-[var(--db-border-subtle)] pt-4"><span className="mr-2 self-center text-xs font-bold tracking-wide db-muted">Verification</span><button disabled={busy} onClick={() => verify("VERIFIED")} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-success-500 px-4 text-sm font-bold text-white"><FiShield /> Verify upload</button><button disabled={busy} onClick={() => verify("REJECTED")} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-danger-500 px-4 text-sm font-bold text-danger-600"><FiXCircle /> Reject</button></div>}</DashboardPanel>
     <nav aria-label="Document details" className="dashboard-panel overflow-x-auto p-1.5"><div className="flex min-w-max gap-1" role="tablist">{TABS.map(([value, label]) => <button key={value} role="tab" aria-selected={tab === value} onClick={() => setTab(value)} className={join("min-h-11 rounded-xl px-4 text-sm font-bold outline-none focus-visible:ring-2 focus-visible:ring-obaol-500", tab === value ? "bg-obaol-500 text-obaol-950" : "db-muted-strong hover:bg-[var(--db-surface-muted)]")}>{label}</button>)}</div></nav>
-    {tab === "preview" && <div className="overflow-hidden rounded-2xl border border-[var(--db-border)] bg-white shadow-sm"><UnifiedDocumentView doc={doc} /></div>}
+    {tab === "preview" && <DocumentPreview doc={doc} templates={templates.data || []} html={rendered.data} loading={rendered.isLoading} failed={rendered.isError} busy={busy} canSelect={canOwn && doc.status === "DRAFT"} select={selectTemplate} retry={() => rendered.refetch()} />}
     {tab === "data" && <StructuredData doc={doc} />}
     {tab === "original" && <OriginalFile doc={doc} id={key} />}
     {tab === "activity" && <Activity doc={doc} />}
@@ -47,6 +49,25 @@ export default function DocumentationDetail() {
     {tab === "sharing" && <Sharing doc={doc} canOwn={canOwn} inviteUrl={inviteUrl} busy={busy} copied={copied} invite={() => action("invite")} revoke={() => action("revoke-invite")} copy={copyInvite} />}
     <div className="fixed inset-x-3 bottom-3 z-30 flex gap-2 rounded-2xl border border-[var(--db-border)] bg-background/95 p-2 shadow-xl backdrop-blur md:hidden"><button onClick={downloadPdf} className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-obaol-500 text-sm font-bold text-obaol-950"><FiDownload /> Download</button>{canOwn && doc.status !== "DRAFT" && <button onClick={() => setTab("sharing")} className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--db-border)] text-sm font-bold"><FiShare2 /> Share</button>}</div>
   </DashboardPage>;
+}
+
+function DocumentPreview({ doc, templates, html, loading, failed, busy, canSelect, select, retry }: any) {
+  return <div className="space-y-5">
+    <DashboardPanel className="p-5">
+      <DashboardSectionHeader title="Document template" description={canSelect ? "Choose any admin-published template. The selected version is frozen when the document is issued." : "This issued document uses its frozen published template version."} />
+      {templates.length ? <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{templates.map((template: any) => {
+        const selected = String(doc.selectedTemplateId || doc.templateSnapshot?._id || "") === String(template._id);
+        return <button key={template._id} disabled={!canSelect || busy} onClick={() => select(String(template._id))} className={join("rounded-2xl border p-4 text-left outline-none transition focus-visible:ring-2 focus-visible:ring-obaol-500", selected ? "border-obaol-500 bg-obaol-500/10" : "border-[var(--db-border)] hover:border-obaol-500", !canSelect && "cursor-default")} aria-pressed={selected}>
+          <div className="flex items-start justify-between gap-3"><div><strong className="block">{template.name || humanize(template.visualStyle || "Template")}</strong><span className="mt-1 block text-xs db-muted">{humanize(template.visualStyle || "custom")} · {template.scope === "COMPANY_OVERRIDE" ? "Company" : "Global"} · v{template.version}</span></div>{template.isDefault && <DashboardStatusBadge tone="brand">Default</DashboardStatusBadge>}</div>
+          {template.description && <p className="mt-3 line-clamp-2 text-xs db-muted">{template.description}</p>}
+          {selected && <p className="mt-3 text-xs font-bold text-obaol-700">Selected for this document</p>}
+        </button>;
+      })}</div> : <div className="mt-4"><InlineNotice tone="warning">No published template is available for this document type. Ask an administrator to publish one.</InlineNotice></div>}
+    </DashboardPanel>
+    <div className="overflow-hidden rounded-2xl border border-[var(--db-border)] bg-[var(--db-surface-muted)] shadow-sm">
+      {loading ? <div className="p-10"><LoadingState title="Rendering document" /></div> : failed ? <div className="p-8"><DashboardEmptyState title="Preview could not be rendered" description="The renderer or selected template may be unavailable." action={<button onClick={retry} className="rounded-xl bg-obaol-500 px-4 py-2 font-bold text-obaol-950">Try again</button>} /></div> : <iframe title={`${doc.documentNumber || "Document"} preview`} srcDoc={String(html || "")} className="h-[1120px] w-full bg-white" sandbox="allow-same-origin" />}
+    </div>
+  </div>;
 }
 
 function StructuredData({ doc }: { doc: any }) {

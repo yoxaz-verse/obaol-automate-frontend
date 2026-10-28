@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { Chip } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRoutes } from "@/core/api/apiRoutes";
-import { getData } from "@/core/api/apiHandler";
+import { getData, postData } from "@/core/api/apiHandler";
 import TemplateCanvasRenderer from "./TemplateCanvasRenderer";
 
 const DOC_LABELS: Record<string, string> = {
@@ -46,12 +46,16 @@ export default function DocumentTemplatePreview({
   enquiry,
   order,
   doc,
+  templateId,
+  canonical = false,
 }: {
   docType: string;
   actionType?: string;
   enquiry?: any;
   order?: any;
   doc?: any;
+  templateId?: string;
+  canonical?: boolean;
 }) {
   const typeKey = String(docType || "").toUpperCase();
   const docLabel = DOC_LABELS[typeKey] || "Trade Document";
@@ -65,8 +69,9 @@ export default function DocumentTemplatePreview({
   const selectedTemplate = useMemo(() => {
     const groups = Array.isArray(templateQuery.data?.data?.data) ? templateQuery.data.data.data : [];
     const group = groups.find((g: any) => String(g?.documentType || g?.docType || "") === typeKey);
-    return group?.live || group?.preview || group?.published || group?.draft || null;
-  }, [templateQuery.data, typeKey]);
+    const rows = (group?.all || []).filter((row: any) => row.stage === "LIVE" && row.isActive !== false);
+    return rows.find((row: any) => String(row._id) === String(templateId || "")) || rows.find((row: any) => row.isDefault) || group?.live || group?.preview || group?.draft || null;
+  }, [templateQuery.data, typeKey, templateId]);
   const layoutSchema = selectedTemplate?.layoutSchema || fallbackSchema;
 
   const sourceEnquiry = enquiry || order?.enquiry || null;
@@ -119,6 +124,27 @@ export default function DocumentTemplatePreview({
     manualInput: {},
   };
 
+  const canonicalQuery = useQuery({
+    queryKey: ["canonical-document-template-preview", typeKey, templateId, sourceEnquiry?._id, doc?._id],
+    queryFn: async () => (await postData(apiRoutes.documentTemplates.preview, {
+      documentType: typeKey,
+      templateId,
+      document: {
+        type: typeKey,
+        documentNumber: normalizedData.documentNumber,
+        status: doc?.status || "DRAFT",
+        issueDate: doc?.issueDate || new Date().toISOString(),
+        buyer: normalizedData.buyer,
+        seller: normalizedData.seller,
+        lineItems: normalizedData.lineItems.map((item: any) => ({ ...item, description: item.description || item.productName, quantity: item.quantity || item.quantityMT, unit: item.unit || "MT", unitPrice: item.unitPrice || item.ratePerKg, taxRate: item.taxRate || 0, total: item.total || item.amount })),
+        totals: { currency: doc?.totals?.currency || "INR", ...normalizedData.totals },
+        terms: normalizedData.terms,
+        documentData: doc?.documentData || {},
+      },
+    })).data.data.html,
+    enabled: Boolean(canonical && typeKey && templateId),
+  });
+
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
@@ -133,7 +159,7 @@ export default function DocumentTemplatePreview({
         )}
       </div>
 
-      <TemplateCanvasRenderer layoutSchema={layoutSchema} docLabel={docLabel} data={normalizedData} />
+      {canonical ? (canonicalQuery.isLoading ? <div className="grid min-h-[700px] place-items-center text-sm text-default-500">Rendering canonical preview…</div> : canonicalQuery.isError ? <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">The canonical preview could not be rendered.</div> : <iframe title={`${docLabel} canonical preview`} srcDoc={String(canonicalQuery.data || "")} className="h-[1040px] w-full rounded-lg border bg-white" sandbox="allow-same-origin" />) : <TemplateCanvasRenderer layoutSchema={layoutSchema} docLabel={docLabel} data={normalizedData} />}
     </div>
   );
 }

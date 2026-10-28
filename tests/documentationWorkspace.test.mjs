@@ -114,6 +114,10 @@ test("document preview and sharing use dynamic published templates and canonical
   assert.match(detail, /selectedTemplateId/);
   assert.match(detail, /srcDoc/);
   assert.match(detail, /admin-published template/);
+  assert.match(detail, /ShareDialog/);
+  assert.match(detail, /Generate secure link/);
+  assert.match(detail, /Open recipient preview/);
+  assert.match(detail, /expiresInDays/);
   assert.match(shared, /\/render/);
   assert.match(shared, /srcDoc/);
   assert.match(admin, /Published template catalog/);

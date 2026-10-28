@@ -480,6 +480,65 @@ canvas {
     outline: none !important;
     box-shadow: inset 0 0 0 2px rgba(207, 152, 60, 0.72) !important;
   }
+
+  .doc-action {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    border: 1px solid transparent;
+    border-radius: .75rem;
+    padding: .625rem 1rem;
+    font-size: .875rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+
+  .doc-action:focus-visible, .doc-interactive-card:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--db-panel), 0 0 0 4px rgba(207, 152, 60, .65);
+  }
+
+  .doc-action:disabled { cursor: not-allowed; opacity: .5; }
+  .doc-action:not(:disabled):active { transform: translateY(1px); }
+  .doc-action--primary { background: rgb(207 152 60); color: rgb(28 22 12); box-shadow: 0 8px 20px -14px rgba(146, 91, 13, .9); }
+  .doc-action--primary:not(:disabled):hover { background: rgb(222 173 87); box-shadow: 0 12px 24px -14px rgba(146, 91, 13, .85); }
+  .doc-action--secondary { border-color: var(--db-border-subtle); background: var(--db-panel); color: rgb(var(--foreground-rgb)); }
+  .doc-action--secondary:not(:disabled):hover { border-color: rgba(207, 152, 60, .65); background: color-mix(in srgb, rgb(207 152 60) 8%, var(--db-panel)); }
+  .doc-action--tertiary { background: var(--db-inset); color: var(--db-muted-strong); }
+  .doc-action--tertiary:not(:disabled):hover { background: color-mix(in srgb, rgb(207 152 60) 10%, var(--db-inset)); color: rgb(var(--foreground-rgb)); }
+  .doc-action--danger { border-color: color-mix(in srgb, rgb(239 68 68) 45%, transparent); color: rgb(220 38 38); background: color-mix(in srgb, rgb(239 68 68) 6%, var(--db-panel)); }
+  .doc-action--danger:not(:disabled):hover { background: color-mix(in srgb, rgb(239 68 68) 12%, var(--db-panel)); }
+  .doc-action--icon { min-width: 2.5rem; padding: 0; background: transparent; color: var(--db-muted-strong); }
+  .doc-action--icon:not(:disabled):hover { background: var(--db-inset); color: rgb(var(--foreground-rgb)); }
+
+  .doc-field {
+    min-height: 2.75rem;
+    width: 100%;
+    border: 1px solid var(--db-border-subtle);
+    border-radius: .75rem;
+    background: var(--db-inset);
+    color: rgb(var(--foreground-rgb));
+    font-size: .875rem;
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+  }
+  .doc-field:hover { border-color: var(--db-border-strong); }
+  .doc-field:focus { border-color: rgb(207 152 60); background: var(--db-panel); box-shadow: 0 0 0 3px rgba(207, 152, 60, .16); }
+
+  .doc-interactive-card {
+    width: 100%;
+    border: 1px solid var(--db-border-subtle);
+    border-radius: 1rem;
+    background: var(--db-inset);
+    padding: 1rem;
+    text-align: left;
+    transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+  .doc-interactive-card:hover { border-color: rgba(207, 152, 60, .55); background: color-mix(in srgb, rgb(207 152 60) 6%, var(--db-inset)); box-shadow: var(--db-shadow-card); transform: translateY(-1px); }
+  .doc-interactive-card--selected { border-color: rgba(207, 152, 60, .65); background: color-mix(in srgb, rgb(207 152 60) 10%, var(--db-panel)); }
 }
 
 [data-dashboard-content] > * {

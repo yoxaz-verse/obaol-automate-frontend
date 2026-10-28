@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent, DragEvent, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ChangeEvent, DragEvent, ReactNode } from "react";
 import Link from "next/link";
 import {
   FiActivity, FiAlertCircle, FiCheckCircle, FiClock, FiFileText, FiGrid,
@@ -22,6 +22,21 @@ export const DOCUMENTATION_VIEWS: Array<{ key: DocumentationView; label: string;
 ];
 
 export const join = (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(" ");
+export type DocumentationActionVariant = "primary" | "secondary" | "tertiary" | "danger" | "icon";
+
+export const documentationActionClass = (variant: DocumentationActionVariant = "secondary", fullWidth = false) => join(
+  "doc-action",
+  `doc-action--${variant}`,
+  fullWidth && "w-full sm:w-auto",
+);
+
+export function DocumentationButton({ variant = "secondary", fullWidth = false, className, type = "button", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: DocumentationActionVariant; fullWidth?: boolean }) {
+  return <button type={type} className={join(documentationActionClass(variant, fullWidth), className)} {...props} />;
+}
+
+export function DocumentationInteractiveCard({ children, className, selected = false, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { selected?: boolean }) {
+  return <button type="button" className={join("doc-interactive-card", selected && "doc-interactive-card--selected", className)} {...props}>{children}</button>;
+}
 export const humanize = (value?: unknown) => String(value || "").replaceAll("_", " ").toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase());
 export const documentLabel = (value?: string) => DOCUMENT_LABELS[String(value || "")] || humanize(value) || "Document";
 export const categoryForType = (value?: string) => DOCUMENT_CATEGORIES.find(item => item.types.includes(String(value || "")))?.label || "Other";
@@ -38,11 +53,11 @@ export function StatusBadge({ value, verification = false }: { value?: string; v
 }
 
 export function WorkspaceNav({ active, isAdmin, onChange }: { active: DocumentationView; isAdmin: boolean; onChange: (view: DocumentationView) => void }) {
-  return <nav aria-label="Documentation workspace" className="dashboard-panel overflow-x-auto p-1.5">
+  return <nav aria-label="Documentation workspace" className="dashboard-panel overflow-x-auto p-1.5 shadow-sm">
     <div className="flex min-w-max gap-1" role="tablist">
       {DOCUMENTATION_VIEWS.filter(item => isAdmin || item.key !== "configuration").map(item => <button
         key={item.key} role="tab" aria-selected={active === item.key} onClick={() => onChange(item.key)}
-        className={join("min-h-11 rounded-xl px-4 text-left outline-none transition focus-visible:ring-2 focus-visible:ring-obaol-500", active === item.key ? "bg-obaol-500 text-obaol-950 shadow-sm" : "db-muted-strong hover:bg-[var(--db-surface-muted)]")}
+        className={join("min-h-11 rounded-xl px-4 text-left outline-none transition-all focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2", active === item.key ? "bg-obaol-500 text-obaol-950 shadow-sm" : "db-muted-strong hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300")}
       ><span className="block text-sm font-bold">{item.label}</span><span className={join("hidden text-[11px] lg:block", active === item.key ? "text-obaol-950/70" : "db-muted")}>{item.description}</span></button>)}
     </div>
   </nav>;
@@ -51,26 +66,26 @@ export function WorkspaceNav({ active, isAdmin, onChange }: { active: Documentat
 const metricIcons = { documents: FiFileText, drafts: FiClock, verification: FiCheckCircle, extraction: FiActivity, shared: FiShare2 };
 export function MetricCard({ label, value, icon, tone = "neutral", onClick }: { label: string; value: number; icon: keyof typeof metricIcons; tone?: "neutral" | "brand" | "warning" | "success"; onClick?: () => void }) {
   const Icon = metricIcons[icon];
-  const card = <DashboardPanel className={join("h-full p-5 transition", onClick && "group hover:-translate-y-0.5 hover:border-obaol-500/40 hover:shadow-md")}>
+  const card = <DashboardPanel className={join("h-full overflow-hidden p-5 transition-all", onClick && "group hover:-translate-y-0.5 hover:border-obaol-500/40 hover:shadow-md")}>
     <div className="flex items-start justify-between gap-4"><div><p className="text-sm font-medium db-muted">{label}</p><p className="mt-2 text-3xl font-bold tracking-tight">{value}</p></div><span className={join("grid h-10 w-10 place-items-center rounded-xl", tone === "brand" && "bg-obaol-500/15 text-obaol-700 dark:text-obaol-300", tone === "warning" && "bg-warning-500/10 text-warning-600", tone === "success" && "bg-success-500/10 text-success-600", tone === "neutral" && "db-inset db-muted-strong")}><Icon aria-hidden="true" /></span></div>
     {onClick && <p className="mt-4 text-xs font-semibold text-obaol-700 opacity-0 transition group-hover:opacity-100 dark:text-obaol-300">Open filtered library →</p>}
   </DashboardPanel>;
-  return onClick ? <button className="w-full text-left" onClick={onClick}>{card}</button> : card;
+  return onClick ? <button className="w-full rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2" onClick={onClick}>{card}</button> : card;
 }
 
 export function SearchField({ value, onChange, placeholder = "Search documents" }: { value: string; onChange: (value: string) => void; placeholder?: string }) {
-  return <label className="relative block min-w-0 flex-1"><span className="sr-only">{placeholder}</span><FiSearch aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 db-muted" /><input value={value} onChange={event => onChange(event.target.value)} placeholder={placeholder} className="min-h-11 w-full rounded-xl border border-[var(--db-border)] bg-transparent py-2 pl-10 pr-10 text-sm outline-none transition focus:border-obaol-500 focus:ring-2 focus:ring-obaol-500/20" />{value && <button aria-label="Clear search" onClick={() => onChange("")} className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg hover:bg-default-100"><FiX /></button>}</label>;
+  return <label className="relative block min-w-0 flex-1"><span className="sr-only">{placeholder}</span><FiSearch aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 db-muted" /><input value={value} onChange={event => onChange(event.target.value)} placeholder={placeholder} className="doc-field py-2 pl-10 pr-10" />{value && <button aria-label="Clear search" onClick={() => onChange("")} className="doc-action doc-action--icon absolute right-1.5 top-1/2 h-8 min-h-8 w-8 min-w-8 -translate-y-1/2"><FiX /></button>}</label>;
 }
 
 export function ViewToggle({ value, onChange }: { value: LibraryDisplay; onChange: (value: LibraryDisplay) => void }) {
-  return <div className="flex rounded-xl border border-[var(--db-border)] p-1" aria-label="Library display">
-    <button aria-label="Table view" aria-pressed={value === "table"} onClick={() => onChange("table")} className={join("grid h-9 w-9 place-items-center rounded-lg", value === "table" && "bg-obaol-500 text-obaol-950")}><FiList /></button>
-    <button aria-label="Card view" aria-pressed={value === "cards"} onClick={() => onChange("cards")} className={join("grid h-9 w-9 place-items-center rounded-lg", value === "cards" && "bg-obaol-500 text-obaol-950")}><FiGrid /></button>
+  return <div className="flex rounded-xl border border-[var(--db-border-subtle)] db-inset p-1" aria-label="Library display">
+    <button aria-label="Table view" aria-pressed={value === "table"} onClick={() => onChange("table")} className={join("grid h-9 w-9 place-items-center rounded-lg transition", value === "table" ? "bg-obaol-500 text-obaol-950 shadow-sm" : "db-muted hover:text-foreground")}><FiList /></button>
+    <button aria-label="Card view" aria-pressed={value === "cards"} onClick={() => onChange("cards")} className={join("grid h-9 w-9 place-items-center rounded-lg transition", value === "cards" ? "bg-obaol-500 text-obaol-950 shadow-sm" : "db-muted hover:text-foreground")}><FiGrid /></button>
   </div>;
 }
 
 export function SelectField({ label, value, onChange, children }: { label: string; value: string; onChange: (value: string) => void; children: ReactNode }) {
-  return <label className="min-w-0"><span className="mb-1 block text-[11px] font-bold tracking-wide db-muted">{label}</span><select aria-label={label} value={value} onChange={event => onChange(event.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--db-border)] bg-transparent px-3 text-sm outline-none focus:border-obaol-500 focus:ring-2 focus:ring-obaol-500/20">{children}</select></label>;
+  return <label className="min-w-0"><span className="mb-1 block text-[11px] font-bold tracking-wide db-muted">{label}</span><select aria-label={label} value={value} onChange={event => onChange(event.target.value)} className="doc-field px-3">{children}</select></label>;
 }
 
 export function FileDropzone({ file, onFile }: { file: File | null; onFile: (file: File | null) => void }) {
@@ -107,5 +122,5 @@ export function InlineNotice({ children, tone = "neutral" }: { children: ReactNo
 }
 
 export function DocumentCard({ doc }: { doc: any }) {
-  return <DashboardPanel className="flex h-full flex-col p-5"><div className="flex items-start justify-between gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-obaol-500/15 text-obaol-700 dark:text-obaol-300"><FiFileText /></span><StatusBadge value={doc.status} /></div><Link href={`/dashboard/documentation/${doc._id}`} className="mt-4 truncate text-base font-bold text-foreground hover:text-obaol-700">{doc.documentNumber || "Untitled document"}</Link><p className="mt-1 text-xs db-muted">{documentLabel(doc.type)} · {categoryForType(doc.type)}</p><p className="mt-4 line-clamp-2 text-sm">{doc.seller?.name || "Unknown seller"} <span className="db-muted">→</span> {doc.buyer?.name || "Unknown buyer"}</p><div className="mt-auto flex items-center justify-between gap-3 pt-5"><StatusBadge value={doc.verifiedStatus} verification /><span className="text-xs db-muted">{formatDate(doc.updatedAt || doc.createdAt)}</span></div></DashboardPanel>;
+  return <DashboardPanel className="group flex h-full flex-col overflow-hidden p-5 transition-all hover:-translate-y-0.5 hover:border-obaol-500/40 hover:shadow-md"><div className="flex items-start justify-between gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl border border-obaol-500/20 bg-obaol-500/10 text-obaol-700 dark:text-obaol-300"><FiFileText /></span><StatusBadge value={doc.status} /></div><Link href={`/dashboard/documentation/${doc._id}`} className="mt-4 truncate text-base font-bold text-foreground outline-none transition hover:text-obaol-700 focus-visible:text-obaol-700">{doc.documentNumber || "Untitled document"}</Link><p className="mt-1 text-xs db-muted">{documentLabel(doc.type)} · {categoryForType(doc.type)}</p><p className="mt-4 line-clamp-2 text-sm">{doc.seller?.name || "Unknown seller"} <span className="db-muted">→</span> {doc.buyer?.name || "Unknown buyer"}</p><div className="mt-auto flex items-center justify-between gap-3 pt-5"><StatusBadge value={doc.verifiedStatus} verification /><span className="text-xs db-muted">{formatDate(doc.updatedAt || doc.createdAt)}</span></div></DashboardPanel>;
 }

@@ -22,6 +22,23 @@ test("documentation provides one workspace and legacy redirects", () => {
   assert.match(read("src/app/dashboard/commercial-documents/page.tsx"), /redirect\("\/dashboard\/documentation"\)/);
 });
 
+test("documentation surfaces share the dashboard action, field, and card system", () => {
+  const workspace = read("src/app/dashboard/documentation/page.tsx");
+  const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");
+  const styles = read("src/app/globals.css");
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  const creator = read("src/components/dashboard/Documentation/DocumentCreator.tsx");
+
+  for (const variant of ["primary", "secondary", "tertiary", "danger", "icon"]) assert.match(styles, new RegExp(`doc-action--${variant}`));
+  assert.match(workspaceUi, /DocumentationButton/);
+  assert.match(workspaceUi, /DocumentationInteractiveCard/);
+  assert.match(workspaceUi, /focus-visible:ring-offset-2/);
+  assert.match(workspace, /fullWidth/);
+  assert.match(detail, /documentationActionClass/);
+  assert.match(creator, /doc-field/);
+  assert.match(styles, /doc-interactive-card:hover/);
+});
+
 test("uploaded documents require an extraction review before completion", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
   const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");
@@ -68,6 +85,18 @@ test("document creator is canonical, guided, and preserves the legacy URL", () =
   for (const section of ["Document setup", "Parties", "Terms and notes", "Review draft"]) assert.match(creator, new RegExp(section));
   assert.match(creator, /beforeunload/);
   assert.match(creator, /Save draft/);
+});
+
+test("document draft validation always produces visible and accessible feedback", () => {
+  const creator = read("src/components/dashboard/Documentation/DocumentCreator.tsx");
+  assert.match(creator, /<form[^>]*noValidate/);
+  assert.match(creator, /Complete.*required field.*before saving/);
+  assert.match(creator, /showToastMessage/);
+  assert.match(creator, /scrollIntoView/);
+  assert.match(creator, /aria-invalid/);
+  assert.match(creator, /aria-describedby/);
+  assert.match(creator, /Draft was not saved/);
+  assert.doesNotMatch(creator, /disabled=\{saving \|\| customers\.isLoading \|\| !\(customers\.data \|\| \[\]\)\.length\}/);
 });
 
 test("purpose-built creator configuration covers every studio document type", () => {

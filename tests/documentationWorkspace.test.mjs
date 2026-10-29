@@ -39,6 +39,31 @@ test("documentation surfaces share the dashboard action, field, and card system"
   assert.match(styles, /doc-interactive-card:hover/);
 });
 
+test("document detail header uses compact, centered shared actions", () => {
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");
+  const styles = read("src/app/globals.css");
+
+  assert.match(detail, /actionAlignment="center"/);
+  assert.match(detail, /DocumentationButton size="sm" variant="primary"/);
+  assert.match(detail, /documentationActionClass\("secondary", false, "sm"\)/);
+  assert.match(workspaceUi, /DocumentationActionSize = "sm" \| "md"/);
+  assert.match(styles, /\.doc-action--sm/);
+  assert.doesNotMatch(detail.match(/<PageHeader[\s\S]*?\/>/)?.[0] || "", /min-h-11|w-full/);
+});
+
+test("accepted quotations expose reviewed conversion and bidirectional order navigation", () => {
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  const order = read("src/app/dashboard/orders/[id]/page.tsx");
+
+  assert.match(detail, /Ready to convert/);
+  assert.match(detail, /doc\.convertedOrder\.route/);
+  assert.match(detail, /packaging specifications/);
+  assert.match(detail, /externalProduct: \{ name: form\.product\.trim\(\), variant: form\.variant\.trim\(\)/);
+  assert.match(order, /Created from accepted quotation/);
+  assert.match(order, /sourceQuotation\.route/);
+});
+
 test("uploaded documents require an extraction review before completion", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
   const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");

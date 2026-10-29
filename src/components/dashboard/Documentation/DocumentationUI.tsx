@@ -23,15 +23,17 @@ export const DOCUMENTATION_VIEWS: Array<{ key: DocumentationView; label: string;
 
 export const join = (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(" ");
 export type DocumentationActionVariant = "primary" | "secondary" | "tertiary" | "danger" | "icon";
+export type DocumentationActionSize = "sm" | "md";
 
-export const documentationActionClass = (variant: DocumentationActionVariant = "secondary", fullWidth = false) => join(
+export const documentationActionClass = (variant: DocumentationActionVariant = "secondary", fullWidth = false, size: DocumentationActionSize = "md") => join(
   "doc-action",
   `doc-action--${variant}`,
+  `doc-action--${size}`,
   fullWidth && "w-full sm:w-auto",
 );
 
-export function DocumentationButton({ variant = "secondary", fullWidth = false, className, type = "button", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: DocumentationActionVariant; fullWidth?: boolean }) {
-  return <button type={type} className={join(documentationActionClass(variant, fullWidth), className)} {...props} />;
+export function DocumentationButton({ variant = "secondary", size = "md", fullWidth = false, className, type = "button", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: DocumentationActionVariant; size?: DocumentationActionSize; fullWidth?: boolean }) {
+  return <button type={type} className={join(documentationActionClass(variant, fullWidth, size), className)} {...props} />;
 }
 
 export function DocumentationInteractiveCard({ children, className, selected = false, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { selected?: boolean }) {

@@ -14,6 +14,7 @@ export type PageHeaderProps = {
   eyebrowTone?: "brand" | "success" | "warning" | "danger";
   className?: string;
   translateTitle?: boolean;
+  actionAlignment?: "end" | "center";
 };
 
 export default function PageHeader({
@@ -28,6 +29,7 @@ export default function PageHeader({
   eyebrowTone = "brand",
   className,
   translateTitle = true,
+  actionAlignment = "end",
 }: PageHeaderProps) {
   const eyebrowToneClass = {
     brand: "text-obaol-700 dark:text-obaol-300",
@@ -47,7 +49,7 @@ export default function PageHeader({
           ))}
         </nav>
       )}
-      <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <div className={`grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_auto] ${actionAlignment === "center" ? "lg:items-center" : "lg:items-end"}`}>
         <div className="min-w-0 max-w-3xl">
           {eyebrow && <p className={`mb-2 text-xs font-bold uppercase tracking-[0.16em] ${eyebrowToneClass}`}>{eyebrow}</p>}
           <h1 className={`${translateTitle ? "" : "notranslate"} break-words text-2xl font-bold tracking-tight text-foreground md:text-3xl`} translate={translateTitle ? undefined : "no"}>{title}</h1>

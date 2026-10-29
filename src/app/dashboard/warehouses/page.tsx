@@ -17,7 +17,7 @@ import {
 } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Warehouse {
@@ -99,6 +99,8 @@ function LoadingState({ label }: { label: string }) {
 export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "operations" }) {
     const queryClient = useQueryClient();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const focusedWarehouseId = searchParams.get("warehouseId") || "";
     const { user } = useContext(AuthContext);
     const { formatRate } = useCurrency();
     const roleLower = String(user?.role || "").toLowerCase();
@@ -169,6 +171,13 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
     const categoryNameMap = new Map(categories.map((cat: any) => [String(cat?._id || ""), cat?.name || ""]));
     const movements = Array.isArray(movementsData) ? movementsData : [];
     const charges = Array.isArray(chargesData) ? chargesData : [];
+
+    useEffect(() => {
+        if (!focusedWarehouseId || !warehouses.some((warehouse) => warehouse._id === focusedWarehouseId)) return;
+        window.requestAnimationFrame(() => {
+            document.getElementById(`warehouse-${focusedWarehouseId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    }, [focusedWarehouseId, warehousesData]);
 
     // ── Mutations ──────────────────────────────────────────────────────────────
     const updateMutation = useMutation({
@@ -307,7 +316,11 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                 : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                                         {warehouses.map((wh) => (
-                                            <Card key={wh._id} className="bg-content1 border border-default-200/50 shadow-sm hover:shadow-md hover:border-obaol-500/30 transition-all duration-200 group">
+                                            <Card
+                                                id={`warehouse-${wh._id}`}
+                                                key={wh._id}
+                                                className={`bg-content1 border shadow-sm hover:shadow-md hover:border-obaol-500/30 transition-all duration-200 group ${focusedWarehouseId === wh._id ? "border-obaol-500 ring-2 ring-obaol-500/30" : "border-default-200/50"}`}
+                                            >
                                                 <CardHeader className="flex items-start justify-between gap-3 pb-2 px-4 pt-4">
                                                     <div className="flex items-center gap-3 min-w-0">
                                                         <div className="w-9 h-9 rounded-xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 flex-shrink-0">

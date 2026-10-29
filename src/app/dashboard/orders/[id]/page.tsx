@@ -798,6 +798,17 @@ export default function OrderDetailsPage() {
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Next action:</strong> {nextOrderAction}</p>
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Responsible party:</strong> {nextResponsibleParty}</p>
             </section>
+            {(order as any)?.sourceQuotation?.route && (
+                <section aria-label="Source quotation" className="flex flex-col gap-3 rounded-2xl border border-success-500/30 bg-success-500/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="text-sm font-bold text-foreground">Created from accepted quotation</p>
+                        <p className="mt-1 text-sm text-default-500">{(order as any).sourceQuotation.documentNumber} remains the immutable commercial source for this order.</p>
+                    </div>
+                    <Link href={(order as any).sourceQuotation.route} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-success-500/40 px-4 text-sm font-bold text-success-700">
+                        Open quotation <FiArrowRight />
+                    </Link>
+                </section>
+            )}
             <div className={`w-full rounded-3xl border px-5 py-4 ${classificationTheme.shellClass} ${classificationTheme.shellBorderClass}`}>
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-black  tracking-widest text-default-500">Classification Signal</span>

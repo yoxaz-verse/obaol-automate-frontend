@@ -503,6 +503,8 @@ canvas {
 
   .doc-action:disabled { cursor: not-allowed; opacity: .5; }
   .doc-action:not(:disabled):active { transform: translateY(1px); }
+  .doc-action--md { min-height: 2.75rem; padding: .625rem 1rem; font-size: .875rem; }
+  .doc-action--sm { min-height: 2.25rem; padding: .4375rem .75rem; font-size: .8125rem; line-height: 1.125rem; }
   .doc-action--primary { background: rgb(207 152 60); color: rgb(28 22 12); box-shadow: 0 8px 20px -14px rgba(146, 91, 13, .9); }
   .doc-action--primary:not(:disabled):hover { background: rgb(222 173 87); box-shadow: 0 12px 24px -14px rgba(146, 91, 13, .85); }
   .doc-action--secondary { border-color: var(--db-border-subtle); background: var(--db-panel); color: rgb(var(--foreground-rgb)); }

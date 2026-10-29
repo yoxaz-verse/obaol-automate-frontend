@@ -753,6 +753,15 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       item.officeAddress || item.associateCompany?.address,
                       "",
                     ));
+              const warehouseId = toDisplayText(
+                item.warehouseId?._id || item.warehouseId,
+                "",
+              ).trim();
+              const warehouseName = toDisplayText(
+                item.warehouseId?.name || item.warehouseName,
+                "",
+              ).trim();
+              const locationLabel = warehouseName || locationDisplay;
 
               // Rule: Owners see base rate only. Non-owners see final price (base + admin commission).
               const displayedPrice =
@@ -817,7 +826,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   item.associate?.associateCompany,
                 productVariant: productVariantLabel,
                 product: toDisplayText(item.productVariant?.product?.name),
-                location: locationDisplay || "--",
+                location: locationLabel || "--",
+                locationAddress: locationDisplay || "--",
+                warehouseId,
+                warehouseName,
                 productId:
                   item.productVariant?.product?._id ||
                   item.productVariant?.product,
@@ -2259,21 +2271,25 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       <FiMoreHorizontal size={18} />
                                     </Button>
                                   </PopoverTrigger>
-                                  <PopoverContent className="w-[min(19rem,calc(100vw-2rem))] p-0">
-                                    <div className="w-full space-y-3 p-4">
-                                      <div className="grid grid-cols-2 gap-3 border-b border-divider pb-3">
-                                        <div className="min-w-0">
-                                          <p className="text-[9px] font-black  tracking-widest text-default-400">Stock</p>
-                                          <p className="truncate text-sm font-bold text-foreground" title={toDisplayText(item.inventoryQty || item.quantity, "—")}>
-                                            {item.inventoryQty || item.quantity || "—"}
+                                  <PopoverContent className="w-[min(16rem,calc(100vw-2rem))] p-0">
+                                    <div className="w-full space-y-3 p-3">
+                                      <div className="min-w-0 border-b border-divider pb-3">
+                                        <p className="text-[9px] font-black tracking-widest text-default-400">Location</p>
+                                        {item.warehouseId && item.warehouseName ? (
+                                          <Button
+                                            size="sm"
+                                            variant="light"
+                                            className="mt-1 h-auto max-w-full justify-start px-0 py-1 text-left font-bold text-foreground"
+                                            onPress={() => router.push(`/dashboard/warehouses?warehouseId=${encodeURIComponent(item.warehouseId)}`)}
+                                            endContent={<FiArrowRight size={13} className="shrink-0" />}
+                                          >
+                                            <span className="truncate" title={item.warehouseName}>{item.warehouseName}</span>
+                                          </Button>
+                                        ) : (
+                                          <p className="mt-1 line-clamp-2 text-sm font-bold text-foreground" title={toDisplayText(item.locationAddress || item.location, "—")}>
+                                            {item.locationAddress && item.locationAddress !== "--" ? item.locationAddress : "—"}
                                           </p>
-                                        </div>
-                                        <div className="min-w-0 text-right">
-                                          <p className="text-[9px] font-black  tracking-widest text-default-400">Location</p>
-                                          <p className="truncate text-sm font-bold text-foreground" title={toDisplayText(item.location, "—")}>
-                                            {item.location && item.location !== "--" ? item.location : "—"}
-                                          </p>
-                                        </div>
+                                        )}
                                       </div>
                                       <div className="flex flex-wrap items-center justify-end gap-2">
                                         {item.isMarketplaceView && item.isOwnedByViewer ? (

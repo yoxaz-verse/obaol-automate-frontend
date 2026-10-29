@@ -605,6 +605,8 @@ test("catalog grid cards respond to their container without compressing controls
   assert.equal(variantRate.includes("Listing status"), true);
   assert.equal(variantRate.includes('layout="inline"'), true);
   assert.equal(variantRate.includes("More options for"), true);
+  assert.equal(variantRate.includes("/dashboard/warehouses?warehouseId="), true);
+  assert.equal(variantRate.includes("item.warehouseName"), true);
   assert.equal(globals.includes("repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr))"), true);
   assert.equal(globals.includes("@container catalog-card (max-width: 15rem)"), true);
   assert.equal(globals.includes(".catalog-card-standard-actions"), true);

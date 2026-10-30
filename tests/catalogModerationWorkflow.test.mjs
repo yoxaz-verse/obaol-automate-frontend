@@ -12,6 +12,13 @@ test("catalog additions use a dedicated owner workspace", () => {
   assert.match(additions, /Private — catalog approval pending/);
   assert.match(additions, /Locked after approval/);
   assert.match(additions, /deletePreview/);
+  assert.match(additions, /What do you want to add\?/);
+  assert.match(additions, /Where does it belong\?/);
+  assert.match(additions, /Hierarchy preview/);
+  assert.match(additions, /grouped by category/);
+  assert.match(additions, /Choose a category first/);
+  assert.match(additions, /Description \(optional\)/);
+  assert.match(additions, /row\.entityType === "subCategory" \? nextCategoryId/);
 });
 
 test("catalog moderation has a dedicated audited admin queue", () => {

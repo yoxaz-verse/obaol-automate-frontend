@@ -37,3 +37,16 @@ test("My Company exposes operational overview sections", () => {
     assert.equal(company.includes(label), true, `missing ${label}`);
   }
 });
+
+test("company capabilities show one authoritative review state and cooldown eligibility", () => {
+  const company = read("../src/app/dashboard/company/page.tsx");
+  assert.equal(company.includes('label: "Changes pending review"'), true);
+  assert.equal(company.includes('label: "Changes approved"'), true);
+  assert.equal(company.includes('label: "Changes rejected"'), true);
+  assert.equal(company.includes('label: "Capabilities approved"'), true);
+  assert.equal(company.includes('capabilityEligibility.reason === "APPROVAL_COOLDOWN"'), true);
+  assert.equal(company.includes("Capabilities can be changed again after"), true);
+  assert.equal(company.includes("Pending: {interestStatusSummary.pending}"), false);
+  assert.equal(company.includes("Under Review: {interestStatusSummary.underReview}"), false);
+  assert.equal(company.includes("Action Taken: {interestStatusSummary.actionTaken}"), false);
+});

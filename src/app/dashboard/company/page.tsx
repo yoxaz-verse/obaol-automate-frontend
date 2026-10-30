@@ -150,7 +150,10 @@ export default function CompanyWorkspacePage() {
     queryKey: ["company-capability-requests", associateCompanyId],
     queryFn: async () => {
       const response = await getData(apiRoutes.companyCapabilityChangeRequests.list, { page: 1, limit: 200 });
-      return response?.data?.data || [];
+      return {
+        rows: Array.isArray(response?.data?.data) ? response.data.data : [],
+        eligibility: response?.data?.meta?.eligibility || { canSubmit: true, reason: null, nextEligibleAt: null },
+      };
     },
     enabled: isAssociate && Boolean(associateCompanyId),
   });
@@ -317,6 +320,9 @@ export default function CompanyWorkspacePage() {
       queryClient.invalidateQueries({ queryKey: ["company-capability-requests"] });
     },
     onError: (error: any) => {
+      if (error?.response?.status === 409) {
+        queryClient.invalidateQueries({ queryKey: ["company-capability-requests"] });
+      }
       showToastMessage({
         type: "error",
         message: error?.response?.data?.message || error?.message || "Failed to submit interest request.",
@@ -372,7 +378,7 @@ export default function CompanyWorkspacePage() {
     : Array.isArray(interestsQuery.data?.approvedCompanyFunctionPriorities)
       ? interestsQuery.data.approvedCompanyFunctionPriorities.map(String)
       : [];
-  const interestReports = useMemo(() => (Array.isArray(capabilityRequestsQuery.data) ? capabilityRequestsQuery.data : []).map((row: any) => ({
+  const interestReports = useMemo(() => (Array.isArray(capabilityRequestsQuery.data?.rows) ? capabilityRequestsQuery.data.rows : []).map((row: any) => ({
     ...row,
     payload: {
       requestedProvidedFunctionIds: row.requestedProvidedFunctionIds || [],
@@ -382,32 +388,20 @@ export default function CompanyWorkspacePage() {
     },
     adminNotes: row.reviewNotes,
     reporterAssociateId: row.requesterAssociateId,
-  })), [capabilityRequestsQuery.data]);
-  const interestStatusSummary = useMemo(() => {
-    const summary = {
-      pending: 0,
-      underReview: 0,
-      actionTaken: 0,
-      rejected: 0,
-      latest: null as any,
-    };
-    if (!interestReports.length) return summary;
-    summary.latest = interestReports[0];
-    interestReports.forEach((row: any) => {
-      const status = String(row?.status || "").toUpperCase();
-      if (status === "PENDING_REVIEW") summary.pending += 1;
-      if (status === "UNDER_REVIEW") summary.underReview += 1;
-      if (status === "APPROVED") summary.actionTaken += 1;
-      if (status === "REJECTED") summary.rejected += 1;
-    });
-    return summary;
-  }, [interestReports]);
+  })), [capabilityRequestsQuery.data?.rows]);
   const latestPendingLikeReport = useMemo(() => {
     return interestReports.find((row: any) => {
       const status = String(row?.status || "").toUpperCase();
       return status === "PENDING_REVIEW" || status === "UNDER_REVIEW";
     }) || null;
   }, [interestReports]);
+  const latestCompletedCapabilityRequest = useMemo(() => interestReports.find((row: any) => {
+    const status = String(row?.status || "").toUpperCase();
+    return status === "APPROVED" || status === "REJECTED";
+  }) || null, [interestReports]);
+  const capabilityEligibility = capabilityRequestsQuery.data?.eligibility || { canSubmit: true, reason: null, nextEligibleAt: null };
+  const isCapabilityCooldown = capabilityEligibility.reason === "APPROVAL_COOLDOWN";
+  const capabilitySubmissionBlocked = Boolean(latestPendingLikeReport || recentInterestSubmission || !capabilityEligibility.canSubmit);
 
   useEffect(() => {
     if (!recentInterestSubmission) return;
@@ -455,6 +449,16 @@ export default function CompanyWorkspacePage() {
   }, [latestPendingLikeReport, recentInterestSubmission]);
 
   const pendingBannerCreatedAt = latestPendingLikeReport?.createdAt || recentInterestSubmission?.createdAt || null;
+
+  const currentCapabilityReview = latestPendingLikeReport || recentInterestSubmission
+    ? { label: "Changes pending review", color: "warning" as const }
+    : String(latestCompletedCapabilityRequest?.status || "").toUpperCase() === "APPROVED"
+      ? { label: "Changes approved", color: "success" as const }
+      : String(latestCompletedCapabilityRequest?.status || "").toUpperCase() === "REJECTED"
+        ? { label: "Changes rejected", color: "danger" as const }
+        : providedFunctionIds.length && soughtFunctionIds.length
+          ? { label: "Capabilities approved", color: "success" as const }
+          : { label: "Capabilities not configured", color: "warning" as const };
 
   const supervisorId = String(company?.supervisor?._id || company?.supervisor || "");
   const isSupervisor = Boolean(user?.id && supervisorId && user?.id === supervisorId);
@@ -838,7 +842,7 @@ export default function CompanyWorkspacePage() {
           { label: "Live listings", value: String(stats.liveProductCount || 0), icon: <LuPackage /> },
           { label: "Enquiries handled", value: String(enquiryCount), icon: <LuActivity /> },
           { label: "Orders completed", value: String(completedOrderCount), icon: <LuLayoutDashboard /> },
-          { label: "Pending requests", value: String(interestStatusSummary.pending + interestStatusSummary.underReview), icon: <LuClipboardList /> },
+          { label: "Pending requests", value: latestPendingLikeReport || recentInterestSubmission ? "1" : "0", icon: <LuClipboardList /> },
         ].map((item) => <CompanyMetricCard key={item.label} {...item} />)}
       </section>
 
@@ -858,27 +862,13 @@ export default function CompanyWorkspacePage() {
             </p>
             {interestsQuery.data?.updatedAt ? <p className="mt-1 text-xs text-default-400">Last updated {formatDate(interestsQuery.data.updatedAt)}</p> : null}
           </div>
-          <Button color="primary" variant="flat" isDisabled={Boolean(latestPendingLikeReport)} onPress={openCapabilityEditor}>
-            {latestPendingLikeReport ? "Request Pending" : "Change Capabilities"}
+          <Button color="primary" variant="flat" isDisabled={capabilitySubmissionBlocked || capabilityRequestsQuery.isLoading} onPress={openCapabilityEditor}>
+            {latestPendingLikeReport || recentInterestSubmission ? "Request Pending" : isCapabilityCooldown ? "Changes Locked" : "Change Capabilities"}
           </Button>
         </div>
-        <div className="mb-3">
-          <Chip size="sm" color={providedFunctionIds.length && soughtFunctionIds.length ? "success" : "warning"} variant="flat">
-            {providedFunctionIds.length && soughtFunctionIds.length ? "Configured" : "Not Configured"}
-          </Chip>
-        </div>
         <div className="mb-3 flex flex-wrap gap-2">
-          <Chip size="sm" variant="flat" color="warning">
-            Pending: {interestStatusSummary.pending}
-          </Chip>
-          <Chip size="sm" variant="flat" color="secondary">
-            Under Review: {interestStatusSummary.underReview}
-          </Chip>
-          <Chip size="sm" variant="flat" color="success">
-            Action Taken: {interestStatusSummary.actionTaken}
-          </Chip>
-          <Chip size="sm" variant="flat" color="danger">
-            Rejected: {interestStatusSummary.rejected}
+          <Chip size="sm" variant="flat" color={currentCapabilityReview.color}>
+            {currentCapabilityReview.label}
           </Chip>
         </div>
         {(latestPendingLikeReport || recentInterestSubmission) && (
@@ -907,6 +897,14 @@ export default function CompanyWorkspacePage() {
             </div>
           </div>
         )}
+        {isCapabilityCooldown && !latestPendingLikeReport && !recentInterestSubmission ? (
+          <div className="mb-4 rounded-lg border border-success-200 bg-success-50 px-3 py-2 text-sm text-success-800 dark:border-success-400/30 dark:bg-success-400/10 dark:text-success-200">
+            <div className="font-medium">The latest capability changes were approved.</div>
+            <div className="mt-1 text-xs">
+              Capabilities can be changed again after {formatDate(capabilityEligibility.nextEligibleAt)}.
+            </div>
+          </div>
+        ) : null}
         <div className="grid gap-6 xl:grid-cols-2">
           {renderApprovedProfile("What your company provides", providedFunctionIds, providedPriorityIds)}
           {renderApprovedProfile("What your company is seeking", soughtFunctionIds, soughtPriorityIds)}
@@ -1186,7 +1184,7 @@ export default function CompanyWorkspacePage() {
             <Button
               color="primary"
               isLoading={interestRequestMutation.isPending}
-              isDisabled={requestedProvidedIds.length === 0 || requestedSoughtIds.length === 0 || Boolean(latestPendingLikeReport)}
+              isDisabled={requestedProvidedIds.length === 0 || requestedSoughtIds.length === 0 || capabilitySubmissionBlocked}
               onPress={() => interestRequestMutation.mutate()}
             >
               Submit Request

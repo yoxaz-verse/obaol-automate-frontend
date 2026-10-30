@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useContext, useEffect, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import AuthContext from "@/context/AuthContext";
-import { apiRoutes, inventoryRoutes, inventoryReservationRoutes } from "@/core/api/apiRoutes";
+import { apiRoutes, inventoryRoutes, inventoryReservationRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import {
     Card,
     CardBody,
@@ -73,6 +73,7 @@ export default function EnquiryDetailsPage() {
     const enquiryId = String(Array.isArray(id) ? id[0] : id || "").trim();
     const isValidEnquiryId = /^[a-fA-F0-9]{24}$/.test(enquiryId);
     const router = useRouter();
+    const searchParams = useSearchParams();
     const queryClient = useQueryClient();
     const { convertRate, formatRate } = useCurrency();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -93,11 +94,8 @@ export default function EnquiryDetailsPage() {
     const [importDeliveryMode, setImportDeliveryMode] = useState<string>("");
     const [inventoryAcceptOpen, setInventoryAcceptOpen] = useState(false);
     const [selectedInventoryId, setSelectedInventoryId] = useState<string>("");
-    const [isAddingNewInventory, setIsAddingNewInventory] = useState(false);
-    const [inlineWarehouseName, setInlineWarehouseName] = useState("");
+    const [selectedWarehouseOptionId, setSelectedWarehouseOptionId] = useState<string>("");
     const [inlineQuantity, setInlineQuantity] = useState("");
-    const [inlineStateId, setInlineStateId] = useState<string>("");
-    const [inlineDistrictId, setInlineDistrictId] = useState<string>("");
     const [acceptAttempted, setAcceptAttempted] = useState(false);
     const [docActionOpen, setDocActionOpen] = useState(false);
     const [docActionRule, setDocActionRule] = useState<any>(null);
@@ -241,6 +239,18 @@ export default function EnquiryDetailsPage() {
             }),
         enabled: Boolean(sellerCompanyId && productVariantId),
     });
+    const { data: sellerWarehousesResponse, isLoading: isSellerWarehousesLoading } = useQuery({
+        queryKey: ["seller-warehouses", sellerCompanyId],
+        queryFn: () =>
+            getData(warehouseRoutes.getAll, {
+                scope: "my",
+                isActive: true,
+                associateCompany: sellerCompanyId,
+                ownerCompanyId: sellerCompanyId,
+                limit: 500,
+            }),
+        enabled: Boolean(sellerCompanyId),
+    });
     const productNameLabel = getProductDisplayName(enquiry);
     const variantNameLabel = getVariantDisplayName(enquiry, liveRate);
     const classificationRateObj = liveRate || enquiry?.variantRateId || null;
@@ -262,10 +272,10 @@ export default function EnquiryDetailsPage() {
         () =>
             Array.from(
                 new Set(
-                    [executionContext.originState, executionContext.destinationState, inlineStateId].filter(Boolean)
+                    [executionContext.originState, executionContext.destinationState].filter(Boolean)
                 )
             ),
-        [executionContext.originState, executionContext.destinationState, inlineStateId]
+        [executionContext.originState, executionContext.destinationState]
     );
     const { data: districtsResponse } = useQuery({
         queryKey: ["districts", districtStateIds.join("|")],
@@ -739,28 +749,28 @@ export default function EnquiryDetailsPage() {
 
     const sellerAcceptMutation = useMutation({
         mutationFn: async () => {
-            // If adding new or updating existing inline
-            if (isAddingNewInventory || inventoryOptions.length === 0 || (selectedInventoryId && Number(inlineQuantity) > 0)) {
-                const qty = Number(inlineQuantity);
+            if (!selectedWarehouseOption) {
+                throw new Error("Select a warehouse to proceed.");
+            }
 
+            // Create stock in the selected warehouse, or top up its existing inventory.
+            if (!selectedInventory || (selectedInventoryId && Number(inlineQuantity) > 0)) {
+                const qty = Number(inlineQuantity);
                 let targetInvId = selectedInventoryId;
 
-                // 1. Handle Inventory (Create or Update)
-                if (isAddingNewInventory || inventoryOptions.length === 0) {
-                    if (!inlineWarehouseName) throw new Error("Warehouse name is required for new inventory.");
-                    if (!qty || qty <= 0) throw new Error("Please enter a valid quantity.");
-                    if (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)) {
-                        throw new Error("Please select state and district for the new warehouse.");
+                if (!selectedInventory) {
+                    if (!selectedWarehouseOption.warehouseId) {
+                        throw new Error("Legacy inventory cannot be used to create warehouse stock.");
                     }
+                    if (!qty || qty <= 0) throw new Error("Please enter a valid quantity.");
 
                     const invRes = await postData(inventoryRoutes.getAll, {
                         productVariant: productVariantId,
                         product: enquiry?.productVariant?.product?._id || enquiry?.productId?._id,
                         associateCompany: sellerCompanyId,
                         associate: (enquiry as any)?.sellerAssociateId?._id || (enquiry as any)?.sellerAssociateId,
-                        warehouseName: inlineWarehouseName,
-                        ...(inlineStateId && { state: inlineStateId }),
-                        ...(inlineDistrictId && { district: inlineDistrictId }),
+                        storageLocation: "MY",
+                        warehouseId: selectedWarehouseOption.warehouseId,
                         quantity: qty,
                         unit: "MT",
                     });
@@ -795,11 +805,11 @@ export default function EnquiryDetailsPage() {
             toast.success("Enquiry accepted and inventory updated.");
             setInventoryAcceptOpen(false);
             setSelectedInventoryId("");
-            setIsAddingNewInventory(false);
+            setSelectedWarehouseOptionId("");
             setInlineQuantity("");
-            setInlineWarehouseName("");
             queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
             queryClient.invalidateQueries({ queryKey: ["seller-inventories", sellerCompanyId, productVariantId] });
+            queryClient.invalidateQueries({ queryKey: ["seller-warehouses", sellerCompanyId] });
             queryClient.invalidateQueries({ queryKey: ["variantRate", variantRateId] });
         },
         onError: (error: any) => {
@@ -1349,7 +1359,10 @@ export default function EnquiryDetailsPage() {
     const sellerReservationRows = Array.isArray(sellerReservationResponse?.data?.data?.data)
         ? sellerReservationResponse?.data?.data?.data
         : (sellerReservationResponse?.data?.data || []);
-    const isInventoryLoading = isSellerInventoryLoading || isSellerReservationLoading;
+    const sellerWarehouseRows = Array.isArray(sellerWarehousesResponse?.data?.data?.data)
+        ? sellerWarehousesResponse?.data?.data?.data
+        : (sellerWarehousesResponse?.data?.data || []);
+    const isInventoryLoading = isSellerInventoryLoading || isSellerReservationLoading || isSellerWarehousesLoading;
     const reservedByInventory = new Map<string, number>();
     for (const reservation of sellerReservationRows || []) {
         const invId = reservation.inventoryId?._id || reservation.inventoryId;
@@ -1371,42 +1384,77 @@ export default function EnquiryDetailsPage() {
             availableQty,
         };
     });
-    const selectedInventory = inventoryOptions.find((row: any) => String(row.invId) === String(selectedInventoryId));
+    const warehouseOptions = (sellerWarehouseRows || [])
+        .filter((warehouse: any) => warehouse?.isActive !== false)
+        .map((warehouse: any) => {
+            const warehouseId = String(warehouse?._id || warehouse?.id || "");
+            const inventory = inventoryOptions.find((row: any) =>
+                String(row?.warehouseId?._id || row?.warehouseId || "") === warehouseId
+            ) || null;
+            return {
+                optionId: `warehouse:${warehouseId}`,
+                warehouseId,
+                warehouse,
+                inventory,
+                warehouseName: warehouse?.name || inventory?.warehouseName || "Warehouse",
+                quantity: Number(inventory?.quantity || 0),
+                reservedQty: Number(inventory?.reservedQty || 0),
+                availableQty: Number(inventory?.availableQty || 0),
+            };
+        });
+    const linkedInventoryIds = new Set(
+        warehouseOptions.map((option: any) => option.inventory?.invId).filter(Boolean).map(String)
+    );
+    const legacyInventoryOptions = inventoryOptions
+        .filter((row: any) => !linkedInventoryIds.has(String(row.invId)))
+        .map((row: any) => ({
+            optionId: `inventory:${row.invId}`,
+            warehouseId: "",
+            warehouse: null,
+            inventory: row,
+            warehouseName: row.warehouseName || "Legacy inventory",
+            quantity: Number(row.quantity || 0),
+            reservedQty: Number(row.reservedQty || 0),
+            availableQty: Number(row.availableQty || 0),
+        }));
+    const warehouseInventoryOptions = [...warehouseOptions, ...legacyInventoryOptions];
+    const selectedWarehouseOption = warehouseInventoryOptions.find((row: any) => row.optionId === selectedWarehouseOptionId) || null;
+    const selectedInventory = selectedWarehouseOption?.inventory || null;
     const requiredQty = Number(enquiry?.quantity || 0);
     const addedQty = Number(inlineQuantity || 0);
     const missingQty = selectedInventory ? Math.max(0, requiredQty - Number(selectedInventory.availableQty || 0)) : 0;
-    const projectedAvailable = !isAddingNewInventory && selectedInventory
+    const projectedAvailable = selectedInventory
         ? (selectedInventory.availableQty || 0) + (Number.isFinite(addedQty) ? addedQty : 0)
         : (selectedInventory?.availableQty || 0);
-    const hasInsufficientStock = Boolean(!isAddingNewInventory && selectedInventory && requiredQty > projectedAvailable);
+    const hasInsufficientStock = Boolean(selectedInventory && requiredQty > projectedAvailable);
     const shouldShowInsufficient = Boolean(acceptAttempted && hasInsufficientStock);
     const shouldShowMissingQtyError = Boolean(
         acceptAttempted &&
-        !isAddingNewInventory &&
         selectedInventory &&
         Number(selectedInventory.availableQty || 0) < requiredQty &&
         !inlineQuantity
     );
 
     useEffect(() => {
-        if (!inventoryAcceptOpen) return;
-        if (isInventoryLoading) return;
-        if (inventoryOptions.length === 0) {
-            setIsAddingNewInventory(true);
-            if (!inlineQuantity) {
-                setInlineQuantity(String(requiredQty || ""));
-            }
-        }
-    }, [inventoryAcceptOpen, inventoryOptions.length, requiredQty, inlineQuantity, isInventoryLoading]);
+        const shouldOpen = searchParams.get("inventoryAccept") === "1";
+        const returnedWarehouseId = searchParams.get("warehouseId") || "";
+        if (!shouldOpen || !returnedWarehouseId || isInventoryLoading) return;
+        const option = warehouseInventoryOptions.find((row: any) => row.warehouseId === returnedWarehouseId);
+        if (!option) return;
+        setSelectedWarehouseOptionId(option.optionId);
+        setSelectedInventoryId(option.inventory?.invId || "");
+        setInlineQuantity(String(Math.max(0, requiredQty - option.availableQty) || ""));
+        setInventoryAcceptOpen(true);
+        router.replace(`/dashboard/enquiries/${enquiryId}`, { scroll: false });
+    }, [searchParams, isInventoryLoading, warehouseInventoryOptions, requiredQty, router, enquiryId]);
 
     useEffect(() => {
         if (!inventoryAcceptOpen) return;
-        if (isAddingNewInventory) return;
         if (!selectedInventory) return;
         if (missingQty <= 0) return;
         if (inlineQuantity) return;
         setInlineQuantity(String(missingQty));
-    }, [inventoryAcceptOpen, isAddingNewInventory, selectedInventoryId, missingQty, inlineQuantity, selectedInventory]);
+    }, [inventoryAcceptOpen, selectedInventoryId, missingQty, inlineQuantity, selectedInventory]);
 
     if (!isValidEnquiryId) {
         return (
@@ -1430,7 +1478,15 @@ export default function EnquiryDetailsPage() {
 
     const handleInventoryAccept = () => {
         setAcceptAttempted(true);
-        if (!isAddingNewInventory && hasInsufficientStock) {
+        if (!selectedWarehouseOption) {
+            toast.error("Select a warehouse to proceed.");
+            return;
+        }
+        if (!selectedInventory && (!inlineQuantity || Number(inlineQuantity) <= 0)) {
+            toast.error("Enter the stock quantity for this warehouse.");
+            return;
+        }
+        if (hasInsufficientStock) {
             toast.error("Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.");
             return;
         }
@@ -2241,7 +2297,6 @@ export default function EnquiryDetailsPage() {
     const enquiryOrderId = (enquiry as any)?.order?._id || (enquiry as any)?.order || null;
     const originDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === executionContext.originState);
     const destinationDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === executionContext.destinationState);
-    const inlineDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === inlineStateId);
     const originPortOptions = originSeaPorts;
     const destinationPortOptions = destinationSeaPorts;
     const preferredIncoterm = (() => {
@@ -4550,21 +4605,11 @@ export default function EnquiryDetailsPage() {
                     isOpen={inventoryAcceptOpen}
                     onOpenChange={(open) => {
                         setInventoryAcceptOpen(open);
-                        if (open) {
-                            if (inventoryOptions.length === 0 && !isInventoryLoading) {
-                                setIsAddingNewInventory(true);
-                                if (!inlineQuantity) {
-                                    setInlineQuantity(String(requiredQty || ""));
-                                }
-                            }
-                        }
                         if (!open) setSelectedInventoryId("");
                         if (!open) {
+                            setSelectedWarehouseOptionId("");
                             setAcceptAttempted(false);
                             setInlineQuantity("");
-                            setInlineWarehouseName("");
-                            setInlineStateId("");
-                            setInlineDistrictId("");
                         }
                     }}
                     isDismissable={false}
@@ -4581,138 +4626,57 @@ export default function EnquiryDetailsPage() {
                                     This inventory and location information is <span className="font-semibold">not visible to the buyer</span>. It is used only for internal documentation and fulfillment.
                                 </div>
 
-                                {inventoryOptions.length > 0 ? (
-                                    <div className="flex gap-2 p-1 bg-default-100 rounded-xl overflow-hidden">
-                                        <Button
-                                            size="sm"
-                                            variant={!isAddingNewInventory ? "solid" : "light"}
-                                            color={!isAddingNewInventory ? "primary" : "default"}
-                                            className="flex-1 font-bold h-8"
-                                            onPress={() => {
-                                                setIsAddingNewInventory(false);
-                                                setAcceptAttempted(false);
-                                            }}
-                                            data-sound="tab"
-                                            startContent={<FiList size={14} />}
-                                        >
-                                            Existing
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant={isAddingNewInventory ? "solid" : "light"}
-                                            color={isAddingNewInventory ? "primary" : "default"}
-                                            className="flex-1 font-bold h-8"
-                                            onPress={() => {
-                                                setIsAddingNewInventory(true);
-                                                setAcceptAttempted(false);
-                                            }}
-                                            data-sound="tab"
-                                            startContent={<FiPlus size={14} />}
-                                        >
-                                            New Stock
-                                        </Button>
+                                {isInventoryLoading ? (
+                                    <div className="rounded-lg border border-default-200/60 bg-default-100/50 px-3 py-2 text-sm text-default-500">
+                                        Loading warehouses and inventory...
                                     </div>
+                                ) : warehouseInventoryOptions.length > 0 ? (
+                                    <Select
+                                        label="Select Warehouse"
+                                        placeholder="Choose a warehouse"
+                                        selectedKeys={selectedWarehouseOptionId ? new Set([selectedWarehouseOptionId]) : new Set()}
+                                        renderValue={() => selectedWarehouseOption
+                                            ? `${selectedWarehouseOption.warehouseName} • ${selectedWarehouseOption.availableQty} MT available`
+                                            : "Choose a warehouse"}
+                                        onSelectionChange={(keys) => {
+                                            const optionId = String(Array.from(keys as Set<string>)[0] || "");
+                                            const picked = warehouseInventoryOptions.find((row: any) => row.optionId === optionId);
+                                            const available = Number(picked?.availableQty || 0);
+                                            setSelectedWarehouseOptionId(optionId);
+                                            setSelectedInventoryId(picked?.inventory?.invId || "");
+                                            setInlineQuantity(available < requiredQty ? String(requiredQty - available) : "");
+                                            setAcceptAttempted(false);
+                                        }}
+                                    >
+                                        {warehouseInventoryOptions.map((row: any) => (
+                                            <SelectItem key={row.optionId} value={row.optionId} textValue={row.warehouseName}>
+                                                {row.warehouseName} • {row.inventory ? `${row.availableQty} MT available` : "No stock for this product"}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
                                 ) : (
-                                    <>
-                                        {isInventoryLoading ? (
-                                            <div className="rounded-lg border border-default-200/60 bg-default-100/50 px-3 py-2 text-sm text-default-500">
-                                                Loading inventory...
-                                            </div>
-                                        ) : (
-                                            <div className="rounded-lg border border-obaol-300/30 bg-obaol-500/10 px-3 py-2 text-sm text-obaol-700">
-                                                No existing inventory found. Please add a new warehouse and stock below.
-                                            </div>
-                                        )}
-                                    </>
+                                    <div className="rounded-lg border border-obaol-300/30 bg-obaol-500/10 px-3 py-2 text-sm text-obaol-700">
+                                        No owned warehouse found. Create a warehouse before adding stock.
+                                    </div>
                                 )}
 
-                                {!isAddingNewInventory && inventoryOptions.length > 0 ? (
-                                    <>
-                                        <Select
-                                            label="Select Warehouse"
-                                            placeholder="Choose inventory"
-                                            selectedKeys={selectedInventoryId ? new Set([selectedInventoryId]) : new Set()}
-                                            renderValue={() => {
-                                                if (!selectedInventory) return "Choose inventory";
-                                                return `${selectedInventory.warehouseName || "Warehouse"} • ${selectedInventory.availableQty} MT available`;
-                                            }}
-                                            onSelectionChange={(keys) => {
-                                                const arr = Array.from(keys as Set<string>);
-                                                const id = arr[0] || "";
-                                                const picked = inventoryOptions.find((row: any) => String(row.invId) === String(id));
-                                                const available = Number(picked?.availableQty || 0);
-                                                const missing = Math.max(0, requiredQty - available);
-                                                setSelectedInventoryId(id);
-                                                setInlineQuantity(missing > 0 ? String(missing) : "");
-                                                setAcceptAttempted(false);
-                                            }}
-                                        >
-                                            {inventoryOptions.map((row: any) => (
-                                                <SelectItem
-                                                    key={row.invId}
-                                                    value={row.invId}
-                                                    textValue={row.warehouseName || "Warehouse"}
-                                                >
-                                                    {row.warehouseName || "Warehouse"} • {row.availableQty} MT available
-                                                </SelectItem>
-                                            ))}
-                                        </Select>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Input
-                                            label="Warehouse Name"
-                                            placeholder="Enter warehouse name"
-                                            value={inlineWarehouseName}
-                                            onValueChange={setInlineWarehouseName}
-                                            variant="bordered"
-                                        />
-                                        {inventoryOptions.length === 0 && (
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <Select
-                                                    label="State"
-                                                    placeholder="Select state"
-                                                    selectedKeys={inlineStateId ? new Set([inlineStateId]) : new Set()}
-                                                    onSelectionChange={(keys) => {
-                                                        const arr = Array.from(keys as Set<string>);
-                                                        const id = arr[0] || "";
-                                                        setInlineStateId(id);
-                                                        setInlineDistrictId("");
-                                                    }}
-                                                >
-                                                    {states.map((item: any) => (
-                                                        <SelectItem key={getEntityId(item)} value={getEntityId(item)}>
-                                                            {item?.name || item?.stateName || "State"}
-                                                        </SelectItem>
-                                                    ))}
-                                                </Select>
-                                                <Select
-                                                    label="District"
-                                                    placeholder="Select district"
-                                                    selectedKeys={inlineDistrictId ? new Set([inlineDistrictId]) : new Set()}
-                                                    onSelectionChange={(keys) => {
-                                                        const arr = Array.from(keys as Set<string>);
-                                                        const id = arr[0] || "";
-                                                        setInlineDistrictId(id);
-                                                    }}
-                                                    isDisabled={!inlineStateId}
-                                                >
-                                                    {inlineDistrictOptions.map((item: any) => (
-                                                        <SelectItem key={getEntityId(item)} value={getEntityId(item)}>
-                                                            {item?.name || item?.districtName || "District"}
-                                                        </SelectItem>
-                                                    ))}
-                                                </Select>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
+                                <Button
+                                    variant="flat"
+                                    color="primary"
+                                    startContent={<FiPlus size={14} />}
+                                    onPress={() => {
+                                        const returnTo = `/dashboard/enquiries/${enquiryId}`;
+                                        router.push(`/dashboard/warehouses/location?returnTo=${encodeURIComponent(returnTo)}`);
+                                    }}
+                                >
+                                    Create New Warehouse
+                                </Button>
 
-                                {(isAddingNewInventory || inventoryOptions.length === 0 || (selectedInventory && selectedInventory.availableQty < requiredQty)) && (
+                                {selectedWarehouseOption && (!selectedInventory || selectedWarehouseOption.availableQty < requiredQty) && (
                                     <div className="flex flex-col gap-2">
                                         <div className="grid grid-cols-2 gap-3">
                                             <Input
-                                                label={isAddingNewInventory ? "Total Stock (MT)" : "Add Stock (MT)"}
+                                                label={selectedInventory ? "Add Stock (MT)" : "Stock for This Product (MT)"}
                                                 type="number"
                                                 placeholder="0"
                                                 value={inlineQuantity}
@@ -4720,7 +4684,7 @@ export default function EnquiryDetailsPage() {
                                                 variant="bordered"
                                             />
                                         </div>
-                                        {!isAddingNewInventory && selectedInventory && selectedInventory.availableQty < requiredQty && (
+                                        {selectedInventory && selectedInventory.availableQty < requiredQty && (
                                             <div className="text-[10px] text-obaol-600 font-bold px-1 italic">
                                                 * This inventory has insufficient stock. Please add the missing {(requiredQty - selectedInventory.availableQty).toFixed(2)} MT to enable selection.
                                             </div>
@@ -4731,9 +4695,9 @@ export default function EnquiryDetailsPage() {
                                     </div>
                                 )}
 
-                                {selectedInventory && !isAddingNewInventory && (
+                                {selectedWarehouseOption && (
                                     <div className="text-[10px] text-default-400  font-black px-1">
-                                        Current Stock: {selectedInventory.availableQty} MT available • {selectedInventory.reservedQty} MT reserved • {selectedInventory.quantity} MT total
+                                        Current Stock: {selectedWarehouseOption.availableQty} MT available • {selectedWarehouseOption.reservedQty} MT reserved • {selectedWarehouseOption.quantity} MT total
                                     </div>
                                 )}
                                 {shouldShowInsufficient && (
@@ -4758,9 +4722,9 @@ export default function EnquiryDetailsPage() {
                                 onPress={handleInventoryAccept}
                                 isLoading={sellerAcceptMutation.isPending}
                                 isDisabled={
-                                    (isAddingNewInventory || inventoryOptions.length === 0)
-                                        ? (!inlineWarehouseName || !inlineQuantity || (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)))
-                                        : (!selectedInventoryId || (selectedInventory && Number(selectedInventory.availableQty || 0) < requiredQty && !inlineQuantity))
+                                    !selectedWarehouseOption ||
+                                    (!selectedInventory && !inlineQuantity) ||
+                                    (selectedInventory && Number(selectedInventory.availableQty || 0) < requiredQty && !inlineQuantity)
                                 }
                             >
                                 Save & Accept Enquiry

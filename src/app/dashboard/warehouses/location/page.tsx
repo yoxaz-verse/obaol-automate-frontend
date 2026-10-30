@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   Button,
@@ -120,6 +120,7 @@ const forwardGeocode = async (query: string) => {
 
 export default function WarehouseLocationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
@@ -162,6 +163,10 @@ export default function WarehouseLocationPage() {
   });
 
   const associateCompanies = Array.isArray(associateCompaniesData) ? associateCompaniesData : [];
+  const requestedReturnTo = searchParams.get("returnTo") || "";
+  const returnTo = /^\/dashboard\/enquiries\/[a-fA-F0-9]{24}$/.test(requestedReturnTo)
+    ? requestedReturnTo
+    : "/dashboard/warehouses";
 
   const createMutation = useMutation({
     mutationFn: (payload: WarehouseForm) => {
@@ -171,9 +176,14 @@ export default function WarehouseLocationPage() {
       };
       return postData(apiRoutes.warehouses.create, cleaned);
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       showToastMessage({ type: "success", message: "Warehouse created successfully!" });
       queryClient.invalidateQueries({ queryKey: ["warehouses"] });
+      const warehouseId = response?.data?.data?._id || response?.data?._id || "";
+      if (returnTo.startsWith("/dashboard/enquiries/") && warehouseId) {
+        router.push(`${returnTo}?inventoryAccept=1&warehouseId=${encodeURIComponent(String(warehouseId))}`);
+        return;
+      }
       router.push("/dashboard/warehouses");
     },
     onError: () => showToastMessage({ type: "error", message: "Failed to create warehouse." }),
@@ -312,7 +322,7 @@ export default function WarehouseLocationPage() {
         <Button 
           variant="flat" 
           className="db-subtle text-foreground font-bold  tracking-widest text-[10px] rounded-xl px-6 h-10 border db-border-subtle"
-          onPress={() => router.push("/dashboard/warehouses")}
+          onPress={() => router.push(returnTo)}
         >
           Back to Asset Registry
         </Button>

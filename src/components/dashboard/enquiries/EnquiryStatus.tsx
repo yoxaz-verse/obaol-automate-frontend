@@ -1,58 +1,47 @@
 import React from "react";
+import type { EnquiryPendingParty } from "@/utils/enquiryCardStatus";
 
 interface EnquiryStatusProps {
-    status: string; // e.g., "New", "In Progress", "Quoted", "Completed", "Rejected"
+    stageLabel: string;
+    responsibilityLabel?: string | null;
+    pendingParty?: EnquiryPendingParty;
+    terminalState?: "CONVERTED" | "COMPLETED" | "CANCELLED" | null;
 }
 
-const EnquiryStatus: React.FC<EnquiryStatusProps> = ({ status }) => {
-    // Map status to colors and progress
-    const getStatusConfig = (s: string) => {
-        const normalize = s?.toLowerCase() || "unknown";
-        if (normalize.includes("new") || normalize.includes("pending"))
-            return { color: "#06b6d4", step: 1, label: "New / Pending" };
-        if (normalize.includes("quot") || normalize.includes("progress") || normalize.includes("process"))
-            return { color: "#8b5cf6", step: 1, label: s.includes("quot") ? "Quoted" : "Processing" };
-        if (normalize.includes("convert"))
-            return { color: "#6366f1", step: 2, label: "Converted" };
-        if (normalize.includes("complete") || normalize.includes("order"))
-            return { color: "#22c55e", step: 3, label: "Completed" };
-        if (normalize.includes("reject") || normalize.includes("cancel"))
-            return { color: "#ef4444", step: 0, label: "Cancelled" };
-        return { color: "#64748b", step: 0, label: s || "Unknown" };
-    };
-
-    const config = getStatusConfig(status);
+const EnquiryStatus: React.FC<EnquiryStatusProps> = ({
+    stageLabel,
+    responsibilityLabel,
+    pendingParty,
+    terminalState,
+}) => {
+    const color = terminalState === "COMPLETED"
+        ? "#22c55e"
+        : terminalState === "CANCELLED"
+            ? "#ef4444"
+            : terminalState === "CONVERTED"
+                ? "#6366f1"
+                : pendingParty === "SELLER"
+                    ? "#d69e2e"
+                    : "#06b6d4";
 
     return (
-        <div className="flex flex-col gap-1.5 min-w-[100px]">
+        <div className="flex flex-col gap-1.5 min-w-0">
             <div className="flex items-center gap-2">
                 <div
-                    className="w-2 h-2 rounded-full animate-pulse"
-                    style={{ backgroundColor: config.color, boxShadow: `0 0 8px ${config.color}` }}
+                    className={`w-2 h-2 rounded-full ${terminalState ? "" : "animate-pulse"}`}
+                    style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}
                 />
                 <span
-                    className="text-[11px] font-bold  tracking-wider"
-                    style={{ color: config.color }}
+                    className="text-[11px] font-bold tracking-wider"
+                    style={{ color }}
                 >
-                    {config.label}
+                    {stageLabel}
                 </span>
             </div>
-
-            {/* Visual Progress Bar - 3 Stage Minimalist */}
-            {config.step > 0 && (
-                <div className="flex gap-1.5 items-center w-full max-w-[80px]">
-                    {[1, 2, 3].map((step) => (
-                        <div
-                            key={step}
-                            className="h-1 rounded-full transition-all duration-700 ease-in-out"
-                            style={{
-                                flex: step <= config.step ? 2 : 1,
-                                backgroundColor: step <= config.step ? config.color : "rgba(148,163,184,0.35)",
-                                opacity: step <= config.step ? 1 : 0.3
-                            }}
-                        />
-                    ))}
-                </div>
+            {responsibilityLabel && (
+                <span className="text-[9px] font-black tracking-widest db-muted pl-4">
+                    {responsibilityLabel}
+                </span>
             )}
         </div>
     );

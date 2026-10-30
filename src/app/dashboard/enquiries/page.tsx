@@ -263,6 +263,7 @@ export default function EnquiryPage() {
               assignedOperator: getOperatorName(item.supplierOperatorId),
               mediatorAssociate: item.mediatorAssociateId?.name || "Direct",
               dateColor: dateInfo.color,
+              rawStatus: item.status,
               status: getStatusKey(item.status),
               quantity: item.quantity || null,
               isAdmin,

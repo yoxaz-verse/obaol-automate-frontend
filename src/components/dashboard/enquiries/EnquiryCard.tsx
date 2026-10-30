@@ -1,10 +1,11 @@
 import React from "react";
 import { Card, CardBody, CardFooter, CardHeader, Button } from "@nextui-org/react";
-import { FiUser, FiClock, FiBriefcase, FiMapPin, FiActivity } from "react-icons/fi";
+import { FiUser, FiClock, FiBriefcase, FiMapPin, FiActivity, FiShoppingCart, FiTag, FiRepeat } from "react-icons/fi";
 import EnquiryStatus from "./EnquiryStatus";
 import { motion } from "framer-motion";
 import { useCurrency } from "@/context/CurrencyContext";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges } from "@/utils/classificationTheme";
+import { getEnquiryCardStatus } from "@/utils/enquiryCardStatus";
 
 interface EnquiryCardProps {
     data: any;
@@ -32,11 +33,37 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({
     const clientName = data.counterparty;
     const companyName = data.associateCompany;
     const date = data.createdAt ? new Date(data.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' }) : "Recent";
-    const status = data.status || "New";
     const quantity = data.quantity ? `${data.quantity} Ton` : null;
     // Filter out 'N/A' variant as it is meaningless
     const variantName = (data.productVariant && data.productVariant !== "N/A") ? data.productVariant : "";
     const classificationBadges = getClassificationBadges(data.classificationProduct || data.productObj || null);
+    const cardStatus = getEnquiryCardStatus({
+        status: data.rawStatus || data.status,
+        workflowStage: data.workflowStage,
+        sellerAcceptedAt: data.sellerAcceptedAt,
+        buyerConfirmedAt: data.buyerConfirmedAt,
+        viewerRole: data.isBuying ? "BUYER" : data.isSelling ? "SELLER" : "OTHER",
+    });
+    const tradeDirection = data.type === "Buying"
+        ? {
+            label: "PURCHASE",
+            Icon: FiShoppingCart,
+            badgeClass: "bg-warning-500/10 text-warning-700 dark:text-warning-300 border-warning-500/20",
+            cardClass: "border-amber-300/70 dark:border-amber-400/25 hover:border-amber-400/80 dark:hover:border-amber-300/40",
+        }
+        : data.type === "Selling"
+            ? {
+                label: "SALE",
+                Icon: FiTag,
+                badgeClass: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+                cardClass: "border-emerald-300/70 dark:border-emerald-400/25 hover:border-emerald-400/80 dark:hover:border-emerald-300/40",
+            }
+            : {
+                label: "MEDIATED",
+                Icon: FiRepeat,
+                badgeClass: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20",
+                cardClass: "border-orange-300/70 dark:border-orange-400/25 hover:border-orange-400/80 dark:hover:border-orange-300/40",
+            };
 
     return (
         <motion.div
@@ -56,15 +83,12 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({
                 }
             }}
         >
-            <Card className="h-full bg-content1 border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md overflow-hidden group rounded-[2rem] transition-all duration-300 hover:border-obaol-500/40">
+            <Card className={`h-full bg-content1 border shadow-sm hover:shadow-md overflow-hidden group rounded-[2rem] transition-all duration-300 ${tradeDirection.cardClass}`}>
                 <CardHeader className="flex flex-col items-start px-6 pt-6 pb-2 gap-3">
                     <div className="flex flex-row justify-between w-full items-center gap-4">
-                        <span className={`text-[8px] font-black  tracking-[0.2em] px-2.5 py-1 rounded-full ${
-                            data.type === "Buying" ? "bg-warning-500/10 text-warning-600" :
-                            data.type === "Selling" ? "bg-emerald-500/10 text-emerald-600" :
-                            "bg-orange-500/10 text-orange-600"
-                        }`}>
-                            {data.type === "Buying" ? "PURCHASE" : data.type === "Selling" ? "SALE" : "MEDIATED"}
+                        <span className={`inline-flex items-center gap-1.5 text-[8px] font-black tracking-[0.2em] px-2.5 py-1 rounded-full border ${tradeDirection.badgeClass}`}>
+                            <tradeDirection.Icon size={10} aria-hidden="true" />
+                            {tradeDirection.label}
                         </span>
                         <div className="flex items-center gap-2 db-muted">
                            <FiClock size={11} className="opacity-50" />
@@ -183,7 +207,11 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({
                                 <Button
                                     variant="flat"
                                     className="w-full font-bold text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/20 border border-transparent transition-all "
-                                    onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.operatorPhone}`; }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onPrefetch?.();
+                                        onCardClick?.();
+                                    }}
                                 >
                                     View Enquiry Details
                                 </Button>
@@ -192,7 +220,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({
                         <div onClick={(e) => e.stopPropagation()} className="shrink-0">{action}</div>
                     </div>
                     <div className="flex justify-start items-center gap-4 px-4 py-2.5 db-inset rounded-2xl border db-border-subtle transition-all group-hover:border-obaol-500/20">
-                        <EnquiryStatus status={status} />
+                        <EnquiryStatus {...cardStatus} />
                         <FiActivity className="text-default-200 group-hover:text-obaol-600 dark:group-hover:text-obaol-300 transition-colors ml-auto opacity-30 group-hover:opacity-100" size={12} />
                     </div>
                 </CardFooter>

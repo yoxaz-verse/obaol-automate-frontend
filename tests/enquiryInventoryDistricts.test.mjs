@@ -8,29 +8,28 @@ const page = readFileSync(
   "utf8"
 );
 
-test("supplier acceptance loads districts for the inline warehouse state", () => {
-  assert.match(
-    page,
-    /\[executionContext\.originState, executionContext\.destinationState, inlineStateId\]\.filter\(Boolean\)/
-  );
-  assert.match(
-    page,
-    /\[executionContext\.originState, executionContext\.destinationState, inlineStateId\]\s*\n\s*\)/
-  );
+test("supplier acceptance loads the seller's active owned warehouses", () => {
+  assert.match(page, /queryKey: \["seller-warehouses", sellerCompanyId\]/);
+  assert.match(page, /scope: "my"/);
+  assert.match(page, /isActive: true/);
+  assert.match(page, /ownerCompanyId: sellerCompanyId/);
+});
+
+test("district loading remains scoped to enquiry execution locations", () => {
+  assert.match(page, /\[executionContext\.originState, executionContext\.destinationState\]\.filter\(Boolean\)/);
   assert.match(page, /queryKey: \["districts", districtStateIds\.join\("\|"\)\]/);
   assert.match(page, /state: districtStateIds/);
   assert.match(page, /enabled: districtStateIds\.length > 0/);
 });
 
-test("changing the inline warehouse state clears the selected district", () => {
-  assert.match(
-    page,
-    /setInlineStateId\(id\);\s*setInlineDistrictId\(""\);/
-  );
+test("new product stock links to the selected real warehouse", () => {
+  assert.match(page, /storageLocation: "MY"/);
+  assert.match(page, /warehouseId: selectedWarehouseOption\.warehouseId/);
+  assert.doesNotMatch(page, /warehouseName: inlineWarehouseName/);
 });
 
-test("district options remain scoped to origin, destination, and inline states", () => {
+test("district options remain scoped to origin and destination", () => {
   assert.match(page, /const originDistrictOptions = districts\.filter/);
   assert.match(page, /const destinationDistrictOptions = districts\.filter/);
-  assert.match(page, /const inlineDistrictOptions = districts\.filter/);
+  assert.doesNotMatch(page, /const inlineDistrictOptions = districts\.filter/);
 });

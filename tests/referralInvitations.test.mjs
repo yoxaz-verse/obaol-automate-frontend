@@ -19,6 +19,15 @@ test("referral dashboard offers tracked email, WhatsApp, and personal-link invit
   assert.equal(page.includes("Activity required"), true);
 });
 
+test("referral dashboard uses shared light and dark dashboard surfaces", () => {
+  const page = read("../src/app/dashboard/referrals/page.tsx");
+  for (const token of ["dashboard-page", "dashboard-panel", "db-inset", "db-muted", "dark:text-obaol-300"]) {
+    assert.equal(page.includes(token), true, `missing theme token ${token}`);
+  }
+  assert.equal(page.includes('bg-[#fbf8f1]'), false, "must not restore the hard-coded light page background");
+  assert.equal(page.includes("const lightCard"), false, "cards must use shared dashboard surfaces");
+});
+
 test("associate onboarding carries the personalized invitation token into registration", () => {
   const form = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
   const routes = read("../src/core/api/apiRoutes.tsx");

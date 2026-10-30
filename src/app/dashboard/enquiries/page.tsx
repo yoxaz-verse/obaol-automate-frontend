@@ -20,14 +20,15 @@ import AuthContext from "@/context/AuthContext";
 import StatsHeader from "@/components/dashboard/enquiries/StatsHeader";
 import EnquiryCard from "@/components/dashboard/enquiries/EnquiryCard";
 import { apiRoutes } from "@/core/api/apiRoutes";
-import { patchData } from "@/core/api/apiHandler";
+import { getData, patchData } from "@/core/api/apiHandler";
 import { useSoundEffect } from "@/context/SoundContext";
+
+const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
 
 /**
  * The main Enquiry page
  */
 export default function EnquiryPage() {
-  const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
   const [selectedType, setSelectedType] = React.useState<string>("All");
   const [selectedStage, setSelectedStage] = React.useState<string>("All");
   const [isTransitioning, setIsTransitioning] = React.useState(false);
@@ -41,6 +42,27 @@ export default function EnquiryPage() {
   }, []);
   const queryClient = useQueryClient();
   const { play } = useSoundEffect();
+
+  const prefetchEnquiry = React.useCallback((rawId: any) => {
+    const targetId = String(rawId || "").trim();
+    if (!isValidObjectId(targetId)) return;
+
+    // Warm both the dynamic route bundle and its critical record before the click.
+    // The detail page is intentionally feature-rich, so loading it only after a
+    // click makes the transition feel much slower than it needs to be.
+    router.prefetch(`/dashboard/enquiries/${targetId}`);
+    void queryClient.prefetchQuery({
+      queryKey: ["enquiry", targetId],
+      queryFn: () => getData(`${apiRoutes.enquiry.getAll}/${targetId}`),
+      staleTime: 30_000,
+    });
+  }, [queryClient, router]);
+
+  useEffect(() => {
+    if (!navigatingId) return;
+    const timeout = window.setTimeout(() => setNavigatingId(null), 10_000);
+    return () => window.clearTimeout(timeout);
+  }, [navigatingId]);
 
   let columns = generateColumns("enquiry", tableConfig);
   columns = columns.filter(
@@ -356,6 +378,8 @@ export default function EnquiryPage() {
                             <EnquiryCard
                               data={item}
                               canViewClientIdentity={isSystemAdmin || item.isAssignedOperator}
+                              prefetchOnMount={index === 0}
+                              onPrefetch={() => prefetchEnquiry(item?._id || item?.id)}
                               onCardClick={() => {
                                 if (navigatingId) return;
                                 const targetId = String(item?._id || item?.id || "").trim();

@@ -10,6 +10,10 @@ test("enquiry detail exposes anonymous locations and a privacy-safe support emai
 
   assert.match(page, /Buyer from:/);
   assert.match(page, /Seller from:/);
+  assert.match(page, /partyLocations\?\.buyer\?\.state/);
+  assert.match(page, /partyLocations\?\.seller\?\.state/);
+  assert.doesNotMatch(page, /partyLocations\?\.buyer\?\.label/);
+  assert.doesNotMatch(page, /partyLocations\?\.seller\?\.label/);
   assert.match(page, /Location not provided/);
   assert.match(page, /Contact support: info@support\.obaol\.com/);
   assert.match(page, /OBAOL Support Request\\nEnquiry ID:/);

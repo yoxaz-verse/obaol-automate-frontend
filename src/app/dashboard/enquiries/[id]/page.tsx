@@ -262,10 +262,10 @@ export default function EnquiryDetailsPage() {
         () =>
             Array.from(
                 new Set(
-                    [executionContext.originState, executionContext.destinationState].filter(Boolean)
+                    [executionContext.originState, executionContext.destinationState, inlineStateId].filter(Boolean)
                 )
             ),
-        [executionContext.originState, executionContext.destinationState]
+        [executionContext.originState, executionContext.destinationState, inlineStateId]
     );
     const { data: districtsResponse } = useQuery({
         queryKey: ["districts", districtStateIds.join("|")],
@@ -1561,8 +1561,8 @@ export default function EnquiryDetailsPage() {
     const sellerCompanyName =
         (isImportEnquiry && importSellerCompanyName) ||
         extractAssociateCompanyName(sellerAssociateObj, "sellerAssociateCompanyName");
-    const buyerLocationLabel = String((enquiry as any)?.partyLocations?.buyer?.label || "Location not provided");
-    const sellerLocationLabel = String((enquiry as any)?.partyLocations?.seller?.label || "Location not provided");
+    const buyerStateLabel = String((enquiry as any)?.partyLocations?.buyer?.state || "Location not provided");
+    const sellerStateLabel = String((enquiry as any)?.partyLocations?.seller?.state || "Location not provided");
     const tradeInputAttribution = (enquiry as any)?.tradeInputAttribution || {};
     const supportSubject = `OBAOL support request #${enquiryId.slice(-6).toUpperCase()}`;
     const supportBody = `OBAOL Support Request\nEnquiry ID: #${enquiryId.slice(-6).toUpperCase()}`;
@@ -3661,11 +3661,11 @@ export default function EnquiryDetailsPage() {
                                 <div className="rounded-xl border border-divider bg-default-50/70 p-3 flex flex-col gap-2">
                                     <div className="flex items-start gap-2 text-sm">
                                         <LuMapPin size={15} className="mt-0.5 text-primary shrink-0" />
-                                        <span><strong>Buyer from:</strong> {buyerLocationLabel}</span>
+                                        <span><strong>Buyer from:</strong> {buyerStateLabel}</span>
                                     </div>
                                     <div className="flex items-start gap-2 text-sm">
                                         <LuMapPin size={15} className="mt-0.5 text-success shrink-0" />
-                                        <span><strong>Seller from:</strong> {sellerLocationLabel}</span>
+                                        <span><strong>Seller from:</strong> {sellerStateLabel}</span>
                                     </div>
                                     <Divider className="my-1" />
                                     <a href={supportEmailUrl} className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">

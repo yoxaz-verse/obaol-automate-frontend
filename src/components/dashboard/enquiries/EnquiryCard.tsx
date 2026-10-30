@@ -11,10 +11,22 @@ interface EnquiryCardProps {
     canViewClientIdentity?: boolean;
     action?: React.ReactNode;
     onCardClick?: () => void;
+    onPrefetch?: () => void;
+    prefetchOnMount?: boolean;
 }
 
-const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity = false, action, onCardClick }) => {
+const EnquiryCard: React.FC<EnquiryCardProps> = ({
+    data,
+    canViewClientIdentity = false,
+    action,
+    onCardClick,
+    onPrefetch,
+    prefetchOnMount = false,
+}) => {
     const { formatRate } = useCurrency();
+    React.useEffect(() => {
+        if (prefetchOnMount) onPrefetch?.();
+    }, [onPrefetch, prefetchOnMount]);
     // Extract data safely
     const productName = data.product || 'Unknown Product';
     const clientName = data.counterparty;
@@ -33,6 +45,9 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
             className="h-full cursor-pointer"
             role="button"
             tabIndex={0}
+            onPointerEnter={() => onPrefetch?.()}
+            onPointerDown={() => onPrefetch?.()}
+            onFocus={() => onPrefetch?.()}
             onClick={() => onCardClick?.()}
             onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {

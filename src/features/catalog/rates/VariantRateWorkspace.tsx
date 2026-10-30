@@ -145,6 +145,24 @@ interface VariantRateProps {
   isActive?: boolean;
 }
 
+const publicationEntityLabel = (entityType: string) => ({
+  category: "Category",
+  subCategory: "Subcategory",
+  product: "Product",
+  productVariant: "Product variant",
+  variantRate: "Listing",
+}[entityType] || "Catalog entry");
+
+const publicationBlockerMessage = (blocker: any) => {
+  if (!blocker) return "";
+  const label = publicationEntityLabel(String(blocker.entityType || ""));
+  const name = toDisplayText(blocker.name, "Catalog entry");
+  const outcome = String(blocker.approvalStatus || "").toUpperCase() === "REJECTED"
+    ? "was not approved"
+    : "is awaiting approval";
+  return `Not currently live — ${label} “${name}” ${outcome}.`;
+};
+
 /**
  * The main "VariantRate" component that:
  *  - Lists variantRates or displayedRates in a table
@@ -779,23 +797,46 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   : typeof item.__effectiveIsLive === "boolean"
                   ? item.__effectiveIsLive
                   : Boolean(item.isLive);
+              const publiclyVisible =
+                typeof item.publiclyVisible === "boolean"
+                  ? item.publiclyVisible
+                  : effectiveIsLive;
+              const showPublicationBlocker =
+                !isMarketplace &&
+                effectiveIsLive &&
+                !publiclyVisible &&
+                Boolean(item.publicationBlocker);
               return {
                 ...rest,
                 isLive: effectiveIsLive,
+                publiclyVisible,
+                publicationBlocker: item.publicationBlocker || null,
                 liveStatus: (
                   <div className="flex flex-col items-end gap-0.5">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-1.5 h-1.5 rounded-full ${effectiveIsLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-danger-500/40"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${publiclyVisible ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : showPublicationBlocker ? "bg-warning-500" : "bg-danger-500/40"}`}
                       />
                       <span
-                        className={`text-[10px] font-black  tracking-widest ${effectiveIsLive ? "text-success-400" : "text-default-400"}`}
+                        className={`text-[10px] font-black tracking-widest ${publiclyVisible ? "text-success-400" : showPublicationBlocker ? "text-warning-500" : "text-default-400"}`}
                       >
-                        {effectiveIsLive ? "LIVE" : "OFFLINE"}
+                        {publiclyVisible ? "LIVE" : showPublicationBlocker ? "AWAITING APPROVAL" : "OFFLINE"}
                       </span>
                     </div>
                   </div>
                 ),
+                publicationNotice: showPublicationBlocker ? (
+                  <div className="max-w-xs rounded-lg border border-warning-500/25 bg-warning-500/10 px-2.5 py-2 text-left">
+                    <p className="text-[10px] font-semibold leading-4 text-warning-700 dark:text-warning-300">
+                      {publicationBlockerMessage(item.publicationBlocker)}
+                    </p>
+                    {item.publicationBlocker?.reviewNotes && (
+                      <p className="mt-1 text-[9px] leading-3 text-default-500">
+                        Admin note: {item.publicationBlocker.reviewNotes}
+                      </p>
+                    )}
+                  </div>
+                ) : null,
                 associate: (
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
@@ -1103,6 +1144,26 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
         return (
           <div className="w-full max-w-full min-w-0">
+            {rate === "catalogItem" && isAssociateUser && (
+              <Card className="mb-4 border border-obaol-300/30 bg-obaol-500/10 shadow-none">
+                <CardBody className="flex flex-row items-start gap-3 px-4 py-3">
+                  <div className="mt-0.5 shrink-0 rounded-full bg-obaol-500/15 p-2 text-obaol-600 dark:text-obaol-300">
+                    <FiInfo size={18} aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-obaol-700 dark:text-obaol-300">
+                      How your catalog works
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-obaol-700/80 dark:text-obaol-200/90 sm:text-sm">
+                      Browse Trade Listings and add products offered by other
+                      sellers to your catalog. Set your own commission, then
+                      share your selling price with buyers. The seller&apos;s
+                      original trade listing remains unchanged.
+                    </p>
+                  </div>
+                </CardBody>
+              </Card>
+            )}
             {(!hideBuiltInFilters ||
               (!displayOnly && rate === "variantRate" && canAddOwnRate)) && (
               <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-8 bg-foreground/[0.03] p-4 rounded-[2rem] border border-foreground/5 backdrop-blur-md shadow-inner">
@@ -1267,12 +1328,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     </div>
                   </div>
                   <h3 className="text-xl font-black text-foreground tracking-tight ">
-                    Your Catalog is Empty
+                    No products added yet
                   </h3>
                   <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
-                    Personalize your catalog to share best rates with your
-                    buyers. Discover and add global products from the
-                    trade workspace.
+                    Choose a product from Trade Listings to add it to your
+                    catalog and set your commission.
                   </p>
                   <Button
                     color="warning"
@@ -1282,7 +1342,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     onPress={() => router.push("/dashboard/marketplace")}
                     startContent={<FiShoppingBag size={20} strokeWidth={2.5} />}
                   >
-                    Explore Trade Listings
+                    Browse Trade Listings
                   </Button>
                 </div>
               ) : finalTableData.length === 0 &&
@@ -1530,7 +1590,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         </thead>
                         <tbody className="divide-y divide-white/5">
                           {finalTableData.map((item: any, index: number) => {
-                            const isLive = item.isLive;
+                            const isLive = item.publiclyVisible ?? item.isLive;
                             const canAddInventory =
                               showInventoryStatus &&
                               item &&
@@ -1677,6 +1737,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                         {isLive ? "● Live" : "○ Off"}
                                       </span>
                                     )}
+                                    {item.publicationNotice}
                                     {item.classification}
                                     {roleLower === "admin" &&
                                       isMarketplaceView &&
@@ -1776,7 +1837,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       }
                     >
                       {finalTableData.map((item: any, index: number) => {
-                        const isLive = item.isLive;
+                        const isLive = item.publiclyVisible ?? item.isLive;
                         const canAddInventory =
                           showInventoryStatus &&
                           item &&
@@ -1932,6 +1993,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       {isLive ? "● Live" : "○ Off"}
                                     </span>
                                   )}
+                                  {item.publicationNotice}
                                   {item.classification}
                                   {roleLower === "admin" &&
                                     isMarketplaceView &&
@@ -2114,6 +2176,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       {isLive ? "● Live" : "○ Off"}
                                     </span>
                                   )}
+                                  {item.publicationNotice}
                                   {roleLower === "admin" &&
                                     isMarketplaceView &&
                                     !isLive && (

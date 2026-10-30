@@ -198,3 +198,13 @@ test("document decisions, governed conversion, and public invitation safety are 
   assert.match(conversions, /sourceStatuses/);
   assert.match(conversions, /selectionMode="multiple"/);
 });
+
+test("document header actions align right without changing other page headers", () => {
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  const header = read("src/components/ui/PageHeader.tsx");
+  assert.match(detail, /reserveCompanionSpace=\{false\}/);
+  assert.match(header, /reserveCompanionSpace = true/);
+  assert.match(header, /lg:justify-self-end/);
+  assert.match(header, /sm:justify-end/);
+  assert.match(header, /\[&>\*\]:w-full/);
+});

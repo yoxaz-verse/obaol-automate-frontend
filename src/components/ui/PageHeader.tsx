@@ -15,6 +15,7 @@ export type PageHeaderProps = {
   className?: string;
   translateTitle?: boolean;
   actionAlignment?: "end" | "center";
+  reserveCompanionSpace?: boolean;
 };
 
 export default function PageHeader({
@@ -30,6 +31,7 @@ export default function PageHeader({
   className,
   translateTitle = true,
   actionAlignment = "end",
+  reserveCompanionSpace = true,
 }: PageHeaderProps) {
   const eyebrowToneClass = {
     brand: "text-obaol-700 dark:text-obaol-300",
@@ -56,7 +58,7 @@ export default function PageHeader({
           {description && <p className="mt-2 max-w-2xl text-sm leading-6 db-muted md:text-base">{description}</p>}
         </div>
         {(actions || primaryAction || secondaryAction) && (
-          <div className="dashboard-companion-safe-actions flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
+          <div className={`${reserveCompanionSpace ? "dashboard-companion-safe-actions" : ""} flex min-w-0 flex-col gap-3 [&>*]:w-full sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:[&>*]:w-auto lg:justify-self-end lg:text-right`}>
             {actions ?? secondaryAction}
             {primaryAction && (
               <Link href={primaryAction.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-5 py-2.5 text-sm font-bold text-obaol-950 outline-none transition hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2">

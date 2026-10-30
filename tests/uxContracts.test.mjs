@@ -405,6 +405,17 @@ test("dashboard discovery uses Trade Listings terminology", () => {
   assert.equal(discovery.includes('title="Today’s Live"'), true);
 });
 
+test("associate catalog explains curation and directs empty catalogs to Trade Listings", () => {
+  const rates = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
+  assert.equal(rates.includes('rate === "catalogItem" && isAssociateUser'), true);
+  assert.equal(rates.includes("How your catalog works"), true);
+  assert.equal(rates.includes("products offered by other"), true);
+  assert.equal(rates.includes("original trade listing remains unchanged"), true);
+  assert.equal(rates.includes("No products added yet"), true);
+  assert.equal(rates.includes("Browse Trade Listings"), true);
+  assert.equal(rates.includes('router.push("/dashboard/marketplace")'), true);
+});
+
 test("marketplace rates are revealed explicitly and past enquiries warn buyers", () => {
   const rates = [
     read("../src/features/catalog/rates/VariantRateWorkspace.tsx"),
@@ -529,6 +540,17 @@ test("published variant rates are status-only and expose a one-hour delete windo
   assert.match(inventory, /Price locked/);
   assert.doesNotMatch(inventory, /Update Published Rate/);
   assert.doesNotMatch(inventory, /Rate updated successfully/);
+});
+
+test("seller listings distinguish requested live state from marketplace publication", () => {
+  const listing = read("../src/features/catalog/rates/VariantRateWorkspace.tsx");
+  assert.equal(listing.includes('typeof item.publiclyVisible === "boolean"'), true);
+  assert.equal(listing.includes('"AWAITING APPROVAL"'), true);
+  assert.equal(listing.includes("Not currently live —"), true);
+  assert.equal(listing.includes("is awaiting approval"), true);
+  assert.equal(listing.includes("was not approved"), true);
+  assert.equal(listing.includes("Admin note:"), true);
+  assert.match(listing, /const isLive = item\.publiclyVisible \?\? item\.isLive/g);
 });
 
 test("variant rate wizard uses searchable, dependent commodity controls", () => {

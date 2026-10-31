@@ -50,15 +50,26 @@ class ObaolShell extends StatefulWidget {
 
 class _ObaolShellState extends State<ObaolShell> {
   final _auth = NativeAuthService();
-  final _pullToRefresh = PullToRefreshController();
+  late final PullToRefreshController _pullToRefresh;
   InAppWebViewController? _controller;
   StreamSubscription<Uri>? _linkSubscription;
+  Uri? _pendingDeepLink;
   int _progress = 0;
   String? _error;
 
   @override
   void initState() {
     super.initState();
+    _pullToRefresh = PullToRefreshController(
+      settings: PullToRefreshSettings(color: const Color(0xffcf983c)),
+      onRefresh: () async => _controller?.reload(),
+    );
+    AppLinks().getInitialLink().then((uri) {
+      if (uri != null) {
+        _pendingDeepLink = uri;
+        _openDeepLink(uri);
+      }
+    });
     _linkSubscription = AppLinks().uriLinkStream.listen(_openDeepLink);
   }
 
@@ -99,10 +110,15 @@ class _ObaolShellState extends State<ObaolShell> {
                     useShouldOverrideUrlLoading: true,
                     mediaPlaybackRequiresUserGesture: false,
                     allowsInlineMediaPlayback: true,
-                    userAgent: 'OBAOL-Mobile/1.0',
+                    applicationNameForUserAgent: 'OBAOL-Mobile/1.0',
                   ),
                   onWebViewCreated: (controller) {
                     _controller = controller;
+                    final pending = _pendingDeepLink;
+                    if (pending != null && isApprovedDeepLink(pending)) {
+                      controller.loadUrl(urlRequest: URLRequest(url: WebUri.uri(pending)));
+                      _pendingDeepLink = null;
+                    }
                     controller.addJavaScriptHandler(
                       handlerName: 'obaolAuth',
                       callback: (arguments) async {
@@ -140,8 +156,6 @@ class _ObaolShellState extends State<ObaolShell> {
                         return NavigationActionPolicy.CANCEL;
                     }
                   },
-                  onReceivedServerTrustAuthRequest: (_, __) async =>
-                      ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.CANCEL),
                   onLoadStart: (_, __) => setState(() => _error = null),
                   onProgressChanged: (_, progress) {
                     setState(() => _progress = progress);

@@ -10,6 +10,9 @@ class AppConfig {
   static const googleServerClientId = String.fromEnvironment(
     'GOOGLE_SERVER_CLIENT_ID',
   );
+  static const googleIosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
+  static const appleServiceId = String.fromEnvironment('APPLE_SERVICE_ID');
+  static const appleRedirectUri = String.fromEnvironment('APPLE_REDIRECT_URI');
 
   static final Uri startUri = Uri.parse(appUrl);
   static final Uri apiUri = Uri.parse(apiBaseUrl);

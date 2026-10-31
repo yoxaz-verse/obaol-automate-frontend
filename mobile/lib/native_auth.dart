@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
@@ -30,6 +31,9 @@ class NativeAuthService {
 
     if (provider == 'google') {
       final account = await GoogleSignIn(
+        clientId: Platform.isIOS && AppConfig.googleIosClientId.isNotEmpty
+            ? AppConfig.googleIosClientId
+            : null,
         serverClientId: AppConfig.googleServerClientId.isEmpty
             ? null
             : AppConfig.googleServerClientId,
@@ -46,9 +50,19 @@ class NativeAuthService {
       };
     } else if (provider == 'apple') {
       final rawNonce = _nonce();
+      if (Platform.isAndroid &&
+          (AppConfig.appleServiceId.isEmpty || AppConfig.appleRedirectUri.isEmpty)) {
+        throw Exception('Apple sign-in is not configured for Android.');
+      }
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: const [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
         nonce: sha256.convert(utf8.encode(rawNonce)).toString(),
+        webAuthenticationOptions: Platform.isAndroid
+            ? WebAuthenticationOptions(
+                clientId: AppConfig.appleServiceId,
+                redirectUri: Uri.parse(AppConfig.appleRedirectUri),
+              )
+            : null,
       );
       if (credential.identityToken == null) throw Exception('Apple did not return an identity token.');
       final name = [credential.givenName, credential.familyName]
@@ -67,7 +81,7 @@ class NativeAuthService {
       throw Exception('Unsupported identity provider.');
     }
 
-    final endpoint = AppConfig.apiUri.resolve('./auth/$provider');
+    final endpoint = Uri.parse('${AppConfig.apiBaseUrl.replaceFirst(RegExp(r'/+$'), '')}/auth/$provider');
     final response = await _client.post(
       endpoint,
       headers: const {'content-type': 'application/json', 'accept': 'application/json'},

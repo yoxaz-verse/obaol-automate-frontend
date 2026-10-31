@@ -18,6 +18,8 @@ test("catalog additions use a dedicated owner workspace", () => {
   assert.match(additions, /grouped by category/);
   assert.match(additions, /Choose a category first/);
   assert.match(additions, /Description \(optional\)/);
+  assert.equal(additions.match(/catalog-hierarchy-field/g)?.length, 3);
+  assert.equal(additions.includes('description={'), false);
   assert.match(additions, /row\.entityType === "subCategory" \? nextCategoryId/);
 });
 

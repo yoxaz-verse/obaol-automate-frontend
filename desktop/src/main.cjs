@@ -3,12 +3,18 @@ const path = require("node:path");
 
 const APP_URL = process.env.OBAOL_DESKTOP_URL || "https://www.obaol.com/auth";
 const APP_ORIGIN = parsedUrl(APP_URL)?.origin;
+const APP_LOAD_TIMEOUT_MS = 20_000;
 const OBAOL_HOSTS = new Set(["obaol.com", "www.obaol.com"]);
 const GOOGLE_AUTH_HOSTS = new Set(["accounts.google.com", "accounts.googleusercontent.com"]);
+const PUBLIC_PAGES = Object.freeze({
+  home: "https://www.obaol.com/",
+  "account-types": "https://www.obaol.com/roles",
+});
 
 let mainWindow = null;
 let tray = null;
 let isQuitting = false;
+let isLoadingApplication = false;
 
 function parsedUrl(value) {
   try {
@@ -37,11 +43,34 @@ function showMainWindow() {
   mainWindow.focus();
 }
 
-function loadApplication() {
-  if (!mainWindow) return;
-  mainWindow.loadURL(APP_URL).catch(() => {
-    mainWindow?.loadFile(path.join(__dirname, "offline.html"));
-  });
+async function showOfflineScreen() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  await mainWindow.loadFile(path.join(__dirname, "offline.html")).catch(() => {});
+}
+
+async function loadApplication() {
+  if (!mainWindow || mainWindow.isDestroyed() || isLoadingApplication) return;
+  isLoadingApplication = true;
+  let timeoutId = null;
+
+  try {
+    await mainWindow.loadFile(path.join(__dirname, "loading.html"));
+    showMainWindow();
+    await Promise.race([
+      mainWindow.loadURL(APP_URL),
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error("Application load timed out.")), APP_LOAD_TIMEOUT_MS);
+      }),
+    ]);
+  } catch (error) {
+    if (error?.code !== "ERR_ABORTED" && error?.errno !== -3) {
+      mainWindow?.webContents.stop();
+      await showOfflineScreen();
+    }
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+    isLoadingApplication = false;
+  }
 }
 
 function createTray() {
@@ -151,12 +180,12 @@ function createWindow() {
   });
   mainWindow.on("closed", () => { mainWindow = null; });
   mainWindow.webContents.on("did-fail-load", (_event, errorCode, _description, validatedURL, isMainFrame) => {
-    if (isMainFrame && errorCode !== -3 && validatedURL !== "") {
-      mainWindow?.loadFile(path.join(__dirname, "offline.html"));
+    if (!isLoadingApplication && isMainFrame && errorCode !== -3 && validatedURL !== "") {
+      void showOfflineScreen();
     }
   });
 
-  loadApplication();
+  void loadApplication();
 }
 
 app.whenReady().then(() => {
@@ -180,7 +209,11 @@ app.whenReady().then(() => {
 });
 
 ipcMain.on("desktop:focus-window", showMainWindow);
-ipcMain.on("desktop:retry", loadApplication);
+ipcMain.on("desktop:retry", () => { void loadApplication(); });
+ipcMain.on("desktop:open-public-page", (_event, page) => {
+  const destination = PUBLIC_PAGES[page];
+  if (destination) void shell.openExternal(destination);
+});
 
 app.on("before-quit", () => { isQuitting = true; });
 app.on("window-all-closed", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
+import { FormEvent, MouseEvent, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
@@ -250,6 +250,11 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
   const otpRemaining = otpExpiresAt - now;
   const resendRemaining = resendAt - now;
+  const openDesktopPublicPage = (event: MouseEvent<HTMLAnchorElement>, page: "home" | "account-types") => {
+    if (!window.obaolDesktop) return;
+    event.preventDefault();
+    window.obaolDesktop.openPublicPage(page);
+  };
 
   return (
     <AuthLayout
@@ -257,7 +262,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       subtitle={mode === "signin" ? "One secure sign-in for Associate and Operator accounts." : "Verify your email, choose your account type, and complete onboarding."}
       cardMaxWidthClass="max-w-[500px]"
       stableContentTop
-      leftPanel={{ headline: "OBAOL", highlight: "ONE SECURE ACCESS", description: "Access commodity discovery, verified partners, execution workflows, documents, and orders from one account entry.", points: ["Password, email code, Google, or passkey", "Private account discovery", "Secure session management"], footer: "Agro trade execution" }}
+      leftPanel={{ headline: "OBAOL", highlight: "ONE SECURE ACCESS", description: "Access commodity discovery, verified partners, execution workflows, documents, and orders from one account entry.", points: ["Private account discovery", "Secure session management"], footer: "Agro trade execution" }}
     >
       <div data-testid="unified-auth" className="space-y-4 lg:space-y-5">
         <div className="grid grid-cols-2 border-b border-slate-200 dark:border-white/10 lg:rounded-xl lg:border-0 lg:bg-slate-100 lg:p-1 lg:dark:bg-white/[0.05]" aria-label="Authentication mode">
@@ -305,7 +310,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
             <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || !isValidEmail(email)} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? "Continue securely" : "Verify email"}</button>
             <div className="relative py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 lg:py-1"><span className="relative z-10 lg:bg-white lg:px-3 lg:dark:bg-content1">or</span><span className="absolute left-0 top-1/2 hidden h-px w-full bg-slate-200 dark:bg-white/10 lg:block" /></div>
             <div className="min-h-[52px] lg:rounded-xl lg:border lg:border-slate-200 lg:p-1.5 lg:dark:border-white/10">
-              {googleClientId ? <><div id={googleContainerId} className="flex min-h-10 justify-center" />{!googleReady && !googleError && <div className="mx-auto h-10 max-w-[340px] animate-pulse rounded-lg bg-slate-100 dark:bg-white/[0.05]" />}</> : <p className="py-3 text-center text-xs text-slate-500">Google sign-in is not configured.</p>}
+              {googleClientId ? <><div id={googleContainerId} data-testid="google-auth-button" className="mx-auto flex min-h-10 w-full max-w-[340px] justify-center overflow-hidden rounded-full" />{!googleReady && !googleError && <div className="mx-auto h-10 max-w-[340px] animate-pulse rounded-full bg-slate-100 dark:bg-white/[0.05]" />}</> : <p className="py-3 text-center text-xs text-slate-500">Google sign-in is not configured.</p>}
               {googleError && <p className="py-2 text-center text-xs text-red-600">{googleError}</p>}
             </div>
           </form>
@@ -344,7 +349,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
           </form>
         )}
 
-        <div data-testid="auth-public-navigation" className="hidden flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs dark:border-white/10 lg:flex"><Link href="/" className="font-semibold text-slate-500 hover:text-obaol-700">Back to OBAOL</Link><Link href="/roles" className="font-semibold text-obaol-700 dark:text-obaol-300">Compare account types</Link></div>
+        <div data-testid="auth-public-navigation" className="hidden flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs dark:border-white/10 lg:flex"><Link href="/" onClick={(event) => openDesktopPublicPage(event, "home")} className="font-semibold text-slate-500 hover:text-obaol-700">Back to OBAOL</Link><Link href="/roles" onClick={(event) => openDesktopPublicPage(event, "account-types")} className="font-semibold text-obaol-700 dark:text-obaol-300">Compare account types</Link></div>
       </div>
     </AuthLayout>
   );

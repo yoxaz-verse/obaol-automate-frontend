@@ -5,6 +5,7 @@ const root = path.resolve(__dirname, "..");
 const required = [
   "src/main.cjs",
   "src/preload.cjs",
+  "src/loading.html",
   "src/offline.html",
   "build/icon.png",
   "build/icon.ico",
@@ -21,6 +22,13 @@ if (missing.length) {
 const manifest = require(path.join(root, "package.json"));
 if (manifest.build?.appId !== "com.obaol.desktop") {
   console.error("Unexpected desktop appId.");
+  process.exit(1);
+}
+
+const mainSource = fs.readFileSync(path.join(root, "src/main.cjs"), "utf8");
+const preloadSource = fs.readFileSync(path.join(root, "src/preload.cjs"), "utf8");
+if (!mainSource.includes('"desktop:open-public-page"') || !preloadSource.includes('"desktop:open-public-page"')) {
+  console.error("Desktop public-page bridge is incomplete.");
   process.exit(1);
 }
 

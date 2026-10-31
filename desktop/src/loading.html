@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OBAOL Supreme — Loading</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 20%, #302511 0, #0a0a0a 42%); color: #fff; padding: 24px; }
+      main { width: min(520px, 100%); text-align: center; padding: 48px; }
+      .mark { position: relative; width: 72px; height: 72px; display: grid; place-items: center; margin: 0 auto 24px; border: 1px solid #cf983c55; border-radius: 22px; background: #cf983c1f; color: #e4b45e; font-size: 30px; font-weight: 900; box-shadow: 0 20px 60px #0008; }
+      .mark::after { content: ""; position: absolute; inset: -9px; border: 2px solid transparent; border-top-color: #cf983c; border-radius: 28px; animation: spin 1s linear infinite; }
+      h1 { margin: 0; font-size: 30px; letter-spacing: -.03em; }
+      p { margin: 14px 0 0; color: #a8a8a8; line-height: 1.6; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { .mark::after { animation: none; border-color: #cf983c66; } }
+    </style>
+  </head>
+  <body>
+    <main role="status" aria-live="polite">
+      <div class="mark" aria-hidden="true">O</div>
+      <h1>Opening OBAOL Supreme</h1>
+      <p>Connecting securely to your workspace…</p>
+    </main>
+  </body>
+</html>

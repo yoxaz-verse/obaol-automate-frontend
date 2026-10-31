@@ -42,6 +42,21 @@ test("mobile auth is a single focused surface without public-site navigation", a
   });
   expect(surface).toEqual({ borderWidth: "0px", borderRadius: "0px", backgroundColor: "rgba(0, 0, 0, 0)" });
 
+  const googleHost = page.getByTestId("google-auth-button");
+  if (await googleHost.count()) {
+    const googleSurface = await googleHost.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return {
+        overflow: style.overflow,
+        borderRadius: style.borderTopLeftRadius,
+        width: node.getBoundingClientRect().width,
+      };
+    });
+    expect(googleSurface.overflow).toBe("hidden");
+    expect(googleSurface.borderRadius).not.toBe("0px");
+    expect(googleSurface.width).toBeLessThanOrEqual(340);
+  }
+
   const signIn = page.getByRole("button", { name: "Sign in" });
   const createAccount = page.getByRole("button", { name: "Create account" });
   for (const control of [signIn, createAccount, page.getByTestId("auth-submit")]) {
@@ -72,6 +87,28 @@ test("desktop auth retains branding, card, and public navigation", async ({ page
   });
   expect(surface.borderWidth).not.toBe("0px");
   expect(surface.borderRadius).not.toBe("0px");
+});
+
+test("desktop auth public links open externally without leaving the app", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__desktopPublicPages = [];
+    window.obaolDesktop = {
+      isDesktop: true,
+      platform: "darwin",
+      version: "test",
+      focusWindow() {},
+      openPublicPage(pageName) { window.__desktopPublicPages.push(pageName); },
+    };
+  });
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/auth", { waitUntil: "domcontentloaded" });
+  const authUrl = page.url();
+
+  await page.getByRole("link", { name: "Back to OBAOL" }).click();
+  await page.getByRole("link", { name: "Compare account types" }).click();
+
+  expect(page.url()).toBe(authUrl);
+  expect(await page.evaluate(() => window.__desktopPublicPages)).toEqual(["home", "account-types"]);
 });
 
 test("forgot-password entry preserves email and requires a public account type", async ({ page }) => {

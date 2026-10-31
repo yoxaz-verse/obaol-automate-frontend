@@ -6,6 +6,11 @@ const desktopApi = Object.freeze({
   platform: process.platform,
   version,
   focusWindow: () => ipcRenderer.send("desktop:focus-window"),
+  openPublicPage: (page) => {
+    if (page === "home" || page === "account-types") {
+      ipcRenderer.send("desktop:open-public-page", page);
+    }
+  },
 });
 
 contextBridge.exposeInMainWorld("obaolDesktop", desktopApi);

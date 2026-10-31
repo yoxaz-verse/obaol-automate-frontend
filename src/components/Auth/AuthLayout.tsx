@@ -348,34 +348,23 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             animate={{ opacity: 1 }}
                         >
                             {/* Card Decoration */}
-                            <div className="absolute left-1/2 top-0 -z-10 h-[120%] w-[120%] -translate-x-1/2 rounded-full bg-obaol-500/[0.04] blur-[120px]" />
+                            <div className="absolute left-1/2 top-0 -z-10 hidden h-[120%] w-[120%] -translate-x-1/2 rounded-full bg-obaol-500/[0.04] blur-[120px] lg:block" />
                             {roleIdentity && (
                                 <div className={`absolute inset-4 rounded-[2.3rem] border border-white/5 -z-10 pointer-events-none ${roleIdentity.motifClassName}`} />
                             )}
 
-                            {/* Mobile Identity */}
-                            <Link href="/" className="lg:hidden mb-3 flex flex-col items-center group cursor-pointer">
-                                <div className="relative mb-2 flex h-11 w-11 items-center justify-center rounded-xl border border-obaol-500/30 bg-obaol-500/10 shadow-xl shadow-obaol-500/10 transition-transform group-hover:scale-110">
-                                    <Image src="/logo.png" alt="OBAOL" width={40} height={40} className="object-contain" />
-                                </div>
-                                <h2 className="text-xl font-bold uppercase tracking-tight text-slate-900 dark:text-foreground">
-                                    OBAOL <span className="text-obaol-700 dark:text-obaol-300">Supreme</span>
-                                </h2>
-                                <p className="text-[8px] font-black tracking-[0.35em] text-slate-500 dark:text-default-400 mt-1 uppercase">Go-To Agro Trade Platform</p>
-                            </Link>
-
                             <div className="relative group">
                                 <motion.div
                                     data-testid="auth-card"
-                                    className={`relative overflow-hidden border bg-white/95 p-5 dark:bg-[#0E0D0A]/95 lg:p-7 ${onboarding ? "rounded-2xl border-slate-200 dark:border-white/10" : "rounded-[2.2rem] border-obaol-200/60 dark:border-obaol-500/10 lg:rounded-[2.5rem]"}`}
+                                    className={`relative overflow-hidden border-0 bg-transparent p-0 lg:border lg:bg-white/95 lg:p-7 lg:dark:bg-[#0E0D0A]/95 ${onboarding ? "rounded-none lg:rounded-2xl lg:border-slate-200 lg:dark:border-white/10" : "rounded-none lg:rounded-[2.5rem] lg:border-obaol-200/60 lg:dark:border-obaol-500/10"}`}
                                     transition={{ duration: 0.45, ease: "easeOut" }}
                                 >
                                     {/* Glass Accents */}
-                                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                                    <div className="absolute right-0 top-0 -mr-20 -mt-20 h-40 w-40 rounded-full bg-obaol-500/10 opacity-0 blur-[80px] transition-opacity duration-1000 group-hover:opacity-100" />
+                                    <div className="absolute inset-x-0 top-0 hidden h-px bg-gradient-to-r from-transparent via-white/10 to-transparent lg:block" />
+                                    <div className="absolute right-0 top-0 -mr-20 -mt-20 hidden h-40 w-40 rounded-full bg-obaol-500/10 opacity-0 blur-[80px] transition-opacity duration-1000 group-hover:opacity-100 lg:block" />
 
                                     {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
-                                    <div className={`relative mb-5 ${stableContentTop ? "min-h-[6.25rem] sm:min-h-[5rem]" : ""}`}>
+                                    <div className={`relative mb-4 lg:mb-5 ${stableContentTop ? "lg:min-h-[5rem]" : ""}`}>
                                         <h1 className="text-2xl font-bold leading-none tracking-tight text-slate-900 dark:text-foreground lg:text-3xl">
                                             {title}
                                         </h1>
@@ -390,7 +379,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                 </motion.div>
 
                                 {/* Account security note */}
-                                <div className="mt-4 flex items-center justify-center gap-3 opacity-35 dark:opacity-20">
+                                <div className="mt-4 hidden items-center justify-center gap-3 opacity-35 dark:opacity-20 lg:flex">
                                     <div className="h-px flex-grow bg-gradient-to-r from-transparent to-divider" />
                                     <div className="text-[7px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-default-400 whitespace-nowrap">
                                         Secure Connection

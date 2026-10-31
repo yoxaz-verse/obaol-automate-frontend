@@ -22,6 +22,58 @@ test("unified sign-in is responsive, accessible, and preserves email", async ({ 
   await expect(page.getByText(/does not reveal whether an email is registered/i)).toBeVisible();
 });
 
+test("mobile auth is a single focused surface without public-site navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/auth?prefill=mobile%40example.com", { waitUntil: "domcontentloaded" });
+
+  await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
+  await expect(page.getByText("Go-To Agro Trade Platform")).toHaveCount(0);
+  await expect(page.getByTestId("auth-public-navigation")).toBeHidden();
+  await expect(page.getByRole("link", { name: "Back to OBAOL" })).toBeHidden();
+  await expect(page.getByRole("link", { name: "Compare account types" })).toBeHidden();
+
+  const surface = await page.getByTestId("auth-card").evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      borderWidth: style.borderTopWidth,
+      borderRadius: style.borderTopLeftRadius,
+      backgroundColor: style.backgroundColor,
+    };
+  });
+  expect(surface).toEqual({ borderWidth: "0px", borderRadius: "0px", backgroundColor: "rgba(0, 0, 0, 0)" });
+
+  const signIn = page.getByRole("button", { name: "Sign in" });
+  const createAccount = page.getByRole("button", { name: "Create account" });
+  for (const control of [signIn, createAccount, page.getByTestId("auth-submit")]) {
+    const box = await control.boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+  }
+
+  await createAccount.click();
+  await expect(createAccount).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: "Create your OBAOL account" })).toBeVisible();
+  await signIn.click();
+  await expect(signIn).toHaveAttribute("aria-pressed", "true");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("desktop auth retains branding, card, and public navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/auth", { waitUntil: "domcontentloaded" });
+
+  await expect(page.getByText("ONE SECURE ACCESS")).toBeVisible();
+  await expect(page.getByTestId("auth-public-navigation")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to OBAOL" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Compare account types" })).toBeVisible();
+
+  const surface = await page.getByTestId("auth-card").evaluate((node) => {
+    const style = getComputedStyle(node);
+    return { borderWidth: style.borderTopWidth, borderRadius: style.borderTopLeftRadius };
+  });
+  expect(surface.borderWidth).not.toBe("0px");
+  expect(surface.borderRadius).not.toBe("0px");
+});
+
 test("forgot-password entry preserves email and requires a public account type", async ({ page }) => {
   await page.goto("/auth");
   await page.getByLabel("Email address").fill("member+reset@example.com");

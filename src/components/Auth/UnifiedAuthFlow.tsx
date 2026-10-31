@@ -259,10 +259,10 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       stableContentTop
       leftPanel={{ headline: "OBAOL", highlight: "ONE SECURE ACCESS", description: "Access commodity discovery, verified partners, execution workflows, documents, and orders from one account entry.", points: ["Password, email code, Google, or passkey", "Private account discovery", "Secure session management"], footer: "Agro trade execution" }}
     >
-      <div data-testid="unified-auth" className="space-y-5">
-        <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1 dark:bg-white/[0.05]" aria-label="Authentication mode">
+      <div data-testid="unified-auth" className="space-y-4 lg:space-y-5">
+        <div className="grid grid-cols-2 border-b border-slate-200 dark:border-white/10 lg:rounded-xl lg:border-0 lg:bg-slate-100 lg:p-1 lg:dark:bg-white/[0.05]" aria-label="Authentication mode">
           {(["signin", "signup"] as AuthMode[]).map((item) => (
-            <button key={item} type="button" onClick={() => switchMode(item)} aria-pressed={mode === item} className={`h-10 rounded-lg text-xs font-black transition ${mode === item ? "bg-white text-slate-950 shadow-sm dark:bg-obaol-500 dark:text-obaol-950" : "text-slate-500 dark:text-white/55"}`}>
+            <button key={item} type="button" onClick={() => switchMode(item)} aria-pressed={mode === item} className={`h-11 border-b-2 text-xs font-black transition lg:h-10 lg:rounded-lg lg:border-b-0 ${mode === item ? "border-obaol-500 text-slate-950 dark:text-white lg:bg-white lg:shadow-sm lg:dark:bg-obaol-500 lg:dark:text-obaol-950" : "border-transparent text-slate-500 dark:text-white/55"}`}>
               {item === "signin" ? "Sign in" : "Create account"}
             </button>
           ))}
@@ -303,8 +303,8 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
               <input ref={emailRef} id={emailId} className={fieldClass} type="email" value={email} autoComplete="email webauthn" inputMode="email" placeholder="name@example.com" disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
             </div>
             <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || !isValidEmail(email)} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? "Continue securely" : "Verify email"}</button>
-            <div className="relative py-1 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400"><span className="relative z-10 bg-white px-3 dark:bg-content1">or</span><span className="absolute left-0 top-1/2 h-px w-full bg-slate-200 dark:bg-white/10" /></div>
-            <div className="min-h-[52px] rounded-xl border border-slate-200 p-1.5 dark:border-white/10">
+            <div className="relative py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 lg:py-1"><span className="relative z-10 lg:bg-white lg:px-3 lg:dark:bg-content1">or</span><span className="absolute left-0 top-1/2 hidden h-px w-full bg-slate-200 dark:bg-white/10 lg:block" /></div>
+            <div className="min-h-[52px] lg:rounded-xl lg:border lg:border-slate-200 lg:p-1.5 lg:dark:border-white/10">
               {googleClientId ? <><div id={googleContainerId} className="flex min-h-10 justify-center" />{!googleReady && !googleError && <div className="mx-auto h-10 max-w-[340px] animate-pulse rounded-lg bg-slate-100 dark:bg-white/[0.05]" />}</> : <p className="py-3 text-center text-xs text-slate-500">Google sign-in is not configured.</p>}
               {googleError && <p className="py-2 text-center text-xs text-red-600">{googleError}</p>}
             </div>
@@ -344,7 +344,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
           </form>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs dark:border-white/10"><Link href="/" className="font-semibold text-slate-500 hover:text-obaol-700">Back to OBAOL</Link><Link href="/roles" className="font-semibold text-obaol-700 dark:text-obaol-300">Compare account types</Link></div>
+        <div data-testid="auth-public-navigation" className="hidden flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs dark:border-white/10 lg:flex"><Link href="/" className="font-semibold text-slate-500 hover:text-obaol-700">Back to OBAOL</Link><Link href="/roles" className="font-semibold text-obaol-700 dark:text-obaol-300">Compare account types</Link></div>
       </div>
     </AuthLayout>
   );

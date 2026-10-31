@@ -39,9 +39,13 @@ class NativeAuthService {
             : AppConfig.googleServerClientId,
         scopes: const ['email', 'profile'],
       ).signIn();
-      if (account == null) throw const NativeAuthCancelled();
+      if (account == null) {
+        throw const NativeAuthCancelled();
+      }
       final auth = await account.authentication;
-      if (auth.idToken == null) throw Exception('Google did not return an identity token.');
+      if (auth.idToken == null) {
+        throw Exception('Google did not return an identity token.');
+      }
       body = {
         'idToken': auth.idToken,
         'role': role,
@@ -51,11 +55,15 @@ class NativeAuthService {
     } else if (provider == 'apple') {
       final rawNonce = _nonce();
       if (Platform.isAndroid &&
-          (AppConfig.appleServiceId.isEmpty || AppConfig.appleRedirectUri.isEmpty)) {
+          (AppConfig.appleServiceId.isEmpty ||
+              AppConfig.appleRedirectUri.isEmpty)) {
         throw Exception('Apple sign-in is not configured for Android.');
       }
       final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: const [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+        scopes: const [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
         nonce: sha256.convert(utf8.encode(rawNonce)).toString(),
         webAuthenticationOptions: Platform.isAndroid
             ? WebAuthenticationOptions(
@@ -64,11 +72,13 @@ class NativeAuthService {
               )
             : null,
       );
-      if (credential.identityToken == null) throw Exception('Apple did not return an identity token.');
-      final name = [credential.givenName, credential.familyName]
-          .whereType<String>()
-          .where((value) => value.trim().isNotEmpty)
-          .join(' ');
+      if (credential.identityToken == null) {
+        throw Exception('Apple did not return an identity token.');
+      }
+      final name = [
+        credential.givenName,
+        credential.familyName,
+      ].whereType<String>().where((value) => value.trim().isNotEmpty).join(' ');
       body = {
         'identityToken': credential.identityToken,
         'rawNonce': rawNonce,
@@ -81,15 +91,26 @@ class NativeAuthService {
       throw Exception('Unsupported identity provider.');
     }
 
-    final endpoint = Uri.parse('${AppConfig.apiBaseUrl.replaceFirst(RegExp(r'/+$'), '')}/auth/$provider');
+    final endpoint = Uri.parse(
+      '${AppConfig.apiBaseUrl.replaceFirst(RegExp(r'/+$'), '')}/auth/$provider',
+    );
     final response = await _client.post(
       endpoint,
-      headers: const {'content-type': 'application/json', 'accept': 'application/json'},
+      headers: const {
+        'content-type': 'application/json',
+        'accept': 'application/json',
+      },
       body: jsonEncode(body),
     );
     final payload = jsonDecode(response.body) as Map<String, dynamic>;
-    if (response.statusCode < 200 || response.statusCode >= 300 || payload['success'] != true) {
-      throw Exception(payload['message'] is String ? payload['message'] : 'Authentication failed.');
+    if (response.statusCode < 200 ||
+        response.statusCode >= 300 ||
+        payload['success'] != true) {
+      throw Exception(
+        payload['message'] is String
+            ? payload['message']
+            : 'Authentication failed.',
+      );
     }
     await _installCookies(response.headers, controller);
     return NativeAuthResult(next: payload['next'] as String? ?? '/dashboard');
@@ -100,7 +121,9 @@ class NativeAuthService {
     InAppWebViewController controller,
   ) async {
     final setCookie = headers['set-cookie'];
-    if (setCookie == null) throw Exception('The server did not return a session cookie.');
+    if (setCookie == null) {
+      throw Exception('The server did not return a session cookie.');
+    }
     final match = RegExp(r'(?:^|,\s*)auth_token=([^;]+)').firstMatch(setCookie);
     if (match == null) throw Exception('The server session cookie is invalid.');
     await CookieManager.instance().setCookie(
@@ -114,7 +137,8 @@ class NativeAuthService {
       sameSite: HTTPCookieSameSitePolicy.NONE,
     );
     await controller.evaluateJavascript(
-      source: "window.dispatchEvent(new CustomEvent('obaol:native-authenticated'));",
+      source:
+          "window.dispatchEvent(new CustomEvent('obaol:native-authenticated'));",
     );
   }
 
@@ -124,9 +148,13 @@ class NativeAuthService {
           : 'Associate';
 
   static String _nonce([int length = 32]) {
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    const chars =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
     final random = Random.secure();
-    return List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
+    return List.generate(
+      length,
+      (_) => chars[random.nextInt(chars.length)],
+    ).join();
   }
 }
 
@@ -143,5 +171,7 @@ String safeAuthError(Object error) {
     'Account exists under a different role.',
     'This email is linked to another Apple account.',
   };
-  return allowed.contains(text) ? text : 'Sign-in could not be completed. Please try again.';
+  return allowed.contains(text)
+      ? text
+      : 'Sign-in could not be completed. Please try again.';
 }

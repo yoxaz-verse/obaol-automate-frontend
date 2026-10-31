@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:obaol_mobile/config.dart';
 import 'package:obaol_mobile/native_auth.dart';
-import 'package:obaol_mobile/navigation_policy.dart';
+import 'package:obaol_mobile/navigation_policy.dart' as policy;
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> main() async {
@@ -80,7 +80,9 @@ class _ObaolShellState extends State<ObaolShell> {
   }
 
   Future<void> _openDeepLink(Uri uri) async {
-    if (isApprovedDeepLink(uri)) await _controller?.loadUrl(urlRequest: URLRequest(url: WebUri.uri(uri)));
+    if (policy.isApprovedDeepLink(uri)) {
+      await _controller?.loadUrl(urlRequest: URLRequest(url: WebUri.uri(uri)));
+    }
   }
 
   @override
@@ -99,7 +101,9 @@ class _ObaolShellState extends State<ObaolShell> {
             child: Stack(
               children: [
                 InAppWebView(
-                  initialUrlRequest: URLRequest(url: WebUri.uri(AppConfig.startUri)),
+                  initialUrlRequest: URLRequest(
+                    url: WebUri.uri(AppConfig.startUri),
+                  ),
                   pullToRefreshController: _pullToRefresh,
                   initialSettings: InAppWebViewSettings(
                     javaScriptEnabled: true,
@@ -115,14 +119,17 @@ class _ObaolShellState extends State<ObaolShell> {
                   onWebViewCreated: (controller) {
                     _controller = controller;
                     final pending = _pendingDeepLink;
-                    if (pending != null && isApprovedDeepLink(pending)) {
-                      controller.loadUrl(urlRequest: URLRequest(url: WebUri.uri(pending)));
+                    if (pending != null && policy.isApprovedDeepLink(pending)) {
+                      controller.loadUrl(
+                        urlRequest: URLRequest(url: WebUri.uri(pending)),
+                      );
                       _pendingDeepLink = null;
                     }
                     controller.addJavaScriptHandler(
                       handlerName: 'obaolAuth',
                       callback: (arguments) async {
-                        final request = arguments.isNotEmpty && arguments.first is Map
+                        final request = arguments.isNotEmpty &&
+                                arguments.first is Map
                             ? Map<String, dynamic>.from(arguments.first as Map)
                             : <String, dynamic>{};
                         try {
@@ -133,7 +140,9 @@ class _ObaolShellState extends State<ObaolShell> {
                           );
                           await controller.loadUrl(
                             urlRequest: URLRequest(
-                              url: WebUri.uri(AppConfig.startUri.resolve(result.next)),
+                              url: WebUri.uri(
+                                AppConfig.startUri.resolve(result.next),
+                              ),
                             ),
                           );
                           return {'ok': true, 'next': result.next};
@@ -146,13 +155,14 @@ class _ObaolShellState extends State<ObaolShell> {
                   shouldOverrideUrlLoading: (controller, action) async {
                     final uri = action.request.url;
                     if (uri == null) return NavigationActionPolicy.CANCEL;
-                    switch (classifyNavigation(uri)) {
-                      case NavigationAction.allow:
+                    switch (policy.classifyNavigation(uri)) {
+                      case policy.NavigationAction.allow:
                         return NavigationActionPolicy.ALLOW;
-                      case NavigationAction.external:
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      case policy.NavigationAction.external:
+                        await launchUrl(uri,
+                            mode: LaunchMode.externalApplication);
                         return NavigationActionPolicy.CANCEL;
-                      case NavigationAction.reject:
+                      case policy.NavigationAction.reject:
                         return NavigationActionPolicy.CANCEL;
                     }
                   },
@@ -166,13 +176,18 @@ class _ObaolShellState extends State<ObaolShell> {
                     setState(() => _error = null);
                   },
                   onReceivedError: (_, request, error) {
-                    if (request.isForMainFrame == true) setState(() => _error = error.description);
+                    if (request.isForMainFrame == true) {
+                      setState(() => _error = error.description);
+                    }
                     _pullToRefresh.endRefreshing();
                   },
                   onDownloadStartRequest: (_, request) async {
                     final uri = Uri.tryParse(request.url.toString());
-                    if (uri != null && classifyNavigation(uri) != NavigationAction.reject) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    if (uri != null &&
+                        policy.classifyNavigation(uri) !=
+                            policy.NavigationAction.reject) {
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
                     }
                   },
                 ),
@@ -182,7 +197,11 @@ class _ObaolShellState extends State<ObaolShell> {
                     color: const Color(0xffcf983c),
                     minHeight: 2,
                   ),
-                if (_error != null) _ErrorView(message: _error!, onRetry: () => _controller?.reload()),
+                if (_error != null)
+                  _ErrorView(
+                    message: _error!,
+                    onRetry: () => _controller?.reload(),
+                  ),
               ],
             ),
           ),
@@ -204,15 +223,32 @@ class _ErrorView extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.cloud_off_rounded, size: 52, color: Color(0xff9a6a22)),
+                const Icon(
+                  Icons.cloud_off_rounded,
+                  size: 52,
+                  color: Color(0xff9a6a22),
+                ),
                 const SizedBox(height: 18),
-                const Text('OBAOL is temporarily offline', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                const Text(
+                  'OBAOL is temporarily offline',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(height: 8),
-                Text(message, textAlign: TextAlign.center, maxLines: 3, overflow: TextOverflow.ellipsis),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 20),
-                FilledButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Try again')),
+                FilledButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try again'),
+                ),
               ],
             ),
           ),
         ),
       );
+}

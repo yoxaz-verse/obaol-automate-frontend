@@ -35,6 +35,9 @@ test("homepage provides stable Windows and macOS installer links", () => {
   assert.match(downloads, /macOS application/);
   assert.match(downloads, /Use OBAOL online/);
   assert.match(downloads, /href="\/auth"/);
+  assert.doesNotMatch(downloads, /Recommended/);
+  assert.doesNotMatch(downloads, /detectPlatform/);
+  assert.match(downloads, /order-1 md:order-3[\s\S]*Use OBAOL online[\s\S]*downloads\.map/);
   assert.ok(home.indexOf("<DesktopDownloadSection />") > home.indexOf("<HeroSection />"));
   assert.ok(home.indexOf("<DesktopDownloadSection />") < home.indexOf("<DeferredServiceShowcase />"));
   assert.doesNotMatch(deferredHome, /DesktopDownloadSection/);

@@ -20,6 +20,11 @@ test("catalog additions use a dedicated owner workspace", () => {
   assert.match(additions, /Description \(optional\)/);
   assert.equal(additions.match(/catalog-hierarchy-field/g)?.length, 3);
   assert.equal(additions.includes('description={'), false);
+  assert.match(additions, /Autocomplete, AutocompleteItem/);
+  assert.equal(additions.match(/allowsCustomValue=\{false\}/g)?.length, 3);
+  assert.equal(additions.match(/defaultFilter=\{filterCatalogOption\}/g)?.length, 3);
+  assert.match(additions, /setCategoryId\(id\); setSubCategoryId\(""\); setParentId/);
+  assert.match(additions, /setSubCategoryId\(id\); setParentId/);
   assert.match(additions, /row\.entityType === "subCategory" \? nextCategoryId/);
 });
 

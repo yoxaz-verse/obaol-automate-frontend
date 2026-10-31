@@ -12,6 +12,7 @@ import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 import PerspectiveGateway from "@/components/home/PerspectiveGateway";
 import DeferredExecutionWorkspace from "@/components/home/DeferredExecutionWorkspace";
 import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
+import DesktopDownloadSection from "@/components/home/DesktopDownloadSection";
 
 const intentCards = [
     {
@@ -37,6 +38,7 @@ export default function HomeContent() {
         <>
             <Header />
             <HeroSection />
+            <DesktopDownloadSection />
             <DeferredServiceShowcase />
             <section id="capability-explorer" className="relative overflow-clip scroll-mt-28 py-12 md:scroll-mt-36 md:py-16 public-standard-section">
                 <ParallaxTradeAccents placement="workspace" />

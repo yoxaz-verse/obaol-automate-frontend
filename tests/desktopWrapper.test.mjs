@@ -25,12 +25,19 @@ test("desktop shell exposes only the minimal read-only bridge", () => {
 
 test("homepage provides stable Windows and macOS installer links", () => {
   const downloads = read("src/components/home/DesktopDownloadSection.tsx");
-  const home = read("src/components/home/HomeDeferredContent.tsx");
+  const home = read("src/components/home/HomeContent.tsx");
+  const deferredHome = read("src/components/home/HomeDeferredContent.tsx");
   const footer = read("src/components/home/footer.tsx");
   assert.match(downloads, /OBAOL-Supreme-Windows-x64\.exe/);
   assert.match(downloads, /OBAOL-Supreme-macOS-Universal\.dmg/);
   assert.match(downloads, /unsigned/);
-  assert.match(home, /<DesktopDownloadSection \/>/);
+  assert.match(downloads, /Windows application/);
+  assert.match(downloads, /macOS application/);
+  assert.match(downloads, /Use OBAOL online/);
+  assert.match(downloads, /href="\/auth"/);
+  assert.ok(home.indexOf("<DesktopDownloadSection />") > home.indexOf("<HeroSection />"));
+  assert.ok(home.indexOf("<DesktopDownloadSection />") < home.indexOf("<DeferredServiceShowcase />"));
+  assert.doesNotMatch(deferredHome, /DesktopDownloadSection/);
   assert.match(footer, /Windows App \(Beta\)/);
   assert.match(footer, /macOS App \(Beta\)/);
 });

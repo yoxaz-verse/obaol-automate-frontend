@@ -3,7 +3,6 @@
 import Link from "next/link";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
-import DesktopDownloadSection from "@/components/home/DesktopDownloadSection";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 
 const intentCards = [
@@ -86,7 +85,6 @@ export default function HomeDeferredContent() {
       </section>
 
       <CTASection />
-      <DesktopDownloadSection />
       <Footer />
     </>
   );

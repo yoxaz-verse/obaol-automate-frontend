@@ -1,0 +1,80 @@
+{
+  "name": "obaol-supreme-desktop",
+  "version": "0.1.0",
+  "description": "OBAOL Supreme desktop client for Windows and macOS",
+  "private": true,
+  "main": "src/main.cjs",
+  "author": "OBAOL",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac dmg --universal",
+    "dist:win": "electron-builder --win nsis --x64",
+    "validate": "node scripts/validate.cjs"
+  },
+  "devDependencies": {
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.obaol.desktop",
+    "productName": "OBAOL Supreme",
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.business",
+      "icon": "build/icon.icns",
+      "artifactName": "OBAOL-Supreme-macOS-Universal.dmg",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["universal"]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "OBAOL Supreme",
+      "backgroundColor": "#0a0a0a",
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        { "x": 140, "y": 190, "type": "file" },
+        { "x": 400, "y": 190, "type": "link", "path": "/Applications" }
+      ]
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "artifactName": "OBAOL-Supreme-Windows-x64.exe",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "OBAOL Supreme"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "yoxaz-verse",
+      "repo": "obaol-automate-frontend"
+    }
+  }
+}

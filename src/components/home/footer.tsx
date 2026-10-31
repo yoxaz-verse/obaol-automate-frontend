@@ -7,6 +7,10 @@ import { FiArrowUp } from "react-icons/fi";
 import { BUSINESS_IDENTITY } from "@/utils/businessIdentity";
 
 export default function Footer() {
+  const windowsDownloadUrl = process.env.NEXT_PUBLIC_WINDOWS_DESKTOP_URL
+    || "https://github.com/yoxaz-verse/obaol-automate-frontend/releases/latest/download/OBAOL-Supreme-Windows-x64.exe";
+  const macosDownloadUrl = process.env.NEXT_PUBLIC_MACOS_DESKTOP_URL
+    || "https://github.com/yoxaz-verse/obaol-automate-frontend/releases/latest/download/OBAOL-Supreme-macOS-Universal.dmg";
   const accentText = "text-obaol-700 dark:text-obaol-300";
   const accentHover = "hover:text-obaol-700 dark:hover:text-obaol-300";
   const accentLine = "bg-obaol-500";
@@ -109,6 +113,8 @@ export default function Footer() {
                   { name: "Trade Finance", href: "/trade-finance" },
                   { name: "Careers", href: "/careers" },
                   { name: "Sign In", href: "/auth" },
+                  { name: "Windows App (Beta)", href: windowsDownloadUrl },
+                  { name: "macOS App (Beta)", href: macosDownloadUrl },
                 ].map((link) => (
                   <li key={link.name}>
                     <Link href={link.href} className="text-default-500 hover:text-foreground hover:translate-x-1 transition-all inline-flex items-center gap-2 group">

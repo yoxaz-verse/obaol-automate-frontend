@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OBAOL Supreme — Offline</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at 50% 20%, #302511 0, #0a0a0a 42%); color: #fff; padding: 24px; }
+      main { width: min(520px, 100%); text-align: center; padding: 48px; border: 1px solid #ffffff18; border-radius: 32px; background: #111111dd; box-shadow: 0 24px 80px #0009; }
+      .mark { width: 68px; height: 68px; display: grid; place-items: center; margin: 0 auto 24px; border-radius: 20px; background: #cf983c22; color: #e4b45e; font-size: 30px; font-weight: 900; }
+      h1 { margin: 0; font-size: 30px; letter-spacing: -.03em; }
+      p { margin: 16px 0 28px; color: #a8a8a8; line-height: 1.6; }
+      button { border: 0; border-radius: 14px; padding: 13px 22px; background: #cf983c; color: #171006; font: inherit; font-weight: 800; cursor: pointer; }
+      button:hover { background: #e0ad53; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark">O</div>
+      <h1>OBAOL is temporarily offline</h1>
+      <p>Check your internet connection, then reconnect to the live OBAOL workspace.</p>
+      <button type="button" onclick="window.obaolOffline.retry()">Try again</button>
+    </main>
+  </body>
+</html>

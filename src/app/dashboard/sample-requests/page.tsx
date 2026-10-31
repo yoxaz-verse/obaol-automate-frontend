@@ -98,7 +98,7 @@ export default function SampleRequestsPage() {
               </div>
               <h2 className="text-4xl font-black text-foreground tracking-tight ">Sample <span className="text-obaol-500">Hub</span></h2>
            </div>
-           <p className="text-[10px] font-black text-default-400  tracking-[0.2em] ml-1">Protocol Initialization & Sample Logistics Lifecycle</p>
+           <p className="text-xs font-bold text-default-600 tracking-[0.12em] ml-1">Protocol Initialization &amp; Sample Logistics Lifecycle</p>
         </div>
         
         <div className="relative w-full max-w-lg group">
@@ -125,7 +125,7 @@ export default function SampleRequestsPage() {
                <LuPackage size={36} />
              </div>
              <h4 className="text-2xl font-black text-foreground  tracking-tight">System Empty</h4>
-             <p className="text-[10px] font-bold text-default-400  tracking-[0.2em] mt-4 opacity-70 max-w-lg mx-auto leading-relaxed mb-10">
+             <p className="text-sm font-medium text-default-600 tracking-wide mt-4 max-w-xl mx-auto leading-6 mb-10">
                No active sample tracking protocols detected. Follow the sampling protocol below to initialize your first dispatch.
              </p>
 
@@ -136,10 +136,10 @@ export default function SampleRequestsPage() {
                   { step: "03", title: "TRACK DISPATCH", desc: "Monitor your sample's logistics lifecycle right here in the Sample Hub.", icon: LuActivity, color: "text-emerald-500" }
                 ].map((item, i) => (
                   <div key={i} className="p-6 rounded-[2rem] bg-foreground/[0.03] border border-white/5 relative group hover:bg-foreground/[0.05] transition-all">
-                    <span className="absolute top-6 right-6 text-[10px] font-black text-foreground/20 italic tracking-widest">{item.step}</span>
-                    <item.icon className={`${item.color} mb-4 opacity-50 group-hover:opacity-100 transition-opacity`} size={24} />
-                    <h5 className="text-[11px] font-black  tracking-widest mb-2">{item.title}</h5>
-                    <p className="text-[9px] font-bold text-default-400  tracking-widest leading-loose opacity-60 group-hover:opacity-100 transition-opacity">{item.desc}</p>
+                    <span className="absolute top-6 right-6 text-xs font-black text-default-500 italic tracking-widest">{item.step}</span>
+                    <item.icon className={`${item.color} mb-4 opacity-80 group-hover:opacity-100 transition-opacity`} size={24} />
+                    <h5 className="text-sm font-black tracking-wider mb-2 text-foreground">{item.title}</h5>
+                    <p className="text-xs font-medium text-default-600 tracking-wide leading-5">{item.desc}</p>
                   </div>
                 ))}
              </div>

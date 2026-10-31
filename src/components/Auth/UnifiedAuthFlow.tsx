@@ -4,7 +4,7 @@ import { FormEvent, useCallback, useContext, useEffect, useId, useRef, useState 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
-import { FiArrowLeft, FiCheck, FiEye, FiEyeOff, FiKey, FiMail, FiShield, FiUser, FiUsers, FiX } from "react-icons/fi";
+import { FiArrowLeft, FiCheck, FiEye, FiEyeOff, FiKey, FiMail, FiShield, FiTool, FiUser, FiUsers, FiX } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { postData } from "@/core/api/apiHandler";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
@@ -268,8 +268,13 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
           ))}
         </div>
 
-        <div aria-live="polite" aria-atomic="true" role={status?.tone === "error" ? "alert" : "status"} className={status ? `relative min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}` : "min-h-0"}>
-          {status?.message}
+        <div aria-live="polite" aria-atomic="true" role={status?.tone === "error" ? "alert" : "status"} className={status ? `relative min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : status.tone === "maintenance" ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}` : "min-h-0"}>
+          {status?.tone === "maintenance" ? (
+            <span className="flex items-start gap-2.5">
+              <FiTool className="mt-0.5 shrink-0" aria-hidden />
+              <span>{status.message}</span>
+            </span>
+          ) : status?.message}
           {status?.code === "ACCOUNT_EXISTS" && (
             <button type="button" aria-label="Dismiss account notice" onClick={() => setStatus(null)} className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg text-current/70 hover:bg-black/5 dark:hover:bg-white/10">
               <FiX aria-hidden />

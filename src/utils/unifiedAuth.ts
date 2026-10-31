@@ -2,13 +2,16 @@ export type PublicAuthRole = "Associate" | "Operator";
 export type AuthMode = "signin" | "signup";
 
 export type AuthStatus = {
-  tone: "info" | "success" | "error";
+  tone: "info" | "success" | "error" | "maintenance";
   message: string;
   code?: string;
 };
 
+export const AUTH_SERVICE_UPGRADE_MESSAGE = "OBAOL services are currently being upgraded. Please try again after some time.";
+
 export const normalizeAuthError = (error: any): AuthStatus => {
   const code = String(error?.response?.data?.code || error?.code || "AUTH_ERROR");
+  const responseStatus = Number(error?.response?.status || 0);
   const retryAfter = Number(error?.response?.data?.retryAfterSeconds || 0);
   const messages: Record<string, string> = {
     INVALID_CREDENTIALS: "The email or password is incorrect.",
@@ -17,16 +20,26 @@ export const normalizeAuthError = (error: any): AuthStatus => {
     ACCOUNT_BLOCKED: "This account cannot access OBAOL. Contact support if you believe this is a mistake.",
     ACCOUNT_PENDING: "Your registration is still awaiting approval.",
     SESSION_COOKIE_BLOCKED: "Your browser blocked the secure session cookie. Allow cookies for OBAOL and try again.",
-    AUTH_UNAVAILABLE: "Sign-in is temporarily unavailable. Please try again.",
   };
   if (code === "RATE_LIMITED" || code === "LOGIN_COOLDOWN") {
     return { tone: "error", code: "RATE_LIMITED", message: retryAfter > 0 ? `Too many attempts. Try again in ${retryAfter} seconds.` : "Too many attempts. Please wait and try again." };
   }
-  const isNetwork = error?.message === "Network Error" || error?.code === "ERR_NETWORK";
+  const hasNoResponse = !error?.response;
+  const errorCode = String(error?.code || "").toUpperCase();
+  const isNetwork = hasNoResponse && (error?.message === "Network Error" || errorCode === "ERR_NETWORK");
+  const isTimeout = hasNoResponse && ["ECONNABORTED", "ETIMEDOUT"].includes(errorCode);
+  const isGatewayUnavailable = [502, 503, 504].includes(responseStatus);
+  if (code === "AUTH_UNAVAILABLE" || isNetwork || isTimeout || isGatewayUnavailable) {
+    return {
+      tone: "maintenance",
+      code: "SERVICE_UPGRADE",
+      message: AUTH_SERVICE_UPGRADE_MESSAGE,
+    };
+  }
   return {
     tone: "error",
     code,
-    message: isNetwork ? "We could not reach OBAOL. Check your connection and try again." : messages[code] || error?.response?.data?.message || error?.message || "Something went wrong. Please try again.",
+    message: messages[code] || error?.response?.data?.message || error?.message || "Something went wrong. Please try again.",
   };
 };
 

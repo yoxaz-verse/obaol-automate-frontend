@@ -10,10 +10,10 @@ import {
 import { 
   LuSearch, LuExternalLink, LuActivity, LuUser, LuPlus, LuGlobe, 
   LuChevronLeft, LuBox, LuArrowRight, LuTerminal, LuArrowUpRight, LuUsers, 
-  LuSettings, LuPhone, LuTag, LuPackage, LuHistory, LuClock, LuMail, LuLock 
+  LuSettings, LuPhone, LuPackage, LuHistory, LuClock, LuMail, LuLock
 } from "react-icons/lu";
 import OnboardingModal from "@/components/dashboard/Company/OnboardingModal";
-import CompanyInterestsModal from "@/components/Login/company-interests-modal";
+import CompanyCapabilityManager from "@/components/dashboard/Company/CompanyCapabilityManager";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import AuthContext from "@/context/AuthContext";
@@ -48,7 +48,6 @@ export default function CompanyProductPage() {
   const [activeDetailTab, setActiveDetailTab] = useState("catalog");
   const [isConfigExpanded, setIsConfigExpanded] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-  const [isInterestsModalOpen, setIsInterestsModalOpen] = useState(false);
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
   const [operatorSearchText, setOperatorSearchText] = useState("");
   const [assignmentFilter, setAssignmentFilter] = useState<"all" | "assigned" | "unassigned">("all");
@@ -271,21 +270,6 @@ export default function CompanyProductPage() {
     ) || 1,
     1
   );
-
-  const normalizeInterestList = (raw: any) => {
-    if (!Array.isArray(raw)) return [];
-    return raw
-      .map((entry: any, idx: number) => {
-        const key = toText(entry?._id, "") || `${toText(entry?.slug, "") || toText(entry, "interest")}-${idx}`;
-        const labelSource = toName(entry, "") || toText(entry, "");
-        const label = labelSource
-          .replace(/_/g, " ")
-          .replace(/-/g, " ")
-          .trim();
-        return { key, label: dashboardCopy(label || "Unknown") };
-      })
-      .filter((entry: { label: string }) => Boolean(entry.label));
-  };
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -551,16 +535,6 @@ export default function CompanyProductPage() {
     selectedCompanyAssociatesQuery.data?.data?.data?.totalCount ||
     0;
   const interestPayload = selectedCompanyInterestsQuery.data?.data?.data || {};
-  const companyInterestsSource = Array.isArray(interestPayload.soughtCapabilities)
-    ? interestPayload.soughtCapabilities
-    : Array.isArray(selectedCompany?.soughtCapabilities)
-      ? selectedCompany.soughtCapabilities
-      : [];
-  const companyInterests = normalizeInterestList(companyInterestsSource);
-  const companyInterestKeys = useMemo(
-    () => companyInterests.map((interest: { key: string }) => String(interest.key)),
-    [companyInterests]
-  );
   const enquiries = useMemo(
     () =>
       Array.isArray(selectedCompanyEnquiriesQuery.data?.data?.data)
@@ -1192,7 +1166,7 @@ export default function CompanyProductPage() {
                       <div className="w-1.5 h-1.5 bg-obaol-500 rounded-full shadow-[0_0_12px_rgba(255,193,7,0.6)]" />
                       <span className="text-[11px] font-black  tracking-[0.4em] text-obaol-600 dark:text-obaol-500 italic">Company Details</span>
                     </div>
-                    <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground  italic">{selectedCompanyName}</h3>
+                    <h3 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground italic">{selectedCompanyName}</h3>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-4">
@@ -1221,15 +1195,15 @@ export default function CompanyProductPage() {
                   <p className="text-default-500 text-sm italic font-bold">Company not found.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                  <div className="lg:col-span-4 space-y-6">
-                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-8 shadow-sm backdrop-blur-xl">
-                      <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                  <div className="lg:col-span-4 space-y-4">
+                    <Card className="rounded-2xl bg-content2/30 dark:bg-white/[0.02] border border-divider p-4 shadow-sm backdrop-blur-xl">
+                      <div className="space-y-4">
                         <div className="flex items-center gap-3 mb-2">
                           <LuGlobe className="text-obaol-500" size={16} />
                           <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Contact Information</span>
                         </div>
-                        <div className="space-y-5">
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                           <div className="flex flex-col">
                             <span className="text-[9px] font-black  text-default-500 tracking-[0.2em] mb-1 opacity-60">Email</span>
                             {selectedCompanyEmail !== "Not available" ? (
@@ -1260,8 +1234,8 @@ export default function CompanyProductPage() {
                       </div>
                     </Card>
 
-                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-8 shadow-sm backdrop-blur-xl">
-                      <div className="space-y-6">
+                    <Card className="rounded-2xl bg-content2/30 dark:bg-white/[0.02] border border-divider p-4 shadow-sm backdrop-blur-xl">
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <LuUser className="text-primary-500" size={16} />
@@ -1326,55 +1300,22 @@ export default function CompanyProductPage() {
                       </div>
                     </Card>
 
-                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-8 shadow-sm backdrop-blur-xl">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <LuTag className="text-secondary-500" size={16} />
-                            <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Sector Affiliations</span>
-                          </div>
-                          {canManageSelectedCompanyInterests ? (
-                            <Button
-                              size="sm"
-                              variant="flat"
-                              color="secondary"
-                              onPress={() => setIsInterestsModalOpen(true)}
-                            >
-                              {companyInterests.length > 0 ? "Edit Interests" : "Add Interests"}
-                            </Button>
-                          ) : null}
-                        </div>
-                        {companyInterests.length ? (
-                          <div className="flex flex-wrap gap-2">
-                            {companyInterests.map((interest: { key: string; label: string }) => (
-                              <Chip key={interest.key} size="sm" color="secondary" variant="flat">
-                                {interest.label}
-                              </Chip>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-[11px] text-default-500">No sector tags configured for this company.</p>
-                        )}
-                      </div>
-                    </Card>
                   </div>
 
-                  <CompanyInterestsModal
-                    open={isInterestsModalOpen}
-                    associateCompanyId={selectedCompanyId}
-                    initialInterests={companyInterestKeys}
-                    title={companyInterests.length > 0 ? "Edit Company Responsibilities" : "Set Company Responsibilities"}
-                    saveLabel={companyInterests.length > 0 ? "Save Changes" : "Save Interests"}
-                    onClose={() => setIsInterestsModalOpen(false)}
-                    onSaved={() => {
-                      setIsInterestsModalOpen(false);
-                      queryClient.invalidateQueries({ queryKey: ["company-interests", selectedCompanyId] });
-                      queryClient.invalidateQueries({ queryKey: ["company-detail", selectedCompanyId] });
-                    }}
-                  />
-
-                  <div className="lg:col-span-8 space-y-6">
-                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-6 shadow-sm backdrop-blur-xl">
+                  <div className="lg:col-span-8 space-y-4">
+                    <CompanyCapabilityManager
+                      companyId={String(selectedCompanyId || "")}
+                      company={selectedCompany}
+                      interestData={interestPayload}
+                      canEdit={canManageSelectedCompanyInterests}
+                      isAdmin={isAdmin}
+                      onChanged={() => {
+                        queryClient.invalidateQueries({ queryKey: ["company-interests", selectedCompanyId] });
+                        queryClient.invalidateQueries({ queryKey: ["company-detail", selectedCompanyId] });
+                        queryClient.invalidateQueries({ queryKey: ["company-directory"] });
+                      }}
+                    />
+                    <Card className="rounded-2xl bg-content2/30 dark:bg-white/[0.02] border border-divider p-4 shadow-sm backdrop-blur-xl">
                       <div className="space-y-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
@@ -1396,9 +1337,9 @@ export default function CompanyProductPage() {
                         ) : associates.length === 0 ? (
                           <p className="text-sm text-default-500 py-2">No associates linked to this company.</p>
                         ) : (
-                          <div className="overflow-x-auto">
+                          <div className="max-h-72 overflow-auto rounded-xl border border-divider/60">
                             <table className="w-full min-w-[720px] text-sm">
-                              <thead className="bg-default-100/70">
+                              <thead className="sticky top-0 z-10 bg-default-100">
                                 <tr>
                                   <th className="text-left px-3 py-2 font-semibold text-default-700">Name</th>
                                   <th className="text-left px-3 py-2 font-semibold text-default-700">Email</th>
@@ -1449,7 +1390,7 @@ export default function CompanyProductPage() {
                       </div>
                     </Card>
 
-                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-6 shadow-sm backdrop-blur-xl">
+                    <Card className="rounded-2xl bg-content2/30 dark:bg-white/[0.02] border border-divider p-4 shadow-sm backdrop-blur-xl">
                       <Tabs
                         selectedKey={activeDetailTab}
                         onSelectionChange={(key) => setActiveDetailTab(String(key))}

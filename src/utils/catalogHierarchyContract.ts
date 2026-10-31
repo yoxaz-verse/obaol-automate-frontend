@@ -12,3 +12,9 @@ export type CatalogHierarchyOption = {
 
 export const normalizeCatalogSearch = (value: unknown) =>
   String(value || "").normalize("NFKC").trim().toLocaleLowerCase("en");
+
+export const filterCatalogHierarchyOptions = <T extends { name: string }>(options: readonly T[], query: unknown): T[] => {
+  const normalizedQuery = normalizeCatalogSearch(query);
+  if (!normalizedQuery) return [...options];
+  return options.filter((option) => normalizeCatalogSearch(option.name).includes(normalizedQuery));
+};

@@ -42,6 +42,7 @@ import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import QuickCreateWarehouseModal from "@/components/Warehouse/QuickCreateWarehouseModal";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 import {
@@ -93,6 +94,7 @@ export default function EnquiryDetailsPage() {
     const [workflowStage, setWorkflowStage] = useState<string>("ENQUIRY_CREATED");
     const [importDeliveryMode, setImportDeliveryMode] = useState<string>("");
     const [inventoryAcceptOpen, setInventoryAcceptOpen] = useState(false);
+    const [quickWarehouseOpen, setQuickWarehouseOpen] = useState(false);
     const [selectedInventoryId, setSelectedInventoryId] = useState<string>("");
     const [selectedWarehouseOptionId, setSelectedWarehouseOptionId] = useState<string>("");
     const [inlineQuantity, setInlineQuantity] = useState("");
@@ -4660,17 +4662,22 @@ export default function EnquiryDetailsPage() {
                                     </div>
                                 )}
 
-                                <Button
-                                    variant="flat"
-                                    color="primary"
-                                    startContent={<FiPlus size={14} />}
-                                    onPress={() => {
-                                        const returnTo = `/dashboard/enquiries/${enquiryId}`;
-                                        router.push(`/dashboard/warehouses/location?returnTo=${encodeURIComponent(returnTo)}`);
-                                    }}
-                                >
-                                    Create New Warehouse
-                                </Button>
+                                {(isSeller || (isSystemAdmin && Boolean(sellerCompanyId))) ? (
+                                    <Button
+                                        variant="flat"
+                                        color="primary"
+                                        startContent={<FiPlus size={14} />}
+                                        onPress={() => setQuickWarehouseOpen(true)}
+                                    >
+                                        Create New Warehouse
+                                    </Button>
+                                ) : warehouseInventoryOptions.length === 0 ? (
+                                    <div className="text-xs text-default-500">
+                                        {isSystemAdmin
+                                            ? "The seller company must be available before creating its warehouse."
+                                            : "Ask the seller to create a private warehouse before accepting this enquiry."}
+                                    </div>
+                                ) : null}
 
                                 {selectedWarehouseOption && (!selectedInventory || selectedWarehouseOption.availableQty < requiredQty) && (
                                     <div className="flex flex-col gap-2">
@@ -4929,6 +4936,24 @@ export default function EnquiryDetailsPage() {
                         )}
                     </ModalContent>
                 </Modal>
+
+                <QuickCreateWarehouseModal
+                    isOpen={quickWarehouseOpen}
+                    onClose={() => setQuickWarehouseOpen(false)}
+                    ownerCompanyId={isSystemAdmin ? sellerCompanyId : undefined}
+                    onCreated={async (warehouse) => {
+                        const warehouseId = String(warehouse?._id || warehouse?.id || "");
+                        await queryClient.invalidateQueries({ queryKey: ["seller-warehouses", sellerCompanyId] });
+                        await queryClient.refetchQueries({ queryKey: ["seller-warehouses", sellerCompanyId] });
+                        if (warehouseId) {
+                            setSelectedWarehouseOptionId(`warehouse:${warehouseId}`);
+                            setSelectedInventoryId("");
+                            setInlineQuantity(String(requiredQty || ""));
+                            setAcceptAttempted(false);
+                        }
+                        toast.success("Private warehouse created and selected.");
+                    }}
+                />
 
                 <Modal
                     isOpen={docActionOpen}

@@ -38,6 +38,7 @@ import { showToastMessage } from "@/utils/utils";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 import { buildInventoryPresentation, daysStored as calculateDaysStored, normalizeObjectId } from "@/features/inventory/domain";
 import { normalizeApiError } from "@/core/api/apiErrors";
+import QuickCreateWarehouseModal from "@/components/Warehouse/QuickCreateWarehouseModal";
 
 const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
 const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
@@ -75,6 +76,7 @@ const InventoryList: React.FC = () => {
     const [costModalOpen, setCostModalOpen] = useState(false);
     const [costInventory, setCostInventory] = useState<any>(null);
     const [customDays, setCustomDays] = useState("");
+    const [quickWarehouseOpen, setQuickWarehouseOpen] = useState(false);
 
     const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
     const [selectedEnquiryInventory, setSelectedEnquiryInventory] = useState<any>(null);
@@ -362,6 +364,14 @@ const InventoryList: React.FC = () => {
             }),
         enabled: shouldFetchInventory && Boolean(effectiveCompanyId),
     });
+    const ownedWarehouses = useMemo(() => {
+        const raw = warehouseData?.data?.data;
+        if (Array.isArray(raw?.data)) return raw.data;
+        if (Array.isArray(raw)) return raw;
+        if (Array.isArray(warehouseData?.data)) return warehouseData.data;
+        return [];
+    }, [warehouseData]);
+    const canQuickCreateWarehouse = isAssociate || (isAdmin && Boolean(effectiveCompanyId));
 
     const { data: reservationData, isLoading: reservationLoading, isFetching: reservationFetching } = useQuery({
         queryKey: ["inventory-reservations", effectiveCompanyId, user?.id],
@@ -429,6 +439,34 @@ const InventoryList: React.FC = () => {
             {!shouldFetchInventory && (
                 <div className="mb-6 rounded-xl border border-obaol-300/30 bg-obaol-500/10 px-4 py-3 text-sm text-obaol-700 dark:text-obaol-300">
                     Select a company to view and manage inventory.
+                </div>
+            )}
+
+            {shouldFetchInventory && (isAssociate || isAdmin) && (
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-obaol-500/20 bg-obaol-500/5 px-5 py-4">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-obaol-500/10 text-obaol-600 dark:text-obaol-300">
+                            <LuWarehouse size={22} aria-hidden />
+                        </div>
+                        <div>
+                            <div className="text-sm font-bold text-foreground">Your Warehouses</div>
+                            <div className="text-xs text-default-500">
+                                {ownedWarehouses.length} private warehouse{ownedWarehouses.length === 1 ? "" : "s"} available for inventory and fulfilment.
+                            </div>
+                        </div>
+                    </div>
+                    <Button
+                        color="primary"
+                        variant="flat"
+                        startContent={<LuWarehouse size={16} />}
+                        onPress={() => setQuickWarehouseOpen(true)}
+                        isDisabled={!canQuickCreateWarehouse}
+                    >
+                        Create Warehouse
+                    </Button>
+                    {isAdmin && !effectiveCompanyId && (
+                        <div className="w-full text-xs text-default-500">Select a company before creating its warehouse.</div>
+                    )}
                 </div>
             )}
 
@@ -1485,6 +1523,17 @@ const InventoryList: React.FC = () => {
                     }}
                 </QueryComponent>
             )}
+
+            <QuickCreateWarehouseModal
+                isOpen={quickWarehouseOpen}
+                onClose={() => setQuickWarehouseOpen(false)}
+                ownerCompanyId={isAdmin ? effectiveCompanyId : undefined}
+                onCreated={async () => {
+                    await queryClient.invalidateQueries({ queryKey: ["inventory-my-warehouses", effectiveCompanyId, user?.id] });
+                    await queryClient.invalidateQueries({ queryKey: ["warehouses"] });
+                    showToastMessage({ type: "success", message: "Private warehouse created successfully.", position: "top-right" });
+                }}
+            />
         </div>
     );
 };

@@ -2,7 +2,7 @@ import { getData } from "@/core/api/apiHandler";
 import type { CatalogHierarchyOption } from "./catalogHierarchyContract";
 
 export type { CatalogHierarchyOption } from "./catalogHierarchyContract";
-export { normalizeCatalogSearch } from "./catalogHierarchyContract";
+export { filterCatalogHierarchyOptions, normalizeCatalogSearch } from "./catalogHierarchyContract";
 
 export type CatalogHierarchyParent =
   | { key: "category"; id: string }

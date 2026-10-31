@@ -64,6 +64,17 @@ test("accepted quotations expose reviewed conversion and bidirectional order nav
   assert.match(order, /sourceQuotation\.route/);
 });
 
+test("quotation owners can record external decisions and create an invoice after acceptance", () => {
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  assert.match(detail, /Record external decision/);
+  assert.match(detail, /\/decision/);
+  assert.match(detail, /decision: "ACCEPTED" \| "REJECTED"/);
+  assert.match(detail, /Create invoice/);
+  assert.match(detail, /Open invoice/);
+  assert.match(detail, /to-invoice/);
+  assert.match(detail, /doc\.convertedInvoice\.route/);
+});
+
 test("uploaded documents require an extraction review before completion", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
   const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");

@@ -1,5 +1,10 @@
 export type CompanyFunctionAction = { label: string; href: string; description: string; primary?: boolean };
 export type CompanyFunctionPreviewDefinition = { slug: string; name: string; description: string; actions: CompanyFunctionAction[] };
+export type ResolvedCompanyFunctionAction = CompanyFunctionAction & {
+  capabilitySlug: string;
+  capabilityName: string;
+  perspective: "provided" | "sought";
+};
 
 export type CompanyFunctionRoleContext = {
   perspectiveLabel: "Seeking" | "Providing";
@@ -107,19 +112,31 @@ export const getPreviewDefinition = (slug: unknown, perspective: "provided" | "s
 export const getCapabilityActionLinks = (
   capabilities: unknown[],
   perspective: "provided" | "sought" = "provided",
-) => {
-  const links: string[] = [];
+) => getCapabilityActions(capabilities, perspective).map(({ href }) => href);
+
+export const getCapabilityActions = (
+  capabilities: unknown[],
+  perspective: "provided" | "sought" = "provided",
+): ResolvedCompanyFunctionAction[] => {
+  const actions: ResolvedCompanyFunctionAction[] = [];
   const seen = new Set<string>();
 
-  capabilities.forEach((slug) => {
-    getPreviewDefinition(slug, perspective)?.actions.forEach(({ href }) => {
-      if (seen.has(href)) return;
-      seen.add(href);
-      links.push(href);
+  capabilities.forEach((value) => {
+    const capabilitySlug = normalizePreviewFunctionSlug(value);
+    const capability = COMPANY_FUNCTION_PREVIEW_DEFINITIONS.find(({ slug }) => slug === capabilitySlug);
+    getPreviewDefinition(capabilitySlug, perspective)?.actions.forEach((action) => {
+      if (seen.has(action.href)) return;
+      seen.add(action.href);
+      actions.push({
+        ...action,
+        capabilitySlug,
+        capabilityName: capability?.name || capabilitySlug,
+        perspective,
+      });
     });
   });
 
-  return links;
+  return actions;
 };
 
 export const getCompanyFunctionRoleContext = (

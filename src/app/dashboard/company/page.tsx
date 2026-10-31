@@ -1,6 +1,6 @@
 "use client";
 
-import { LuUser, LuPlus, LuLayoutDashboard, LuUsers, LuBuilding, LuActivity, LuCheck, LuChevronUp, LuChevronDown, LuGlobe, LuMapPin, LuMail, LuPhone, LuPackage, LuClipboardList, LuArrowUpRight } from "react-icons/lu";
+import { LuUser, LuPlus, LuLayoutDashboard, LuUsers, LuBuilding, LuActivity, LuCheck, LuChevronUp, LuChevronDown, LuMapPin, LuMail, LuPhone, LuPackage, LuClipboardList, LuArrowUpRight } from "react-icons/lu";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,6 +28,7 @@ import { COMPANY_FUNCTION_TAXONOMY_VERSION, fetchRegisterOptions } from "@/utils
 import { CompanyMetricCard, CompanyProfileReadiness } from "@/components/dashboard/Company/CompanyOverviewCards";
 import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPriorities";
 import { getCompanyFunctionPerspectiveDescription } from "@/utils/companyFunctionDescriptions";
+import { getCapabilityActions } from "@/utils/companyFunctionPreview";
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
@@ -323,9 +324,16 @@ export default function CompanyWorkspacePage() {
       if (error?.response?.status === 409) {
         queryClient.invalidateQueries({ queryKey: ["company-capability-requests"] });
       }
+      const errorCode = String(error?.response?.data?.code || "");
+      const nextEligibleAt = error?.response?.data?.nextEligibleAt;
+      if (errorCode === "APPROVAL_COOLDOWN") {
+        setIsInterestModalOpen(false);
+      }
       showToastMessage({
         type: "error",
-        message: error?.response?.data?.message || error?.message || "Failed to submit interest request.",
+        message: errorCode === "APPROVAL_COOLDOWN"
+          ? `Capability changes are locked for 7 days after approval. Available again ${formatDate(nextEligibleAt)}.`
+          : error?.response?.data?.message || error?.message || "Failed to submit interest request.",
         position: "top-right",
       });
     },
@@ -378,6 +386,28 @@ export default function CompanyWorkspacePage() {
     : Array.isArray(interestsQuery.data?.approvedCompanyFunctionPriorities)
       ? interestsQuery.data.approvedCompanyFunctionPriorities.map(String)
       : [];
+  const orderedCapabilitySlugs = (selectedIds: string[], priorityIds: string[]) => {
+    const selected = new Set(selectedIds);
+    const seen = new Set<string>();
+    return [...priorityIds, ...capabilityOptions.map((item: any) => String(item?._id || ""))]
+      .filter((id) => {
+        if (!selected.has(id) || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      })
+      .map((id) => String(capabilityById.get(id)?.slug || ""))
+      .filter(Boolean);
+  };
+  const providingQuickActions = getCapabilityActions(
+    orderedCapabilitySlugs(providedFunctionIds, providedPriorityIds),
+    "provided",
+  ).slice(0, 3);
+  const seekingQuickActions = getCapabilityActions(
+    orderedCapabilitySlugs(soughtFunctionIds, soughtPriorityIds),
+    "sought",
+  ).slice(0, 3);
+  const quickActionsLoading = companyQuery.isLoading || interestsQuery.isLoading || registerOptionsQuery.isLoading;
+  const hasBusinessQuickActions = providingQuickActions.length > 0 || seekingQuickActions.length > 0;
   const interestReports = useMemo(() => (Array.isArray(capabilityRequestsQuery.data?.rows) ? capabilityRequestsQuery.data.rows : []).map((row: any) => ({
     ...row,
     payload: {
@@ -389,7 +419,7 @@ export default function CompanyWorkspacePage() {
     adminNotes: row.reviewNotes,
     reporterAssociateId: row.requesterAssociateId,
   })), [capabilityRequestsQuery.data?.rows]);
-  const latestPendingLikeReport = useMemo(() => {
+  const latestPendingCandidate = useMemo(() => {
     return interestReports.find((row: any) => {
       const status = String(row?.status || "").toUpperCase();
       return status === "PENDING_REVIEW" || status === "UNDER_REVIEW";
@@ -400,6 +430,7 @@ export default function CompanyWorkspacePage() {
     return status === "APPROVED" || status === "REJECTED";
   }) || null, [interestReports]);
   const capabilityEligibility = capabilityRequestsQuery.data?.eligibility || { canSubmit: true, reason: null, nextEligibleAt: null };
+  const latestPendingLikeReport = capabilityEligibility.reason === "PENDING_REVIEW" ? latestPendingCandidate : null;
   const isCapabilityCooldown = capabilityEligibility.reason === "APPROVAL_COOLDOWN";
   const capabilitySubmissionBlocked = Boolean(latestPendingLikeReport || recentInterestSubmission || !capabilityEligibility.canSubmit);
 
@@ -478,6 +509,7 @@ export default function CompanyWorkspacePage() {
   ];
   const profileCompleteness = Math.round((profileChecks.filter((item) => item.complete).length / profileChecks.length) * 100);
   const openCapabilityEditor = () => {
+    if (capabilitySubmissionBlocked) return;
     setRequestedProvidedIds(providedFunctionIds);
     setRequestedSoughtIds(soughtFunctionIds);
     setRequestedProvidedPriorities(reconcileCompanyFunctionPriorities(providedFunctionIds, providedPriorityIds));
@@ -848,9 +880,59 @@ export default function CompanyWorkspacePage() {
 
       <section className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
         <CompanyProfileReadiness percentage={profileCompleteness} checks={profileChecks} />
-        <div className="rounded-2xl border border-default-200 bg-content1 p-5 md:p-6"><h2 className="text-lg font-bold">Quick actions</h2><p className="mb-4 text-sm text-default-500">Continue common company tasks.</p><div className="grid gap-2">{[
-          ["Open commodity directory", "/dashboard/catalog", <LuGlobe key="globe" />], ["Manage trade listings", "/dashboard/product", <LuPackage key="package" />], ["Account settings", "/dashboard/settings", <LuBuilding key="building" />], ["Customer support", "/dashboard/customer-support", <LuUser key="user" />],
-        ].map(([label, href, icon]: any) => <Button key={href} variant="flat" className="justify-start" startContent={icon} endContent={<LuArrowUpRight className="ml-auto" />} onPress={() => router.push(href)}>{label}</Button>)}</div></div>
+        <div className="rounded-2xl border border-default-200 bg-content1 p-5 md:p-6">
+          <h2 className="text-lg font-bold">Company actions</h2>
+          <p className="mb-5 text-sm text-default-500">Shortcuts aligned with your approved company responsibilities.</p>
+
+          {quickActionsLoading ? (
+            <div aria-label="Loading company actions" className="space-y-3">
+              {[0, 1, 2].map((item) => <div key={item} className="h-16 animate-pulse rounded-xl bg-default-100" />)}
+            </div>
+          ) : hasBusinessQuickActions ? (
+            <div className="space-y-5">
+              {[
+                { label: "Providing", actions: providingQuickActions },
+                { label: "Seeking", actions: seekingQuickActions },
+              ].map((group) => group.actions.length ? (
+                <div key={group.label}>
+                  <h3 className="mb-2 text-xs font-bold tracking-wide text-default-500">{group.label}</h3>
+                  <div className="grid gap-2">
+                    {group.actions.map((action) => (
+                      <button
+                        key={`${group.label}-${action.href}`}
+                        type="button"
+                        className="flex w-full items-center gap-3 rounded-xl bg-default-100 px-4 py-3 text-left transition-colors hover:bg-default-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        onClick={() => router.push(action.href)}
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-foreground">{action.label}</span>
+                          <span className="mt-0.5 block text-xs text-default-500">{group.label} · {action.capabilityName}</span>
+                        </span>
+                        <LuArrowUpRight className="shrink-0 text-default-400" aria-hidden="true" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null)}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-warning-300 bg-warning-50/50 p-4 dark:border-warning-400/30 dark:bg-warning-400/10">
+              <p className="text-sm font-semibold text-foreground">Company capabilities are not configured.</p>
+              <p className="mt-1 text-xs leading-5 text-default-500">Add what your company provides and seeks to receive relevant shortcuts.</p>
+              <Button size="sm" color="warning" variant="flat" className="mt-3 font-semibold" onPress={openCapabilityEditor}>Configure company capabilities</Button>
+            </div>
+          )}
+
+          <div className="mt-5 border-t border-default-200 pt-4">
+            <h3 className="mb-2 text-xs font-bold tracking-wide text-default-500">Common actions</h3>
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+              {[
+                ["Account settings", "/dashboard/settings", <LuBuilding key="building" />],
+                ["Customer support", "/dashboard/customer-support", <LuUser key="user" />],
+              ].map(([label, href, icon]: any) => <Button key={href} variant="flat" className="justify-start" startContent={icon} endContent={<LuArrowUpRight className="ml-auto" />} onPress={() => router.push(href)}>{label}</Button>)}
+            </div>
+          </div>
+        </div>
       </section>
 
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
@@ -901,7 +983,7 @@ export default function CompanyWorkspacePage() {
           <div className="mb-4 rounded-lg border border-success-200 bg-success-50 px-3 py-2 text-sm text-success-800 dark:border-success-400/30 dark:bg-success-400/10 dark:text-success-200">
             <div className="font-medium">The latest capability changes were approved.</div>
             <div className="mt-1 text-xs">
-              Capabilities can be changed again after {formatDate(capabilityEligibility.nextEligibleAt)}.
+              Capability changes are locked for 7 days after approval. You can submit another request after {formatDate(capabilityEligibility.nextEligibleAt)}.
             </div>
           </div>
         ) : null}

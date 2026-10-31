@@ -309,9 +309,9 @@ export default function EnquiryPage() {
                       tabContent: "font-black  tracking-[0.15em] text-[10px] db-muted group-data-[selected=true]:text-obaol-500"
                     }}
                   >
-                    <Tab key="All" title="Global Pipeline" />
-                    <Tab key="Buying" title="My Acquisitions" />
-                    <Tab key="Selling" title="Supply Streams" />
+                    <Tab key="All" title="All Enquiries" />
+                    <Tab key="Buying" title="Buying Inventory" />
+                    <Tab key="Selling" title="Selling Inventory" />
                   </Tabs>
                 </div>
 
@@ -334,7 +334,7 @@ export default function EnquiryPage() {
                       tabContent: "font-black  tracking-[0.12em] text-[9px] db-muted group-data-[selected=true]:text-obaol-500"
                     }}
                   >
-                    <Tab key="All" title="Full Stack" />
+                    <Tab key="All" title="All" />
                     <Tab key="Pending" title="New" />
                     <Tab key="Converted" title="Converted" />
                     <Tab key="Completed" title="Closed" />

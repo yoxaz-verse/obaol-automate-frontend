@@ -38,6 +38,22 @@ test("My Company exposes operational overview sections", () => {
   }
 });
 
+test("My Company quick actions follow approved capability responsibilities", () => {
+  const company = read("../src/app/dashboard/company/page.tsx");
+  assert.equal(company.includes("getCapabilityActions("), true);
+  assert.equal(company.includes("orderedCapabilitySlugs(providedFunctionIds, providedPriorityIds)"), true);
+  assert.equal(company.includes("orderedCapabilitySlugs(soughtFunctionIds, soughtPriorityIds)"), true);
+  assert.equal(company.includes(".slice(0, 3)"), true);
+  assert.equal(company.includes('label: "Providing", actions: providingQuickActions'), true);
+  assert.equal(company.includes('label: "Seeking", actions: seekingQuickActions'), true);
+  assert.equal(company.includes("{group.label} · {action.capabilityName}"), true);
+  assert.equal(company.includes("Common actions"), true);
+  assert.equal(company.includes("Configure company capabilities"), true);
+  assert.equal(company.includes('aria-label="Loading company actions"'), true);
+  assert.equal(company.includes("Open commodity directory"), false);
+  assert.equal(company.includes("Manage trade listings"), false);
+});
+
 test("company capabilities show one authoritative review state and cooldown eligibility", () => {
   const company = read("../src/app/dashboard/company/page.tsx");
   assert.equal(company.includes('label: "Changes pending review"'), true);
@@ -45,7 +61,11 @@ test("company capabilities show one authoritative review state and cooldown elig
   assert.equal(company.includes('label: "Changes rejected"'), true);
   assert.equal(company.includes('label: "Capabilities approved"'), true);
   assert.equal(company.includes('capabilityEligibility.reason === "APPROVAL_COOLDOWN"'), true);
-  assert.equal(company.includes("Capabilities can be changed again after"), true);
+  assert.equal(company.includes("Capability changes are locked for 7 days after approval"), true);
+  assert.equal(company.includes('capabilityEligibility.reason === "PENDING_REVIEW" ? latestPendingCandidate : null'), true);
+  assert.equal(company.includes('errorCode === "APPROVAL_COOLDOWN"'), true);
+  assert.equal(company.includes("setIsInterestModalOpen(false)"), true);
+  assert.equal(company.includes("if (capabilitySubmissionBlocked) return"), true);
   assert.equal(company.includes("Pending: {interestStatusSummary.pending}"), false);
   assert.equal(company.includes("Under Review: {interestStatusSummary.underReview}"), false);
   assert.equal(company.includes("Action Taken: {interestStatusSummary.actionTaken}"), false);

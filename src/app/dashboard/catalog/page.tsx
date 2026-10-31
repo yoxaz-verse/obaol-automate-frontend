@@ -387,7 +387,6 @@ export default function CatalogPage() {
             )}
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto">
-            {isAssociateUser && <Button as={Link} href="/dashboard/catalog/additions" color="warning" variant="flat" className="shrink-0">My Additions</Button>}
             <div className="w-full md:w-[380px] relative">
               <Input
                 placeholder="Deep search — products, categories, variants..."
@@ -404,6 +403,7 @@ export default function CatalogPage() {
                 <div className="absolute -bottom-1.5 left-4 right-4 h-[2px] bg-gradient-to-r from-obaol-400 to-orange-500 rounded-full" />
               )}
             </div>
+            {isAssociateUser && <Button as={Link} href="/dashboard/catalog/additions" color="warning" variant="flat" className="shrink-0">My Additions</Button>}
 
             {isAdmin && !selectedProduct && !isSearching && (
               <DeferredAddModal

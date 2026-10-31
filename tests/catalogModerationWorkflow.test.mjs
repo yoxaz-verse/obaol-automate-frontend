@@ -7,6 +7,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 test("catalog additions use a dedicated owner workspace", () => {
   const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
   const additions = read("../src/app/dashboard/catalog/additions/page.tsx");
+  const catalog = read("../src/app/dashboard/catalog/page.tsx");
   assert.equal(wizard.includes("Requested name"), false);
   assert.match(wizard, /dashboard\/catalog\/additions/);
   assert.match(additions, /Private — catalog approval pending/);
@@ -26,6 +27,7 @@ test("catalog additions use a dedicated owner workspace", () => {
   assert.match(additions, /setCategoryId\(id\); setSubCategoryId\(""\); setParentId/);
   assert.match(additions, /setSubCategoryId\(id\); setParentId/);
   assert.match(additions, /row\.entityType === "subCategory" \? nextCategoryId/);
+  assert.ok(catalog.indexOf('placeholder="Deep search') < catalog.indexOf(">My Additions<"));
 });
 
 test("catalog moderation has a dedicated audited admin queue", () => {

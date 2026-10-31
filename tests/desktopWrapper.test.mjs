@@ -11,6 +11,7 @@ test("desktop shell keeps remote content isolated and navigation restricted", ()
   assert.match(main, /sandbox:\s*true/);
   assert.match(main, /setWindowOpenHandler/);
   assert.match(main, /isTrustedOBAOLUrl/);
+  assert.match(main, /isTrustedOBAOLUrl\(url\)[\s\S]*shell\.openExternal\(url\)/);
   assert.match(main, /https:\/\/www\.obaol\.com\/auth/);
 });
 
@@ -19,6 +20,7 @@ test("desktop shell exposes only the minimal read-only bridge", () => {
   assert.match(preload, /Object\.freeze/);
   assert.match(preload, /isDesktop:\s*true/);
   assert.match(preload, /focusWindow/);
+  assert.match(preload, /page === "home" \|\| page === "account-types"/);
   assert.doesNotMatch(preload, /require\([^)]*child_process/);
   assert.doesNotMatch(preload, /require\([^)]*fs/);
 });

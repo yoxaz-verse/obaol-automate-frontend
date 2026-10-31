@@ -138,7 +138,7 @@ function secureWebContents(webContents) {
     }
 
     if (isTrustedOBAOLUrl(url)) {
-      void webContents.loadURL(url);
+      void shell.openExternal(url);
       return { action: "deny" };
     }
     if (/^(https:|mailto:)/.test(url)) void shell.openExternal(url);

@@ -251,7 +251,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   const otpRemaining = otpExpiresAt - now;
   const resendRemaining = resendAt - now;
   const openDesktopPublicPage = (event: MouseEvent<HTMLAnchorElement>, page: "home" | "account-types") => {
-    if (!window.obaolDesktop) return;
+    if (typeof window.obaolDesktop?.openPublicPage !== "function") return;
     event.preventDefault();
     window.obaolDesktop.openPublicPage(page);
   };
@@ -349,7 +349,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
           </form>
         )}
 
-        <div data-testid="auth-public-navigation" className="hidden flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs dark:border-white/10 lg:flex"><Link href="/" onClick={(event) => openDesktopPublicPage(event, "home")} className="font-semibold text-slate-500 hover:text-obaol-700">Back to OBAOL</Link><Link href="/roles" onClick={(event) => openDesktopPublicPage(event, "account-types")} className="font-semibold text-obaol-700 dark:text-obaol-300">Compare account types</Link></div>
+        <div data-testid="auth-public-navigation" className="hidden flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs dark:border-white/10 lg:flex"><Link href="/" target="_blank" rel="noopener noreferrer" onClick={(event) => openDesktopPublicPage(event, "home")} className="font-semibold text-slate-500 hover:text-obaol-700">Back to OBAOL</Link><Link href="/roles" target="_blank" rel="noopener noreferrer" onClick={(event) => openDesktopPublicPage(event, "account-types")} className="font-semibold text-obaol-700 dark:text-obaol-300">Compare account types</Link></div>
       </div>
     </AuthLayout>
   );

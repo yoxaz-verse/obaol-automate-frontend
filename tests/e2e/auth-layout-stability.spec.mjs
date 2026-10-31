@@ -80,6 +80,9 @@ test("desktop auth retains branding, card, and public navigation", async ({ page
   await expect(page.getByTestId("auth-public-navigation")).toBeVisible();
   await expect(page.getByRole("link", { name: "Back to OBAOL" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Compare account types" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to OBAOL" })).toHaveAttribute("target", "_blank");
+  await expect(page.getByRole("link", { name: "Compare account types" })).toHaveAttribute("target", "_blank");
+  await expect(page.getByRole("link", { name: "Back to OBAOL" })).toHaveAttribute("rel", "noopener noreferrer");
 
   const surface = await page.getByTestId("auth-card").evaluate((node) => {
     const style = getComputedStyle(node);
@@ -87,6 +90,30 @@ test("desktop auth retains branding, card, and public navigation", async ({ page
   });
   expect(surface.borderWidth).not.toBe("0px");
   expect(surface.borderRadius).not.toBe("0px");
+});
+
+test("browser auth public links open a new page and preserve the auth form", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/auth", { waitUntil: "domcontentloaded" });
+  await page.getByLabel("Email address").fill("member@example.com");
+  const authUrl = page.url();
+
+  const homePopupPromise = page.waitForEvent("popup");
+  await page.getByRole("link", { name: "Back to OBAOL" }).click();
+  const homePopup = await homePopupPromise;
+  await homePopup.waitForLoadState("domcontentloaded");
+  expect(new URL(homePopup.url()).pathname).toBe("/");
+  await homePopup.close();
+
+  const rolesPopupPromise = page.waitForEvent("popup");
+  await page.getByRole("link", { name: "Compare account types" }).click();
+  const rolesPopup = await rolesPopupPromise;
+  await rolesPopup.waitForLoadState("domcontentloaded");
+  expect(new URL(rolesPopup.url()).pathname).toBe("/roles");
+  await rolesPopup.close();
+
+  expect(page.url()).toBe(authUrl);
+  await expect(page.getByLabel("Email address")).toHaveValue("member@example.com");
 });
 
 test("desktop auth public links open externally without leaving the app", async ({ page }) => {
@@ -109,6 +136,27 @@ test("desktop auth public links open externally without leaving the app", async 
 
   expect(page.url()).toBe(authUrl);
   expect(await page.evaluate(() => window.__desktopPublicPages)).toEqual(["home", "account-types"]);
+});
+
+test("auth public links fall back safely when an older desktop bridge is present", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.obaolDesktop = {
+      isDesktop: true,
+      platform: "darwin",
+      version: "0.1.1",
+      focusWindow() {},
+    };
+  });
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/auth", { waitUntil: "domcontentloaded" });
+  const authUrl = page.url();
+
+  const popupPromise = page.waitForEvent("popup");
+  await page.getByRole("link", { name: "Back to OBAOL" }).click();
+  const popup = await popupPromise;
+  await popup.close();
+
+  expect(page.url()).toBe(authUrl);
 });
 
 test("forgot-password entry preserves email and requires a public account type", async ({ page }) => {

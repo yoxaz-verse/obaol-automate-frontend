@@ -7,7 +7,7 @@ declare global {
       platform: "darwin" | "win32" | "linux" | string;
       version: string;
       focusWindow: () => void;
-      openPublicPage: (page: "home" | "account-types") => void;
+      openPublicPage?: (page: "home" | "account-types") => void;
     }>;
   }
 }

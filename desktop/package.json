@@ -1,6 +1,6 @@
 {
   "name": "obaol-supreme-desktop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OBAOL Supreme desktop client for Windows and macOS",
   "private": true,
   "main": "src/main.cjs",
@@ -8,9 +8,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder",
-    "dist:mac": "electron-builder --mac dmg --universal",
-    "dist:win": "electron-builder --win nsis --x64",
+    "dist": "electron-builder --publish never",
+    "dist:mac": "electron-builder --mac dmg --universal --publish never",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
     "validate": "node scripts/validate.cjs"
   },
   "devDependencies": {

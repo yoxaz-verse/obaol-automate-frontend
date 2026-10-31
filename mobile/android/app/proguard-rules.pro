@@ -1,0 +1,2 @@
+-keep class com.obaol.app.** { *; }
+-keepattributes *Annotation*

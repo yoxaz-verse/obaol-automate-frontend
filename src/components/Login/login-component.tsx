@@ -8,6 +8,7 @@ import {
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
+import { FaApple, FaGoogle } from "react-icons/fa";
 import { FiAlertCircle, FiArrowLeft, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiMail, FiUsers, FiX } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -19,6 +20,7 @@ import { baseUrl } from "@/core/api/axiosInstance";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
 import { getPasswordResetRole } from "@/utils/authRoleRoutes";
+import { isObaolMobileShell, requestMobileAuth, requestWebAppleCredential } from "@/utils/mobileAuthBridge";
 
 
 interface ILoginProps {
@@ -108,7 +110,36 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
   const { isAuthenticated, loading, login, loginWithGoogle, user, refreshUser } = useContext(AuthContext);
   const [googleReady, setGoogleReady] = useState(false);
   const [googleRenderError, setGoogleRenderError] = useState("");
+  const [mobileShell, setMobileShell] = useState(false);
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
+  useEffect(() => setMobileShell(isObaolMobileShell()), []);
+
+  const handleProviderAuth = useCallback(async (provider: "google" | "apple") => {
+    const roleValue = roleLower === "team" || roleLower === "operator" ? "Operator" : "Associate";
+    setIsLoading(true);
+    setErrorMessage("");
+    try {
+      if (mobileShell) {
+        const result = await requestMobileAuth({ provider, role: roleValue, intent: authMode === "signup" ? "register" : "login", rememberMe });
+        if (!result.ok) throw new Error("error" in result ? result.error : "Sign-in failed.");
+        return;
+      }
+      if (provider !== "apple") return;
+      const credential = await requestWebAppleCredential();
+      await postData("/auth/apple", { ...credential, role: roleValue, intent: authMode === "signup" ? "register" : "login", rememberMe });
+      const refreshed = await refreshUser();
+      if (!refreshed) throw new Error("Session cookie blocked. Allow cookies for the API domain and retry.");
+      setLoginStatus("success");
+      setIsRedirecting(true);
+      router.push(authMode === "signup" ? "/dashboard/onboarding?auth=apple" : "/dashboard");
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || "Sign-in failed.");
+      setLoginStatus("error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [authMode, mobileShell, refreshUser, rememberMe, roleLower, router]);
 
   useEffect(() => {
     return () => {
@@ -272,11 +303,12 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
 
   useEffect(() => {
     if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
+    if (mobileShell) return;
     if (!googleClientId || typeof window === "undefined") return;
     loadGoogleGsi()
       .then(() => setGoogleReady(true))
       .catch(() => setGoogleRenderError("Google sign-in is temporarily unavailable."));
-  }, [roleLower, googleClientId]);
+  }, [roleLower, googleClientId, mobileShell]);
 
   useEffect(() => {
     if (!googleReady) return;
@@ -1391,8 +1423,13 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
             </div>
 
             <div className="w-full flex flex-col gap-1.5">
+              {mobileShell && (
+                <Button className="h-12 w-full bg-white text-black" startContent={<FaGoogle />} isLoading={isLoading} onPress={() => handleProviderAuth("google")}>
+                  Continue with Google
+                </Button>
+              )}
               <div className="flex min-h-[96px] items-center justify-center rounded-[1.5rem] border border-default-200/50 bg-gradient-to-b from-default-100/40 to-transparent p-2.5 shadow-soft group/google">
-                {googleClientId ? (
+                {!mobileShell && googleClientId ? (
                   <div className="flex min-h-[74px] w-full flex-col items-center justify-center p-1 transition-[filter] duration-300 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
                     {!googleReady && !googleRenderError && (
                       <div className="h-11 w-full max-w-[340px] animate-pulse rounded-full border border-default-200 bg-default-100/70 dark:border-white/10 dark:bg-white/[0.04]" />
@@ -1413,10 +1450,13 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
                       </div>
                     )}
                   </div>
-                ) : (
+                ) : !mobileShell ? (
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
-                )}
+                ) : null}
               </div>
+              <Button className="h-12 w-full bg-black text-white" startContent={<FaApple />} isLoading={isLoading} onPress={() => handleProviderAuth("apple")}>
+                Continue with Apple
+              </Button>
             </div>
           </div>
         )}
@@ -1432,8 +1472,13 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
             </div>
 
             <div className="w-full flex flex-col gap-1.5">
+              {mobileShell && (
+                <Button className="h-12 w-full bg-white text-black" startContent={<FaGoogle />} isLoading={isLoading} onPress={() => handleProviderAuth("google")}>
+                  Sign up with Google
+                </Button>
+              )}
               <div className="flex min-h-[96px] items-center justify-center rounded-[1.5rem] border border-default-200/50 bg-gradient-to-b from-default-100/40 to-transparent p-2.5 shadow-soft group/google">
-                {googleClientId ? (
+                {!mobileShell && googleClientId ? (
                   <div className="flex min-h-[74px] w-full flex-col items-center justify-center p-1 transition-[filter] duration-300 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
                     {!googleReady && !googleRenderError && (
                       <div className="h-11 w-full max-w-[340px] animate-pulse rounded-full border border-default-200 bg-default-100/70 dark:border-white/10 dark:bg-white/[0.04]" />
@@ -1454,10 +1499,13 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
                       </div>
                     )}
                   </div>
-                ) : (
+                ) : !mobileShell ? (
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
-                )}
+                ) : null}
               </div>
+              <Button className="h-12 w-full bg-black text-white" startContent={<FaApple />} isLoading={isLoading} onPress={() => handleProviderAuth("apple")}>
+                Sign up with Apple
+              </Button>
             </div>
           </div>
         )}

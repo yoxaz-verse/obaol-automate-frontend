@@ -1,6 +1,6 @@
 {
   "name": "obaol-supreme-desktop",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "OBAOL Supreme desktop client for Windows and macOS",
   "private": true,
   "main": "src/main.cjs",

@@ -39,7 +39,7 @@ if (!mainSource.includes("SPLASH_MINIMUM_MS") || !mainSource.includes("createSpl
   process.exit(1);
 }
 
-if (manifest.version !== "0.1.5" || !manifest.dependencies?.["electron-updater"]) {
+if (manifest.version !== "0.1.6" || !manifest.dependencies?.["electron-updater"]) {
   console.error("Desktop updater package or version is incomplete.");
   process.exit(1);
 }
@@ -54,6 +54,16 @@ for (const channel of ["desktop:update-check", "desktop:update-download", "deskt
 const loadingSource = fs.readFileSync(path.join(root, "src/loading.html"), "utf8");
 if (!loadingSource.includes("splash-logo.webp") || !loadingSource.includes("opening-chime.wav") || !loadingSource.includes("prefers-reduced-motion")) {
   console.error("Desktop cinematic splash asset or reduced-motion treatment is incomplete.");
+  process.exit(1);
+}
+
+if (!loadingSource.includes('class="sunburst"') || !loadingSource.includes("const rayCount = 48") || !loadingSource.includes('setAttribute("x1", "0")') || !loadingSource.includes('setAttribute("y1", "0")')) {
+  console.error("The desktop splash does not contain the centered 48-ray sunburst.");
+  process.exit(1);
+}
+
+if (/wave-shell|class="wave"|class="contours"|<ellipse\b/.test(loadingSource)) {
+  console.error("The retired waveform or oval contours are still present.");
   process.exit(1);
 }
 

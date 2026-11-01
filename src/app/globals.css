@@ -181,6 +181,48 @@ body {
 .app-button--danger, .app-button--success, .app-button--warning { color: white !important; }
 .app-button--warning { color: #1b2632 !important; }
 
+/* Application-owned map chrome follows the dashboard palette in both modes. */
+.themed-map-frame {
+  overflow: hidden;
+  border: 1px solid var(--db-border-subtle);
+  border-radius: var(--db-radius-panel);
+  background: var(--db-panel);
+  box-shadow: var(--db-shadow-card);
+}
+.themed-leaflet-map {
+  --map-popup: #fbf8f2;
+  --map-popup-text: #1b2632;
+  --map-popup-muted: #5c5b59;
+  --map-popup-border: rgba(142,132,116,.48);
+  --map-control: #fbf8f2;
+  --map-control-hover: #e7e0d4;
+}
+.dark .themed-leaflet-map {
+  --map-popup: #22303d;
+  --map-popup-text: #eee9df;
+  --map-popup-muted: #c9c1b1;
+  --map-popup-border: rgba(201,193,177,.25);
+  --map-control: #2c3b4d;
+  --map-control-hover: #35475a;
+}
+.themed-leaflet-map .leaflet-bar { border: 1px solid var(--map-popup-border) !important; box-shadow: var(--db-shadow) !important; }
+.themed-leaflet-map .leaflet-bar a {
+  border-color: var(--map-popup-border) !important;
+  background: var(--map-control) !important;
+  color: var(--map-popup-text) !important;
+}
+.themed-leaflet-map .leaflet-bar a:hover { background: var(--map-control-hover) !important; }
+.themed-leaflet-map .leaflet-popup-content-wrapper,
+.themed-leaflet-map .leaflet-popup-tip {
+  border-color: var(--map-popup-border) !important;
+  background: var(--map-popup) !important;
+  color: var(--map-popup-text) !important;
+}
+.themed-map-popup { border-color: var(--map-popup-border) !important; background: var(--map-popup) !important; color: var(--map-popup-text) !important; }
+.themed-map-popup-muted { color: var(--map-popup-muted) !important; }
+.dashboard-segmented-control { border: 1px solid var(--db-border-subtle); background: var(--db-subtle); }
+.dashboard-filter-panel { border: 1px solid var(--db-border-subtle); background: var(--db-panel); box-shadow: var(--db-shadow); }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

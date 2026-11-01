@@ -5,6 +5,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@nextui-org/react";
+import { warehouseMarkerColors } from "@/utils/mapTheme";
 
 export type WarehouseMapItem = {
   _id: string;
@@ -37,12 +38,7 @@ type RenderWarehouse = WarehouseMapItem & {
   color: string;
 };
 
-const CATEGORY_COLOR: Record<string, string> = {
-  GENERAL: "#f59e0b",
-  COLD_STORAGE: "#06b6d4",
-  BONDED: "#8b5cf6",
-  AGRO: "#22c55e",
-};
+const CATEGORY_COLOR: Record<string, string> = warehouseMarkerColors;
 
 const iconCache = new Map<string, L.DivIcon>();
 
@@ -99,21 +95,21 @@ const WarehouseMarkers = React.memo(function WarehouseMarkers({
       {warehouses.map((warehouse) => (
         <Marker key={warehouse._id} position={[warehouse.lat, warehouse.lng]} icon={mkWarehouseIcon(warehouse.color)}>
           <Popup className="tactical-popup">
-            <div className="min-w-[220px] p-2 space-y-3 rounded-lg border bg-white border-slate-200 text-slate-900">
+            <div className="themed-map-popup min-w-[220px] space-y-3 rounded-lg border p-2">
               <div className="space-y-1">
-                <div className="text-[9px] font-black uppercase tracking-widest text-orange-500 font-mono">
+                <div className="font-mono text-[9px] font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">
                   W_Node_{warehouse._id.slice(-4)}
                 </div>
                 <div className="text-sm font-black">{warehouse.name}</div>
               </div>
-              <div className="text-[11px] font-semibold text-slate-700">
+              <div className="themed-map-popup-muted text-[11px] font-semibold">
                 {warehouse.contactPhone || "Contact unavailable"}
               </div>
               {warehouse.contactPhoneSecondary ? (
-                <div className="text-[10px] text-slate-500">Alt: {warehouse.contactPhoneSecondary}</div>
+                <div className="themed-map-popup-muted text-[10px]">Alt: {warehouse.contactPhoneSecondary}</div>
               ) : null}
               <Button
-                color="warning"
+                color="primary"
                 variant="solid"
                 size="sm"
                 fullWidth
@@ -174,7 +170,7 @@ export default function WarehouseRentMap({ warehouses, searchPoint, center, zoom
   return (
     <>
       <MapContainer
-        className="warehouse-rent-map"
+        className="warehouse-rent-map themed-leaflet-map"
         center={center}
         zoom={zoom}
         scrollWheelZoom
@@ -194,10 +190,11 @@ export default function WarehouseRentMap({ warehouses, searchPoint, center, zoom
         }
 
         .warehouse-rent-map .tactical-popup .leaflet-popup-content-wrapper {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
+          background: var(--map-popup);
+          border: 1px solid var(--map-popup-border);
           border-radius: 12px;
-          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+          color: var(--map-popup-text);
+          box-shadow: var(--db-shadow-card);
         }
 
         .warehouse-rent-map .tactical-popup .leaflet-popup-content {
@@ -205,8 +202,8 @@ export default function WarehouseRentMap({ warehouses, searchPoint, center, zoom
         }
 
         .warehouse-rent-map .tactical-popup .leaflet-popup-tip {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
+          background: var(--map-popup);
+          border: 1px solid var(--map-popup-border);
           box-shadow: none;
         }
       `}</style>

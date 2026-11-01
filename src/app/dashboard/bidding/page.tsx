@@ -2,6 +2,7 @@
 
 import { useContext, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { AppButton } from "@/components/ui/AppButton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Autocomplete,
@@ -413,25 +414,25 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   const themeField = {
     label: "font-bold text-[10px] sm:text-[11px]  tracking-wider text-default-500 mb-1",
     inputWrapper:
-      "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[focus=true]:border-warning-500 data-[focus=true]:ring-2 data-[focus=true]:ring-warning-500/20 transition-all border shadow-none",
+      "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[focus=true]:border-obaol-700 data-[focus=true]:ring-2 data-[focus=true]:ring-obaol-500/20 transition-all border shadow-none",
     trigger:
-      "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[open=true]:border-warning-500 data-[open=true]:ring-2 data-[open=true]:ring-warning-500/20 transition-all border shadow-none",
+      "h-12 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[open=true]:border-obaol-700 data-[open=true]:ring-2 data-[open=true]:ring-obaol-500/20 transition-all border shadow-none",
   };
 
   const textareaThemeField = {
     label: "font-bold text-[10px] sm:text-[11px]  tracking-wider text-default-500 mb-1",
     inputWrapper:
-      "py-3 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[focus=true]:border-warning-500 data-[focus=true]:ring-2 data-[focus=true]:ring-warning-500/20 transition-all border shadow-none",
+      "py-3 rounded-xl sm:rounded-2xl border-default-200 bg-content1 hover:bg-default-50 data-[focus=true]:border-obaol-700 data-[focus=true]:ring-2 data-[focus=true]:ring-obaol-500/20 transition-all border shadow-none",
   };
 
   const rows = eventsQuery.data || [];
 
   return (
     <main className="mx-auto w-full max-w-[1400px] p-4 md:p-8">
-      <header className="mb-6 rounded-3xl border border-warning-300/30 bg-gradient-to-br from-warning-50 to-background p-5 dark:from-warning-900/10">
+      <header className="mb-6 rounded-3xl border border-obaol-400/30 bg-gradient-to-br from-obaol-50/70 to-background p-5 dark:from-obaol-950/15">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-warning-600">
+            <div className="mb-2 flex items-center gap-2 text-obaol-700 dark:text-obaol-300">
               <FiLock />
               <span className="text-xs font-black  tracking-[.2em]">Sealed product offers</span>
             </div>
@@ -443,17 +444,16 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
             </p>
           </div>
           {mode === "buyer" && canBuy && (
-            <Button
-              color="warning"
+            <AppButton
+              intent="primary"
               startContent={<FiPlus />}
-              className="font-bold shadow-lg shadow-warning-500/20"
               onPress={() => {
                 resetCreateForm();
                 setShowCreate(true);
               }}
             >
               Create buying request
-            </Button>
+            </AppButton>
           )}
         </div>
       </header>
@@ -471,7 +471,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
       )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        {mode === "seller" ? <Tabs selectedKey={sellerView} onSelectionChange={(key) => setSellerView(String(key) as SellerView)} color="warning" variant="underlined" aria-label="Buying request offer views">
+        {mode === "seller" ? <Tabs selectedKey={sellerView} onSelectionChange={(key) => setSellerView(String(key) as SellerView)} color="primary" variant="underlined" aria-label="Buying request offer views">
           <Tab key="available" title="Open" />
           <Tab key="participating" title="My Offers" />
           <Tab key="history" title="Closed" />
@@ -486,7 +486,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
           <Button
             key={item}
             size="sm"
-            color={status === item ? "warning" : "default"}
+            color={status === item ? "primary" : "default"}
             variant={status === item ? "solid" : "flat"}
             className="font-semibold"
             onPress={() => setStatus(item)}
@@ -498,7 +498,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
 
       {eventsQuery.isLoading ? (
         <div className="flex h-48 items-center justify-center">
-          <Spinner color="warning" />
+          <Spinner color="primary" />
         </div>
       ) : rows.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-divider px-5 py-20 text-center">
@@ -506,7 +506,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
           <h2 className="font-bold">{mode === "buyer" ? "No buying requests here" : sellerView === "available" ? "No available bidding opportunities" : sellerView === "participating" ? "You are not participating in any bidding events" : "No bidding history yet"}</h2>
           <p className="mx-auto mt-1 max-w-xl text-sm text-default-500">{mode === "buyer" ? "Post what your company needs, then return here to compare confidential seller offers and choose a supplier." : "Open requests appear when their product and grade match one of your company’s approved trade listings."}</p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
-            {mode === "buyer" && canBuy ? <Button color="warning" startContent={<FiPlus />} onPress={() => { resetCreateForm(); setShowCreate(true); }}>Create buying request</Button> : null}
+            {mode === "buyer" && canBuy ? <AppButton intent="primary" startContent={<FiPlus />} onPress={() => { resetCreateForm(); setShowCreate(true); }}>Create buying request</AppButton> : null}
             {mode === "seller" ? <Button as={Link} href="/dashboard/product" variant="flat">Manage trade listings</Button> : null}
             {mode === "seller" && canBuy ? <Button as={Link} href="/dashboard/bidding/my" variant="light">Post a buying request</Button> : null}
           </div>
@@ -517,7 +517,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
             <article key={item._id} className="rounded-3xl border border-divider bg-content1 p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-bold  tracking-widest text-warning-600">
+                  <p className="text-xs font-bold tracking-widest text-obaol-700 dark:text-obaol-300">
                     {item.product?.name || "Product requirement"}
                   </p>
                   <h2 className="mt-1 text-xl font-black">{item.title}</h2>
@@ -530,7 +530,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                       : item.status === "CANCELLED"
                         ? "danger"
                         : item.status === "AWARDED"
-                          ? "warning"
+                          ? "primary"
                           : "default"
                   }
                   variant="flat"
@@ -592,7 +592,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                         {item.status === "CLOSED" && (
                           <Button
                             size="sm"
-                            color="warning"
+                            color="primary"
                             className="font-bold"
                             onPress={() => action.mutate({ url: productBiddingRoutes.award(item._id), body: { offerId: o._id } })}
                           >
@@ -607,7 +607,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
               <div className="mt-4 flex flex-wrap gap-2">
                 {mode === "seller" && item.status === "OPEN" && (
                   <Button
-                    color="warning"
+                    color="primary"
                     variant="flat"
                     className="font-bold"
                     onPress={() => {
@@ -702,7 +702,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
           {(onClose) => (
             <form onSubmit={handleCreateSubmit} className="contents">
               <ModalHeader className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-xs font-black  tracking-[0.2em] text-warning-500">
+                <div className="flex items-center gap-2 text-xs font-black tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
                   <FiLock size={13} />
                   <span>Sealed Procurement</span>
                 </div>
@@ -719,7 +719,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                 )}
 
                 {isAdmin ? (
-                  <section aria-labelledby="ownership-heading" className="space-y-4 rounded-2xl border border-warning-300/40 bg-warning-50/40 p-4 sm:p-5 dark:bg-warning-900/10">
+                  <section aria-labelledby="ownership-heading" className="space-y-4 rounded-2xl border border-obaol-400/35 bg-obaol-50/40 p-4 sm:p-5 dark:bg-obaol-950/10">
                     <div>
                       <h3 id="ownership-heading" className="font-bold text-foreground">Request ownership</h3>
                       <p className="text-xs text-default-500">Choose the company and approved associate who will own this request and receive bidding notifications.</p>
@@ -916,8 +916,8 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     <p className="text-xs text-default-500">Choose when sellers can begin and when sealed offers close.</p>
                   </div>
                   <div role="group" aria-label="Opening time" className="grid grid-cols-2 gap-2 rounded-xl bg-default-100 p-1">
-                    <Button type="button" size="sm" variant={openMode === "now" ? "solid" : "light"} color={openMode === "now" ? "warning" : "default"} className="font-semibold" onPress={() => { setOpenMode("now"); setDraft((current: any) => ({ ...current, opensAt: "", closesAt: "", deliveryDate: "" })); clearCreateFieldError("opensAt"); clearCreateFieldError("closesAt"); clearCreateFieldError("deliveryDate"); }}>Open now</Button>
-                    <Button type="button" size="sm" variant={openMode === "scheduled" ? "solid" : "light"} color={openMode === "scheduled" ? "warning" : "default"} className="font-semibold" onPress={() => { setOpenMode("scheduled"); setDraft((current: any) => ({ ...current, opensAt: "", closesAt: "", deliveryDate: "" })); }}>Schedule for later</Button>
+                    <Button type="button" size="sm" variant={openMode === "now" ? "solid" : "light"} color={openMode === "now" ? "primary" : "default"} className="font-semibold" onPress={() => { setOpenMode("now"); setDraft((current: any) => ({ ...current, opensAt: "", closesAt: "", deliveryDate: "" })); clearCreateFieldError("opensAt"); clearCreateFieldError("closesAt"); clearCreateFieldError("deliveryDate"); }}>Open now</Button>
+                    <Button type="button" size="sm" variant={openMode === "scheduled" ? "solid" : "light"} color={openMode === "scheduled" ? "primary" : "default"} className="font-semibold" onPress={() => { setOpenMode("scheduled"); setDraft((current: any) => ({ ...current, opensAt: "", closesAt: "", deliveryDate: "" })); }}>Schedule for later</Button>
                   </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {openMode === "scheduled" ? <Input
@@ -1006,10 +1006,10 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                 </Button>
                 <Button
                   type="submit"
-                  color="warning"
+                  color="primary"
                   isLoading={create.isPending}
                   isDisabled={create.isPending || (isAdmin && (!buyerCompany || !buyerContact))}
-                  className="font-bold shadow-lg shadow-warning-500/20"
+                  className="font-bold"
                   startContent={!create.isPending && <FiPlus />}
                 >
                   Schedule buying request
@@ -1043,7 +1043,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
           {(onClose) => (
             <form onSubmit={handleSubmitOffer} className="contents">
               <ModalHeader className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-xs font-black  tracking-[0.2em] text-warning-500">
+                <div className="flex items-center gap-2 text-xs font-black tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
                   <FiLock size={13} />
                   <span>Confidential Offer</span>
                 </div>
@@ -1055,14 +1055,14 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
               <ModalBody className="space-y-4">
                 {offerError && <div role="alert" className="rounded-xl border border-danger-300 bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700 dark:bg-danger-500/10 dark:text-danger-400">{offerError}</div>}
                 {activeOffer && (
-                  <div className="flex items-center justify-between rounded-2xl border border-warning-500/30 bg-warning-500/10 p-3.5 text-xs text-foreground">
+                  <div className="flex items-center justify-between rounded-2xl border border-obaol-500/30 bg-obaol-500/10 p-3.5 text-xs text-foreground">
                     <div>
-                      <p className="text-sm font-bold text-warning-500">{activeOffer.title}</p>
+                      <p className="text-sm font-bold text-obaol-700 dark:text-obaol-300">{activeOffer.title}</p>
                       <p className="mt-0.5 text-default-400">
                         {activeOffer.product?.name || "Product requirement"} · Requirement: {activeOffer.quantity} {activeOffer.unit}
                       </p>
                     </div>
-                    <Chip size="sm" variant="flat" color="warning">
+                    <Chip size="sm" variant="flat" color="primary">
                       Target: {activeOffer.quantity} {activeOffer.unit}
                     </Chip>
                   </div>
@@ -1174,9 +1174,9 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                 </Button>
                 <Button
                   type="submit"
-                  color="warning"
+                  color="primary"
                   isLoading={submitOffer.isPending}
-                  className="font-bold shadow-lg shadow-warning-500/20"
+                  className="font-bold"
                 >
                   Seal and submit
                 </Button>

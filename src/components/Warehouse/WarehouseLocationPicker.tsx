@@ -6,6 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { LuFlaskConical } from "react-icons/lu";
 import { renderToStaticMarkup } from "react-dom/server";
+import { mapTheme } from "@/utils/mapTheme";
 
 export type WarehouseLocationValue = {
   latitude: number;
@@ -25,7 +26,7 @@ const warehouseMarkerIcon = L.divIcon({
     <div class="warehouse-pin__core">
       <div class="warehouse-pin__ring"></div>
       <svg class="warehouse-pin__glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-3v-6h-4v6H4a1 1 0 0 1-1-1v-9.5Z" fill="#f59e0b" stroke="rgba(255,255,255,0.96)" stroke-width="1.45" />
+        <path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-3v-6h-4v6H4a1 1 0 0 1-1-1v-9.5Z" fill="${mapTheme.flame}" stroke="${mapTheme.palladian}" stroke-width="1.45" />
         <path d="M3 10.5h18" stroke="rgba(255,255,255,0.9)" stroke-width="1.15" />
       </svg>
     </div>
@@ -135,9 +136,9 @@ export default function WarehouseLocationPicker({
           position: absolute;
           inset: 0;
           border-radius: 999px;
-          border: 2px solid rgba(207,152,60, 0.9);
-          background: rgba(207,152,60, 0.15);
-          box-shadow: 0 0 0 4px rgba(207,152,60, 0.12), 0 10px 22px rgba(0, 0, 0, 0.35);
+          border: 2px solid rgba(255,177,98, 0.9);
+          background: rgba(255,177,98, 0.15);
+          box-shadow: 0 0 0 4px rgba(255,177,98, 0.12), 0 10px 22px rgba(27,38,50,0.28);
         }
         .warehouse-pin__glyph {
           position: absolute;
@@ -160,9 +161,9 @@ export default function WarehouseLocationPicker({
           width: 28px;
           height: 28px;
           transform: rotate(-45deg);
-          border: 2px solid #22c55e;
+          border: 2px solid ${mapTheme.flame};
           border-radius: 50% 50% 50% 0;
-          background: #0b1220;
+          background: ${mapTheme.abyssal};
           box-shadow: 0 7px 16px rgba(0, 0, 0, 0.35);
         }
         .lab-location-pin__glyph {
@@ -171,7 +172,7 @@ export default function WarehouseLocationPicker({
           top: 6px;
           width: 18px;
           height: 18px;
-          color: #22c55e;
+          color: ${mapTheme.flame};
           line-height: 1;
           pointer-events: none;
         }

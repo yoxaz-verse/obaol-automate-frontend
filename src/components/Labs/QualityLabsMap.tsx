@@ -11,6 +11,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import { renderToStaticMarkup } from "react-dom/server";
 import { whatsappHref } from "@/types/labProfile";
 import { trackLabContact } from "@/utils/labContact";
+import { mapTheme } from "@/utils/mapTheme";
 
 export type QualityLabMapItem = {
   _id: string;
@@ -41,7 +42,7 @@ const mkDotIcon = () =>
   L.divIcon({
     className: "quality-lab-icon",
     html: `
-      <div style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:9999px;background:#0b1220;border:2px solid #22c55e;box-shadow:0 0 0 3px rgba(34,197,94,0.2),0 6px 16px rgba(0,0,0,0.45);color:#22c55e;line-height:1;">
+      <div style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:9999px;background:${mapTheme.abyssal};border:2px solid ${mapTheme.flame};box-shadow:0 0 0 3px rgba(255,177,98,0.22),0 6px 16px rgba(27,38,50,0.32);color:${mapTheme.flame};line-height:1;">
         ${renderToStaticMarkup(<LuFlaskConical size={13} />)}
       </div>
     `,
@@ -96,7 +97,7 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom }: Prop
     <>
       <MapContainer
         ref={mapRef}
-        className="quality-labs-map"
+        className="quality-labs-map themed-leaflet-map"
         center={center}
         zoom={zoom}
         scrollWheelZoom
@@ -114,17 +115,17 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom }: Prop
           return (
           <Marker key={lab._id} position={[Number(lab.location?.latitude), Number(lab.location?.longitude)]} icon={markerIcon}>
             <Popup className="tactical-popup">
-              <div className="min-w-[240px] p-2 space-y-3 rounded-lg border bg-white border-slate-200 text-slate-900">
+              <div className="themed-map-popup min-w-[240px] space-y-3 rounded-lg border p-2">
                 <div className="space-y-1">
-                  <div className="text-[9px] font-black uppercase tracking-widest text-success-500 font-mono">Q_Lab_{lab._id.slice(-4)}</div>
+                  <div className="font-mono text-[9px] font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">Q_Lab_{lab._id.slice(-4)}</div>
                   <div className="text-sm font-black">{lab.name}</div>
                 </div>
-                {lab.contactPhone ? <div className="text-[11px] font-semibold text-slate-700">{lab.contactPhone}</div> : null}
-                {lab.contactPhoneSecondary ? <div className="text-[10px] text-slate-500">Alt: {lab.contactPhoneSecondary}</div> : null}
-                {lab.certificatesSummary ? <div className="text-[10px] text-slate-500 line-clamp-3">{lab.certificatesSummary}</div> : null}
+                {lab.contactPhone ? <div className="themed-map-popup-muted text-[11px] font-semibold">{lab.contactPhone}</div> : null}
+                {lab.contactPhoneSecondary ? <div className="themed-map-popup-muted text-[10px]">Alt: {lab.contactPhoneSecondary}</div> : null}
+                {lab.certificatesSummary ? <div className="themed-map-popup-muted line-clamp-3 text-[10px]">{lab.certificatesSummary}</div> : null}
                 <div className="flex flex-wrap gap-1">
                   {lab.capabilityStatus === "LEGACY_REQUIRES_MAPPING" ? <span className="rounded-full bg-amber-100 px-2 py-1 text-[9px] font-bold text-amber-800">Requires mapping</span> : <span className="rounded-full bg-emerald-100 px-2 py-1 text-[9px] font-bold text-emerald-800">Structured</span>}
-                  {lab.source ? <span className="rounded-full bg-slate-100 px-2 py-1 text-[9px] text-slate-700">{lab.source.replaceAll("_", " ")}</span> : null}
+                  {lab.source ? <span className="rounded-full bg-default-100 px-2 py-1 text-[9px] text-default-700">{lab.source.replaceAll("_", " ")}</span> : null}
                 </div>
                 <div className="grid grid-cols-3 gap-1">
                   <Button as="a" href={lab.contactPhone ? `tel:${lab.contactPhone}` : undefined} isDisabled={!lab.contactPhone} size="sm" variant="flat" isIconOnly aria-label="Call lab" onPress={() => trackLabContact(lab._id, "PHONE")}><FiPhone /></Button>
@@ -143,10 +144,11 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom }: Prop
         }
 
         .quality-labs-map .tactical-popup .leaflet-popup-content-wrapper {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
+          background: var(--map-popup);
+          border: 1px solid var(--map-popup-border);
           border-radius: 12px;
-          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+          color: var(--map-popup-text);
+          box-shadow: var(--db-shadow-card);
         }
 
         .quality-labs-map .tactical-popup .leaflet-popup-content {
@@ -154,8 +156,8 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom }: Prop
         }
 
         .quality-labs-map .tactical-popup .leaflet-popup-tip {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
+          background: var(--map-popup);
+          border: 1px solid var(--map-popup-border);
           box-shadow: none;
         }
       `}</style>

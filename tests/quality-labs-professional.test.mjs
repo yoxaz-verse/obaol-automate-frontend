@@ -24,7 +24,7 @@ test("lab directory toggles between map and card views with distinct empty state
   assert.match(source, /viewMode === "map" \? <>/);
   assert.match(source, /<QualityLabsMap/);
   assert.match(source, /labs\.map/);
-  assert.match(source, /viewMode === "cards" \? "success" : "default"/);
+  assert.match(source, /viewMode === "cards" \? "primary" : "default"/);
   assert.match(source, /No labs match these filters/);
   assert.match(source, /No published labs are available yet/);
   assert.match(source, /Map location not supplied/);

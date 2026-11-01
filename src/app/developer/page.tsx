@@ -257,7 +257,7 @@ export const metadata: Metadata = {
 
 export default function DeveloperIndexPage() {
   return (
-    <main className="min-h-screen bg-default-50 text-foreground dark:bg-[#07090f]">
+    <main className="min-h-screen bg-default-50 text-foreground dark:bg-brand-abyssal">
       <Header />
       <script
         type="application/ld+json"
@@ -269,7 +269,7 @@ export default function DeveloperIndexPage() {
       />
 
       <section className="mx-auto max-w-6xl px-4 pt-24 md:pt-28">
-        <div className="grid gap-8 rounded-lg border border-default-200 bg-white p-6 shadow-sm dark:border-white/15 dark:bg-[#11151f] md:grid-cols-[1.05fr_0.95fr] md:p-10">
+        <div className="grid gap-8 rounded-lg border border-default-200 bg-white p-6 shadow-sm dark:border-white/15 dark:bg-brand-blue md:grid-cols-[1.05fr_0.95fr] md:p-10">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">
               Developer Documentation
@@ -297,7 +297,7 @@ export default function DeveloperIndexPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-default-200 bg-default-50 p-5 dark:border-white/15 dark:bg-[#0c1118]">
+          <div className="rounded-lg border border-default-200 bg-default-50 p-5 dark:border-white/15 dark:bg-brand-abyssal">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500 dark:text-white/60">
               API Base URL
             </p>
@@ -331,7 +331,7 @@ export default function DeveloperIndexPage() {
         {overviewCards.map((card) => {
           const Icon = card.icon;
           return (
-            <article key={card.title} className="rounded-lg border border-default-200 bg-white p-5 dark:border-white/15 dark:bg-[#11151f]">
+            <article key={card.title} className="rounded-lg border border-default-200 bg-white p-5 dark:border-white/15 dark:bg-brand-blue">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
                 <Icon aria-hidden="true" />
               </div>
@@ -343,7 +343,7 @@ export default function DeveloperIndexPage() {
       </section>
 
       <section id="quick-start" className="mx-auto mt-8 max-w-6xl px-4">
-        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-brand-blue md:p-8">
           <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500 dark:text-white/60">Quick Start</p>
@@ -371,7 +371,7 @@ export default function DeveloperIndexPage() {
       </section>
 
       <section id="endpoint-reference" className="mx-auto mt-8 max-w-6xl px-4">
-        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-brand-blue md:p-8">
           <div className="max-w-3xl">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500 dark:text-white/60">Endpoint Reference</p>
             <h2 className="mt-2 text-2xl font-black text-default-900 dark:text-white">Protected business APIs</h2>
@@ -414,7 +414,7 @@ export default function DeveloperIndexPage() {
 
       <section id="code-examples" className="mx-auto mt-8 grid max-w-6xl gap-4 px-4 lg:grid-cols-3">
         {codeExamples.map((example) => (
-          <article key={example.title} className="rounded-lg border border-default-200 bg-white p-5 dark:border-white/15 dark:bg-[#11151f]">
+            <article key={example.title} className="rounded-lg border border-default-200 bg-white p-5 dark:border-white/15 dark:bg-brand-blue">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-base font-black text-default-900 dark:text-white">{example.title}</h2>
               <span className="rounded-md bg-default-100 px-2 py-1 text-xs font-bold text-default-500 dark:bg-white/10 dark:text-white/60">
@@ -430,7 +430,7 @@ export default function DeveloperIndexPage() {
 
       <section id="authentication" className="mx-auto mt-8 max-w-6xl px-4">
         <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+          <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-brand-blue md:p-8">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
               <FiShield aria-hidden="true" />
             </div>
@@ -445,7 +445,7 @@ export default function DeveloperIndexPage() {
             </ul>
           </div>
 
-          <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+          <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-brand-blue md:p-8">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
               <FiLock aria-hidden="true" />
             </div>
@@ -466,7 +466,7 @@ export default function DeveloperIndexPage() {
       </section>
 
       <section id="mcp-setup" className="mx-auto mt-8 max-w-6xl px-4">
-        <div className="grid gap-6 rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid gap-6 rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-brand-blue md:p-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500 dark:text-white/60">MCP / ChatGPT Connector Setup</p>
             <h2 className="mt-2 text-2xl font-black text-default-900 dark:text-white">Connect tools without sharing raw keys</h2>
@@ -503,7 +503,7 @@ export default function DeveloperIndexPage() {
       </section>
 
       <section id="faq" className="mx-auto mb-12 mt-8 max-w-6xl px-4">
-        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-brand-blue md:p-8">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
             <FiBookOpen aria-hidden="true" />
           </div>

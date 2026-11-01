@@ -263,7 +263,7 @@ function ExecutionStageCard({
       aria-label={`Step ${stage.sequence}: ${stage.label}`}
       onClick={onSelect}
       className={`group isolate overflow-hidden rounded-[1.15rem] border text-left shadow-[0_18px_35px_-25px_rgba(0,0,0,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 sm:rounded-[1.4rem] ${reducedMotion ? "" : "transition-[border-color,box-shadow] duration-300"} ${active
-        ? "border-obaol-400 bg-slate-950 text-white shadow-[0_22px_42px_-24px_rgba(0,0,0,0.8)]"
+        ? "border-obaol-400 bg-brand-abyssal text-white shadow-[0_22px_42px_-24px_rgba(27,38,50,0.8)]"
         : "border-obaol-300/75 bg-gradient-to-br from-obaol-50 via-white to-amber-50 text-slate-900 hover:border-obaol-500 dark:border-obaol-400/30 dark:from-slate-900 dark:via-slate-950 dark:to-amber-950/30 dark:text-white"} ${className}`}
       style={style}
     >

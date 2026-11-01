@@ -21,7 +21,6 @@ import LiveNotificationSubscriber from "@/components/dashboard/LiveNotificationS
 import { SidebarGovernanceProvider, useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { DashboardNavigationProvider, useDashboardNavigation } from "@/context/DashboardNavigationContext";
 import DashboardNavigationProgress from "@/components/dashboard/DashboardNavigationProgress";
-import DashboardNavigationQuote from "@/components/dashboard/DashboardNavigationQuote";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -227,11 +226,6 @@ function DashboardLayoutContent({
                 <CompanyApprovalBanner />
                 <div className="relative" aria-busy={isNavigating || undefined}>
                   {children}
-                  {isNavigating ? (
-                    <div className="pointer-events-none absolute inset-0 z-40 flex min-h-[12rem] items-start justify-center rounded-2xl bg-background/35 pt-8 backdrop-blur-[1px]" role="status" aria-live="polite">
-                      <DashboardNavigationQuote />
-                    </div>
-                  ) : null}
                 </div>
               </div>
             </div>

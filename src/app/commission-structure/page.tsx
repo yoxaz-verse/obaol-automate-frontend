@@ -534,7 +534,7 @@ export default function CommissionStructurePage() {
             viewport={{ once: true }}
             className="mt-12 p-1 rounded-3xl bg-gradient-to-r from-obaol-500 via-amber-600 to-orange-700"
           >
-            <div className="bg-[#05070c] rounded-[1.4rem] p-8 md:p-10 text-center relative overflow-hidden text-white">
+            <div className="relative overflow-hidden rounded-[1.4rem] bg-brand-abyssal p-8 text-center text-white md:p-10">
                 <div className="relative z-10">
                     <LuShieldCheck size={50} className="text-obaol-500 mx-auto mb-8" />
                     <h2 className="text-3xl md:text-5xl font-black mb-6 leading-none uppercase italic tracking-tighter text-white">

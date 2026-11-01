@@ -190,7 +190,7 @@ export default function DeveloperKeysPage() {
   };
 
   return (
-    <main className="min-h-screen bg-default-50 dark:bg-[#07090f] px-4 py-10">
+    <main className="min-h-screen bg-default-50 px-4 py-10 dark:bg-brand-abyssal">
       <section className="mx-auto max-w-6xl space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -203,12 +203,12 @@ export default function DeveloperKeysPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/developer/usage" className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:text-white dark:border-white/30 dark:bg-[#11151f]">Usage</Link>
-            <button onClick={handleSignOut} className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:text-white dark:border-white/30 dark:bg-[#11151f]">Sign out</button>
+            <Link href="/developer/usage" className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:border-white/30 dark:bg-brand-blue dark:text-white">Usage</Link>
+            <button onClick={handleSignOut} className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:border-white/30 dark:bg-brand-blue dark:text-white">Sign out</button>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+        <div className="rounded-2xl border border-default-200 bg-white p-4 dark:border-white/15 dark:bg-brand-blue md:p-6">
           <h2 className="text-lg font-medium text-default-900 dark:text-white">Create API Key</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <input value={label} onChange={(e) => setLabel(e.target.value)} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5" placeholder="Key label" />
@@ -231,7 +231,7 @@ export default function DeveloperKeysPage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6 overflow-x-auto">
+        <div className="overflow-x-auto rounded-2xl border border-default-200 bg-white p-4 dark:border-white/15 dark:bg-brand-blue md:p-6">
           <h2 className="text-lg font-medium text-default-900 dark:text-white">Your Keys</h2>
           {isLoading ? (
             <SectionSkeleton rows={5} className="mt-4" />
@@ -273,7 +273,7 @@ export default function DeveloperKeysPage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+        <div className="rounded-2xl border border-default-200 bg-white p-4 dark:border-white/15 dark:bg-brand-blue md:p-6">
           <h2 className="text-lg font-medium text-default-900 dark:text-white">Usage Snippet</h2>
           <p className="mt-2 text-sm text-default-600 dark:text-white/80">Authorization header format:</p>
           <code className="mt-2 block rounded bg-black/5 px-3 py-2 text-sm dark:bg-white/10 dark:text-white/95">Authorization: Bearer &lt;API_KEY&gt;</code>
@@ -281,7 +281,7 @@ export default function DeveloperKeysPage() {
           <code className="mt-2 block rounded bg-black/5 px-3 py-2 text-xs dark:bg-white/10 dark:text-white/90">GET /v1/products/all</code>
         </div>
 
-        <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+        <div className="rounded-2xl border border-default-200 bg-white p-4 dark:border-white/15 dark:bg-brand-blue md:p-6">
           <h2 className="text-lg font-medium text-default-900 dark:text-white">ChatGPT App / MCP Connector</h2>
           <p className="mt-1 text-sm text-default-600 dark:text-white/80">
             Recommended setup uses a revocable connector token instead of exposing raw API keys in MCP URL.
@@ -331,7 +331,7 @@ export default function DeveloperKeysPage() {
                 if (!newConnectorUrl) return;
                 await navigator.clipboard.writeText(newConnectorUrl);
               }}
-              className="rounded-lg border border-default-300 px-4 py-2 text-sm text-default-800 dark:text-white dark:border-white/30 dark:bg-[#11151f] disabled:opacity-50"
+              className="rounded-lg border border-default-300 px-4 py-2 text-sm text-default-800 disabled:opacity-50 dark:border-white/30 dark:bg-brand-blue dark:text-white"
             >
               Copy MCP URL
             </button>

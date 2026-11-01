@@ -52,18 +52,18 @@ export default function DeveloperUsagePage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen bg-default-50 dark:bg-[#07090f] px-4 py-10">
+    <main className="min-h-screen bg-default-50 px-4 py-10 dark:bg-brand-abyssal">
       <section className="mx-auto max-w-6xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-default-900 dark:text-white">Developer Usage</h1>
             <p className="text-sm text-default-600 dark:text-white/80">Track API usage by endpoint and API key.</p>
           </div>
-          <Link href="/developer/keys" className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:text-white dark:border-white/30 dark:bg-[#11151f]">Back to Keys</Link>
+          <Link href="/developer/keys" className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:border-white/30 dark:bg-brand-blue dark:text-white">Back to Keys</Link>
         </div>
 
         {isLoading ? (
-          <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6">
+          <div className="rounded-2xl border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-brand-blue">
             <PageSkeleton sections={3} />
           </div>
         ) : data ? (
@@ -77,7 +77,7 @@ export default function DeveloperUsagePage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+              <div className="rounded-2xl border border-default-200 bg-white p-4 dark:border-white/15 dark:bg-brand-blue md:p-6">
                 <h2 className="text-lg font-medium text-default-900 dark:text-white">Top Routes</h2>
                 <ul className="mt-3 space-y-2 text-sm">
                   {data.topRoutes.length === 0 ? (
@@ -93,7 +93,7 @@ export default function DeveloperUsagePage() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+              <div className="rounded-2xl border border-default-200 bg-white p-4 dark:border-white/15 dark:bg-brand-blue md:p-6">
                 <h2 className="text-lg font-medium text-default-900 dark:text-white">Per Key (30d)</h2>
                 <ul className="mt-3 space-y-2 text-sm">
                   {data.perKey.length === 0 ? (
@@ -111,7 +111,7 @@ export default function DeveloperUsagePage() {
             </div>
           </>
         ) : (
-          <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6 text-sm text-default-600 dark:text-white/80">No usage data found.</div>
+          <div className="rounded-2xl border border-default-200 bg-white p-6 text-sm text-default-600 dark:border-white/15 dark:bg-brand-blue dark:text-white/80">No usage data found.</div>
         )}
 
         {error && (
@@ -126,7 +126,7 @@ export default function DeveloperUsagePage() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4">
+    <div className="rounded-xl border border-default-200 bg-white p-4 dark:border-white/15 dark:bg-brand-blue">
       <p className="text-xs text-default-500 dark:text-white/70">{label}</p>
       <p className="mt-1 text-xl font-semibold text-default-900 dark:text-white">{value}</p>
     </div>

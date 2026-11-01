@@ -52,6 +52,12 @@ const config: Config = {
       colors: {
         obaol,
         brand: brandPalette,
+        // Application ink and paper always use the OBAOL palette. Exact
+        // neutrals are opt-in for documents, media, codes, and provider marks.
+        black: brandPalette.abyssal,
+        white: brandPalette.palladian,
+        "pure-black": "#000000",
+        "pure-white": "#FFFFFF",
         // Legacy decorative orange utilities now resolve to the OBAOL brand ramp.
         orange: obaol,
       },

@@ -1458,7 +1458,7 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 ) : null}
               </div>
-              <Button className="h-12 w-full bg-black text-white" startContent={<FaApple />} isLoading={isLoading} onPress={() => handleProviderAuth("apple")}>
+              <Button className="h-12 w-full bg-pure-black text-pure-white" startContent={<FaApple />} isLoading={isLoading} onPress={() => handleProviderAuth("apple")}>
                 Continue with Apple
               </Button>
             </div>
@@ -1507,7 +1507,7 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 ) : null}
               </div>
-              <Button className="h-12 w-full bg-black text-white" startContent={<FaApple />} isLoading={isLoading} onPress={() => handleProviderAuth("apple")}>
+              <Button className="h-12 w-full bg-pure-black text-pure-white" startContent={<FaApple />} isLoading={isLoading} onPress={() => handleProviderAuth("apple")}>
                 Sign up with Apple
               </Button>
             </div>

@@ -190,11 +190,11 @@ export default function AssociateGuidebook({ profile, registrationStatus }: Prop
         <div className="mt-8 grid gap-8 lg:grid-cols-[260px,minmax(0,1fr)]">
           <aside className="lg:sticky lg:top-8 lg:self-start" aria-label="Guidebook table of contents">
             <nav className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible">
-              <button onClick={() => jumpToCategory("all")} aria-pressed={category === "all"} className={`min-w-max rounded-xl px-4 py-3 text-left text-sm font-bold transition ${category === "all" ? "bg-obaol-500 text-black" : "border border-divider bg-content1 hover:border-obaol-500"}`}>All topics</button>
+              <button onClick={() => jumpToCategory("all")} aria-pressed={category === "all"} className={`min-w-max rounded-xl border px-4 py-3 text-left text-sm font-bold transition ${category === "all" ? "dashboard-selected-control" : "border-divider bg-content1 hover:border-obaol-500"}`}>All topics</button>
               {associateGuideCategories.map((item) => (
-                <button key={item.id} onClick={() => jumpToCategory(item.id)} aria-pressed={category === item.id} className={`min-w-max rounded-xl px-4 py-3 text-left transition ${category === item.id ? "bg-obaol-500 text-black" : "border border-divider bg-content1 hover:border-obaol-500"}`}>
+                <button key={item.id} onClick={() => jumpToCategory(item.id)} aria-pressed={category === item.id} className={`min-w-max rounded-xl border px-4 py-3 text-left transition ${category === item.id ? "dashboard-selected-control" : "border-divider bg-content1 hover:border-obaol-500"}`}>
                   <span className="block text-sm font-bold">{item.label}</span>
-                  <span className={`mt-1 hidden text-xs leading-5 lg:block ${category === item.id ? "text-black/70" : "text-default-500"}`}>{item.description}</span>
+                  <span className={`mt-1 hidden text-xs leading-5 lg:block ${category === item.id ? "text-[color:rgba(27,38,50,0.78)]" : "db-muted"}`}>{item.description}</span>
                 </button>
               ))}
             </nav>

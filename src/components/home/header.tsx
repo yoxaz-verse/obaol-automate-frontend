@@ -143,7 +143,7 @@ export default function Header() {
             </div>
           </div>
           {open && (
-            <div id="public-page-directory" className="absolute left-4 right-4 top-full mt-2 max-h-[calc(100dvh-7rem-var(--safe-top)-var(--safe-bottom))] overflow-y-auto overscroll-contain rounded-2xl border border-obaol-500/20 bg-[#FCFAF6] p-4 shadow-[0_24px_70px_-24px_rgba(0,0,0,0.55)] dark:bg-[#090806] lg:p-6">
+            <div id="public-page-directory" className="absolute left-4 right-4 top-full mt-2 max-h-[calc(100dvh-7rem-var(--safe-top)-var(--safe-bottom))] overflow-y-auto overscroll-contain rounded-2xl border border-obaol-500/20 bg-content1 p-4 shadow-[0_24px_70px_-24px_rgba(27,38,50,0.55)] dark:bg-brand-blue lg:p-6">
               <nav aria-label="All public pages" className="columns-1 gap-6 lg:columns-3">
                 {publicNavigation.map((group) => {
                   const Icon = groupIcons[group.icon];

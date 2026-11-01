@@ -159,8 +159,8 @@ export default function DeveloperLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-default-50 dark:bg-[#07090f] px-4 py-16">
-      <section className="mx-auto max-w-lg rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-8 shadow-sm dark:shadow-none">
+    <main className="min-h-screen bg-default-50 px-4 py-16 dark:bg-brand-abyssal">
+      <section className="mx-auto max-w-lg rounded-2xl border border-default-200 bg-white p-8 shadow-sm dark:border-white/15 dark:bg-brand-blue dark:shadow-none">
         <h1 className="text-2xl font-semibold text-default-900 dark:text-white">
           Developer Mode Login
         </h1>

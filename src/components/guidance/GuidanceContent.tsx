@@ -669,7 +669,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
 
                   {videoOutline.map((step, i) => (
                     <div key={step.title} className="relative pl-10">
-                      <div className="absolute left-0 top-0 w-8 h-8 rounded-lg bg-content4 dark:bg-[#0a0f1d] border border-obaol-500/30 flex items-center justify-center z-10 shadow-sm">
+                      <div className="absolute left-0 top-0 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-obaol-500/30 bg-content4 shadow-sm dark:bg-brand-blue">
                         <span className="text-[11px] font-black text-obaol-500 italic">{i + 1}</span>
                       </div>
                       <p className="text-[12px] font-black text-foreground uppercase tracking-widest mb-3">

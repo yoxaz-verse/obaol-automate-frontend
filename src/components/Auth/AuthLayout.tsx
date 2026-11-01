@@ -254,7 +254,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 {topContent && <div className="mb-4">{topContent}</div>}
                 <div className={leftPanel ? "mx-auto grid w-full max-w-[1120px] items-start gap-4 lg:grid-cols-[240px_minmax(0,1fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
                     {leftPanel && (
-                        <div className="order-2 hidden rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#0E0D0A] lg:sticky lg:top-4 lg:order-1 lg:block">
+                        <div className="order-2 hidden rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-brand-blue lg:sticky lg:top-4 lg:order-1 lg:block">
                             <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact />
                         </div>
                     )}
@@ -281,7 +281,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
     return (
         <MotionConfig reducedMotion="user">
-        <div data-testid="auth-layout" className="relative flex min-h-screen min-h-[100dvh] w-full overflow-hidden bg-obaol-50/45 text-slate-900 selection:bg-obaol-500/30 dark:bg-[#090806] dark:text-foreground">
+        <div data-testid="auth-layout" className="relative flex min-h-screen min-h-[100dvh] w-full overflow-hidden bg-obaol-50/45 text-slate-900 selection:bg-obaol-500/30 dark:bg-brand-abyssal dark:text-foreground">
             {/* Branded background layer */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(207,152,60,0.08)_0%,_transparent_55%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(207,152,60,0.03)_0%,_transparent_50%)]" />
@@ -356,7 +356,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             <div className="relative group">
                                 <motion.div
                                     data-testid="auth-card"
-                                    className={`relative overflow-hidden border-0 bg-transparent p-0 lg:border lg:bg-white/95 lg:p-7 lg:dark:bg-[#0E0D0A]/95 ${onboarding ? "rounded-none lg:rounded-2xl lg:border-slate-200 lg:dark:border-white/10" : "rounded-none lg:rounded-[2.5rem] lg:border-obaol-200/60 lg:dark:border-obaol-500/10"}`}
+                                    className={`relative overflow-hidden border-0 bg-transparent p-0 lg:border lg:bg-white/95 lg:p-7 lg:dark:bg-brand-blue/95 ${onboarding ? "rounded-none lg:rounded-2xl lg:border-slate-200 lg:dark:border-white/10" : "rounded-none lg:rounded-[2.5rem] lg:border-obaol-200/60 lg:dark:border-obaol-500/10"}`}
                                     transition={{ duration: 0.45, ease: "easeOut" }}
                                 >
                                     {/* Glass Accents */}

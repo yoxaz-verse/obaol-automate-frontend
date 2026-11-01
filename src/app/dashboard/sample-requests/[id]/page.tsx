@@ -748,7 +748,7 @@ export default function SampleRequestDetailPage() {
         isDismissable={false}
         isKeyboardDismissDisabled
         classNames={{
-          base: "bg-[#05070c]/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
+          base: "bg-brand-abyssal/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
           header: "border-b border-white/5",
           footer: "border-t border-white/5",
           closeButton: "hover:bg-white/5 active:scale-95 transition-all",
@@ -846,7 +846,7 @@ export default function SampleRequestDetailPage() {
          isDismissable={false}
          isKeyboardDismissDisabled
          classNames={{
-           base: "bg-[#05070c]/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
+           base: "bg-brand-abyssal/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
            closeButton: "hover:bg-white/5 active:scale-95 transition-all",
          }}
       >
@@ -934,7 +934,7 @@ export default function SampleRequestDetailPage() {
          isDismissable={false}
          isKeyboardDismissDisabled
          classNames={{
-           base: "bg-[#05070c]/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
+           base: "bg-brand-abyssal/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
            closeButton: "hover:bg-white/5 active:scale-95 transition-all",
          }}
       >
@@ -1008,7 +1008,7 @@ export default function SampleRequestDetailPage() {
          isDismissable={false}
          isKeyboardDismissDisabled
          classNames={{
-           base: "bg-[#05070c]/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
+           base: "bg-brand-abyssal/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
            closeButton: "hover:bg-white/5 active:scale-95 transition-all",
          }}
       >

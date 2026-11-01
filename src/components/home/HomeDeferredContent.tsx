@@ -55,7 +55,7 @@ export default function HomeDeferredContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
             {intentCards.map((card) => (
               <article key={card.href} className="relative p-[1px] bg-gradient-to-br from-default-200 via-transparent to-default-200 rounded-[1.5rem] md:rounded-[3rem] overflow-hidden">
-                <div className="relative p-6 md:p-12 rounded-[1.4rem] md:rounded-[2.8rem] bg-white dark:bg-[#0A0A0A] h-full flex flex-col justify-between items-start gap-6 md:gap-12">
+                <div className="relative flex h-full flex-col items-start justify-between gap-6 rounded-[1.4rem] bg-white p-6 dark:bg-brand-blue md:gap-12 md:rounded-[2.8rem] md:p-12">
                   <div className="space-y-3 md:space-y-6">
                     <h3 className={homeTitleStyles.cardTitleLarge}>{card.title}</h3>
                     <p className="text-sm md:text-lg text-default-500 leading-relaxed font-medium">{card.description}</p>

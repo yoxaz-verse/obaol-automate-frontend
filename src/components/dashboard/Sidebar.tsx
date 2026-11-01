@@ -77,8 +77,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             void queryClient.prefetchQuery(importsQueryOptions({ mine: true, limit: 20 }));
         } else if (path === "/dashboard/imports/reservations") {
             void queryClient.prefetchQuery(importReservationsQueryOptions({ mine: true, listingId: undefined, limit: 20 }));
+        } else if (path === "/dashboard/marketplace") {
+            void import("@/core/data/useMarketplace").then((marketplace) => {
+                void queryClient.prefetchQuery(marketplace.marketplaceFirstPageQueryOptions());
+                void queryClient.prefetchQuery(marketplace.marketplaceVisibilityQueryOptions());
+                if (String(user?.role || "").toLowerCase() === "admin") {
+                    void queryClient.prefetchQuery(marketplace.marketplaceStatsQueryOptions());
+                }
+            });
         }
-    }, [prefetch, queryClient]);
+    }, [prefetch, queryClient, user?.role]);
 
     const { data: unreadSummaryData } = useQuery({
         queryKey: ["notifications", "unread-summary"],
@@ -122,27 +130,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         navigate(optionLink);
     };
 
-    React.useEffect(() => {
-        const paths = filteredOptions
-            .filter((option) => !isComingSoonDashboardNavigation(option.link, user?.role, capabilities, governedPages))
-            .map((option) => option.link)
-            .filter((path) => path !== pathname);
-        let cancelled = false;
-        let index = 0;
-        let timer: number | undefined;
-        const warmNext = () => {
-            if (cancelled || index >= paths.length) return;
-            warmDestination(paths[index++]);
-            timer = window.setTimeout(warmNext, 180);
-        };
-        const idle = window.setTimeout(warmNext, 700);
-        return () => {
-            cancelled = true;
-            window.clearTimeout(idle);
-            if (timer) window.clearTimeout(timer);
-        };
-    }, [capabilities, filteredOptions, governedPages, pathname, user?.role, warmDestination]);
-
     const activeNavigationGroupLabel = activeNavigationGroup?.label;
     React.useEffect(() => {
         if (activeNavigationGroupLabel) setOpenNavigationGroup(activeNavigationGroupLabel);
@@ -167,7 +154,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 title={isCollapsed && isComingSoon ? `${opt.name} — Coming soon` : undefined}
                 className={`w-full group relative flex items-center h-10 rounded-xl border border-transparent outline-none ring-0 transition-all duration-300 ${
                     isActive
-                    ? "border-obaol-500/25 bg-obaol-500/10 text-obaol-700 dark:text-obaol-200 font-bold shadow-sm"
+                    ? "border-obaol-500/25 db-selected text-[var(--brand-truffle)] dark:text-[var(--brand-flame)] font-bold"
                     : "text-default-500 hover:border-obaol-500/20 hover:text-foreground hover:db-inset"
                 } ${isCollapsed ? "justify-center" : `${nested ? "pl-6 pr-3" : "px-3"} gap-3`} ${isDisabled ? "cursor-not-allowed opacity-50 hover:bg-transparent hover:text-default-500" : ""}`}
                 aria-disabled={isDisabled}
@@ -176,9 +163,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 aria-label={isComingSoon ? `${opt.name}, coming soon` : opt.name}
             >
                 {isActive && (
-                    <div className="absolute left-0 w-[3px] h-5 bg-obaol-400 rounded-r-full" />
+                    <div className="absolute left-0 h-5 w-[3px] rounded-r-full bg-[var(--brand-flame)]" />
                 )}
-                <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-obaol-700 dark:text-obaol-300 scale-110" : !isDisabled ? "group-hover:scale-110 group-hover:text-obaol-500" : ""}`}>
+                <div className={`text-[18px] transition-all duration-500 ${isActive ? "scale-110 text-[var(--brand-truffle)] dark:text-[var(--brand-flame)]" : !isDisabled ? "group-hover:scale-110 group-hover:text-obaol-500" : ""}`}>
                     {isPending ? <FiLoader className="animate-spin" aria-hidden="true" /> : opt.icon}
                 </div>
                 {!isCollapsed && (
@@ -229,7 +216,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 type="button"
                 aria-label={isCollapsed ? "Expand navigation" : "Collapse navigation"}
                 onClick={() => { play("toggle"); setIsCollapsed(!isCollapsed); }}
-                className="absolute -right-4 top-[84px] z-50 flex h-8 w-8 items-center justify-center rounded-xl border db-border-strong db-panel text-default-400 outline-none ring-0 shadow-lg transition-all hover:border-obaol-500/50 hover:text-obaol-700 dark:hover:text-obaol-300 group"
+                className="absolute -right-4 top-[84px] z-50 flex h-8 w-8 items-center justify-center rounded-xl border db-border-strong db-panel db-muted outline-none ring-0 shadow-lg transition-all hover:border-obaol-500/50 hover:text-obaol-700 dark:hover:text-obaol-300 group"
             >
                 {isCollapsed ? <FiChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" /> : <FiChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />}
             </button>
@@ -279,7 +266,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                                     type="button"
                                     aria-expanded={isOpen}
                                     onClick={() => setOpenNavigationGroup(isOpen ? null : row.label)}
-                                    className={`flex h-9 w-full items-center justify-between rounded-xl border border-transparent px-3 text-[11px] font-semibold outline-none ring-0 transition-colors ${hasActiveLink ? "border-obaol-500/20 text-obaol-700 dark:text-obaol-300" : "text-default-400 hover:border-obaol-500/20 hover:text-foreground hover:db-inset"}`}
+                                    className={`flex h-9 w-full items-center justify-between rounded-xl border border-transparent px-3 text-[11px] font-semibold outline-none ring-0 transition-colors ${hasActiveLink ? "border-obaol-500/20 text-[var(--brand-truffle)] dark:text-[var(--brand-flame)]" : "db-muted hover:border-obaol-500/20 hover:text-foreground hover:db-inset"}`}
                                 >
                                     <span className="truncate">{row.label}</span>
                                     <FiChevronDown size={13} className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />

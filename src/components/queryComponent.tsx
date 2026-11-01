@@ -59,10 +59,6 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     enabled,
   });
 
-  useEffect(() => {
-    if (enabled && refreshEnabled) void refetch();
-  }, [enabled, refreshEnabled, refetch]);
-
   const rawResult = page !== undefined ? data?.data?.data : data?.data;
   const responseData =
     page !== undefined

@@ -243,7 +243,7 @@ export default function TemplateCanvasRenderer({
   ].sort((a, b) => a.z - b.z);
 
   return (
-    <Card data-shadow-preserve className="w-full border border-default-200/60 shadow-xl bg-white text-black">
+    <Card data-shadow-preserve className="w-full border border-default-200/60 bg-pure-white text-pure-black shadow-xl">
       <CardBody className="p-4">
         <div className="w-full overflow-auto">
           <div

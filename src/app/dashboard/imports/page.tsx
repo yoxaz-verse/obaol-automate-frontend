@@ -1087,7 +1087,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
                             value: "text-white font-bold  text-xs",
-                            popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                            popoverContent: "bg-brand-blue border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
                         >
@@ -1112,7 +1112,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
                             value: "text-white font-bold  text-xs",
-                            popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                            popoverContent: "bg-brand-blue border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
                         >
@@ -1135,7 +1135,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors disabled:opacity-30",
                             label: "text-default-400 font-medium",
                             value: "text-white font-bold  text-xs",
-                            popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                            popoverContent: "bg-brand-blue border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
                         >
@@ -1289,7 +1289,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
                           value: "text-white font-bold  text-xs",
-                          popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                          popoverContent: "bg-brand-blue border border-white/10 rounded-2xl",
                         }}
                         popoverProps={{ shouldCloseOnBlur: false }}
                       >
@@ -1406,7 +1406,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                               trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                               label: "text-default-400 font-medium",
                               value: "text-white font-bold  text-xs",
-                              popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                              popoverContent: "bg-brand-blue border border-white/10 rounded-2xl",
                             }}
                             popoverProps={{ shouldCloseOnBlur: false }}
                           >
@@ -1984,7 +1984,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
                           value: "text-white font-bold  text-xs",
-                          popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                          popoverContent: "bg-brand-blue border border-white/10 rounded-2xl",
                         }}
                         popoverProps={{ shouldCloseOnBlur: false }}
                       >

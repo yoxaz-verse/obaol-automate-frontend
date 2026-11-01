@@ -564,7 +564,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
         stableAdditionalParams,
         stableEffectiveFilters,
         serverSearch,
-        addedRateIds.size, // Refresh when catalog items change
       ]}
       page={page}
       limit={limit}

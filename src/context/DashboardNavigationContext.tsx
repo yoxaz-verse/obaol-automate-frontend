@@ -18,6 +18,7 @@ export function DashboardNavigationProvider({ children }: { children: React.Reac
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const originPathRef = useRef(pathname);
   const watchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prefetchedPathsRef = useRef(new Set<string>());
 
   const clearPending = useCallback(() => {
     if (watchdogRef.current) clearTimeout(watchdogRef.current);
@@ -29,6 +30,10 @@ export function DashboardNavigationProvider({ children }: { children: React.Reac
     if (!path || path === pathname) return;
     originPathRef.current = pathname;
     setPendingPath(path);
+    if (process.env.NODE_ENV !== "production" && typeof performance !== "undefined") {
+      performance.clearMarks("dashboard-navigation-start");
+      performance.mark("dashboard-navigation-start", { detail: { from: pathname, to: path } });
+    }
     if (watchdogRef.current) clearTimeout(watchdogRef.current);
     watchdogRef.current = setTimeout(clearPending, 15000);
     if (options?.replace) router.replace(path);
@@ -36,12 +41,27 @@ export function DashboardNavigationProvider({ children }: { children: React.Reac
   }, [clearPending, pathname, router]);
 
   const prefetch = useCallback((path: string) => {
-    if (!path || path === pathname) return;
+    if (!path || path === pathname || prefetchedPathsRef.current.has(path)) return;
+    prefetchedPathsRef.current.add(path);
     router.prefetch(path);
   }, [pathname, router]);
 
   useEffect(() => {
-    if (pendingPath && pathname !== originPathRef.current) clearPending();
+    if (!pendingPath || pathname === originPathRef.current) return;
+    if (process.env.NODE_ENV !== "production" && typeof performance !== "undefined") {
+      performance.mark("dashboard-navigation-ready", { detail: { path: pathname } });
+      try {
+        const measure = performance.measure(
+          "dashboard-navigation",
+          "dashboard-navigation-start",
+          "dashboard-navigation-ready",
+        );
+        console.debug(`[navigation] ${pathname} ready in ${Math.round(measure.duration)}ms`);
+      } catch {
+        // Direct visits do not have a navigation start mark.
+      }
+    }
+    clearPending();
   }, [clearPending, pathname, pendingPath]);
 
   useEffect(() => () => {

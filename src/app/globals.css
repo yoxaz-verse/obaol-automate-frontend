@@ -19,6 +19,8 @@
   --brand-flame: #ffb162;
   --brand-truffle: #a35139;
   --brand-abyssal: #1b2632;
+  --functional-black: #000000;
+  --functional-white: #ffffff;
   --foreground-rgb: 27, 38, 50;
   --background-start-rgb: 238, 233, 223;
   --background-end-rgb: 238, 233, 223;
@@ -466,13 +468,30 @@ canvas {
     background: var(--db-selected);
   }
 
+  .dashboard-selected-control {
+    border-color: color-mix(in srgb, var(--brand-truffle) 36%, transparent) !important;
+    background: var(--brand-flame) !important;
+    color: var(--brand-abyssal) !important;
+    box-shadow: 0 8px 20px -14px rgba(163, 81, 57, 0.72);
+  }
+
+  .dashboard-selected-control:hover {
+    background: color-mix(in srgb, var(--brand-flame) 82%, var(--brand-truffle)) !important;
+  }
+
+  .dashboard-selected-control:focus-visible,
+  .dashboard-selected-control[data-focus-visible="true"] {
+    outline: 2px solid var(--brand-truffle) !important;
+    outline-offset: 3px !important;
+  }
+
   .db-disabled {
     color: var(--db-disabled);
   }
 
   .db-paper {
-    background: #fff;
-    color: #0f172a;
+    background: var(--functional-white);
+    color: var(--functional-black);
   }
 
   .db-focus {
@@ -1197,7 +1216,7 @@ a {
   border: 1px solid #e2e8f0;
   border-left: 3px solid var(--brand-flame);
   border-radius: .875rem;
-  background: #fff;
+  background: var(--db-panel);
   padding: 1rem;
   text-align: left;
 }

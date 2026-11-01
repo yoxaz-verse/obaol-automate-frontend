@@ -33,7 +33,7 @@ const tradeFlow = [
 function AmbientBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[#f6f3ed] dark:bg-[#060504]" />
+      <div className="absolute inset-0 bg-brand-palladian dark:bg-brand-abyssal" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e12080a_1px,transparent_1px),linear-gradient(to_bottom,#1e120807_1px,transparent_1px)] bg-[size:56px_56px] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)]" />
       <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/90 to-transparent dark:from-obaol-500/10" />
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-obaol-50/80 to-transparent dark:from-black/25" />
@@ -56,7 +56,7 @@ function IconBadge({ icon: Icon }: { icon: IconType }) {
 export default function AuthEntry({ signInView = false, prefill, reason }: { signInView?: boolean; prefill?: string; reason?: string }) {
   const showExistingAccountNotice = signInView && reason === "account-exists";
   return (
-    <main className="relative min-h-[100dvh] bg-[#f6f3ed] px-4 py-4 text-obaol-950 dark:bg-[#060504] dark:text-white sm:px-6 sm:py-6">
+    <main className="relative min-h-[100dvh] bg-brand-palladian px-4 py-4 text-brand-abyssal dark:bg-brand-abyssal dark:text-white sm:px-6 sm:py-6">
       <AmbientBackground />
 
       <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col">

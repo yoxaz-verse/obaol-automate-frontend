@@ -12,11 +12,13 @@ import MarketplaceFilterBar, {
   MarketplaceFilterState,
 } from "@/components/dashboard/Marketplace/MarketplaceFilterBar";
 import AuthContext from "@/context/AuthContext";
-import { getData } from "@/core/api/apiHandler";
-import { variantRateRoutes } from "@/core/api/apiRoutes";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import { useCompanyAccess } from "@/utils/companyAccess";
 import { buildDashboardAccessInfoUrl } from "@/utils/dashboardAccess";
+import {
+    marketplaceStatsQueryOptions,
+    marketplaceVisibilityQueryOptions,
+} from "@/core/data/useMarketplace";
 
 const TabsAny = Tabs as any;
 const TabAny = Tab as any;
@@ -98,20 +100,10 @@ export default function MarketplacePage() {
         setOfflineState(normalizedState);
     };
     const statsQuery = useQuery({
-        queryKey: ["marketplace-stats"],
-        queryFn: async () => {
-            const response = await getData(variantRateRoutes.marketplaceStats);
-            return response?.data?.data || {};
-        },
+        ...marketplaceStatsQueryOptions(),
         enabled: isAdmin,
     });
-    const visibilityQuery = useQuery({
-        queryKey: ["marketplace-visibility-summary"],
-        queryFn: async () => {
-            const response = await getData(variantRateRoutes.marketplaceVisibilitySummary);
-            return response?.data?.data || {};
-        },
-    });
+    const visibilityQuery = useQuery(marketplaceVisibilityQueryOptions());
     const exclusionLabels: Record<string, string> = {
         missingOwner: "Missing listing owner",
         missingCompany: "Missing company",

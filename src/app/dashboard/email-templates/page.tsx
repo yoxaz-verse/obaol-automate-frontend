@@ -225,7 +225,7 @@ export default function EmailTemplatesPage() {
               <div className="text-xs  tracking-wider text-default-500 mb-1">Text</div>
               <pre className="whitespace-pre-wrap text-sm mb-3">{previewText}</pre>
               <div className="text-xs  tracking-wider text-default-500 mb-1">HTML</div>
-              <div className="rounded-lg border border-default-300 bg-white p-3 text-black" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+              <div className="rounded-lg border border-default-300 bg-pure-white p-3 text-pure-black" dangerouslySetInnerHTML={{ __html: previewHtml }} />
             </div>
           </CardBody>
         </Card>

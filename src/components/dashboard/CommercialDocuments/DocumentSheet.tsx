@@ -5,7 +5,7 @@ import { formatDocumentMoney } from "@/components/dashboard/Documentation/docume
 export default function DocumentSheet({ doc }: { doc: any }) {
   if (!doc) return null;
   const money = (n: any) => formatDocumentMoney(n, doc.currency || doc.totals?.currency || "INR");
-  return <article className="commercial-sheet mx-auto max-w-[820px] bg-white text-slate-900 border border-slate-200 shadow-sm p-8 md:p-12 print:border-0 print:shadow-none print:p-0">
+  return <article className="commercial-sheet mx-auto max-w-[820px] border border-slate-200 bg-pure-white p-8 text-pure-black shadow-sm md:p-12 print:border-0 print:p-0 print:shadow-none">
     <header className="flex justify-between gap-6 border-b border-slate-200 pb-8">
       <div>{doc.issuer?.logo && <img src={doc.issuer.logo} alt="Company logo" className="h-14 w-auto mb-3" />}<h1 className="text-2xl font-bold">{doc.issuer?.name}</h1><p className="whitespace-pre-line text-sm text-slate-600">{doc.issuer?.billingAddress}</p><p className="text-sm">{doc.issuer?.email} · {doc.issuer?.phone}</p>{doc.issuer?.gstin && <p className="text-sm">GSTIN: {doc.issuer.gstin}</p>}</div>
       <div className="text-right shrink-0"><h2 className="text-2xl font-bold">{doc.type === "INVOICE" ? "Invoice" : "Quotation"}</h2><p className="text-sm">{doc.number}</p><p className="text-sm">Issued: {new Date(doc.issueDate).toLocaleDateString()}</p>{doc.validUntil && <p className="text-sm">Valid until: {new Date(doc.validUntil).toLocaleDateString()}</p>}{doc.dueDate && <p className="text-sm">Due: {new Date(doc.dueDate).toLocaleDateString()}</p>}<p className="text-sm font-semibold mt-2">{doc.status}</p></div>

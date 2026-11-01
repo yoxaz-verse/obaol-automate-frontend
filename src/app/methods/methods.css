@@ -1,5 +1,5 @@
 :root {
-  --bg-space: #050505;
+  --bg-space: var(--brand-abyssal);
   --accent-primary: #0070ee;
   --accent-secondary: #9333ea;
   --accent-success: #22c55e;
@@ -11,7 +11,7 @@
 .methods-container {
   min-height: 100vh;
   background-color: var(--bg-space);
-  color: #fff;
+  color: var(--brand-palladian);
   font-family: var(--font-body), system-ui, sans-serif;
   overflow-x: hidden;
   position: relative;
@@ -53,7 +53,7 @@
   text-transform: uppercase;
   letter-spacing: -0.05em;
   font-style: italic;
-  background: linear-gradient(to bottom, #fff, #666);
+  background: linear-gradient(to bottom, var(--brand-palladian), var(--brand-oatmeal));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

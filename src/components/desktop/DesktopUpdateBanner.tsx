@@ -55,7 +55,7 @@ export default function DesktopUpdateBanner() {
     <aside
       aria-live="polite"
       aria-label="Desktop application update"
-      className="fixed inset-x-3 top-3 z-[10000] mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border border-amber-400/35 bg-[#11100e]/95 px-4 py-3 text-white shadow-2xl shadow-black/40 backdrop-blur-md sm:inset-x-6"
+      className="fixed inset-x-3 top-3 z-[10000] mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border border-amber-400/35 bg-brand-abyssal/95 px-4 py-3 text-white shadow-2xl shadow-black/40 backdrop-blur-md sm:inset-x-6"
     >
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-400/15 text-lg text-amber-300" aria-hidden="true">↑</div>
       <div className="min-w-0 flex-1">

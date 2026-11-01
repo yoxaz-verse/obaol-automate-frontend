@@ -317,7 +317,7 @@ export default function ExecutionEnquiriesPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-8 border-b border-divider">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-obaol-500 text-black shadow-lg shadow-obaol-500/20">
+            <div className="rounded-2xl bg-[var(--brand-flame)] p-3 text-[var(--brand-abyssal)]">
               <FiGlobe className="text-2xl" />
             </div>
             <div>
@@ -330,8 +330,8 @@ export default function ExecutionEnquiriesPage() {
             <Button
               size="sm"
               variant={activeTab === "deal-execution" ? "solid" : "light"}
-              color={activeTab === "deal-execution" ? "warning" : "default"}
-              className={`font-black  tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "deal-execution" ? "shadow-lg shadow-obaol-500/20" : "opacity-60"}`}
+              color="default"
+              className={`font-black tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "deal-execution" ? "dashboard-selected-control" : "db-muted hover:db-inset"}`}
               onPress={() => setActiveTab("deal-execution")}
             >
               <FiActivity className="mr-2" /> Deal Execution
@@ -339,8 +339,8 @@ export default function ExecutionEnquiriesPage() {
             <Button
               size="sm"
               variant={activeTab === "execution-bidding" ? "solid" : "light"}
-              color={activeTab === "execution-bidding" ? "warning" : "default"}
-              className={`font-black  tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "execution-bidding" ? "shadow-lg shadow-obaol-500/20" : "opacity-60"}`}
+              color="default"
+              className={`font-black tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "execution-bidding" ? "dashboard-selected-control" : "db-muted hover:db-inset"}`}
               onPress={() => setActiveTab("execution-bidding")}
             >
               <FiZap className="mr-2" /> Execution Bidding
@@ -390,7 +390,7 @@ export default function ExecutionEnquiriesPage() {
                           <span className="text-xs font-black  tracking-widest text-obaol-600 bg-obaol-500/10 px-2 py-0.5 rounded-md">
                             Anchor
                           </span>
-                          <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
+                          <span className="text-xs font-black db-muted">#{enq.enquiryCode}</span>
                           {(enq.workflowStage || enq.status) && (
                             <div className="flex flex-wrap gap-2 ml-2">
                               {enq.workflowStage && (
@@ -417,12 +417,12 @@ export default function ExecutionEnquiriesPage() {
 
                     <div className="flex items-center gap-10">
                       <div className="hidden lg:flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-1">Origin</span>
+                        <span className="mb-1 text-[10px] font-black tracking-[0.2em] db-muted">Origin</span>
                         <span className="text-sm font-black text-foreground  tracking-tight">{enq.seller}</span>
                       </div>
                       <div className="w-px h-10 bg-divider hidden lg:block" />
                       <div className="flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-1">Destination</span>
+                        <span className="mb-1 text-[10px] font-black tracking-[0.2em] db-muted">Destination</span>
                         <span className="text-sm font-black text-foreground  tracking-tight">{enq.buyer}</span>
                       </div>
                     </div>
@@ -476,7 +476,7 @@ export default function ExecutionEnquiriesPage() {
 
                           <div className="flex items-center gap-3">
                             <div className="flex flex-col text-right">
-                              <span className="text-[10px] font-black text-default-400  tracking-widest">State</span>
+                              <span className="text-[10px] font-black tracking-widest db-muted">State</span>
                               <span className={`text-xs font-black  ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500"}`}>{task.status === "COMPLETED" ? "Verified" : "Syncing"}</span>
                             </div>
                           </div>
@@ -489,11 +489,11 @@ export default function ExecutionEnquiriesPage() {
             ))}
 
             {!dealsLoading && enquiriesWithTasks.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
-                <FiCompass className="text-4xl animate-spin-slow" />
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <FiCompass className="text-4xl db-muted-strong animate-spin-slow" />
                 <div className="text-center">
-                  <h3 className="text-sm font-black  tracking-widest">Void Detected</h3>
-                  <p className="font-black text-default-500  text-xs tracking-widest mt-2">All deal ecosystems are currently dormant or filtered.</p>
+                  <h3 className="text-sm font-black tracking-widest text-foreground">Void Detected</h3>
+                  <p className="mt-2 text-xs font-semibold tracking-wide db-muted">All deal ecosystems are currently dormant or filtered.</p>
                 </div>
               </div>
             )}
@@ -511,7 +511,7 @@ export default function ExecutionEnquiriesPage() {
             <div className="hidden">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-black  tracking-widest text-obaol-500">Execution Bids</h2>
-                <span className="text-[10px] font-black  tracking-[0.3em] text-default-400">
+                <span className="text-[10px] font-black tracking-[0.3em] db-muted">
                   OPEN TASKS
                 </span>
               </div>
@@ -531,7 +531,7 @@ export default function ExecutionEnquiriesPage() {
                           <span className="text-xs font-black  tracking-widest text-obaol-600 bg-obaol-500/10 px-2 py-0.5 rounded-md">
                             Anchor
                           </span>
-                          <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
+                          <span className="text-xs font-black db-muted">#{enq.enquiryCode}</span>
                           {(enq.workflowStage || enq.status) && (
                             <div className="flex flex-wrap gap-2 ml-2">
                               {enq.workflowStage && (
@@ -557,12 +557,12 @@ export default function ExecutionEnquiriesPage() {
                       </div>
                     <div className="flex items-center gap-10">
                       <div className="hidden lg:flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-1">Origin</span>
+                        <span className="mb-1 text-[10px] font-black tracking-[0.2em] db-muted">Origin</span>
                         <span className="text-sm font-black text-foreground  tracking-tight">{enq.seller}</span>
                       </div>
                       <div className="w-px h-10 bg-divider hidden lg:block" />
                       <div className="flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400  tracking-[0.2em] mb-1">Destination</span>
+                        <span className="mb-1 text-[10px] font-black tracking-[0.2em] db-muted">Destination</span>
                         <span className="text-sm font-black text-foreground  tracking-tight">{enq.buyer}</span>
                       </div>
                     </div>
@@ -650,7 +650,7 @@ export default function ExecutionEnquiriesPage() {
                                     }
                                     return (
                                       <div className="flex flex-col items-end">
-                                        <span className={`text-[10px] font-black  tracking-[0.2em] mb-1 ${task.status === "OPEN" ? "text-warning-500" : "text-default-400"}`}>Bidding Status</span>
+                                        <span className={`mb-1 text-[10px] font-black tracking-[0.2em] ${task.status === "OPEN" ? "text-warning-500" : "db-muted"}`}>Bidding Status</span>
                                         <span className={`text-[10px] font-black  ${task.status === "OPEN" ? "text-warning-600" : "text-default-500"}`}>{task.status === "OPEN" ? "IN PROCESS" : "CLOSED"}</span>
                                       </div>
                                     );
@@ -663,7 +663,7 @@ export default function ExecutionEnquiriesPage() {
                                   <div className="overflow-x-auto scrollbar-hide mb-2 border-b border-default-200/30 pb-2">
                                     <table className="w-full min-w-[360px] text-[10px]">
                                       <thead>
-                                        <tr className="text-default-400 font-black  tracking-tight">
+                                        <tr className="font-black tracking-tight db-muted">
                                           <th className="text-left py-0.5">Entity</th>
                                           <th className="text-left py-0.5">Quote</th>
                                           <th className="text-left py-0.5">Note</th>
@@ -680,7 +680,7 @@ export default function ExecutionEnquiriesPage() {
                                             </td>
                                             <td className="py-0.5 text-default-500 truncate max-w-[140px]">{bid?.note || "-"}</td>
                                             <td className="py-0.5 text-default-500 opacity-80">{String(bid?.status || "SUBMITTED")}</td>
-                                            <td className="py-0.5 text-default-400 opacity-60">{formatDate(bid?.updatedAt || bid?.createdAt)}</td>
+                                            <td className="py-0.5 db-muted">{formatDate(bid?.updatedAt || bid?.createdAt)}</td>
                                           </tr>
                                         ))}
                                       </tbody>
@@ -688,7 +688,7 @@ export default function ExecutionEnquiriesPage() {
                                   </div>
                                 )}
                                 {canViewBidDetails && bids.length === 0 && (
-                                  <div className="text-[10px] font-black  tracking-widest text-default-400 px-2 py-2">
+                                  <div className="px-2 py-2 text-[10px] font-black tracking-widest db-muted">
                                     No bids yet
                                   </div>
                                 )}
@@ -734,7 +734,7 @@ export default function ExecutionEnquiriesPage() {
                                                 textValue={companyName}
                                               >
                                                 <div className="flex items-center gap-3">
-                                                   <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-obaol-500 group-data-[selected=true]:text-black border border-divider">
+                                                   <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-divider bg-default-100 db-muted group-data-[selected=true]:border-obaol-500/40 group-data-[selected=true]:bg-[var(--brand-flame)] group-data-[selected=true]:text-[var(--brand-abyssal)] dark:bg-white/5">
                                                       <FiPackage size={14} />
                                                    </div>
                                                    <div className="flex flex-col">
@@ -854,7 +854,7 @@ export default function ExecutionEnquiriesPage() {
                                                 textValue={companyName}
                                               >
                                                 <div className="flex items-center gap-3">
-                                                   <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-obaol-500 group-data-[selected=true]:text-black border border-divider">
+                                                   <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-divider bg-default-100 db-muted group-data-[selected=true]:border-obaol-500/40 group-data-[selected=true]:bg-[var(--brand-flame)] group-data-[selected=true]:text-[var(--brand-abyssal)] dark:bg-white/5">
                                                       <FiShield size={14} />
                                                    </div>
                                                    <div className="flex flex-col">

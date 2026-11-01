@@ -131,8 +131,10 @@ test("desktop auth public links open externally without leaving the app", async 
   await page.goto("/auth", { waitUntil: "domcontentloaded" });
   const authUrl = page.url();
 
-  await page.getByRole("link", { name: "Back to OBAOL" }).click();
-  await page.getByRole("link", { name: "Compare account types" }).click();
+  await expect(page.getByRole("heading", { name: "Welcome to OBAOL Desktop" })).toBeVisible();
+  await expect(page.getByTestId("auth-submit")).toHaveText("Continue to OBAOL Desktop");
+  await page.getByRole("link", { name: "Visit OBAOL website" }).click();
+  await page.getByRole("link", { name: "View account types" }).click();
 
   expect(page.url()).toBe(authUrl);
   expect(await page.evaluate(() => window.__desktopPublicPages)).toEqual(["home", "account-types"]);
@@ -152,7 +154,7 @@ test("auth public links fall back safely when an older desktop bridge is present
   const authUrl = page.url();
 
   const popupPromise = page.waitForEvent("popup");
-  await page.getByRole("link", { name: "Back to OBAOL" }).click();
+  await page.getByRole("link", { name: "Visit OBAOL website" }).click();
   const popup = await popupPromise;
   await popup.close();
 

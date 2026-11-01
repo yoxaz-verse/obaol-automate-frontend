@@ -38,6 +38,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   const [passkeySupported, setPasskeySupported] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
   const [googleError, setGoogleError] = useState("");
+  const [isDesktopApp, setIsDesktopApp] = useState(false);
   const emailId = useId();
   const passwordId = useId();
   const otpId = useId();
@@ -64,7 +65,9 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   useEffect(() => {
     emailRef.current?.focus();
     try { setPasskeySupported(browserSupportsWebAuthn()); } catch { setPasskeySupported(false); }
-    if (typeof window !== "undefined" && (Boolean(window.obaolDesktop?.isDesktop) || isObaolMobileShell())) {
+    const desktopApp = typeof window !== "undefined" && Boolean(window.obaolDesktop?.isDesktop);
+    setIsDesktopApp(desktopApp);
+    if (desktopApp || isObaolMobileShell()) {
       setRememberMe(true);
     }
   }, []);
@@ -262,8 +265,8 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
   return (
     <AuthLayout
-      title={mode === "signin" ? "Welcome back" : "Create your OBAOL account"}
-      subtitle={mode === "signin" ? "One secure sign-in for Associate and Operator accounts." : "Verify your email, choose your account type, and complete onboarding."}
+      title={mode === "signin" ? (isDesktopApp ? "Welcome to OBAOL Desktop" : "Welcome back") : "Create your OBAOL account"}
+      subtitle={mode === "signin" ? (isDesktopApp ? "Sign in to open your secure desktop workspace." : "One secure sign-in for Associate and Operator accounts.") : "Verify your email, choose your account type, and complete onboarding."}
       cardMaxWidthClass="max-w-[500px]"
       stableContentTop
       leftPanel={{ headline: "OBAOL", highlight: "ONE SECURE ACCESS", description: "Access commodity discovery, verified partners, execution workflows, documents, and orders from one account entry.", points: ["Private account discovery", "Secure session management"], footer: "Agro trade execution" }}
@@ -311,7 +314,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
               <label htmlFor={emailId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">Email address</label>
               <input ref={emailRef} id={emailId} className={fieldClass} type="email" value={email} autoComplete="email webauthn" inputMode="email" placeholder="name@example.com" disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
             </div>
-            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || !isValidEmail(email)} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? "Continue securely" : "Verify email"}</button>
+            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || !isValidEmail(email)} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely") : "Verify email"}</button>
             <div className="relative py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 lg:py-1"><span className="relative z-10 lg:bg-white lg:px-3 lg:dark:bg-content1">or</span><span className="absolute left-0 top-1/2 hidden h-px w-full bg-slate-200 dark:bg-white/10 lg:block" /></div>
             <div className="min-h-[52px] lg:rounded-xl lg:border lg:border-slate-200 lg:p-1.5 lg:dark:border-white/10">
               {googleClientId ? <><div id={googleContainerId} data-testid="google-auth-button" className="mx-auto flex min-h-10 w-full max-w-[340px] justify-center overflow-hidden rounded-full" />{!googleReady && !googleError && <div className="mx-auto h-10 max-w-[340px] animate-pulse rounded-full bg-slate-100 dark:bg-white/[0.05]" />}</> : <p className="py-3 text-center text-xs text-slate-500">Google sign-in is not configured.</p>}
@@ -353,7 +356,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
           </form>
         )}
 
-        <div data-testid="auth-public-navigation" className="hidden flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs dark:border-white/10 lg:flex"><Link href="/" target="_blank" rel="noopener noreferrer" onClick={(event) => openDesktopPublicPage(event, "home")} className="font-semibold text-slate-500 hover:text-obaol-700">Back to OBAOL</Link><Link href="/roles" target="_blank" rel="noopener noreferrer" onClick={(event) => openDesktopPublicPage(event, "account-types")} className="font-semibold text-obaol-700 dark:text-obaol-300">Compare account types</Link></div>
+        <div data-testid="auth-public-navigation" className="hidden flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs dark:border-white/10 lg:flex"><Link href="/" target="_blank" rel="noopener noreferrer" onClick={(event) => openDesktopPublicPage(event, "home")} className="font-semibold text-slate-500 hover:text-obaol-700">{isDesktopApp ? "Visit OBAOL website" : "Back to OBAOL"}</Link><Link href="/roles" target="_blank" rel="noopener noreferrer" onClick={(event) => openDesktopPublicPage(event, "account-types")} className="font-semibold text-obaol-700 dark:text-obaol-300">{isDesktopApp ? "View account types" : "Compare account types"}</Link></div>
       </div>
     </AuthLayout>
   );

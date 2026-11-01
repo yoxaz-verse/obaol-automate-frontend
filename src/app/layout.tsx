@@ -9,6 +9,7 @@ import AnalyticsTracker from "@/components/ui/AnalyticsTracker";
 import { Suspense } from "react";
 import { BUSINESS_IDENTITY, ORGANIZATION_SAME_AS } from "@/utils/businessIdentity";
 import localFont from "next/font/local";
+import DesktopUpdateBanner from "@/components/desktop/DesktopUpdateBanner";
 
 const obaolFont = localFont({
   src: "./fonts/plus-jakarta-sans-latin.woff2",
@@ -170,6 +171,7 @@ export default function RootLayout({
           `}} />
       </head>
       <body style={{ overflowX: "hidden" }}>
+        <DesktopUpdateBanner />
         <a className="skip-link" href="#main-content">Skip to main content</a>
         <PublicProviders>
           <div id="main-content" tabIndex={-1}><PublicPageScope>{children}</PublicPageScope></div>

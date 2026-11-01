@@ -11,6 +11,16 @@ const desktopApi = Object.freeze({
       ipcRenderer.send("desktop:open-public-page", page);
     }
   },
+  checkForUpdates: () => ipcRenderer.invoke("desktop:update-check"),
+  downloadUpdate: () => ipcRenderer.invoke("desktop:update-download"),
+  installUpdate: () => ipcRenderer.invoke("desktop:update-install"),
+  onUpdateStatus: (listener) => {
+    if (typeof listener !== "function") return () => {};
+    const handler = (_event, status) => listener(status);
+    ipcRenderer.on("desktop:update-status", handler);
+    ipcRenderer.invoke("desktop:update-status-current").then(listener).catch(() => {});
+    return () => ipcRenderer.removeListener("desktop:update-status", handler);
+  },
 });
 
 contextBridge.exposeInMainWorld("obaolDesktop", desktopApi);

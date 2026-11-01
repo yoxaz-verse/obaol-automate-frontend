@@ -39,6 +39,18 @@ if (!mainSource.includes("SPLASH_MINIMUM_MS") || !mainSource.includes("createSpl
   process.exit(1);
 }
 
+if (manifest.version !== "0.1.4" || !manifest.dependencies?.["electron-updater"]) {
+  console.error("Desktop updater package or version is incomplete.");
+  process.exit(1);
+}
+
+for (const channel of ["desktop:update-check", "desktop:update-download", "desktop:update-install", "desktop:update-status"]) {
+  if (!mainSource.includes(channel) || !preloadSource.includes(channel)) {
+    console.error(`Desktop updater bridge is missing ${channel}.`);
+    process.exit(1);
+  }
+}
+
 const loadingSource = fs.readFileSync(path.join(root, "src/loading.html"), "utf8");
 if (!loadingSource.includes("splash-statue.webp") || !loadingSource.includes("prefers-reduced-motion")) {
   console.error("Desktop cinematic splash asset or reduced-motion treatment is incomplete.");

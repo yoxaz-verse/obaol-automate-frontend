@@ -38,8 +38,29 @@ test("desktop cold launch uses a sandboxed cinematic splash", () => {
   assert.match(loading, /OBAOL/);
   assert.match(loading, /Supreme/);
   assert.match(loading, /prefers-reduced-motion:\s*reduce/);
-  assert.equal(manifest.version, "0.1.3");
+  assert.equal(manifest.version, "0.1.4");
   assert.ok(manifest.build.files.includes("build/splash-statue.webp"));
+});
+
+test("desktop updater is user-controlled and platform safe", () => {
+  const main = read("desktop/src/main.cjs");
+  const preload = read("desktop/src/preload.cjs");
+  const banner = read("src/components/desktop/DesktopUpdateBanner.tsx");
+  const workflow = read(".github/workflows/desktop-release.yml");
+  const manifest = JSON.parse(read("desktop/package.json"));
+  assert.equal(manifest.version, "0.1.4");
+  assert.equal(manifest.dependencies["electron-updater"], "^6.6.2");
+  assert.match(main, /autoDownload\s*=\s*false/);
+  assert.match(main, /autoInstallOnAppQuit\s*=\s*false/);
+  assert.match(main, /isTrustedUpdateSender/);
+  assert.match(main, /process\.platform === "darwin"[\s\S]*shell\.openExternal\(MAC_INSTALLER_URL\)/);
+  assert.match(main, /quitAndInstall\(false, true\)/);
+  assert.match(preload, /desktop:update-check/);
+  assert.match(preload, /desktop:update-status/);
+  assert.match(banner, /window\.obaolDesktop/);
+  assert.match(banner, /Restart and install/);
+  assert.match(workflow, /latest\.yml/);
+  assert.match(workflow, /\.exe\.blockmap/);
 });
 
 test("homepage provides stable Windows and macOS installer links", () => {

@@ -29,3 +29,9 @@ npm run dist:win
 macOS universal builds must run on macOS. Windows x64 builds run on the Windows GitHub Actions runner. Release tags use `desktop-v<version>`, for example `desktop-v0.1.0`.
 
 Initial packages are unsigned beta builds. Windows SmartScreen and macOS Gatekeeper may warn users until signing credentials are configured.
+
+## Updates
+
+Packaged Windows builds check the public GitHub release feed after startup and expose a user-initiated download and restart flow. Releases must include `latest.yml`, the NSIS installer, and its blockmap. macOS checks the same public release version but opens the stable DMG download in the default browser; automatic macOS replacement remains disabled until the app is signed with an Apple Developer ID.
+
+Development builds report that they are current and never download or install releases.

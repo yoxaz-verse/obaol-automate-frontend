@@ -1,6 +1,6 @@
 {
   "name": "obaol-supreme-desktop",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "OBAOL Supreme desktop client for Windows and macOS",
   "private": true,
   "main": "src/main.cjs",
@@ -16,6 +16,9 @@
   "devDependencies": {
     "electron": "^39.0.0",
     "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
   },
   "build": {
     "appId": "com.obaol.desktop",

@@ -30,7 +30,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-windows
-          path: desktop/dist/OBAOL-Supreme-Windows-x64.exe
+          path: |
+            desktop/dist/OBAOL-Supreme-Windows-x64.exe
+            desktop/dist/OBAOL-Supreme-Windows-x64.exe.blockmap
+            desktop/dist/latest.yml
           if-no-files-found: error
 
   macos:

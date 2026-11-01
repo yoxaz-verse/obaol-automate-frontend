@@ -1,4 +1,5 @@
-const { app, BrowserWindow, Menu, Tray, ipcMain, nativeImage, session, shell } = require("electron");
+const { app, BrowserWindow, Menu, Tray, dialog, ipcMain, nativeImage, session, shell } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const path = require("node:path");
 
 const APP_URL = process.env.OBAOL_DESKTOP_URL || "https://www.obaol.com/auth";
@@ -6,6 +7,9 @@ const APP_ORIGIN = parsedUrl(APP_URL)?.origin;
 const APP_LOAD_TIMEOUT_MS = 20_000;
 const SPLASH_MINIMUM_MS = 2_800;
 const SPLASH_REDUCED_MOTION_MS = 900;
+const AUTOMATIC_UPDATE_CHECK_DELAY_MS = 4_000;
+const LATEST_RELEASE_API = "https://api.github.com/repos/yoxaz-verse/obaol-automate-frontend/releases/latest";
+const MAC_INSTALLER_URL = "https://github.com/yoxaz-verse/obaol-automate-frontend/releases/latest/download/OBAOL-Supreme-macOS-Universal.dmg";
 const OBAOL_HOSTS = new Set(["obaol.com", "www.obaol.com"]);
 const GOOGLE_AUTH_HOSTS = new Set(["accounts.google.com", "accounts.googleusercontent.com"]);
 const PUBLIC_PAGES = Object.freeze({
@@ -19,6 +23,107 @@ let tray = null;
 let isQuitting = false;
 let isLoadingApplication = false;
 let hasPlayedLaunchCinematic = false;
+let hasPerformedAutomaticUpdateCheck = false;
+let updateCheckPromise = null;
+let updateStatus = Object.freeze({ state: "idle" });
+let updateMenuCheckIsActive = false;
+
+function setUpdateStatus(nextStatus) {
+  updateStatus = Object.freeze({ ...nextStatus });
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("desktop:update-status", updateStatus);
+  }
+  return updateStatus;
+}
+
+function normalizeVersion(value) {
+  const match = String(value || "").match(/(?:desktop-v|v)?(\d+)\.(\d+)\.(\d+)/i);
+  return match ? match.slice(1, 4).map(Number) : null;
+}
+
+function isNewerVersion(candidate, current) {
+  const next = normalizeVersion(candidate);
+  const installed = normalizeVersion(current);
+  if (!next || !installed) return false;
+  for (let index = 0; index < 3; index += 1) {
+    if (next[index] !== installed[index]) return next[index] > installed[index];
+  }
+  return false;
+}
+
+function isTrustedUpdateSender(event) {
+  return Boolean(event?.sender && isTrustedOBAOLUrl(event.sender.getURL()));
+}
+
+async function showUpdateCheckResult(status) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  const options = status.state === "available" || status.state === "ready"
+    ? {
+        type: "info",
+        title: "OBAOL Supreme update",
+        message: `Version ${status.version || "new"} is available.`,
+        detail: process.platform === "darwin"
+          ? "Use the update banner to download the latest macOS installer."
+          : "Use the update banner to download and install it when you are ready.",
+      }
+    : status.state === "error"
+      ? { type: "warning", title: "Update check failed", message: "OBAOL Supreme could not check for updates.", detail: status.message || "Please try again later." }
+      : { type: "info", title: "OBAOL Supreme is up to date", message: `You are using the latest version (${app.getVersion()}).` };
+  await dialog.showMessageBox(mainWindow, options);
+}
+
+async function checkMacUpdate() {
+  const response = await fetch(LATEST_RELEASE_API, {
+    headers: { Accept: "application/vnd.github+json", "User-Agent": `OBAOL-Supreme/${app.getVersion()}` },
+  });
+  if (!response.ok) throw new Error(`GitHub returned ${response.status}.`);
+  const release = await response.json();
+  const version = normalizeVersion(release?.tag_name)?.join(".");
+  if (!version) throw new Error("The latest release has an invalid version.");
+  return isNewerVersion(version, app.getVersion())
+    ? setUpdateStatus({ state: "available", version, message: "Download the latest macOS installer." })
+    : setUpdateStatus({ state: "up-to-date", version: app.getVersion() });
+}
+
+async function checkForDesktopUpdate(showResult = false) {
+  if (updateCheckPromise) return updateCheckPromise;
+  if (!app.isPackaged) {
+    const status = setUpdateStatus({ state: "up-to-date", version: app.getVersion(), message: "Updates are disabled in development builds." });
+    if (showResult) await showUpdateCheckResult(status);
+    return status;
+  }
+
+  setUpdateStatus({ state: "checking" });
+  updateCheckPromise = (async () => {
+    try {
+      if (process.platform === "darwin") return await checkMacUpdate();
+      if (process.platform === "win32") {
+        const result = await autoUpdater.checkForUpdates();
+        return updateStatus.state === "checking"
+          ? setUpdateStatus({ state: "up-to-date", version: result?.updateInfo?.version || app.getVersion() })
+          : updateStatus;
+      }
+      return setUpdateStatus({ state: "up-to-date", version: app.getVersion() });
+    } catch (error) {
+      return setUpdateStatus({ state: "error", message: error?.message || "Unable to check for updates." });
+    } finally {
+      updateCheckPromise = null;
+    }
+  })();
+  const status = await updateCheckPromise;
+  if (showResult) await showUpdateCheckResult(status);
+  return status;
+}
+
+function configureUpdater() {
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = false;
+  autoUpdater.on("update-available", (info) => setUpdateStatus({ state: "available", version: info.version }));
+  autoUpdater.on("update-not-available", () => setUpdateStatus({ state: "up-to-date", version: app.getVersion() }));
+  autoUpdater.on("download-progress", (progress) => setUpdateStatus({ state: "downloading", version: updateStatus.version, percent: progress.percent }));
+  autoUpdater.on("update-downloaded", (info) => setUpdateStatus({ state: "ready", version: info.version, message: "Restart OBAOL Supreme to finish installing." }));
+  autoUpdater.on("error", (error) => setUpdateStatus({ state: "error", message: error?.message || "The update could not be completed." }));
+}
 
 function parsedUrl(value) {
   try {
@@ -126,6 +231,10 @@ async function loadApplication() {
       closeSplashWindow();
     }
     showMainWindow();
+    if (!hasPerformedAutomaticUpdateCheck) {
+      hasPerformedAutomaticUpdateCheck = true;
+      setTimeout(() => { void checkForDesktopUpdate(false); }, AUTOMATIC_UPDATE_CHECK_DELAY_MS);
+    }
   } catch (error) {
     if (error?.code !== "ERR_ABORTED" && error?.errno !== -3) {
       mainWindow?.webContents.stop();
@@ -184,6 +293,16 @@ function createMenu() {
     {
       role: "help",
       submenu: [
+        {
+          label: "Check for Updates…",
+          click: async () => {
+            if (updateMenuCheckIsActive) return;
+            updateMenuCheckIsActive = true;
+            try { await checkForDesktopUpdate(true); } finally { updateMenuCheckIsActive = false; }
+          },
+        },
+        { label: `Version ${app.getVersion()}`, enabled: false },
+        { type: "separator" },
         { label: "OBAOL website", click: () => shell.openExternal("https://www.obaol.com") },
         { label: "Contact support", click: () => shell.openExternal("mailto:info@support.obaol.com") },
       ],
@@ -268,6 +387,7 @@ app.whenReady().then(() => {
     callback(permission === "notifications" && isTrustedOBAOLUrl(webContents.getURL()));
   });
 
+  configureUpdater();
   createMenu();
   createWindow();
   createTray();
@@ -283,6 +403,36 @@ ipcMain.on("desktop:retry", () => { void loadApplication(); });
 ipcMain.on("desktop:open-public-page", (_event, page) => {
   const destination = PUBLIC_PAGES[page];
   if (destination) void shell.openExternal(destination);
+});
+ipcMain.handle("desktop:update-status-current", (event) => (
+  isTrustedUpdateSender(event) ? updateStatus : Object.freeze({ state: "error", message: "Untrusted update request." })
+));
+ipcMain.handle("desktop:update-check", (event) => {
+  if (!isTrustedUpdateSender(event)) return Object.freeze({ state: "error", message: "Untrusted update request." });
+  return checkForDesktopUpdate(false);
+});
+ipcMain.handle("desktop:update-download", async (event) => {
+  if (!isTrustedUpdateSender(event)) return Object.freeze({ state: "error", message: "Untrusted update request." });
+  if (process.platform === "darwin") {
+    await shell.openExternal(MAC_INSTALLER_URL);
+    return updateStatus;
+  }
+  if (process.platform !== "win32" || !app.isPackaged || updateStatus.state !== "available") return updateStatus;
+  try {
+    setUpdateStatus({ state: "downloading", version: updateStatus.version, percent: 0 });
+    await autoUpdater.downloadUpdate();
+  } catch (error) {
+    setUpdateStatus({ state: "error", message: error?.message || "The update could not be downloaded." });
+  }
+  return updateStatus;
+});
+ipcMain.handle("desktop:update-install", (event) => {
+  if (!isTrustedUpdateSender(event)) return Object.freeze({ state: "error", message: "Untrusted update request." });
+  if (process.platform === "win32" && app.isPackaged && updateStatus.state === "ready") {
+    isQuitting = true;
+    setImmediate(() => autoUpdater.quitAndInstall(false, true));
+  }
+  return updateStatus;
 });
 
 app.on("before-quit", () => {

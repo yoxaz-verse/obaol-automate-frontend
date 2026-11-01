@@ -135,6 +135,52 @@ body {
   outline-offset: 3px;
 }
 
+/* One action hierarchy for NextUI buttons, native buttons, and button-like links. */
+.app-button {
+  min-height: 2.75rem;
+  border-radius: var(--db-radius-control, .75rem);
+  padding-inline: 1rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+}
+.app-button:is(:focus-visible, [data-focus-visible="true"]) {
+  outline: 2px solid var(--app-focus) !important;
+  outline-offset: 3px !important;
+}
+.app-button:not(:disabled, [aria-disabled="true"]):active { transform: translateY(1px) scale(.99); }
+.app-button:is(:disabled, [aria-disabled="true"], [data-disabled="true"]) { cursor: not-allowed; opacity: .52; }
+.app-button--primary {
+  border: 1px solid color-mix(in srgb, var(--brand-truffle) 28%, transparent) !important;
+  background: var(--brand-flame) !important;
+  color: var(--brand-abyssal) !important;
+  box-shadow: 0 8px 20px -14px rgba(163, 81, 57, .78);
+}
+.app-button--primary:not(:disabled, [aria-disabled="true"]):hover {
+  background: color-mix(in srgb, var(--brand-flame) 76%, var(--brand-truffle)) !important;
+  box-shadow: 0 10px 24px -14px rgba(163, 81, 57, .72);
+}
+.app-button--secondary {
+  border: 1px solid var(--brand-truffle) !important;
+  background: var(--db-panel) !important;
+  color: var(--brand-truffle) !important;
+}
+.app-button--secondary:not(:disabled, [aria-disabled="true"]):hover {
+  background: color-mix(in srgb, var(--brand-flame) 13%, var(--db-panel)) !important;
+}
+.dark .app-button--secondary { color: var(--brand-flame) !important; border-color: var(--brand-flame) !important; }
+.app-button--tertiary, .app-button--icon {
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: rgb(var(--foreground-rgb)) !important;
+  box-shadow: none;
+}
+.app-button--tertiary:not(:disabled, [aria-disabled="true"]):hover,
+.app-button--icon:not(:disabled, [aria-disabled="true"]):hover { background: var(--db-hover) !important; }
+.app-button--icon { min-width: 2.75rem; padding-inline: 0; }
+.app-button--danger, .app-button--success, .app-button--warning { color: white !important; }
+.app-button--warning { color: #1b2632 !important; }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -126,6 +126,7 @@ class NativeAuthService {
     }
     final match = RegExp(r'(?:^|,\s*)auth_token=([^;]+)').firstMatch(setCookie);
     if (match == null) throw Exception('The server session cookie is invalid.');
+    final expiresDate = _cookieExpiresDate(setCookie);
     await CookieManager.instance().setCookie(
       url: WebUri('https://www.obaol.com'),
       name: 'auth_token',
@@ -135,11 +136,33 @@ class NativeAuthService {
       isSecure: true,
       isHttpOnly: true,
       sameSite: HTTPCookieSameSitePolicy.NONE,
+      expiresDate: expiresDate,
     );
     await controller.evaluateJavascript(
       source:
           "window.dispatchEvent(new CustomEvent('obaol:native-authenticated'));",
     );
+  }
+
+  static int? _cookieExpiresDate(String setCookie, [DateTime? now]) {
+    final maxAge = RegExp(
+      r'(?:^|;)\s*Max-Age=(\d+)',
+      caseSensitive: false,
+    ).firstMatch(setCookie);
+    if (maxAge != null) {
+      final seconds = int.tryParse(maxAge.group(1)!);
+      if (seconds != null) {
+        return (now ?? DateTime.now()).toUtc().millisecondsSinceEpoch +
+            seconds * 1000;
+      }
+    }
+    final expires = RegExp(
+      r'(?:^|;)\s*Expires=([^;]+)',
+      caseSensitive: false,
+    ).firstMatch(setCookie);
+    return expires == null
+        ? null
+        : DateTime.tryParse(expires.group(1)!.trim())?.millisecondsSinceEpoch;
   }
 
   static String _role(Object? value) =>

@@ -10,6 +10,7 @@ import { postData } from "@/core/api/apiHandler";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
 import { AuthMode, AuthStatus, PublicAuthRole, authDestination, formatAuthCountdown, isValidEmail, normalizeAuthError } from "@/utils/unifiedAuth";
 import AuthLayout from "./AuthLayout";
+import { isObaolMobileShell } from "@/utils/mobileAuthBridge";
 
 type Stage = "email" | "methods" | "otp";
 type Props = { initialMode?: AuthMode; initialRole?: PublicAuthRole; prefill?: string; intent?: string };
@@ -63,6 +64,9 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   useEffect(() => {
     emailRef.current?.focus();
     try { setPasskeySupported(browserSupportsWebAuthn()); } catch { setPasskeySupported(false); }
+    if (typeof window !== "undefined" && (Boolean(window.obaolDesktop?.isDesktop) || isObaolMobileShell())) {
+      setRememberMe(true);
+    }
   }, []);
 
   useEffect(() => {

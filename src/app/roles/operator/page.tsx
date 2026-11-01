@@ -367,7 +367,7 @@ export default function OperatorRolePage() {
                 <Button
                   as={Link}
                   href="/commission-structure"
-                  className="bg-slate-900 hover:bg-slate-800 text-white dark:bg-obaol-500 dark:hover:bg-obaol-400 dark:text-slate-950 font-bold h-12 px-8 rounded-xl shadow-lg shadow-slate-900/10 dark:shadow-obaol-500/20 transition-all text-sm tracking-wide"
+                  className="app-button app-button--primary h-12 px-8 text-sm tracking-wide"
                   endContent={<FiArrowRight size={16} />}
                 >
                   View Detailed Commission Structure
@@ -509,7 +509,7 @@ export default function OperatorRolePage() {
                 <Button
                   as={Link}
                   href="/auth/operator/register"
-                  className="bg-slate-900 hover:bg-slate-800 text-white dark:bg-obaol-500 dark:hover:bg-obaol-400 dark:text-slate-950 font-bold h-12 px-8 rounded-xl shadow-lg shadow-slate-900/15 dark:shadow-obaol-500/20 transition-all text-sm tracking-wide"
+                  className="app-button app-button--primary h-12 px-8 text-sm tracking-wide"
                   endContent={<FiArrowRight size={18} />}
                 >
                   Start Operator Entry

@@ -113,7 +113,11 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
   const [mobileShell, setMobileShell] = useState(false);
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
-  useEffect(() => setMobileShell(isObaolMobileShell()), []);
+  useEffect(() => {
+    const isMobile = isObaolMobileShell();
+    setMobileShell(isMobile);
+    if (isMobile || Boolean(window.obaolDesktop?.isDesktop)) setRememberMe(true);
+  }, []);
 
   const handleProviderAuth = useCallback(async (provider: "google" | "apple") => {
     const roleValue = roleLower === "team" || roleLower === "operator" ? "Operator" : "Associate";
@@ -479,7 +483,7 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
       if (rememberMe) {
         localStorage.setItem(
           "rememberMeTime",
-          JSON.stringify(new Date().getTime() + 10 * 24 * 60 * 60 * 1000)
+          JSON.stringify(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)
         );
       }
 
@@ -696,7 +700,7 @@ const LoginComponent = ({ role, mode = "login", initialQuery = {} }: ILoginProps
         const refreshed = await refreshUser();
         if (!refreshed) throw new Error("Session cookie blocked. Allow cookies for obaol.com/api.obaol.com and retry.");
         if (rememberMe) {
-          localStorage.setItem("rememberMeTime", JSON.stringify(Date.now() + 24 * 60 * 60 * 1000));
+          localStorage.setItem("rememberMeTime", JSON.stringify(Date.now() + 30 * 24 * 60 * 60 * 1000));
         }
         setOtpVerified(true);
         setLoginStatus("success");

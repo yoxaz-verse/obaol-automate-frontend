@@ -9,6 +9,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:obaol_mobile/config.dart';
 import 'package:obaol_mobile/native_auth.dart';
 import 'package:obaol_mobile/navigation_policy.dart' as policy;
+import 'package:obaol_mobile/native_update.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> main() async {
@@ -50,12 +51,14 @@ class ObaolShell extends StatefulWidget {
 
 class _ObaolShellState extends State<ObaolShell> {
   final _auth = NativeAuthService();
+  final _updates = NativeUpdateService();
   late final PullToRefreshController _pullToRefresh;
   InAppWebViewController? _controller;
   StreamSubscription<Uri>? _linkSubscription;
   Uri? _pendingDeepLink;
   int _progress = 0;
   String? _error;
+  NativeUpdateInfo? _update;
 
   @override
   void initState() {
@@ -71,6 +74,9 @@ class _ObaolShellState extends State<ObaolShell> {
       }
     });
     _linkSubscription = AppLinks().uriLinkStream.listen(_openDeepLink);
+    if (Platform.isIOS) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _checkForUpdate());
+    }
   }
 
   @override
@@ -83,6 +89,24 @@ class _ObaolShellState extends State<ObaolShell> {
     if (policy.isApprovedDeepLink(uri)) {
       await _controller?.loadUrl(urlRequest: URLRequest(url: WebUri.uri(uri)));
     }
+  }
+
+  Future<void> _checkForUpdate() async {
+    final update = await _updates.check();
+    if (mounted && update != null) setState(() => _update = update);
+  }
+
+  Future<void> _openUpdate() async {
+    final update = _update;
+    if (update == null) return;
+    await launchUrl(update.storeUri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _dismissUpdate() async {
+    final update = _update;
+    if (update == null || update.required) return;
+    await _updates.dismiss(update.version);
+    if (mounted) setState(() => _update = null);
   }
 
   @override
@@ -202,6 +226,109 @@ class _ObaolShellState extends State<ObaolShell> {
                     message: _error!,
                     onRetry: () => _controller?.reload(),
                   ),
+                if (_update != null && _update!.required)
+                  Positioned.fill(
+                    child: _RequiredUpdateView(
+                      version: _update!.version,
+                      onUpdate: _openUpdate,
+                    ),
+                  )
+                else if (_update != null)
+                  Positioned(
+                    top: 10,
+                    left: 12,
+                    right: 12,
+                    child: _UpdateBanner(
+                      version: _update!.version,
+                      onUpdate: _openUpdate,
+                      onLater: _dismissUpdate,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+class _UpdateBanner extends StatelessWidget {
+  const _UpdateBanner({
+    required this.version,
+    required this.onUpdate,
+    required this.onLater,
+  });
+  final String version;
+  final VoidCallback onUpdate;
+  final VoidCallback onLater;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        elevation: 10,
+        color: const Color(0xff17130d),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
+          child: Row(
+            children: [
+              const Icon(Icons.system_update_rounded, color: Color(0xffe0a340)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'OBAOL $version is available',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              TextButton(onPressed: onLater, child: const Text('Later')),
+              FilledButton(onPressed: onUpdate, child: const Text('Update')),
+            ],
+          ),
+        ),
+      );
+}
+
+class _RequiredUpdateView extends StatelessWidget {
+  const _RequiredUpdateView({required this.version, required this.onUpdate});
+  final String version;
+  final VoidCallback onUpdate;
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(
+        color: const Color(0xff0c0a07),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.security_update_good_rounded,
+                  size: 56,
+                  color: Color(0xffe0a340),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Update to OBAOL $version',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'This update is required to continue securely.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 22),
+                FilledButton.icon(
+                  onPressed: onUpdate,
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Open App Store'),
+                ),
               ],
             ),
           ),

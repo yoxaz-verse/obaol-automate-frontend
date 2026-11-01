@@ -27,6 +27,7 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { DEFAULT_STALE_TIME, extractList, useImportReservations, useImportsList } from "@/core/data";
 import Title from "@/components/titles";
 import { DashboardGridSkeleton } from "@/components/ui/DashboardSkeleton";
+import { AppButton } from "@/components/ui/AppButton";
 import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
 import { showToastMessage } from "@/utils/utils";
 import { useCompanyAccess } from "@/utils/companyAccess";
@@ -773,7 +774,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                                <Button
                                  fullWidth
                                  isDisabled={isTerminalListing(listing)}
-                                 className="h-10 rounded-xl font-bold  tracking-widest text-[10px] bg-foreground text-background shadow-md hover:scale-[1.02] active:scale-95 transition-all"
+                                 className="app-button app-button--primary h-10 text-[10px] tracking-widest"
                                  onClick={() => {
                                    setSelectedListing(listing);
                                    setReserveOpen(true);
@@ -946,7 +947,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         {status === "PENDING" && (
                           <div className="grid grid-cols-2 gap-3 mt-2">
                              <Button
-                               className="h-10 rounded-xl font-bold  tracking-widest text-[10px] bg-foreground text-background shadow-md hover:scale-[1.02] active:scale-95 transition-all"
+                               className="app-button app-button--primary h-10 text-[10px] tracking-widest"
                                onClick={() => {
                                  setSelectedReservation(reservation);
                                  setEditReservationQty(String(reservation.quantityRequested || ""));
@@ -978,7 +979,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                            <div className="flex flex-col gap-3">
                               <Button
                                 fullWidth
-                                className="h-10 rounded-xl font-bold  tracking-widest text-[10px] bg-foreground text-background shadow-md transition-all active:scale-95"
+                                className="app-button app-button--primary h-10 text-[10px] tracking-widest"
                                 onPress={() => lockReservationMutation.mutate({
                                    listingId: String(reservation.listingId?._id || reservation.listingId || ""),
                                    reservationId: reservation._id
@@ -997,7 +998,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                           <div className="flex flex-col gap-3">
                             <Button
                               fullWidth
-                              className="h-10 rounded-xl font-bold  tracking-widest text-[10px] bg-foreground text-background shadow-md transition-all active:scale-95"
+                              className="app-button app-button--primary h-10 text-[10px] tracking-widest"
                               isLoading={redirectingEnquiryId === reservation._id}
                               onPress={() => {
                                 const linked = reservation?.linkedEnquiryId;
@@ -1029,9 +1030,9 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                     <p className="mt-2 max-w-md text-sm leading-relaxed text-default-500">
                       Reservations will appear here after you reserve an available quantity from an Import Opportunity.
                     </p>
-                    <Button as={Link} href="/dashboard/imports" className="mt-6 bg-foreground px-6 font-bold text-background" endContent={<FiArrowRight size={15} />}>
+                    <AppButton as={Link} href="/dashboard/imports" intent="primary" className="mt-6 px-6" endContent={<FiArrowRight size={15} />}>
                       Browse import opportunities
-                    </Button>
+                    </AppButton>
                   </div>
                 )}
               </motion.div>

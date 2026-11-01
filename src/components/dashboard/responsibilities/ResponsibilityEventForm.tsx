@@ -800,7 +800,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         <Button
                           fullWidth
                           size="lg"
-                          className={`h-16 rounded-[1.5rem] font-bold  tracking-widest text-[11px] shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${!isResponsibilityEventChanged && responsibilitySavedAt ? "bg-success text-white" : "bg-foreground text-background"}`}
+                          className={`app-button h-16 rounded-[1.5rem] text-[11px] tracking-widest ${!isResponsibilityEventChanged && responsibilitySavedAt ? "app-button--success bg-success" : "app-button--primary"}`}
                           isLoading={Boolean(savingFramework)}
                           isDisabled={Boolean(packagingDisclosureError || routeNotesDisclosureError) || (!isResponsibilityEventChanged && !!responsibilitySavedAt) || isReadOnlyAfterConversion}
                           onPress={() => onSaveFramework()}

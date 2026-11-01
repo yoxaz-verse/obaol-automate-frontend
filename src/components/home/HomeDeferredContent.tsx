@@ -60,7 +60,7 @@ export default function HomeDeferredContent() {
                     <h3 className={homeTitleStyles.cardTitleLarge}>{card.title}</h3>
                     <p className="text-sm md:text-lg text-default-500 leading-relaxed font-medium">{card.description}</p>
                   </div>
-                  <Link href={card.href} className="inline-flex items-center gap-4 px-6 py-3 md:px-10 md:py-5 rounded-full bg-foreground text-background font-black text-sm md:text-lg">
+                  <Link href={card.href} className="public-button public-button--primary inline-flex items-center gap-4 rounded-full px-6 py-3 text-sm md:px-10 md:py-5 md:text-lg">
                     {card.cta}
                   </Link>
                 </div>

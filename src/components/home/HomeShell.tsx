@@ -62,7 +62,7 @@ export default function HomeShell() {
             <Link href="/why-obaol" className="inline-flex items-center rounded-full border border-default-300 px-6 py-3 text-sm font-bold">
               Read Why OBAOL
             </Link>
-            <Link href="/how-it-works" className="inline-flex items-center rounded-full bg-foreground text-background px-6 py-3 text-sm font-bold">
+            <Link href="/how-it-works" className="public-button public-button--primary inline-flex items-center rounded-full px-6 py-3 text-sm font-bold">
               View How It Works
             </Link>
           </div>

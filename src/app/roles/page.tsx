@@ -119,7 +119,7 @@ export default function RolesPage() {
 
                   <div className="flex flex-col gap-3 mt-auto">
                     <Button
-                      className="w-full h-12 rounded-xl bg-slate-900 text-white dark:bg-obaol-500 dark:text-slate-950 font-bold transition-all shadow-lg shadow-slate-900/10 dark:shadow-obaol-500/20"
+                      className="app-button app-button--primary h-12 w-full"
                       isLoading={isRegisterLoading}
                       onPress={handleRegister}
                     >
@@ -191,7 +191,7 @@ export default function RolesPage() {
 
                   <div className="flex flex-col gap-3 mt-auto">
                     <Button
-                      className="w-full h-12 rounded-xl bg-slate-900 text-white dark:bg-obaol-500 dark:text-slate-950 font-bold transition-all shadow-lg shadow-slate-900/10 dark:shadow-obaol-500/20"
+                      className="app-button app-button--primary h-12 w-full"
                       isLoading={isJoinLoading}
                       onPress={handleJoin}
                     >

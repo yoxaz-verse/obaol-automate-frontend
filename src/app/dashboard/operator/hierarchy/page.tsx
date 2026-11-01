@@ -961,7 +961,7 @@ export default function OperatorHierarchyPage() {
 
               <div className="mt-auto pt-8">
                 <Button
-                  className="w-full h-14 rounded-2xl font-black text-sm  tracking-widest bg-foreground text-background shadow-xl hover:-translate-y-1 transition-all"
+                  className="app-button app-button--primary h-14 w-full rounded-2xl text-sm tracking-widest"
                   onPress={() => setSelectedMeta(null)}
                 >
                   Mission Complete

@@ -15,9 +15,14 @@ class AppConfig {
   );
   static const appleServiceId = String.fromEnvironment('APPLE_SERVICE_ID');
   static const appleRedirectUri = String.fromEnvironment('APPLE_REDIRECT_URI');
+  static const versionManifestUrl = String.fromEnvironment(
+    'VERSION_MANIFEST_URL',
+    defaultValue: 'https://www.obaol.com/api/native-app-versions',
+  );
 
   static final Uri startUri = Uri.parse(appUrl);
   static final Uri apiUri = Uri.parse(apiBaseUrl);
+  static final Uri versionManifestUri = Uri.parse(versionManifestUrl);
   static const trustedHosts = {'obaol.com', 'www.obaol.com', 'api.obaol.com'};
 
   static bool isTrusted(Uri uri) =>

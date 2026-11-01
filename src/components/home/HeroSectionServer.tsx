@@ -10,8 +10,8 @@ export const HERO_STAGES = [
   { id: "quality", label: "Quality Testing", message: "Test quality against your exact specs & requirements.", src: "/images/execution-flow/06-quality-testing.webp", deliverable: "Independent Lab COA Certificate", phase: "Verify" },
   { id: "packaging", label: "Packaging", message: "Prepare goods for safe, compliant shipment.", src: "/images/execution-flow/07-packaging.webp", deliverable: "Standard Export Packaging & Fumigation", phase: "Move" },
   { id: "procurement", label: "Procurement", message: "Get on-ground procurement assistance & execution.", src: "/images/execution-flow/08-procurement.webp", deliverable: "Batch Sourcing & Purchase Lock", phase: "Move" },
-  { id: "transport", label: "Inland Transport", message: "Coordinate the journey from origin source to port.", src: "/images/execution-flow/09-inland-transportation.webp", deliverable: "GPS Monitored Inland Transport", phase: "Move" },
-  { id: "freight", label: "Freight Forwarding", message: "Move international shipments with freight partners.", src: "/images/hero-operations/freight.webp", deliverable: "Port Customs & Bill of Lading", phase: "Close" },
+  { id: "transport-freight", label: "Transport & Freight", message: "Coordinate inland movement, customs, and international freight milestones.", src: "/images/execution-flow/09-inland-transportation.webp", deliverable: "Tracking, Customs & Bill of Lading", phase: "Move" },
+  { id: "buyer-approval", label: "Buyer Receipt & Approval", message: "Receive the delivered commodity, confirm specifications, and approve the handoff.", src: "/images/hero-bulk-execution-v4.webp", deliverable: "Buyer Acceptance & Delivery Record", phase: "Receive & Approve" },
 ] as const satisfies readonly HeroStage[];
 
 export default function HeroSectionServer() {
@@ -41,7 +41,7 @@ export default function HeroSectionServer() {
 
             {/* Main Title */}
             <div className="space-y-3.5">
-              <h1 className="text-4xl font-black leading-[1.06] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-[3.35rem] lg:text-[3.25rem] xl:text-[3.5rem]">
+              <h1 className="text-4xl font-black leading-[1.06] tracking-tight text-brand-abyssal dark:text-brand-palladian sm:text-5xl md:text-[3.35rem] lg:text-[3.25rem] xl:text-[3.5rem]">
                 The B2B Bulk Trade{" "}
                 <span className="bg-gradient-to-r from-obaol-600 via-amber-500 to-obaol-400 bg-clip-text text-transparent drop-shadow-sm">
                   Execution Platform

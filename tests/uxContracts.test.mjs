@@ -119,19 +119,22 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
 
   assert.deepEqual(stageLabels, [
     "Discovery", "Sampling", "Coordination", "Documentation", "Inspection Visit",
-    "Quality Testing", "Packaging", "Procurement", "Inland Transport", "Freight Forwarding",
+    "Quality Testing", "Packaging", "Procurement", "Transport & Freight", "Buyer Receipt & Approval",
   ]);
   assert.equal(stageMessages.length, 10);
-  assert.deepEqual([...new Set(stagePhases)], ["Plan", "Verify", "Move", "Close"]);
+  assert.deepEqual([...new Set(stagePhases)], ["Plan", "Verify", "Move", "Receive & Approve"]);
   assert.equal(imagePaths.length, 10);
   assert.equal(new Set(imagePaths).size, 10);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/execution-flow/")).length, 9);
-  assert.equal(imagePaths.filter((path) => path.startsWith("/images/hero-operations/")).join(""), "/images/hero-operations/freight.webp");
+  assert.equal(imagePaths.filter((path) => path.startsWith("/images/hero-operations/")).length, 0);
+  assert.equal(imagePaths.at(-1), "/images/hero-bulk-execution-v4.webp");
   assert.equal(hero.includes('"use client"'), false);
   assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
   assert.equal(hero.includes('data-hero-centered-layout="true"'), true);
   assert.equal(hero.includes("lg:min-h-[clamp(36rem,calc(100svh-6rem),50rem)]"), true);
   assert.equal(hero.includes("max-w-[90rem]"), true);
+  assert.equal(hero.includes("text-brand-abyssal dark:text-brand-palladian"), true);
+  assert.equal(hero.includes("text-slate-950 dark:text-white"), false);
   assert.equal(hero.includes("lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
   assert.equal(hero.includes('<ParallaxTradeAccents placement="hero" />'), false);
   assert.equal(explorer.includes('<ParallaxTradeAccents placement="hero" motionEnabled={!reducedMotion} />'), true);
@@ -144,17 +147,20 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('data-execution-stage-band="true"'), true);
   assert.equal(explorer.includes('className="hidden border-y border-default-200/70 bg-default-50/55 py-7 dark:bg-default-50/[0.025] md:block lg:py-8"'), true);
   assert.equal(explorer.includes('data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="mt-'), false);
-  assert.equal(explorer.includes("data-execution-stage-group={phase.phase.toLowerCase()}"), true);
+  assert.equal(explorer.includes("data-execution-stage-group={phase.slug}"), true);
   assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), false);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-bulk-artwork="true"'), true);
-  assert.equal(explorer.includes('/images/hero-bulk-execution-v3.webp'), true);
-  assert.equal(explorer.includes('data-active-phase={activePhase?.toLowerCase() ?? "none"}'), true);
-  assert.equal(explorer.includes('data-hero-phase-region={phase.phase.toLowerCase()}'), true);
-  assert.equal(explorer.includes('data-hero-phase-highlight={phase.phase.toLowerCase()}'), true);
+  assert.equal(explorer.includes('/images/hero-bulk-execution-v4.webp'), true);
+  assert.equal(explorer.includes('data-active-phase={activePhaseGroup?.slug ?? "none"}'), true);
+  assert.equal(explorer.includes('data-hero-phase-region={phase.slug}'), true);
+  assert.equal(explorer.includes('data-hero-phase-highlight={phase.slug}'), true);
   assert.equal(explorer.includes('aria-pressed={selectedPhase === phase.phase}'), true);
   assert.equal(explorer.includes('const activePhase = previewPhase ?? selectedPhase'), true);
-  assert.equal(explorer.includes('opacity-55 grayscale-[70%] brightness-[0.55]'), true);
+  assert.equal(explorer.includes('opacity-55 grayscale-[70%] brightness-[0.55]'), false);
+  assert.equal(explorer.includes('data-hero-phase-outcome={activePhaseGroup.slug}'), true);
+  assert.equal(explorer.includes('Black Pepper · 18 MT'), true);
+  assert.equal(explorer.includes('Illustrative trade · {activePhaseGroup.name}'), true);
   assert.equal(explorer.includes('data-hero-depth-layer='), false);
   assert.equal(explorer.includes("grid-cols-[0.86fr_1.18fr_0.92fr]"), false);
   assert.equal(explorer.includes("rounded-l-["), false);
@@ -168,8 +174,8 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("Complete trade execution"), false);
   assert.equal(explorer.includes("From origin to delivery"), false);
   assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
-  assert.equal(explorer.includes('aria-label="Execution phases: Plan, Verify, Move, and Close"'), true);
-  assert.equal(explorer.includes("data-execution-phase={phase.phase.toLowerCase()}"), true);
+  assert.equal(explorer.includes('aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve"'), true);
+  assert.equal(explorer.includes("data-execution-phase={phase.slug}"), true);
   assert.equal(explorer.includes('onMouseEnter={() => preview(phase.phase)}'), true);
   assert.equal(explorer.includes('onFocus={() => preview(phase.phase)}'), true);
   assert.equal(explorer.includes('onClick={() => select(phase.phase)}'), true);
@@ -189,12 +195,13 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(accents.includes('type AccentSize = "small" | "medium" | "large"'), true);
   assert.equal(accents.includes('/images/home-accents/warehouse-forklift.webp'), true);
   const heroAccentsBlock = accents.match(/hero: \[[\s\S]*?\],\n  services:/)?.[0] ?? "";
+  assert.equal(heroAccentsBlock.includes('/images/home-accents/commodity-spices.webp'), false);
   assert.equal(heroAccentsBlock.includes('/images/home-accents/logistics-container.webp'), false);
   assert.equal(accents.includes('serviceId: "freight"'), true);
   assert.equal(accents.includes('data-accent-service={accent.serviceId}'), true);
   assert.equal(accents.includes('data-accent-visible={visible ? "true" : "false"}'), true);
   assert.equal(accents.includes('/images/home-accents/cargo-ship.webp'), true);
-  assert.equal(accents.includes("travel: 96"), true);
+  assert.equal(accents.includes("travel: 96"), false);
   assert.equal(accents.includes("travel: 60"), true);
   assert.equal(accents.includes("travel: 64"), true);
   assert.equal(accents.includes('data-accent-motion={enabled ? "active" : "static"}'), true);
@@ -231,6 +238,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.webp", import.meta.url))), true);
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-art-v2.webp", import.meta.url))), true);
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-bulk-execution-v3.webp", import.meta.url))), true);
+  assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-bulk-execution-v4.webp", import.meta.url))), true);
   for (const accent of ["commodity-spices", "verification-clipboard", "laboratory-sample", "packaging-sack", "logistics-container", "warehouse-forklift", "cargo-ship"]) {
     const accentPath = fileURLToPath(new URL(`../public/images/home-accents/${accent}.webp`, import.meta.url));
     assert.equal(existsSync(accentPath), true, `${accent} should exist`);

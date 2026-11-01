@@ -22,7 +22,6 @@ type Accent = {
 
 const accents: Record<AccentPlacement, readonly Accent[]> = {
   hero: [
-    { id: "commodity", src: "/images/home-accents/commodity-spices.webp", className: "bottom-[10%] left-[1%] w-[clamp(7rem,7vw,9rem)] opacity-55", aspect: "aspect-[640/427]", travel: 96, xTravel: 18, depth: "foreground", size: "small" },
     { id: "verification", src: "/images/home-accents/verification-clipboard.webp", className: "left-[-13%] top-[-24%] w-[clamp(6.5rem,6.5vw,8.5rem)] opacity-[0.42]", aspect: "aspect-[640/427]", travel: 60, xTravel: -10, depth: "middle", size: "medium" },
   ],
   services: [

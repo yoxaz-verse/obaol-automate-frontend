@@ -11,17 +11,17 @@ export type HeroStage = {
   message: string;
   src: string;
   deliverable?: string;
-  phase: "Plan" | "Verify" | "Move" | "Close";
+  phase: "Plan" | "Verify" | "Move" | "Receive & Approve";
 };
 
-const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"]; summary: string; left: number; width: number }> = [
-  { name: "Plan", range: "01—03", phase: "Plan", summary: "Coordinate bulk suppliers, buyer requirements, and available inventory.", left: 0, width: 25 },
-  { name: "Verify", range: "04—06", phase: "Verify", summary: "Inspect warehouses, sample commodities, and complete quality documentation.", left: 25, width: 25 },
-  { name: "Move", range: "07—09", phase: "Move", summary: "Package bulk goods and coordinate pallets, inland transport, and freight.", left: 50, width: 25 },
-  { name: "Close", range: "10", phase: "Close", summary: "Confirm delivery, complete the handoff, and close trade documentation.", left: 75, width: 25 },
+const phaseGroups: Array<{ name: string; slug: string; range: string; phase: HeroStage["phase"]; summary: string; left: number; width: number; status: string; evidence: string }> = [
+  { name: "Plan", slug: "plan", range: "01—03", phase: "Plan", summary: "Coordinate bulk suppliers, buyer requirements, and available inventory.", left: 0, width: 25, status: "Buyer requirement captured", evidence: "Origin and supplier coverage" },
+  { name: "Verify", slug: "verify", range: "04—06", phase: "Verify", summary: "Inspect warehouses, sample commodities, and complete quality documentation.", left: 25, width: 25, status: "Specification approved", evidence: "Sample and COA verified" },
+  { name: "Move", slug: "move", range: "07—09", phase: "Move", summary: "Package bulk goods and coordinate inland transport, freight, and shipment evidence.", left: 50, width: 25, status: "Shipment in execution", evidence: "Tracking and bill of lading" },
+  { name: "Receive & Approve", slug: "receive-and-approve", range: "10", phase: "Receive & Approve", summary: "The buyer receives the commodity, confirms the specification, and accepts the completed handoff.", left: 75, width: 25, status: "Buyer accepted delivery", evidence: "Acceptance and delivery record" },
 ];
 
-const HERO_ARTWORK = "/images/hero-bulk-execution-v3.webp";
+const HERO_ARTWORK = "/images/hero-bulk-execution-v4.webp";
 
 export default function HeroStageExplorer() {
   const adaptiveMotion = useAdaptiveMotion();
@@ -29,6 +29,7 @@ export default function HeroStageExplorer() {
   const [selectedPhase, setSelectedPhase] = useState<HeroStage["phase"] | null>(null);
   const [previewPhase, setPreviewPhase] = useState<HeroStage["phase"] | null>(null);
   const activePhase = previewPhase ?? selectedPhase;
+  const activePhaseGroup = phaseGroups.find((phase) => phase.phase === activePhase);
   const transitionClass = reducedMotion ? "" : "transition-[filter,opacity,transform,background-color,color] duration-300 ease-out";
 
   const preview = (phase: HeroStage["phase"]) => setPreviewPhase(phase);
@@ -36,7 +37,7 @@ export default function HeroStageExplorer() {
   const select = (phase: HeroStage["phase"]) => setSelectedPhase((current) => current === phase ? null : phase);
 
   return (
-    <div data-hero-panel="execution-map" data-active-phase={activePhase?.toLowerCase() ?? "none"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
+    <div data-hero-panel="execution-map" data-active-phase={activePhaseGroup?.slug ?? "none"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
       <h2 className="sr-only">Connected bulk trade execution network</h2>
       <div className="pointer-events-none absolute inset-[16%_8%_10%] rounded-full bg-obaol-400/12 blur-3xl dark:bg-obaol-400/[0.08]" />
       <div
@@ -46,13 +47,13 @@ export default function HeroStageExplorer() {
         className="relative aspect-[1983/793] w-full overflow-hidden rounded-[1.5rem] focus-within:ring-1 focus-within:ring-obaol-500/70"
       >
         <ParallaxTradeAccents placement="hero" motionEnabled={!reducedMotion} />
-        <Image src={HERO_ARTWORK} alt="" aria-hidden="true" fill priority quality={84} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${transitionClass} ${activePhase ? "opacity-55 grayscale-[70%] brightness-[0.55] dark:brightness-[0.42]" : "opacity-100"}`} />
+        <Image src={HERO_ARTWORK} alt="" aria-hidden="true" fill priority quality={84} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${transitionClass}`} />
         {phaseGroups.map((phase) => (
           <div
             key={`highlight-${phase.phase}`}
-            data-hero-phase-highlight={phase.phase.toLowerCase()}
+            data-hero-phase-highlight={phase.slug}
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-0 z-10 overflow-hidden ${transitionClass} ${activePhase === phase.phase ? "opacity-100 saturate-[1.1] brightness-[1.05]" : "opacity-0"}`}
+            className={`pointer-events-none absolute inset-0 z-10 overflow-hidden ${transitionClass} ${activePhase === phase.phase ? "opacity-100 saturate-[1.04] brightness-[1.02]" : "opacity-0"}`}
             style={{ clipPath: `inset(0 ${100 - phase.left - phase.width}% 0 ${phase.left}%)` }}
           >
             <Image src={HERO_ARTWORK} alt="" fill quality={84} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${activePhase === phase.phase && !reducedMotion ? "scale-[1.015]" : "scale-100"} ${transitionClass}`} />
@@ -64,7 +65,7 @@ export default function HeroStageExplorer() {
             <button
               key={`region-${phase.phase}`}
               type="button"
-              data-hero-phase-region={phase.phase.toLowerCase()}
+              data-hero-phase-region={phase.slug}
               aria-label={`${phase.name}: ${phase.summary}`}
               aria-pressed={selectedPhase === phase.phase}
               onMouseEnter={() => preview(phase.phase)}
@@ -80,14 +81,29 @@ export default function HeroStageExplorer() {
         </div>
       </div>
 
-      <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Close" className="relative z-30 mx-[7%] mt-1 pb-2 sm:mx-[9%] sm:mt-2 lg:pb-0">
+      {activePhaseGroup && (
+        <div aria-live="polite" className="pt-3">
+          <div data-hero-phase-outcome={activePhaseGroup.slug} className="flex flex-col gap-3 rounded-2xl border border-obaol-500/30 bg-content1/95 p-3.5 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-4">
+            <div className="min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">Illustrative trade · {activePhaseGroup.name}</p>
+              <p className="mt-1 truncate text-sm font-black text-foreground">Black Pepper · 18 MT</p>
+            </div>
+            <dl className="grid min-w-0 grid-cols-2 gap-x-5 gap-y-1 text-[10px] sm:text-right">
+              <div><dt className="font-semibold db-muted">Status</dt><dd className="mt-0.5 font-bold text-foreground">{activePhaseGroup.status}</dd></div>
+              <div><dt className="font-semibold db-muted">Evidence</dt><dd className="mt-0.5 font-bold text-foreground">{activePhaseGroup.evidence}</dd></div>
+            </dl>
+          </div>
+        </div>
+      )}
+
+      <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve" className="relative z-30 mx-[7%] mt-1 pb-2 sm:mx-[9%] sm:mt-2 lg:pb-0">
         <div className="absolute left-[7px] right-[7px] top-[7px] h-px bg-obaol-700/70 dark:bg-obaol-300/70" />
         <div className="relative grid grid-cols-4">
           {phaseGroups.map((phase, index) => (
             <button
               key={phase.phase}
               type="button"
-              data-execution-phase={phase.phase.toLowerCase()}
+              data-execution-phase={phase.slug}
               aria-label={`${phase.name}: ${phase.summary}`}
               aria-pressed={selectedPhase === phase.phase}
               onMouseEnter={() => preview(phase.phase)}
@@ -124,9 +140,9 @@ export function HeroStageBand({ stages }: { stages: readonly HeroStage[] }) {
             {phaseGroups.map((phase) => {
               const phaseStages = stages.filter((stage) => stage.phase === phase.phase);
               return (
-                <section key={phase.phase} data-execution-stage-group={phase.phase.toLowerCase()} className="border-t border-obaol-500/35 pt-3" aria-labelledby={`hero-phase-${phase.phase.toLowerCase()}`}>
+                <section key={phase.phase} data-execution-stage-group={phase.slug} className="border-t border-obaol-500/35 pt-3" aria-labelledby={`hero-phase-${phase.slug}`}>
                   <div className="mb-3 flex items-baseline justify-between gap-3">
-                    <h3 id={`hero-phase-${phase.phase.toLowerCase()}`} className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">{phase.name}</h3>
+                    <h3 id={`hero-phase-${phase.slug}`} className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">{phase.name}</h3>
                     <span className="font-mono text-[9px] text-muted-foreground">{phase.range}</span>
                   </div>
                   <ol className="space-y-2">

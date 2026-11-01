@@ -5,55 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OBAOL Supreme — Opening</title>
     <style>
-      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #050403; }
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #000; }
       * { box-sizing: border-box; }
       html, body { width: 100%; height: 100%; }
-      body { margin: 0; overflow: hidden; background: #050403; color: #f7f1e6; }
-      .cinematic { position: relative; display: grid; width: 100%; height: 100%; min-height: 480px; place-items: center; isolation: isolate; background: #050403; }
-      .artwork { position: absolute; inset: -3%; z-index: -4; background-image: url("../build/splash-statue.webp"); background-position: 50% 50%; background-size: cover; opacity: 0; filter: saturate(.82) contrast(1.08) brightness(.72); transform: translateY(4.5%) scale(1.075); animation: statue-reveal 2.35s cubic-bezier(.2,.72,.2,1) .12s forwards; }
-      .vignette, .center-veil, .grain, .gold-line { position: absolute; inset: 0; pointer-events: none; }
-      .vignette { z-index: -3; background: linear-gradient(180deg, rgba(2,2,2,.52), transparent 24%, transparent 72%, rgba(2,2,2,.78)), radial-gradient(ellipse at center, transparent 24%, rgba(0,0,0,.12) 54%, rgba(0,0,0,.84) 100%); }
-      .center-veil { z-index: -2; background: radial-gradient(ellipse 38% 24% at 50% 51%, rgba(3,3,3,.72), rgba(3,3,3,.22) 58%, transparent 78%); opacity: 0; animation: veil-in 1.25s ease-out .75s forwards; }
-      .grain { z-index: 4; opacity: .055; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E"); }
-      .gold-line { inset: auto 8% 7%; height: 1px; background: linear-gradient(90deg, transparent, rgba(210,158,65,.7), transparent); opacity: 0; transform: scaleX(.2); animation: line-open 1.15s cubic-bezier(.2,.72,.2,1) 1.45s forwards; }
-      .identity { position: relative; width: min(88vw, 920px); padding: 24px; text-align: center; transform: translateY(1%); }
-      .wordmark { position: relative; display: inline-flex; align-items: baseline; justify-content: center; gap: clamp(10px, 1.2vw, 22px); margin: 0; overflow: hidden; font-size: clamp(38px, 7.4vw, 88px); font-weight: 900; line-height: .92; letter-spacing: .42em; text-transform: uppercase; text-shadow: 0 3px 18px rgba(0,0,0,.92), 0 0 48px rgba(206,152,60,.18); opacity: 0; transform: scale(.93); animation: word-converge 1.55s cubic-bezier(.16,.84,.2,1) .72s forwards; }
-      .wordmark .obaol { color: #fffaf0; }
-      .wordmark .supreme { color: #d9a64b; }
-      .wordmark::after { content: ""; position: absolute; inset: -20% -30%; background: linear-gradient(105deg, transparent 38%, rgba(255,242,201,.7) 49%, transparent 60%); transform: translateX(-115%); animation: gold-sweep 1.05s ease-in-out 1.52s forwards; mix-blend-mode: screen; }
-      .subtitle { margin: 18px 0 0; color: rgba(244,231,203,.72); font-size: clamp(9px, 1.25vw, 14px); font-weight: 700; letter-spacing: .34em; text-transform: uppercase; opacity: 0; transform: translateY(8px); animation: subtitle-in .75s ease-out 1.58s forwards; }
-      .status { position: absolute; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; gap: 10px; color: rgba(244,231,203,.48); font-size: 9px; font-weight: 800; letter-spacing: .27em; text-transform: uppercase; opacity: 0; animation: status-in .6s ease-out 2.05s forwards; }
-      .status::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #d29d42; box-shadow: 0 0 13px rgba(210,157,66,.75); animation: breathe 1.5s ease-in-out 2.4s infinite; }
-      @keyframes statue-reveal { 0% { opacity: 0; transform: translateY(4.5%) scale(1.075); filter: saturate(.45) contrast(1.18) brightness(.25); } 45% { opacity: .74; } 100% { opacity: 1; transform: translateY(0) scale(1); filter: saturate(.82) contrast(1.08) brightness(.72); } }
-      @keyframes veil-in { to { opacity: 1; } }
-      @keyframes line-open { to { opacity: 1; transform: scaleX(1); } }
-      @keyframes word-converge { 0% { opacity: 0; letter-spacing: .42em; transform: scale(.93); filter: blur(9px); } 58% { opacity: 1; } 100% { opacity: 1; letter-spacing: -.045em; transform: scale(1); filter: blur(0); } }
-      @keyframes gold-sweep { to { transform: translateX(115%); } }
-      @keyframes subtitle-in { to { opacity: 1; transform: translateY(0); } }
+      html { transition: opacity .3s ease, filter .3s ease; }
+      html.is-leaving { opacity: 0; filter: blur(5px); }
+      body { margin: 0; overflow: hidden; background: #000; color: #f7f1e6; }
+      .opening { position: relative; width: 100%; height: 100%; min-height: 480px; overflow: hidden; isolation: isolate; background: #000; }
+      .ambient { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(204,145,45,.085), transparent 17%), radial-gradient(ellipse at 50% 52%, rgba(153,101,20,.045), transparent 42%); opacity: 0; animation: ambient-in 1.2s ease-out .08s forwards; }
+      .center-point { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: #e2aa4a; box-shadow: 0 0 16px 5px rgba(218,157,54,.45); opacity: 0; transform: translate(-50%, -50%) scale(.2); animation: point-in .5s ease-out .08s forwards, point-out .45s ease-in .78s forwards; }
+      .contours { position: absolute; left: 50%; top: 50%; width: min(78vw, 920px); aspect-ratio: 1.7; overflow: visible; opacity: 0; transform: translate(-50%, -50%) scale(.42); animation: contours-open 1.65s cubic-bezier(.16,.78,.22,1) .2s forwards; }
+      .contours ellipse { fill: none; stroke: rgba(211,155,61,.3); stroke-width: 1; vector-effect: non-scaling-stroke; }
+      .contours ellipse:nth-child(2) { stroke: rgba(211,155,61,.2); }
+      .contours ellipse:nth-child(3) { stroke: rgba(211,155,61,.12); }
+      .contours ellipse:nth-child(4) { stroke: rgba(211,155,61,.07); }
+      .wave-shell { position: absolute; left: 50%; top: 50%; width: min(64vw, 720px); height: 150px; opacity: 0; transform: translate(-50%, -53%); animation: wave-rise 1.5s cubic-bezier(.16,.78,.22,1) .45s forwards; }
+      .wave { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 7px rgba(219,158,56,.38)); }
+      .wave .ghost { fill: none; stroke: rgba(218,158,58,.13); stroke-width: 1; }
+      .wave .trace { fill: none; stroke: #dca448; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1030; stroke-dashoffset: 1030; animation: trace-wave 1.15s cubic-bezier(.34,.08,.2,1) .48s forwards; }
+      .logo-stage { position: absolute; left: 50%; top: 50%; width: min(45vw, 500px); transform: translate(-50%, -50%) scale(.92); opacity: 0; filter: blur(8px); animation: logo-resolve 1.05s cubic-bezier(.16,.82,.22,1) .93s forwards; }
+      .logo-frame { position: relative; overflow: hidden; }
+      .logo { display: block; width: 100%; height: auto; object-fit: contain; }
+      .logo-frame::after { content: ""; position: absolute; inset: -35% -45%; background: linear-gradient(108deg, transparent 39%, rgba(255,232,178,.55) 49%, transparent 59%); mix-blend-mode: screen; transform: translateX(-115%); animation: logo-sweep .85s ease-in-out 1.35s forwards; }
+      .particle { position: absolute; left: 50%; top: 50%; width: 3px; height: 3px; border-radius: 50%; background: #dca448; opacity: 0; box-shadow: 0 0 8px rgba(220,164,72,.6); }
+      .particle.p1 { --x: -260px; --y: -105px; animation: particle-out 1.35s ease-out .72s forwards; }
+      .particle.p2 { --x: 280px; --y: -70px; animation: particle-out 1.5s ease-out .82s forwards; }
+      .particle.p3 { --x: -220px; --y: 115px; animation: particle-out 1.4s ease-out .92s forwards; }
+      .particle.p4 { --x: 245px; --y: 125px; animation: particle-out 1.55s ease-out .78s forwards; }
+      .status { position: absolute; right: 0; bottom: 7%; left: 0; display: flex; align-items: center; justify-content: center; gap: 10px; color: rgba(244,231,203,.42); font-size: 9px; font-weight: 800; letter-spacing: .27em; text-transform: uppercase; opacity: 0; animation: status-in .6s ease-out 1.95s forwards; }
+      .status::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #d29d42; box-shadow: 0 0 13px rgba(210,157,66,.75); animation: breathe 1.5s ease-in-out 2.2s infinite; }
+      .grain { position: absolute; inset: 0; pointer-events: none; opacity: .028; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E"); }
+      @keyframes ambient-in { to { opacity: 1; } }
+      @keyframes point-in { to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+      @keyframes point-out { to { opacity: .2; transform: translate(-50%, -50%) scale(3); } }
+      @keyframes contours-open { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.42); } 45% { opacity: 1; } 100% { opacity: .72; transform: translate(-50%, -50%) scale(1); } }
+      @keyframes wave-rise { 0% { opacity: 0; transform: translate(-50%, -20%); } 48% { opacity: 1; } 100% { opacity: .95; transform: translate(-50%, -128%); } }
+      @keyframes trace-wave { to { stroke-dashoffset: 0; } }
+      @keyframes logo-resolve { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.92); filter: blur(8px); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); } }
+      @keyframes logo-sweep { to { transform: translateX(115%); } }
+      @keyframes particle-out { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); } 25% { opacity: .7; } 100% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1); } }
       @keyframes status-in { to { opacity: 1; } }
-      @keyframes breathe { 0%, 100% { opacity: .42; transform: scale(.82); } 50% { opacity: 1; transform: scale(1.2); } }
-      @media (max-aspect-ratio: 4 / 3) { .artwork { background-size: auto 108%; } .wordmark { font-size: clamp(34px, 7vw, 68px); } }
+      @keyframes breathe { 0%, 100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.2); } }
+      @media (max-aspect-ratio: 4 / 3) { .logo-stage { width: min(58vw, 470px); } .wave-shell { width: min(76vw, 650px); } .contours { width: min(92vw, 780px); } }
       @media (prefers-reduced-motion: reduce) {
-        .artwork, .center-veil, .gold-line, .wordmark, .wordmark::after, .subtitle, .status, .status::before { animation: none; }
-        .artwork { opacity: 1; transform: none; filter: saturate(.82) contrast(1.08) brightness(.72); }
-        .center-veil, .gold-line, .wordmark, .subtitle, .status { opacity: 1; }
-        .gold-line { transform: none; }
-        .wordmark { letter-spacing: -.045em; transform: none; filter: none; }
+        html { transition-duration: .15s; }
+        .ambient, .center-point, .contours, .wave-shell, .wave .trace, .logo-stage, .logo-frame::after, .particle, .status, .status::before { animation: none; }
+        .ambient { opacity: 1; }
+        .center-point, .wave-shell, .particle { display: none; }
+        .contours { opacity: .45; transform: translate(-50%, -50%) scale(1); }
+        .logo-stage { opacity: 1; transform: translate(-50%, -50%); filter: none; }
+        .status { opacity: 1; }
       }
     </style>
   </head>
   <body>
-    <main class="cinematic" role="status" aria-live="polite" aria-label="Opening OBAOL Supreme">
-      <div class="artwork" aria-hidden="true"></div>
-      <div class="vignette" aria-hidden="true"></div>
-      <div class="center-veil" aria-hidden="true"></div>
-      <div class="grain" aria-hidden="true"></div>
-      <section class="identity">
-        <h1 class="wordmark"><span class="obaol">OBAOL</span><span class="supreme">Supreme</span></h1>
-        <p class="subtitle">Commodity Trade Execution System</p>
-      </section>
+    <main class="opening" role="status" aria-live="polite" aria-label="Opening OBAOL Supreme">
+      <div class="ambient" aria-hidden="true"></div>
+      <div class="center-point" aria-hidden="true"></div>
+      <svg class="contours" viewBox="0 0 900 530" aria-hidden="true">
+        <ellipse cx="450" cy="265" rx="190" ry="104" /><ellipse cx="450" cy="265" rx="270" ry="150" />
+        <ellipse cx="450" cy="265" rx="355" ry="202" /><ellipse cx="450" cy="265" rx="438" ry="254" />
+      </svg>
+      <div class="wave-shell" aria-hidden="true">
+        <svg class="wave" viewBox="0 0 720 150" preserveAspectRatio="none">
+          <path class="ghost" d="M4 87 C80 87 103 87 154 87 C190 87 190 58 216 58 C242 58 249 109 277 109 C309 109 318 28 352 28 C386 28 393 122 427 122 C456 122 465 69 491 69 C519 69 522 87 565 87 C616 87 643 87 716 87" />
+          <path class="trace" d="M4 87 C80 87 103 87 154 87 C190 87 190 58 216 58 C242 58 249 109 277 109 C309 109 318 28 352 28 C386 28 393 122 427 122 C456 122 465 69 491 69 C519 69 522 87 565 87 C616 87 643 87 716 87" />
+        </svg>
+      </div>
+      <section class="logo-stage" aria-label="OBAOL"><div class="logo-frame"><img class="logo" src="../build/splash-logo.webp" alt="OBAOL" /></div></section>
+      <i class="particle p1" aria-hidden="true"></i><i class="particle p2" aria-hidden="true"></i>
+      <i class="particle p3" aria-hidden="true"></i><i class="particle p4" aria-hidden="true"></i>
       <div class="status" aria-hidden="true">Preparing your secure workspace</div>
-      <div class="gold-line" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+      <audio id="opening-chime" src="../build/opening-chime.wav" preload="auto" aria-hidden="true"></audio>
     </main>
+    <script>
+      (() => {
+        const chime = document.getElementById("opening-chime");
+        chime.volume = 0.28;
+        const play = () => chime.play().catch(() => {});
+        if (document.readyState === "complete") play();
+        else window.addEventListener("load", play, { once: true });
+      })();
+    </script>
   </body>
 </html>

@@ -163,6 +163,13 @@ function closeSplashWindow() {
   splashWindow = null;
 }
 
+async function dissolveSplashWindow() {
+  if (!splashWindow || splashWindow.isDestroyed()) return;
+  await splashWindow.webContents.executeJavaScript("document.documentElement.classList.add('is-leaving')", true).catch(() => {});
+  await waitFor(300);
+  closeSplashWindow();
+}
+
 async function createSplashWindow() {
   splashWindow = new BrowserWindow({
     width: 1120,
@@ -228,7 +235,7 @@ async function loadApplication() {
       const splashState = await splashStatePromise.catch(() => ({ reducedMotion: false }));
       const minimumDuration = splashState.reducedMotion ? SPLASH_REDUCED_MOTION_MS : SPLASH_MINIMUM_MS;
       await waitFor(minimumDuration - (Date.now() - cinematicStartedAt));
-      closeSplashWindow();
+      await dissolveSplashWindow();
     }
     showMainWindow();
     if (!hasPerformedAutomaticUpdateCheck) {
@@ -243,7 +250,7 @@ async function loadApplication() {
         const splashState = await splashStatePromise?.catch(() => ({ reducedMotion: false }));
         const minimumDuration = splashState?.reducedMotion ? SPLASH_REDUCED_MOTION_MS : SPLASH_MINIMUM_MS;
         await waitFor(minimumDuration - (Date.now() - cinematicStartedAt));
-        closeSplashWindow();
+        await dissolveSplashWindow();
       }
       showMainWindow();
     }

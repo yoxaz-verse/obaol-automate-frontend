@@ -11,8 +11,8 @@ const required = [
   "build/icon.ico",
   "build/icon.icns",
   "build/tray.png",
-  "build/splash-statue.webp",
-  "build/splash-statue-source.png",
+  "build/splash-logo.webp",
+  "build/opening-chime.wav",
 ];
 
 const missing = required.filter((file) => !fs.existsSync(path.join(root, file)));
@@ -39,7 +39,7 @@ if (!mainSource.includes("SPLASH_MINIMUM_MS") || !mainSource.includes("createSpl
   process.exit(1);
 }
 
-if (manifest.version !== "0.1.4" || !manifest.dependencies?.["electron-updater"]) {
+if (manifest.version !== "0.1.5" || !manifest.dependencies?.["electron-updater"]) {
   console.error("Desktop updater package or version is incomplete.");
   process.exit(1);
 }
@@ -52,8 +52,13 @@ for (const channel of ["desktop:update-check", "desktop:update-download", "deskt
 }
 
 const loadingSource = fs.readFileSync(path.join(root, "src/loading.html"), "utf8");
-if (!loadingSource.includes("splash-statue.webp") || !loadingSource.includes("prefers-reduced-motion")) {
+if (!loadingSource.includes("splash-logo.webp") || !loadingSource.includes("opening-chime.wav") || !loadingSource.includes("prefers-reduced-motion")) {
   console.error("Desktop cinematic splash asset or reduced-motion treatment is incomplete.");
+  process.exit(1);
+}
+
+if (loadingSource.includes("statue") || manifest.build.files.some((file) => file.includes("statue"))) {
+  console.error("The retired statue splash is still referenced.");
   process.exit(1);
 }
 

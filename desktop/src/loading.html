@@ -3,25 +3,57 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>OBAOL Supreme — Loading</title>
+    <title>OBAOL Supreme — Opening</title>
     <style>
-      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #050403; }
       * { box-sizing: border-box; }
-      body { margin: 0; min-height: 100vh; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 20%, #302511 0, #0a0a0a 42%); color: #fff; padding: 24px; }
-      main { width: min(520px, 100%); text-align: center; padding: 48px; }
-      .mark { position: relative; width: 72px; height: 72px; display: grid; place-items: center; margin: 0 auto 24px; border: 1px solid #cf983c55; border-radius: 22px; background: #cf983c1f; color: #e4b45e; font-size: 30px; font-weight: 900; box-shadow: 0 20px 60px #0008; }
-      .mark::after { content: ""; position: absolute; inset: -9px; border: 2px solid transparent; border-top-color: #cf983c; border-radius: 28px; animation: spin 1s linear infinite; }
-      h1 { margin: 0; font-size: 30px; letter-spacing: -.03em; }
-      p { margin: 14px 0 0; color: #a8a8a8; line-height: 1.6; }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      @media (prefers-reduced-motion: reduce) { .mark::after { animation: none; border-color: #cf983c66; } }
+      html, body { width: 100%; height: 100%; }
+      body { margin: 0; overflow: hidden; background: #050403; color: #f7f1e6; }
+      .cinematic { position: relative; display: grid; width: 100%; height: 100%; min-height: 480px; place-items: center; isolation: isolate; background: #050403; }
+      .artwork { position: absolute; inset: -3%; z-index: -4; background-image: url("../build/splash-statue.webp"); background-position: 50% 50%; background-size: cover; opacity: 0; filter: saturate(.82) contrast(1.08) brightness(.72); transform: translateY(4.5%) scale(1.075); animation: statue-reveal 2.35s cubic-bezier(.2,.72,.2,1) .12s forwards; }
+      .vignette, .center-veil, .grain, .gold-line { position: absolute; inset: 0; pointer-events: none; }
+      .vignette { z-index: -3; background: linear-gradient(180deg, rgba(2,2,2,.52), transparent 24%, transparent 72%, rgba(2,2,2,.78)), radial-gradient(ellipse at center, transparent 24%, rgba(0,0,0,.12) 54%, rgba(0,0,0,.84) 100%); }
+      .center-veil { z-index: -2; background: radial-gradient(ellipse 38% 24% at 50% 51%, rgba(3,3,3,.72), rgba(3,3,3,.22) 58%, transparent 78%); opacity: 0; animation: veil-in 1.25s ease-out .75s forwards; }
+      .grain { z-index: 4; opacity: .055; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E"); }
+      .gold-line { inset: auto 8% 7%; height: 1px; background: linear-gradient(90deg, transparent, rgba(210,158,65,.7), transparent); opacity: 0; transform: scaleX(.2); animation: line-open 1.15s cubic-bezier(.2,.72,.2,1) 1.45s forwards; }
+      .identity { position: relative; width: min(88vw, 920px); padding: 24px; text-align: center; transform: translateY(1%); }
+      .wordmark { position: relative; display: inline-flex; align-items: baseline; justify-content: center; gap: clamp(10px, 1.2vw, 22px); margin: 0; overflow: hidden; font-size: clamp(38px, 7.4vw, 88px); font-weight: 900; line-height: .92; letter-spacing: .42em; text-transform: uppercase; text-shadow: 0 3px 18px rgba(0,0,0,.92), 0 0 48px rgba(206,152,60,.18); opacity: 0; transform: scale(.93); animation: word-converge 1.55s cubic-bezier(.16,.84,.2,1) .72s forwards; }
+      .wordmark .obaol { color: #fffaf0; }
+      .wordmark .supreme { color: #d9a64b; }
+      .wordmark::after { content: ""; position: absolute; inset: -20% -30%; background: linear-gradient(105deg, transparent 38%, rgba(255,242,201,.7) 49%, transparent 60%); transform: translateX(-115%); animation: gold-sweep 1.05s ease-in-out 1.52s forwards; mix-blend-mode: screen; }
+      .subtitle { margin: 18px 0 0; color: rgba(244,231,203,.72); font-size: clamp(9px, 1.25vw, 14px); font-weight: 700; letter-spacing: .34em; text-transform: uppercase; opacity: 0; transform: translateY(8px); animation: subtitle-in .75s ease-out 1.58s forwards; }
+      .status { position: absolute; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; gap: 10px; color: rgba(244,231,203,.48); font-size: 9px; font-weight: 800; letter-spacing: .27em; text-transform: uppercase; opacity: 0; animation: status-in .6s ease-out 2.05s forwards; }
+      .status::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #d29d42; box-shadow: 0 0 13px rgba(210,157,66,.75); animation: breathe 1.5s ease-in-out 2.4s infinite; }
+      @keyframes statue-reveal { 0% { opacity: 0; transform: translateY(4.5%) scale(1.075); filter: saturate(.45) contrast(1.18) brightness(.25); } 45% { opacity: .74; } 100% { opacity: 1; transform: translateY(0) scale(1); filter: saturate(.82) contrast(1.08) brightness(.72); } }
+      @keyframes veil-in { to { opacity: 1; } }
+      @keyframes line-open { to { opacity: 1; transform: scaleX(1); } }
+      @keyframes word-converge { 0% { opacity: 0; letter-spacing: .42em; transform: scale(.93); filter: blur(9px); } 58% { opacity: 1; } 100% { opacity: 1; letter-spacing: -.045em; transform: scale(1); filter: blur(0); } }
+      @keyframes gold-sweep { to { transform: translateX(115%); } }
+      @keyframes subtitle-in { to { opacity: 1; transform: translateY(0); } }
+      @keyframes status-in { to { opacity: 1; } }
+      @keyframes breathe { 0%, 100% { opacity: .42; transform: scale(.82); } 50% { opacity: 1; transform: scale(1.2); } }
+      @media (max-aspect-ratio: 4 / 3) { .artwork { background-size: auto 108%; } .wordmark { font-size: clamp(34px, 7vw, 68px); } }
+      @media (prefers-reduced-motion: reduce) {
+        .artwork, .center-veil, .gold-line, .wordmark, .wordmark::after, .subtitle, .status, .status::before { animation: none; }
+        .artwork { opacity: 1; transform: none; filter: saturate(.82) contrast(1.08) brightness(.72); }
+        .center-veil, .gold-line, .wordmark, .subtitle, .status { opacity: 1; }
+        .gold-line { transform: none; }
+        .wordmark { letter-spacing: -.045em; transform: none; filter: none; }
+      }
     </style>
   </head>
   <body>
-    <main role="status" aria-live="polite">
-      <div class="mark" aria-hidden="true">O</div>
-      <h1>Opening OBAOL Supreme</h1>
-      <p>Connecting securely to your workspace…</p>
+    <main class="cinematic" role="status" aria-live="polite" aria-label="Opening OBAOL Supreme">
+      <div class="artwork" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+      <div class="center-veil" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+      <section class="identity">
+        <h1 class="wordmark"><span class="obaol">OBAOL</span><span class="supreme">Supreme</span></h1>
+        <p class="subtitle">Commodity Trade Execution System</p>
+      </section>
+      <div class="status" aria-hidden="true">Preparing your secure workspace</div>
+      <div class="gold-line" aria-hidden="true"></div>
     </main>
   </body>
 </html>

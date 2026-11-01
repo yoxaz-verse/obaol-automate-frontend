@@ -11,6 +11,8 @@ const required = [
   "build/icon.ico",
   "build/icon.icns",
   "build/tray.png",
+  "build/splash-statue.webp",
+  "build/splash-statue-source.png",
 ];
 
 const missing = required.filter((file) => !fs.existsSync(path.join(root, file)));
@@ -29,6 +31,17 @@ const mainSource = fs.readFileSync(path.join(root, "src/main.cjs"), "utf8");
 const preloadSource = fs.readFileSync(path.join(root, "src/preload.cjs"), "utf8");
 if (!mainSource.includes('"desktop:open-public-page"') || !preloadSource.includes('"desktop:open-public-page"')) {
   console.error("Desktop public-page bridge is incomplete.");
+  process.exit(1);
+}
+
+if (!mainSource.includes("SPLASH_MINIMUM_MS") || !mainSource.includes("createSplashWindow")) {
+  console.error("Desktop cinematic splash flow is incomplete.");
+  process.exit(1);
+}
+
+const loadingSource = fs.readFileSync(path.join(root, "src/loading.html"), "utf8");
+if (!loadingSource.includes("splash-statue.webp") || !loadingSource.includes("prefers-reduced-motion")) {
+  console.error("Desktop cinematic splash asset or reduced-motion treatment is incomplete.");
   process.exit(1);
 }
 

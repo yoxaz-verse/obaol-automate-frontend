@@ -4,6 +4,8 @@ const path = require("node:path");
 const APP_URL = process.env.OBAOL_DESKTOP_URL || "https://www.obaol.com/auth";
 const APP_ORIGIN = parsedUrl(APP_URL)?.origin;
 const APP_LOAD_TIMEOUT_MS = 20_000;
+const SPLASH_MINIMUM_MS = 2_800;
+const SPLASH_REDUCED_MOTION_MS = 900;
 const OBAOL_HOSTS = new Set(["obaol.com", "www.obaol.com"]);
 const GOOGLE_AUTH_HOSTS = new Set(["accounts.google.com", "accounts.googleusercontent.com"]);
 const PUBLIC_PAGES = Object.freeze({
@@ -12,9 +14,11 @@ const PUBLIC_PAGES = Object.freeze({
 });
 
 let mainWindow = null;
+let splashWindow = null;
 let tray = null;
 let isQuitting = false;
 let isLoadingApplication = false;
+let hasPlayedLaunchCinematic = false;
 
 function parsedUrl(value) {
   try {
@@ -37,10 +41,58 @@ function isGoogleAuthUrl(value) {
 }
 
 function showMainWindow() {
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    splashWindow.show();
+    splashWindow.focus();
+    return;
+  }
   if (!mainWindow) return;
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.show();
   mainWindow.focus();
+}
+
+function closeSplashWindow() {
+  if (!splashWindow) return;
+  if (!splashWindow.isDestroyed()) splashWindow.destroy();
+  splashWindow = null;
+}
+
+async function createSplashWindow() {
+  splashWindow = new BrowserWindow({
+    width: 1120,
+    height: 700,
+    minWidth: 840,
+    minHeight: 525,
+    frame: false,
+    resizable: true,
+    movable: true,
+    show: false,
+    skipTaskbar: true,
+    backgroundColor: "#050403",
+    icon: path.join(__dirname, "../build/icon.png"),
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
+  });
+  splashWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  splashWindow.webContents.on("will-navigate", (event) => event.preventDefault());
+  splashWindow.once("ready-to-show", () => {
+    splashWindow?.center();
+    splashWindow?.show();
+  });
+
+  await splashWindow.loadFile(path.join(__dirname, "loading.html"));
+  const reducedMotion = await splashWindow.webContents
+    .executeJavaScript("window.matchMedia('(prefers-reduced-motion: reduce)').matches", true)
+    .catch(() => false);
+  return { reducedMotion };
+}
+
+function waitFor(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, Math.max(0, milliseconds)));
 }
 
 async function showOfflineScreen() {
@@ -52,20 +104,39 @@ async function loadApplication() {
   if (!mainWindow || mainWindow.isDestroyed() || isLoadingApplication) return;
   isLoadingApplication = true;
   let timeoutId = null;
+  const playCinematic = !hasPlayedLaunchCinematic;
+  const cinematicStartedAt = Date.now();
+  let splashStatePromise = null;
 
   try {
-    await mainWindow.loadFile(path.join(__dirname, "loading.html"));
-    showMainWindow();
+    if (playCinematic) {
+      hasPlayedLaunchCinematic = true;
+      splashStatePromise = createSplashWindow();
+    }
     await Promise.race([
       mainWindow.loadURL(APP_URL),
       new Promise((_, reject) => {
         timeoutId = setTimeout(() => reject(new Error("Application load timed out.")), APP_LOAD_TIMEOUT_MS);
       }),
     ]);
+    if (playCinematic) {
+      const splashState = await splashStatePromise.catch(() => ({ reducedMotion: false }));
+      const minimumDuration = splashState.reducedMotion ? SPLASH_REDUCED_MOTION_MS : SPLASH_MINIMUM_MS;
+      await waitFor(minimumDuration - (Date.now() - cinematicStartedAt));
+      closeSplashWindow();
+    }
+    showMainWindow();
   } catch (error) {
     if (error?.code !== "ERR_ABORTED" && error?.errno !== -3) {
       mainWindow?.webContents.stop();
       await showOfflineScreen();
+      if (playCinematic) {
+        const splashState = await splashStatePromise?.catch(() => ({ reducedMotion: false }));
+        const minimumDuration = splashState?.reducedMotion ? SPLASH_REDUCED_MOTION_MS : SPLASH_MINIMUM_MS;
+        await waitFor(minimumDuration - (Date.now() - cinematicStartedAt));
+        closeSplashWindow();
+      }
+      showMainWindow();
     }
   } finally {
     if (timeoutId) clearTimeout(timeoutId);
@@ -172,7 +243,6 @@ function createWindow() {
   });
 
   secureWebContents(mainWindow.webContents);
-  mainWindow.once("ready-to-show", () => mainWindow?.show());
   mainWindow.on("close", (event) => {
     if (isQuitting) return;
     event.preventDefault();
@@ -215,7 +285,10 @@ ipcMain.on("desktop:open-public-page", (_event, page) => {
   if (destination) void shell.openExternal(destination);
 });
 
-app.on("before-quit", () => { isQuitting = true; });
+app.on("before-quit", () => {
+  isQuitting = true;
+  closeSplashWindow();
+});
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin" && isQuitting) app.quit();
 });

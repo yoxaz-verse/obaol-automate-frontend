@@ -25,6 +25,23 @@ test("desktop shell exposes only the minimal read-only bridge", () => {
   assert.doesNotMatch(preload, /require\([^)]*fs/);
 });
 
+test("desktop cold launch uses a sandboxed cinematic splash", () => {
+  const main = read("desktop/src/main.cjs");
+  const loading = read("desktop/src/loading.html");
+  const manifest = JSON.parse(read("desktop/package.json"));
+  assert.match(main, /SPLASH_MINIMUM_MS\s*=\s*2_800/);
+  assert.match(main, /hasPlayedLaunchCinematic/);
+  assert.match(main, /nodeIntegration:\s*false/);
+  assert.match(main, /sandbox:\s*true/);
+  assert.match(main, /closeSplashWindow\(\);[\s\S]*showMainWindow\(\)/);
+  assert.match(loading, /splash-statue\.webp/);
+  assert.match(loading, /OBAOL/);
+  assert.match(loading, /Supreme/);
+  assert.match(loading, /prefers-reduced-motion:\s*reduce/);
+  assert.equal(manifest.version, "0.1.3");
+  assert.ok(manifest.build.files.includes("build/splash-statue.webp"));
+});
+
 test("homepage provides stable Windows and macOS installer links", () => {
   const downloads = read("src/components/home/DesktopDownloadSection.tsx");
   const home = read("src/components/home/HomeContent.tsx");

@@ -56,6 +56,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/onboarding", label: "Onboarding", section: "Overview", roles: ["associate", "operator", "team"] },
   { path: "/dashboard/pending-approval", label: "Pending approval", section: "Overview", roles: ["associate", "operator", "team"] },
   { path: "/dashboard/rejected", label: "Access status", section: "Overview", roles: ["associate", "operator", "team"] },
+  { path: "/dashboard/access-info", label: "Workspace access", section: "Overview", roles: ["admin", "associate", "operator", "team", "customer-support"] },
 
   { path: "/dashboard/product", label: "My Listings", section: "Products", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, mobilePriority: 4, primaryAction: { label: "Create listing", href: "/dashboard/product" } },
   { path: "/dashboard/catalog", label: "Commodity Catalog", section: "Products", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Company & Account" },
@@ -261,6 +262,28 @@ const routeMatches = (pattern: string, path: string) => {
 export const getDashboardRoute = (path: string) => {
   const normalized = normalizePath(path);
   return DASHBOARD_ROUTE_MANIFEST.find((route) => routeMatches(route.path, normalized)) || null;
+};
+
+export type DashboardAccessReason = "role" | "company-function" | "coming-soon";
+
+const ACCESS_INFO_PATH = "/dashboard/access-info";
+
+export const isDashboardAccessReason = (value: unknown): value is DashboardAccessReason =>
+  value === "role" || value === "company-function" || value === "coming-soon";
+
+export const resolveDashboardAccessTarget = (value: unknown) => {
+  const target = String(value || "").trim().split(/[?#]/)[0];
+  if (!target.startsWith("/dashboard/") || target === ACCESS_INFO_PATH) return null;
+  return getDashboardRoute(target) ? target : null;
+};
+
+export const buildDashboardAccessInfoUrl = (target: string, reason: DashboardAccessReason) => {
+  const safeTarget = resolveDashboardAccessTarget(target);
+  const params = new URLSearchParams({
+    target: safeTarget || "/dashboard",
+    reason,
+  });
+  return `${ACCESS_INFO_PATH}?${params.toString()}`;
 };
 
 export const isDashboardRouteActive = (pathname: string, routePath: string) => {

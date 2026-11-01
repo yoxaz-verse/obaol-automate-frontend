@@ -15,6 +15,12 @@ export type SidebarGovernanceSnapshot = {
   updatedAt?: string;
   sectionOrder: Record<"IMPORTANT" | "SEEKING" | "PROVIDING" | "OTHER_SERVICES", string[]>;
   mappings: SidebarGovernanceMapping[];
+  routeAudience?: Record<string, SidebarRouteAudience[]>;
+};
+
+export type SidebarRouteAudience = {
+  functionSlug: string;
+  placement: "SEEKING" | "PROVIDING";
 };
 
 export type ResolvedSidebarPage = {

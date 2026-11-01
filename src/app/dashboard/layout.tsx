@@ -55,12 +55,6 @@ function DashboardLayoutContent({
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const [navigationNotice, setNavigationNotice] = useState<string | null>(null);
-
-  useEffect(() => {
-    setNavigationNotice(new URLSearchParams(window.location.search).get("navigation"));
-  }, [pathname]);
-
   // The dashboard scrolls inside its own container, so Next.js cannot restore
   // its position when routes change. Always start a newly opened page at the top.
   useEffect(() => {
@@ -229,11 +223,6 @@ function DashboardLayoutContent({
               }}
             >
               <div data-dashboard-content className="max-w-[var(--db-content-width)] mx-auto w-full px-3 pb-4 pt-1 md:p-6 min-w-0">
-                {navigationNotice && pathname === "/dashboard" ? (
-                  <div role="status" className="mb-3 rounded-xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-sm text-warning-700 dark:text-warning-300">
-                    {navigationNotice === "coming-soon" ? "That workspace is coming soon and is not available yet." : "That workspace is not available for your current company functions."}
-                  </div>
-                ) : null}
                 <DashboardContextBar />
                 <CompanyApprovalBanner />
                 <div className="relative" aria-busy={isNavigating || undefined}>

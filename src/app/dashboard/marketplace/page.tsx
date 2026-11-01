@@ -16,6 +16,7 @@ import { getData } from "@/core/api/apiHandler";
 import { variantRateRoutes } from "@/core/api/apiRoutes";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import { useCompanyAccess } from "@/utils/companyAccess";
+import { buildDashboardAccessInfoUrl } from "@/utils/dashboardAccess";
 
 const TabsAny = Tabs as any;
 const TabAny = Tab as any;
@@ -246,10 +247,12 @@ export default function MarketplacePage() {
                                     <div className="text-[10px] font-bold  tracking-wider text-default-500">
                                         Trade Listings
                                     </div>
-                                    {canAddOwnRate && (
+                                    {(isAdminUser || isAssociateUser) && (
                                         <Button
                                             size="sm"
-                                            onPress={() => router.push("/dashboard/product")}
+                                            onPress={() => router.push(canAddOwnRate
+                                                ? "/dashboard/product"
+                                                : buildDashboardAccessInfoUrl("/dashboard/product", "company-function"))}
                                             variant="flat"
                                             color="warning"
                                             className="font-black tracking-widest px-4 md:px-5 h-9 md:h-10 rounded-xl  text-[10px] md:text-[11px]"

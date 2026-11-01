@@ -5,6 +5,7 @@ export const SIDEBAR_RECOVERY_ROUTES = new Set([
   "/dashboard/onboarding",
   "/dashboard/pending-approval",
   "/dashboard/rejected",
+  "/dashboard/access-info",
   "/dashboard/guidance",
   "/dashboard/settings",
   "/dashboard/customer-support",

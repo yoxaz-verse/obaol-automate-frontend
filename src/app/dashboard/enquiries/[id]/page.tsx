@@ -4681,16 +4681,16 @@ export default function EnquiryDetailsPage() {
 
                                 {selectedWarehouseOption && (!selectedInventory || selectedWarehouseOption.availableQty < requiredQty) && (
                                     <div className="flex flex-col gap-2">
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <Input
-                                                label={selectedInventory ? "Add Stock (MT)" : "Stock for This Product (MT)"}
-                                                type="number"
-                                                placeholder="0"
-                                                value={inlineQuantity}
-                                                onValueChange={setInlineQuantity}
-                                                variant="bordered"
-                                            />
-                                        </div>
+                                        <Input
+                                            label={selectedInventory ? "Add Stock (MT)" : "Stock for This Product (MT)"}
+                                            labelPlacement="outside"
+                                            type="number"
+                                            placeholder="0"
+                                            value={inlineQuantity}
+                                            onValueChange={setInlineQuantity}
+                                            variant="bordered"
+                                            min="0"
+                                        />
                                         {selectedInventory && selectedInventory.availableQty < requiredQty && (
                                             <div className="text-[10px] text-obaol-600 font-bold px-1 italic">
                                                 * This inventory has insufficient stock. Please add the missing {(requiredQty - selectedInventory.availableQty).toFixed(2)} MT to enable selection.

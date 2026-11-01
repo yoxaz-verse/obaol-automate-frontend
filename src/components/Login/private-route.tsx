@@ -2,7 +2,7 @@ import AuthContext from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import BrandedLoader from "@/components/ui/BrandedLoader";
-import { canAccessDashboardRoute } from "@/utils/dashboardAccess";
+import { buildDashboardAccessInfoUrl, canAccessDashboardRoute } from "@/utils/dashboardAccess";
 import { getDashboardRoute } from "@/utils/dashboardAccess";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { SIDEBAR_RECOVERY_ROUTES } from "@/utils/sidebarGovernance";
@@ -32,10 +32,10 @@ const PrivateRoute = ({
       if (!isAuthenticated) {
         router.replace("/auth?view=signin");
       } else if (!roleAllowed) {
-        router.replace("/403");
+        router.replace(buildDashboardAccessInfoUrl(pathname, "role"));
       } else if (!isAllowed) {
-        const reason = governedStatus === "COMING_SOON" ? "coming-soon" : "not-available";
-        router.replace(`/dashboard?navigation=${reason}`);
+        const reason = governedStatus === "COMING_SOON" ? "coming-soon" : "company-function";
+        router.replace(buildDashboardAccessInfoUrl(pathname, reason));
       }
     }
   }, [isAuthenticated, loading, governancePending, roleAllowed, isAllowed, governedStatus, router]);

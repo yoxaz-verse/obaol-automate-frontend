@@ -6,7 +6,7 @@ import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { sidebarGovernanceRoutes } from "@/core/api/apiRoutes";
 import { indexResolvedSidebarGovernance, resolveSidebarGovernance } from "@/utils/sidebarGovernance";
-import type { ResolvedSidebarPage, SidebarGovernanceSnapshot, SidebarPageStatus } from "@/types/sidebarGovernance";
+import type { ResolvedSidebarPage, SidebarGovernanceSnapshot, SidebarPageStatus, SidebarRouteAudience } from "@/types/sidebarGovernance";
 
 type SidebarGovernanceContextValue = {
   isAssociate: boolean;
@@ -17,6 +17,7 @@ type SidebarGovernanceContextValue = {
   resolved: ResolvedSidebarPage[];
   sections: Record<ResolvedSidebarPage["placement"], ResolvedSidebarPage[]>;
   getRouteStatus: (path: string) => SidebarPageStatus;
+  getRouteAudience: (path: string) => SidebarRouteAudience[];
   refresh: () => Promise<unknown>;
 };
 
@@ -47,8 +48,9 @@ export const SidebarGovernanceProvider = ({ children }: { children: ReactNode })
     resolved,
     sections: index.sections,
     getRouteStatus: index.getRouteStatus,
+    getRouteAudience: (path: string) => query.data?.routeAudience?.[path] || [],
     refresh: query.refetch,
-  }), [index, isAssociate, query.data?.revision, query.isError, query.isLoading, query.isSuccess, query.refetch, resolved]);
+  }), [index, isAssociate, query.data?.revision, query.data?.routeAudience, query.isError, query.isLoading, query.isSuccess, query.refetch, resolved]);
   return <SidebarGovernanceContext.Provider value={value}>{children}</SidebarGovernanceContext.Provider>;
 };
 

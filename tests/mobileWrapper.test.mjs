@@ -23,6 +23,26 @@ test("Flutter shell exposes the native identity bridge and persistent cookie", (
   assert.match(auth, /SignInWithApple/);
   assert.match(auth, /isHttpOnly: true/);
   assert.match(auth, /sameSite: HTTPCookieSameSitePolicy\.NONE/);
+  assert.match(auth, /expiresDate: expiresDate/);
+});
+
+test("iOS update checks are throttled and limited to the App Store", () => {
+  const updater = read("mobile/lib/native_update.dart");
+  const main = read("mobile/lib/main.dart");
+  const pubspec = read("mobile/pubspec.yaml");
+  const manifest = read("src/app/api/native-app-versions/route.ts");
+  assert.match(updater, /Duration\(hours: 12\)/);
+  assert.match(updater, /storeUri\.host != 'apps\.apple\.com'/);
+  assert.match(updater, /PackageInfo\.fromPlatform/);
+  assert.match(updater, /_dismissedVersionKey/);
+  assert.match(main, /Platform\.isIOS/);
+  assert.match(main, /Open App Store/);
+  assert.match(main, /Later/);
+  assert.match(pubspec, /version: 1\.0\.1\+2/);
+  assert.match(pubspec, /package_info_plus:/);
+  assert.match(pubspec, /shared_preferences:/);
+  assert.match(manifest, /IOS_APP_STORE_URL/);
+  assert.match(manifest, /enabled \? storeUrl : ""/);
 });
 
 test("mobile release configuration uses the permanent OBAOL identity", () => {

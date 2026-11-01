@@ -24,13 +24,21 @@ flutter run \
   --dart-define=GOOGLE_IOS_CLIENT_ID=IOS_CLIENT_ID.apps.googleusercontent.com \
   --dart-define=APPLE_SERVICE_ID=com.obaol.web \
   --dart-define=APPLE_REDIRECT_URI=https://www.obaol.com/auth/apple/callback
+```
 
+```sh
 dart format --output=none --set-exit-if-changed lib test
 flutter analyze
 flutter test
 flutter build appbundle --release
 flutter build ipa --release
 ```
+
+The iOS wrapper checks `https://www.obaol.com/api/native-app-versions` at most
+once every 12 hours. Override it for staging with
+`--dart-define=VERSION_MANIFEST_URL=https://example.com/api/native-app-versions`.
+The production prompt remains hidden until `IOS_APP_STORE_URL` is configured on
+the website deployment.
 
 Debug builds can point `APP_URL` and `API_BASE_URL` to a reachable HTTPS development environment. Cleartext HTTP is deliberately disabled; use a trusted development certificate.
 

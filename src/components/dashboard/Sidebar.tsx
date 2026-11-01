@@ -231,8 +231,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             >
                 <div className="relative group-hover:scale-110 transition-transform duration-500">
                     <div className="absolute inset-0 bg-obaol-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-default-100 to-transparent dark:from-white/10 dark:to-transparent border border-default-200 dark:border-white/10 flex items-center justify-center shadow-sm overflow-hidden">
-                       <Image src="/logo.png" width={28} height={28} alt="Obaol" className="object-contain" />
+                    <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-default-100 to-transparent dark:from-white/10 dark:to-transparent border border-default-200 dark:border-white/10 flex items-center justify-center shadow-sm overflow-hidden p-1.5">
+                       <Image src="/logo-dark.png" width={32} height={32} alt="Obaol" className="hidden dark:block object-contain" />
+                       <Image src="/logo-light.png" width={32} height={32} alt="Obaol" className="block dark:hidden object-contain" />
                        <div className="absolute bottom-0 left-0 w-full h-[2px] bg-obaol-500 opacity-50 shadow-[0_-4px_10px_rgba(207,152,60,0.5)]" />
                     </div>
                 </div>

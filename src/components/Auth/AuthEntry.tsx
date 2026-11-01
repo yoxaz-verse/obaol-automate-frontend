@@ -62,8 +62,9 @@ export default function AuthEntry({ signInView = false, prefill, reason }: { sig
       <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <Link href="/" aria-label="OBAOL home" className="group flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-obaol-500/20 bg-white shadow-sm transition-transform duration-500 group-hover:scale-105 dark:border-obaol-400/25 dark:bg-obaol-500/10">
-              <Image src="/logo.png" alt="OBAOL" width={34} height={34} priority />
+            <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-obaol-500/20 bg-white shadow-sm transition-transform duration-500 group-hover:scale-105 dark:border-obaol-400/25 dark:bg-obaol-500/10 p-1">
+              <Image src="/logo-dark.png" alt="OBAOL" width={34} height={34} priority className="hidden dark:block object-contain" />
+              <Image src="/logo-light.png" alt="OBAOL" width={34} height={34} priority className="block dark:hidden object-contain" />
             </span>
             <span className="flex flex-col">
               <span className="text-sm font-black uppercase text-obaol-950 dark:text-white">OBAOL</span>

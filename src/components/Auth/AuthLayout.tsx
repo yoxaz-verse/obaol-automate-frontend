@@ -309,8 +309,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                     <div className="relative z-20 w-full max-w-xl mx-auto">
                         <Link href="/" className="flex items-center gap-4 mb-8 group cursor-pointer justify-center lg:justify-start">
-                            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-obaol-500/30 bg-obaol-500/10 transition-transform duration-500 group-hover:scale-110">
-                                <Image src="/logo.png" alt="OBAOL" width={32} height={32} className="object-contain" />
+                            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-obaol-500/30 bg-obaol-500/10 transition-transform duration-500 group-hover:scale-110 p-1.5">
+                                <Image src="/logo-dark.png" alt="OBAOL" width={34} height={34} className="hidden dark:block object-contain" />
+                                <Image src="/logo-light.png" alt="OBAOL" width={34} height={34} className="block dark:hidden object-contain" />
                                 <div className="absolute inset-0 bg-obaol-500/20 opacity-0 blur-xl transition-opacity group-hover:opacity-100" />
                             </div>
                             <div className="flex flex-col">

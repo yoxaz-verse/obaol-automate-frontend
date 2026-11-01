@@ -259,7 +259,8 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                       {/* Drawer content */}
                       <div className="p-5 sm:p-8 border-b db-border-subtle flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Image src="/logo.png" width={28} height={28} alt="Logo" />
+                          <Image src="/logo-dark.png" width={28} height={28} alt="Logo" className="hidden dark:block object-contain" />
+                          <Image src="/logo-light.png" width={28} height={28} alt="Logo" className="block dark:hidden object-contain" />
                           <div>
                             <p className="font-black text-xs tracking-widest ">OBAOL</p>
                             <p className="text-[9px] font-bold text-obaol-700  tracking-widest dark:text-obaol-300">Supreme</p>

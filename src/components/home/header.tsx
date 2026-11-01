@@ -108,8 +108,23 @@ export default function Header() {
       }} className={`fixed top-0 left-0 right-0 z-[100] safe-pt transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
         <PublicContainer className="relative">
           <div className={`public-header-shell flex items-center justify-between gap-3 rounded-2xl px-4 md:px-6 border border-obaol-500/20 bg-background/85 shadow-[0_12px_40px_-20px_rgba(0,0,0,0.25)] backdrop-blur-xl transition-all duration-300 ${scrolled ? "h-14 border-obaol-500/40 shadow-[0_12px_30px_-15px_rgba(207,152,60,0.2)]" : "h-16"}`}>
-            <Link href="/" aria-label="OBAOL home" onClick={() => closeMenu()} className="relative flex-shrink-0">
-              <Image src="/logo.png" alt="OBAOL" width={95} height={28} priority className="object-contain rounded-md" />
+            <Link href="/" aria-label="OBAOL home" onClick={() => closeMenu()} className="relative flex-shrink-0 flex items-center">
+              <Image
+                src="/logo-dark.png"
+                alt="OBAOL"
+                width={100}
+                height={27}
+                priority
+                className="hidden dark:block h-7 w-auto object-contain"
+              />
+              <Image
+                src="/logo-light.png"
+                alt="OBAOL"
+                width={100}
+                height={27}
+                priority
+                className="block dark:hidden h-7 w-auto object-contain"
+              />
             </Link>
             <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-1">
               {primaryPublicLinks.map((link) => (

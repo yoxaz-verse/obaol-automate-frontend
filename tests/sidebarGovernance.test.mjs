@@ -19,7 +19,7 @@ const governancePagePath = new URL("../src/app/dashboard/sidebar-governance/page
 const assignmentPanelPath = new URL("../src/components/sidebar-governance/PageAssignments.tsx", import.meta.url);
 const orderAndPreviewPath = new URL("../src/components/sidebar-governance/OrderAndPreview.tsx", import.meta.url);
 const governanceHookPath = new URL("../src/hooks/useSidebarGovernance.tsx", import.meta.url);
-const dashboardLayoutPath = new URL("../src/app/dashboard/layout.tsx", import.meta.url);
+const dashboardLayoutPath = new URL("../src/app/dashboard/DashboardClientLayout.tsx", import.meta.url);
 
 const row = (functionSlug, routePath, placement, status, order = 0) => ({ functionSlug, routePath, placement, status, order });
 

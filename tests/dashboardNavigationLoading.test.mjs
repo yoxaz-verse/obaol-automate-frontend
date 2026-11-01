@@ -6,7 +6,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 
 test("dashboard navigation starts before routing and safely resets", () => {
   const context = read("../src/context/DashboardNavigationContext.tsx");
-  const layout = read("../src/app/dashboard/layout.tsx");
+  const layout = read("../src/app/dashboard/DashboardClientLayout.tsx");
   const quote = read("../src/components/dashboard/DashboardNavigationQuote.tsx");
   assert.match(context, /setPendingPath\(path\)/);
   assert.match(context, /setTimeout\(clearPending, 15000\)/);

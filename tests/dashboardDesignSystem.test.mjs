@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (path) => fs.readFileSync(path, "utf8");
 
 test("dashboard routes share one constrained workspace surface", () => {
-  const layout = read("src/app/dashboard/layout.tsx");
+  const layout = read("src/app/dashboard/DashboardClientLayout.tsx");
   const styles = read("src/app/globals.css");
 
   assert.match(layout, /data-dashboard-content/);

@@ -127,7 +127,7 @@ test("notifications use the compact inbox and role-aware composer", () => {
 });
 
 test("dashboard streams enriched enquiry notifications into notification caches", () => {
-  const layout = read("../src/app/dashboard/layout.tsx");
+  const layout = read("../src/app/dashboard/DashboardClientLayout.tsx");
   const subscriber = read("../src/components/dashboard/LiveNotificationSubscriber.tsx");
   const panel = read("../src/components/dashboard/NotificationPanel.tsx");
   assert.equal(layout.includes("<LiveNotificationSubscriber userId={user?.id} />"), true);

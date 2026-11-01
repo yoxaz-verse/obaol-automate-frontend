@@ -7,9 +7,14 @@ export const DEFAULT_OG_IMAGE = "/logo.png";
 export const PRIMARY_MARKET = "India";
 
 export const DEFAULT_DESCRIPTION =
-  "Starting in India, OBAOL Supreme is a software-led commodity trade execution system combining online coordination with on-ground support for verified sourcing, documentation, logistics, and trade closure. We are expanding globally across key commodity corridors.";
+  "OBAOL Supreme is an India-first B2B bulk trade execution platform for coordinating domestic and international agricultural commodity trade, from sourcing through logistics and closure.";
 
 export const DEFAULT_KEYWORDS = [
+  "B2B bulk trade execution platform",
+  "bulk trade platform India",
+  "domestic bulk trade platform",
+  "international bulk trade execution",
+  "agricultural commodity trade execution",
   "commodity trade execution",
   "agro commodity trade support",
   "buyer supplier coordination",
@@ -69,7 +74,7 @@ export function buildMetadata({
   const finalKeywords = dedupe([...DEFAULT_KEYWORDS, ...keywords, ...GEO_KEYWORDS]);
 
   return {
-    title,
+    title: { absolute: title },
     description: finalDescription,
     keywords: finalKeywords,
     metadataBase: new URL(BASE_URL),
@@ -108,6 +113,7 @@ export function buildWebPageJsonLd({
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
+    "@id": `${BASE_URL}${path}#webpage`,
     name: title,
     url: `${BASE_URL}${path}`,
     description: description || DEFAULT_DESCRIPTION,
@@ -125,6 +131,7 @@ export function buildWebSiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${BASE_URL}/#website`,
     name: SITE_NAME,
     url: BASE_URL,
     areaServed: [

@@ -4,7 +4,7 @@ import fs from "node:fs";
 
 const helper = fs.readFileSync(new URL("../src/utils/companyAccess.ts", import.meta.url), "utf8");
 const banner = fs.readFileSync(new URL("../src/components/dashboard/CompanyApprovalBanner.tsx", import.meta.url), "utf8");
-const layout = fs.readFileSync(new URL("../src/app/dashboard/layout.tsx", import.meta.url), "utf8");
+const layout = fs.readFileSync(new URL("../src/app/dashboard/DashboardClientLayout.tsx", import.meta.url), "utf8");
 const axios = fs.readFileSync(new URL("../src/core/api/axiosInstance.tsx", import.meta.url), "utf8");
 
 test("company read-only access is centralized in the authenticated user state", () => {

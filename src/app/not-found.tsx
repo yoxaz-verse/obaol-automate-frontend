@@ -1,34 +1,26 @@
-// src/app/not-found.tsx or src/pages/404.tsx (depending on your Next.js version)
+import type { Metadata } from "next";
+import Link from "next/link";
 
-"use client"; // Enables the component to use React hooks and client-side features
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation"; // For Next.js 13+
-import BrandedLoader from "@/components/ui/BrandedLoader";
-import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
-
-const NotFound = () => {
-  const { isAuthenticated, loading } = usePublicAuthStatus(); // Access authentication state
-  const router = useRouter(); // Initialize the router
-
-  useEffect(() => {
-    if (!loading) {
-      // Ensure that authentication status is determined
-      if (isAuthenticated) {
-        router.push("/dashboard"); // Redirect authenticated users to the dashboard
-      } else {
-        router.push("/auth"); // Redirect unauthenticated users to the auth page
-      }
-    }
-  }, [isAuthenticated, loading, router]); // Dependencies for useEffect
-
-  if (loading) {
-    // While authentication status is being determined, show a loading indicator
-    return <BrandedLoader fullScreen message="Loading destination" />;
-  }
-
-  // Optionally, return null since redirection will occur
-  return null;
+export const metadata: Metadata = {
+  title: "Page Not Found | OBAOL Supreme",
+  robots: { index: false, follow: true },
 };
 
-export default NotFound;
+export default function NotFound() {
+  return (
+    <main className="grid min-h-[100svh] place-items-center bg-background px-6 py-20 text-foreground">
+      <section className="mx-auto max-w-2xl text-center">
+        <p className="text-sm font-bold uppercase tracking-[0.24em] text-obaol-600">404 · Page not found</p>
+        <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">This destination is unavailable.</h1>
+        <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-default-600">
+          The address may be outdated, retired, or incorrect. Continue to OBAOL Supreme’s public trade execution information or return home.
+        </p>
+        <nav aria-label="Page not found options" className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/" className="public-button public-button--primary">Return home</Link>
+          <Link href="/how-it-works" className="public-button public-button--secondary">How OBAOL works</Link>
+          <Link href="/roles" className="public-button public-button--secondary">Explore participant roles</Link>
+        </nav>
+      </section>
+    </main>
+  );
+}

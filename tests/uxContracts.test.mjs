@@ -16,7 +16,7 @@ test("mobile app shell primitives are present", () => {
   const layout = read("../src/app/layout.tsx");
   const manifest = read("../src/app/manifest.ts");
   const globals = read("../src/app/globals.css");
-  const dashboardLayout = read("../src/app/dashboard/layout.tsx");
+  const dashboardLayout = read("../src/app/dashboard/DashboardClientLayout.tsx");
   const bottomNav = read("../src/components/dashboard/BottomNav.tsx");
   const table = read("../src/components/CurdTable/common-table.tsx");
 
@@ -90,7 +90,7 @@ test("homepage hero leads with one coordinated platform while preserving registr
 
   for (const phrase of [
     "One platform. Every trade role.",
-    "Buyers, suppliers, and specialist partners coordinate one trade through shared technology, clear handoffs, and visible progress.",
+    "Buyers, sellers, and execution partners coordinate domestic and international bulk trade through shared technology, clear handoffs, and visible progress.",
   ]) assert.equal(hero.includes(phrase), true);
   for (const phrase of ["Open Agro Execution Platform", "Open registration—", "10 verified stages"]) {
     assert.equal(hero.includes(phrase), false);
@@ -99,8 +99,8 @@ test("homepage hero leads with one coordinated platform while preserving registr
   assert.equal(heroCta.includes('const href = !loading && isAuthenticated ? "/dashboard" : "/auth"'), true);
   assert.equal(header.includes('signedIn ? "Open workspace" : "Join Platform"'), true);
   assert.equal(header.includes('href={signedIn ? "/dashboard" : "/auth"}'), true);
-  assert.equal(homepage.includes("open-registration B2B agro execution platform"), true);
-  assert.equal(homepage.includes("An open-registration platform"), true);
+  assert.equal(homepage.includes("B2B Bulk Trade Execution Platform"), true);
+  assert.equal(homepage.includes("domestic and international agricultural commodity trade"), true);
 });
 
 test("homepage hero is calm and the complete ten-stage map appears later", () => {
@@ -317,7 +317,7 @@ test("homepage services use a mobile puzzle and desktop synchronized chapter sto
   assert.equal(hero.includes("One platform. Every trade role."), true);
   assert.equal(homeContent.includes("OBAOL is the technology and coordination platform"), true);
   assert.equal(homeContent.includes("Independent trade participants do the specialist work."), true);
-  assert.equal(homepage.includes("open-registration B2B agro execution platform"), true);
+  assert.equal(homepage.includes("B2B Bulk Trade Execution Platform"), true);
   for (const imagePath of imagePaths) {
     const assetUrl = new URL(`../public${imagePath}`, import.meta.url);
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);

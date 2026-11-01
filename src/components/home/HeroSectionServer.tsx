@@ -42,21 +42,21 @@ export default function HeroSectionServer() {
             {/* Main Title */}
             <div className="space-y-2">
               <h1 className="text-4xl font-black leading-[1.04] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-[3.4rem] lg:text-[3.25rem] xl:text-[3.5rem]">
-                The Execution{" "}
+                The B2B Bulk Trade{" "}
                 <span className="bg-gradient-to-r from-obaol-600 via-amber-500 to-obaol-400 bg-clip-text text-transparent drop-shadow-sm">
-                  Ecosystem
+                  Execution Platform
                 </span>
               </h1>
               <div className="flex items-center gap-2.5 pt-1">
                 <span className="text-xs font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">for</span>
                 <span className="text-2xl font-black tracking-tight text-foreground sm:text-3xl lg:text-[2rem] xl:text-[2.2rem]">
-                  B2B Agro Trade.
+                  Agricultural commodities, India first.
                 </span>
               </div>
             </div>
 
             {/* Subheading */}
-            <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">Buyers, suppliers, and specialist partners coordinate one trade through shared technology, clear handoffs, and visible progress.</p>
+            <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">Buyers, sellers, and execution partners coordinate domestic and international bulk trade through shared technology, clear handoffs, and visible progress.</p>
 
             <HeroCTA />
           </div>

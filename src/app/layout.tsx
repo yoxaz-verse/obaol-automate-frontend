@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
 
   title: {
-    default: "OBAOL Supreme — Commodity Trade Execution System",
+    default: "B2B Bulk Trade Execution Platform | OBAOL Supreme",
     template: `%s | ${SITE_NAME}`,
   },
 
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: BASE_URL,
     siteName: "OBAOL",
-    title: "OBAOL Supreme — Where Commodity Trades Get Executed",
+    title: "B2B Bulk Trade Execution Platform | OBAOL Supreme",
     description: DEFAULT_DESCRIPTION,
     images: [
       {
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "OBAOL — Commodity Trade Execution System",
+    title: "B2B Bulk Trade Execution Platform | OBAOL Supreme",
     description: DEFAULT_DESCRIPTION,
     images: ["/logo.png"],
   },
@@ -181,26 +181,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "SoftwareApplication",
-              name: "OBAOL",
-              applicationCategory: "BusinessApplication",
-              operatingSystem: "Web",
-              description:
-                "A unified operating system for physical commodity and agro-commodity trading.",
-              offers: {
-                "@type": "Offer",
-                price: "0",
-                priceCurrency: "USD",
-              },
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
               "@type": "Organization",
+              "@id": `${BASE_URL}/#organization`,
               name: BUSINESS_IDENTITY.legalName,
               url: BASE_URL,
               logo: `${BASE_URL}/logo.png`,
@@ -238,8 +220,10 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
+              "@id": `${BASE_URL}/#website`,
               name: SITE_NAME,
               url: BASE_URL,
+              publisher: { "@id": `${BASE_URL}/#organization` },
               areaServed: [
                 { "@type": "Country", name: "India" },
                 { "@type": "Country", name: "United Arab Emirates" },

@@ -1,12 +1,13 @@
 /* Public presentation only. Dashboard and authentication retain their own tokens. */
 .obaol-public {
-  --public-bg: #fcfaf6;
-  --public-surface: #ffffff;
-  --public-inset: #f5f1e9;
-  --public-text: #192321;
-  --public-muted: #59635e;
-  --public-border: #e4e3dc;
-  --public-accent: #94631c;
+  --public-bg: var(--brand-palladian);
+  --public-surface: #fbf8f2;
+  --public-inset: #e7e0d4;
+  --public-text: var(--brand-abyssal);
+  --public-muted: #4f5b67;
+  --public-border: color-mix(in srgb, var(--brand-oatmeal) 72%, var(--brand-blue));
+  --public-accent: var(--brand-truffle);
+  --public-accent-fill: var(--brand-flame);
   --public-success: #28704d;
   background: var(--public-bg);
   color: var(--public-text);
@@ -19,13 +20,14 @@
   --public-card-radius: 16px;
 }
 .dark .obaol-public {
-  --public-bg: #111412;
-  --public-surface: #191d1a;
-  --public-inset: #222721;
-  --public-text: #f3f1e9;
-  --public-muted: #b0b8b0;
-  --public-border: #343b33;
-  --public-accent: #e3b866;
+  --public-bg: var(--brand-abyssal);
+  --public-surface: #22303d;
+  --public-inset: var(--brand-blue);
+  --public-text: var(--brand-palladian);
+  --public-muted: var(--brand-oatmeal);
+  --public-border: #516275;
+  --public-accent: var(--brand-flame);
+  --public-accent-fill: var(--brand-flame);
   --public-success: #8ed3a8;
 }
 .obaol-public .public-container,
@@ -47,8 +49,8 @@
 .obaol-public .public-card { padding: clamp(20px, 2.5vw, 28px); border: 1px solid var(--public-border); border-radius: var(--public-card-radius); background: var(--public-surface); box-shadow: 0 4px 16px #00000003; }
 .obaol-public .public-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; color: var(--public-accent); background: var(--public-inset); }
 .obaol-public .public-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 18px; border: 1px solid transparent; border-radius: 10px; font-size: 14px; line-height: 1.5; font-weight: 650; transition: background .18s, border-color .18s; }
-.obaol-public .public-button--primary { background: #cf983c; color: #211b10; }
-.obaol-public .public-button--primary:hover { background: #dfac54; }
+.obaol-public .public-button--primary { background: var(--public-accent-fill); color: var(--brand-abyssal); }
+.obaol-public .public-button--primary:hover { background: color-mix(in srgb, var(--brand-flame) 78%, var(--brand-truffle)); }
 .obaol-public .public-button--secondary { background: var(--public-surface); border-color: var(--public-border); color: var(--public-text); }
 .obaol-public .public-button--secondary:hover { border-color: var(--public-accent); background: var(--public-inset); }
 .obaol-public :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--app-focus); outline-offset: 3px; }
@@ -97,7 +99,7 @@
 .execution-milestones li { display: grid; grid-template-columns: 36px minmax(0,1fr); align-items: center; gap: 8px 14px; padding-block: 20px; border-bottom: 1px solid var(--public-border); }
 .execution-step { display: flex; justify-content: center; align-items: center; width: 36px; height: 36px; border: 1px solid var(--public-border); border-radius: 50%; font-size: 12px; color: var(--public-muted); }
 .execution-step--complete, .execution-complete { color: var(--public-success); }
-.execution-step--active { background: #cf983c; border-color: #cf983c; color: #211b10; }
+.execution-step--active { background: var(--public-accent-fill); border-color: var(--public-accent-fill); color: var(--brand-abyssal); }
 .execution-milestones h4 { font-size: 14px; font-weight: 650; }
 .execution-milestones p { margin-top: 5px; color: var(--public-muted); font-size: 13px; line-height: 1.6; }
 .execution-milestone-status { grid-column: 2; font-size: 11px; }

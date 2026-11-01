@@ -7,8 +7,9 @@ const read = (path) => readFileSync(fileURLToPath(new URL(path, import.meta.url)
 
 test("dashboard theme exposes layered semantic surfaces for both modes", () => {
   const css = read("../src/app/globals.css");
-  assert.match(css, /\.light\s*\{[\s\S]*--db-bg: #f1f4f8;[\s\S]*--db-panel: #ffffff;/);
-  assert.match(css, /\.dark\s*\{[\s\S]*--db-bg: #090b0f;[\s\S]*--db-panel: rgba\(20, 24, 31, 0\.98\);[\s\S]*--db-inset: rgba\(31, 37, 46, 0\.9\);/);
+  for (const token of ["--brand-palladian: #eee9df", "--brand-oatmeal: #c9c1b1", "--brand-blue: #2c3b4d", "--brand-flame: #ffb162", "--brand-truffle: #a35139", "--brand-abyssal: #1b2632"]) assert.match(css, new RegExp(token));
+  assert.match(css, /:root\s*\{[\s\S]*--db-bg: var\(--brand-palladian\);[\s\S]*--db-panel: #fbf8f2;/);
+  assert.match(css, /\.dark\s*\{[\s\S]*--db-bg: var\(--brand-abyssal\);[\s\S]*--db-panel: rgba\(44, 59, 77, 0\.98\);[\s\S]*--db-inset: rgba\(30, 43, 56, 0\.94\);/);
   assert.match(css, /\.db-paper\s*\{[\s\S]*background: #fff;[\s\S]*color: #0f172a;/);
 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Autocomplete,
@@ -39,6 +40,7 @@ import { deleteData, getData, postData, putData } from "@/core/api/apiHandler";
 import { productBiddingRoutes, productRoutes, productVariantRoutes, variantRateRoutes } from "@/core/api/apiRoutes";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 
 type Mode = "buyer" | "seller";
 type SellerView = "available" | "participating" | "history";
@@ -59,13 +61,15 @@ type EventRow = {
   ownOffer?: any;
   offers?: any[];
   draftEnquiry?: string | null;
+  buyer?: { _id: string; name?: string; email?: string } | string;
+  buyerCompany?: { _id: string; name?: string } | string;
 };
 
 const statuses = ["DRAFT", "SCHEDULED", "OPEN", "CLOSED", "AWARDED", "CANCELLED"];
 const message = (error: any) => error?.response?.data?.message || "The request could not be completed.";
 const dateText = (value?: string) =>
   value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "Not scheduled";
-type CreateField = "title" | "product" | "productVariant" | "quantity" | "opensAt" | "closesAt" | "deliveryDate" | "specifications";
+type CreateField = "buyerCompany" | "buyer" | "title" | "product" | "productVariant" | "quantity" | "opensAt" | "closesAt" | "deliveryDate" | "specifications";
 type CreateErrors = Partial<Record<CreateField, string>>;
 type OpenMode = "now" | "scheduled";
 const localDateTimeValue = (date: Date) => {
@@ -84,6 +88,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   const { user } = useContext(AuthContext);
   const client = useQueryClient();
   const role = String(user?.role || "").toLowerCase();
+  const isAdmin = role === "admin";
   const provided = user?.providedCapabilities || [];
   const sought = user?.soughtCapabilities || [];
   const canBuy = role !== "associate" || sought.includes("buyer") || provided.includes("buyer");
@@ -99,6 +104,8 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
   const [openMode, setOpenMode] = useState<OpenMode>("now");
   const [productSearch, setProductSearch] = useState("");
   const [variantSearch, setVariantSearch] = useState("");
+  const [buyerCompany, setBuyerCompany] = useState("");
+  const [buyerContact, setBuyerContact] = useState("");
   const debouncedProductSearch = useDebouncedValue(productSearch.trim(), 300);
   const debouncedVariantSearch = useDebouncedValue(variantSearch.trim(), 300);
   const createErrorRef = useRef<HTMLDivElement>(null);
@@ -153,6 +160,12 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
         ...(debouncedVariantSearch ? { search: debouncedVariantSearch } : {}),
       }, { cacheMode: "bypass" })).data?.data?.data || [],
     enabled: mode === "buyer" && showCreate && Boolean(draft.product),
+  });
+
+  const buyerContactsQuery = useQuery({
+    queryKey: ["bidding-buyer-contacts", buyerCompany],
+    queryFn: async () => (await getData(productBiddingRoutes.buyerContacts, { companyId: buyerCompany }, { cacheMode: "bypass" })).data?.data || [],
+    enabled: isAdmin && mode === "buyer" && showCreate && Boolean(buyerCompany),
   });
 
   const listingsQuery = useQuery({
@@ -221,6 +234,8 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
     setCreateErrors({});
     setProductSearch("");
     setVariantSearch("");
+    setBuyerCompany("");
+    setBuyerContact("");
     setDraft({
       title: "", product: "", productVariant: "", quantity: "", unit: "MT",
       specifications: "", deliveryLocation: "", deliveryDate: "", opensAt: "", closesAt: "",
@@ -255,6 +270,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
     mutationFn: async ({ effectiveOpensAt }: { effectiveOpensAt: Date }) => {
       const created = await postData(productBiddingRoutes.create, {
         ...draft,
+        ...(isAdmin ? { buyerCompany, buyer: buyerContact } : {}),
         quantity: Number(draft.quantity),
         deliveryDate: draft.deliveryDate ? new Date(`${draft.deliveryDate}T00:00:00`).toISOString() : null,
       });
@@ -298,6 +314,8 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
     const closesAt = new Date(draft.closesAt);
     const titleViolation = detectOffPlatformDisclosure(draft.title);
     const specificationsViolation = detectOffPlatformDisclosure(draft.specifications);
+    if (isAdmin && !buyerCompany) errors.buyerCompany = "Select the company that owns this buying request.";
+    if (isAdmin && !buyerContact) errors.buyer = "Select an approved buyer contact for the company.";
     if (!draft.title.trim()) errors.title = "Enter a title for the buying request.";
     else if (titleViolation) errors.title = titleViolation.message;
     if (!draft.product) errors.product = "Search for and select a product.";
@@ -483,10 +501,15 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
           <Spinner color="warning" />
         </div>
       ) : rows.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-divider py-20 text-center">
+        <div className="rounded-3xl border border-dashed border-divider px-5 py-20 text-center">
           <FiLock className="mx-auto mb-3 text-3xl text-default-300" />
           <h2 className="font-bold">{mode === "buyer" ? "No buying requests here" : sellerView === "available" ? "No available bidding opportunities" : sellerView === "participating" ? "You are not participating in any bidding events" : "No bidding history yet"}</h2>
-          <p className="text-sm text-default-500">{mode === "buyer" ? "Buying requests matching this status will appear here." : "Matching seller opportunities will appear here."}</p>
+          <p className="mx-auto mt-1 max-w-xl text-sm text-default-500">{mode === "buyer" ? "Post what your company needs, then return here to compare confidential seller offers and choose a supplier." : "Open requests appear when their product and grade match one of your company’s approved trade listings."}</p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            {mode === "buyer" && canBuy ? <Button color="warning" startContent={<FiPlus />} onPress={() => { resetCreateForm(); setShowCreate(true); }}>Create buying request</Button> : null}
+            {mode === "seller" ? <Button as={Link} href="/dashboard/product" variant="flat">Manage trade listings</Button> : null}
+            {mode === "seller" && canBuy ? <Button as={Link} href="/dashboard/bidding/my" variant="light">Post a buying request</Button> : null}
+          </div>
         </div>
       ) : (
         <section className="grid gap-4 lg:grid-cols-2">
@@ -515,6 +538,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                   {item.status}
                 </Chip>
               </div>
+              {isAdmin && mode === "buyer" ? <p className="mt-2 text-xs text-default-500">{typeof item.buyerCompany === "object" ? item.buyerCompany?.name || "Unknown company" : "Unknown company"} · {typeof item.buyer === "object" ? item.buyer?.name || "Unknown buyer contact" : "Unknown buyer contact"}</p> : null}
 
               <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-default-50 p-4 text-sm dark:bg-content2">
                 <div>
@@ -693,6 +717,41 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     {createError}
                   </div>
                 )}
+
+                {isAdmin ? (
+                  <section aria-labelledby="ownership-heading" className="space-y-4 rounded-2xl border border-warning-300/40 bg-warning-50/40 p-4 sm:p-5 dark:bg-warning-900/10">
+                    <div>
+                      <h3 id="ownership-heading" className="font-bold text-foreground">Request ownership</h3>
+                      <p className="text-xs text-default-500">Choose the company and approved associate who will own this request and receive bidding notifications.</p>
+                    </div>
+                    <div id="buying-request-buyerCompany">
+                      <CompanySearch
+                        defaultSelected={buyerCompany || null}
+                        onSelect={(id) => {
+                          setBuyerCompany(id || "");
+                          setBuyerContact("");
+                          clearCreateFieldError("buyerCompany");
+                          clearCreateFieldError("buyer");
+                        }}
+                      />
+                      {createErrors.buyerCompany ? <p className="mt-1 text-xs text-danger">{createErrors.buyerCompany}</p> : null}
+                    </div>
+                    <Select
+                      id="buying-request-buyer"
+                      label="Buyer contact"
+                      placeholder={!buyerCompany ? "Select a company first" : buyerContactsQuery.isLoading ? "Loading approved contacts…" : "Select an approved contact"}
+                      selectedKeys={buyerContact ? [buyerContact] : []}
+                      onSelectionChange={(keys) => { setBuyerContact(String(Array.from(keys)[0] || "")); clearCreateFieldError("buyer"); }}
+                      isDisabled={!buyerCompany || buyerContactsQuery.isLoading || buyerContactsQuery.isError}
+                      isLoading={buyerContactsQuery.isLoading}
+                      isInvalid={Boolean(createErrors.buyer)}
+                      errorMessage={createErrors.buyer || (buyerContactsQuery.isError ? "Unable to load approved contacts." : buyerCompany && !buyerContactsQuery.isLoading && !(buyerContactsQuery.data || []).length ? "This company has no active approved contacts." : undefined)}
+                      classNames={themeField}
+                    >
+                      {(buyerContactsQuery.data || []).map((contact: any) => <SelectItem key={contact._id} textValue={contact.name}>{contact.name} · {contact.email}</SelectItem>)}
+                    </Select>
+                  </section>
+                ) : null}
 
                 <section aria-labelledby="requirement-heading" className="space-y-4 rounded-2xl border border-default-200 bg-default-50 p-4 sm:p-5 dark:bg-content2">
                   <div>
@@ -949,7 +1008,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                   type="submit"
                   color="warning"
                   isLoading={create.isPending}
-                  isDisabled={create.isPending}
+                  isDisabled={create.isPending || (isAdmin && (!buyerCompany || !buyerContact))}
                   className="font-bold shadow-lg shadow-warning-500/20"
                   startContent={!create.isPending && <FiPlus />}
                 >

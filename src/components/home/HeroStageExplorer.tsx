@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
-import { inkArtworkMaskStyle } from "@/components/home/inkArtworkMask";
+import { useState } from "react";
 import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
@@ -15,138 +14,92 @@ export type HeroStage = {
   phase: "Plan" | "Verify" | "Move" | "Close";
 };
 
-const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"] }> = [
-  { name: "Plan", range: "01—03", phase: "Plan" },
-  { name: "Verify", range: "04—06", phase: "Verify" },
-  { name: "Move", range: "07—09", phase: "Move" },
-  { name: "Close", range: "10", phase: "Close" },
+const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"]; summary: string; left: number; width: number }> = [
+  { name: "Plan", range: "01—03", phase: "Plan", summary: "Coordinate bulk suppliers, buyer requirements, and available inventory.", left: 0, width: 25 },
+  { name: "Verify", range: "04—06", phase: "Verify", summary: "Inspect warehouses, sample commodities, and complete quality documentation.", left: 25, width: 25 },
+  { name: "Move", range: "07—09", phase: "Move", summary: "Package bulk goods and coordinate pallets, inland transport, and freight.", left: 50, width: 25 },
+  { name: "Close", range: "10", phase: "Close", summary: "Confirm delivery, complete the handoff, and close trade documentation.", left: 75, width: 25 },
 ];
 
-export default function HeroStageExplorer() {
-  const sceneRef = useRef<HTMLElement>(null);
-  const adaptiveMotion = useAdaptiveMotion();
-  const parallaxEnabled = !adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch;
+const HERO_ARTWORK = "/images/hero-bulk-execution-v3.webp";
 
-  useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene || !parallaxEnabled) return;
-    const layers = Array.from(scene.querySelectorAll<HTMLElement>("[data-hero-depth-travel]"));
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const rect = scene.getBoundingClientRect();
-      const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
-      for (const layer of layers) {
-        const travel = Number(layer.dataset.heroDepthTravel || 0);
-        layer.style.transform = `translate3d(0, ${(0.5 - progress) * travel}px, 0)`;
-      }
-    };
-    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
-    update();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, [parallaxEnabled]);
+export default function HeroStageExplorer() {
+  const adaptiveMotion = useAdaptiveMotion();
+  const reducedMotion = adaptiveMotion.prefersReducedMotion;
+  const [selectedPhase, setSelectedPhase] = useState<HeroStage["phase"] | null>(null);
+  const [previewPhase, setPreviewPhase] = useState<HeroStage["phase"] | null>(null);
+  const activePhase = previewPhase ?? selectedPhase;
+  const transitionClass = reducedMotion ? "" : "transition-[filter,opacity,transform,background-color,color] duration-300 ease-out";
+
+  const preview = (phase: HeroStage["phase"]) => setPreviewPhase(phase);
+  const stopPreview = () => setPreviewPhase(null);
+  const select = (phase: HeroStage["phase"]) => setSelectedPhase((current) => current === phase ? null : phase);
 
   return (
-    <div data-hero-panel="execution-map" data-hero-depth-scene="true" data-hero-parallax={parallaxEnabled ? "active" : "static"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
-      <h2 className="sr-only">Connected Indian agro trade operations</h2>
+    <div data-hero-panel="execution-map" data-active-phase={activePhase?.toLowerCase() ?? "none"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
+      <h2 className="sr-only">Connected bulk trade execution network</h2>
       <div className="pointer-events-none absolute inset-[16%_8%_10%] rounded-full bg-obaol-400/12 blur-3xl dark:bg-obaol-400/[0.08]" />
-      <figure
-        ref={sceneRef}
-        data-hero-layered-artwork="true"
+      <div
+        data-hero-bulk-artwork="true"
         data-hero-lifecycle-visual="true"
-        role="img"
-        aria-label="Watercolor illustration of connected Indian agro trade operations moving from farm sourcing through preparation and onward to delivery"
-        className="relative aspect-[1672/941] w-full"
+        aria-label="Interactive watercolor panorama of independent bulk suppliers, buyers, warehouse inspectors, quality specialists, logistics providers, and delivery partners coordinating one agricultural commodity trade"
+        className="relative aspect-[1983/793] w-full overflow-hidden rounded-[1.5rem] focus-within:ring-1 focus-within:ring-obaol-500/70"
       >
-        <div
-          data-hero-atmosphere="true"
-          data-atmosphere-motion="static"
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-[12%] -left-[6%] -right-[6%] -top-[10%] z-0"
-        >
+        <ParallaxTradeAccents placement="hero" motionEnabled={!reducedMotion} />
+        <Image src={HERO_ARTWORK} alt="" aria-hidden="true" fill priority quality={84} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${transitionClass} ${activePhase ? "opacity-55 grayscale-[70%] brightness-[0.55] dark:brightness-[0.42]" : "opacity-100"}`} />
+        {phaseGroups.map((phase) => (
           <div
-            data-hero-atmosphere-theme="light"
-            className="absolute inset-0 dark:hidden"
-            style={{
-              backgroundImage: "radial-gradient(ellipse 46% 40% at 22% 58%, rgba(255,255,255,0.96) 0%, rgba(235,245,255,0.72) 42%, transparent 76%), radial-gradient(ellipse 52% 44% at 76% 42%, rgba(255,255,255,0.92) 0%, rgba(219,235,248,0.62) 48%, transparent 80%), radial-gradient(ellipse 55% 30% at 58% 78%, rgba(255,247,229,0.58) 0%, transparent 76%)",
-              filter: "blur(22px)",
-            }}
-          />
-          <div
-            data-hero-atmosphere-theme="dark"
-            className="absolute inset-0 hidden dark:block"
-            style={{
-              backgroundImage: "radial-gradient(ellipse 48% 42% at 24% 56%, rgba(30,35,38,0.8) 0%, rgba(20,24,27,0.5) 48%, transparent 78%), radial-gradient(ellipse 54% 46% at 76% 42%, rgba(42,38,31,0.72) 0%, rgba(28,27,25,0.46) 50%, transparent 80%), radial-gradient(ellipse 50% 28% at 58% 78%, rgba(207,152,60,0.16) 0%, transparent 76%)",
-              filter: "blur(24px)",
-            }}
-          />
-        </div>
-        <ParallaxTradeAccents placement="hero" motionEnabled={parallaxEnabled} />
-        <div data-hero-depth-layer="background" aria-hidden="true" data-ink-artwork-mask="true" style={inkArtworkMaskStyle} className="absolute inset-0">
-          <Image
-            src="/images/hero-layers/background.webp"
-            alt=""
+            key={`highlight-${phase.phase}`}
+            data-hero-phase-highlight={phase.phase.toLowerCase()}
             aria-hidden="true"
-            fill
-            priority
-            quality={65}
-            sizes="(max-width: 1023px) 100vw, 58vw"
-            className="object-contain contrast-[1.01] saturate-[0.98] dark:brightness-[0.8] dark:saturate-[0.9]"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-obaol-500/[0.04]" />
+            className={`pointer-events-none absolute inset-0 z-10 overflow-hidden ${transitionClass} ${activePhase === phase.phase ? "opacity-100 saturate-[1.1] brightness-[1.05]" : "opacity-0"}`}
+            style={{ clipPath: `inset(0 ${100 - phase.left - phase.width}% 0 ${phase.left}%)` }}
+          >
+            <Image src={HERO_ARTWORK} alt="" fill quality={84} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${activePhase === phase.phase && !reducedMotion ? "scale-[1.015]" : "scale-100"} ${transitionClass}`} />
+            <div className="absolute inset-y-0 border-x border-obaol-300/70 bg-gradient-to-t from-obaol-500/10 via-transparent to-white/10" style={{ left: `${phase.left}%`, width: `${phase.width}%` }} />
+          </div>
+        ))}
+        <div role="group" aria-label="Explore the four bulk trade execution phases" className="absolute inset-0 z-20 grid grid-cols-4">
+          {phaseGroups.map((phase) => (
+            <button
+              key={`region-${phase.phase}`}
+              type="button"
+              data-hero-phase-region={phase.phase.toLowerCase()}
+              aria-label={`${phase.name}: ${phase.summary}`}
+              aria-pressed={selectedPhase === phase.phase}
+              onMouseEnter={() => preview(phase.phase)}
+              onMouseLeave={stopPreview}
+              onFocus={() => preview(phase.phase)}
+              onBlur={stopPreview}
+              onClick={() => select(phase.phase)}
+              className="group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-obaol-300"
+            >
+              <span className={`absolute inset-x-2 bottom-2 rounded-full bg-black/65 px-2 py-1 text-center text-[8px] font-bold uppercase tracking-[0.16em] text-white opacity-0 backdrop-blur-sm group-hover:opacity-100 group-focus-visible:opacity-100 sm:bottom-3 sm:text-[9px] ${transitionClass}`}>{phase.name}</span>
+            </button>
+          ))}
         </div>
-        <div data-hero-depth-layer="logistics" data-hero-depth-travel="20" aria-hidden="true" className="absolute inset-0 z-10 will-change-transform [filter:drop-shadow(0_4px_5px_rgba(15,23,42,0.08))]">
-          <Image
-            src="/images/hero-layers/logistics.webp"
-            alt=""
-            aria-hidden="true"
-            fill
-            loading="eager"
-            quality={65}
-            sizes="(max-width: 1023px) 100vw, 58vw"
-            className="origin-right scale-[0.62] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
-          />
-        </div>
-        <div data-hero-depth-layer="operations" data-hero-depth-travel="45" aria-hidden="true" className="absolute inset-0 z-20 will-change-transform [filter:drop-shadow(0_5px_7px_rgba(15,23,42,0.1))]">
-          <Image
-            src="/images/hero-layers/operations.webp"
-            alt=""
-            aria-hidden="true"
-            fill
-            loading="eager"
-            quality={65}
-            sizes="(max-width: 1023px) 100vw, 58vw"
-            className="origin-bottom-left scale-[0.88] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
-          />
-        </div>
-        <div data-hero-depth-layer="commodities" data-hero-depth-travel="80" aria-hidden="true" className="absolute inset-0 z-30 will-change-transform [filter:drop-shadow(0_7px_9px_rgba(15,23,42,0.12))]">
-          <Image
-            src="/images/hero-layers/commodities.webp"
-            alt=""
-            aria-hidden="true"
-            fill
-            priority
-            quality={65}
-            sizes="(max-width: 1023px) 100vw, 58vw"
-            className="origin-bottom-left scale-[0.58] object-contain dark:brightness-[0.82] dark:saturate-[0.92]"
-          />
-        </div>
-      </figure>
+      </div>
 
       <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Close" className="relative z-30 mx-[7%] mt-1 pb-2 sm:mx-[9%] sm:mt-2 lg:pb-0">
         <div className="absolute left-[7px] right-[7px] top-[7px] h-px bg-obaol-700/70 dark:bg-obaol-300/70" />
         <div className="relative grid grid-cols-4">
           {phaseGroups.map((phase, index) => (
-            <div key={phase.phase} data-execution-phase={phase.phase.toLowerCase()} className={index === phaseGroups.length - 1 ? "text-right" : index > 0 ? "text-center" : ""}>
-              <span className={`mb-2 block size-[15px] rounded-full border-[3px] border-background bg-obaol-500 shadow-[0_0_0_1px_rgba(180,119,18,0.75)] dark:shadow-[0_0_0_1px_rgba(228,199,153,0.72)] sm:mb-3 ${index === phaseGroups.length - 1 ? "ml-auto" : index > 0 ? "mx-auto" : ""}`} />
-              <span className="block text-[8px] font-bold uppercase tracking-[0.14em] text-foreground sm:text-[10px] sm:tracking-[0.2em] xl:text-[11px]">{phase.name}</span>
-            </div>
+            <button
+              key={phase.phase}
+              type="button"
+              data-execution-phase={phase.phase.toLowerCase()}
+              aria-label={`${phase.name}: ${phase.summary}`}
+              aria-pressed={selectedPhase === phase.phase}
+              onMouseEnter={() => preview(phase.phase)}
+              onMouseLeave={stopPreview}
+              onFocus={() => preview(phase.phase)}
+              onBlur={stopPreview}
+              onClick={() => select(phase.phase)}
+              className={`group rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80 ${index === phaseGroups.length - 1 ? "text-right" : index > 0 ? "text-center" : ""}`}
+            >
+              <span className={`mb-2 block size-[15px] rounded-full border-[3px] border-background shadow-[0_0_0_1px_rgba(180,119,18,0.75)] dark:shadow-[0_0_0_1px_rgba(228,199,153,0.72)] sm:mb-3 ${transitionClass} ${activePhase === phase.phase ? "scale-125 bg-amber-300 shadow-[0_0_18px_rgba(207,152,60,0.9)]" : "bg-obaol-500"} ${index === phaseGroups.length - 1 ? "ml-auto" : index > 0 ? "mx-auto" : ""}`} />
+              <span className={`block text-[8px] font-bold uppercase tracking-[0.14em] sm:text-[10px] sm:tracking-[0.2em] xl:text-[11px] ${transitionClass} ${activePhase === phase.phase ? "text-obaol-700 dark:text-obaol-200" : activePhase ? "text-foreground/40" : "text-foreground"}`}>{phase.name}</span>
+            </button>
           ))}
         </div>
       </div>

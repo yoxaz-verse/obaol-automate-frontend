@@ -90,7 +90,7 @@ test("homepage hero leads with one coordinated platform while preserving registr
 
   for (const phrase of [
     "One platform. Every trade role.",
-    "Buyers, sellers, and execution partners coordinate domestic and international bulk trade through shared technology, clear handoffs, and visible progress.",
+    "Buyers, bulk suppliers, and independent execution partners coordinate domestic and international commodity trade through shared technology, clear handoffs, and visible progress.",
   ]) assert.equal(hero.includes(phrase), true);
   for (const phrase of ["Open Agro Execution Platform", "Open registration—", "10 verified stages"]) {
     assert.equal(hero.includes(phrase), false);
@@ -134,7 +134,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(hero.includes("max-w-[90rem]"), true);
   assert.equal(hero.includes("lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
   assert.equal(hero.includes('<ParallaxTradeAccents placement="hero" />'), false);
-  assert.equal(explorer.includes('<ParallaxTradeAccents placement="hero" motionEnabled={parallaxEnabled} />'), true);
+  assert.equal(explorer.includes('<ParallaxTradeAccents placement="hero" motionEnabled={!reducedMotion} />'), true);
   assert.equal(explorer.includes('from "framer-motion"'), false);
   assert.equal(heroCta.includes("pt-5 lg:pt-6"), true);
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
@@ -147,33 +147,22 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("data-execution-stage-group={phase.phase.toLowerCase()}"), true);
   assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), false);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
-  assert.equal(explorer.includes('data-hero-depth-scene="true"'), true);
-  assert.equal(explorer.includes('data-hero-layered-artwork="true"'), true);
-  assert.equal(explorer.includes('data-hero-segmented-artwork="true"'), false);
-  for (const layer of ["background", "logistics", "operations", "commodities"]) {
-    assert.equal(explorer.includes(`data-hero-depth-layer="${layer}"`), true);
-    assert.equal(explorer.includes(`/images/hero-layers/${layer}.webp`), true);
-  }
-  for (const obsoleteLayer of ["back", "middle", "front", "origin", "prepare", "move"]) {
-    assert.equal(explorer.includes(`data-hero-depth-layer="${obsoleteLayer}"`), false);
-  }
+  assert.equal(explorer.includes('data-hero-bulk-artwork="true"'), true);
+  assert.equal(explorer.includes('/images/hero-bulk-execution-v3.webp'), true);
+  assert.equal(explorer.includes('data-active-phase={activePhase?.toLowerCase() ?? "none"}'), true);
+  assert.equal(explorer.includes('data-hero-phase-region={phase.phase.toLowerCase()}'), true);
+  assert.equal(explorer.includes('data-hero-phase-highlight={phase.phase.toLowerCase()}'), true);
+  assert.equal(explorer.includes('aria-pressed={selectedPhase === phase.phase}'), true);
+  assert.equal(explorer.includes('const activePhase = previewPhase ?? selectedPhase'), true);
+  assert.equal(explorer.includes('opacity-55 grayscale-[70%] brightness-[0.55]'), true);
+  assert.equal(explorer.includes('data-hero-depth-layer='), false);
   assert.equal(explorer.includes("grid-cols-[0.86fr_1.18fr_0.92fr]"), false);
   assert.equal(explorer.includes("rounded-l-["), false);
   assert.equal(explorer.includes("border border-white"), false);
-  assert.equal(explorer.includes('data-hero-parallax={parallaxEnabled ? "active" : "static"}'), true);
-  assert.equal(explorer.includes("requestAnimationFrame(update)"), true);
-  assert.equal(explorer.includes('addEventListener("scroll", schedule, { passive: true })'), true);
-  assert.equal(explorer.includes('data-hero-depth-travel="20"'), true);
-  assert.equal(explorer.includes('data-hero-depth-travel="45"'), true);
-  assert.equal(explorer.includes('data-hero-depth-travel="80"'), true);
-  assert.equal(explorer.includes("!adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch"), true);
-  assert.equal(explorer.includes("origin-right scale-[0.62]"), true);
-  assert.equal(explorer.includes("origin-bottom-left scale-[0.88]"), true);
-  assert.equal(explorer.includes("origin-bottom-left scale-[0.58]"), true);
-  assert.equal(explorer.includes('role="img"'), true);
-  assert.equal(explorer.includes("farm sourcing through preparation and onward to delivery"), true);
-  assert.equal(explorer.match(/alt=""/g)?.length, 4);
-  assert.equal(explorer.includes("inkArtworkMaskStyle"), true);
+  assert.equal(explorer.includes('const reducedMotion = adaptiveMotion.prefersReducedMotion'), true);
+  assert.equal(explorer.includes('reducedMotion ? "" : "transition-'), true);
+  assert.equal(explorer.includes("independent bulk suppliers, buyers, warehouse inspectors"), true);
+  assert.equal(explorer.includes("inkArtworkMaskStyle"), false);
   assert.equal(explorer.includes("A shared path for every trade role"), true);
   assert.equal(explorer.includes("10 connected stages"), true);
   assert.equal(explorer.includes("Complete trade execution"), false);
@@ -181,17 +170,16 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
   assert.equal(explorer.includes('aria-label="Execution phases: Plan, Verify, Move, and Close"'), true);
   assert.equal(explorer.includes("data-execution-phase={phase.phase.toLowerCase()}"), true);
-  assert.equal(explorer.includes('data-hero-atmosphere="true"'), true);
-  assert.equal(explorer.includes('data-atmosphere-motion="static"'), true);
-  assert.equal(explorer.includes('data-hero-atmosphere-theme="light"'), true);
-  assert.equal(explorer.includes('data-hero-atmosphere-theme="dark"'), true);
+  assert.equal(explorer.includes('onMouseEnter={() => preview(phase.phase)}'), true);
+  assert.equal(explorer.includes('onFocus={() => preview(phase.phase)}'), true);
+  assert.equal(explorer.includes('onClick={() => select(phase.phase)}'), true);
   assert.equal(explorer.includes('data-execution-route="stepped"'), false);
   assert.equal(explorer.includes("stages.filter("), true);
   assert.equal(explorer.includes('data-execution-stage-grid="true"'), true);
   assert.equal(explorer.includes("grid-cols-1"), true);
   assert.equal(explorer.includes("md:grid-cols-2"), true);
   assert.equal(explorer.includes("xl:grid-cols-[3fr_3fr_3fr_1.2fr]"), true);
-  assert.equal(explorer.includes("Watercolor illustration of connected Indian agro trade operations"), true);
+  assert.equal(explorer.includes("Connected bulk trade execution network"), true);
   assert.equal(accents.includes("data-home-parallax-accents={placement}"), true);
   assert.equal(accents.includes("data-parallax-accent={accent.id}"), true);
   assert.equal(accents.includes("data-accent-depth={accent.depth}"), true);
@@ -242,12 +230,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   }
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.webp", import.meta.url))), true);
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-art-v2.webp", import.meta.url))), true);
-  for (const layer of ["background", "logistics", "operations", "commodities"]) {
-    const layerPath = fileURLToPath(new URL(`../public/images/hero-layers/${layer}.webp`, import.meta.url));
-    assert.equal(existsSync(layerPath), true);
-    const layerBytes = readFileSync(layerPath);
-    if (layer !== "background") assert.equal(layerBytes.includes(Buffer.from("ALPH")), true, `${layer} should preserve transparency`);
-  }
+  assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-bulk-execution-v3.webp", import.meta.url))), true);
   for (const accent of ["commodity-spices", "verification-clipboard", "laboratory-sample", "packaging-sack", "logistics-container", "warehouse-forklift", "cargo-ship"]) {
     const accentPath = fileURLToPath(new URL(`../public/images/home-accents/${accent}.webp`, import.meta.url));
     assert.equal(existsSync(accentPath), true, `${accent} should exist`);
@@ -588,6 +571,19 @@ test("variant rate wizard uses searchable, dependent commodity controls", () => 
   assert.equal(wizard.includes("This subcategory is not associated with the selected category."), true);
   assert.equal(wizard.includes(">Refresh</Button>"), true);
   assert.equal(wizard.includes("isCurrentStepIncomplete"), true);
+  assert.equal(wizard.includes('label="Search product directly"'), true);
+  assert.equal(wizard.includes('"/catalog/products/search"'), true);
+  assert.equal(wizard.includes("selectDirectProduct"), true);
+  assert.equal(wizard.includes("<FiCheck className=\"shrink-0 text-obaol-500\""), false);
+});
+
+test("admin catalog workbook import is exposed from the directory", () => {
+  const catalog = read("../src/app/dashboard/catalog/page.tsx");
+  const importer = read("../src/app/dashboard/catalog/import/page.tsx");
+  assert.equal(catalog.includes('href="/dashboard/catalog/import"'), true);
+  assert.equal(importer.includes('postMultipart("/catalog/import"'), true);
+  assert.equal(importer.includes('instance.get("/catalog/import/template"'), true);
+  assert.equal(importer.includes("Category, Subcategory, Product, Variant"), true);
 });
 
 test("variant rate classification is written atomically and hierarchy remains neutral", () => {

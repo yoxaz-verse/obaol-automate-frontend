@@ -249,8 +249,10 @@ export const getDashboardBottomNavigation = ({
     const provided = new Set(providedCapabilities.map((item) => String(item).toLowerCase()));
     const sought = new Set(soughtCapabilities.map((item) => String(item).toLowerCase()));
     const normalized = new Set(combinedCapabilities.map((item) => String(item).toLowerCase()));
-    const priorityPath = provided.has("seller") || sought.has("buyer")
-      ? "/dashboard/product"
+    const priorityPath = sought.has("buyer")
+      ? "/dashboard/bidding/my"
+      : provided.has("seller")
+        ? "/dashboard/product"
       : provided.has("buyer") || sought.has("seller") || normalized.has("sourcing")
         ? "/dashboard/marketplace"
         : "/dashboard/execution-enquiries";

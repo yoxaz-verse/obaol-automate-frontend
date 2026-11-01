@@ -22,7 +22,7 @@ export const doughnutChartData = {
     {
       label: "Projects",
       data: [70],
-      backgroundColor: ["#A155B9", "#16BFD6", '#165BAA', '#F765A3'],
+      backgroundColor: ["#FFB162", "#A35139", "#2C3B4D", "#C9C1B1"],
       // borderColor: ["#e17cfd", "#4cd7f6"],
       cutout: 50,
     },

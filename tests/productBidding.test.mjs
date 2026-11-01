@@ -6,6 +6,7 @@ const page = fs.readFileSync(new URL("../src/app/dashboard/bidding/page.tsx", im
 const buyerPage = fs.readFileSync(new URL("../src/app/dashboard/bidding/my/page.tsx", import.meta.url), "utf8");
 const access = fs.readFileSync(new URL("../src/utils/dashboardAccess.ts", import.meta.url), "utf8");
 const sidebar = fs.readFileSync(new URL("../src/utils/utils.tsx", import.meta.url), "utf8");
+const dashboardNav = fs.readFileSync(new URL("../src/utils/dashboardNav.ts", import.meta.url), "utf8");
 
 test("buyer and seller bidding workspaces are registered independently", () => {
   assert.match(access, /path: "\/dashboard\/bidding"/);
@@ -16,9 +17,9 @@ test("buyer and seller bidding workspaces are registered independently", () => {
 
 test("bidding workspace fixes the seller page and buyer page to separate modes", () => {
   assert.match(page, /Offer identities and prices unlock only after closing/);
-  assert.match(page, /Available/);
-  assert.match(page, /Participating/);
-  assert.match(page, /History/);
+  assert.match(page, /key="available" title="Open"/);
+  assert.match(page, /key="participating" title="My Offers"/);
+  assert.match(page, /key="history" title="Closed"/);
   assert.match(page, /Create buying request/);
   assert.match(page, /Variant \/ Grade/);
   assert.match(page, /productVariant/);
@@ -60,4 +61,14 @@ test("buying request modal exposes useful catalog states and flat surfaces", () 
   assert.match(page, /backdrop="opaque"/);
   assert.match(page, /base: "border border-default-200 bg-content1 shadow-none/);
   assert.match(page, /content: "border border-default-200 bg-content1 shadow-none/);
+});
+
+test("buyer-priority navigation and admin ownership controls are explicit", () => {
+  assert.match(dashboardNav, /sought\.has\("buyer"\)[\s\S]*?"\/dashboard\/bidding\/my"/);
+  assert.match(page, /Request ownership/);
+  assert.match(page, /productBiddingRoutes\.buyerContacts/);
+  assert.match(page, /buyerCompany, buyer: buyerContact/);
+  assert.match(page, /Select an approved buyer contact/);
+  assert.match(page, /Manage trade listings/);
+  assert.match(page, /Post a buying request/);
 });

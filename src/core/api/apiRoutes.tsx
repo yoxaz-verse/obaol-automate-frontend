@@ -272,6 +272,7 @@ export const enquiryRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.ENQUIRY
 });
 export const productBiddingRoutes = {
   list: "/product-bidding",
+  buyerContacts: "/product-bidding/buyer-contacts",
   create: "/product-bidding",
   update: (id: string) => `/product-bidding/${id}`,
   publish: (id: string) => `/product-bidding/${id}/publish`,

@@ -103,7 +103,7 @@ test("manifest is installable and honest about dashboard PWA defaults", async ({
   expect(manifest.scope).toBe("/");
   expect(manifest.display).toBe("standalone");
   expect(manifest.orientation).toBe("portrait");
-  expect(manifest.theme_color).toBe("#cf983c");
+  expect(manifest.theme_color).toBe("#1b2632");
   expect(Array.isArray(manifest.icons)).toBeTruthy();
   expect(manifest.icons.length).toBeGreaterThanOrEqual(2);
   expect(manifest.icons.some((icon) => icon.sizes === "512x512")).toBeTruthy();

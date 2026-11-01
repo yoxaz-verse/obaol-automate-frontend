@@ -30,6 +30,17 @@ test("lab directory toggles between map and card views with distinct empty state
   assert.match(source, /Map location not supplied/);
 });
 
+test("lab filters are compact, accessible, and collapse after applying", async () => {
+  const source = await readFile(directoryPath, "utf8");
+  assert.match(source, /const \[filtersOpen, setFiltersOpen\] = useState\(false\)/);
+  assert.match(source, /aria-expanded=\{filtersOpen\}/);
+  assert.match(source, /aria-controls="quality-labs-filters"/);
+  assert.match(source, /filtersOpen \? "Close filters" : "Open filters"/);
+  assert.match(source, /id="quality-labs-filters"/);
+  assert.match(source, /\{activeEntries\.length\} active/);
+  assert.match(source, /setApplied\(filters\); setFiltersOpen\(false\);/);
+});
+
 test("lab controls are searchable, multi-selectable and accessible", async () => {
   const source = await readFile(searchablePath, "utf8");
   assert.match(source, /Search options/);

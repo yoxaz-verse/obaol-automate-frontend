@@ -176,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 aria-label={isComingSoon ? `${opt.name}, coming soon` : opt.name}
             >
                 {isActive && (
-                    <div className="absolute left-0 w-[2.5px] h-5 bg-obaol-500 rounded-r-full shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
+                    <div className="absolute left-0 w-[3px] h-5 bg-obaol-400 rounded-r-full" />
                 )}
                 <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-obaol-700 dark:text-obaol-300 scale-110" : !isDisabled ? "group-hover:scale-110 group-hover:text-obaol-500" : ""}`}>
                     {isPending ? <FiLoader className="animate-spin" aria-hidden="true" /> : opt.icon}
@@ -209,7 +209,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                     <span aria-hidden="true" className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-obaol-500" />
                 )}
                 {isCollapsed && isActive && (
-                    <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-obaol-500 shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
+                    <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-obaol-400" />
                 )}
             </button>
         );

@@ -3,7 +3,7 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { SoundProvider } from "@/context/SoundContext";
 import SoundInitializer from "@/components/ui/SoundInitializer";
-import { PwaInstallProvider } from "@/context/PwaInstallContext";
+import { PwaRuntimeProvider } from "@/context/PwaRuntimeContext";
 import PwaRuntime from "@/components/pwa/PwaRuntime";
 
 export function PublicProviders({ children }: { children: React.ReactNode }) {
@@ -13,13 +13,13 @@ export function PublicProviders({ children }: { children: React.ReactNode }) {
       defaultTheme="light"
       enableSystem={false}
     >
-      <PwaInstallProvider>
+      <PwaRuntimeProvider>
         <SoundProvider>
           <SoundInitializer />
           <PwaRuntime />
           {children}
         </SoundProvider>
-      </PwaInstallProvider>
+      </PwaRuntimeProvider>
     </NextThemesProvider>
   );
 }

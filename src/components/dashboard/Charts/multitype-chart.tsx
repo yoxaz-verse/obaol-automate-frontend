@@ -12,6 +12,7 @@ import {
   BarController,
 } from 'chart.js';
 import * as ReactChartJS from 'react-chartjs-2';
+import { chartPalette } from '@/utils/chartTheme';
 const { Chart } = ReactChartJS as any;
 ChartJS.register(
   LinearScale,
@@ -33,7 +34,7 @@ export const data = {
     {
       type: 'line' as const,
       label: 'Dataset 1',
-      borderColor: '#A155B9',
+      borderColor: chartPalette.truffle,
       borderWidth: 2,
       fill: false,
       data: [10, 200, 400, 30, 20, 20, 10],
@@ -41,9 +42,9 @@ export const data = {
     {
       type: 'bar' as const,
       label: 'Dataset 2',
-      backgroundColor: '#165BAA',
+      backgroundColor: chartPalette.flame,
       data: [10, 200, 400, 30, 20, 20, 10],
-      borderColor: 'white',
+      borderColor: chartPalette.blue,
       borderWidth: 2,
     },
   ],

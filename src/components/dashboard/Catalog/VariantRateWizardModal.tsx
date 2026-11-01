@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation";
 import {
   Button,
+  Autocomplete,
+  AutocompleteItem,
   Input,
   Listbox,
   ListboxItem,
@@ -20,7 +22,7 @@ import {
   Switch,
 } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiArrowRight, FiCheck, FiCheckCircle, FiChevronDown, FiGlobe, FiMapPin, FiPackage, FiRefreshCw, FiSearch, FiTruck, FiX, FiZap } from "react-icons/fi";
+import { FiArrowRight, FiCheckCircle, FiChevronDown, FiGlobe, FiMapPin, FiPackage, FiRefreshCw, FiSearch, FiTruck, FiX, FiZap } from "react-icons/fi";
 import { getData, postData } from "@/core/api/apiHandler";
 import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
@@ -57,6 +59,11 @@ type CommodityLoadState = {
   message?: string;
 };
 type CommodityLoadStates = Record<CommodityField, CommodityLoadState>;
+type ProductSearchResult = {
+  product: { id: string; name: string };
+  subCategory: { id: string; name: string };
+  category: { id: string; name: string };
+};
 
 const INITIAL_COMMODITY_LOAD_STATES: CommodityLoadStates = {
   category: { status: "idle" },
@@ -256,9 +263,6 @@ const CommodityPicker = ({
                             {option.approvalStatus && option.approvalStatus !== "APPROVED" ? ` · ${option.approvalStatus.replaceAll("_", " ")}` : ""}
                           </span>
                         </span>
-                        {option.id === selectedKey && (
-                          <FiCheck className="shrink-0 text-obaol-500" size={16} />
-                        )}
                       </span>
                     </ListboxItem>
                   ))}
@@ -362,6 +366,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [subCategories, setSubCategories] = useState<CatalogHierarchyOption[]>([]);
   const [products, setProducts] = useState<CatalogHierarchyOption[]>([]);
   const [variants, setVariants] = useState<CatalogHierarchyOption[]>([]);
+  const [directProductQuery, setDirectProductQuery] = useState("");
+  const [directProductResults, setDirectProductResults] = useState<ProductSearchResult[]>([]);
+  const [directProductLoading, setDirectProductLoading] = useState(false);
+  const [directProductError, setDirectProductError] = useState("");
   const [commodityLoadStates, setCommodityLoadStates] = useState<CommodityLoadStates>(INITIAL_COMMODITY_LOAD_STATES);
   const [commodityRetries, setCommodityRetries] = useState<CommodityRetries>({
     category: 0,
@@ -375,6 +383,42 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     product: 0,
     productVariant: 0,
   });
+
+  useEffect(() => {
+    if (!isOpen || directProductQuery.trim().length < 2) {
+      setDirectProductResults([]);
+      setDirectProductError("");
+      setDirectProductLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setDirectProductLoading(true);
+      setDirectProductError("");
+      try {
+        const response = await getData("/catalog/products/search", { q: directProductQuery.trim(), limit: 30 }, { signal: controller.signal, cacheMode: "bypass" });
+        setDirectProductResults(Array.isArray(response?.data?.data) ? response.data.data : []);
+      } catch {
+        if (!controller.signal.aborted) setDirectProductError("Could not search products. Try again.");
+      } finally {
+        if (!controller.signal.aborted) setDirectProductLoading(false);
+      }
+    }, 300);
+    return () => { window.clearTimeout(timeout); controller.abort(); };
+  }, [directProductQuery, isOpen]);
+
+  const selectDirectProduct = (key: React.Key | null) => {
+    const match = directProductResults.find((row) => row.product.id === String(key || ""));
+    if (!match) return;
+    setCategories((current) => current.some((row) => row.id === match.category.id) ? current : [...current, { id: match.category.id, name: match.category.name, level: "category", parentId: null, parentName: null, approvalStatus: "APPROVED", reviewNotes: "" }]);
+    setSubCategories([{ id: match.subCategory.id, name: match.subCategory.name, level: "subCategory", parentId: match.category.id, parentName: match.category.name, approvalStatus: "APPROVED", reviewNotes: "" }]);
+    setProducts([{ id: match.product.id, name: match.product.name, level: "product", parentId: match.subCategory.id, parentName: match.subCategory.name, approvalStatus: "APPROVED", reviewNotes: "" }]);
+    setVariants([]);
+    setFormData((current) => ({ ...current, category: match.category.id, subCategory: match.subCategory.id, product: match.product.id, productVariant: "" }));
+    setErrors((current) => ({ ...current, category: "", subCategory: "", product: "", productVariant: "" }));
+    setDirectProductQuery(match.product.name);
+    window.setTimeout(() => document.querySelector<HTMLButtonElement>('[data-commodity-trigger="productVariant"]')?.focus(), 0);
+  };
   const [associates, setAssociates] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null);
@@ -1144,6 +1188,33 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         <div className="mb-4">
                           <h4 id="commodity-selection-heading" className="text-sm font-bold text-foreground">Commodity selection</h4>
                           <p className="mt-1 text-xs text-default-500">Search and select each level to identify the exact product grade.</p>
+                        </div>
+                        <div className="mb-4 rounded-xl border border-obaol-500/25 bg-obaol-500/5 p-3">
+                          <Autocomplete
+                            aria-label="Search product directly"
+                            label="Search product directly"
+                            description="Choose a product to fill its category and subcategory automatically."
+                            placeholder="Type at least 2 characters"
+                            variant="bordered"
+                            inputValue={directProductQuery}
+                            onInputChange={setDirectProductQuery}
+                            onSelectionChange={selectDirectProduct}
+                            items={directProductResults}
+                            isLoading={directProductLoading}
+                            allowsCustomValue={false}
+                            startContent={<FiSearch className="text-default-400" />}
+                            listboxProps={{
+                              emptyContent: directProductError || (directProductQuery.trim().length < 2 ? "Type at least 2 characters." : "No matching products found."),
+                            }}
+                            popoverProps={{ placement: "bottom-start", shouldFlip: true, classNames: { content: "z-[130] border border-default-200 bg-background" } }}
+                          >
+                            {(row) => (
+                              <AutocompleteItem key={row.product.id} textValue={row.product.name}>
+                                <span className="block font-semibold">{row.product.name}</span>
+                                <span className="block text-xs text-default-500">{row.category.name} › {row.subCategory.name}</span>
+                              </AutocompleteItem>
+                            )}
+                          </Autocomplete>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                           {renderCommodityAutocomplete({

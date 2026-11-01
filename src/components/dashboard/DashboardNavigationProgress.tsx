@@ -29,7 +29,7 @@ export default function DashboardNavigationProgress() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-[99999] h-1 origin-left bg-obaol-500 shadow-[0_0_10px_rgba(207,152,60,0.55)]"
+      className="pointer-events-none fixed left-0 top-0 z-[99999] h-1 origin-left bg-obaol-400"
       style={{
         width: `${progress}%`,
         opacity: progress === 100 ? 0 : 1,

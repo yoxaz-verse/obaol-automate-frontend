@@ -30,33 +30,34 @@ export default function HeroSectionServer() {
         >
           <div className="space-y-5 lg:py-2">
             {/* Status / Kicker Pill */}
-            <div className="inline-flex items-center gap-2.5 py-1">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-obaol-500"></span>
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-3.5 py-1.5 backdrop-blur-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-obaol-500"></span>
               </span>
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.25em] text-obaol-700 dark:text-obaol-300 sm:text-xs">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300 sm:text-xs">
                 One platform. Every trade role.
               </span>
             </div>
 
             {/* Main Title */}
-            <div className="space-y-2">
-              <h1 className="text-4xl font-black leading-[1.04] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-[3.4rem] lg:text-[3.25rem] xl:text-[3.5rem]">
+            <div className="space-y-3.5">
+              <h1 className="text-4xl font-black leading-[1.06] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-[3.35rem] lg:text-[3.25rem] xl:text-[3.5rem]">
                 The B2B Bulk Trade{" "}
                 <span className="bg-gradient-to-r from-obaol-600 via-amber-500 to-obaol-400 bg-clip-text text-transparent drop-shadow-sm">
                   Execution Platform
                 </span>
               </h1>
-              <div className="flex items-center gap-2.5 pt-1">
-                <span className="text-xs font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">for</span>
-                <span className="text-2xl font-black tracking-tight text-foreground sm:text-3xl lg:text-[2rem] xl:text-[2.2rem]">
-                  Agricultural commodities, India first.
+              <p className="text-lg font-bold tracking-tight text-foreground/90 sm:text-xl lg:text-[1.35rem] leading-snug">
+                For agricultural commodities across{" "}
+                <span className="text-obaol-600 dark:text-obaol-400 font-extrabold">
+                  India & global export markets
                 </span>
-              </div>
+                .
+              </p>
             </div>
 
             {/* Subheading */}
-            <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">Buyers, sellers, and execution partners coordinate domestic and international bulk trade through shared technology, clear handoffs, and visible progress.</p>
+            <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">Buyers, bulk suppliers, and independent execution partners coordinate domestic and international commodity trade through shared technology, clear handoffs, and visible progress.</p>
 
             <HeroCTA />
           </div>

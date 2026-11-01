@@ -1,4 +1,5 @@
 import * as ReactChartJS from "react-chartjs-2";
+import { chartPalette } from "@/utils/chartTheme";
 const { Line } = ReactChartJS as any;
 
 const data = {
@@ -8,8 +9,8 @@ const data = {
       label: "First dataset",
       data: [33, 53, 85, 41, 44, 65],
       fill: true,
-      backgroundColor: "rgba(75,192,192,0.2)",
-      borderColor: "rgba(75,192,192,1)"
+      backgroundColor: "rgba(255,177,98,0.2)",
+      borderColor: chartPalette.truffle
     },
     // {
     //   label: "Second dataset",

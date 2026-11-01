@@ -13,7 +13,7 @@ import { usePageVisibility } from "@/hooks/usePageVisibility";
 /* ================= ANIMATION VARIANTS ================= */
 /* The execution story shares one active stage across copy, image, and controls. */
 
-const OBAOL_GOLD = "#CF983C";
+const OBAOL_GOLD = "#FFB162";
 
 type HeroStage = {
   id: string;

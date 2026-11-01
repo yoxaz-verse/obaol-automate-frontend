@@ -48,6 +48,10 @@ export default function SearchableSelect({
 
   const toggle = (key: string) => {
     if (!multiple) {
+      if (value.length === 1 && value[0] === key) {
+        setOpen(false);
+        return;
+      }
       onChange([key]);
       setOpen(false);
       return;
@@ -181,7 +185,7 @@ export default function SearchableSelect({
                     type="button"
                     role="option"
                     aria-selected={value.includes(option.key)}
-                    onClick={() => toggle(option.key)}
+                    onClick={(event) => { event.stopPropagation(); toggle(option.key); }}
                     className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-default-100 focus:bg-default-100 focus:outline-none transition-colors"
                   >
                     {multiple ? (

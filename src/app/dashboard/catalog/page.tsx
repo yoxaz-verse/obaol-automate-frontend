@@ -404,6 +404,7 @@ export default function CatalogPage() {
               )}
             </div>
             {isAssociateUser && <Button as={Link} href="/dashboard/catalog/additions" color="warning" variant="flat" className="shrink-0">My Additions</Button>}
+            {user?.role === "Admin" && <Button as={Link} href="/dashboard/catalog/import" color="warning" variant="bordered" className="shrink-0">Import Excel</Button>}
 
             {isAdmin && !selectedProduct && !isSearching && (
               <DeferredAddModal

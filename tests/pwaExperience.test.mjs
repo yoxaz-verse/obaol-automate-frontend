@@ -16,7 +16,7 @@ test("PWA runtime never caches API or mutation responses", () => {
 test("offline fallback is branded, accessible, and reconnects automatically", () => {
   const offline = read("public/offline.html");
   assert.match(offline, /src="\/logo\.png" alt="OBAOL"/);
-  assert.match(offline, /#cf983c/i);
+  assert.match(offline, /#ffb162/i);
   assert.match(offline, /prefers-color-scheme:dark/);
   assert.match(offline, /prefers-reduced-motion:reduce/);
   assert.match(offline, /aria-live="polite"/);
@@ -27,13 +27,26 @@ test("offline fallback is branded, accessible, and reconnects automatically", ()
   assert.match(offline, /transaction data is never stored for offline use/);
 });
 
-test("install manager supports browser prompts, iOS guidance, cooldown, and updates", () => {
-  const context = read("src/context/PwaInstallContext.tsx");
-  assert.match(context, /beforeinstallprompt/);
-  assert.match(context, /display-mode: standalone/);
-  assert.match(context, /DISMISS_COOLDOWN/);
+test("PWA runtime tracks connectivity and supports service worker updates", () => {
+  const context = read("src/context/PwaRuntimeContext.tsx");
+  assert.match(context, /navigator\.onLine/);
+  assert.match(context, /addEventListener\("online"/);
+  assert.match(context, /addEventListener\("offline"/);
   assert.match(context, /SKIP_WAITING/);
   assert.match(context, /process\.env\.NODE_ENV !== "production"/);
+  assert.doesNotMatch(context, /beforeinstallprompt/);
+  assert.doesNotMatch(context, /appinstalled/);
+});
+
+test("browser install UI is not exposed in public navigation or settings", () => {
+  const header = read("src/components/home/header.tsx");
+  const settings = read("src/app/dashboard/settings/page.tsx");
+  const runtime = read("src/components/pwa/PwaRuntime.tsx");
+  for (const source of [header, settings, runtime]) {
+    assert.doesNotMatch(source, /InstallAppButton/);
+    assert.doesNotMatch(source, /Install app/);
+    assert.doesNotMatch(source, /Install OBAOL/);
+  }
 });
 
 test("production PWA icon set contains standard and maskable sizes", () => {

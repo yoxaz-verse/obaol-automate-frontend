@@ -62,16 +62,15 @@ for (const theme of ["light", "dark"]) {
       expect(previewBox.x).toBeGreaterThanOrEqual(0);
       expect(previewBox.x + previewBox.width).toBeLessThanOrEqual(width + 1);
       await expect(page.locator('[data-perspective-card="true"]')).toHaveCount(3);
-      const layeredArtwork = page.locator('[data-hero-layered-artwork="true"]');
-      await expect(layeredArtwork).toHaveAttribute("role", "img");
-      const atmosphere = layeredArtwork.locator('[data-hero-atmosphere="true"]');
-      await expect(atmosphere).toHaveAttribute("data-atmosphere-motion", "static");
-      await expect(atmosphere.locator(`[data-hero-atmosphere-theme="${theme}"]`)).toBeVisible();
-      await expect(atmosphere.locator(`[data-hero-atmosphere-theme="${theme === "light" ? "dark" : "light"}"]`)).toBeHidden();
+      const executionMap = page.locator('[data-hero-panel="execution-map"]');
+      const bulkArtwork = executionMap.locator('[data-hero-bulk-artwork="true"]');
+      await expect(bulkArtwork).toBeVisible();
+      await expect(bulkArtwork.locator('[data-hero-phase-region]')).toHaveCount(4);
+      await expect(bulkArtwork.locator('[data-hero-phase-highlight]')).toHaveCount(4);
+      await expect(executionMap).toHaveAttribute("data-active-phase", "none");
       const phaseRail = page.locator('[data-execution-route="phase-rail"]');
       await expect(phaseRail.locator('[data-execution-phase]')).toHaveCount(4);
       expect(await phaseRail.locator('[data-execution-phase]').allTextContents()).toEqual(["Plan", "Verify", "Move", "Close"]);
-      await expect(page.locator('[data-hero-depth-scene="true"]')).toHaveAttribute("data-hero-parallax", "static");
       await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(4);
       await expect(page.locator('[data-parallax-accent]')).toHaveCount(7);
       await expect(page.locator('[data-accent-depth="foreground"]')).toHaveCount(4);
@@ -81,11 +80,7 @@ for (const theme of ["light", "dark"]) {
       for (const placement of ["hero", "services", "serviceChapter", "workspace"]) {
         await expect(page.locator(`[data-home-parallax-accents="${placement}"]`)).toHaveAttribute("data-accent-motion", "static");
       }
-      await expect(layeredArtwork.locator('[data-hero-depth-layer]')).toHaveCount(4);
-      for (const layer of ["background", "logistics", "operations", "commodities"]) {
-        await expect(layeredArtwork.locator(`[data-hero-depth-layer="${layer}"]`)).toBeVisible();
-      }
-      const artworkBox = await layeredArtwork.boundingBox();
+      const artworkBox = await bulkArtwork.boundingBox();
       const railBox = await phaseRail.boundingBox();
       expect(artworkBox.x).toBeGreaterThanOrEqual(0);
       if (width < 1280) expect(artworkBox.x + artworkBox.width).toBeLessThanOrEqual(width + 1);
@@ -160,7 +155,7 @@ test("service puzzle reveals every service with accessible selection", async ({ 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test("desktop hero uses distinct cinematic object-layer parallax", async ({ page }) => {
+test("desktop hero spotlights and persists each bulk execution phase", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.addInitScript(() => {
@@ -177,76 +172,48 @@ test("desktop hero uses distinct cinematic object-layer parallax", async ({ page
   });
   await page.goto("/");
 
-  const scene = page.locator('[data-hero-depth-scene="true"]');
+  const scene = page.locator('[data-hero-panel="execution-map"]');
   const hero = page.locator('[data-natural-scroll-hero="true"]');
   const centeredLayout = hero.locator('[data-hero-centered-layout="true"]');
   const heroAccents = hero.locator('[data-home-parallax-accents="hero"]');
-  await expect(scene).toHaveAttribute("data-hero-parallax", "active");
   await expect(heroAccents).toHaveAttribute("data-accent-motion", "active");
   await expect(heroAccents).toHaveAttribute("data-hero-floating-composition", "true");
   await expect(heroAccents.locator('[data-parallax-accent]')).toHaveCount(2);
-  const pepper = heroAccents.locator('[data-parallax-accent="commodity"]');
-  const clipboard = heroAccents.locator('[data-parallax-accent="verification"]');
-  await expect(pepper).toHaveAttribute("data-accent-depth", "foreground");
-  await expect(clipboard).toHaveAttribute("data-accent-depth", "middle");
-  const pepperBox = await pepper.boundingBox();
-  const clipboardBox = await clipboard.boundingBox();
   const heroBox = await hero.boundingBox();
   const layoutBox = await centeredLayout.boundingBox();
-  const artworkBox = await scene.locator('[data-hero-layered-artwork="true"]').boundingBox();
+  const artwork = scene.locator('[data-hero-bulk-artwork="true"]');
+  const artworkBox = await artwork.boundingBox();
   const phaseRailBox = await scene.locator('[data-execution-route="phase-rail"]').boundingBox();
-  const copyBox = await centeredLayout.locator(":scope > div").first().boundingBox();
   expect(heroBox.height).toBeGreaterThanOrEqual(700);
   expect(Math.abs((layoutBox.y + layoutBox.height / 2) - (heroBox.y + heroBox.height / 2))).toBeLessThan(45);
   expect(artworkBox.width).toBeGreaterThan(layoutBox.width * 0.55);
   expect(artworkBox.x + artworkBox.width).toBeGreaterThanOrEqual(1416);
-  expect(clipboardBox.x).toBeLessThan(artworkBox.x + 1);
-  expect(clipboardBox.x + clipboardBox.width).toBeGreaterThan(artworkBox.x - 24);
-  expect(pepperBox.y).toBeLessThan(artworkBox.y + artworkBox.height);
-  expect(pepperBox.y + pepperBox.height).toBeLessThanOrEqual(phaseRailBox.y + 1);
-  const artworkCore = {
-    x: artworkBox.x + artworkBox.width * 0.18,
-    y: artworkBox.y + artworkBox.height * 0.18,
-    width: artworkBox.width * 0.64,
-    height: artworkBox.height * 0.64,
-  };
-  for (const accentBox of [pepperBox, clipboardBox]) {
-    const overlapsCopy = accentBox.x < copyBox.x + copyBox.width && accentBox.x + accentBox.width > copyBox.x
-      && accentBox.y < copyBox.y + copyBox.height && accentBox.y + accentBox.height > copyBox.y;
-    expect(overlapsCopy).toBe(false);
-    const overlapsArtworkCore = accentBox.x < artworkCore.x + artworkCore.width && accentBox.x + accentBox.width > artworkCore.x
-      && accentBox.y < artworkCore.y + artworkCore.height && accentBox.y + accentBox.height > artworkCore.y;
-    expect(overlapsArtworkCore).toBe(false);
-  }
-  const supportingOpacity = await page.locator('[data-accent-placement="services"], [data-accent-placement="workspace"]').evaluateAll((elements) => elements.map((element) => Number(getComputedStyle(element).opacity)));
-  const heroOpacity = await heroAccents.locator('[data-parallax-accent]').evaluateAll((elements) => elements.map((element) => Number(getComputedStyle(element).opacity)));
-  expect(Math.max(...supportingOpacity)).toBeLessThan(Math.min(...heroOpacity));
-  const layers = ["logistics", "operations", "commodities"];
-  const accentBefore = await heroAccents.locator('[data-parallax-accent]').evaluateAll((elements) => elements.map((element) => getComputedStyle(element).transform));
-  const backgroundBefore = await scene.locator('[data-hero-depth-layer="background"]').evaluate((element) => getComputedStyle(element).transform);
-  const before = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
-  await page.evaluate(() => window.scrollTo({ top: 500, behavior: "instant" }));
-  await page.waitForTimeout(350);
-  const after = await Promise.all(layers.map((layer) => scene.locator(`[data-hero-depth-layer="${layer}"]`).evaluate((element) => getComputedStyle(element).transform)));
-  const backgroundAfter = await scene.locator('[data-hero-depth-layer="background"]').evaluate((element) => getComputedStyle(element).transform);
-  const accentAfter = await heroAccents.locator('[data-parallax-accent]').evaluateAll((elements) => elements.map((element) => getComputedStyle(element).transform));
-  expect(after).not.toEqual(before);
-  expect(new Set(after).size).toBe(3);
-  expect(backgroundAfter).toBe(backgroundBefore);
-  expect(accentAfter).not.toEqual(accentBefore);
-  expect(new Set(accentAfter).size).toBe(2);
-  const accentTravel = (beforeTransform, afterTransform) => {
-    const y = (transform) => {
-      if (transform === "none") return 0;
-      const values = transform.slice(transform.indexOf("(") + 1, -1).split(",").map(Number);
-      return transform.startsWith("matrix3d") ? values[13] : values[5];
-    };
-    return Math.abs(y(afterTransform) - y(beforeTransform));
-  };
-  const travelByAccent = accentBefore.map((transform, index) => accentTravel(transform, accentAfter[index]));
-  expect(travelByAccent[0]).toBeGreaterThan(10);
-  expect(travelByAccent[1]).toBeGreaterThan(5);
-  expect(travelByAccent[0]).toBeGreaterThan(travelByAccent[1]);
+  expect(phaseRailBox.y).toBeGreaterThanOrEqual(artworkBox.y + artworkBox.height - 1);
+
+  const planRegion = artwork.locator('[data-hero-phase-region="plan"]');
+  const verifyRegion = artwork.locator('[data-hero-phase-region="verify"]');
+  const planHighlight = artwork.locator('[data-hero-phase-highlight="plan"]');
+  const verifyRail = scene.locator('[data-execution-phase="verify"]');
+
+  await planRegion.hover();
+  await expect(scene).toHaveAttribute("data-active-phase", "plan");
+  await expect(planHighlight).toHaveCSS("opacity", "1");
+  await planRegion.click();
+  await expect(planRegion).toHaveAttribute("aria-pressed", "true");
+  await page.mouse.move(0, 0);
+  await expect(scene).toHaveAttribute("data-active-phase", "plan");
+
+  await verifyRegion.hover();
+  await expect(scene).toHaveAttribute("data-active-phase", "verify");
+  await page.mouse.move(0, 0);
+  await expect(scene).toHaveAttribute("data-active-phase", "plan");
+
+  await verifyRail.focus();
+  await expect(scene).toHaveAttribute("data-active-phase", "verify");
+  await page.keyboard.press("Enter");
+  await expect(verifyRail).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("Tab");
+  await expect(scene).toHaveAttribute("data-active-phase", "verify");
 });
 
 test("centered desktop hero remains contained on a short laptop viewport", async ({ page }) => {
@@ -256,13 +223,13 @@ test("centered desktop hero remains contained on a short laptop viewport", async
 
   const hero = page.locator('[data-natural-scroll-hero="true"]');
   const layout = hero.locator('[data-hero-centered-layout="true"]');
-  const scene = hero.locator('[data-hero-depth-scene="true"]');
+  const scene = hero.locator('[data-hero-panel="execution-map"]');
   const heroAccents = hero.locator('[data-home-parallax-accents="hero"]');
   await expect(layout).toBeVisible();
-  await expect(scene).toHaveAttribute("data-hero-parallax", "static");
+  await expect(scene).toHaveAttribute("data-active-phase", "none");
   await expect(heroAccents).toHaveAttribute("data-accent-motion", "static");
   await expect(hero.getByRole("link", { name: /Open Workspace|Join the Open Platform/ })).toBeVisible();
-  const paragraphBox = await hero.getByText("Buyers, suppliers, and specialist partners coordinate one trade through shared technology, clear handoffs, and visible progress.").boundingBox();
+  const paragraphBox = await hero.getByText("Buyers, bulk suppliers, and independent execution partners coordinate domestic and international commodity trade through shared technology, clear handoffs, and visible progress.").boundingBox();
   const ctaBox = await hero.getByRole("link", { name: /Open Workspace|Join the Open Platform/ }).boundingBox();
   const heroBox = await hero.boundingBox();
   const sceneBox = await scene.boundingBox();

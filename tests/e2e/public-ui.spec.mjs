@@ -72,15 +72,8 @@ for (const theme of ["light", "dark"]) {
       const phaseRail = page.locator('[data-execution-route="phase-rail"]');
       await expect(phaseRail.locator('[data-execution-phase]')).toHaveCount(4);
       expect(await phaseRail.locator('[data-execution-phase]').allTextContents()).toEqual(["Plan", "Verify", "Move", "Receive & Approve"]);
-      await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(4);
-      await expect(page.locator('[data-parallax-accent]')).toHaveCount(7);
-      await expect(page.locator('[data-accent-depth="foreground"]')).toHaveCount(4);
-      await expect(page.locator('[data-accent-depth="middle"]')).toHaveCount(1);
-      await expect(page.locator('[data-accent-depth="background"]')).toHaveCount(2);
-      await expect(page.locator('[data-accent-size="large"]')).toHaveCount(3);
-      for (const placement of ["hero", "services", "serviceChapter", "workspace"]) {
-        await expect(page.locator(`[data-home-parallax-accents="${placement}"]`)).toHaveAttribute("data-accent-motion", "static");
-      }
+      await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(0);
+      await expect(page.locator('[data-parallax-accent]')).toHaveCount(0);
       const artworkBox = await bulkArtwork.boundingBox();
       const railBox = await phaseRail.boundingBox();
       expect(artworkBox.x).toBeGreaterThanOrEqual(0);
@@ -193,10 +186,7 @@ test("desktop hero spotlights and persists each bulk execution phase", async ({ 
   const scene = page.locator('[data-hero-panel="execution-map"]');
   const hero = page.locator('[data-natural-scroll-hero="true"]');
   const centeredLayout = hero.locator('[data-hero-centered-layout="true"]');
-  const heroAccents = hero.locator('[data-home-parallax-accents="hero"]');
-  await expect(heroAccents).toHaveAttribute("data-accent-motion", "active");
-  await expect(heroAccents).toHaveAttribute("data-hero-floating-composition", "true");
-  await expect(heroAccents.locator('[data-parallax-accent]')).toHaveCount(2);
+  await expect(hero.locator('[data-home-parallax-accents]')).toHaveCount(0);
   const heroBox = await hero.boundingBox();
   const layoutBox = await centeredLayout.boundingBox();
   const artwork = scene.locator('[data-hero-bulk-artwork="true"]');
@@ -242,10 +232,9 @@ test("centered desktop hero remains contained on a short laptop viewport", async
   const hero = page.locator('[data-natural-scroll-hero="true"]');
   const layout = hero.locator('[data-hero-centered-layout="true"]');
   const scene = hero.locator('[data-hero-panel="execution-map"]');
-  const heroAccents = hero.locator('[data-home-parallax-accents="hero"]');
   await expect(layout).toBeVisible();
   await expect(scene).toHaveAttribute("data-active-phase", "none");
-  await expect(heroAccents).toHaveAttribute("data-accent-motion", "static");
+  await expect(hero.locator('[data-home-parallax-accents]')).toHaveCount(0);
   await expect(hero.getByRole("link", { name: /Open Workspace|Join the Open Platform/ })).toBeVisible();
   const paragraphBox = await hero.getByText("Buyers, bulk suppliers, and independent execution partners coordinate domestic and international commodity trade through shared technology, clear handoffs, and visible progress.").boundingBox();
   const ctaBox = await hero.getByRole("link", { name: /Open Workspace|Join the Open Platform/ }).boundingBox();
@@ -277,12 +266,10 @@ test("desktop service story synchronizes in both scroll directions", async ({ pa
   const story = page.locator('[data-service-desktop-story="true"]');
   await expect(story).toBeVisible();
   const activePanel = story.locator('[data-active-service]');
-  const freightContainer = activePanel.locator('[data-parallax-accent="logistics-container"]');
   for (const id of ["discovery", "quality", "freight", "documentation", "discovery"]) {
     await story.locator(`[data-service-chapter="${id}"]`).scrollIntoViewIfNeeded();
     await page.waitForTimeout(120);
     await expect(activePanel).toHaveAttribute("data-active-service", id);
-    await expect(freightContainer).toHaveAttribute("data-accent-visible", id === "freight" ? "true" : "false");
   }
   await expect(activePanel.locator('[data-service-artwork-layer="true"]')).toHaveCount(9);
   const washBox = await activePanel.locator('[data-service-background-wash="true"]').boundingBox();

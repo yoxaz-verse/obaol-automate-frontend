@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-02T05:12:17.191Z",
-  "totalBytes": 36404762,
-  "referencedBytes": 9341466,
-  "unreferencedBytes": 27063296,
+  "generatedAt": "2026-11-02T05:38:16.031Z",
+  "totalBytes": 36031254,
+  "referencedBytes": 8639582,
+  "unreferencedBytes": 27391672,
   "largestReferenced": [
     {
       "path": "/images/india_map.webp",
@@ -40,13 +40,6 @@
       "allowlisted": false
     },
     {
-      "path": "/images/hero-bulk-execution-v5.webp",
-      "bytes": 432532,
-      "referenced": true,
-      "directReference": true,
-      "allowlisted": false
-    },
-    {
       "path": "/images/services/procurement-trade-art-v2.webp",
       "bytes": 427456,
       "referenced": true,
@@ -70,6 +63,13 @@
     {
       "path": "/images/services/sourcing-trade-art-v2.webp",
       "bytes": 417628,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-bulk-execution-v6.webp",
+      "bytes": 414752,
       "referenced": true,
       "directReference": true,
       "allowlisted": false
@@ -131,20 +131,6 @@
       "allowlisted": false
     },
     {
-      "path": "/images/home-accents/warehouse-forklift.webp",
-      "bytes": 169710,
-      "referenced": true,
-      "directReference": true,
-      "allowlisted": false
-    },
-    {
-      "path": "/images/home-accents/cargo-ship.webp",
-      "bytes": 158802,
-      "referenced": true,
-      "directReference": true,
-      "allowlisted": false
-    },
-    {
       "path": "/images/execution-flow/08-procurement.webp",
       "bytes": 149328,
       "referenced": true,
@@ -175,6 +161,20 @@
     {
       "path": "/images/execution-flow/05-inspection-visit.webp",
       "bytes": 131288,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/execution-flow/09-inland-transportation.webp",
+      "bytes": 114556,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/order-execution-laptop.webp",
+      "bytes": 112924,
       "referenced": true,
       "directReference": true,
       "allowlisted": false
@@ -317,6 +317,13 @@
     {
       "path": "/images/hero-agro-execution-sketch.webp",
       "bytes": 436552,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
+      "path": "/images/hero-bulk-execution-v5.webp",
+      "bytes": 432532,
       "referenced": false,
       "directReference": false,
       "allowlisted": false
@@ -520,13 +527,6 @@
     {
       "path": "/images/hero-operations/pallet-loading-stock.webp",
       "bytes": 147100,
-      "referenced": false,
-      "directReference": false,
-      "allowlisted": false
-    },
-    {
-      "path": "/images/hero-operations/coordination-alt.webp",
-      "bytes": 134918,
       "referenced": false,
       "directReference": false,
       "allowlisted": false

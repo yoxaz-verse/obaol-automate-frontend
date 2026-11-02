@@ -110,7 +110,6 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   const homeContent = read("../src/components/home/HomeContent.tsx");
   const homepage = read("../src/app/page.tsx");
   const globals = read("../src/app/globals.css");
-  const accents = read("../src/components/home/ParallaxTradeAccents.tsx");
   const stagesBlock = hero.match(/const HERO_STAGES = \[[\s\S]*?\] as const satisfies readonly HeroStage\[\];/)?.[0] ?? "";
   const imagePaths = [...stagesBlock.matchAll(/src: "(\/images\/[^"]+)"/g)].map((match) => match[1]);
   const stageLabels = [...stagesBlock.matchAll(/label: "([^"]+)"/g)].map((match) => match[1]);
@@ -127,7 +126,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(new Set(imagePaths).size, 10);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/execution-flow/")).length, 9);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/hero-operations/")).length, 0);
-  assert.equal(imagePaths.at(-1), "/images/hero-bulk-execution-v5.webp");
+  assert.equal(imagePaths.at(-1), "/images/hero-bulk-execution-v6.webp");
   assert.equal(hero.includes('"use client"'), false);
   assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
   assert.equal(hero.includes('data-hero-centered-layout="true"'), true);
@@ -137,7 +136,8 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(hero.includes("text-slate-950 dark:text-white"), false);
   assert.equal(hero.includes("lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
   assert.equal(hero.includes('<ParallaxTradeAccents placement="hero" />'), false);
-  assert.equal(explorer.includes('<ParallaxTradeAccents placement="hero" motionEnabled={!reducedMotion} />'), true);
+  assert.equal(explorer.includes("ParallaxTradeAccents"), false);
+  assert.equal(homeContent.includes("ParallaxTradeAccents"), false);
   assert.equal(explorer.includes('from "framer-motion"'), false);
   assert.equal(heroCta.includes("pt-5 lg:pt-6"), true);
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
@@ -151,7 +151,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), false);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-bulk-artwork="true"'), true);
-  assert.equal(explorer.includes('/images/hero-bulk-execution-v5.webp'), true);
+  assert.equal(explorer.includes('/images/hero-bulk-execution-v6.webp'), true);
   assert.equal(explorer.includes('data-active-phase={activePhaseGroup?.slug ?? "none"}'), true);
   assert.equal(explorer.includes('data-hero-phase-region={phase.slug}'), true);
   assert.equal(explorer.includes('data-hero-phase-highlight={phase.slug}'), true);
@@ -190,27 +190,6 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("md:grid-cols-2"), true);
   assert.equal(explorer.includes("xl:grid-cols-[3fr_3fr_3fr_1.2fr]"), true);
   assert.equal(explorer.includes("Connected bulk trade execution network"), true);
-  assert.equal(accents.includes("data-home-parallax-accents={placement}"), true);
-  assert.equal(accents.includes("data-parallax-accent={accent.id}"), true);
-  assert.equal(accents.includes("data-accent-depth={accent.depth}"), true);
-  assert.equal(accents.includes("data-accent-size={accent.size}"), true);
-  assert.equal(accents.includes('data-hero-floating-composition={isHeroComposition ? "true" : undefined}'), true);
-  assert.equal(accents.includes('type AccentDepth = "foreground" | "middle" | "background"'), true);
-  assert.equal(accents.includes('type AccentSize = "small" | "medium" | "large"'), true);
-  assert.equal(accents.includes('/images/home-accents/warehouse-forklift.webp'), true);
-  const heroAccentsBlock = accents.match(/hero: \[[\s\S]*?\],\n  services:/)?.[0] ?? "";
-  assert.equal(heroAccentsBlock.includes('/images/home-accents/commodity-spices.webp'), false);
-  assert.equal(heroAccentsBlock.includes('/images/home-accents/logistics-container.webp'), false);
-  assert.equal(accents.includes('serviceId: "freight"'), true);
-  assert.equal(accents.includes('data-accent-service={accent.serviceId}'), true);
-  assert.equal(accents.includes('data-accent-visible={visible ? "true" : "false"}'), true);
-  assert.equal(accents.includes('/images/home-accents/cargo-ship.webp'), true);
-  assert.equal(accents.includes("travel: 96"), false);
-  assert.equal(accents.includes("travel: 60"), true);
-  assert.equal(accents.includes("travel: 64"), true);
-  assert.equal(accents.includes('data-accent-motion={enabled ? "active" : "static"}'), true);
-  assert.equal(accents.includes('isHeroComposition ? "z-40 overflow-visible" : isChapterComposition ? "z-[2] overflow-visible" : "z-20 overflow-hidden"'), true);
-  assert.equal(accents.includes("!adaptiveMotion.prefersReducedMotion && !adaptiveMotion.isMobile && !adaptiveMotion.isTouch"), true);
   assert.equal(explorer.includes("animate-ping"), false);
   assert.equal(explorer.includes("group-hover:scale"), false);
   assert.equal(explorer.includes("<svg"), false);
@@ -243,11 +222,8 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-art-v2.webp", import.meta.url))), true);
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-bulk-execution-v3.webp", import.meta.url))), true);
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-bulk-execution-v4.webp", import.meta.url))), true);
-  for (const accent of ["commodity-spices", "verification-clipboard", "laboratory-sample", "packaging-sack", "logistics-container", "warehouse-forklift", "cargo-ship"]) {
-    const accentPath = fileURLToPath(new URL(`../public/images/home-accents/${accent}.webp`, import.meta.url));
-    assert.equal(existsSync(accentPath), true, `${accent} should exist`);
-    assert.equal(readFileSync(accentPath).includes(Buffer.from("ALPH")), true, `${accent} should preserve transparency`);
-  }
+  assert.equal(existsSync(fileURLToPath(new URL("../src/components/home/ParallaxTradeAccents.tsx", import.meta.url))), false);
+  assert.equal(existsSync(fileURLToPath(new URL("../public/images/home-accents", import.meta.url))), false);
 });
 
 test("homepage services use a mobile puzzle and desktop synchronized chapter story", () => {

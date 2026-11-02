@@ -46,12 +46,9 @@ test("public routes do not eagerly load authenticated UI and toast runtimes", ()
 
 test("the homepage hero avoids Framer Motion on the critical path", () => {
   const hero = readFileSync("src/components/home/HeroStageExplorer.tsx", "utf8");
-  const accents = readFileSync("src/components/home/ParallaxTradeAccents.tsx", "utf8");
   const adaptiveMotion = readFileSync("src/hooks/useAdaptiveMotion.ts", "utf8");
   assert.doesNotMatch(hero, /from ["']framer-motion["']/);
-  assert.doesNotMatch(accents, /from ["']framer-motion["']/);
   assert.doesNotMatch(adaptiveMotion, /from ["']framer-motion["']/);
-  assert.match(hero, /requestAnimationFrame/);
   assert.match(adaptiveMotion, /prefers-reduced-motion: reduce/);
 });
 

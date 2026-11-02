@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import ParallaxTradeAccents from "@/components/home/ParallaxTradeAccents";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 export type HeroStage = {
@@ -21,7 +20,7 @@ const phaseGroups: Array<{ name: string; slug: string; range: string; phase: Her
   { name: "Receive & Approve", slug: "receive-and-approve", range: "10", phase: "Receive & Approve", summary: "The overseas buyer receives the commodity, confirms the specification, and approves the completed import handoff.", left: 75, width: 25, status: "International buyer approved receipt", evidence: "Destination acceptance record" },
 ];
 
-const HERO_ARTWORK = "/images/hero-bulk-execution-v5.webp";
+const HERO_ARTWORK = "/images/hero-bulk-execution-v6.webp";
 
 export default function HeroStageExplorer() {
   const adaptiveMotion = useAdaptiveMotion();
@@ -47,7 +46,6 @@ export default function HeroStageExplorer() {
         aria-label="Interactive panorama of independent bulk suppliers, warehouse inspectors, quality specialists, logistics providers, and an overseas buyer coordinating one agricultural commodity trade"
         className="relative aspect-[1983/793] w-full overflow-hidden rounded-xl bg-content2 focus-within:ring-1 focus-within:ring-obaol-500/70 sm:rounded-2xl"
       >
-        <ParallaxTradeAccents placement="hero" motionEnabled={!reducedMotion} />
         <Image src={HERO_ARTWORK} alt="" aria-hidden="true" fill priority quality={88} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${transitionClass} ${activePhase ? "opacity-55 saturate-[0.65] brightness-[0.82]" : "opacity-100"}`} />
         {phaseGroups.map((phase) => (
           <div

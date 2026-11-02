@@ -65,12 +65,12 @@ export default function StartedIn() {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
             <span className="text-orange-500">Started</span> in the{" "}
             <span className="text-green-500">Indian Market</span>.<br />
-            Designed for Domestic & Global Trade.
+            Built for Domestic & International Coordination.
           </h2>
 
           <p className="mt-8 text-lg md:text-xl text-default-500 leading-relaxed max-w-2xl">
-            OBAOL simplifies and automates both domestic and international
-            commodity trading using a single, structured operating system.
+            OBAOL is being developed from India to support registered companies
+            coordinating domestic and international bulk commodity trade.
           </p>
         </motion.div>
 
@@ -84,14 +84,15 @@ export default function StartedIn() {
             className="p-8 md:p-10 rounded-3xl border border-default-200/50 bg-white/[0.02] backdrop-blur-2xl hover:bg-white/[0.04] transition-all duration-500 public-surface-card"
           >
             <p className="text-base md:text-lg text-default-600 leading-relaxed">
-              We began by building and validating the system in India — not
-              because it is geographically limited, but because India represents
-              one of the <span className="text-foreground font-semibold">most complex commodity trading environments</span>.
+              India is OBAOL&apos;s primary market and the starting point for building
+              role-aware workflows across buying, selling, services, documents,
+              and physical execution.
             </p>
 
             <p className="mt-6 text-sm md:text-base text-default-500 leading-relaxed">
-              Fragmented supply chains, diverse raw material sources, varying
-              quality standards, and multi-layer logistics operate simultaneously.
+              The platform is designed around real coordination needs across
+              diverse commodity sources, quality requirements, operating
+              locations, and multi-company logistics.
             </p>
           </motion.div>
 
@@ -103,13 +104,14 @@ export default function StartedIn() {
             className="p-8 md:p-10 rounded-3xl border border-orange-500/20 bg-orange-500/[0.03] backdrop-blur-2xl shadow-none hover:border-orange-500/40 transition-all duration-500 public-surface-card"
           >
             <p className="text-base md:text-lg text-foreground font-medium leading-relaxed">
-              Validating execution under these conditions ensures the same
-              system can operate reliably across global trade routes.
+              The same execution model can support cross-border workflows while
+              preserving clear roles, responsibilities, and milestone context.
             </p>
 
             <p className="mt-6 text-sm md:text-base text-default-600 leading-relaxed">
-              A platform capable of handling domestic complexity is inherently
-              prepared for international trade execution.
+              Expansion into additional markets remains subject to local
+              operating requirements, regulations, qualified partners, and the
+              capabilities available in each trade corridor.
             </p>
           </motion.div>
         </div>
@@ -125,8 +127,8 @@ export default function StartedIn() {
           <div className="h-px w-full bg-gradient-to-r from-orange-500/0 via-orange-500/30 to-green-500/0" />
           <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-48 h-px bg-gradient-to-r from-transparent via-default-200 to-transparent opacity-30" />
           <p className="mt-8 text-sm md:text-base font-medium text-default-600 max-w-3xl leading-relaxed text-center sm:text-left">
-            A system proven in a high-complexity domestic market is structurally
-            ready to support global commodity trade execution.
+            India-first does not mean India-only. It means expanding responsibly
+            from a clearly defined primary market.
           </p>
         </motion.div>
       </div>

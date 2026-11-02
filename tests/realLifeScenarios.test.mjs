@@ -9,6 +9,7 @@ test("role pages load published scenario cards and keep them out of static role 
   assert.match(rolePage, /getPublishedRoleScenarios/);
   assert.match(rolePage, /Real-Life Scenarios for/);
   assert.match(rolePage, /real-life-scenarios\/\$\{scenario\.slug\}/);
+  assert.doesNotMatch(rolePage, /getPublishedRoleScenarios\([^)]*\)\s*\.slice\(/);
 });
 
 test("story pages are server rendered with article, breadcrumb and FAQ schema", () => {
@@ -32,4 +33,6 @@ test("preview is explicitly noindex and sitemap includes published scenario reco
 test("admin editor exposes structured blocks and controlled publication", () => {
   const admin = read("src/app/dashboard/real-life-scenarios/page.tsx");
   for (const expected of ["Structured story blocks", "Search preview", "Save draft", "Preview", "Publish", "Schedule", "Archive", "disclosureAccepted"]) assert.match(admin, new RegExp(expected));
+  assert.match(admin, /\{count\?\.total \|\| 0\} created/);
+  assert.doesNotMatch(admin, /\/3 created|three scenarios|required three/i);
 });

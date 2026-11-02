@@ -20,6 +20,7 @@ export default function HeroSectionServer() {
       {/* Ambient background glow & grid mesh */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-obaol-500/10 blur-[120px] dark:bg-obaol-500/14" />
+        <div className="absolute top-1/4 -right-12 h-[500px] w-[500px] rounded-full bg-gradient-to-bl from-obaol-400/16 via-amber-500/10 to-transparent blur-[120px] dark:from-obaol-500/16 dark:via-amber-500/10" />
         <div className="absolute top-1/3 right-10 h-[400px] w-[400px] rounded-full bg-amber-500/[0.06] blur-[100px] dark:bg-amber-500/10" />
         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-30 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
       </div>

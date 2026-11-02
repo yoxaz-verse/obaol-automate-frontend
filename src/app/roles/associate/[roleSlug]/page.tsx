@@ -158,7 +158,7 @@ export default async function AssociateRoleDetailPage({
 }) {
   const role = getAssociateRoleBySlug(params.roleSlug);
   if (!role) notFound();
-  const realLifeScenarios = (await getPublishedRoleScenarios(role.slug)).slice(0, 3);
+  const realLifeScenarios = await getPublishedRoleScenarios(role.slug);
 
   const group = associateRoleGroups.find((item) => item.key === role.group);
   const relatedRoles = role.relatedRoles
@@ -417,7 +417,7 @@ export default async function AssociateRoleDetailPage({
                   <h2 id="real-life-scenarios-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Real-Life Scenarios for {role.displayName}</h2>
                   <p className="mt-4 leading-7 text-foreground/65">Explore illustrative situations based on challenges businesses in this role commonly face, and see how a more accountable workflow can help.</p>
                 </div>
-                <div className="grid gap-5 md:grid-cols-3">
+                <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                   {realLifeScenarios.map((scenario) => (
                     <article key={scenario._id} className="public-surface-card flex flex-col rounded-3xl border border-default-200/70 bg-content1/30 p-6 shadow-2xs transition-all hover:-translate-y-1 hover:border-orange-500/35 hover:shadow-md">
                       <span className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-500">Representative scenario</span>

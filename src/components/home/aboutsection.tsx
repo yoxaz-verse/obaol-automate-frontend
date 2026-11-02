@@ -23,21 +23,20 @@ export default function AboutSection() {
                     transition={{ duration: 0.8 }}
                 >
                     <span className="text-sm font-bold tracking-widest uppercase text-default-500 mb-4 block">
-                        Our Vision
+                        Our Mission
                     </span>
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-tight mb-8">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-400 drop-shadow-sm">
-                            Who We Are
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-400 drop-shadow-sm">
+                            One Operating Context for Physical Trade
                         </span>
                     </h2>
 
                     <div className="space-y-6">
                         <p className="text-default-500 text-lg md:text-xl leading-relaxed">
-                            OBAOL is founded on the principle that <span className="text-foreground font-medium">transparency and execution</span> are the lifeblood of commodities trading.
-                            We are not just a platform; we are a dedicated team of trade operating specialists committed to fixing the broken agro-commodity supply chain.
+                            Physical commodity trade involves more than matching a buyer and seller. Requirements, company context, samples, documents, services, responsibilities, and milestones must remain connected from commercial interest through closure.
                         </p>
                         <p className="text-default-500 text-base md:text-lg leading-relaxed">
-                            Our mission is to eliminate the noise of non-performers and provide a secure, verified environment where real buyers and suppliers can transact with confidence.
+                            OBAOL&apos;s mission is to reduce fragmented communication, incomplete requirements, unclear ownership, disconnected records, and weak milestone visibility across that execution process.
                         </p>
                     </div>
 

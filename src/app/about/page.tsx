@@ -14,18 +14,18 @@ const StartedIn = dynamic(() => import("@/components/home/startedin"), {
 });
 
 export const metadata = buildMetadata({
-  title: "About OBAOL Supreme | Trade Execution Platform",
+  title: "About OBAOL Supreme | B2B Bulk Trade Execution",
   description:
-    "Starting in India, OBAOL Supreme is an execution-focused commodity trade platform built for reliable deal closure and operational accountability as we expand globally.",
-  keywords: ["trade execution platform", "commodity operations", "supplier coordination", "buyer verification"],
+    "OBAOL Supreme is an India-first B2B bulk trade execution platform connecting registered companies across sourcing, documents, services, logistics, and closure.",
+  keywords: ["B2B bulk trade execution", "commodity workflow coordination", "buyer supplier collaboration", "trade service providers", "India commodity trade platform"],
   path: "/about",
   type: "article",
 });
 
 const webPageJsonLd = buildWebPageJsonLd({
-  title: "About OBAOL Supreme | Trade Execution Platform",
+  title: "About OBAOL Supreme | B2B Bulk Trade Execution",
   description:
-    "Understand OBAOL’s mission, execution model, and role in structured commodity trade operations.",
+    "Understand OBAOL’s India-first mission, company roles, execution model, and boundaries across domestic and international bulk commodity trade.",
   path: "/about",
 });
 export default function AboutPage() {
@@ -42,7 +42,13 @@ export default function AboutPage() {
         <StartedIn key="started-in-section" />
         <AboutExecutionFramework />
       </div>
-      <CTASection />
+      <CTASection
+        eyebrow="Choose the right participation path"
+        title="Find the OBAOL Role That Matches Your Business"
+        description="Registered companies select the buying, selling, or service capabilities that should shape their workspace and responsibilities."
+        href="/roles"
+        label="Explore Platform Roles"
+      />
       <Footer />
     </main>
   );

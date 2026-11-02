@@ -155,8 +155,8 @@ test("lab map fits all markers when no search point is active", async () => {
 test("My Lab lists multiple profiles and only exposes aggregate contact counts", async () => {
   const source = await readFile(myLabsPath, "utf8");
   assert.match(source, /apiRoutes\.labProfiles\.mine/);
-  assert.match(source, /addWarehouseUrl = "\/dashboard\/warehouses\/location"/);
-  assert.match(source, />Add Warehouse<\/Button>/);
+  assert.match(source, /addLabUrl = `\/dashboard\/quality-labs\/location/);
+  assert.match(source, />Add Lab<\/AppButton>/);
   assert.match(source, /mineArchive/);
   assert.match(source, /mineRestore/);
   assert.match(source, /rows\.map/);

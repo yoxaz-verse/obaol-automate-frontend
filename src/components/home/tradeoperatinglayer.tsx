@@ -48,15 +48,15 @@ export default function WhoCanUseObaol() {
       <div className="relative z-10 public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* SECTION HEADER – SEO + POSITIONING */}
         <header className="max-w-4xl mb-12 md:mb-16">
-          <motion.h2
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-foreground"
           >
-            Built to <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-400">Lower the Entry Barrier</span> to Commodity Trading
-          </motion.h2>
+            Built to Make <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-400">Bulk Trade Execution</span> More Accountable
+          </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -65,10 +65,9 @@ export default function WhoCanUseObaol() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mt-8 text-default-500 text-lg md:text-xl leading-relaxed"
           >
-            Commodity trading has traditionally been difficult to enter —
-            requiring capital, insider access, and years of informal experience.
-            OBAOL changes this by turning trade execution into a structured
-            system, not a capital-heavy gamble.
+            OBAOL Supreme is an India-first B2B bulk trade execution platform
+            for registered companies coordinating domestic and international
+            agricultural commodity trade.
           </motion.p>
 
           <motion.p
@@ -78,8 +77,9 @@ export default function WhoCanUseObaol() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="mt-6 text-default-600 text-base md:text-lg"
           >
-            Participants can enter the ecosystem, learn how real trades work,
-            and contribute value without needing upfront investment to start.
+            It connects requirements, supply responses, company context,
+            samples, documents, procurement, packaging, quality, warehousing,
+            logistics, customs, and closure in a shared operating environment.
           </motion.p>
         </header>
 
@@ -88,93 +88,69 @@ export default function WhoCanUseObaol() {
           {/* Subtle line connecting cards */}
           <div className="hidden md:block absolute top-0 bottom-0 left-1/2 w-px bg-default-200/20 -translate-x-1/2" />
 
-          {/* NEW ENTRANTS – PRIMARY AUDIENCE */}
           <BenefitRow
-            title="New Entrants to Commodity Trading"
-            subtitle="Start without capital. Grow through execution."
+            title="Buyers, Importers & Procurement Companies"
+            subtitle="Define demand and coordinate sourcing activity."
             delay={0.1}
             points={[
-              "Enter the commodity trade ecosystem without upfront capital requirements",
-              "Learn real-world trade workflows through structured execution",
-              "Participate via verification, coordination, services, or facilitation",
-              "Build credibility and experience by contributing measurable value",
+              "Record product, quantity, destination, timing, and delivery requirements",
+              "Discover relevant supply and manage structured responses",
+              "Coordinate buyer-side documents, decisions, and execution handoffs",
             ]}
           />
 
           <BenefitRow
-            title="Buyers"
-            subtitle="Source faster. Trade with confidence."
+            title="Suppliers, Exporters & Traders"
+            subtitle="Present capabilities and respond to genuine requirements."
             delay={0.2}
             points={[
-              "Access pre-verified suppliers without weeks of manual searching",
-              "Reduce counterparty risk through standardized trade workflows",
-              "Execute trades faster with integrated documentation and logistics",
+              "Maintain accurate product, supply, origin, and company information",
+              "Respond against requirements the business can substantiate",
+              "Coordinate samples, quality, documents, readiness, and dispatch",
             ]}
           />
 
           <BenefitRow
-            title="Suppliers"
-            subtitle="Reach genuine demand. Reduce wasted effort."
+            title="Packaging, Quality, Warehouse & Logistics Companies"
+            subtitle="Support physical execution with visible capabilities."
             delay={0.3}
             points={[
-              "Engage only with serious, verified buyers",
-              "Showcase available stock, capacity, and certifications clearly",
-              "Close deals faster without repeated manual verification",
+              "Record service capabilities, locations, facilities, and credentials",
+              "Review requirements linked to active execution workflows",
+              "Coordinate service milestones and operational handoffs",
             ]}
           />
 
           <BenefitRow
-            title="Packaging Providers"
-            subtitle="Turn operational capability into revenue."
+            title="Freight Forwarders & Customs Agencies"
+            subtitle="Keep shipment and clearance work connected to the trade."
             delay={0.4}
             points={[
-              "Present packaging services directly within trade flows",
-              "Get engaged only when packaging is actually required",
-              "Create recurring service revenue natively",
+              "Review route, cargo, port, schedule, and document context",
+              "Coordinate bookings, filings, status, and partner handoffs",
+              "Maintain shipment or clearance milestones in the execution record",
             ]}
           />
 
           <BenefitRow
-            title="Logistics Partners"
-            subtitle="Convert capacity into consistent business."
+            title="Finance, Insurance & Technology Partners"
+            subtitle="Support eligible trades through specialist capabilities."
             delay={0.5}
             points={[
-              "Offer transport services aligned with real shipment requirements",
-              "Receive clear timelines, destinations, and readiness signals",
-              "Generate revenue without chasing fragmented leads",
+              "Describe supported markets, products, and assessment requirements",
+              "Review authorized trade context under provider-led processes",
+              "Coordinate decisions, documents, or approved integrations",
             ]}
           />
 
           <BenefitRow
-            title="Procurement Agents"
-            subtitle="Execute on-ground work with clarity."
+            title="Operators for Registered Organizations"
+            subtitle="Coordinate work on behalf of an accountable company."
             delay={0.6}
             points={[
-              "Receive structured procurement and verification assignments",
-              "Perform stock checks, quality verification, and confirmations",
-              "Act as trusted third-party representatives for buyers",
-            ]}
-          />
-
-          <BenefitRow
-            title="Trade Facilitators"
-            subtitle="Manage complex trades with less friction."
-            delay={0.7}
-            points={[
-              "Coordinate multi-party trades inside a single execution system",
-              "Reduce miscommunication and operational overhead",
-              "Deliver predictable outcomes with transparent tracking",
-            ]}
-          />
-
-          <BenefitRow
-            title="AI & Automation"
-            subtitle="Integrate. Observe. Execute."
-            delay={0.8}
-            points={[
-              "Integrate via APIs to monitor and automate trade workflows",
-              "Trigger documentation, alerts, and reporting automatically",
-              "Build intelligent execution logic on top of OBAOL",
+              "Maintain enquiries, documents, tasks, and company information",
+              "Coordinate internal and external participants against assigned work",
+              "Keep decisions, exceptions, and next actions visible",
             ]}
           />
         </div>
@@ -208,11 +184,10 @@ export default function WhoCanUseObaol() {
         >
           <p className="text-foreground/70 text-sm leading-relaxed">
             <span className="text-orange-400/80 font-semibold uppercase tracking-widest block mb-2 text-xs">The OBAOL Standard</span>
-            OBAOL does not promise shortcuts or guaranteed profits. It provides
-            a standardized system where participants earn by executing real work
-            — sourcing, verifying, packaging, transporting, coordinating, and
-            managing commodity trades — instead of relying on speculation or
-            informal networks.
+            OBAOL supports coordination but does not guarantee transactions,
+            demand, supply, assignments, financing, insurance, delivery, quality,
+            or commercial outcomes. Registered companies remain responsible for
+            their decisions, diligence, licenses, contracts, and regulated work.
           </p>
         </motion.div>
       </div>

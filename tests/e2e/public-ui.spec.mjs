@@ -468,8 +468,11 @@ test("About marketing sections use one responsive content container", async ({ p
     expect(sectionBox.x).toBeLessThanOrEqual(1);
     expect(sectionBox.width).toBeGreaterThanOrEqual(width - 1);
 
-    const headingBox = await page.getByRole("heading", { name: "Who We Are" }).boundingBox();
+    const headingBox = await page.getByRole("heading", { name: "One Operating Context for Physical Trade" }).boundingBox();
     const imageBox = await page.getByRole("img", { name: "Jacob Alwin, Entrepreneur" }).boundingBox();
+
+    await expect(page.getByRole("heading", { name: "Built to Make Bulk Trade Execution More Accountable" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Explore Platform Roles" })).toHaveAttribute("href", "/roles");
 
     if (width >= 768) {
       expect(imageBox.x).toBeGreaterThan(headingBox.x + headingBox.width);

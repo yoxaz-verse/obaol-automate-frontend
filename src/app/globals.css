@@ -144,13 +144,13 @@ body {
   padding-inline: 1rem;
   font-weight: 700;
   letter-spacing: -.01em;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 .app-button:is(:focus-visible, [data-focus-visible="true"]) {
   outline: 2px solid var(--app-focus) !important;
   outline-offset: 3px !important;
 }
-.app-button:not(:disabled, [aria-disabled="true"]):active { transform: translateY(1px) scale(.99); }
+.app-button:not(:disabled, [aria-disabled="true"]):active { box-shadow: none; }
 .app-button:is(:disabled, [aria-disabled="true"], [data-disabled="true"]) { cursor: not-allowed; opacity: .52; }
 .app-button--primary {
   border: 1px solid color-mix(in srgb, var(--brand-truffle) 28%, transparent) !important;

@@ -70,6 +70,12 @@ test("associate onboarding marks validated fields as required and leaves optiona
 
   assert.equal(phoneField.includes("isRequired?: boolean"), true);
   assert.equal(phoneField.includes("isRequired={isRequired}"), true);
+  assert.equal(phoneField.includes("showVisualLabel?: boolean"), true);
+  assert.equal(phoneField.includes("showVisualLabel = true"), true);
+  assert.equal(phoneField.includes("label && showVisualLabel"), true);
+  assert.match(form, /data-onboarding-phone-label[\s\S]*Primary Phone Number[\s\S]*showVisualLabel=\{false\}/);
+  assert.match(form, /data-onboarding-phone-label[\s\S]*Secondary Phone \(Optional\)[\s\S]*showVisualLabel=\{false\}/);
+  assert.match(form, /label="Primary Phone Number"[\s\S]*isRequired[\s\S]*showVisualLabel=\{false\}/);
   for (const optionalLabel of [
     "Secondary Phone (Optional)",
     "GSTIN Number (Optional)",

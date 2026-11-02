@@ -12,6 +12,7 @@ type PhoneFieldProps = {
   nationalValue?: any;
   disabled?: boolean;
   isRequired?: boolean;
+  showVisualLabel?: boolean;
   className?: string;
   isInvalid?: boolean;
   errorMessage?: string;
@@ -26,6 +27,7 @@ export default function PhoneField({
   nationalValue,
   disabled,
   isRequired,
+  showVisualLabel = true,
   className,
   isInvalid,
   errorMessage,
@@ -51,7 +53,7 @@ export default function PhoneField({
 
   return (
     <div className={`w-full ${className || ""}`}>
-      {label && (
+      {label && showVisualLabel && (
         <div data-onboarding-phone-label className="mb-1.5 px-2 text-[10px] font-black uppercase tracking-widest text-default-400">
           {label}
           {isRequired ? <span aria-hidden="true" className="ml-0.5 text-danger">*</span> : null}

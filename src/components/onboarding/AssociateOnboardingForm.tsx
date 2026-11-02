@@ -1447,11 +1447,15 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     )}
                   </div>
                   <div className="md:col-span-2">
+                    <div data-onboarding-phone-label className="mb-1.5 px-1">
+                      Primary Phone Number<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+                    </div>
                     <div data-invalid={Boolean(errors.phone)} className={`associate-control-shell rounded-xl border p-0.5 overflow-hidden transition-all ${errors.phone ? "border-danger" : "border-default-200"}`}>
                       <PhoneField
                         name="phone"
                         label="Primary Phone Number"
                         isRequired
+                        showVisualLabel={false}
                         value={formData.phone}
                         countryCodeValue={formData.phoneCountryCode}
                         nationalValue={formData.phoneNational}
@@ -1465,10 +1469,14 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     {errors.phone ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phone}</p> : null}
                   </div>
                   <div className="md:col-span-2">
+                    <div data-onboarding-phone-label className="mb-1.5 px-1">
+                      Secondary Phone (Optional)
+                    </div>
                     <div data-invalid={Boolean(errors.phoneSecondary)} className={`associate-control-shell rounded-xl border p-0.5 overflow-hidden transition-all ${errors.phoneSecondary ? "border-danger" : "border-default-200"}`}>
                       <PhoneField
                         name="phoneSecondary"
                         label="Secondary Phone (Optional)"
+                        showVisualLabel={false}
                         value={formData.phoneSecondary}
                         countryCodeValue={formData.phoneSecondaryCountryCode}
                         nationalValue={formData.phoneSecondaryNational}

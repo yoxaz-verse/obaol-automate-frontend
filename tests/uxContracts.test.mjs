@@ -157,13 +157,15 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('data-hero-phase-highlight={phase.slug}'), true);
   assert.equal(explorer.includes('data-hero-phase-dividers="true"'), true);
   assert.equal(explorer.includes('data-hero-phase-divider="true"'), true);
-  assert.equal(explorer.includes('data-hero-phase-outcome-overlay="true"'), true);
+  assert.equal(explorer.includes('data-hero-phase-outcome-overlay="true"'), false);
   assert.equal(explorer.includes('min-h-[5.75rem]'), false);
-  assert.equal(explorer.includes('aria-pressed={selectedPhase === phase.phase}'), true);
-  assert.equal(explorer.includes('const activePhase = previewPhase ?? selectedPhase'), true);
+  assert.equal(explorer.includes('aria-pressed={selectedItem?.kind === "phase" && selectedItem.id === phase.phase}'), true);
+  assert.equal(explorer.includes('const activeItem = previewItem ?? selectedItem'), true);
   assert.equal(explorer.includes('scale-[1.015]'), false);
   assert.equal(explorer.includes('opacity-55 grayscale-[70%] brightness-[0.55]'), false);
-  assert.equal(explorer.includes('data-hero-phase-outcome={activePhaseGroup?.slug ?? "none"}'), true);
+  assert.equal(explorer.includes('data-hero-trade-detail="true"'), true);
+  assert.equal(explorer.includes('data-detail-kind={displayedResponsibility ? "responsibility" : "phase"}'), true);
+  assert.equal(explorer.includes('h-[9.5rem]'), true);
   assert.equal(explorer.includes('Black Pepper · 18 MT'), true);
   assert.equal(explorer.includes('Illustrative trade · {displayedPhaseGroup.name}'), true);
   assert.equal(explorer.includes('data-hero-depth-layer='), false);
@@ -179,11 +181,25 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes("Complete trade execution"), false);
   assert.equal(explorer.includes("From origin to delivery"), false);
   assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
+  assert.equal(explorer.includes('data-execution-map="hierarchical"'), true);
+  assert.equal(explorer.includes('data-execution-responsibility-grid="true"'), true);
   assert.equal(explorer.includes('aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve"'), true);
   assert.equal(explorer.includes("data-execution-phase={phase.slug}"), true);
-  assert.equal(explorer.includes('onMouseEnter={() => preview(phase.phase)}'), true);
-  assert.equal(explorer.includes('onFocus={() => preview(phase.phase)}'), true);
-  assert.equal(explorer.includes('onClick={() => select(phase.phase)}'), true);
+  assert.equal(explorer.includes('onMouseEnter={() => preview({ kind: "phase", id: phase.phase })}'), true);
+  assert.equal(explorer.includes('onFocus={() => preview({ kind: "phase", id: phase.phase })}'), true);
+  assert.equal(explorer.includes('onClick={() => select({ kind: "phase", id: phase.phase })}'), true);
+  assert.equal(explorer.includes('data-execution-responsibility={item.id}'), true);
+  assert.equal(explorer.includes('data-parent-phase={phase.slug}'), true);
+  assert.equal(explorer.includes('onClick={() => select({ kind: "responsibility", id: item.id })}'), true);
+  const responsibilityLabels = [...explorer.matchAll(/id: "[^"]+", label: "([^"]+)", phase:/g)].map((match) => match[1]);
+  assert.deepEqual(responsibilityLabels, [
+    "Buyer Requirement", "Supplier Sourcing", "Sampling",
+    "Documentation", "Warehouse Inspection", "Quality & COA",
+    "Payment Readiness", "Packaging & Fumigation", "Inland Transport",
+    "CHA & Customs", "Freight Forwarding", "Buyer Receipt & Acceptance",
+  ]);
+  assert.equal(explorer.includes("Licensed Customs House Agent or customs broker"), true);
+  assert.equal(explorer.includes("OBAOL coordinates"), true);
   assert.equal(explorer.includes('data-execution-route="stepped"'), false);
   assert.equal(explorer.includes("stages.filter("), true);
   assert.equal(explorer.includes('data-execution-stage-grid="true"'), true);

@@ -11,13 +11,46 @@ export type HeroStage = {
   src: string;
   deliverable?: string;
   phase: "Plan" | "Verify" | "Move" | "Receive & Approve";
+  coordinator?: string;
+  provider?: string;
+  evidence?: string;
+  railOrder?: number;
 };
 
-const phaseGroups: Array<{ name: string; slug: string; range: string; phase: HeroStage["phase"]; summary: string; left: number; width: number; status: string; evidence: string }> = [
-  { name: "Plan", slug: "plan", range: "01—03", phase: "Plan", summary: "Coordinate bulk suppliers, buyer requirements, and available inventory.", left: 0, width: 25, status: "Buyer requirement captured", evidence: "Origin and supplier coverage" },
-  { name: "Verify", slug: "verify", range: "04—06", phase: "Verify", summary: "Inspect warehouses, sample commodities, and complete quality documentation.", left: 25, width: 25, status: "Specification approved", evidence: "Sample and COA verified" },
-  { name: "Move", slug: "move", range: "07—09", phase: "Move", summary: "Package bulk goods and coordinate inland transport, freight, and shipment evidence.", left: 50, width: 25, status: "Shipment in execution", evidence: "Tracking and bill of lading" },
-  { name: "Receive & Approve", slug: "receive-and-approve", range: "10", phase: "Receive & Approve", summary: "The overseas buyer receives the commodity, confirms the specification, and approves the completed import handoff.", left: 75, width: 25, status: "International buyer approved receipt", evidence: "Destination acceptance record" },
+type HeroResponsibility = {
+  id: string;
+  label: string;
+  phase: HeroStage["phase"];
+  coordinator: string;
+  provider: string;
+  evidence: string;
+  railOrder: number;
+};
+
+type HeroSelection =
+  | { kind: "phase"; id: HeroStage["phase"] }
+  | { kind: "responsibility"; id: string };
+
+const phaseGroups: Array<{ name: string; slug: string; range: string; phase: HeroStage["phase"]; summary: string; left: number; width: number; status: string; provider: string; evidence: string }> = [
+  { name: "Plan", slug: "plan", range: "01—03", phase: "Plan", summary: "Coordinate the buyer requirement, qualified origins, suppliers, and representative samples.", left: 0, width: 25, status: "Requirement and supply plan coordinated", provider: "Buyer, sourcing partners, and suppliers", evidence: "Requirement, origin shortlist, and sample record" },
+  { name: "Verify", slug: "verify", range: "04—06", phase: "Verify", summary: "Coordinate documentation, warehouse inspection, quality testing, and specification confirmation.", left: 25, width: 25, status: "Specification and trade file verified", provider: "Documentation specialists, inspectors, and laboratories", evidence: "Trade file, stock audit, and COA" },
+  { name: "Move", slug: "move", range: "07—11", phase: "Move", summary: "Coordinate payment readiness, packaging, transport, customs clearance, and international freight.", left: 50, width: 25, status: "Cargo and shipment milestones coordinated", provider: "Payment parties, packers, carriers, CHA, and forwarders", evidence: "Readiness, clearance, tracking, and bill of lading" },
+  { name: "Receive & Approve", slug: "receive-and-approve", range: "12", phase: "Receive & Approve", summary: "Coordinate destination receipt so the overseas buyer can inspect and approve the completed handoff.", left: 75, width: 25, status: "International buyer approved receipt", provider: "Buyer and destination receiving partner", evidence: "Acceptance and delivery record" },
+];
+
+const responsibilities: readonly HeroResponsibility[] = [
+  { id: "buyer-requirement", label: "Buyer Requirement", phase: "Plan", coordinator: "OBAOL structures the required product, quantity, specification, destination, and timeline.", provider: "Buyer or procurement team", evidence: "Structured buyer requirement", railOrder: 1 },
+  { id: "supplier-sourcing", label: "Supplier Sourcing", phase: "Plan", coordinator: "OBAOL coordinates qualified origin and supplier coverage for the requirement.", provider: "Bulk suppliers and sourcing partners", evidence: "Origin and supplier shortlist", railOrder: 2 },
+  { id: "sampling", label: "Sampling", phase: "Plan", coordinator: "OBAOL coordinates representative samples and the buyer review milestone.", provider: "Supplier, sampler, and buyer", evidence: "Sample dispatch and review record", railOrder: 3 },
+  { id: "documentation", label: "Documentation", phase: "Verify", coordinator: "OBAOL coordinates the commercial and compliance documents needed to progress the trade.", provider: "Documentation specialists and counterparties", evidence: "Commercial and customs-ready trade file", railOrder: 4 },
+  { id: "warehouse-inspection", label: "Warehouse Inspection", phase: "Verify", coordinator: "OBAOL coordinates an independent check of stock, operations, and readiness at origin.", provider: "Independent warehouse inspector", evidence: "On-site stock and warehouse audit", railOrder: 5 },
+  { id: "quality-coa", label: "Quality & COA", phase: "Verify", coordinator: "OBAOL coordinates testing against the agreed specification and tracks approval.", provider: "Accredited quality laboratory", evidence: "Certificate of Analysis (COA)", railOrder: 6 },
+  { id: "payment-readiness", label: "Payment Readiness", phase: "Move", coordinator: "OBAOL tracks the agreed payment milestone before the relevant cargo release or shipment action.", provider: "Buyer, seller, bank, or agreed payment party", evidence: "Payment milestone confirmation", railOrder: 7 },
+  { id: "packaging-fumigation", label: "Packaging & Fumigation", phase: "Move", coordinator: "OBAOL coordinates export-ready packing and required fumigation against the trade specification.", provider: "Packaging and fumigation providers", evidence: "Packing and fumigation record", railOrder: 8 },
+  { id: "inland-transport", label: "Inland Transport", phase: "Move", coordinator: "OBAOL coordinates dispatch and inland movement from origin to the shipment handoff.", provider: "Inland carrier and logistics partner", evidence: "Dispatch and inland tracking record", railOrder: 9 },
+  { id: "cha-customs", label: "CHA & Customs", phase: "Move", coordinator: "OBAOL coordinates clearance milestones with the appointed Customs House Agent.", provider: "Licensed Customs House Agent or customs broker", evidence: "Customs filing and clearance evidence", railOrder: 10 },
+  { id: "freight-forwarding", label: "Freight Forwarding", phase: "Move", coordinator: "OBAOL coordinates the international booking, carrier handoff, and shipment milestones.", provider: "Freight forwarder and international carrier", evidence: "Booking, tracking, and bill of lading", railOrder: 11 },
+  { id: "buyer-receipt", label: "Buyer Receipt & Acceptance", phase: "Receive & Approve", coordinator: "OBAOL records destination receipt, specification confirmation, and buyer acceptance.", provider: "Buyer and destination receiving partner", evidence: "Acceptance and delivery record", railOrder: 12 },
 ];
 
 const HERO_ARTWORK = "/images/hero-bulk-execution-v7.webp";
@@ -25,16 +58,20 @@ const HERO_ARTWORK = "/images/hero-bulk-execution-v7.webp";
 export default function HeroStageExplorer() {
   const adaptiveMotion = useAdaptiveMotion();
   const reducedMotion = adaptiveMotion.prefersReducedMotion;
-  const [selectedPhase, setSelectedPhase] = useState<HeroStage["phase"] | null>(null);
-  const [previewPhase, setPreviewPhase] = useState<HeroStage["phase"] | null>(null);
-  const activePhase = previewPhase ?? selectedPhase;
+  const [selectedItem, setSelectedItem] = useState<HeroSelection | null>(null);
+  const [previewItem, setPreviewItem] = useState<HeroSelection | null>(null);
+  const activeItem = previewItem ?? selectedItem;
+  const activeResponsibility = activeItem?.kind === "responsibility" ? responsibilities.find((item) => item.id === activeItem.id) : undefined;
+  const activePhase = activeItem?.kind === "phase" ? activeItem.id : activeResponsibility?.phase;
   const activePhaseGroup = phaseGroups.find((phase) => phase.phase === activePhase);
   const displayedPhaseGroup = activePhaseGroup ?? phaseGroups[0];
+  const displayedResponsibility = activeResponsibility;
   const transitionClass = reducedMotion ? "" : "transition-[filter,opacity,transform,background-color,color] duration-300 ease-out";
 
-  const preview = (phase: HeroStage["phase"]) => setPreviewPhase(phase);
-  const stopPreview = () => setPreviewPhase(null);
-  const select = (phase: HeroStage["phase"]) => setSelectedPhase((current) => current === phase ? null : phase);
+  const selectionKey = (item: HeroSelection | null) => item ? `${item.kind}:${item.id}` : "none";
+  const preview = (item: HeroSelection) => setPreviewItem(item);
+  const stopPreview = () => setPreviewItem(null);
+  const select = (item: HeroSelection) => setSelectedItem((current) => selectionKey(current) === selectionKey(item) ? null : item);
 
   return (
     <div data-hero-panel="execution-map" data-active-phase={activePhaseGroup?.slug ?? "none"} className="relative min-w-0 px-1 py-5 sm:px-4 lg:px-0 lg:py-0 xl:w-[calc(100%+clamp(3rem,8vw,10rem))] xl:max-w-none">
@@ -71,57 +108,87 @@ export default function HeroStageExplorer() {
               type="button"
               data-hero-phase-region={phase.slug}
               aria-label={`${phase.name}: ${phase.summary}`}
-              aria-pressed={selectedPhase === phase.phase}
-              onMouseEnter={() => preview(phase.phase)}
+              aria-pressed={selectedItem?.kind === "phase" && selectedItem.id === phase.phase}
+              onMouseEnter={() => preview({ kind: "phase", id: phase.phase })}
               onMouseLeave={stopPreview}
-              onFocus={() => preview(phase.phase)}
+              onFocus={() => preview({ kind: "phase", id: phase.phase })}
               onBlur={stopPreview}
-              onClick={() => select(phase.phase)}
+              onClick={() => select({ kind: "phase", id: phase.phase })}
               className="group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-obaol-300"
             >
               <span className={`absolute inset-x-2 bottom-2 rounded-full bg-black/65 px-2 py-1 text-center text-[8px] font-bold uppercase tracking-[0.16em] text-white opacity-0 backdrop-blur-sm group-hover:opacity-100 group-focus-visible:opacity-100 sm:bottom-3 sm:text-[9px] ${transitionClass}`}>{phase.name}</span>
             </button>
           ))}
         </div>
-        <div
-          data-hero-phase-outcome-overlay="true"
-          data-hero-phase-outcome={activePhaseGroup?.slug ?? "none"}
-          aria-hidden={!activePhaseGroup}
-          aria-live="polite"
-          className={`pointer-events-none absolute inset-x-3 bottom-10 z-30 flex items-center justify-between gap-3 rounded-xl border border-obaol-300/35 bg-background/90 px-3 py-2 shadow-lg backdrop-blur-md sm:inset-x-4 sm:bottom-12 sm:px-4 ${transitionClass} ${activePhaseGroup ? "visible translate-y-0 opacity-100" : "invisible translate-y-1 opacity-0"}`}
-        >
-          <div className="min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">Illustrative trade · {displayedPhaseGroup.name}</p>
-            <p className="mt-0.5 truncate text-xs font-black text-foreground sm:text-sm">Black Pepper · 18 MT</p>
+      </div>
+
+      <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve" className="relative z-30 mt-2 overflow-x-auto pb-2 sm:mt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div data-execution-map="hierarchical" className="min-w-[64rem] px-[7%] sm:px-[9%] xl:min-w-0">
+          <div className="relative grid grid-cols-4">
+            <div className="absolute left-[7px] right-[7px] top-[7px] h-px bg-obaol-700/70 dark:bg-obaol-300/70" />
+            {phaseGroups.map((phase, index) => (
+              <button
+                key={phase.phase}
+                type="button"
+                data-execution-phase={phase.slug}
+                aria-label={`${phase.name}: ${phase.summary}`}
+                aria-pressed={selectedItem?.kind === "phase" && selectedItem.id === phase.phase}
+                onMouseEnter={() => preview({ kind: "phase", id: phase.phase })}
+                onMouseLeave={stopPreview}
+                onFocus={() => preview({ kind: "phase", id: phase.phase })}
+                onBlur={stopPreview}
+                onClick={() => select({ kind: "phase", id: phase.phase })}
+                className={`group snap-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80 ${index === phaseGroups.length - 1 ? "text-right" : index > 0 ? "text-center" : ""}`}
+              >
+                <span className={`mb-2 block size-[15px] rounded-full border-[3px] border-background shadow-[0_0_0_1px_rgba(180,119,18,0.75)] dark:shadow-[0_0_0_1px_rgba(228,199,153,0.72)] sm:mb-3 ${transitionClass} ${activePhase === phase.phase && !activeResponsibility ? "scale-125 bg-amber-300 shadow-[0_0_18px_rgba(207,152,60,0.9)]" : activePhase === phase.phase ? "bg-amber-300" : "bg-obaol-500"} ${index === phaseGroups.length - 1 ? "ml-auto" : index > 0 ? "mx-auto" : ""}`} />
+                <span className={`block text-[8px] font-bold uppercase tracking-[0.14em] sm:text-[10px] sm:tracking-[0.2em] xl:text-[11px] ${transitionClass} ${activePhase === phase.phase ? "text-obaol-700 dark:text-obaol-200" : activePhase ? "text-foreground/40" : "text-foreground"}`}>{phase.name}</span>
+              </button>
+            ))}
           </div>
-          <dl className="hidden min-w-0 grid-cols-2 gap-x-5 gap-y-1 text-[10px] text-right sm:grid">
-            <div><dt className="font-semibold db-muted">Status</dt><dd className="mt-0.5 font-bold text-foreground">{displayedPhaseGroup.status}</dd></div>
-            <div><dt className="font-semibold db-muted">Evidence</dt><dd className="mt-0.5 font-bold text-foreground">{displayedPhaseGroup.evidence}</dd></div>
-          </dl>
+
+          <div data-execution-responsibility-grid="true" className="mt-4 grid grid-cols-4 gap-5">
+            {phaseGroups.map((phase) => (
+              <div key={phase.phase} data-responsibility-group={phase.slug} className="grid auto-cols-fr grid-flow-col gap-1 border-t border-obaol-500/25 pt-2">
+                {responsibilities.filter((item) => item.phase === phase.phase).map((item) => {
+                  const isActive = activeResponsibility?.id === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      data-execution-responsibility={item.id}
+                      data-parent-phase={phase.slug}
+                      aria-label={`${item.label}. ${item.coordinator} Provider: ${item.provider}. Evidence: ${item.evidence}.`}
+                      aria-pressed={selectedItem?.kind === "responsibility" && selectedItem.id === item.id}
+                      onMouseEnter={() => preview({ kind: "responsibility", id: item.id })}
+                      onMouseLeave={stopPreview}
+                      onFocus={() => preview({ kind: "responsibility", id: item.id })}
+                      onBlur={stopPreview}
+                      onClick={() => select({ kind: "responsibility", id: item.id })}
+                      className="group flex h-[4.5rem] min-w-0 flex-col items-center rounded-md px-0.5 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80"
+                    >
+                      <span className={`mt-0.5 block size-2.5 rounded-full border border-obaol-600 ${transitionClass} ${isActive ? "bg-amber-300 shadow-[0_0_0_4px_rgba(245,158,11,0.18)]" : "bg-background group-hover:bg-obaol-200 group-focus-visible:bg-obaol-200"}`} />
+                      <span className={`mt-2 line-clamp-2 text-[8px] font-semibold leading-3 ${transitionClass} ${isActive ? "text-obaol-700 dark:text-obaol-200" : activeItem ? "text-foreground/45" : "text-foreground/75"}`}>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve" className="relative z-30 mx-[7%] mt-2 pb-2 sm:mx-[9%] sm:mt-3 lg:pb-0">
-        <div className="absolute left-[7px] right-[7px] top-[7px] h-px bg-obaol-700/70 dark:bg-obaol-300/70" />
-        <div className="relative grid grid-cols-4">
-          {phaseGroups.map((phase, index) => (
-            <button
-              key={phase.phase}
-              type="button"
-              data-execution-phase={phase.slug}
-              aria-label={`${phase.name}: ${phase.summary}`}
-              aria-pressed={selectedPhase === phase.phase}
-              onMouseEnter={() => preview(phase.phase)}
-              onMouseLeave={stopPreview}
-              onFocus={() => preview(phase.phase)}
-              onBlur={stopPreview}
-              onClick={() => select(phase.phase)}
-              className={`group rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80 ${index === phaseGroups.length - 1 ? "text-right" : index > 0 ? "text-center" : ""}`}
-            >
-              <span className={`mb-2 block size-[15px] rounded-full border-[3px] border-background shadow-[0_0_0_1px_rgba(180,119,18,0.75)] dark:shadow-[0_0_0_1px_rgba(228,199,153,0.72)] sm:mb-3 ${transitionClass} ${activePhase === phase.phase ? "scale-125 bg-amber-300 shadow-[0_0_18px_rgba(207,152,60,0.9)]" : "bg-obaol-500"} ${index === phaseGroups.length - 1 ? "ml-auto" : index > 0 ? "mx-auto" : ""}`} />
-              <span className={`block text-[8px] font-bold uppercase tracking-[0.14em] sm:text-[10px] sm:tracking-[0.2em] xl:text-[11px] ${transitionClass} ${activePhase === phase.phase ? "text-obaol-700 dark:text-obaol-200" : activePhase ? "text-foreground/40" : "text-foreground"}`}>{phase.name}</span>
-            </button>
-          ))}
+      <div data-hero-trade-detail="true" data-detail-kind={displayedResponsibility ? "responsibility" : "phase"} aria-live="polite" className="mt-2 h-[9.5rem] overflow-hidden rounded-2xl border border-obaol-500/30 bg-content1/95 p-3.5 shadow-sm backdrop-blur-sm sm:h-[7.5rem] sm:px-4">
+        <div className="flex h-full flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+          <div className="min-w-0 sm:max-w-[42%]">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">Illustrative trade · {displayedPhaseGroup.name}</p>
+            <p className="mt-1 truncate text-sm font-black text-foreground">Black Pepper · 18 MT</p>
+            <p className="mt-1 text-[11px] font-bold text-foreground">{displayedResponsibility?.label ?? displayedPhaseGroup.status}</p>
+          </div>
+          <dl className="grid min-w-0 flex-1 grid-cols-2 gap-x-4 gap-y-1 text-[10px] sm:grid-cols-3 sm:text-right">
+            <div className="col-span-2 sm:col-span-1"><dt className="font-semibold db-muted">OBAOL coordinates</dt><dd className="mt-0.5 line-clamp-3 font-semibold text-foreground">{displayedResponsibility?.coordinator ?? displayedPhaseGroup.summary}</dd></div>
+            <div><dt className="font-semibold db-muted">Specialist</dt><dd className="mt-0.5 line-clamp-2 font-bold text-foreground">{displayedResponsibility?.provider ?? displayedPhaseGroup.provider}</dd></div>
+            <div><dt className="font-semibold db-muted">Evidence</dt><dd className="mt-0.5 line-clamp-2 font-bold text-foreground">{displayedResponsibility?.evidence ?? displayedPhaseGroup.evidence}</dd></div>
+          </dl>
         </div>
       </div>
     </div>

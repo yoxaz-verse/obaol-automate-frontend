@@ -68,11 +68,22 @@ for (const theme of ["light", "dark"]) {
       await expect(bulkArtwork.locator('[data-hero-phase-region]')).toHaveCount(4);
       await expect(bulkArtwork.locator('[data-hero-phase-highlight]')).toHaveCount(4);
       await expect(bulkArtwork.locator('[data-hero-phase-divider="true"]')).toHaveCount(3);
-      await expect(bulkArtwork.locator('[data-hero-phase-outcome-overlay="true"]')).toHaveCount(1);
+      await expect(bulkArtwork.locator('[data-hero-phase-outcome-overlay="true"]')).toHaveCount(0);
       await expect(executionMap).toHaveAttribute("data-active-phase", "none");
       const phaseRail = page.locator('[data-execution-route="phase-rail"]');
       await expect(phaseRail.locator('[data-execution-phase]')).toHaveCount(4);
       expect(await phaseRail.locator('[data-execution-phase]').allTextContents()).toEqual(["Plan", "Verify", "Move", "Receive & Approve"]);
+      const responsibilityNodes = phaseRail.locator('[data-execution-responsibility]');
+      await expect(responsibilityNodes).toHaveCount(12);
+      expect((await responsibilityNodes.allTextContents()).map((label) => label.trim())).toEqual([
+        "Buyer Requirement", "Supplier Sourcing", "Sampling",
+        "Documentation", "Warehouse Inspection", "Quality & COA",
+        "Payment Readiness", "Packaging & Fumigation", "Inland Transport",
+        "CHA & Customs", "Freight Forwarding", "Buyer Receipt & Acceptance",
+      ]);
+      const tradeDetail = executionMap.locator('[data-hero-trade-detail="true"]');
+      await expect(tradeDetail).toBeVisible();
+      await expect(tradeDetail).toContainText("Black Pepper · 18 MT");
       await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(0);
       await expect(page.locator('[data-parallax-accent]')).toHaveCount(0);
       const artworkBox = await bulkArtwork.boundingBox();
@@ -87,22 +98,36 @@ for (const theme of ["light", "dark"]) {
         const mapBeforeHover = await executionMap.boundingBox();
         const artworkBeforeHover = await bulkArtwork.boundingBox();
         const railBeforeHover = await phaseRail.boundingBox();
+        const detailBeforeHover = await tradeDetail.boundingBox();
         await bulkArtwork.locator('[data-hero-phase-region="receive-and-approve"]').hover();
         await expect(executionMap).toHaveAttribute("data-active-phase", "receive-and-approve");
-        const outcomeOverlay = bulkArtwork.locator('[data-hero-phase-outcome="receive-and-approve"]');
-        await expect(outcomeOverlay).toBeVisible();
+        await expect(tradeDetail).toHaveAttribute("data-detail-kind", "phase");
+        await expect(tradeDetail).toContainText("Receive & Approve");
         const mapDuringHover = await executionMap.boundingBox();
         const artworkDuringHover = await bulkArtwork.boundingBox();
         const railDuringHover = await phaseRail.boundingBox();
-        const outcomeDuringHover = await outcomeOverlay.boundingBox();
+        const detailDuringHover = await tradeDetail.boundingBox();
         expect(mapDuringHover).toEqual(mapBeforeHover);
         expect(artworkDuringHover).toEqual(artworkBeforeHover);
         expect(railDuringHover).toEqual(railBeforeHover);
-        expect(outcomeDuringHover.y).toBeGreaterThanOrEqual(artworkDuringHover.y);
-        expect(outcomeDuringHover.y + outcomeDuringHover.height).toBeLessThanOrEqual(artworkDuringHover.y + artworkDuringHover.height);
+        expect(detailDuringHover).toEqual(detailBeforeHover);
+        expect(detailDuringHover.y).toBeGreaterThanOrEqual(railDuringHover.y + railDuringHover.height - 1);
         await page.mouse.move(0, 0);
         await expect(executionMap).toHaveAttribute("data-active-phase", "none");
         expect(await phaseRail.boundingBox()).toEqual(railBeforeHover);
+
+        const customsNode = phaseRail.locator('[data-execution-responsibility="cha-customs"]');
+        const customsBoxBefore = await customsNode.boundingBox();
+        await customsNode.click();
+        await expect(customsNode).toHaveAttribute("aria-pressed", "true");
+        await expect(executionMap).toHaveAttribute("data-active-phase", "move");
+        await expect(tradeDetail).toHaveAttribute("data-detail-kind", "responsibility");
+        await expect(tradeDetail).toContainText("CHA & Customs");
+        await expect(tradeDetail).toContainText("Licensed Customs House Agent or customs broker");
+        expect(await customsNode.boundingBox()).toEqual(customsBoxBefore);
+        expect(await bulkArtwork.boundingBox()).toEqual(artworkBeforeHover);
+        expect(await phaseRail.boundingBox()).toEqual(railBeforeHover);
+        expect(await tradeDetail.boundingBox()).toEqual(detailBeforeHover);
       }
       const hierarchyIsCorrect = await page.evaluate(() => {
         const workspace = document.querySelector("#capability-explorer");

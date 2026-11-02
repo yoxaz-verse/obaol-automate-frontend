@@ -184,6 +184,26 @@ test("Admin sidebar groups operational routes by workflow without duplicates", (
   assert.deepEqual(new Set(groupedLinks), new Set(expectedOperationalLinks));
 });
 
+test("Freight navigation is registered for the sidebar and accessible to operational roles", () => {
+  const options = readFileSync("src/utils/utils.tsx", "utf8");
+  const freightLinks = [
+    "/dashboard/freight-forwarding",
+    "/dashboard/freight-forwarding/my",
+    "/dashboard/freight-forwarding/shipments",
+    "/dashboard/freight-forwarding/customs",
+    "/dashboard/freight-forwarding/finance",
+  ];
+  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Freight")?.links, freightLinks);
+  for (const path of freightLinks) {
+    assert.match(options, new RegExp(`link: "${path.replaceAll("/", "\\/")}"`));
+    for (const role of ["Admin", "Associate", "Operator", "Team"]) {
+      assert.equal(canAccessDashboardRoute({ path, role }), true, `${role} should access ${path}`);
+    }
+    assert.equal(canAccessDashboardRoute({ path, role: "CustomerSupport" }), false);
+  }
+  assert.equal(isDashboardRouteActive("/dashboard/freight-forwarding/shipments/507f1f77bcf86cd799439011", "/dashboard/freight-forwarding/shipments"), true);
+});
+
 test("Admin sidebar places Organization below Operations/Admin", () => {
   const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
   const adminBranch = navigation.slice(navigation.indexOf('if (normalizedRole === "admin")'));

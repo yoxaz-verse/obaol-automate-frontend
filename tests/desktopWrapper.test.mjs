@@ -45,7 +45,9 @@ test("desktop cold launch uses a sandboxed cinematic splash", () => {
   assert.match(loading, /class="logo-stage"/);
   assert.doesNotMatch(loading, /statue/i);
   assert.match(loading, /prefers-reduced-motion:\s*reduce/);
-  assert.equal(manifest.version, "0.1.6");
+  assert.doesNotMatch(loading, /\.logo-stage\s*\{[^}]*\bbackground\s*:/s);
+  assert.doesNotMatch(loading, /\.logo-stage\s*\{[^}]*\bpadding\s*:/s);
+  assert.equal(manifest.version, "0.1.7");
   assert.ok(manifest.build.files.includes("build/splash-logo.webp"));
   assert.ok(manifest.build.files.includes("build/opening-chime.wav"));
   assert.ok(!manifest.build.files.some((file) => file.includes("statue")));
@@ -57,7 +59,7 @@ test("desktop updater is user-controlled and platform safe", () => {
   const banner = read("src/components/desktop/DesktopUpdateBanner.tsx");
   const workflow = read(".github/workflows/desktop-release.yml");
   const manifest = JSON.parse(read("desktop/package.json"));
-  assert.equal(manifest.version, "0.1.6");
+  assert.equal(manifest.version, "0.1.7");
   assert.equal(manifest.dependencies["electron-updater"], "^6.6.2");
   assert.match(main, /autoDownload\s*=\s*false/);
   assert.match(main, /autoInstallOnAppQuit\s*=\s*false/);

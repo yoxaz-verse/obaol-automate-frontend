@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const sharp = require("sharp");
 
 const root = path.resolve(__dirname, "..");
 const required = [
@@ -39,7 +40,7 @@ if (!mainSource.includes("SPLASH_MINIMUM_MS") || !mainSource.includes("createSpl
   process.exit(1);
 }
 
-if (manifest.version !== "0.1.6" || !manifest.dependencies?.["electron-updater"]) {
+if (manifest.version !== "0.1.7" || !manifest.dependencies?.["electron-updater"]) {
   console.error("Desktop updater package or version is incomplete.");
   process.exit(1);
 }
@@ -62,6 +63,11 @@ if (!loadingSource.includes('class="sunburst"') || !loadingSource.includes("cons
   process.exit(1);
 }
 
+if (/\.logo-stage\s*\{[^}]*\bbackground\s*:/s.test(loadingSource) || /\.logo-stage\s*\{[^}]*\bpadding\s*:/s.test(loadingSource)) {
+  console.error("The splash logo stage must not add a background panel or excess padding.");
+  process.exit(1);
+}
+
 if (/wave-shell|class="wave"|class="contours"|<ellipse\b/.test(loadingSource)) {
   console.error("The retired waveform or oval contours are still present.");
   process.exit(1);
@@ -72,4 +78,15 @@ if (loadingSource.includes("statue") || manifest.build.files.some((file) => file
   process.exit(1);
 }
 
-console.log(`Desktop package ${manifest.version} is structurally valid.`);
+sharp(path.join(root, "build/splash-logo.webp")).metadata()
+  .then((metadata) => {
+    if (!metadata.hasAlpha || metadata.channels !== 4) {
+      console.error("The packaged splash logo must contain a real alpha channel.");
+      process.exit(1);
+    }
+    console.log(`Desktop package ${manifest.version} is structurally valid.`);
+  })
+  .catch((error) => {
+    console.error(`Could not inspect the splash logo: ${error.message}`);
+    process.exit(1);
+  });

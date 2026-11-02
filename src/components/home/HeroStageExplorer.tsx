@@ -72,6 +72,12 @@ const executionRail: readonly HeroRailItem[] = [
   { kind: "phase", phase: phaseGroups[3] },
 ];
 
+const railPosition = (index: number) => {
+  if (index <= 4) return (index / 4) * (100 / 3);
+  if (index <= 8) return (100 / 3) + ((index - 4) / 4) * (100 / 3);
+  return (200 / 3) + ((index - 8) / 7) * (100 / 3);
+};
+
 const HERO_ARTWORK = "/images/hero-bulk-execution-v7.webp";
 
 export default function HeroStageExplorer() {
@@ -143,7 +149,7 @@ export default function HeroStageExplorer() {
 
       <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve" className="relative z-30 mt-2 overflow-x-auto pb-2 sm:mt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div data-execution-map="hierarchical" data-execution-layout="single-rail" className="min-w-[58rem] px-[7%] sm:px-[9%] xl:min-w-0">
-          <div className="relative grid h-[3.5rem] grid-cols-[repeat(16,minmax(2.5rem,1fr))] items-start">
+          <div className="relative h-[3.5rem]">
             <div className="absolute left-[7px] right-[7px] top-[7px] h-px bg-obaol-700/70 dark:bg-obaol-300/70" />
             {executionRail.map((item, index) => {
               if (item.kind === "phase") {
@@ -161,7 +167,8 @@ export default function HeroStageExplorer() {
                     onFocus={() => preview({ kind: "phase", id: phase.phase })}
                     onBlur={stopPreview}
                     onClick={() => select({ kind: "phase", id: phase.phase })}
-                    className={`group relative z-10 flex snap-center flex-col rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80 ${isFinal ? "items-end text-right" : "items-center text-center"}`}
+                    className={`group absolute top-0 z-10 flex snap-center flex-col rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80 ${index === 0 ? "items-start text-left" : isFinal ? "-translate-x-full items-end text-right" : "-translate-x-1/2 items-center text-center"}`}
+                    style={{ left: `${railPosition(index)}%` }}
                   >
                     <span data-node-size="milestone" className={`mb-2 block size-[15px] rounded-full border-[3px] border-background bg-obaol-500 shadow-[0_0_0_1px_rgba(180,119,18,0.75)] dark:shadow-[0_0_0_1px_rgba(228,199,153,0.72)] ${transitionClass} ${activePhase === phase.phase && !activeResponsibility ? "scale-125 bg-amber-300 shadow-[0_0_18px_rgba(207,152,60,0.9)]" : activePhase === phase.phase ? "bg-amber-300" : ""}`} />
                     <span className={`whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.14em] sm:text-[9px] sm:tracking-[0.17em] xl:text-[10px] ${transitionClass} ${activePhase === phase.phase ? "text-obaol-700 dark:text-obaol-200" : activePhase ? "text-foreground/40" : "text-foreground"}`}>{phase.name}</span>
@@ -186,7 +193,8 @@ export default function HeroStageExplorer() {
                   onFocus={() => preview({ kind: "responsibility", id: responsibility.id })}
                   onBlur={stopPreview}
                   onClick={() => select({ kind: "responsibility", id: responsibility.id })}
-                  className="group relative z-10 flex snap-center justify-center rounded-md pt-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80"
+                  className="group absolute top-0 z-10 flex w-8 -translate-x-1/2 snap-center justify-center rounded-md pt-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80"
+                  style={{ left: `${railPosition(index)}%` }}
                 >
                   <span data-node-size="responsibility" className={`block size-2.5 rounded-full border border-obaol-600 ${transitionClass} ${isActive ? "bg-amber-300 shadow-[0_0_0_4px_rgba(245,158,11,0.18)]" : "bg-background group-hover:bg-obaol-200 group-focus-visible:bg-obaol-200"}`} />
                 </button>

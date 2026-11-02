@@ -195,7 +195,8 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('data-node-size="milestone"'), true);
   assert.equal(explorer.includes('data-node-size="responsibility"'), true);
   assert.equal(explorer.includes('{responsibility.label}</span>'), false);
-  assert.equal(explorer.includes('grid-cols-[repeat(16,minmax(2.5rem,1fr))]'), true);
+  assert.equal(explorer.includes('const railPosition = (index: number)'), true);
+  assert.equal(explorer.includes('style={{ left: `${railPosition(index)}%` }}'), true);
   const responsibilityLabels = [...explorer.matchAll(/id: "[^"]+", label: "([^"]+)", phase:/g)].map((match) => match[1]);
   assert.deepEqual(responsibilityLabels, [
     "Buyer Requirement", "Supplier Sourcing", "Sampling",

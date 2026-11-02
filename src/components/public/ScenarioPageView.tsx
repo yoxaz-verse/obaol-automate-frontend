@@ -5,7 +5,7 @@ import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 import ScenarioBody from "@/components/public/ScenarioBody";
 import { getAssociateRoleBySlug, getAssociateRolePath } from "@/data/associateRoles";
 import type { RealLifeScenario } from "@/types/realLifeScenario";
-import { FiArrowLeft, FiArrowRight, FiInfo, FiUsers } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiUsers } from "react-icons/fi";
 
 export default function ScenarioPageView({ scenario, related = [], preview = false }: { scenario: RealLifeScenario; related?: RealLifeScenario[]; preview?: boolean }) {
   const role = getAssociateRoleBySlug(scenario.roleSlug);
@@ -27,7 +27,7 @@ export default function ScenarioPageView({ scenario, related = [], preview = fal
               </nav>
               <div className="mt-6 max-w-4xl">
                 <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full border border-orange-500/25 bg-orange-500/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-orange-500">Representative scenario</span>
+                  <span className="rounded-full border border-orange-500/25 bg-orange-500/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-orange-500">Industry scenario</span>
                   <span className="rounded-full border border-default-200 px-3 py-1 text-xs font-bold text-foreground/60">{role.displayName}</span>
                 </div>
                 <h1 className="public-hero-title mt-5">{scenario.h1}</h1>
@@ -39,10 +39,6 @@ export default function ScenarioPageView({ scenario, related = [], preview = fal
 
           <div className="container mx-auto grid max-w-5xl gap-10 px-4 py-14 public-layout-container lg:grid-cols-[minmax(0,1fr)_240px]">
             <div>
-              <aside className="mb-10 flex gap-3 rounded-3xl border border-sky-500/20 bg-sky-500/[0.06] p-5 text-sm leading-6 text-foreground/70">
-                <FiInfo className="mt-1 shrink-0 text-sky-500" />
-                <p>This is an illustrative scenario based on challenges commonly encountered by businesses in this role. It is not a customer testimonial, verified case study, or guarantee of results.</p>
-              </aside>
               {scenario.heroImageUrl && scenario.heroImageAlt && <>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={scenario.heroImageUrl} alt={scenario.heroImageAlt} className="mb-10 aspect-[16/9] w-full rounded-3xl border border-default-200 object-cover" /></>}
               <ScenarioBody blocks={scenario.blocks || []} />
 

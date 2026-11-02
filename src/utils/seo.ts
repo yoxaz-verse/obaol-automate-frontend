@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const BASE_URL = "https://obaol.com";
 export const SITE_NAME = "OBAOL Supreme";
-export const DEFAULT_OG_IMAGE = "/logo.png";
+export const DEFAULT_OG_IMAGE = "/social/obaol-share-v2.png";
 
 export const PRIMARY_MARKET = "India";
 

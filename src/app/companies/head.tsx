@@ -21,7 +21,7 @@ export default function CompaniesHead() {
         content="Starting in India, explore companies operating in the OBAOL commodity trade network as we expand globally."
       />
       <meta property="og:url" content={URL} />
-      <meta property="og:image" content="https://obaol.com/logo.png" />
+      <meta property="og:image" content="https://obaol.com/social/obaol-share-v2.png" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="Partner Companies | OBAOL Supreme" />
@@ -29,7 +29,7 @@ export default function CompaniesHead() {
         name="twitter:description"
         content="Starting in India, explore companies operating in the OBAOL commodity trade network as we expand globally."
       />
-      <meta name="twitter:image" content="https://obaol.com/logo.png" />
+      <meta name="twitter:image" content="https://obaol.com/social/obaol-share-v2.png" />
     </>
   );
 }

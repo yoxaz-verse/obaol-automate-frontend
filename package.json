@@ -10,6 +10,7 @@
     "metrics:static": "node scripts/code-health.mjs",
     "check:health": "node scripts/code-health.mjs src --check",
     "metrics:assets": "node scripts/audit-public-assets.mjs",
+    "assets:social-brand": "node scripts/generate-social-brand-assets.mjs",
     "start": "next start",
     "warmup": "node scripts/warm-dashboard.mjs",
     "lint": "next lint",

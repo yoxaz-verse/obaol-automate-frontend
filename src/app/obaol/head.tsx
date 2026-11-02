@@ -21,7 +21,7 @@ export default function ObaolHead() {
         content="Starting in India, public product display experience for OBAOL commodity modules as we expand globally."
       />
       <meta property="og:url" content={URL} />
-      <meta property="og:image" content="https://obaol.com/logo.png" />
+      <meta property="og:image" content="https://obaol.com/social/obaol-share-v2.png" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="OBAOL Live Product Display | OBAOL Supreme" />
@@ -29,7 +29,7 @@ export default function ObaolHead() {
         name="twitter:description"
         content="Starting in India, public product display experience for OBAOL commodity modules as we expand globally."
       />
-      <meta name="twitter:image" content="https://obaol.com/logo.png" />
+      <meta name="twitter:image" content="https://obaol.com/social/obaol-share-v2.png" />
     </>
   );
 }

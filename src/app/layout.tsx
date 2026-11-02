@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [
       {
-        url: "/logo.png",
+        url: "/social/obaol-share-v2.png",
         width: 1200,
         height: 630,
         alt: "OBAOL Commodity Trade Execution System",
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "B2B Bulk Trade Execution Platform | OBAOL Supreme",
     description: DEFAULT_DESCRIPTION,
-    images: ["/logo.png"],
+    images: ["/social/obaol-share-v2.png"],
   },
 
   category: "Business",
@@ -85,10 +85,13 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/logo.png", href: "/logo.png", type: "image/png" }
+      { url: "/favicon.ico", href: "/favicon.ico", type: "image/x-icon" },
+      { url: "/icons/obaol-icon-v2-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/obaol-icon-v2-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/obaol-icon-v2-48.png", sizes: "48x48", type: "image/png" }
     ],
     apple: [
-      { url: "/apple-touch-icon.png", href: "/apple-touch-icon.png", type: "image/png" }
+      { url: "/apple-touch-icon.png", href: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
     ]
   },
   other: {

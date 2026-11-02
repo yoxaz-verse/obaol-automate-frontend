@@ -48,7 +48,7 @@ export default function LiveNotificationSubscriber({ userId }: { userId?: string
           }
           const desktopNotification = new Notification(notification.title || "OBAOL Supreme", {
             body: notification.message || "You have a new workspace update.",
-            icon: "/pwa/icon-192.png",
+            icon: "/icons/obaol-icon-v2-192.png",
             tag: notification._id,
           });
           desktopNotification.onclick = () => {

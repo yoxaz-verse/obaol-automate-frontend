@@ -15,31 +15,31 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/dashboard",
     prefer_related_applications: false,
     shortcuts: [
-      { name: "Workspace", short_name: "Workspace", url: "/dashboard", icons: [{ src: "/pwa/icon-192.png", sizes: "192x192" }] },
-      { name: "Marketplace", short_name: "Market", url: "/dashboard/marketplace", icons: [{ src: "/pwa/icon-192.png", sizes: "192x192" }] },
-      { name: "Enquiries", short_name: "Enquiries", url: "/dashboard/enquiries", icons: [{ src: "/pwa/icon-192.png", sizes: "192x192" }] },
+      { name: "Workspace", short_name: "Workspace", url: "/dashboard", icons: [{ src: "/icons/obaol-icon-v2-192.png", sizes: "192x192" }] },
+      { name: "Marketplace", short_name: "Market", url: "/dashboard/marketplace", icons: [{ src: "/icons/obaol-icon-v2-192.png", sizes: "192x192" }] },
+      { name: "Enquiries", short_name: "Enquiries", url: "/dashboard/enquiries", icons: [{ src: "/icons/obaol-icon-v2-192.png", sizes: "192x192" }] },
     ],
     icons: [
       {
-        src: "/pwa/icon-192.png",
+        src: "/icons/obaol-icon-v2-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/pwa/icon-512.png",
+        src: "/icons/obaol-icon-v2-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/pwa/icon-maskable-192.png",
+        src: "/icons/obaol-icon-maskable-v2-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/pwa/icon-maskable-512.png",
+        src: "/icons/obaol-icon-maskable-v2-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

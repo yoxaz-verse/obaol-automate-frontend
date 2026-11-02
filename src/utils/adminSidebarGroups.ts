@@ -4,6 +4,7 @@ export type AdminWorkflowGroup =
   | "Trade"
   | "Labs"
   | "Packaging"
+  | "Freight"
   | "Warehouse";
 
 export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup; links: string[] }> = [
@@ -50,6 +51,16 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
       "/dashboard/packaging",
       "/dashboard/packaging/my",
       "/dashboard/packaging/execution",
+    ],
+  },
+  {
+    label: "Freight",
+    links: [
+      "/dashboard/freight-forwarding",
+      "/dashboard/freight-forwarding/my",
+      "/dashboard/freight-forwarding/shipments",
+      "/dashboard/freight-forwarding/customs",
+      "/dashboard/freight-forwarding/finance",
     ],
   },
   {

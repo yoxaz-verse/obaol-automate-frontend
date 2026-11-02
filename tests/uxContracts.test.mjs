@@ -188,6 +188,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('data-execution-route="phase-rail"'), true);
   assert.equal(explorer.includes('data-execution-map="hierarchical"'), true);
   assert.equal(explorer.includes('data-execution-layout="single-rail"'), true);
+  assert.equal(explorer.includes('className="min-w-[68rem] px-[7%] sm:px-[9%]"'), true);
   assert.equal(explorer.includes('data-execution-responsibility-grid="true"'), false);
   assert.equal(explorer.includes('aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve"'), true);
   assert.equal(explorer.includes("data-execution-phase={phase.slug}"), true);
@@ -199,6 +200,11 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('onClick={() => select({ kind: "responsibility", id: responsibility.id })}'), true);
   assert.equal(explorer.includes('data-node-size="milestone"'), true);
   assert.equal(explorer.includes('data-node-size="responsibility"'), true);
+  assert.equal(explorer.includes('data-node-hit-target="milestone"'), true);
+  assert.equal(explorer.includes('data-node-hit-target="responsibility"'), true);
+  assert.equal(explorer.includes('flex size-11 snap-center'), true);
+  assert.equal(explorer.includes('flex size-10 -translate-x-1/2'), true);
+  assert.equal(explorer.includes('pointer-events-none absolute top-6'), true);
   assert.equal(explorer.includes('{responsibility.label}</span>'), false);
   assert.equal(explorer.includes('const railPosition = (index: number)'), true);
   assert.equal(explorer.includes('style={{ left: `${railPosition(index)}%` }}'), true);

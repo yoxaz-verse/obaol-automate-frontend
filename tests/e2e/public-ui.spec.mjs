@@ -106,6 +106,28 @@ for (const theme of ["light", "dark"]) {
         const artworkBeforeHover = await bulkArtwork.boundingBox();
         const railBeforeHover = await phaseRail.boundingBox();
         const detailBeforeHover = await tradeDetail.boundingBox();
+        const hitTargets = phaseRail.locator('[data-node-hit-target]');
+        await expect(hitTargets).toHaveCount(16);
+        const targetBoxes = await hitTargets.evaluateAll((nodes) => nodes.map((node) => {
+          const rect = node.getBoundingClientRect();
+          const centerTarget = document.elementFromPoint(rect.left + rect.width / 2, rect.top + 7)?.closest("button");
+          return { width: rect.width, height: rect.height, ownsCenter: centerTarget === node };
+        }));
+        expect(targetBoxes.every(({ width: targetWidth, height: targetHeight, ownsCenter }) => targetWidth >= 40 && targetHeight >= 40 && ownsCenter)).toBe(true);
+
+        const finalMilestone = phaseRail.locator('[data-execution-phase="receive-and-approve"]');
+        const finalMilestoneBox = await finalMilestone.boundingBox();
+        for (const responsibilityId of ["cha-customs", "freight-forwarding", "buyer-receipt"]) {
+          const responsibilityNode = phaseRail.locator(`[data-execution-responsibility="${responsibilityId}"]`);
+          const responsibilityBox = await responsibilityNode.boundingBox();
+          expect(responsibilityBox.x + responsibilityBox.width <= finalMilestoneBox.x || finalMilestoneBox.x + finalMilestoneBox.width <= responsibilityBox.x).toBe(true);
+          await responsibilityNode.hover();
+          await expect(tradeDetail).toHaveAttribute("data-detail-kind", "responsibility");
+        }
+        await expect(tradeDetail).toContainText("Buyer Receipt & Acceptance");
+        await page.mouse.move(0, 0);
+        await expect(tradeDetail).toHaveCSS("opacity", "0");
+
         await bulkArtwork.locator('[data-hero-phase-region="receive-and-approve"]').hover();
         await expect(executionMap).toHaveAttribute("data-active-phase", "receive-and-approve");
         await expect(tradeDetail).toHaveAttribute("data-detail-visible", "true");

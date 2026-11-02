@@ -43,6 +43,8 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   const passwordId = useId();
   const otpId = useId();
   const emailRef = useRef<HTMLInputElement>(null);
+  const authStateRef = useRef({ email, mode, role, rememberMe });
+  authStateRef.current = { email, mode, role, rememberMe };
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
   const googleContainerId = "unified-google-auth";
   const isBusy = Boolean(busy);
@@ -89,12 +91,12 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
   const showError = (error: any) => setStatus(normalizeAuthError(error));
 
-  const redirectExistingAccountToSignIn = useCallback(() => {
+  const redirectExistingAccountToSignIn = useCallback((accountEmail = authStateRef.current.email) => {
     setMode("signin");
     setStage("email");
     setPassword("");
     setOtp("");
-    const params = new URLSearchParams({ mode: "signin", prefill: email.trim().toLowerCase(), reason: "account-exists" });
+    const params = new URLSearchParams({ mode: "signin", prefill: accountEmail.trim().toLowerCase(), reason: "account-exists" });
     if (intent) params.set("intent", intent);
     window.history.replaceState(window.history.state, "", `/auth?${params.toString()}`);
     setStatus({
@@ -102,7 +104,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       code: "ACCOUNT_EXISTS",
       message: "An account already exists for this email. Please sign in instead.",
     });
-  }, [email, intent]);
+  }, [intent]);
 
   const switchMode = (nextMode: AuthMode) => {
     if (nextMode === mode) return;
@@ -226,23 +228,24 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
   const handleGoogleCredential = useCallback(async (response: { credential?: string }) => {
     if (!response?.credential) return;
+    const current = authStateRef.current;
     setBusy("google");
     setStatus(null);
     try {
       const result = await postData("/auth/google", {
         idToken: response.credential,
-        intent: mode === "signup" ? "register" : "login",
-        ...(mode === "signup" ? { role } : {}),
-        rememberMe,
+        intent: current.mode === "signup" ? "register" : "login",
+        ...(current.mode === "signup" ? { role: current.role } : {}),
+        rememberMe: current.rememberMe,
       });
-      await finishAuthentication(result.data?.next || (mode === "signup" ? "/dashboard/onboarding?auth=google" : undefined));
+      await finishAuthentication(result.data?.next || (current.mode === "signup" ? "/dashboard/onboarding?auth=google" : undefined));
     } catch (error: any) {
-      if (mode === "signup" && error?.response?.data?.code === "ACCOUNT_EXISTS") redirectExistingAccountToSignIn();
+      if (current.mode === "signup" && error?.response?.data?.code === "ACCOUNT_EXISTS") redirectExistingAccountToSignIn(current.email);
       else showError(error);
     } finally {
       setBusy("");
     }
-  }, [finishAuthentication, mode, redirectExistingAccountToSignIn, rememberMe, role]);
+  }, [finishAuthentication, redirectExistingAccountToSignIn]);
 
   useEffect(() => {
     if (!googleClientId || stage !== "email") return;
@@ -280,7 +283,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
           ))}
         </div>
 
-        <div aria-live="polite" aria-atomic="true" role={status?.tone === "error" ? "alert" : "status"} className={status ? `relative min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : status.tone === "maintenance" ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}` : "min-h-0"}>
+        <div data-testid="auth-status-region" aria-live="polite" aria-atomic="true" role={status?.tone === "error" ? "alert" : "status"} className={status ? `relative min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : status.tone === "maintenance" ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}` : "min-h-12"}>
           {status?.tone === "maintenance" ? (
             <span className="flex items-start gap-2.5">
               <FiTool className="mt-0.5 shrink-0" aria-hidden />

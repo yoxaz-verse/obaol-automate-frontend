@@ -226,7 +226,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 type="button"
                 aria-label="Go to dashboard"
                 disabled={isOnboardingLocked}
-                className={`relative flex min-h-[88px] w-full items-center justify-center px-4 py-6 outline-none ring-0 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-obaol-500/50 group ${isOnboardingLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                className={`relative flex min-h-[72px] w-full items-center justify-center px-4 py-4 outline-none ring-0 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-obaol-500/50 group ${isOnboardingLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                 onClick={() => {
                     if (isOnboardingLocked) return;
                     navigate("/dashboard");
@@ -234,19 +234,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             >
                 <Image
                     src="/logo-dark.png"
-                    width={148}
-                    height={41}
+                    width={100}
+                    height={28}
                     alt="OBAOL"
                     priority
-                    className={`hidden dark:block h-auto object-contain transition-all duration-500 group-hover:scale-105 ${isCollapsed ? "w-[52px]" : "w-[148px]"}`}
+                    className={`hidden dark:block h-auto object-contain transition-all duration-300 group-hover:scale-105 ${isCollapsed ? "w-[38px]" : "w-[100px]"}`}
                 />
                 <Image
                     src="/logo-light.png"
-                    width={148}
-                    height={41}
+                    width={100}
+                    height={28}
                     alt="OBAOL"
                     priority
-                    className={`block dark:hidden h-auto object-contain transition-all duration-500 group-hover:scale-105 ${isCollapsed ? "w-[52px]" : "w-[148px]"}`}
+                    className={`block dark:hidden h-auto object-contain transition-all duration-300 group-hover:scale-105 ${isCollapsed ? "w-[38px]" : "w-[100px]"}`}
                 />
             </button>
 

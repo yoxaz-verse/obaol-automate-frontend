@@ -387,7 +387,7 @@ canvas {
   }
   [data-testid="auth-layout"] { overflow-y: auto !important; }
   [data-testid="auth-layout"] [data-testid="auth-card"] {
-    border-radius: 1.25rem !important;
+    border-radius: 0 !important;
     padding: 1rem !important;
     box-shadow: 0 14px 40px -24px rgba(15, 23, 42, .28);
   }
@@ -805,6 +805,36 @@ h6 {
 
 a {
   text-decoration: none !important;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+.auth-scroll-region {
+  scrollbar-gutter: stable;
+}
+
+/* Shared calm interaction policy: animate paint, never geometry. */
+.calm-interaction {
+  transition-property: color, background-color, border-color, opacity, box-shadow;
+  transition-duration: 180ms;
+  transition-timing-function: ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .scrollbar-gutter-stable {

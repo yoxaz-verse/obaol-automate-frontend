@@ -228,9 +228,9 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 mobileMenuReturnFocusRef.current = mobileMenuTriggerRef.current;
                 setIsMobileMenuOpen(true);
               }}
-              className={`group flex items-center justify-center w-10 h-10 rounded-xl bg-default-100/80 hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 transition-all active:scale-95 ${isOnboardingLocked ? "opacity-50 cursor-not-allowed hover:bg-default-100/80 hover:text-current" : ""}`}
+              className={`calm-interaction group flex items-center justify-center w-10 h-10 rounded-xl bg-default-100/80 hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 ${isOnboardingLocked ? "opacity-50 cursor-not-allowed hover:bg-default-100/80 hover:text-current" : ""}`}
             >
-              <CiMenuBurger size={20} className="group-hover:rotate-180 transition-transform duration-500" />
+              <CiMenuBurger size={20} />
             </button>
 
             {mounted && !isOnboardingLocked && createPortal(
@@ -407,13 +407,12 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                     unreadCount > 0 ? "bg-obaol-500/15 text-obaol-700 dark:text-obaol-300" : "text-default-500 hover:db-inset hover:text-foreground"
                   }`}
                 >
-                  <FiBell size={18} className={unreadCount > 0 ? "animate-bounce" : ""} />
+                  <FiBell size={18} />
                   {unreadCount > 0 && (
                     <>
                       <span className="absolute -top-1.5 -right-1.5 z-10 h-5 min-w-[20px] px-1.5 rounded-full bg-danger-500 text-white text-[10px] font-black leading-5 text-center border-2 border-[var(--db-panel)]">
                         {unreadBadge}
                       </span>
-                      <span className="absolute -top-1.5 -right-1.5 z-0 h-5 w-5 rounded-full bg-danger-500/40 animate-ping" />
                     </>
                   )}
                 </button>
@@ -434,7 +433,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
             >
               <DropdownTrigger>
                 <button className="group flex items-center gap-3 rounded-2xl border border-obaol-500/25 bg-gradient-to-br from-obaol-500/10 to-black/[0.02] p-1.5 pr-4 outline-none ring-0 transition-all hover:border-obaol-500/50 dark:to-white/5">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-obaol-400 to-obaol-600 flex items-center justify-center text-obaol-950 text-xs font-bold group-hover:scale-105 transition-transform">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-obaol-400 to-obaol-600 text-xs font-bold text-obaol-950">
                     {username?.slice(0, 1).toUpperCase()}
                   </div>
                   <div className="flex flex-col items-start sr-only sm:not-sr-only">

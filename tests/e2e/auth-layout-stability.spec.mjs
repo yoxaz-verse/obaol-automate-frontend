@@ -181,7 +181,8 @@ test("forgot-password sends the selected public role", async ({ page }) => {
   });
 
   await page.goto("/auth/forgot-password?prefill=operator%40example.com");
-  await page.getByRole("radio", { name: "Operator" }).check();
+  await page.getByText("Operator", { exact: true }).click();
+  await expect(page.getByRole("radio", { name: "Operator" })).toBeChecked();
   await page.getByRole("button", { name: "Send OTP" }).click();
   await expect(page.getByText("operator@example.com")).toBeVisible();
 });
@@ -323,5 +324,41 @@ test("switching authentication modes keeps the card anchored", async ({ page }) 
   const repeatedBox = await card.boundingBox();
   expect(repeatedBox).not.toBeNull();
   expect(Math.abs(repeatedBox.y - signInBox.y)).toBeLessThanOrEqual(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("typing and feedback updates do not move the auth controls", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.route(/\/auth\/onboarding\/start$/, (route) => route.fulfill({
+    status: 500,
+    contentType: "application/json",
+    body: JSON.stringify({ success: false, message: "Please try again." }),
+  }));
+  await page.goto("/auth?mode=signup", { waitUntil: "domcontentloaded" });
+
+  const card = page.getByTestId("auth-card");
+  const email = page.getByLabel("Email address");
+  const statusRegion = page.getByTestId("auth-status-region");
+  const initialCard = await card.boundingBox();
+  const initialEmail = await email.boundingBox();
+  const initialStatus = await statusRegion.boundingBox();
+
+  await email.fill("stable@example.com");
+  await expect(email).toBeFocused();
+  expect(await card.boundingBox()).toEqual(initialCard);
+  expect(await email.boundingBox()).toEqual(initialEmail);
+  expect(await statusRegion.boundingBox()).toEqual(initialStatus);
+
+  await page.getByRole("button", { name: "Verify email" }).click();
+  await expect(statusRegion).toContainText("Please try again.");
+  expect(await card.boundingBox()).toEqual(initialCard);
+  expect(await email.boundingBox()).toEqual(initialEmail);
+
+  await email.pressSequentially("x");
+  await expect(email).toBeFocused();
+  await expect(statusRegion).toBeEmpty();
+  expect(await card.boundingBox()).toEqual(initialCard);
+  expect(await email.boundingBox()).toEqual(initialEmail);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

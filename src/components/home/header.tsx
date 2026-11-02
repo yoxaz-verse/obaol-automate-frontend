@@ -105,9 +105,9 @@ export default function Header() {
       {open && !desktop && <div aria-hidden="true" onClick={() => closeMenu(true)} className="fixed inset-0 z-[99] bg-black/30 lg:hidden" />}
       <header ref={headerRef} onBlur={(event) => {
         if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false);
-      }} className={`fixed top-0 left-0 right-0 z-[100] safe-pt transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
+      }} className="fixed left-0 right-0 top-0 z-[100] safe-pt py-2.5">
         <PublicContainer className="relative">
-          <div className={`public-header-shell flex items-center justify-between gap-3 rounded-2xl px-4 md:px-6 border border-obaol-500/20 bg-background/85 shadow-[0_12px_40px_-20px_rgba(27,38,50,0.25)] backdrop-blur-xl transition-all duration-300 ${scrolled ? "h-14 border-obaol-500/40 shadow-[0_12px_30px_-15px_rgba(207,152,60,0.2)]" : "h-16"}`}>
+          <div className={`public-header-shell calm-interaction flex h-16 items-center justify-between gap-3 rounded-2xl border bg-background/85 px-4 shadow-[0_12px_40px_-20px_rgba(27,38,50,0.25)] backdrop-blur-xl md:px-6 ${scrolled ? "border-obaol-500/40 shadow-[0_12px_30px_-15px_rgba(207,152,60,0.2)]" : "border-obaol-500/20"}`}>
             <Link href="/" aria-label="OBAOL home" onClick={() => closeMenu()} className="relative flex-shrink-0 flex items-center">
               <Image
                 src="/logo-dark.png"
@@ -147,7 +147,7 @@ export default function Header() {
                   Sign In
                 </Link>
               )}
-              <Link href={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-obaol-500 to-amber-500 px-4 py-2.5 text-sm font-extrabold text-obaol-950 shadow-[0_4px_16px_rgba(207,152,60,0.35)] transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_6px_22px_rgba(207,152,60,0.5)] active:scale-[0.97]">
+              <Link href={signedIn ? "/dashboard" : "/auth"} className="calm-interaction inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-obaol-500 to-amber-500 px-4 py-2.5 text-sm font-extrabold text-obaol-950 shadow-[0_4px_16px_rgba(207,152,60,0.35)] hover:shadow-[0_6px_22px_rgba(207,152,60,0.5)]">
                 {signedIn ? "Open workspace" : "Join Platform"}
               </Link>
               <button ref={mobileTrigger} type="button" onClick={() => setOpen((value) => !value)}

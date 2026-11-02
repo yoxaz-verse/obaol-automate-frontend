@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Image from "next/image";
-import { motion, MotionConfig, useReducedMotion } from "framer-motion";
+import { MotionConfig } from "framer-motion";
 import Link from "next/link";
 import { FiArrowRight, FiCheckCircle, FiChevronDown } from "react-icons/fi";
 
@@ -39,91 +39,13 @@ interface AuthLayoutProps {
     stableContentTop?: boolean;
 }
 
-const FloatingPixel = ({ delay }: { delay: number }) => {
-    const reduceMotion = useReducedMotion();
-    const [mounted, setMounted] = useState(false);
-    const [config, setConfig] = useState({ x: "0vw", duration: 15 });
-
-    useEffect(() => {
-        setMounted(true);
-        setConfig({
-            x: Math.random() * 100 + "vw",
-            duration: 15 + Math.random() * 10,
-        });
-    }, []);
-
-    if (!mounted || reduceMotion) return null;
-
-    return (
-        <motion.div
-            className="absolute h-1 w-1 rounded-full bg-obaol-500/30"
-            initial={{ y: "110vh", x: config.x, opacity: 0 }}
-            animate={{
-                y: "-10vh",
-                opacity: [0, 1, 0],
-            }}
-            transition={{
-                duration: config.duration,
-                repeat: Infinity,
-                delay: delay,
-                ease: "linear",
-                repeatType: "loop",
-            }}
-        />
-    );
-};
-
 const TypewriterEffect = ({ words }: { words: string[] }) => {
-    const reduceMotion = useReducedMotion();
-    const [index, setIndex] = useState(0);
-    const [subIndex, setSubIndex] = useState(0);
-    const [reverse, setReverse] = useState(false);
-    const [blink, setBlink] = useState(true);
-
-    useEffect(() => {
-        if (reduceMotion) return;
-        const timeout2 = setTimeout(() => {
-            setBlink((prev) => !prev);
-        }, 500);
-        return () => clearTimeout(timeout2);
-    }, [blink, reduceMotion]);
-
-    useEffect(() => {
-        if (reduceMotion) return;
-        if (index === words.length) {
-            setIndex(0);
-            return;
-        }
-        if (subIndex === words[index].length + 1 && !reverse) {
-            setReverse(true);
-            return;
-        }
-        if (subIndex === 0 && reverse) {
-            setReverse(false);
-            setIndex((prev) => (prev + 1) % words.length);
-            return;
-        }
-        const timeout = setTimeout(() => {
-            setSubIndex((prev) => prev + (reverse ? -1 : 1));
-        }, Math.max(reverse ? 50 : subIndex === words[index].length ? 2000 : 100, Math.random() * 50));
-        return () => clearTimeout(timeout);
-    }, [subIndex, index, reverse, words, reduceMotion]);
-
-    return (
-        <span translate="no">
-            {reduceMotion ? words[0] : `${words[index].substring(0, subIndex)}`}
-            {!reduceMotion && (blink ? "|" : " ")}
-        </span>
-    );
+    return <span translate="no">{words[0]}</span>;
 };
 
 const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { leftPanel: LeftPanelContent; roleIdentity?: AuthLayoutProps["roleIdentity"]; compact?: boolean }) => (
     <div className={`${compact ? "space-y-4" : "space-y-7"} text-center lg:text-left`}>
-        <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.1 }}
-        >
+        <div>
             {roleIdentity && (
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1">
                     <span className="h-2 w-2 rounded-full bg-obaol-500" />
@@ -138,14 +60,9 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
                     {leftPanel.highlight || "TRADE WORKSPACE"}
                 </span>
             </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-            className="max-w-lg mx-auto lg:mx-0 space-y-5"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.45, delay: 0.2 }}
-        >
+        <div className="max-w-lg mx-auto lg:mx-0 space-y-5">
             {leftPanel.description && (
                 <p className="border-l-2 border-obaol-500/40 pl-4 text-sm font-medium leading-relaxed text-slate-600 dark:text-foreground/60 xl:text-base">
                     {leftPanel.description}
@@ -228,7 +145,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
                     </span>
                 )}
             </div>
-        </motion.div>
+        </div>
     </div>
 );
 
@@ -288,10 +205,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:50px_50px]" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:10px_10px]" />
                 
-                {[...Array(20)].map((_, i) => (
-                    <FloatingPixel key={i} delay={i * 0.5} />
-                ))}
-
                 {/* Ambient Glows */}
                 <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] rounded-full bg-obaol-500/10 opacity-30 blur-[150px]" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary-500/10 rounded-full blur-[150px] opacity-20" />
@@ -299,10 +212,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
             <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
                 {/* Left Side: Tactical Branding */}
-                <motion.div
+                <div
                 className="relative hidden w-5/12 flex-col items-center justify-center overflow-hidden border-r border-obaol-200/70 bg-white/70 p-8 backdrop-blur-2xl dark:border-obaol-500/10 dark:bg-white/[0.01] lg:flex xl:p-10"
-                    initial={false}
-                    animate={{ opacity: 1 }}
                 >
                     {/* Background Scanline */}
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(27,38,50,0)_50%,rgba(27,38,50,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
@@ -338,15 +249,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                     </div>
 
                     
-                </motion.div>
+                </div>
 
                 {/* Right side: account form */}
-                <div className="relative flex min-h-screen min-h-[100dvh] w-full flex-col overflow-y-auto bg-transparent custom-scrollbar lg:w-7/12">
+                <div className="auth-scroll-region relative flex min-h-screen min-h-[100dvh] w-full flex-col overflow-y-auto bg-transparent custom-scrollbar lg:w-7/12">
                     <div className={`relative z-10 flex flex-grow justify-center p-4 lg:px-8 lg:pb-8 xl:px-10 xl:pb-10 ${stableContentTop ? "items-start lg:pt-[clamp(4rem,14vh,10rem)]" : "items-center lg:pt-8 xl:pt-10"}`}>
-                        <motion.div
+                        <div
                             className={`w-full ${cardMaxWidthClass} relative`}
-                            initial={false}
-                            animate={{ opacity: 1 }}
                         >
                             {/* Card Decoration */}
                             <div className="absolute left-1/2 top-0 -z-10 hidden h-[120%] w-[120%] -translate-x-1/2 rounded-full bg-obaol-500/[0.04] blur-[120px] lg:block" />
@@ -355,10 +264,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             )}
 
                             <div className="relative group">
-                                <motion.div
+                                <div
                                     data-testid="auth-card"
                                     className={`relative overflow-hidden border-0 bg-transparent p-0 lg:border lg:bg-white/95 lg:p-7 lg:dark:bg-brand-blue/95 ${onboarding ? "rounded-none lg:rounded-2xl lg:border-slate-200 lg:dark:border-white/10" : "rounded-none lg:rounded-[2.5rem] lg:border-obaol-200/60 lg:dark:border-obaol-500/10"}`}
-                                    transition={{ duration: 0.45, ease: "easeOut" }}
                                 >
                                     {/* Glass Accents */}
                                     <div className="absolute inset-x-0 top-0 hidden h-px bg-gradient-to-r from-transparent via-white/10 to-transparent lg:block" />
@@ -377,7 +285,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     </div>
 
                                     {children}
-                                </motion.div>
+                                </div>
 
                                 {/* Account security note */}
                                 <div className="mt-4 hidden items-center justify-center gap-3 opacity-35 dark:opacity-20 lg:flex">
@@ -388,7 +296,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     <div className="h-px flex-grow bg-gradient-to-l from-transparent to-divider" />
                                 </div>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
             </div>

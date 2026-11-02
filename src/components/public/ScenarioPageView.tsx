@@ -59,7 +59,7 @@ export default function ScenarioPageView({ scenario, related = [], preview = fal
             </div>
             <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
               <div className="rounded-3xl border border-default-200 bg-content1/40 p-5"><p className="text-xs font-black uppercase tracking-wider text-orange-500">Primary topic</p><p className="mt-2 font-bold">{scenario.primaryKeyword}</p></div>
-              {related.length > 0 && <div><h2 className="text-lg font-black">More {role.displayName} scenarios</h2><div className="mt-3 space-y-3">{related.filter((item) => item._id !== scenario._id).slice(0, 3).map((item) => <Link key={item._id} href={`${rolePath}/real-life-scenarios/${item.slug}`} className="block rounded-2xl border border-default-200 p-4 text-sm font-bold hover:border-orange-500/40 hover:text-orange-500">{item.h1}</Link>)}</div></div>}
+              {related.length > 0 && <div><h2 className="text-lg font-black">More {role.displayName} scenarios</h2><div className="mt-3 space-y-3">{related.filter((item) => item._id !== scenario._id).map((item) => <Link key={item._id} href={`${rolePath}/real-life-scenarios/${item.slug}`} className="block rounded-2xl border border-default-200 p-4 text-sm font-bold hover:border-orange-500/40 hover:text-orange-500">{item.h1}</Link>)}</div></div>}
             </aside>
           </div>
         </article>

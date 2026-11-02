@@ -14,11 +14,13 @@ test("role pages load published scenario cards and keep them out of static role 
 
 test("story pages are server rendered with article, breadcrumb and FAQ schema", () => {
   const page = read("src/app/roles/associate/[roleSlug]/real-life-scenarios/[storySlug]/page.tsx");
+  const view = read("src/components/public/ScenarioPageView.tsx");
   assert.doesNotMatch(page, /"use client"/);
   assert.match(page, /"@type": "Article"/);
   assert.match(page, /"@type": "BreadcrumbList"/);
   assert.match(page, /"@type": "FAQPage"/);
   assert.match(page, /generateMetadata/);
+  assert.doesNotMatch(view, /related\.filter\([^;]+\.slice\(0,\s*3\)/);
 });
 
 test("preview is explicitly noindex and sitemap includes published scenario records", () => {
@@ -35,4 +37,11 @@ test("admin editor exposes structured blocks and controlled publication", () => 
   for (const expected of ["Structured story blocks", "Search preview", "Save draft", "Preview", "Publish", "Schedule", "Archive", "disclosureAccepted"]) assert.match(admin, new RegExp(expected));
   assert.match(admin, /\{count\?\.total \|\| 0\} created/);
   assert.doesNotMatch(admin, /\/3 created|three scenarios|required three/i);
+});
+
+test("public scenario fetches report backend failures instead of failing silently", () => {
+  const data = read("src/data/realLifeScenarios.ts");
+  assert.match(data, /console\.error\(`\[real-life-scenarios\]/);
+  assert.match(data, /failed with HTTP \$\{response\.status\}/);
+  assert.match(data, /reportFetchFailure/);
 });

@@ -75,11 +75,16 @@ for (const theme of ["light", "dark"]) {
       expect(await phaseRail.locator('[data-execution-phase]').allTextContents()).toEqual(["Plan", "Verify", "Move", "Receive & Approve"]);
       const responsibilityNodes = phaseRail.locator('[data-execution-responsibility]');
       await expect(responsibilityNodes).toHaveCount(12);
-      expect((await responsibilityNodes.allTextContents()).map((label) => label.trim())).toEqual([
-        "Buyer Requirement", "Supplier Sourcing", "Sampling",
-        "Documentation", "Warehouse Inspection", "Quality & COA",
-        "Payment Readiness", "Packaging & Fumigation", "Inland Transport",
-        "CHA & Customs", "Freight Forwarding", "Buyer Receipt & Acceptance",
+      expect((await responsibilityNodes.allTextContents()).every((label) => label.trim() === "")).toBe(true);
+      await expect(phaseRail.locator('[data-execution-layout="single-rail"]')).toHaveCount(1);
+      await expect(phaseRail.locator('[data-execution-responsibility-grid="true"]')).toHaveCount(0);
+      expect(await phaseRail.locator('[data-execution-layout="single-rail"] > div').evaluate((rail) => Array.from(rail.children)
+        .filter((node) => node instanceof HTMLButtonElement)
+        .map((node) => node.dataset.executionPhase ? `phase:${node.dataset.executionPhase}` : `responsibility:${node.dataset.executionResponsibility}`))).toEqual([
+        "phase:plan", "responsibility:buyer-requirement", "responsibility:supplier-sourcing", "responsibility:sampling",
+        "phase:verify", "responsibility:documentation", "responsibility:warehouse-inspection", "responsibility:quality-coa",
+        "phase:move", "responsibility:payment-readiness", "responsibility:packaging-fumigation", "responsibility:inland-transport",
+        "responsibility:cha-customs", "responsibility:freight-forwarding", "responsibility:buyer-receipt", "phase:receive-and-approve",
       ]);
       const tradeDetail = executionMap.locator('[data-hero-trade-detail="true"]');
       await expect(tradeDetail).toBeVisible();

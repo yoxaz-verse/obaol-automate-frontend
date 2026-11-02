@@ -31,6 +31,10 @@ type HeroSelection =
   | { kind: "phase"; id: HeroStage["phase"] }
   | { kind: "responsibility"; id: string };
 
+type HeroRailItem =
+  | { kind: "phase"; phase: (typeof phaseGroups)[number] }
+  | { kind: "responsibility"; responsibility: HeroResponsibility };
+
 const phaseGroups: Array<{ name: string; slug: string; range: string; phase: HeroStage["phase"]; summary: string; left: number; width: number; status: string; provider: string; evidence: string }> = [
   { name: "Plan", slug: "plan", range: "01—03", phase: "Plan", summary: "Coordinate the buyer requirement, qualified origins, suppliers, and representative samples.", left: 0, width: 25, status: "Requirement and supply plan coordinated", provider: "Buyer, sourcing partners, and suppliers", evidence: "Requirement, origin shortlist, and sample record" },
   { name: "Verify", slug: "verify", range: "04—06", phase: "Verify", summary: "Coordinate documentation, warehouse inspection, quality testing, and specification confirmation.", left: 25, width: 25, status: "Specification and trade file verified", provider: "Documentation specialists, inspectors, and laboratories", evidence: "Trade file, stock audit, and COA" },
@@ -51,6 +55,21 @@ const responsibilities: readonly HeroResponsibility[] = [
   { id: "cha-customs", label: "CHA & Customs", phase: "Move", coordinator: "OBAOL coordinates clearance milestones with the appointed Customs House Agent.", provider: "Licensed Customs House Agent or customs broker", evidence: "Customs filing and clearance evidence", railOrder: 10 },
   { id: "freight-forwarding", label: "Freight Forwarding", phase: "Move", coordinator: "OBAOL coordinates the international booking, carrier handoff, and shipment milestones.", provider: "Freight forwarder and international carrier", evidence: "Booking, tracking, and bill of lading", railOrder: 11 },
   { id: "buyer-receipt", label: "Buyer Receipt & Acceptance", phase: "Receive & Approve", coordinator: "OBAOL records destination receipt, specification confirmation, and buyer acceptance.", provider: "Buyer and destination receiving partner", evidence: "Acceptance and delivery record", railOrder: 12 },
+];
+
+const responsibilityItems = (phase: HeroStage["phase"]): HeroRailItem[] => responsibilities
+  .filter((item) => item.phase === phase)
+  .map((responsibility) => ({ kind: "responsibility", responsibility }));
+
+const executionRail: readonly HeroRailItem[] = [
+  { kind: "phase", phase: phaseGroups[0] },
+  ...responsibilityItems("Plan"),
+  { kind: "phase", phase: phaseGroups[1] },
+  ...responsibilityItems("Verify"),
+  { kind: "phase", phase: phaseGroups[2] },
+  ...responsibilityItems("Move"),
+  ...responsibilityItems("Receive & Approve"),
+  { kind: "phase", phase: phaseGroups[3] },
 ];
 
 const HERO_ARTWORK = "/images/hero-bulk-execution-v7.webp";
@@ -123,61 +142,61 @@ export default function HeroStageExplorer() {
       </div>
 
       <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve" className="relative z-30 mt-2 overflow-x-auto pb-2 sm:mt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div data-execution-map="hierarchical" className="min-w-[64rem] px-[7%] sm:px-[9%] xl:min-w-0">
-          <div className="relative grid grid-cols-4">
+        <div data-execution-map="hierarchical" data-execution-layout="single-rail" className="min-w-[58rem] px-[7%] sm:px-[9%] xl:min-w-0">
+          <div className="relative grid h-[3.5rem] grid-cols-[repeat(16,minmax(2.5rem,1fr))] items-start">
             <div className="absolute left-[7px] right-[7px] top-[7px] h-px bg-obaol-700/70 dark:bg-obaol-300/70" />
-            {phaseGroups.map((phase, index) => (
-              <button
-                key={phase.phase}
-                type="button"
-                data-execution-phase={phase.slug}
-                aria-label={`${phase.name}: ${phase.summary}`}
-                aria-pressed={selectedItem?.kind === "phase" && selectedItem.id === phase.phase}
-                onMouseEnter={() => preview({ kind: "phase", id: phase.phase })}
-                onMouseLeave={stopPreview}
-                onFocus={() => preview({ kind: "phase", id: phase.phase })}
-                onBlur={stopPreview}
-                onClick={() => select({ kind: "phase", id: phase.phase })}
-                className={`group snap-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80 ${index === phaseGroups.length - 1 ? "text-right" : index > 0 ? "text-center" : ""}`}
-              >
-                <span className={`mb-2 block size-[15px] rounded-full border-[3px] border-background shadow-[0_0_0_1px_rgba(180,119,18,0.75)] dark:shadow-[0_0_0_1px_rgba(228,199,153,0.72)] sm:mb-3 ${transitionClass} ${activePhase === phase.phase && !activeResponsibility ? "scale-125 bg-amber-300 shadow-[0_0_18px_rgba(207,152,60,0.9)]" : activePhase === phase.phase ? "bg-amber-300" : "bg-obaol-500"} ${index === phaseGroups.length - 1 ? "ml-auto" : index > 0 ? "mx-auto" : ""}`} />
-                <span className={`block text-[8px] font-bold uppercase tracking-[0.14em] sm:text-[10px] sm:tracking-[0.2em] xl:text-[11px] ${transitionClass} ${activePhase === phase.phase ? "text-obaol-700 dark:text-obaol-200" : activePhase ? "text-foreground/40" : "text-foreground"}`}>{phase.name}</span>
-              </button>
-            ))}
-          </div>
+            {executionRail.map((item, index) => {
+              if (item.kind === "phase") {
+                const phase = item.phase;
+                const isFinal = phase.phase === "Receive & Approve";
+                return (
+                  <button
+                    key={`phase-${phase.slug}`}
+                    type="button"
+                    data-execution-phase={phase.slug}
+                    aria-label={`${phase.name}: ${phase.summary}`}
+                    aria-pressed={selectedItem?.kind === "phase" && selectedItem.id === phase.phase}
+                    onMouseEnter={() => preview({ kind: "phase", id: phase.phase })}
+                    onMouseLeave={stopPreview}
+                    onFocus={() => preview({ kind: "phase", id: phase.phase })}
+                    onBlur={stopPreview}
+                    onClick={() => select({ kind: "phase", id: phase.phase })}
+                    className={`group relative z-10 flex snap-center flex-col rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80 ${isFinal ? "items-end text-right" : "items-center text-center"}`}
+                  >
+                    <span data-node-size="milestone" className={`mb-2 block size-[15px] rounded-full border-[3px] border-background bg-obaol-500 shadow-[0_0_0_1px_rgba(180,119,18,0.75)] dark:shadow-[0_0_0_1px_rgba(228,199,153,0.72)] ${transitionClass} ${activePhase === phase.phase && !activeResponsibility ? "scale-125 bg-amber-300 shadow-[0_0_18px_rgba(207,152,60,0.9)]" : activePhase === phase.phase ? "bg-amber-300" : ""}`} />
+                    <span className={`whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.14em] sm:text-[9px] sm:tracking-[0.17em] xl:text-[10px] ${transitionClass} ${activePhase === phase.phase ? "text-obaol-700 dark:text-obaol-200" : activePhase ? "text-foreground/40" : "text-foreground"}`}>{phase.name}</span>
+                  </button>
+                );
+              }
 
-          <div data-execution-responsibility-grid="true" className="mt-4 grid grid-cols-4 gap-5">
-            {phaseGroups.map((phase) => (
-              <div key={phase.phase} data-responsibility-group={phase.slug} className="grid auto-cols-fr grid-flow-col gap-1 border-t border-obaol-500/25 pt-2">
-                {responsibilities.filter((item) => item.phase === phase.phase).map((item) => {
-                  const isActive = activeResponsibility?.id === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      data-execution-responsibility={item.id}
-                      data-parent-phase={phase.slug}
-                      aria-label={`${item.label}. ${item.coordinator} Provider: ${item.provider}. Evidence: ${item.evidence}.`}
-                      aria-pressed={selectedItem?.kind === "responsibility" && selectedItem.id === item.id}
-                      onMouseEnter={() => preview({ kind: "responsibility", id: item.id })}
-                      onMouseLeave={stopPreview}
-                      onFocus={() => preview({ kind: "responsibility", id: item.id })}
-                      onBlur={stopPreview}
-                      onClick={() => select({ kind: "responsibility", id: item.id })}
-                      className="group flex h-[4.5rem] min-w-0 flex-col items-center rounded-md px-0.5 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80"
-                    >
-                      <span className={`mt-0.5 block size-2.5 rounded-full border border-obaol-600 ${transitionClass} ${isActive ? "bg-amber-300 shadow-[0_0_0_4px_rgba(245,158,11,0.18)]" : "bg-background group-hover:bg-obaol-200 group-focus-visible:bg-obaol-200"}`} />
-                      <span className={`mt-2 line-clamp-2 text-[8px] font-semibold leading-3 ${transitionClass} ${isActive ? "text-obaol-700 dark:text-obaol-200" : activeItem ? "text-foreground/45" : "text-foreground/75"}`}>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+              const responsibility = item.responsibility;
+              const parentPhase = phaseGroups.find((phase) => phase.phase === responsibility.phase)!;
+              const isActive = activeResponsibility?.id === responsibility.id;
+              return (
+                <button
+                  key={`responsibility-${responsibility.id}`}
+                  type="button"
+                  data-execution-responsibility={responsibility.id}
+                  data-parent-phase={parentPhase.slug}
+                  data-rail-order={responsibility.railOrder}
+                  aria-label={`${responsibility.label}. ${responsibility.coordinator} Provider: ${responsibility.provider}. Evidence: ${responsibility.evidence}.`}
+                  aria-pressed={selectedItem?.kind === "responsibility" && selectedItem.id === responsibility.id}
+                  onMouseEnter={() => preview({ kind: "responsibility", id: responsibility.id })}
+                  onMouseLeave={stopPreview}
+                  onFocus={() => preview({ kind: "responsibility", id: responsibility.id })}
+                  onBlur={stopPreview}
+                  onClick={() => select({ kind: "responsibility", id: responsibility.id })}
+                  className="group relative z-10 flex snap-center justify-center rounded-md pt-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/80"
+                >
+                  <span data-node-size="responsibility" className={`block size-2.5 rounded-full border border-obaol-600 ${transitionClass} ${isActive ? "bg-amber-300 shadow-[0_0_0_4px_rgba(245,158,11,0.18)]" : "bg-background group-hover:bg-obaol-200 group-focus-visible:bg-obaol-200"}`} />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      <div data-hero-trade-detail="true" data-detail-kind={displayedResponsibility ? "responsibility" : "phase"} aria-live="polite" className="mt-2 h-[9.5rem] overflow-hidden rounded-2xl border border-obaol-500/30 bg-content1/95 p-3.5 shadow-sm backdrop-blur-sm sm:h-[7.5rem] sm:px-4">
+      <div data-hero-trade-detail="true" data-detail-kind={displayedResponsibility ? "responsibility" : "phase"} aria-live="polite" className="mt-1 h-[8.5rem] overflow-hidden rounded-2xl border border-obaol-500/30 bg-content1/95 p-3.5 shadow-sm backdrop-blur-sm sm:h-[6.75rem] sm:px-4">
         <div className="flex h-full flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
           <div className="min-w-0 sm:max-w-[42%]">
             <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">Illustrative trade · {displayedPhaseGroup.name}</p>

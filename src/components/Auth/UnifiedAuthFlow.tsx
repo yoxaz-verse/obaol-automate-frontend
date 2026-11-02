@@ -15,7 +15,7 @@ import { isObaolMobileShell } from "@/utils/mobileAuthBridge";
 type Stage = "email" | "methods" | "otp";
 type Props = { initialMode?: AuthMode; initialRole?: PublicAuthRole; prefill?: string; intent?: string };
 
-const fieldClass = "h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-obaol-500 focus:ring-2 focus:ring-obaol-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/15 dark:bg-white/[0.04] dark:text-white";
+const fieldClass = "h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-brand-abyssal outline-none transition focus:border-obaol-500 focus:ring-2 focus:ring-obaol-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/15 dark:bg-white/[0.04] dark:text-brand-palladian";
 const primaryClass = "inline-flex h-12 w-full items-center justify-center rounded-xl bg-gradient-to-r from-obaol-400 to-obaol-600 px-5 text-sm font-black text-obaol-950 shadow-lg shadow-obaol-500/15 transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 disabled:cursor-not-allowed disabled:opacity-55";
 const secondaryClass = "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-800 transition hover:border-obaol-500/60 hover:bg-obaol-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 disabled:opacity-55 dark:border-white/15 dark:bg-white/[0.03] dark:text-white dark:hover:bg-white/[0.07]";
 
@@ -274,7 +274,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       <div data-testid="unified-auth" className="space-y-4 lg:space-y-5">
         <div className="grid grid-cols-2 border-b border-slate-200 dark:border-white/10 lg:rounded-xl lg:border-0 lg:bg-slate-100 lg:p-1 lg:dark:bg-white/[0.05]" aria-label="Authentication mode">
           {(["signin", "signup"] as AuthMode[]).map((item) => (
-            <button key={item} type="button" onClick={() => switchMode(item)} aria-pressed={mode === item} className={`h-11 border-b-2 text-xs font-black transition lg:h-10 lg:rounded-lg lg:border-b-0 ${mode === item ? "border-obaol-500 text-slate-950 dark:text-white lg:bg-white lg:shadow-sm lg:dark:bg-obaol-500 lg:dark:text-obaol-950" : "border-transparent text-slate-500 dark:text-white/55"}`}>
+            <button key={item} type="button" onClick={() => switchMode(item)} aria-pressed={mode === item} className={`h-11 border-b-2 text-xs font-black transition lg:h-10 lg:rounded-lg lg:border-b-0 ${mode === item ? "border-obaol-500 text-brand-abyssal dark:text-brand-palladian lg:bg-white lg:shadow-sm lg:dark:bg-obaol-500 lg:dark:text-obaol-950" : "border-transparent text-slate-500 dark:text-white/55"}`}>
               {item === "signin" ? "Sign in" : "Create account"}
             </button>
           ))}

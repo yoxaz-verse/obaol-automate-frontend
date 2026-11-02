@@ -96,8 +96,8 @@
   --db-hover: rgba(238, 233, 223, 0.07);
   --db-selected: rgba(255, 177, 98, 0.18);
   --db-disabled: rgba(201, 193, 177, 0.4);
-  --db-shadow: 0 2px 8px -3px rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
-  --db-shadow-card: 0 2px 8px -3px rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --db-shadow: 0 2px 8px -3px rgba(27, 38, 50, 0.5), 0 1px 2px -1px rgba(27, 38, 50, 0.3);
+  --db-shadow-card: 0 2px 8px -3px rgba(27, 38, 50, 0.5), 0 1px 2px -1px rgba(27, 38, 50, 0.3);
 }
 
 body {
@@ -961,7 +961,7 @@ a {
   --onboarding-focus: #006fee;
   --onboarding-focus-ring: rgba(0, 111, 238, 0.18);
   --onboarding-control-height: 2.75rem;
-  color: #0f172a;
+  color: var(--brand-abyssal);
 }
 
 .dark .onboarding-form { color: hsl(var(--nextui-foreground)); }
@@ -1161,7 +1161,7 @@ a {
 }
 
 .onboarding-progress__steps .is-active .onboarding-progress__label { color: var(--brand-truffle); font-weight: 700; }
-.onboarding-progress__steps .is-complete .onboarding-progress__label { color: #0f172a; font-weight: 600; }
+.onboarding-progress__steps .is-complete .onboarding-progress__label { color: var(--brand-abyssal); font-weight: 600; }
 .dark .onboarding-progress__number { background: hsl(var(--nextui-content1)); }
 .dark .onboarding-progress__steps::before { background: #334155; }
 .dark .onboarding-progress__steps .is-active .onboarding-progress__label { color: #e4c799; font-weight: 700; }
@@ -1270,7 +1270,7 @@ a {
 }
 
 .onboarding-capability-note a { color: #006fee; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
-.dark .onboarding-capability-note, .dark .onboarding-review-notice { border-color: #334155; background: #0f172a; color: #cbd5e1; }
+.dark .onboarding-capability-note, .dark .onboarding-review-notice { border-color: #405166; background: var(--brand-abyssal); color: var(--brand-palladian); }
 
 [data-auth-embedded] [data-auth-form-card] { max-width: 54rem; width: 100%; }
 
@@ -1279,7 +1279,7 @@ a {
   .onboarding-form :is(input, textarea) { font-size: 1rem !important; line-height: 1.5rem !important; }
   .onboarding-progress { margin-bottom: 1.25rem; }
   .onboarding-progress__summary { display: flex; align-items: center; justify-content: space-between; margin-bottom: .65rem; font-size: .8125rem; }
-  .onboarding-progress__summary strong { color: #0f172a; font-size: .875rem; }
+  .onboarding-progress__summary strong { color: var(--brand-abyssal); font-size: .875rem; }
   .dark .onboarding-progress__summary strong { color: #f8fafc; }
   .onboarding-progress__track { display: block; }
   .onboarding-progress__steps { display: none; }

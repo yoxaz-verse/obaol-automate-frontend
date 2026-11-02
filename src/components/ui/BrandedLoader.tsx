@@ -121,11 +121,20 @@ export default function BrandedLoader({
             className="relative z-10 rounded-3xl border border-default-200 bg-background p-6 shadow-[0_0_40px_rgba(207,152,60,0.12)]"
           >
             <Image
-              src="/logo.png"
+              src="/logo-dark.png"
               alt="OBAOL"
               width={currentSize.logo}
               height={currentSize.logo}
-              className="rounded-lg object-contain opacity-90"
+              priority
+              className="hidden dark:block rounded-lg object-contain"
+            />
+            <Image
+              src="/logo-light.png"
+              alt="OBAOL"
+              width={currentSize.logo}
+              height={currentSize.logo}
+              priority
+              className="block dark:hidden rounded-lg object-contain"
             />
 
             {/* Stage badge — always rendered, icon swaps with CSS transition */}

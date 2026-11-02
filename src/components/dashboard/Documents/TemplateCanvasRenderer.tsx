@@ -75,7 +75,7 @@ const fmt = (n: any, currency = "INR") => {
 const isValidHexColor = (value: string) => /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(String(value || "").trim());
 const resolveTextColor = (value?: string) => {
   const color = String(value || "").trim();
-  return isValidHexColor(color) ? color : "#111827";
+  return isValidHexColor(color) ? color : "#000000";
 };
 
 const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {

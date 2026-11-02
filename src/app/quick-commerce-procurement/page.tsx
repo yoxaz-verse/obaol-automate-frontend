@@ -215,7 +215,7 @@ export default function QuickCommerceProcurementPage() {
 
             <div className="relative">
               <div className="absolute -inset-4 rounded-[2rem] bg-obaol-500/10 blur-2xl public-decoration" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-foreground/10 bg-content1 shadow-[0_28px_80px_-45px_rgba(0,0,0,0.7)] public-surface-card">
+              <div className="relative overflow-hidden rounded-[2rem] border border-foreground/10 bg-content1 shadow-[0_28px_80px_-45px_rgba(27,38,50,0.7)] public-surface-card">
                 <RevealImage
                   src="/images/order-execution-laptop.webp"
                   alt="OBAOL procurement execution workspace"
@@ -282,7 +282,7 @@ export default function QuickCommerceProcurementPage() {
                 {supportPillars.map((pillar) => {
                   const Icon = pillar.icon;
                   return (
-                    <article key={pillar.title} className="rounded-2xl border border-foreground/10 bg-background p-6 shadow-[0_18px_45px_-34px_rgba(0,0,0,0.6)]">
+                    <article key={pillar.title} className="rounded-2xl border border-foreground/10 bg-background p-6 shadow-[0_18px_45px_-34px_rgba(27,38,50,0.6)]">
                       <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-obaol-500/12 text-obaol-700 dark:text-obaol-300">
                         <Icon className="h-5 w-5" />
                       </div>

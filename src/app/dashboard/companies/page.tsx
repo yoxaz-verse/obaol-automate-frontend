@@ -745,7 +745,7 @@ export default function CompanyProductPage() {
                 popoverProps={{
                   classNames: {
                     base: "before:bg-divider",
-                    content: "bg-content1/90 dark:bg-content1/90 backdrop-blur-2xl border border-divider shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] p-2",
+                    content: "bg-content1/90 dark:bg-content1/90 backdrop-blur-2xl border border-divider shadow-[0_20px_50px_rgba(27,38,50,0.5)] rounded-[2rem] p-2",
                   },
                   offset: 12
                 }}

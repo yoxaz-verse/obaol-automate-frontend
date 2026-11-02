@@ -53,7 +53,7 @@ function ComingSoonState({ feature }: { feature: ComingSoonFeature }) {
 
   return (
     <section className="flex min-h-[calc(100dvh-13rem)] items-center justify-center px-2 py-8 sm:px-6">
-      <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-primary/20 bg-content1/80 px-6 py-14 text-center shadow-[0_24px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-20">
+      <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-primary/20 bg-content1/80 px-6 py-14 text-center shadow-[0_24px_80px_rgba(27,38,50,0.18)] backdrop-blur-2xl sm:px-12 sm:py-20">
         <div
           aria-hidden="true"
           className="absolute inset-x-16 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent"

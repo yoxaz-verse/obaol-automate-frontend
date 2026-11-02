@@ -357,7 +357,7 @@ export default function OperatorRolePage() {
                       ))}
                     </div>
                   </div>
-                  <div className="mt-8 p-5 rounded-2xl bg-slate-900 text-amber-300 dark:bg-amber-500/10 dark:text-amber-300 border border-slate-800 dark:border-amber-500/20 font-semibold text-xs italic leading-relaxed shadow-sm">
+                  <div className="mt-8 p-5 rounded-2xl bg-brand-abyssal text-amber-300 dark:bg-brand-blue dark:text-amber-300 border border-brand-blue dark:border-amber-500/20 font-semibold text-xs italic leading-relaxed shadow-sm">
                     &quot;Efficiency is rewarded. Effort is expected. Completion is what creates value.&quot;
                   </div>
                 </div>

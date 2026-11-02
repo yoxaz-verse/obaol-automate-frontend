@@ -28,7 +28,7 @@ const makeElement = (type: string) => ({
   locked: false,
   content: type === "TEXT" ? "Sample text" : "",
   style: {},
-  typography: { fontSize: 12, fontWeight: 500, color: "#111827", textAlign: "left" },
+  typography: { fontSize: 12, fontWeight: 500, color: "#000000", textAlign: "left" },
   binding: { bindingType: "SYSTEM_TOKEN", token: "", fieldKey: "", required: false, defaultValue: "" },
 });
 
@@ -413,7 +413,7 @@ export default function DocumentationTemplatesPage() {
                     <Input size="sm" type="number" label="Z Index" value={String(selectedAny.zIndex || 1)} onChange={(e) => updateSelected({ zIndex: Number(e.target.value || 1) })} />
                   </div>
                   <Switch isSelected={selectedAny.visible !== false} onValueChange={(checked) => updateSelected({ visible: checked })}>Visible</Switch>
-                  <Input size="sm" label="Text Color (Hex)" value={String(selectedAny?.typography?.color || "#111827")} onChange={(e) => updateSelectedTypography({ color: e.target.value })} placeholder="#111827" />
+                  <Input size="sm" label="Text Color (Hex)" value={String(selectedAny?.typography?.color || "#000000")} onChange={(e) => updateSelectedTypography({ color: e.target.value })} placeholder="#000000" />
                   <Input size="sm" type="number" label="Font Size" value={String(selectedAny?.typography?.fontSize || 12)} onChange={(e) => updateSelectedTypography({ fontSize: Number(e.target.value || 12) })} />
 
                   {selectedElement ? (

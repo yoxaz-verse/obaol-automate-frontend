@@ -2194,7 +2194,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               {/* Product Details */}
                               <div className="flex flex-col gap-1 mt-1">
                                 <h4
-                                  className="text-sm sm:text-lg font-black text-slate-900 dark:text-white leading-tight line-clamp-2"
+                                  className="text-sm sm:text-lg font-black text-brand-abyssal dark:text-brand-palladian leading-tight line-clamp-2"
                                   title={toDisplayText(item.product, "Product")}
                                 >
                                   {toDisplayText(item.product, "Product")}

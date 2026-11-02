@@ -835,7 +835,7 @@ export default function EditModal({
               accept={f.accept || "image/*,application/pdf"}
               disabled={disabled}
               onChange={(event) => setSelectedUploadFile(event.target.files?.[0] || null)}
-              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-obaol-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
+              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-obaol-500 file:px-3 file:py-2 file:font-semibold file:text-brand-abyssal"
             />
             <p className="mt-2 text-xs text-default-500" aria-live="polite">{selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : "Choose a new file only if you want to replace the existing one."}</p>
             {formData[f.key] && (

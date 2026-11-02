@@ -885,7 +885,7 @@ export default function OperatorHierarchyPage() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 180 }}
-              className="absolute inset-y-0 right-0 w-full sm:w-[420px] bg-content1 border-l border-divider p-8 shadow-[-20px_0_50px_rgba(0,0,0,0.2)] flex flex-col"
+              className="absolute inset-y-0 right-0 w-full sm:w-[420px] bg-content1 border-l border-divider p-8 shadow-[-20px_0_50px_rgba(27,38,50,0.2)] flex flex-col"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-8">

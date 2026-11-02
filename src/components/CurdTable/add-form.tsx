@@ -1003,7 +1003,7 @@ const AddForm: React.FC<AddFormProps> = ({
               type="file"
               accept={field.accept || "image/*,application/pdf"}
               onChange={(event) => setSelectedUploadFile(event.target.files?.[0] || null)}
-              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-obaol-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
+              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-obaol-500 file:px-3 file:py-2 file:font-semibold file:text-brand-abyssal"
             />
             <p className="mt-2 text-xs text-default-500" aria-live="polite">{selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : "Choose one image or PDF."}</p>
           </div>
@@ -1032,7 +1032,7 @@ const AddForm: React.FC<AddFormProps> = ({
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-16 px-8 text-center relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
+            className="flex flex-col items-center justify-center py-16 px-8 text-center relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(27,38,50,0.05)]"
           >
             {/* Celebratory Particles */}
             {[...Array(6)].map((_, i) => (

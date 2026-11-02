@@ -532,7 +532,7 @@ export default function OnboardingModal({
                 {!createdAssociateCredential ? (
                   <>
                     {!shouldHideCombinedFlow ? (
-                      <div className="rounded-[2rem] border border-divider/50 bg-content1/70 p-8 shadow-[inset_0_2px_20px_rgba(0,0,0,0.2)] backdrop-blur-md">
+                      <div className="rounded-[2rem] border border-divider/50 bg-content1/70 p-8 shadow-[inset_0_2px_20px_rgba(27,38,50,0.2)] backdrop-blur-md">
                       {combinedStep === 1 && (
                         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                           <Input label="Associate Name" labelPlacement="outside" placeholder="Legal full name" variant="bordered" radius="lg" size="lg" value={combinedAssociateForm.name} onValueChange={(value) => setCombinedAssociateForm((current) => ({ ...current, name: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />

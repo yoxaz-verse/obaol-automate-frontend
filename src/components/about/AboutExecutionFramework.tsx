@@ -193,7 +193,7 @@ export default function AboutExecutionFramework() {
 
             {/* 4. WHAT OBAOL IS NOT */}
             <section className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-                <div className="p-12 md:p-20 rounded-[4rem] bg-foreground text-background dark:bg-neutral-900 shadow-2xl relative overflow-hidden group">
+                <div className="p-12 md:p-20 rounded-[4rem] bg-foreground text-background dark:bg-brand-blue shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/10 blur-[100px] rounded-full pointer-events-none group-hover:bg-red-500/15 transition-all duration-1000 public-decoration" />
 
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">

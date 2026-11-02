@@ -26,7 +26,7 @@ export function TimeCompare({
 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Traditional */}
-        <div className="p-6 rounded-lg border border-gray-800 bg-neutral-950">
+        <div className="p-6 rounded-lg border border-brand-blue bg-brand-abyssal">
           <span className="text-xs uppercase tracking-wide text-gray-500">
             Traditional Method
           </span>
@@ -45,7 +45,7 @@ export function TimeCompare({
 
         {/* OBAOL */}
         <div
-          className={`p-6 rounded-lg bg-neutral-900 border transition-all ${
+          className={`p-6 rounded-lg bg-brand-blue border transition-all ${
             highlight
               ? "border-orange-400 shadow-[0_0_25px_rgba(255,165,0,0.25)]"
               : "border-gray-700"

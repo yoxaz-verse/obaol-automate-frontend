@@ -74,7 +74,7 @@ export default function SystemIntergrationSection() {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-lg border border-default-200 bg-content1 p-5 shadow-[0_18px_60px_-44px_rgba(0,0,0,0.65)] dark:border-white/15">
+            <div className="rounded-lg border border-default-200 bg-content1 p-5 shadow-[0_18px_60px_-44px_rgba(27,38,50,0.65)] dark:border-white/15">
               <div className="flex items-center justify-between gap-4 border-b border-default-200 pb-4 dark:border-white/10">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500">Docs Preview</p>

@@ -3459,7 +3459,7 @@ export default function EnquiryDetailsPage() {
                     <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-6 pt-6 pb-0">
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,0,0,0.1)]" />
+                                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(27,38,50,0.1)]" />
                                 <span className="text-[10px]  font-black tracking-[0.2em] text-default-500 dark:text-default-400">Document Vault</span>
                             </div>
                             <h3 className="text-lg font-black text-foreground tracking-tighter inline-flex items-center gap-2">
@@ -3848,7 +3848,7 @@ export default function EnquiryDetailsPage() {
                                         <span className="text-[10px]  font-black tracking-widest text-default-400">Net EXW Rate / KG</span>
                                         <span className="font-black text-lg text-primary">{formatRate(netRate)}</span>
                                     </div>
-                                    <div className="mt-4 p-4 bg-white/60 dark:bg-slate-900/40 rounded-xl border border-success/20 flex flex-col gap-1">
+                                    <div className="mt-4 p-4 bg-white/60 dark:bg-brand-blue/40 rounded-xl border border-success/20 flex flex-col gap-1">
                                         <span className="text-[10px]  font-black text-success-600 tracking-widest">Calculated Trade Volume</span>
                                         <span className="font-black text-2xl text-success-700 dark:text-success-400 tracking-tight">
                                             {convertRate(tradeVolume)}
@@ -4377,7 +4377,7 @@ export default function EnquiryDetailsPage() {
                                             Finalizing will create execution tasks and move this enquiry into the Execution Panel.
                                         </div>
                                         <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-1 h-3 rounded-full bg-primary shadow-[0_0_10px_rgba(0,0,0,0.2)] dark:shadow-[0_0_10px_rgba(255,255,255,0.1)]" />
+                                            <div className="w-1 h-3 rounded-full bg-primary shadow-[0_0_10px_rgba(27,38,50,0.2)] dark:shadow-[0_0_10px_rgba(238,233,223,0.1)]" />
                                             <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Global Trade Terms</span>
                                         </div>
                                         <div className="grid grid-cols-1 gap-2">
@@ -4405,7 +4405,7 @@ export default function EnquiryDetailsPage() {
  
                                     <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5">
                                         <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-1 h-3 rounded-full bg-success-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
+                                            <div className="w-1 h-3 rounded-full bg-success-500 shadow-[0_0_10px_rgba(27,38,50,0.1)]" />
                                             <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Packaging Specifications</span>
                                         </div>
                                         <div className={`p-4 rounded-xl border text-xs font-bold italic whitespace-pre-line leading-relaxed shadow-sm ${!responsibilitySummary.packagingSpecs || responsibilitySummary.packagingSpecs.includes("No specifications") 
@@ -4417,7 +4417,7 @@ export default function EnquiryDetailsPage() {
  
                                     <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5">
                                         <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-1 h-3 rounded-full bg-obaol-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
+                                            <div className="w-1 h-3 rounded-full bg-obaol-500 shadow-[0_0_10px_rgba(27,38,50,0.1)]" />
                                             <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Responsibility Matrix</span>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -4748,7 +4748,7 @@ export default function EnquiryDetailsPage() {
                     backdrop="blur"
                     scrollBehavior="inside"
                     classNames={{
-                        base: "bg-content1 dark:bg-content1 border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] max-h-[92vh]",
+                        base: "bg-content1 dark:bg-content1 border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(27,38,50,0.5)] rounded-[2.5rem] max-h-[92vh]",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-xl",
                         closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",
@@ -4961,7 +4961,7 @@ export default function EnquiryDetailsPage() {
                     isDismissable={false}
                     isKeyboardDismissDisabled
                     classNames={{
-                        base: "bg-black/90 dark:bg-content1/95 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
+                        base: "bg-brand-abyssal/90 dark:bg-content1/95 border border-white/10 shadow-[0_20px_50px_rgba(27,38,50,0.5)]",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-2xl",
                         closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",

@@ -130,7 +130,7 @@ export default function WhyObaolPremiumLogic() {
 
             {/* SECTION 3: SYSTEM LEVEL SHIFT */}
             <section className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-                <div className="p-12 md:p-24 rounded-[5rem] bg-foreground text-background dark:bg-neutral-900 shadow-2xl relative overflow-hidden group">
+                <div className="p-12 md:p-24 rounded-[5rem] bg-foreground text-background dark:bg-brand-blue shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-orange-500/5 blur-[150px] rounded-full pointer-events-none public-decoration" />
 
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">

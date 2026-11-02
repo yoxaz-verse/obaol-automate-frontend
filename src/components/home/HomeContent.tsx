@@ -138,7 +138,7 @@ export default function HomeContent() {
                         {intentCards.map((card, i) => (
                             <article
                                 key={card.href}
-                                className="relative group rounded-[1.75rem] md:rounded-[2.5rem] border border-default-200/80 bg-content1/90 overflow-hidden shadow-[0_24px_80px_-48px_rgba(0,0,0,0.65)] transition-all duration-500 hover:-translate-y-1 hover:border-obaol-400/50 hover:shadow-[0_28px_90px_-45px_rgba(207,152,60,0.42)] public-surface-card"
+                                className="relative group rounded-[1.75rem] md:rounded-[2.5rem] border border-default-200/80 bg-content1/90 overflow-hidden shadow-[0_24px_80px_-48px_rgba(27,38,50,0.65)] transition-all duration-500 hover:-translate-y-1 hover:border-obaol-400/50 hover:shadow-[0_28px_90px_-45px_rgba(207,152,60,0.42)] public-surface-card"
                             >
                                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-obaol-300/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <div className="relative h-full p-7 md:p-10 lg:p-12 flex flex-col">

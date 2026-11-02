@@ -22,7 +22,7 @@ export default function SharedDocumentPage() {
   async function download() { setBusy("download"); setMessage(""); try { const response = await instance.get(`${api.share(token)}/pdf`, { responseType: "blob" }); const url = URL.createObjectURL(response.data); const link = document.createElement("a"); link.href = url; link.download = `${query.data?.number || "document"}.pdf`; link.click(); URL.revokeObjectURL(url); } catch (e: any) { setMessage(e?.response?.data?.message || "Could not download PDF."); } finally { setBusy(null); } }
   const doc = query.data;
 
-  return <main className="min-h-screen overflow-x-hidden bg-slate-50 p-3 text-slate-950 sm:p-5 md:p-8">
+  return <main className="min-h-screen overflow-x-hidden bg-slate-50 p-3 text-brand-abyssal sm:p-5 md:p-8">
     <header className="no-print mx-auto mb-5 flex max-w-[960px] min-w-0 flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-widest text-amber-700">OBAOL secure document</p><h1 className="notranslate mt-1 break-words text-lg font-bold" translate="no">{doc?.number || "Document invitation"}</h1></div>
       <button disabled={Boolean(busy) || !doc} onClick={download} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 font-semibold disabled:opacity-50"><FiDownload />{busy === "download" ? "Downloading…" : "Download PDF"}</button>

@@ -127,7 +127,7 @@ export default function RolesPage() {
                     </Button>
                     <Link
                       href="/roles/associate"
-                      className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white font-bold transition-all hover:bg-obaol-500 hover:text-white group/btn"
+                      className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-slate-100 dark:bg-white/10 text-brand-abyssal dark:text-brand-palladian font-bold transition-all hover:bg-obaol-500 hover:text-brand-abyssal group/btn"
                     >
                       <span className="text-sm">Explore Associate Roles</span>
                       <FiArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
@@ -199,7 +199,7 @@ export default function RolesPage() {
                     </Button>
                     <Link
                       href="/roles/operator"
-                      className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white font-bold transition-all hover:bg-obaol-500 hover:text-white group/btn"
+                      className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-slate-100 dark:bg-white/10 text-brand-abyssal dark:text-brand-palladian font-bold transition-all hover:bg-obaol-500 hover:text-brand-abyssal group/btn"
                     >
                       <span className="text-sm">More Details</span>
                       <FiArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />

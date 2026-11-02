@@ -132,7 +132,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
                     </span>
                 </div>
             )}
-            <p className={`${compact ? "text-2xl md:text-3xl" : "text-4xl xl:text-5xl"} mb-2 font-bold leading-[1.02] tracking-tight text-slate-900 dark:text-foreground`}>
+            <p className={`${compact ? "text-2xl md:text-3xl" : "text-4xl xl:text-5xl"} mb-2 font-bold leading-[1.02] tracking-tight text-brand-abyssal dark:text-foreground`}>
                 {leftPanel.headline} <br />
                 <span className={`bg-clip-text text-transparent ${roleIdentity?.highlightClassName || "bg-gradient-to-r from-obaol-700 via-obaol-500 to-amber-500 dark:from-obaol-200 dark:via-obaol-400 dark:to-obaol-600"}`}>
                     {leftPanel.highlight || "TRADE WORKSPACE"}
@@ -261,7 +261,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                     <div data-auth-form-card className={`min-w-0 rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-content1 sm:p-6 ${leftPanel ? "order-1 lg:order-2" : ""}`}>
                         {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
                         <div className="mb-6 flex flex-col text-left sm:mb-7">
-                            <h2 className="mb-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-foreground sm:text-3xl">
+                            <h2 className="mb-1 text-2xl font-bold tracking-tight text-brand-abyssal dark:text-foreground sm:text-3xl">
                                 {title}
                             </h2>
                             {subtitle && (
@@ -281,7 +281,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
     return (
         <MotionConfig reducedMotion="user">
-        <div data-testid="auth-layout" className="relative flex min-h-screen min-h-[100dvh] w-full overflow-hidden bg-obaol-50/45 text-slate-900 selection:bg-obaol-500/30 dark:bg-brand-abyssal dark:text-foreground">
+        <div data-testid="auth-layout" className="relative flex min-h-screen min-h-[100dvh] w-full overflow-hidden bg-obaol-50/45 text-brand-abyssal selection:bg-obaol-500/30 dark:bg-brand-abyssal dark:text-foreground">
             {/* Branded background layer */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(207,152,60,0.08)_0%,_transparent_55%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(207,152,60,0.03)_0%,_transparent_50%)]" />
@@ -305,7 +305,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                     animate={{ opacity: 1 }}
                 >
                     {/* Background Scanline */}
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(27,38,50,0)_50%,rgba(27,38,50,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
 
                     <div className="relative z-20 w-full max-w-xl mx-auto">
                         <Link href="/" className="flex items-center gap-4 mb-8 group cursor-pointer justify-center lg:justify-start">
@@ -324,7 +324,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact={onboarding} />
                         ) : (
                             <div className="space-y-8">
-                                <p className="mb-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-slate-900 dark:text-foreground xl:text-7xl">
+                                <p className="mb-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-brand-abyssal dark:text-foreground xl:text-7xl">
                                     OBAOL <br />
                                     <span className="block min-h-[1.2em] bg-gradient-to-r from-obaol-200 via-obaol-400 to-obaol-600 bg-clip-text leading-tight text-transparent">
                                         <TypewriterEffect words={["BUYING", "SELLING", "LOGISTICS", "INVENTORY", "TRADE EXECUTION"]} />
@@ -366,7 +366,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                                     {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
                                     <div className={`relative mb-4 lg:mb-5 ${stableContentTop ? "lg:min-h-[5rem]" : ""}`}>
-                                        <h1 className="text-2xl font-bold leading-none tracking-tight text-slate-900 dark:text-foreground lg:text-3xl">
+                                        <h1 className="text-2xl font-bold leading-none tracking-tight text-brand-abyssal dark:text-foreground lg:text-3xl">
                                             {title}
                                         </h1>
                                         {subtitle && (

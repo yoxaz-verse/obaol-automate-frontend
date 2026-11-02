@@ -17,11 +17,20 @@ export default function ForgotPasswordPage({ searchParams }: PageProps) {
 
             <div className="z-10 w-full flex flex-col items-center">
                 <Image
-                    src={"/logo.png"}
+                    src="/logo-dark.png"
                     width={150}
-                    height={150}
+                    height={42}
                     alt="Obaol"
-                    className="mb-8 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                    priority
+                    className="mb-8 hidden dark:block opacity-90 hover:opacity-100 transition-opacity cursor-pointer object-contain"
+                />
+                <Image
+                    src="/logo-light.png"
+                    width={150}
+                    height={42}
+                    alt="Obaol"
+                    priority
+                    className="mb-8 block dark:hidden opacity-90 hover:opacity-100 transition-opacity cursor-pointer object-contain"
                 />
                 <ForgotPasswordComponent role={role} prefill={prefill} />
             </div>

@@ -209,6 +209,11 @@ export const sidebarOptions = [
     link: "/dashboard/email-templates",
   },
   {
+    name: "Real-Life Scenarios",
+    icon: <FiBookOpen />,
+    link: "/dashboard/real-life-scenarios",
+  },
+  {
     name: "Flow Rules",
     icon: <FiActivity />,
     link: "/dashboard/flow-rules",

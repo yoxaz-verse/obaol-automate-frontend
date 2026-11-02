@@ -33,13 +33,43 @@ test("dashboard entry points share navigation feedback and intent prefetch", () 
   assert.match(sidebar, /warmDestination/);
   assert.match(sidebar, /aria-busy=\{isPending \|\| undefined\}/);
   assert.doesNotMatch(sidebar, /warmNext|setTimeout\(warmNext/);
-  assert.match(sidebar, /marketplaceFirstPageQueryOptions/);
+  assert.match(sidebar, /warmDashboardRoute/);
 });
 
 test("dashboard route fallback uses a stable content skeleton", () => {
   const loading = read("../src/app/dashboard/loading.tsx");
-  assert.match(loading, /SectionSkeleton/);
+  assert.match(loading, /DashboardRouteSkeleton/);
   assert.doesNotMatch(loading, /BrandedLoader/);
+});
+
+test("priority dashboard routes expose stable route-level skeletons", () => {
+  for (const route of ["marketplace", "inventory", "enquiries", "orders", "profile"]) {
+    const loading = read(`../src/app/dashboard/${route}/loading.tsx`);
+    assert.match(loading, /DashboardRouteSkeleton/);
+  }
+  const skeleton = read("../src/components/dashboard/DashboardRouteSkeleton.tsx");
+  assert.match(skeleton, /role="status"/);
+  assert.match(skeleton, /motion-reduce:animate-none/);
+});
+
+test("navigation timing covers route commit and painted content readiness", () => {
+  const context = read("../src/context/DashboardNavigationContext.tsx");
+  const ready = read("../src/components/dashboard/DashboardContentReady.tsx");
+  assert.match(context, /routeCommittedAt/);
+  assert.match(context, /contentReadyAt/);
+  assert.match(context, /obaol:navigation-timing/);
+  assert.match(context, /markContentReady/);
+  assert.match(ready, /requestAnimationFrame/);
+});
+
+test("priority warmups are centralized, bounded, and data-saver aware", () => {
+  const warmups = read("../src/core/navigation/dashboardRouteWarmup.ts");
+  for (const route of ["dashboard", "marketplace", "inventory", "enquiries", "orders", "profile"]) {
+    assert.match(warmups, new RegExp(`/${route === "dashboard" ? "dashboard" : `dashboard/${route}`}`));
+  }
+  assert.match(warmups, /saveData/);
+  assert.match(warmups, /prefers-reduced-data/);
+  assert.match(warmups, /warmedDataRoutes/);
 });
 
 test("periodic query refresh does not duplicate the initial request", () => {

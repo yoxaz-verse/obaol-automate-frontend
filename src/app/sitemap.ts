@@ -3,6 +3,9 @@ import { MetadataRoute } from "next";
 import { buildPublicWebApiUrl } from "@/utils/publicApi";
 import { associateRoleSlugs, getAssociateRolePath } from "@/data/associateRoles";
 import { BASE_URL } from "@/utils/seo";
+import { getAllPublishedScenarios } from "@/data/realLifeScenarios";
+
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = BASE_URL;
@@ -34,6 +37,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "monthly",
   }));
 
+  const scenarios = await getAllPublishedScenarios();
+  const scenarioEntries: MetadataRoute.Sitemap = scenarios.map((scenario) => ({
+    url: `${baseUrl}${getAssociateRolePath(scenario.roleSlug)}/real-life-scenarios/${scenario.slug}`,
+    lastModified: scenario.updatedAt ? new Date(scenario.updatedAt) : undefined,
+    priority: 0.6,
+    changeFrequency: "monthly" as const,
+  }));
+
   try {
     const companiesRes = await fetch(
       buildPublicWebApiUrl("/associate-companies?limit=2000&fields=slug,subdomain,customDomain"),
@@ -55,8 +66,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
       }));
 
-    return [...staticEntries, ...associateRoleEntries, ...brandEntries];
+    return [...staticEntries, ...associateRoleEntries, ...scenarioEntries, ...brandEntries];
   } catch {
-    return [...staticEntries, ...associateRoleEntries];
+    return [...staticEntries, ...associateRoleEntries, ...scenarioEntries];
   }
 }

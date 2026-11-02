@@ -47,9 +47,10 @@ test("private routes expose server-owned noindex metadata", () => {
   }
 });
 
-test("sitemap contains only intended public routes and no fabricated lastmod", () => {
+test("sitemap contains only intended public routes and uses real scenario modification dates", () => {
   const sitemap = read("src/app/sitemap.ts");
-  assert.doesNotMatch(sitemap, /lastModified|new Date\(/);
+  assert.match(sitemap, /lastModified: scenario\.updatedAt/);
+  assert.doesNotMatch(sitemap, /lastModified: new Date\(\)/);
   assert.match(sitemap, /commission-structure/);
   assert.match(sitemap, /methods/);
   for (const excluded of ["/auth", "/dashboard", "/developer", "/trade-directory", "/product"]) {

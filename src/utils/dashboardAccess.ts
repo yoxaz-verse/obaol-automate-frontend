@@ -136,6 +136,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/documentation-preview", label: "Documentation Preview", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], searchable: false, activeParent: "/dashboard/documentation-template-studio" },
   { path: "/dashboard/documentation-templates", label: "Documentation Templates", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], searchable: false, activeParent: "/dashboard/documentation-template-studio" },
   { path: "/dashboard/email-templates", label: "Email Templates", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/real-life-scenarios", label: "Real-Life Scenarios", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true, description: "Create, preview, and publish representative role scenarios." },
   { path: "/dashboard/flow-rules", label: "Flow Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/order-rules", label: "Order Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/enquiry-rules", label: "Enquiry Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },

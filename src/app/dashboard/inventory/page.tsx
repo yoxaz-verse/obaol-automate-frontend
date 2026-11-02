@@ -1,9 +1,5 @@
 import React from "react";
-import dynamic from "next/dynamic";
-
-const InventoryList = dynamic(() => import("@/components/dashboard/Inventory/InventoryList"), {
-    loading: () => <div className="min-h-[420px] rounded-2xl border border-default-200 bg-content1/70" />,
-});
+import DeferredInventoryList from "@/components/dashboard/Inventory/DeferredInventoryList";
 
 export default function InventoryPage() {
     return (
@@ -18,7 +14,7 @@ export default function InventoryPage() {
                             Track and manage your physical stock levels across warehouses.
                         </p>
                     </div>
-                    <InventoryList />
+                    <DeferredInventoryList />
                 </div>
             </div>
         </div>

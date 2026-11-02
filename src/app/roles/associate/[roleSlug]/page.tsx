@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
+import { getPublishedRoleScenarios } from "@/data/realLifeScenarios";
 import { buildMetadata, buildWebPageJsonLd } from "@/utils/seo";
 import {
   associateRoleGroups,
@@ -26,6 +27,7 @@ import {
 } from "react-icons/fi";
 
 type Params = { roleSlug: string };
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return associateRoleSlugs.map((roleSlug) => ({ roleSlug }));
@@ -149,13 +151,14 @@ const CapabilityFeatureGrid = ({
   );
 };
 
-export default function AssociateRoleDetailPage({
+export default async function AssociateRoleDetailPage({
   params,
 }: {
   params: Params;
 }) {
   const role = getAssociateRoleBySlug(params.roleSlug);
   if (!role) notFound();
+  const realLifeScenarios = (await getPublishedRoleScenarios(role.slug)).slice(0, 3);
 
   const group = associateRoleGroups.find((item) => item.key === role.group);
   const relatedRoles = role.relatedRoles
@@ -405,6 +408,28 @@ export default function AssociateRoleDetailPage({
               </div>
             </div>
           </section>
+
+          {realLifeScenarios.length > 0 && (
+            <section aria-labelledby="real-life-scenarios-heading" className="public-standard-section border-b border-default-200/60 py-16">
+              <div className="container mx-auto max-w-6xl px-4 public-layout-container">
+                <div className="mb-10 max-w-3xl">
+                  <span className="inline-flex rounded-full border border-orange-500/25 bg-orange-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">Representative stories</span>
+                  <h2 id="real-life-scenarios-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Real-Life Scenarios for {role.displayName}</h2>
+                  <p className="mt-4 leading-7 text-foreground/65">Explore illustrative situations based on challenges businesses in this role commonly face, and see how a more accountable workflow can help.</p>
+                </div>
+                <div className="grid gap-5 md:grid-cols-3">
+                  {realLifeScenarios.map((scenario) => (
+                    <article key={scenario._id} className="public-surface-card flex flex-col rounded-3xl border border-default-200/70 bg-content1/30 p-6 shadow-2xs transition-all hover:-translate-y-1 hover:border-orange-500/35 hover:shadow-md">
+                      <span className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-500">Representative scenario</span>
+                      <h3 className="mt-4 text-xl font-black leading-7">{scenario.h1}</h3>
+                      <p className="mt-3 flex-1 text-sm leading-6 text-foreground/65">{scenario.excerpt}</p>
+                      <Link href={`${getAssociateRolePath(role.slug)}/real-life-scenarios/${scenario.slug}`} className="mt-6 inline-flex items-center gap-2 font-bold text-orange-500">Read scenario <FiArrowRight /></Link>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Qualification Section */}
           <section

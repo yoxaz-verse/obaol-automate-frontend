@@ -38,13 +38,13 @@ import { showToastMessage } from "@/utils/utils";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
 import { buildInventoryPresentation, daysStored as calculateDaysStored, normalizeObjectId } from "@/features/inventory/domain";
 import { normalizeApiError } from "@/core/api/apiErrors";
-import QuickCreateWarehouseModal from "@/components/Warehouse/QuickCreateWarehouseModal";
 
 const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
 const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
 const DeleteModal = dynamic(() => import("@/components/CurdTable/delete"), { ssr: false });
 const DynamicFilter = dynamic(() => import("@/components/CurdTable/dynamic-filtering"), { ssr: false });
 const CompanySearch = dynamic(() => import("@/components/dashboard/Company/CompanySearch"), { ssr: false });
+const QuickCreateWarehouseModal = dynamic(() => import("@/components/Warehouse/QuickCreateWarehouseModal"), { ssr: false });
 
 const InventoryList: React.FC = () => {
     const queryClient = useQueryClient();

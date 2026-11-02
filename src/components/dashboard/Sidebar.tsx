@@ -17,6 +17,7 @@ import { notificationRoutes, supportChatRoutes } from "@/core/api/apiRoutes";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
 import { importReservationsQueryOptions, importsQueryOptions } from "@/core/data/useImports";
+import { warmDashboardRoute } from "@/core/navigation/dashboardRouteWarmup";
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -33,25 +34,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const governance = useSidebarGovernance();
     const governedPages = governance.isAssociate ? governance.resolved : undefined;
 
-    const filteredOptions = getRoleFilteredSidebarOptions(
+    const filteredOptions = React.useMemo(() => getRoleFilteredSidebarOptions(
         sidebarOptions as any[],
         String(user?.role || ""),
         [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
         governedPages,
-    );
+    ), [governedPages, user?.providedCapabilities, user?.role, user?.soughtCapabilities]);
     const capabilities = React.useMemo(
         () => [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])],
         [user?.providedCapabilities, user?.soughtCapabilities],
     );
-    const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
-    const sidebarSections = getDashboardSidebarSections(
+    const optionMap = React.useMemo(() => new Map(filteredOptions.map((option) => [option.link, option])), [filteredOptions]);
+    const sidebarSections = React.useMemo(() => getDashboardSidebarSections(
         filteredOptions as any[],
         String(user?.role || ""),
         capabilities,
         user?.providedCapabilities || [],
         user?.soughtCapabilities || [],
         governedPages,
-    );
+    ), [capabilities, filteredOptions, governedPages, user?.providedCapabilities, user?.role, user?.soughtCapabilities]);
     type NavigationRow = { kind: "group" | "section"; label: string; links: string[] };
     const navigationRows = sidebarSections.flatMap<NavigationRow>((section) => section.groups
         ? section.groups.map((group) => ({
@@ -71,20 +72,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const { play } = useSoundEffect();
     const warmDestination = React.useCallback((path: string) => {
         prefetch(path);
+        warmDashboardRoute(path, { queryClient, role: user?.role });
         if (path === "/dashboard/imports") {
             void queryClient.prefetchQuery(importsQueryOptions({ mine: false, limit: 20 }));
         } else if (path === "/dashboard/imports/my-listings") {
             void queryClient.prefetchQuery(importsQueryOptions({ mine: true, limit: 20 }));
         } else if (path === "/dashboard/imports/reservations") {
             void queryClient.prefetchQuery(importReservationsQueryOptions({ mine: true, listingId: undefined, limit: 20 }));
-        } else if (path === "/dashboard/marketplace") {
-            void import("@/core/data/useMarketplace").then((marketplace) => {
-                void queryClient.prefetchQuery(marketplace.marketplaceFirstPageQueryOptions());
-                void queryClient.prefetchQuery(marketplace.marketplaceVisibilityQueryOptions());
-                if (String(user?.role || "").toLowerCase() === "admin") {
-                    void queryClient.prefetchQuery(marketplace.marketplaceStatsQueryOptions());
-                }
-            });
         }
     }, [prefetch, queryClient, user?.role]);
 
@@ -96,7 +90,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         },
         enabled: Boolean(user?.id),
         staleTime: 60 * 1000,
-        refetchInterval: 60 * 1000,
+        refetchInterval: () => typeof document !== "undefined" && document.visibilityState === "visible" ? 60 * 1000 : false,
+        refetchIntervalInBackground: false,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
     });
@@ -105,8 +100,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         queryKey: ["support", "availability", "sidebar"],
         queryFn: async () => (await getData(supportChatRoutes.availability, {}, { cacheMode: "bypass" }))?.data?.data || {},
         enabled: Boolean(user?.id),
-        refetchInterval: 10 * 1000,
-        staleTime: 5 * 1000,
+        refetchInterval: () => typeof document !== "undefined" && document.visibilityState === "visible" ? 30 * 1000 : false,
+        refetchIntervalInBackground: false,
+        staleTime: 20 * 1000,
     });
     const isSupportStaff = ["admin", "customersupport", "customer-support"].includes(String(user?.role || "").toLowerCase());
     const dotMap: Record<string, number> = {
@@ -146,6 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         return (
             <button
                 key={opt.name}
+                data-navigation-target={opt.link}
                 onClick={(e) => handleOptionClick(e, opt.link)}
                 onMouseEnter={() => !isDisabled && warmDestination(opt.link)}
                 onFocus={() => !isDisabled && warmDestination(opt.link)}

@@ -24,7 +24,7 @@ export default defineConfig({
   projects: [
     {
       name: "mobile-pwa-iphone",
-      testIgnore: /authenticated-flows\.spec\.mjs/,
+      testIgnore: /(?:authenticated-flows|dashboard-navigation-performance)\.spec\.mjs/,
       use: {
         ...devices["iPhone 13"],
         viewport: { width: 390, height: 844 },
@@ -35,7 +35,7 @@ export default defineConfig({
     },
     {
       name: "authenticated-mobile",
-      testMatch: /authenticated-flows\.spec\.mjs/,
+      testMatch: /(?:authenticated-flows|dashboard-navigation-performance)\.spec\.mjs/,
       use: {
         ...devices["iPhone 13"],
         baseURL: "http://localhost:3100",
@@ -47,7 +47,7 @@ export default defineConfig({
     },
     {
       name: "authenticated-desktop",
-      testMatch: /authenticated-flows\.spec\.mjs/,
+      testMatch: /(?:authenticated-flows|dashboard-navigation-performance)\.spec\.mjs/,
       use: {
         ...devices["Desktop Safari"],
         baseURL: "http://localhost:3100",

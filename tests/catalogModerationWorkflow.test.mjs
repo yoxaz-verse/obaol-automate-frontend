@@ -43,4 +43,7 @@ test("catalog moderation has a dedicated audited admin queue", () => {
   assert.match(queue, /Save audited edit/);
   assert.match(queue, /Associate/);
   assert.match(queue, /Company/);
+  assert.match(queue, /Requested rate/);
+  assert.match(queue, /No rate submitted/);
+  assert.match(queue, /requestedRates\.map/);
 });

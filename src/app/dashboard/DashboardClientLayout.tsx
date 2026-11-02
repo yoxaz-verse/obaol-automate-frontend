@@ -21,6 +21,7 @@ import LiveNotificationSubscriber from "@/components/dashboard/LiveNotificationS
 import { SidebarGovernanceProvider, useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { DashboardNavigationProvider, useDashboardNavigation } from "@/context/DashboardNavigationContext";
 import DashboardNavigationProgress from "@/components/dashboard/DashboardNavigationProgress";
+import DashboardContentReady from "@/components/dashboard/DashboardContentReady";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -196,6 +197,7 @@ function DashboardLayoutContent({
   return (
     <section data-dashboard-shell className="w-full min-w-0 h-[100dvh] max-h-[100dvh] flex overflow-hidden db-bg relative">
       <DashboardNavigationProgress />
+      <DashboardContentReady />
       <PrivateRoute pathname={pathname}>
         <LiveNotificationSubscriber userId={user?.id} />
         <DashboardEnhancements />

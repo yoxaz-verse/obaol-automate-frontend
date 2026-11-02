@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useState } from "react";
+import dynamic from "next/dynamic";
 import AuthContext from "@/context/AuthContext";
 import {
   Avatar as HeroAvatar,
@@ -14,18 +15,18 @@ import {
 const Avatar = HeroAvatar as any;
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
-import EditModal from "@/components/CurdTable/edit-model";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { deleteDataBody, getData, patchData, postData } from "@/core/api/apiHandler";
-import AddModal from "@/components/CurdTable/add-model";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractCount, extractList } from "@/core/data/queryUtils";
 import InsightCard from "@/components/dashboard/InsightCard";
 import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiKey, FiTrash2 } from "react-icons/fi";
-import { motion } from "framer-motion";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardField, DashboardPage, DashboardPanel, DashboardSectionHeader, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
+
+const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
+const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
 
 const ASSOCIATE_ADMIN_CONTROLLED_FIELDS = new Set([
   "isActive",

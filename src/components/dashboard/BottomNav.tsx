@@ -45,6 +45,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
           return (
             <DashboardLink
               key={route.path}
+              data-navigation-target={route.path}
               href={route.path}
               aria-current={isActive ? "page" : undefined}
               aria-label={route.label}

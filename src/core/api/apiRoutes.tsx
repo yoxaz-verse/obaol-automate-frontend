@@ -336,6 +336,14 @@ export const systemConfigRoutes = {
   emailTemplatesTest: "/system-config/email-templates/test",
 };
 
+export const realLifeScenarioRoutes = {
+  admin: "/real-life-scenarios/admin",
+  update: (id: string) => `/real-life-scenarios/admin/${id}`,
+  transition: (id: string) => `/real-life-scenarios/admin/${id}/transition`,
+  previewToken: (id: string) => `/real-life-scenarios/admin/${id}/preview-token`,
+  reorder: "/real-life-scenarios/admin/reorder",
+};
+
 export const countryRoutes = createCRUDRoutes(BASE_PATHS.COUNTRY);
 export const unLoCodeRoutes = createCRUDRoutes(BASE_PATHS.UN_LO_CODE);
 export const unLoCodeFunctionRoutes = createCRUDRoutes(
@@ -724,6 +732,7 @@ export const apiRoutes = {
     invitations: "/associate-referrals/invitations",
   },
   organizationReports: organizationReportRoutes,
+  realLifeScenarios: realLifeScenarioRoutes,
   companyCapabilityChangeRequests: companyCapabilityChangeRequestRoutes,
   inventory: inventoryRoutes,
   warehouses: {

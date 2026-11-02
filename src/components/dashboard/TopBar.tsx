@@ -294,6 +294,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                          {group.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
                                            <button
                                              key={opt.name}
+                                             data-navigation-target={opt.link}
                                              onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)) { navigate(opt.link); setIsMobileMenuOpen(false); } }}
                                              onMouseEnter={() => prefetch(opt.link)}
                                              onFocus={() => prefetch(opt.link)}
@@ -318,6 +319,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                }) : sec.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
                                  <button
                                    key={opt.name}
+                                   data-navigation-target={opt.link}
                                    onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role, capabilities, governedPages)) { navigate(opt.link); setIsMobileMenuOpen(false); } }}
                                    onMouseEnter={() => prefetch(opt.link)}
                                    onFocus={() => prefetch(opt.link)}

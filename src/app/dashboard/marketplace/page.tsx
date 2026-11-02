@@ -1,16 +1,14 @@
 "use client";
 
 import React, { useContext, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Chip, Spacer, Tab, Tabs } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { LuWarehouse } from "react-icons/lu";
 import { FiGrid } from "react-icons/fi";
 import { FiPlus } from "react-icons/fi";
-import MarketplaceFilterBar, {
-  MarketplaceFilterState,
-} from "@/components/dashboard/Marketplace/MarketplaceFilterBar";
+import type { MarketplaceFilterState } from "@/components/dashboard/Marketplace/MarketplaceFilterBar";
 import AuthContext from "@/context/AuthContext";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import { useCompanyAccess } from "@/utils/companyAccess";
@@ -19,6 +17,9 @@ import {
     marketplaceStatsQueryOptions,
     marketplaceVisibilityQueryOptions,
 } from "@/core/data/useMarketplace";
+
+const VariantRate = dynamic(() => import("@/components/dashboard/Catalog/variant-rate"), { ssr: false });
+const MarketplaceFilterBar = dynamic(() => import("@/components/dashboard/Marketplace/MarketplaceFilterBar"), { ssr: false });
 
 const TabsAny = Tabs as any;
 const TabAny = Tab as any;

@@ -86,6 +86,7 @@ export default function HeroStageExplorer() {
   const [selectedItem, setSelectedItem] = useState<HeroSelection | null>(null);
   const [previewItem, setPreviewItem] = useState<HeroSelection | null>(null);
   const activeItem = previewItem ?? selectedItem;
+  const panelVisible = Boolean(activeItem);
   const activeResponsibility = activeItem?.kind === "responsibility" ? responsibilities.find((item) => item.id === activeItem.id) : undefined;
   const activePhase = activeItem?.kind === "phase" ? activeItem.id : activeResponsibility?.phase;
   const activePhaseGroup = phaseGroups.find((phase) => phase.phase === activePhase);
@@ -204,7 +205,14 @@ export default function HeroStageExplorer() {
         </div>
       </div>
 
-      <div data-hero-trade-detail="true" data-detail-kind={displayedResponsibility ? "responsibility" : "phase"} aria-live="polite" className="mt-1 h-[8.5rem] overflow-hidden rounded-2xl border border-obaol-500/30 bg-content1/95 p-3.5 shadow-sm backdrop-blur-sm sm:h-[6.75rem] sm:px-4">
+      <div
+        data-hero-trade-detail="true"
+        data-detail-kind={displayedResponsibility ? "responsibility" : "phase"}
+        data-detail-visible={panelVisible ? "true" : "false"}
+        aria-hidden={!panelVisible}
+        aria-live="polite"
+        className={`mt-1 h-[8.5rem] overflow-hidden rounded-2xl border border-obaol-500/30 bg-content1/95 p-3.5 shadow-sm backdrop-blur-sm sm:h-[6.75rem] sm:px-4 ${reducedMotion ? "" : "transition-opacity duration-300 ease-out"} ${panelVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      >
         <div className="flex h-full flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
           <div className="min-w-0 sm:max-w-[42%]">
             <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">Illustrative trade · {displayedPhaseGroup.name}</p>

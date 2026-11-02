@@ -165,6 +165,11 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('opacity-55 grayscale-[70%] brightness-[0.55]'), false);
   assert.equal(explorer.includes('data-hero-trade-detail="true"'), true);
   assert.equal(explorer.includes('data-detail-kind={displayedResponsibility ? "responsibility" : "phase"}'), true);
+  assert.equal(explorer.includes('const panelVisible = Boolean(activeItem)'), true);
+  assert.equal(explorer.includes('data-detail-visible={panelVisible ? "true" : "false"}'), true);
+  assert.equal(explorer.includes('aria-hidden={!panelVisible}'), true);
+  assert.equal(explorer.includes('panelVisible ? "opacity-100" : "pointer-events-none opacity-0"'), true);
+  assert.equal(explorer.includes('transition-opacity duration-300 ease-out'), true);
   assert.equal(explorer.includes('sm:h-[6.75rem]'), true);
   assert.equal(explorer.includes('Black Pepper · 18 MT'), true);
   assert.equal(explorer.includes('Illustrative trade · {displayedPhaseGroup.name}'), true);

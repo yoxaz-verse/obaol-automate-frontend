@@ -88,7 +88,9 @@ for (const theme of ["light", "dark"]) {
       ]);
       const tradeDetail = executionMap.locator('[data-hero-trade-detail="true"]');
       await expect(tradeDetail).toBeVisible();
-      await expect(tradeDetail).toContainText("Black Pepper · 18 MT");
+      await expect(tradeDetail).toHaveAttribute("data-detail-visible", "false");
+      await expect(tradeDetail).toHaveAttribute("aria-hidden", "true");
+      await expect(tradeDetail).toHaveCSS("opacity", "0");
       await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(0);
       await expect(page.locator('[data-parallax-accent]')).toHaveCount(0);
       const artworkBox = await bulkArtwork.boundingBox();
@@ -106,6 +108,9 @@ for (const theme of ["light", "dark"]) {
         const detailBeforeHover = await tradeDetail.boundingBox();
         await bulkArtwork.locator('[data-hero-phase-region="receive-and-approve"]').hover();
         await expect(executionMap).toHaveAttribute("data-active-phase", "receive-and-approve");
+        await expect(tradeDetail).toHaveAttribute("data-detail-visible", "true");
+        await expect(tradeDetail).toHaveAttribute("aria-hidden", "false");
+        await expect(tradeDetail).toHaveCSS("opacity", "1");
         await expect(tradeDetail).toHaveAttribute("data-detail-kind", "phase");
         await expect(tradeDetail).toContainText("Receive & Approve");
         const mapDuringHover = await executionMap.boundingBox();
@@ -119,6 +124,7 @@ for (const theme of ["light", "dark"]) {
         expect(detailDuringHover.y).toBeGreaterThanOrEqual(railDuringHover.y + railDuringHover.height - 1);
         await page.mouse.move(0, 0);
         await expect(executionMap).toHaveAttribute("data-active-phase", "none");
+        await expect(tradeDetail).toHaveCSS("opacity", "0");
         expect(await phaseRail.boundingBox()).toEqual(railBeforeHover);
 
         const customsNode = phaseRail.locator('[data-execution-responsibility="cha-customs"]');
@@ -127,11 +133,19 @@ for (const theme of ["light", "dark"]) {
         await expect(customsNode).toHaveAttribute("aria-pressed", "true");
         await expect(executionMap).toHaveAttribute("data-active-phase", "move");
         await expect(tradeDetail).toHaveAttribute("data-detail-kind", "responsibility");
+        await expect(tradeDetail).toHaveCSS("opacity", "1");
         await expect(tradeDetail).toContainText("CHA & Customs");
         await expect(tradeDetail).toContainText("Licensed Customs House Agent or customs broker");
         expect(await customsNode.boundingBox()).toEqual(customsBoxBefore);
         expect(await bulkArtwork.boundingBox()).toEqual(artworkBeforeHover);
         expect(await phaseRail.boundingBox()).toEqual(railBeforeHover);
+        expect(await tradeDetail.boundingBox()).toEqual(detailBeforeHover);
+        await page.mouse.move(0, 0);
+        await expect(tradeDetail).toHaveCSS("opacity", "1");
+        await customsNode.click();
+        await expect(customsNode).toHaveAttribute("aria-pressed", "false");
+        await page.mouse.move(0, 0);
+        await expect(tradeDetail).toHaveCSS("opacity", "0");
         expect(await tradeDetail.boundingBox()).toEqual(detailBeforeHover);
       }
       const hierarchyIsCorrect = await page.evaluate(() => {

@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-02T05:38:16.031Z",
-  "totalBytes": 36031254,
-  "referencedBytes": 8639582,
-  "unreferencedBytes": 27391672,
+  "generatedAt": "2026-11-02T05:45:09.919Z",
+  "totalBytes": 36456640,
+  "referencedBytes": 8650216,
+  "unreferencedBytes": 27806424,
   "largestReferenced": [
     {
       "path": "/images/india_map.webp",
@@ -47,6 +47,13 @@
       "allowlisted": false
     },
     {
+      "path": "/images/hero-bulk-execution-v7.webp",
+      "bytes": 425386,
+      "referenced": true,
+      "directReference": true,
+      "allowlisted": false
+    },
+    {
       "path": "/images/services/documentation-trade-art-v2.webp",
       "bytes": 424366,
       "referenced": true,
@@ -63,13 +70,6 @@
     {
       "path": "/images/services/sourcing-trade-art-v2.webp",
       "bytes": 417628,
-      "referenced": true,
-      "directReference": true,
-      "allowlisted": false
-    },
-    {
-      "path": "/images/hero-bulk-execution-v6.webp",
-      "bytes": 414752,
       "referenced": true,
       "directReference": true,
       "allowlisted": false
@@ -329,6 +329,13 @@
       "allowlisted": false
     },
     {
+      "path": "/images/hero-bulk-execution-v6.webp",
+      "bytes": 414752,
+      "referenced": false,
+      "directReference": false,
+      "allowlisted": false
+    },
+    {
       "path": "/images/services/freight-trade-sketch.webp",
       "bytes": 381256,
       "referenced": false,
@@ -520,13 +527,6 @@
     {
       "path": "/images/hero-operations/procurement-goods.webp",
       "bytes": 148926,
-      "referenced": false,
-      "directReference": false,
-      "allowlisted": false
-    },
-    {
-      "path": "/images/hero-operations/pallet-loading-stock.webp",
-      "bytes": 147100,
       "referenced": false,
       "directReference": false,
       "allowlisted": false

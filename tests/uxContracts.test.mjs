@@ -126,7 +126,7 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(new Set(imagePaths).size, 10);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/execution-flow/")).length, 9);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/hero-operations/")).length, 0);
-  assert.equal(imagePaths.at(-1), "/images/hero-bulk-execution-v6.webp");
+  assert.equal(imagePaths.at(-1), "/images/hero-bulk-execution-v7.webp");
   assert.equal(hero.includes('"use client"'), false);
   assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
   assert.equal(hero.includes('data-hero-centered-layout="true"'), true);
@@ -151,13 +151,14 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(explorer.includes('/images/hero-agro-execution-art-v2.webp'), false);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-bulk-artwork="true"'), true);
-  assert.equal(explorer.includes('/images/hero-bulk-execution-v6.webp'), true);
+  assert.equal(explorer.includes('/images/hero-bulk-execution-v7.webp'), true);
   assert.equal(explorer.includes('data-active-phase={activePhaseGroup?.slug ?? "none"}'), true);
   assert.equal(explorer.includes('data-hero-phase-region={phase.slug}'), true);
   assert.equal(explorer.includes('data-hero-phase-highlight={phase.slug}'), true);
   assert.equal(explorer.includes('data-hero-phase-dividers="true"'), true);
   assert.equal(explorer.includes('data-hero-phase-divider="true"'), true);
-  assert.equal(explorer.includes('min-h-[5.75rem]'), true);
+  assert.equal(explorer.includes('data-hero-phase-outcome-overlay="true"'), true);
+  assert.equal(explorer.includes('min-h-[5.75rem]'), false);
   assert.equal(explorer.includes('aria-pressed={selectedPhase === phase.phase}'), true);
   assert.equal(explorer.includes('const activePhase = previewPhase ?? selectedPhase'), true);
   assert.equal(explorer.includes('scale-[1.015]'), false);

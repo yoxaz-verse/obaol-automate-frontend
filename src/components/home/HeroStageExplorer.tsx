@@ -20,7 +20,7 @@ const phaseGroups: Array<{ name: string; slug: string; range: string; phase: Her
   { name: "Receive & Approve", slug: "receive-and-approve", range: "10", phase: "Receive & Approve", summary: "The overseas buyer receives the commodity, confirms the specification, and approves the completed import handoff.", left: 75, width: 25, status: "International buyer approved receipt", evidence: "Destination acceptance record" },
 ];
 
-const HERO_ARTWORK = "/images/hero-bulk-execution-v6.webp";
+const HERO_ARTWORK = "/images/hero-bulk-execution-v7.webp";
 
 export default function HeroStageExplorer() {
   const adaptiveMotion = useAdaptiveMotion();
@@ -83,26 +83,25 @@ export default function HeroStageExplorer() {
             </button>
           ))}
         </div>
-      </div>
-
-      <div aria-live="polite" className="min-h-[5.75rem] pt-3 sm:min-h-[5.25rem]">
         <div
+          data-hero-phase-outcome-overlay="true"
           data-hero-phase-outcome={activePhaseGroup?.slug ?? "none"}
           aria-hidden={!activePhaseGroup}
-          className={`flex flex-col gap-3 rounded-2xl border border-obaol-500/30 bg-content1/95 p-3.5 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-4 ${transitionClass} ${activePhaseGroup ? "visible opacity-100" : "invisible opacity-0"}`}
+          aria-live="polite"
+          className={`pointer-events-none absolute inset-x-3 bottom-10 z-30 flex items-center justify-between gap-3 rounded-xl border border-obaol-300/35 bg-background/90 px-3 py-2 shadow-lg backdrop-blur-md sm:inset-x-4 sm:bottom-12 sm:px-4 ${transitionClass} ${activePhaseGroup ? "visible translate-y-0 opacity-100" : "invisible translate-y-1 opacity-0"}`}
         >
           <div className="min-w-0">
             <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">Illustrative trade · {displayedPhaseGroup.name}</p>
-            <p className="mt-1 truncate text-sm font-black text-foreground">Black Pepper · 18 MT</p>
+            <p className="mt-0.5 truncate text-xs font-black text-foreground sm:text-sm">Black Pepper · 18 MT</p>
           </div>
-          <dl className="grid min-w-0 grid-cols-2 gap-x-5 gap-y-1 text-[10px] sm:text-right">
+          <dl className="hidden min-w-0 grid-cols-2 gap-x-5 gap-y-1 text-[10px] text-right sm:grid">
             <div><dt className="font-semibold db-muted">Status</dt><dd className="mt-0.5 font-bold text-foreground">{displayedPhaseGroup.status}</dd></div>
             <div><dt className="font-semibold db-muted">Evidence</dt><dd className="mt-0.5 font-bold text-foreground">{displayedPhaseGroup.evidence}</dd></div>
           </dl>
         </div>
       </div>
 
-      <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve" className="relative z-30 mx-[7%] mt-1 pb-2 sm:mx-[9%] sm:mt-2 lg:pb-0">
+      <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Receive and Approve" className="relative z-30 mx-[7%] mt-2 pb-2 sm:mx-[9%] sm:mt-3 lg:pb-0">
         <div className="absolute left-[7px] right-[7px] top-[7px] h-px bg-obaol-700/70 dark:bg-obaol-300/70" />
         <div className="relative grid grid-cols-4">
           {phaseGroups.map((phase, index) => (

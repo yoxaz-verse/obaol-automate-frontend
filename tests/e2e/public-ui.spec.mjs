@@ -68,6 +68,7 @@ for (const theme of ["light", "dark"]) {
       await expect(bulkArtwork.locator('[data-hero-phase-region]')).toHaveCount(4);
       await expect(bulkArtwork.locator('[data-hero-phase-highlight]')).toHaveCount(4);
       await expect(bulkArtwork.locator('[data-hero-phase-divider="true"]')).toHaveCount(3);
+      await expect(bulkArtwork.locator('[data-hero-phase-outcome-overlay="true"]')).toHaveCount(1);
       await expect(executionMap).toHaveAttribute("data-active-phase", "none");
       const phaseRail = page.locator('[data-execution-route="phase-rail"]');
       await expect(phaseRail.locator('[data-execution-phase]')).toHaveCount(4);
@@ -88,13 +89,17 @@ for (const theme of ["light", "dark"]) {
         const railBeforeHover = await phaseRail.boundingBox();
         await bulkArtwork.locator('[data-hero-phase-region="receive-and-approve"]').hover();
         await expect(executionMap).toHaveAttribute("data-active-phase", "receive-and-approve");
-        await expect(executionMap.locator('[data-hero-phase-outcome="receive-and-approve"]')).toBeVisible();
+        const outcomeOverlay = bulkArtwork.locator('[data-hero-phase-outcome="receive-and-approve"]');
+        await expect(outcomeOverlay).toBeVisible();
         const mapDuringHover = await executionMap.boundingBox();
         const artworkDuringHover = await bulkArtwork.boundingBox();
         const railDuringHover = await phaseRail.boundingBox();
+        const outcomeDuringHover = await outcomeOverlay.boundingBox();
         expect(mapDuringHover).toEqual(mapBeforeHover);
         expect(artworkDuringHover).toEqual(artworkBeforeHover);
         expect(railDuringHover).toEqual(railBeforeHover);
+        expect(outcomeDuringHover.y).toBeGreaterThanOrEqual(artworkDuringHover.y);
+        expect(outcomeDuringHover.y + outcomeDuringHover.height).toBeLessThanOrEqual(artworkDuringHover.y + artworkDuringHover.height);
         await page.mouse.move(0, 0);
         await expect(executionMap).toHaveAttribute("data-active-phase", "none");
         expect(await phaseRail.boundingBox()).toEqual(railBeforeHover);

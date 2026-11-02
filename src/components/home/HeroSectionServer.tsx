@@ -11,7 +11,7 @@ export const HERO_STAGES = [
   { id: "packaging", label: "Packaging", message: "Prepare goods for safe, compliant shipment.", src: "/images/execution-flow/07-packaging.webp", deliverable: "Standard Export Packaging & Fumigation", phase: "Move" },
   { id: "procurement", label: "Procurement", message: "Get on-ground procurement assistance & execution.", src: "/images/execution-flow/08-procurement.webp", deliverable: "Batch Sourcing & Purchase Lock", phase: "Move" },
   { id: "transport-freight", label: "Transport & Freight", message: "Coordinate inland movement, customs, and international freight milestones.", src: "/images/execution-flow/09-inland-transportation.webp", deliverable: "Tracking, Customs & Bill of Lading", phase: "Move" },
-  { id: "buyer-approval", label: "Buyer Receipt & Approval", message: "The overseas buyer receives the delivered commodity, confirms specifications, and approves the import handoff.", src: "/images/hero-bulk-execution-v6.webp", deliverable: "Destination Acceptance & Delivery Record", phase: "Receive & Approve" },
+  { id: "buyer-approval", label: "Buyer Receipt & Approval", message: "The overseas buyer receives the delivered commodity, confirms specifications, and approves the import handoff.", src: "/images/hero-bulk-execution-v7.webp", deliverable: "Destination Acceptance & Delivery Record", phase: "Receive & Approve" },
 ] as const satisfies readonly HeroStage[];
 
 export default function HeroSectionServer() {

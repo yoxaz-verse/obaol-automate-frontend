@@ -26,7 +26,7 @@ test("mobile auth is a single focused surface without public-site navigation", a
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/auth?prefill=mobile%40example.com", { waitUntil: "domcontentloaded" });
 
-  await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to OBAOL" })).toBeVisible();
   await expect(page.getByText("Go-To Agro Trade Platform")).toHaveCount(0);
   await expect(page.getByTestId("auth-public-navigation")).toBeHidden();
   await expect(page.getByRole("link", { name: "Explore OBAOL" })).toBeHidden();
@@ -66,7 +66,7 @@ test("mobile auth is a single focused surface without public-site navigation", a
 
   await createAccount.click();
   await expect(createAccount).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("heading", { name: "Create your OBAOL account" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Welcome to OBAOL" })).toBeVisible();
   await signIn.click();
   await expect(signIn).toHaveAttribute("aria-pressed", "true");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -76,7 +76,11 @@ test("desktop auth retains branding, card, and public navigation", async ({ page
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/auth", { waitUntil: "domcontentloaded" });
 
-  await expect(page.getByText("ONE SECURE ACCESS")).toBeVisible();
+  await expect(page.getByText("FROM DISCOVERY TO EXECUTION")).toBeVisible();
+  await expect(page.getByText("Discover commodities, connect with verified trade partners, and manage orders, documents, and execution in one workspace.")).toBeVisible();
+  await expect(page.getByText("Discover verified opportunities")).toBeVisible();
+  await expect(page.getByText("Coordinate documents and orders")).toBeVisible();
+  await expect(page.getByText("Track execution in one workspace")).toBeVisible();
   await expect(page.getByTestId("auth-public-navigation")).toBeVisible();
   await expect(page.getByRole("link", { name: "Explore OBAOL" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Explore account types" })).toBeVisible();
@@ -131,7 +135,7 @@ test("desktop auth public links open externally without leaving the app", async 
   await page.goto("/auth", { waitUntil: "domcontentloaded" });
   const authUrl = page.url();
 
-  await expect(page.getByRole("heading", { name: "Welcome to OBAOL Desktop" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to OBAOL Desktop" })).toBeVisible();
   await expect(page.getByTestId("auth-submit")).toHaveText("Continue to OBAOL Desktop");
   await page.getByRole("link", { name: "Explore OBAOL" }).click();
   await page.getByRole("link", { name: "Explore account types" }).click();
@@ -300,7 +304,7 @@ test("switching authentication modes keeps the card anchored", async ({ page }) 
   const createAccount = page.getByRole("button", { name: "Create account" });
   await createAccount.click();
   await expect(createAccount).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("heading", { name: "Create your OBAOL account" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Welcome to OBAOL" })).toBeVisible();
   await expect(page).toHaveURL(/\/auth\?mode=signup&role=associate&prefill=layout(?:%40|@)example(?:\.|%2E)com&intent=SERVICE/);
   const signUpBox = await card.boundingBox();
   expect(signUpBox).not.toBeNull();
@@ -311,7 +315,7 @@ test("switching authentication modes keeps the card anchored", async ({ page }) 
   const signIn = page.getByRole("button", { name: "Sign in" });
   await signIn.click();
   await expect(signIn).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to OBAOL" })).toBeVisible();
   await expect(page).toHaveURL(/\/auth\?mode=signin&prefill=layout(?:%40|@)example(?:\.|%2E)com&intent=SERVICE/);
   const returnedBox = await card.boundingBox();
   expect(returnedBox).not.toBeNull();

@@ -119,7 +119,7 @@ export default function HeroStageExplorer() {
         aria-label="Interactive panorama of independent bulk suppliers, warehouse inspectors, quality specialists, logistics providers, and an overseas buyer coordinating one agricultural commodity trade"
         className="relative aspect-[1983/793] w-full overflow-hidden rounded-xl bg-content2 ring-1 ring-obaol-900/10 shadow-[0_12px_36px_-10px_rgba(27,38,50,0.14)] dark:ring-obaol-300/15 dark:shadow-[0_16px_40px_-10px_rgba(0,0,0,0.55)] focus-within:ring-1 focus-within:ring-obaol-500/70 sm:rounded-2xl"
       >
-        <Image src={HERO_ARTWORK} alt="" aria-hidden="true" fill priority quality={88} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${transitionClass} ${activePhase ? "opacity-55 saturate-[0.65] brightness-[0.82]" : "opacity-100"}`} />
+        <Image src={HERO_ARTWORK} alt="" aria-hidden="true" fill priority fetchPriority="high" quality={75} sizes="(max-width: 1279px) 100vw, 68vw" className={`object-cover ${transitionClass} ${activePhase ? "opacity-55 saturate-[0.65] brightness-[0.82]" : "opacity-100"}`} />
         {phaseGroups.map((phase) => (
           <div
             key={`highlight-${phase.phase}`}
@@ -128,7 +128,7 @@ export default function HeroStageExplorer() {
             className={`pointer-events-none absolute inset-0 z-10 overflow-hidden ${transitionClass} ${activePhase === phase.phase ? "opacity-100" : "opacity-0"}`}
             style={{ clipPath: `inset(0 ${100 - phase.left - phase.width}% 0 ${phase.left}%)` }}
           >
-            <Image src={HERO_ARTWORK} alt="" fill quality={88} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${transitionClass}`} />
+            <Image src={HERO_ARTWORK} alt="" fill quality={75} sizes="(max-width: 1023px) 100vw, 68vw" className={`object-cover ${transitionClass}`} />
             <div className="absolute inset-y-0 bg-gradient-to-t from-obaol-500/[0.07] via-transparent to-white/[0.04]" style={{ left: `${phase.left}%`, width: `${phase.width}%` }} />
             <div className="absolute inset-y-0 bg-gradient-to-t from-obaol-950/25 via-transparent to-amber-400/[0.12]" style={{ left: `${phase.left}%`, width: `${phase.width}%` }} />
             <div className="absolute top-0 h-[2.5px] bg-gradient-to-r from-obaol-400 via-amber-300 to-obaol-400 shadow-[0_1px_8px_rgba(233,140,80,0.7)]" style={{ left: `${phase.left}%`, width: `${phase.width}%` }} />

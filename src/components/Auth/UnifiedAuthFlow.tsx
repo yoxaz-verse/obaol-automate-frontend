@@ -268,11 +268,11 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
   return (
     <AuthLayout
-      title={mode === "signin" ? (isDesktopApp ? "Welcome to OBAOL Desktop" : "Welcome back") : "Create your OBAOL account"}
-      subtitle={mode === "signin" ? (isDesktopApp ? "Sign in to open your secure desktop workspace." : "One secure sign-in for Associate and Operator accounts.") : "Verify your email, choose your account type, and complete onboarding."}
+      title={mode === "signin" ? (isDesktopApp ? "Sign in to OBAOL Desktop" : "Sign in to OBAOL") : "Welcome to OBAOL"}
+      subtitle={mode === "signin" ? (isDesktopApp ? "Sign in to open your secure desktop workspace." : "Access your Associate or Operator workspace.") : "Verify your email, choose your account type, and complete onboarding."}
       cardMaxWidthClass="max-w-[500px]"
       stableContentTop
-      leftPanel={{ headline: "OBAOL", highlight: "ONE SECURE ACCESS", description: "Access commodity discovery, verified partners, execution workflows, documents, and orders from one account entry.", points: ["Private account discovery", "Secure session management"], footer: "Agro trade execution" }}
+      leftPanel={{ headline: "OBAOL", highlight: "FROM DISCOVERY TO EXECUTION", description: "Discover commodities, connect with verified trade partners, and manage orders, documents, and execution in one workspace.", points: ["Discover verified opportunities", "Coordinate documents and orders", "Track execution in one workspace"] }}
     >
       <div data-testid="unified-auth" className="space-y-4 lg:space-y-5">
         <div className="grid grid-cols-2 border-b border-slate-200 dark:border-white/10 lg:rounded-xl lg:border-0 lg:bg-slate-100 lg:p-1 lg:dark:bg-white/[0.05]" aria-label="Authentication mode">

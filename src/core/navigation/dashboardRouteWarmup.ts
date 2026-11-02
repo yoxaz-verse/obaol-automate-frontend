@@ -18,6 +18,13 @@ const warmMarketplace: RouteWarmup = async ({ queryClient, role }) => {
   ]);
 };
 
+const firstPage = (url: string, queryKey: readonly unknown[], params: Record<string, unknown> = {}) =>
+  ({
+    queryKey,
+    queryFn: () => getData(url, { page: 1, limit: 25, ...params }),
+    staleTime: 30_000,
+  });
+
 export const DASHBOARD_ROUTE_WARMUPS: Readonly<Record<string, RouteWarmup | undefined>> = {
   "/dashboard": undefined,
   "/dashboard/marketplace": warmMarketplace,
@@ -33,6 +40,31 @@ export const DASHBOARD_ROUTE_WARMUPS: Readonly<Record<string, RouteWarmup | unde
     staleTime: 30_000,
   }),
   "/dashboard/profile": undefined,
+  "/dashboard/users": ({ queryClient }) => queryClient.prefetchQuery({
+    queryKey: ["customer-support-agents"],
+    queryFn: async () => (await getData(apiRoutes.customerSupportAgents.list, {}, { cacheMode: "bypass" })).data?.data || [],
+    staleTime: 30_000,
+  }),
+  // Company-directory cache keys include the authenticated user id. Code is
+  // still prefetched by the router; data is left to the page to avoid a
+  // duplicate request under a non-matching cache key.
+  "/dashboard/companies": undefined,
+  "/dashboard/operators/overview": ({ queryClient }) => queryClient.prefetchQuery(firstPage(
+    apiRoutes.operator.getAll,
+    ["operator-overview", "operators"],
+    { limit: 200, sort: "name:asc" },
+  )),
+  "/dashboard/approvals": ({ queryClient }) => {
+    const count = (route: string) => async () => {
+      const response = await getData(route, { status: "PENDING_REVIEW", limit: 1 });
+      return Number(response?.data?.meta?.total ?? response?.data?.data?.length ?? 0);
+    };
+    return Promise.all([
+      queryClient.prefetchQuery({ queryKey: ["approval-summary", "associates"], queryFn: count(apiRoutes.approvals.associatesList), staleTime: 30_000 }),
+      queryClient.prefetchQuery({ queryKey: ["approval-summary", "companies"], queryFn: count(apiRoutes.approvals.companiesList), staleTime: 30_000 }),
+      queryClient.prefetchQuery({ queryKey: ["approval-summary", "operators"], queryFn: count(apiRoutes.approvals.operatorsList), staleTime: 30_000 }),
+    ]);
+  },
 };
 
 const warmedDataRoutes = new Set<string>();

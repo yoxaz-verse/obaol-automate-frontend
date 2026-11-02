@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 type DashboardNavigationContextValue = {
@@ -22,6 +22,16 @@ export type DashboardNavigationTiming = {
 
 const DashboardNavigationContext = createContext<DashboardNavigationContextValue | null>(null);
 
+const normalizedDestination = (path: string) => {
+  if (typeof window === "undefined") return path;
+  try {
+    const url = new URL(path, window.location.href);
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return path;
+  }
+};
+
 export function DashboardNavigationProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -38,29 +48,53 @@ export function DashboardNavigationProvider({ children }: { children: React.Reac
   }, []);
 
   const navigate = useCallback((path: string, options?: { replace?: boolean }) => {
-    if (!path || path === pathname) return;
+    if (!path) {
+      clearPending();
+      return;
+    }
+    const destination = normalizedDestination(path);
+    const current = typeof window === "undefined" ? pathname : `${window.location.pathname}${window.location.search}`;
+    if (destination === current) {
+      clearPending();
+      return;
+    }
     originPathRef.current = pathname;
-    setPendingPath(path);
+    setPendingPath(destination);
     if (typeof performance !== "undefined") {
       timingRef.current = {
         from: pathname,
-        to: path,
-        prefetched: prefetchedPathsRef.current.has(path),
+        to: destination,
+        prefetched: prefetchedPathsRef.current.has(destination),
         startedAt: performance.now(),
       };
       performance.clearMarks("dashboard-navigation-start");
-      performance.mark("dashboard-navigation-start", { detail: { from: pathname, to: path } });
+      performance.mark("dashboard-navigation-start", { detail: { from: pathname, to: destination } });
     }
     if (watchdogRef.current) clearTimeout(watchdogRef.current);
     watchdogRef.current = setTimeout(clearPending, 15000);
-    if (options?.replace) router.replace(path);
-    else router.push(path);
+    // Keep feedback synchronous while allowing React to schedule the route tree.
+    // A synchronous router failure must never leave the shell permanently busy.
+    try {
+      startTransition(() => {
+        if (options?.replace) router.replace(destination);
+        else router.push(destination);
+      });
+    } catch (error) {
+      clearPending();
+      window.dispatchEvent(new CustomEvent("obaol:navigation-error", { detail: { from: pathname, to: destination } }));
+      throw error;
+    }
   }, [clearPending, pathname, router]);
 
   const prefetch = useCallback((path: string) => {
-    if (!path || path === pathname || prefetchedPathsRef.current.has(path)) return;
-    prefetchedPathsRef.current.add(path);
-    router.prefetch(path);
+    const destination = normalizedDestination(path);
+    if (!destination || destination.split("?")[0] === pathname || prefetchedPathsRef.current.has(destination)) return;
+    prefetchedPathsRef.current.add(destination);
+    try {
+      router.prefetch(destination);
+    } catch {
+      prefetchedPathsRef.current.delete(destination);
+    }
   }, [pathname, router]);
 
   const markContentReady = useCallback((path = pathname) => {
@@ -99,6 +133,16 @@ export function DashboardNavigationProvider({ children }: { children: React.Reac
   useEffect(() => () => {
     if (watchdogRef.current) clearTimeout(watchdogRef.current);
   }, []);
+
+  useEffect(() => {
+    const clearOnHistoryNavigation = () => clearPending();
+    window.addEventListener("popstate", clearOnHistoryNavigation);
+    window.addEventListener("pagehide", clearOnHistoryNavigation);
+    return () => {
+      window.removeEventListener("popstate", clearOnHistoryNavigation);
+      window.removeEventListener("pagehide", clearOnHistoryNavigation);
+    };
+  }, [clearPending]);
 
   const value = useMemo(() => ({
     pendingPath,

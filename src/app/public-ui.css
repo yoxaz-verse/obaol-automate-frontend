@@ -77,6 +77,7 @@
 .obaol-public .public-surface-card { border-radius: var(--public-card-radius) !important; border-color: var(--public-border); background: var(--public-surface); box-shadow: 0 4px 16px #00000003; }
 .obaol-public .public-decoration { display: none; }
 .obaol-public .public-header-shell { background: var(--public-surface); border-color: var(--public-border); box-shadow: 0 4px 20px #00000005; }
+.obaol-public .public-site-header { background: linear-gradient(to bottom, var(--public-bg) 0%, color-mix(in srgb, var(--public-bg) 88%, transparent) 72%, transparent 100%); }
 .obaol-public header nav a { min-height: 44px; display: inline-flex; align-items: center; }
 .obaol-public footer { border-color: var(--public-border); padding-block: 56px 32px; }
 .obaol-public footer a { display: inline-flex; align-items: center; min-height: 44px; }

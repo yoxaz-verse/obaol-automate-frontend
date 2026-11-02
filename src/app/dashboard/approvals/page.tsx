@@ -41,6 +41,15 @@ const formatDate = (value: any) => {
 
 const getApprovalTimelineValue = (row: any) => row?.approvalRequestedAt || row?.createdAt;
 
+const approvalCountOptions = (kind: "associates" | "companies" | "operators", route: string) => ({
+  queryKey: ["approval-summary", kind] as const,
+  queryFn: async () => {
+    const response = await getData(route, { status: "PENDING_REVIEW", limit: 1 });
+    return Number(response?.data?.meta?.total ?? response?.data?.data?.length ?? 0);
+  },
+  staleTime: 30_000,
+});
+
 function OnboardingApprovalQueue() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<"associates" | "companies" | "operators">("associates");
@@ -92,6 +101,7 @@ function OnboardingApprovalQueue() {
     onSuccess: () => {
       showToastMessage({ type: "success", message: "Approval status updated.", position: "top-right" });
       queryClient.invalidateQueries({ queryKey: ["approvals"] });
+      queryClient.invalidateQueries({ queryKey: ["approval-summary"] });
       setNotes("");
       setActiveAction(null);
     },
@@ -136,25 +146,13 @@ function OnboardingApprovalQueue() {
   const meta = listQuery.data?.meta || { page: 1, pages: 1, total: 0, limit };
 
   // Fetch counts for other tabs to show notification dots
-  const associatesCountQuery = useQuery({
-    queryKey: ["approvals", "associates", "PENDING_REVIEW", "count"],
-    queryFn: () => getData(apiRoutes.approvals.associatesList, { status: "PENDING_REVIEW", limit: 1 }),
-    staleTime: 30000,
-  });
-  const companiesCountQuery = useQuery({
-    queryKey: ["approvals", "companies", "PENDING_REVIEW", "count"],
-    queryFn: () => getData(apiRoutes.approvals.companiesList, { status: "PENDING_REVIEW", limit: 1 }),
-    staleTime: 30000,
-  });
-  const operatorsCountQuery = useQuery({
-    queryKey: ["approvals", "operators", "PENDING_REVIEW", "count"],
-    queryFn: () => getData(apiRoutes.approvals.operatorsList, { status: "PENDING_REVIEW", limit: 1 }),
-    staleTime: 30000,
-  });
+  const associatesCountQuery = useQuery(approvalCountOptions("associates", apiRoutes.approvals.associatesList));
+  const companiesCountQuery = useQuery(approvalCountOptions("companies", apiRoutes.approvals.companiesList));
+  const operatorsCountQuery = useQuery(approvalCountOptions("operators", apiRoutes.approvals.operatorsList));
 
-  const hasAssociatesPending = Number(associatesCountQuery.data?.data?.meta?.total || 0) > 0;
-  const hasCompaniesPending = Number(companiesCountQuery.data?.data?.meta?.total || 0) > 0;
-  const hasOperatorsPending = Number(operatorsCountQuery.data?.data?.meta?.total || 0) > 0;
+  const hasAssociatesPending = Number(associatesCountQuery.data || 0) > 0;
+  const hasCompaniesPending = Number(companiesCountQuery.data || 0) > 0;
+  const hasOperatorsPending = Number(operatorsCountQuery.data || 0) > 0;
 
   const TabTitle = ({ title, hasDot }: { title: string; hasDot: boolean }) => (
     <div className="flex items-center gap-2">
@@ -547,12 +545,12 @@ export default function ApprovalsPage() {
   const requested = String(searchParams.get("workflow") || "onboarding") as Workflow;
   const workflow: Workflow = ["onboarding", "capabilities", "labs", "catalog"].includes(requested) ? requested : "onboarding";
   useEffect(() => { patchData(apiRoutes.notifications.markSectionRead("approvals"), {}).catch(() => undefined); }, []);
-  const count = (route: string, params?: Record<string, any>) => async () => { const response = await getData(route, { ...params, limit: 1 }); return Number(response?.data?.meta?.total ?? response?.data?.data?.length ?? 0); };
   const onboardingCounts = [
-    useQuery({ queryKey: ["approval-summary", "associates"], queryFn: count(apiRoutes.approvals.associatesList, { status: "PENDING_REVIEW" }), staleTime: 30000 }),
-    useQuery({ queryKey: ["approval-summary", "companies"], queryFn: count(apiRoutes.approvals.companiesList, { status: "PENDING_REVIEW" }), staleTime: 30000 }),
-    useQuery({ queryKey: ["approval-summary", "operators"], queryFn: count(apiRoutes.approvals.operatorsList, { status: "PENDING_REVIEW" }), staleTime: 30000 }),
+    useQuery(approvalCountOptions("associates", apiRoutes.approvals.associatesList)),
+    useQuery(approvalCountOptions("companies", apiRoutes.approvals.companiesList)),
+    useQuery(approvalCountOptions("operators", apiRoutes.approvals.operatorsList)),
   ];
+  const count = (route: string, params?: Record<string, any>) => async () => { const response = await getData(route, { ...params, limit: 1 }); return Number(response?.data?.meta?.total ?? response?.data?.data?.length ?? 0); };
   const capabilityCount = useQuery({ queryKey: ["approval-summary", "capabilities"], queryFn: count(apiRoutes.companyCapabilityChangeRequests.list, { status: "PENDING_REVIEW" }), staleTime: 30000 });
   const labCount = useQuery({ queryKey: ["approval-summary", "labs"], queryFn: async () => {
     const [profiles, taxonomy] = await Promise.all([getData(apiRoutes.labProfiles.approvals, { status: "PENDING_REVIEW" }), getData(apiRoutes.labProfiles.taxonomyAdmin, { status: "REQUESTED" })]);

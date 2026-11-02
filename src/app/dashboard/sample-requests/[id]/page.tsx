@@ -351,7 +351,7 @@ export default function SampleRequestDetailPage() {
   const productName = request?.variantRateId?.productVariant?.product?.name || "Product";
   const buyerName = request?.buyerAssociateId?.name || "Buyer";
   const supplierName = request?.supplierCompanyId?.name || "Supplier";
-  const buyerDisplay = !isAssociate ? buyerName : isBuyer ? buyerName : "";
+  const buyerDisplay = isAdmin ? buyerName : "";
   const supplierDisplay = !isAssociate ? supplierName : isSupplier ? supplierName : "";
   const samplePaymentTermLabel =
     String(request?.samplePaymentTerm || "ADVANCE") === "COURIER_CHARGES"
@@ -415,9 +415,11 @@ export default function SampleRequestDetailPage() {
         <div className="lg:col-span-8 flex flex-col gap-8">
           {/* Main Info Card */}
           <Card className="rounded-[2.5rem] bg-foreground/[0.02] backdrop-blur-3xl border border-foreground/5 dark:border-white/5 shadow-none overflow-hidden p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className={`grid grid-cols-1 gap-10 ${isAdmin || !isAssociate ? "md:grid-cols-2" : ""}`}>
+              {(isAdmin || !isAssociate) && (
               <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-4">
+                {isAdmin && (
+                <div data-testid="sample-request-owner" className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-warning/10 text-warning flex items-center justify-center">
                     <LuUser size={24} />
                   </div>
@@ -426,6 +428,7 @@ export default function SampleRequestDetailPage() {
                     <p className="text-sm font-bold  tracking-tight">{buyerDisplay || "—"}</p>
                   </div>
                 </div>
+                )}
 
                 {!isAssociate && (
                   <div className="flex items-center gap-4">
@@ -439,6 +442,7 @@ export default function SampleRequestDetailPage() {
                   </div>
                 )}
               </div>
+              )}
 
               <div className="flex flex-col gap-6 p-6 rounded-[2rem] bg-foreground/[0.03] border border-foreground/5 justify-center">
                 <div className="flex items-baseline gap-2">

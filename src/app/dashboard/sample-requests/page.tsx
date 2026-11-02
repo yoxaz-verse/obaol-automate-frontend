@@ -65,20 +65,17 @@ export default function SampleRequestsPage() {
       const variantName = row?.variantRateId?.productVariant?.name || "";
       const buyerName = row?.buyerAssociateId?.name || "";
       const supplierName = row?.supplierCompanyId?.name || "";
-      const isAssociateBuyer =
-        isAssociate &&
-        String(row?.buyerAssociateId?._id || row?.buyerAssociateId) === String(associateId || "");
       const isAssociateSeller =
         isAssociate &&
         associateCompanyId &&
         String(row?.supplierCompanyId?._id || row?.supplierCompanyId) === String(associateCompanyId);
-      const buyerSearch = !isAssociate ? buyerName : isAssociateBuyer ? buyerName : "";
+      const buyerSearch = isAdmin ? buyerName : "";
       const supplierSearch = !isAssociate ? supplierName : isAssociateSeller ? supplierName : "";
       const location = `${row?.requestDivision?.name || ""} ${row?.requestDistrict?.name || ""} ${row?.requestState?.name || ""}`;
       const stack = `${productName} ${variantName} ${buyerSearch} ${supplierSearch} ${location}`.toLowerCase();
       return stack.includes(term);
     });
-  }, [sampleRows, search, isAssociate, associateCompanyId, associateId]);
+  }, [sampleRows, search, isAdmin, isAssociate, associateCompanyId]);
 
   const scopedRows = filteredRows;
 
@@ -169,7 +166,7 @@ export default function SampleRequestsPage() {
                 isAssociate &&
                 associateCompanyId &&
                 String(row?.supplierCompanyId?._id || row?.supplierCompanyId) === String(associateCompanyId);
-              const buyerDisplay = !isAssociate ? buyerName : isAssociateBuyer ? buyerName : "";
+              const buyerDisplay = isAdmin ? buyerName : "";
               const supplierDisplay = !isAssociate ? supplierName : isAssociateSeller ? supplierName : "";
               const location = `${row?.requestDivision?.name || row?.requestCity?.name || ""}, ${row?.requestState?.name || ""}`;
               const requestedQty = row?.requestedSampleQtyKg ? `${row.requestedSampleQtyKg} KG` : "N/A";
@@ -192,10 +189,14 @@ export default function SampleRequestsPage() {
                 >
                   <Card className="bg-content1 dark:bg-content1 border border-default-300 dark:border-white/20 shadow-none rounded-[2rem] overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full flex flex-col">
                     <CardBody className="p-0 flex flex-col h-full">
-                      <div className="p-6 pb-4 flex flex-col gap-3">
+                      <div className="p-4 pb-3 flex flex-col gap-2.5">
                         <div className="flex items-start justify-between w-full">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[8px] font-black text-obaol-500  tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-full border border-obaol-500/20">ID: {String(row._id).slice(-6).toUpperCase()}</span>
+                                <span data-testid="sample-request-badge" className="inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/20">
+                                  <LuPackage size={9} />
+                                  Sample
+                                </span>
                                 <div className="w-1 h-1 rounded-full bg-obaol-500 animate-pulse" />
                             </div>
                             {!hideStatusChip && (
@@ -215,26 +216,30 @@ export default function SampleRequestsPage() {
                         </div>
                       </div>
 
-                      <div className="px-6 py-5 grid grid-cols-2 gap-y-5 gap-x-6 border-t border-divider/40 flex-grow bg-foreground/[0.02]">
+                      <div className="px-4 py-3 grid grid-cols-2 gap-3 border-t border-divider/40 flex-grow bg-foreground/[0.02]">
                         {[
-                          { label: "Owner", val: buyerDisplay || "—", icon: LuUser, color: "text-blue-500/50" },
+                          ...(isAdmin
+                            ? [{ label: "Owner", val: buyerDisplay, icon: LuUser, color: "text-blue-500/50" }]
+                            : []),
                           ...(!isAssociate
                             ? [{ label: "Entity", val: supplierDisplay || "—", icon: LuPackage, color: "text-orange-500/50" }]
                             : []),
                           { label: "Zone", val: location, icon: LuMapPin, color: "text-emerald-500/50" },
                           { label: "Load", val: requestedQty, icon: LuActivity, color: "text-obaol-500/50" },
                         ].map((detail, dIdx) => (
-                           <div key={dIdx} className="flex flex-col gap-1 overflow-hidden">
+                           <div key={dIdx} className="flex min-w-0 items-center gap-2 overflow-hidden rounded-xl bg-foreground/[0.025] px-2.5 py-2">
+                              <detail.icon size={12} className={`${detail.color} shrink-0`} />
+                              <div className="min-w-0">
                               <span className="text-[8px] font-black text-default-400  tracking-[0.1em] flex items-center gap-2 opacity-60">
-                                <detail.icon size={10} className={detail.color} />
                                 {detail.label}
                               </span>
                               <span className="text-[11px] font-black text-foreground  truncate tracking-tight">{detail.val}</span>
+                              </div>
                            </div>
                         ))}
                       </div>
 
-                      <div className="p-6 mt-auto">
+                      <div className="p-4 pt-3 mt-auto">
                         {canView && (
                           <Button
                             fullWidth

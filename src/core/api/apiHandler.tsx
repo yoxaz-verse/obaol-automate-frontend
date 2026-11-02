@@ -9,14 +9,28 @@ type GetDataOptions = {
   timeoutMs?: number;
 };
 
+const recordApiTiming = (url: string, startedAt: number, status: number, requestId?: string) => {
+  if (typeof window === "undefined" || typeof performance === "undefined") return;
+  const duration = performance.now() - startedAt;
+  window.dispatchEvent(new CustomEvent("obaol:api-timing", {
+    detail: {
+      // Deliberately exclude query parameters and response data from telemetry.
+      route: String(url).split("?")[0],
+      duration,
+      status,
+      requestId: requestId || undefined,
+    },
+  }));
+};
+
 // GET request to the API
 export const getData = async (
   url: string,
   params: RequestParams = {},
   options: GetDataOptions = {}
 ) => {
+  const startedAt = typeof performance === "undefined" ? Date.now() : performance.now();
   try {
-    const startedAt = Date.now();
     const useBypassCache = options.cacheMode === "bypass";
     const response = await instance.get(url, {
       params,
@@ -30,12 +44,15 @@ export const getData = async (
         }
         : undefined,
     });
+    const requestId = String(response.headers?.["x-request-id"] || "");
+    recordApiTiming(url, startedAt, response.status, requestId);
     if (process.env.NODE_ENV !== "production") {
-      const elapsedMs = Date.now() - startedAt;
+      const elapsedMs = (typeof performance === "undefined" ? Date.now() : performance.now()) - startedAt;
       console.debug(`[api][get] ${url} completed in ${elapsedMs}ms`);
     }
     return response;
-  } catch (error) {
+  } catch (error: any) {
+    recordApiTiming(url, startedAt, Number(error?.response?.status || 0), String(error?.response?.headers?.["x-request-id"] || ""));
     // Callers (typically query boundaries) own presentation and telemetry. Logging
     // here duplicates handled failures and produces console noise during redirects.
     throw error;

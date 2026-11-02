@@ -256,6 +256,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   type ViewMode = "grid" | "list" | "table" | "compact";
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const limit = isMarketplaceView ? 24 : 24;
   const [selectedInventoryRate, setSelectedInventoryRate] = useState<import("./domain").RateRow | null>(null);
@@ -1836,6 +1837,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       }
                     >
                       {finalTableData.map((item: any, index: number) => {
+                        const actionMenuId = String(item._id || index);
                         const isLive = item.publiclyVisible ?? item.isLive;
                         const canAddInventory =
                           showInventoryStatus &&
@@ -2321,7 +2323,18 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     </span>
                                   ) : null}
                                 </div>
-                                <Popover placement="bottom-end" showArrow>
+                                <Popover
+                                  placement="top-end"
+                                  shouldFlip
+                                  offset={8}
+                                  containerPadding={12}
+                                  shouldBlockScroll={false}
+                                  showArrow
+                                  isOpen={openActionMenuId === actionMenuId}
+                                  onOpenChange={(isOpen) =>
+                                    setOpenActionMenuId(isOpen ? actionMenuId : null)
+                                  }
+                                >
                                   <PopoverTrigger>
                                     <Button
                                       isIconOnly
@@ -2333,8 +2346,15 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       <FiMoreHorizontal size={18} />
                                     </Button>
                                   </PopoverTrigger>
-                                  <PopoverContent className="w-[min(16rem,calc(100vw-2rem))] p-0">
-                                    <div className="w-full space-y-3 p-3">
+                                  <PopoverContent className="w-[min(13rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] p-0">
+                                    <div
+                                      className="w-full min-w-0 space-y-3 p-3"
+                                      onClick={(event) => {
+                                        if ((event.target as HTMLElement).closest("button, a, [role='menuitem']")) {
+                                          setOpenActionMenuId(null);
+                                        }
+                                      }}
+                                    >
                                       <div className="min-w-0 border-b border-divider pb-3">
                                         <p className="text-[9px] font-black tracking-widest text-default-400">Location</p>
                                         {item.warehouseId && item.warehouseName ? (
@@ -2348,7 +2368,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                             <span className="truncate" title={item.warehouseName}>{item.warehouseName}</span>
                                           </Button>
                                         ) : (
-                                          <p className="mt-1 line-clamp-2 text-sm font-bold text-foreground" title={toDisplayText(item.locationAddress || item.location, "—")}>
+                                          <p className="mt-1 break-words text-sm font-bold leading-snug text-foreground" title={toDisplayText(item.locationAddress || item.location, "—")}>
                                             {item.locationAddress && item.locationAddress !== "--" ? item.locationAddress : "—"}
                                           </p>
                                         )}

@@ -509,6 +509,39 @@ test("Methods heading remains below the public header", async ({ page }) => {
   }
 });
 
+test("homepage and How It Works stay responsive below the shared header", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  for (const width of [375, 768, 1024, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/");
+
+    const header = page.locator(".public-header-shell");
+    const heroTitle = page.getByRole("heading", { name: /The B2B Bulk Trade Execution Platform/ });
+    const heroMedia = page.locator('[data-hero-panel="execution-map"]');
+    const headerBottom = await header.evaluate((element) => element.getBoundingClientRect().bottom);
+    const titleBox = await heroTitle.boundingBox();
+    const mediaBox = await heroMedia.boundingBox();
+    expect(titleBox.y).toBeGreaterThan(headerBottom);
+    expect(width < 1280 ? mediaBox.y > titleBox.y + titleBox.height : mediaBox.x > titleBox.x + titleBox.width).toBe(true);
+    if (width >= 1280) {
+      await expect(page.locator("header nav[aria-label='Primary navigation']")).toBeVisible();
+    } else {
+      await expect(page.locator("header nav[aria-label='Primary navigation']")).toBeHidden();
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+    await page.goto("/how-it-works");
+    const howTitle = page.getByRole("heading", { name: "Trade execution, explained by process." });
+    const howHeaderBottom = await header.evaluate((element) => element.getBoundingClientRect().bottom);
+    const howTitleTop = await howTitle.evaluate((element) => element.getBoundingClientRect().top);
+    expect(howTitleTop).toBeGreaterThan(howHeaderBottom);
+    await expect(page.getByRole("heading", { name: "Six stages from requirement to closure" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Filter noise early. Keep accountability visible." })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
 test("public pages keep compact, uniform vertical spacing", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 

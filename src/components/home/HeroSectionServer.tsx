@@ -16,7 +16,7 @@ export const HERO_STAGES = [
 
 export default function HeroSectionServer() {
   return (
-    <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-8 pt-16 lg:py-8">
+    <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-10 pt-8 sm:pt-10 xl:py-10">
       {/* Ambient background glow & grid mesh */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-obaol-500/10 blur-[120px] dark:bg-obaol-500/14" />
@@ -27,9 +27,9 @@ export default function HeroSectionServer() {
       <div className="public-layout-container relative z-30 mx-auto w-full max-w-[96rem] px-6 sm:px-12">
         <div
           data-hero-centered-layout="true"
-          className="mx-auto grid w-full max-w-[90rem] gap-12 lg:min-h-[clamp(36rem,calc(100svh-6rem),50rem)] lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:items-center lg:gap-10 xl:gap-14"
+          className="mx-auto grid w-full max-w-[90rem] gap-10 xl:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] xl:items-center xl:gap-14"
         >
-          <div className="space-y-5 lg:py-2">
+          <div className="max-w-3xl space-y-5 xl:max-w-none xl:py-2">
             {/* Status / Kicker Pill */}
             <div className="inline-flex items-center gap-2.5 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-3.5 py-1.5 backdrop-blur-sm">
               <span className="relative flex h-2 w-2">
@@ -42,7 +42,7 @@ export default function HeroSectionServer() {
 
             {/* Main Title */}
             <div className="space-y-3.5">
-              <h1 className="text-4xl font-black leading-[1.06] tracking-tight text-brand-abyssal dark:text-brand-palladian sm:text-5xl md:text-[3.35rem] lg:text-[3.25rem] xl:text-[3.5rem]">
+              <h1 className="max-w-[18ch] text-4xl font-black leading-[1.06] tracking-tight text-brand-abyssal dark:text-brand-palladian sm:text-5xl md:text-[3.35rem] xl:text-[3.5rem]">
                 The B2B Bulk Trade{" "}
                 <span className="bg-gradient-to-r from-obaol-600 via-amber-500 to-obaol-400 bg-clip-text text-transparent drop-shadow-sm">
                   Execution Platform

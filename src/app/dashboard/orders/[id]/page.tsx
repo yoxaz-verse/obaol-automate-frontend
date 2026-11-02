@@ -143,8 +143,12 @@ export default function OrderDetailsPage() {
             try {
                 const byId = await getData(`${apiRoutes.orders.getAll}/${orderId}`);
                 return byId;
-            } catch {
-                const listRes = await getData(apiRoutes.orders.getAll, { page: 1, limit: 100, sort: "createdAt:desc" });
+            } catch (directError: any) {
+                // Only use the legacy enquiry-id fallback for a genuine 404. Retrying
+                // a large list after timeouts or server errors doubles the wait and
+                // makes navigation appear stuck.
+                if (Number(directError?.response?.status || 0) !== 404) throw directError;
+                const listRes = await getData(apiRoutes.orders.getAll, { page: 1, limit: 25, sort: "createdAt:desc" });
                 const rows = Array.isArray(listRes?.data?.data?.data)
                     ? listRes.data.data.data
                     : Array.isArray(listRes?.data?.data)

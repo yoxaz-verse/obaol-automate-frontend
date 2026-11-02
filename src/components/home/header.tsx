@@ -55,7 +55,7 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
+    const media = window.matchMedia("(min-width: 1280px)");
     const update = () => { setDesktop(media.matches); setOpen(false); };
     update();
     media.addEventListener("change", update);
@@ -102,10 +102,10 @@ export default function Header() {
 
   return (
     <>
-      {open && !desktop && <div aria-hidden="true" onClick={() => closeMenu(true)} className="fixed inset-0 z-[99] bg-black/30 lg:hidden" />}
+      {open && !desktop && <div aria-hidden="true" onClick={() => closeMenu(true)} className="fixed inset-0 z-[99] bg-black/30 xl:hidden" />}
       <header ref={headerRef} onBlur={(event) => {
         if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false);
-      }} className="fixed left-0 right-0 top-0 z-[100] safe-pt py-2.5">
+      }} className="public-site-header sticky top-0 z-[100] safe-pt py-2.5">
         <PublicContainer className="relative">
           <div className={`public-header-shell calm-interaction flex h-16 items-center justify-between gap-3 rounded-2xl border bg-background/85 px-4 shadow-[0_12px_40px_-20px_rgba(27,38,50,0.25)] backdrop-blur-xl md:px-6 ${scrolled ? "border-obaol-500/40 shadow-[0_12px_30px_-15px_rgba(207,152,60,0.2)]" : "border-obaol-500/20"}`}>
             <Link href="/" aria-label="OBAOL home" onClick={() => closeMenu()} className="relative flex-shrink-0 flex items-center">
@@ -126,7 +126,7 @@ export default function Header() {
                 className="block dark:hidden h-7 w-auto object-contain"
               />
             </Link>
-            <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-1">
+            <nav aria-label="Primary navigation" className="hidden xl:flex items-center gap-0.5">
               {primaryPublicLinks.map((link) => (
                 <Link key={link.href} href={link.href} aria-current={pathname === link.href ? "page" : undefined}
                   onClick={() => closeMenu()} className="px-3.5 py-2 text-sm font-semibold text-foreground/75 hover:text-foreground rounded-xl hover:bg-obaol-500/10 aria-[current=page]:text-obaol-600 dark:aria-[current=page]:text-obaol-300 aria-[current=page]:bg-obaol-500/10 transition-colors">
@@ -151,15 +151,15 @@ export default function Header() {
                 {signedIn ? "Open workspace" : "Join Platform"}
               </Link>
               <button ref={mobileTrigger} type="button" onClick={() => setOpen((value) => !value)}
-                className="lg:hidden touch-target inline-flex items-center justify-center rounded-lg border border-foreground/10 bg-foreground/[0.04]"
+                className="xl:hidden touch-target inline-flex items-center justify-center rounded-lg border border-foreground/10 bg-foreground/[0.04]"
                 aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="public-page-directory">
                 {open ? <FiX aria-hidden="true" size={20} /> : <FiMenu aria-hidden="true" size={20} />}
               </button>
             </div>
           </div>
           {open && (
-            <div id="public-page-directory" className="absolute left-4 right-4 top-full mt-2 max-h-[calc(100dvh-7rem-var(--safe-top)-var(--safe-bottom))] overflow-y-auto overscroll-contain rounded-2xl border border-obaol-500/20 bg-content1 p-4 shadow-[0_24px_70px_-24px_rgba(27,38,50,0.55)] dark:bg-brand-blue lg:p-6">
-              <nav aria-label="All public pages" className="columns-1 gap-6 lg:columns-3">
+            <div id="public-page-directory" className="absolute left-4 right-4 top-full mt-2 max-h-[calc(100dvh-7rem-var(--safe-top)-var(--safe-bottom))] overflow-y-auto overscroll-contain rounded-2xl border border-obaol-500/20 bg-content1 p-4 shadow-[0_24px_70px_-24px_rgba(27,38,50,0.55)] dark:bg-brand-blue xl:p-6">
+              <nav aria-label="All public pages" className="columns-1 gap-6 xl:columns-3">
                 {publicNavigation.map((group) => {
                   const Icon = groupIcons[group.icon];
                   return (
@@ -182,7 +182,7 @@ export default function Header() {
                   );
                 })}
               </nav>
-              <div className="mt-2 flex flex-wrap items-center justify-center gap-3 border-t border-foreground/10 pt-4 lg:hidden">
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-3 border-t border-foreground/10 pt-4 xl:hidden">
                 {!signedIn && <Link href="/auth?view=signin" onClick={() => closeMenu(true)} className="min-h-11 rounded-xl border border-foreground/10 px-4 py-3 text-sm font-semibold">Sign In</Link>}
                 <Link href={signedIn ? "/dashboard" : "/auth"} onClick={() => closeMenu(true)} className="min-h-11 rounded-xl bg-obaol-500 px-4 py-3 text-sm font-bold text-obaol-950">{signedIn ? "Open workspace" : "Get Started"}</Link>
                 {soundButton}

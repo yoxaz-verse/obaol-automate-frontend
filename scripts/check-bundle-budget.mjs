@@ -23,8 +23,22 @@ const budgets = {
   "/dashboard/map/page": 385,
   "/dashboard/enquiries/[id]/page": 385,
   "/dashboard/orders/[id]/page": 360,
+  "/dashboard/approvals/page": 340,
+  "/dashboard/companies/page": 440,
+  "/dashboard/operators/overview/page": 260,
+  "/dashboard/reports/page": 280,
+  "/dashboard/sidebar-governance/page": 285,
   "/verification/page": 535,
 };
+
+// Every dashboard route is available to administrators, so no newly added
+// admin screen may silently ship an unbounded initial bundle. High-traffic
+// routes above retain substantially tighter route-specific ceilings.
+for (const route of Object.keys(manifest.pages || {})) {
+  if (route.startsWith("/dashboard") && route.endsWith("/page") && budgets[route] === undefined) {
+    budgets[route] = 450;
+  }
+}
 
 let failed = false;
 for (const [route, budgetKb] of Object.entries(budgets)) {

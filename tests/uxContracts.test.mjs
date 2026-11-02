@@ -77,6 +77,17 @@ test("subcategory deletion is exposed only to admins", () => {
   assert.match(categoryDivision, /String\(user\?\.role \|\| ""\)\.toLowerCase\(\) === "admin" && \([\s\S]*?<UserDeleteModal/);
 });
 
+test("sample requests use compact sample cards and restrict owner names to admins", () => {
+  const list = read("../src/app/dashboard/sample-requests/page.tsx");
+  const detail = read("../src/app/dashboard/sample-requests/[id]/page.tsx");
+
+  assert.match(list, /data-testid="sample-request-badge"[\s\S]*Sample/);
+  assert.match(list, /\.\.\.\(isAdmin[\s\S]*label: "Owner"/);
+  assert.doesNotMatch(list, /label: "Owner", val: buyerDisplay \|\| "—"/);
+  assert.match(detail, /\{isAdmin && \([\s\S]*data-testid="sample-request-owner"/);
+  assert.match(detail, /const buyerDisplay = isAdmin \? buyerName : ""/);
+});
+
 test("active homepage source does not advertise fabricated runtime telemetry", () => {
   const homepage = read("../src/components/home/HomeContent.tsx") + read("../src/components/home/HeroSectionServer.tsx");
   for (const phrase of ["CORE_LATENCY", "AES-256", "SYS_LINK"]) assert.equal(homepage.includes(phrase), false);
@@ -130,11 +141,11 @@ test("homepage hero is calm and the complete ten-stage map appears later", () =>
   assert.equal(hero.includes('"use client"'), false);
   assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
   assert.equal(hero.includes('data-hero-centered-layout="true"'), true);
-  assert.equal(hero.includes("lg:min-h-[clamp(36rem,calc(100svh-6rem),50rem)]"), true);
+  assert.equal(hero.includes("min-h-[clamp(36rem,calc(100svh-6rem),50rem)]"), false);
   assert.equal(hero.includes("max-w-[90rem]"), true);
   assert.equal(hero.includes("text-brand-abyssal dark:text-brand-palladian"), true);
   assert.equal(hero.includes("text-slate-950 dark:text-white"), false);
-  assert.equal(hero.includes("lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
+  assert.equal(hero.includes("xl:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]"), true);
   assert.equal(hero.includes('<ParallaxTradeAccents placement="hero" />'), false);
   assert.equal(explorer.includes("ParallaxTradeAccents"), false);
   assert.equal(homeContent.includes("ParallaxTradeAccents"), false);
@@ -645,6 +656,12 @@ test("catalog grid cards respond to their container without compressing controls
   assert.equal(variantRate.includes("Listing status"), true);
   assert.equal(variantRate.includes('layout="inline"'), true);
   assert.equal(variantRate.includes("More options for"), true);
+  assert.equal(variantRate.includes('placement="top-end"'), true);
+  assert.equal(variantRate.includes("shouldFlip"), true);
+  assert.equal(variantRate.includes("containerPadding={12}"), true);
+  assert.equal(variantRate.includes("w-[min(13rem,calc(100vw-1.5rem))]"), true);
+  assert.equal(variantRate.includes("openActionMenuId"), true);
+  assert.equal(variantRate.includes("break-words text-sm font-bold leading-snug"), true);
   assert.equal(variantRate.includes("/dashboard/warehouses?warehouseId="), true);
   assert.equal(variantRate.includes("item.warehouseName"), true);
   assert.equal(globals.includes("repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr))"), true);

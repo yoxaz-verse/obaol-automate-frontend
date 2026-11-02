@@ -226,7 +226,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 type="button"
                 aria-label="Go to dashboard"
                 disabled={isOnboardingLocked}
-                className={`relative flex min-h-[72px] w-full items-center justify-center px-4 py-4 outline-none ring-0 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-obaol-500/50 group ${isOnboardingLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                className={`relative flex min-h-[72px] w-full items-center px-4 py-4 outline-none ring-0 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-obaol-500/50 group ${isCollapsed ? "justify-center" : "justify-start"} ${isOnboardingLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                 onClick={() => {
                     if (isOnboardingLocked) return;
                     navigate("/dashboard");

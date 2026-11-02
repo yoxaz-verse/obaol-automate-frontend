@@ -222,28 +222,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             </button>
 
             {/* Console Header */}
-            <div
-                className={`relative px-6 py-10 flex cursor-pointer group ${isCollapsed ? "justify-center" : "gap-4 items-center"} ${isOnboardingLocked ? "cursor-not-allowed opacity-70" : ""}`}
+            <button
+                type="button"
+                aria-label="Go to dashboard"
+                disabled={isOnboardingLocked}
+                className={`relative flex min-h-[88px] w-full items-center justify-center px-4 py-6 outline-none ring-0 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-obaol-500/50 group ${isOnboardingLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                 onClick={() => {
                     if (isOnboardingLocked) return;
                     navigate("/dashboard");
                 }}
             >
-                <div className="relative group-hover:scale-110 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-obaol-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-default-100 to-transparent dark:from-white/10 dark:to-transparent border border-default-200 dark:border-white/10 flex items-center justify-center shadow-sm overflow-hidden p-1.5">
-                       <Image src="/logo-dark.png" width={32} height={32} alt="Obaol" className="hidden dark:block object-contain" />
-                       <Image src="/logo-light.png" width={32} height={32} alt="Obaol" className="block dark:hidden object-contain" />
-                       <div className="absolute bottom-0 left-0 w-full h-[2px] bg-obaol-500 opacity-50 shadow-[0_-4px_10px_rgba(207,152,60,0.5)]" />
-                    </div>
-                </div>
-                {!isCollapsed && (
-                    <div className="flex flex-col">
-                        <span className="font-black text-lg tracking-[0.25em] text-foreground leading-none">OBAOL</span>
-                        <span className="mt-2 text-[8px] font-bold  tracking-[0.3em] text-obaol-700 dark:text-obaol-300/70">Trade workspace</span>
-                    </div>
-                )}
-            </div>
+                <Image
+                    src="/logo-dark.png"
+                    width={148}
+                    height={41}
+                    alt="OBAOL"
+                    priority
+                    className={`hidden dark:block h-auto object-contain transition-all duration-500 group-hover:scale-105 ${isCollapsed ? "w-[52px]" : "w-[148px]"}`}
+                />
+                <Image
+                    src="/logo-light.png"
+                    width={148}
+                    height={41}
+                    alt="OBAOL"
+                    priority
+                    className={`block dark:hidden h-auto object-contain transition-all duration-500 group-hover:scale-105 ${isCollapsed ? "w-[52px]" : "w-[148px]"}`}
+                />
+            </button>
 
             {/* Navigation Array */}
             <div className="flex-1 min-h-0 px-4 space-y-0.5 overflow-y-auto overscroll-contain no-scrollbar pb-10">

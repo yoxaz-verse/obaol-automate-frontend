@@ -29,8 +29,8 @@ test("mobile auth is a single focused surface without public-site navigation", a
   await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
   await expect(page.getByText("Go-To Agro Trade Platform")).toHaveCount(0);
   await expect(page.getByTestId("auth-public-navigation")).toBeHidden();
-  await expect(page.getByRole("link", { name: "Back to OBAOL" })).toBeHidden();
-  await expect(page.getByRole("link", { name: "Compare account types" })).toBeHidden();
+  await expect(page.getByRole("link", { name: "Explore OBAOL" })).toBeHidden();
+  await expect(page.getByRole("link", { name: "Explore account types" })).toBeHidden();
 
   const surface = await page.getByTestId("auth-card").evaluate((node) => {
     const style = getComputedStyle(node);
@@ -78,11 +78,11 @@ test("desktop auth retains branding, card, and public navigation", async ({ page
 
   await expect(page.getByText("ONE SECURE ACCESS")).toBeVisible();
   await expect(page.getByTestId("auth-public-navigation")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to OBAOL" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Compare account types" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to OBAOL" })).toHaveAttribute("target", "_blank");
-  await expect(page.getByRole("link", { name: "Compare account types" })).toHaveAttribute("target", "_blank");
-  await expect(page.getByRole("link", { name: "Back to OBAOL" })).toHaveAttribute("rel", "noopener noreferrer");
+  await expect(page.getByRole("link", { name: "Explore OBAOL" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Explore account types" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Explore OBAOL" })).toHaveAttribute("target", "_blank");
+  await expect(page.getByRole("link", { name: "Explore account types" })).toHaveAttribute("target", "_blank");
+  await expect(page.getByRole("link", { name: "Explore OBAOL" })).toHaveAttribute("rel", "noopener noreferrer");
 
   const surface = await page.getByTestId("auth-card").evaluate((node) => {
     const style = getComputedStyle(node);
@@ -99,14 +99,14 @@ test("browser auth public links open a new page and preserve the auth form", asy
   const authUrl = page.url();
 
   const homePopupPromise = page.waitForEvent("popup");
-  await page.getByRole("link", { name: "Back to OBAOL" }).click();
+  await page.getByRole("link", { name: "Explore OBAOL" }).click();
   const homePopup = await homePopupPromise;
   await homePopup.waitForLoadState("domcontentloaded");
   expect(new URL(homePopup.url()).pathname).toBe("/");
   await homePopup.close();
 
   const rolesPopupPromise = page.waitForEvent("popup");
-  await page.getByRole("link", { name: "Compare account types" }).click();
+  await page.getByRole("link", { name: "Explore account types" }).click();
   const rolesPopup = await rolesPopupPromise;
   await rolesPopup.waitForLoadState("domcontentloaded");
   expect(new URL(rolesPopup.url()).pathname).toBe("/roles");
@@ -133,8 +133,8 @@ test("desktop auth public links open externally without leaving the app", async 
 
   await expect(page.getByRole("heading", { name: "Welcome to OBAOL Desktop" })).toBeVisible();
   await expect(page.getByTestId("auth-submit")).toHaveText("Continue to OBAOL Desktop");
-  await page.getByRole("link", { name: "Visit OBAOL website" }).click();
-  await page.getByRole("link", { name: "View account types" }).click();
+  await page.getByRole("link", { name: "Explore OBAOL" }).click();
+  await page.getByRole("link", { name: "Explore account types" }).click();
 
   expect(page.url()).toBe(authUrl);
   expect(await page.evaluate(() => window.__desktopPublicPages)).toEqual(["home", "account-types"]);
@@ -154,7 +154,7 @@ test("auth public links fall back safely when an older desktop bridge is present
   const authUrl = page.url();
 
   const popupPromise = page.waitForEvent("popup");
-  await page.getByRole("link", { name: "Visit OBAOL website" }).click();
+  await page.getByRole("link", { name: "Explore OBAOL" }).click();
   const popup = await popupPromise;
   await popup.close();
 

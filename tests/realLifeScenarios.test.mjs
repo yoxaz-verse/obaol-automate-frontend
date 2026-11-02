@@ -49,9 +49,11 @@ test("public scenario fetches report backend failures instead of failing silentl
 test("public stories use the industry-scenario label without defensive disclaimer copy", () => {
   const rolePage = read("src/app/roles/associate/[roleSlug]/page.tsx");
   const view = read("src/components/public/ScenarioPageView.tsx");
+  const page = read("src/app/roles/associate/[roleSlug]/real-life-scenarios/[storySlug]/page.tsx");
   assert.match(rolePage, /Real-life scenarios/);
   assert.match(rolePage, /Industry scenario/);
   assert.match(view, /Industry scenario/);
   assert.doesNotMatch(view, /not a customer testimonial|verified case study|guarantee of results/i);
+  assert.doesNotMatch(page, /not a customer testimonial|verified case study|guarantee of results/i);
   assert.doesNotMatch(view, /FiInfo/);
 });

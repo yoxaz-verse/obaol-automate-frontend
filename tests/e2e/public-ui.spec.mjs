@@ -67,10 +67,11 @@ for (const theme of ["light", "dark"]) {
       await expect(bulkArtwork).toBeVisible();
       await expect(bulkArtwork.locator('[data-hero-phase-region]')).toHaveCount(4);
       await expect(bulkArtwork.locator('[data-hero-phase-highlight]')).toHaveCount(4);
+      await expect(bulkArtwork.locator('[data-hero-phase-divider="true"]')).toHaveCount(3);
       await expect(executionMap).toHaveAttribute("data-active-phase", "none");
       const phaseRail = page.locator('[data-execution-route="phase-rail"]');
       await expect(phaseRail.locator('[data-execution-phase]')).toHaveCount(4);
-      expect(await phaseRail.locator('[data-execution-phase]').allTextContents()).toEqual(["Plan", "Verify", "Move", "Close"]);
+      expect(await phaseRail.locator('[data-execution-phase]').allTextContents()).toEqual(["Plan", "Verify", "Move", "Receive & Approve"]);
       await expect(page.locator('[data-home-parallax-accents]')).toHaveCount(4);
       await expect(page.locator('[data-parallax-accent]')).toHaveCount(7);
       await expect(page.locator('[data-accent-depth="foreground"]')).toHaveCount(4);
@@ -88,6 +89,23 @@ for (const theme of ["light", "dark"]) {
       expect(railBox.y).toBeGreaterThanOrEqual(artworkBox.y + artworkBox.height - 1);
       expect(railBox.x).toBeGreaterThanOrEqual(0);
       expect(railBox.x + railBox.width).toBeLessThanOrEqual(width + 1);
+      if (width >= 1024) {
+        const mapBeforeHover = await executionMap.boundingBox();
+        const artworkBeforeHover = await bulkArtwork.boundingBox();
+        const railBeforeHover = await phaseRail.boundingBox();
+        await bulkArtwork.locator('[data-hero-phase-region="receive-and-approve"]').hover();
+        await expect(executionMap).toHaveAttribute("data-active-phase", "receive-and-approve");
+        await expect(executionMap.locator('[data-hero-phase-outcome="receive-and-approve"]')).toBeVisible();
+        const mapDuringHover = await executionMap.boundingBox();
+        const artworkDuringHover = await bulkArtwork.boundingBox();
+        const railDuringHover = await phaseRail.boundingBox();
+        expect(mapDuringHover).toEqual(mapBeforeHover);
+        expect(artworkDuringHover).toEqual(artworkBeforeHover);
+        expect(railDuringHover).toEqual(railBeforeHover);
+        await page.mouse.move(0, 0);
+        await expect(executionMap).toHaveAttribute("data-active-phase", "none");
+        expect(await phaseRail.boundingBox()).toEqual(railBeforeHover);
+      }
       const hierarchyIsCorrect = await page.evaluate(() => {
         const workspace = document.querySelector("#capability-explorer");
         const stages = document.querySelector('[data-execution-stage-band="true"]');

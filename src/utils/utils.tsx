@@ -13,7 +13,37 @@ import { LiaMapMarkedAltSolid } from "react-icons/lia";
 import { GoOrganization } from "react-icons/go";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
-import { LuWarehouse, LuShip, LuShare2 } from "react-icons/lu";
+import {
+  LuBusFront,
+  LuChartNoAxesCombined,
+  LuCircleHelp,
+  LuClipboardCheck,
+  LuContact,
+  LuContainer,
+  LuCreditCard,
+  LuIdCard,
+  LuListChecks,
+  LuListPlus,
+  LuMap,
+  LuMicroscope,
+  LuNotebookTabs,
+  LuPackageCheck,
+  LuPackageOpen,
+  LuPanelLeft,
+  LuPanelsTopLeft,
+  LuPanelTopOpen,
+  LuRoute,
+  LuScanLine,
+  LuScrollText,
+  LuSettings2,
+  LuShare2,
+  LuShip,
+  LuStamp,
+  LuUserCog,
+  LuUsersRound,
+  LuWarehouse,
+  LuWorkflow,
+} from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
 import { TbBuildingWarehouse, TbArrowsUpDown } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
@@ -72,7 +102,7 @@ export const sidebarOptions = [
   },
   {
     name: "Buying Requests",
-    icon: <RiAuctionLine />,
+    icon: <LuListChecks />,
     link: "/dashboard/bidding/my",
   },
   {
@@ -100,7 +130,7 @@ export const sidebarOptions = [
     icon: <LuShip />,
     link: "/dashboard/imports",
   },
-  { name: "My Import Listings", icon: <LuShip />, link: "/dashboard/imports/my-listings" },
+  { name: "My Import Listings", icon: <LuListPlus />, link: "/dashboard/imports/my-listings" },
   { name: "Import Reservations", icon: <FiClipboard />, link: "/dashboard/imports/reservations" },
   {
     name: "Commodity Catalog", //Translate
@@ -128,23 +158,23 @@ export const sidebarOptions = [
     icon: <LuFlaskConical />,
     link: "/dashboard/quality-labs",
   },
-  { name: "My Lab", icon: <LuFlaskConical />, link: "/dashboard/quality-labs/my" },
-  { name: "Lab Execution", icon: <FiActivity />, link: "/dashboard/quality-labs/execution" },
+  { name: "My Lab", icon: <LuMicroscope />, link: "/dashboard/quality-labs/my" },
+  { name: "Lab Execution", icon: <LuClipboardCheck />, link: "/dashboard/quality-labs/execution" },
   { name: "Packaging Services", icon: <FiPackage />, link: "/dashboard/packaging" },
-  { name: "My Packaging", icon: <FiPackage />, link: "/dashboard/packaging/my" },
-  { name: "Packaging Execution", icon: <FiActivity />, link: "/dashboard/packaging/execution" },
-  { name: "Freight Forwarding", icon: <LuShip />, link: "/dashboard/freight-forwarding" },
-  { name: "My Freight Profile", icon: <LuBuilding2 />, link: "/dashboard/freight-forwarding/my" },
+  { name: "My Packaging", icon: <LuPackageOpen />, link: "/dashboard/packaging/my" },
+  { name: "Packaging Execution", icon: <LuScanLine />, link: "/dashboard/packaging/execution" },
+  { name: "Freight Forwarding", icon: <LuContainer />, link: "/dashboard/freight-forwarding" },
+  { name: "My Freight Profile", icon: <LuContact />, link: "/dashboard/freight-forwarding/my" },
   { name: "Freight Associates", icon: <FiUsers />, link: "/dashboard/freight-forwarding/associates" },
   { name: "Freight Shipments", icon: <LuTruck />, link: "/dashboard/freight-forwarding/shipments" },
-  { name: "Freight Customs", icon: <FiClipboard />, link: "/dashboard/freight-forwarding/customs" },
+  { name: "Freight Customs", icon: <LuStamp />, link: "/dashboard/freight-forwarding/customs" },
   { name: "Freight Finance", icon: <LuWallet />, link: "/dashboard/freight-forwarding/finance" },
-  { name: "Transport Overview", icon: <LuTruck />, link: "/dashboard/inland-transportation" },
-  { name: "Transport Opportunities", icon: <RiAuctionLine />, link: "/dashboard/inland-transportation/opportunities" },
+  { name: "Transport Overview", icon: <LuMap />, link: "/dashboard/inland-transportation" },
+  { name: "Transport Opportunities", icon: <LuRoute />, link: "/dashboard/inland-transportation/opportunities" },
   { name: "Transport Trips", icon: <LiaMapMarkedAltSolid />, link: "/dashboard/inland-transportation/trips" },
-  { name: "Fleet & Drivers", icon: <LuTruck />, link: "/dashboard/inland-transportation/fleet" },
+  { name: "Fleet & Drivers", icon: <LuBusFront />, link: "/dashboard/inland-transportation/fleet" },
   { name: "Transport Documents", icon: <FiFileText />, link: "/dashboard/inland-transportation/documents" },
-  { name: "Transport Profile", icon: <LuBuilding2 />, link: "/dashboard/inland-transportation/profile" },
+  { name: "Transport Profile", icon: <LuIdCard />, link: "/dashboard/inland-transportation/profile" },
   {
     name: "My Company",
     icon: <GoOrganization />,
@@ -167,7 +197,7 @@ export const sidebarOptions = [
   },
   {
     name: "Team",
-    icon: <FiUsers />,
+    icon: <LuUsersRound />,
     link: "/dashboard/operator/team",
   },
   {
@@ -182,12 +212,12 @@ export const sidebarOptions = [
   },
   {
     name: "External Orders",
-    icon: <LuTruck />,
+    icon: <LuPackageCheck />,
     link: "/dashboard/external-orders",
   },
   {
     name: "Documentation",
-    icon: <FiFileText />,
+    icon: <LuNotebookTabs />,
     link: "/dashboard/documentation",
   },
   {
@@ -202,7 +232,7 @@ export const sidebarOptions = [
   },
   {
     name: "Payment Rules",
-    icon: <LuWallet />,
+    icon: <LuCreditCard />,
     link: "/dashboard/payments",
   },
   {
@@ -222,17 +252,17 @@ export const sidebarOptions = [
   },
   {
     name: "Flow Rules",
-    icon: <FiActivity />,
+    icon: <LuWorkflow />,
     link: "/dashboard/flow-rules",
   },
   {
     name: "Order Rules",
-    icon: <FiPackage />,
+    icon: <LuScrollText />,
     link: "/dashboard/order-rules",
   },
   {
     name: "Operator Overview",
-    icon: <FiUsers />,
+    icon: <LuChartNoAxesCombined />,
     link: "/dashboard/operators/overview",
   },
   {
@@ -242,7 +272,7 @@ export const sidebarOptions = [
   },
   {
     name: "Execution Panel",
-    icon: <FiClipboard />,
+    icon: <LuPanelTopOpen />,
     link: "/dashboard/execution-enquiries",
   },
   {
@@ -262,7 +292,7 @@ export const sidebarOptions = [
   },
   {
     name: "Guidance",
-    icon: <FiBookOpen />,
+    icon: <LuCircleHelp />,
     link: "/dashboard/guidance",
   },
 
@@ -288,22 +318,22 @@ export const sidebarOptions = [
   },
   {
     name: "Users", //Translate
-    icon: <FiUsers />,
+    icon: <LuUserCog />,
     link: "/dashboard/users",
   },
   {
     name: "Function Preview",
-    icon: <FiLayers />,
+    icon: <LuPanelsTopLeft />,
     link: "/dashboard/function-preview",
   },
   {
     name: "Sidebar Governance",
-    icon: <MdOutlineSettingsInputComponent />,
+    icon: <LuPanelLeft />,
     link: "/dashboard/sidebar-governance",
   },
   {
     name: "Essentials", //Translate
-    icon: <MdOutlineSettingsInputComponent />,
+    icon: <LuSettings2 />,
     link: "/dashboard/essentials",
   },
   // {

@@ -58,6 +58,7 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
     links: [
       "/dashboard/freight-forwarding",
       "/dashboard/freight-forwarding/my",
+      "/dashboard/freight-forwarding/associates",
       "/dashboard/freight-forwarding/shipments",
       "/dashboard/freight-forwarding/customs",
       "/dashboard/freight-forwarding/finance",

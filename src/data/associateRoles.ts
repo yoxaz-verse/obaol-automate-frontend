@@ -3,6 +3,15 @@ export type AssociateRoleGroup = "trade" | "supply-procurement" | "logistics-qua
 export type AssociateParticipationMode = "BUY" | "SELL" | "BOTH" | "SERVICE";
 
 export interface AssociateRoleFaqItem { question: string; answer: string }
+export interface AssociateRoleJourneyStep { title: string; description: string }
+export interface AssociateRoleJourney {
+  eyebrow: string;
+  title: string;
+  description: string;
+  steps: AssociateRoleJourneyStep[];
+  completionTitle: string;
+  completionDescription: string;
+}
 export interface AssociateRoleDefinition {
   slug: string;
   displayName: string;
@@ -26,6 +35,7 @@ export interface AssociateRoleDefinition {
   seo: { title: string; description: string; keywords: string[] };
   faqs: AssociateRoleFaqItem[];
   relatedRoles: string[];
+  serviceJourney?: AssociateRoleJourney;
 }
 
 export const associateRoleGroups: Array<{ key: AssociateRoleGroup; label: string; description: string }> = [
@@ -138,6 +148,23 @@ const roles: AssociateRoleBase[] = [
     seo: { title: "Inland Transportation Companies on OBAOL | Associate Role", description: "See how registered inland transport companies support commodity pickup, movement, handoffs, and delivery through OBAOL.", keywords: ["inland transportation", "commodity transport", "first mile logistics"] },
     faqs: [{ question: "Can a transporter support export cargo?", answer: "Yes. Inland legs can support international shipments when route, cargo, and capability fit." }, { question: "How are requirements matched?", answer: "Company capability and location provide context; the provider must review each requirement and accept its terms." }],
     relatedRoles: ["warehouse-owners", "freight-forwarders", "logistics-providers"],
+    serviceJourney: {
+      eyebrow: "Transporter workflow",
+      title: "Run the inland movement from opportunity to proof of delivery",
+      description: "OBAOL keeps the commercial request, operational handoffs, movement updates, documents, and delivery evidence connected in one workflow for the transport company and every authorized participant.",
+      steps: [
+        { title: "Register the transport business", description: "Create the company profile and record operating locations, route coverage, vehicle types, cargo capabilities, and authorized contacts." },
+        { title: "Review matched requirements", description: "See inland movement opportunities that fit the company’s capabilities, including cargo, pickup, destination, schedule, and handling context." },
+        { title: "Submit a service bid", description: "Review the complete requirement, confirm capacity and commercial terms, and submit the transport offer through the execution workspace." },
+        { title: "Plan dispatch and pickup", description: "After award, assign the operational team, confirm the vehicle and pickup window, and coordinate readiness with the supplier or warehouse." },
+        { title: "Manage loading and transit", description: "Record arrival and loading milestones, keep authorized parties updated during transit, and report delays, route issues, or cargo exceptions." },
+        { title: "Complete delivery and handover", description: "Confirm arrival, unloading, recipient handover, and any destination notes required to close the movement accurately." },
+        { title: "Attach transport evidence", description: "Keep applicable transport records, exception evidence, and proof of delivery connected to the order instead of scattered across channels." },
+        { title: "Close the service leg", description: "Finish the assigned inland leg with a traceable milestone history so the wider trade or shipment can move to its next stage." },
+      ],
+      completionTitle: "One shared record for the entire inland leg",
+      completionDescription: "Transport teams retain operational ownership while buyers, sellers, warehouses, forwarders, and OBAOL operators see the updates relevant to their role.",
+    },
   },
   {
     slug: "freight-forwarders", displayName: "Freight Forwarders", group: "logistics-quality-compliance", participationModes: ["SERVICE"], iconKey: "freightForwarder",

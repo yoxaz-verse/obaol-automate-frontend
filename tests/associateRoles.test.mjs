@@ -67,6 +67,17 @@ test("associate capability statuses identify representative live, upcoming, and 
   assert.match(getAssociateRoleBySlug("agritech-companies").collaborationOpportunities.join(" "), /pre-trade|traceability|technology/i);
 });
 
+test("inland transportation explains the complete provider journey", () => {
+  const journey = getAssociateRoleBySlug("inland-transportation").serviceJourney;
+  assert.ok(journey, "inland transportation must have a dedicated service journey");
+  assert.ok(journey.steps.length >= 8, "journey should cover the end-to-end transport process");
+  assert.match(journey.steps.map((step) => `${step.title} ${step.description}`).join(" "), /register/i);
+  assert.match(journey.steps.map((step) => `${step.title} ${step.description}`).join(" "), /bid/i);
+  assert.match(journey.steps.map((step) => `${step.title} ${step.description}`).join(" "), /pickup/i);
+  assert.match(journey.steps.map((step) => `${step.title} ${step.description}`).join(" "), /transit/i);
+  assert.match(journey.steps.map((step) => `${step.title} ${step.description}`).join(" "), /proof of delivery/i);
+});
+
 test("functional groups contain every role exactly once in the intended order", () => {
   const groupedSlugs = associateRoleGroups.flatMap((group) => getAssociateRolesByGroup(group.key).map((role) => role.slug));
   assert.deepEqual(groupedSlugs, associateRoleSlugs);

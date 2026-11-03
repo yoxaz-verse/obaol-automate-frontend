@@ -189,6 +189,7 @@ test("Freight navigation is registered for the sidebar and accessible to operati
   const freightLinks = [
     "/dashboard/freight-forwarding",
     "/dashboard/freight-forwarding/my",
+    "/dashboard/freight-forwarding/associates",
     "/dashboard/freight-forwarding/shipments",
     "/dashboard/freight-forwarding/customs",
     "/dashboard/freight-forwarding/finance",
@@ -196,8 +197,14 @@ test("Freight navigation is registered for the sidebar and accessible to operati
   assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Freight")?.links, freightLinks);
   for (const path of freightLinks) {
     assert.match(options, new RegExp(`link: "${path.replaceAll("/", "\\/")}"`));
-    for (const role of ["Admin", "Associate", "Operator", "Team"]) {
+    const allowedRoles = path.endsWith("/associates") ? ["Admin"] : ["Admin", "Associate", "Operator", "Team"];
+    for (const role of allowedRoles) {
       assert.equal(canAccessDashboardRoute({ path, role }), true, `${role} should access ${path}`);
+    }
+    if (path.endsWith("/associates")) {
+      for (const role of ["Associate", "Operator", "Team"]) {
+        assert.equal(canAccessDashboardRoute({ path, role }), false, `${role} should not access ${path}`);
+      }
     }
     assert.equal(canAccessDashboardRoute({ path, role: "CustomerSupport" }), false);
   }

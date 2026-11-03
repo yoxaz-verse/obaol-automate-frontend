@@ -36,6 +36,13 @@ test("account menu uses concise professional labels and bordered selection state
     assert.equal(topBar.includes(label), true, `missing ${label}`);
   }
   assert.match(topBar, /data-\[focus=true\]:border-obaol-500\/30/);
+  for (const label of ["Profile", "Language", "Theme", "Sign out"]) {
+    assert.match(
+      topBar,
+      new RegExp(`text-\\[rgb\\(var\\(--foreground-rgb\\)\\)\\][^>]*>${label}<`),
+      `${label} should use the theme-aware foreground color`,
+    );
+  }
   assert.doesNotMatch(topBar, /Node Language|System Theme|Terminate Session|Management Portal/);
 });
 

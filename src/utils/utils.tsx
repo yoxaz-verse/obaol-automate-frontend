@@ -135,6 +135,7 @@ export const sidebarOptions = [
   { name: "Packaging Execution", icon: <FiActivity />, link: "/dashboard/packaging/execution" },
   { name: "Freight Forwarding", icon: <LuShip />, link: "/dashboard/freight-forwarding" },
   { name: "My Freight Profile", icon: <LuBuilding2 />, link: "/dashboard/freight-forwarding/my" },
+  { name: "Freight Associates", icon: <FiUsers />, link: "/dashboard/freight-forwarding/associates" },
   { name: "Freight Shipments", icon: <LuTruck />, link: "/dashboard/freight-forwarding/shipments" },
   { name: "Freight Customs", icon: <FiClipboard />, link: "/dashboard/freight-forwarding/customs" },
   { name: "Freight Finance", icon: <LuWallet />, link: "/dashboard/freight-forwarding/finance" },

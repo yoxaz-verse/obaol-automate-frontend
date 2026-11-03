@@ -19,9 +19,17 @@ import UsersExportButton from "./users-export-button";
 
 interface UserTabContentProps {
   currentTable: string;
+  lockedFilters?: Record<string, string | number | boolean>;
+  showAdd?: boolean;
+  showDelete?: boolean;
 }
 
-const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
+const UserTabContent: React.FC<UserTabContentProps> = ({
+  currentTable,
+  lockedFilters = {},
+  showAdd = true,
+  showDelete = true,
+}) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
@@ -44,9 +52,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
-  const refetchData = () => {
-    // Implement refetch logic if necessary
-  };
   const tableLabel = currentTable;
 
   return (
@@ -57,6 +62,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
           currentTable,
           apiRoutesByRole[currentTable],
           filters,
+          lockedFilters,
           debouncedSearch,
           page,
         ]}
@@ -65,10 +71,11 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
         search={debouncedSearch}
         additionalParams={{
           ...filters,
+          ...lockedFilters,
           sort: "createdAt:desc",
         }}
       >
-        {(data: any, _refetch, meta) => {
+        {(data: any, refetch, meta) => {
           const fetchedData = Array.isArray(data) ? data : (data?.data || []);
           // Generate formFields with updated values
           let formFields = tableConfig[currentTable];
@@ -116,12 +123,12 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
             <>
               <div className="flex items-center justify-between">
                 {/* AddModal for adding new entries */}
-                <AddModal
+                {showAdd ? <AddModal
                   currentTable={currentTable}
                   formFields={formFields} // Pass the updated formFields
                   apiEndpoint={apiRoutesByRole[currentTable]}
-                  refetchData={refetchData}
-                />
+                  refetchData={refetch}
+                /> : <span />}
                 <DynamicFilter
                   currentTable={currentTable}
                   formFields={tableConfig[currentTable]}
@@ -166,18 +173,18 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                         currentTable={currentTable}
                         formFields={formFields}
                         apiEndpoint={apiRoutesByRole[currentTable]} // Assuming API endpoint for update
-                        refetchData={refetchData}
+                        refetchData={refetch}
                       />
                     )}
-                    deleteModal={(item: any) => (
+                    deleteModal={showDelete ? (item: any) => (
                       <DeleteModal
                         _id={item._id}
                         name={item.name}
                         deleteApiEndpoint={apiRoutesByRole[currentTable]}
-                        refetchData={refetchData}
+                        refetchData={refetch}
                         useBody={true}
                       />
-                    )}
+                    ) : undefined}
                   />
                 </TableFrame>
               ) : (

@@ -20,6 +20,7 @@ import {
   FiCheckCircle,
   FiClock,
   FiHelpCircle,
+  FiMapPin,
   FiShield,
   FiStar,
   FiUsers,
@@ -276,6 +277,59 @@ export default async function AssociateRoleDetailPage({
               </div>
             </div>
           </section>
+
+          {role.serviceJourney && (
+            <section
+              aria-labelledby="service-journey-heading"
+              className="public-standard-section border-y border-default-200/60 bg-foreground/[0.025] py-16"
+              data-testid="associate-service-journey"
+            >
+              <div className="container mx-auto max-w-6xl px-4 public-layout-container">
+                <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+                  <div className="lg:sticky lg:top-24">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-orange-500/25 bg-orange-500/10 px-3.5 py-1 text-xs font-black uppercase tracking-[0.2em] text-orange-500">
+                      <FiMapPin className="h-3.5 w-3.5" /> {role.serviceJourney.eyebrow}
+                    </span>
+                    <h2 id="service-journey-heading" className="mt-4 text-3xl font-black tracking-tight md:text-5xl">
+                      {role.serviceJourney.title}
+                    </h2>
+                    <p className="mt-5 max-w-xl text-base leading-7 text-foreground/65">
+                      {role.serviceJourney.description}
+                    </p>
+                    <div className="mt-8 rounded-3xl border border-orange-500/20 bg-orange-500/[0.06] p-6">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm shadow-orange-500/25">
+                        <FiCheckCircle className="h-5 w-5" />
+                      </div>
+                      <h3 className="mt-4 text-lg font-black">{role.serviceJourney.completionTitle}</h3>
+                      <p className="mt-2 text-sm leading-6 text-foreground/65">
+                        {role.serviceJourney.completionDescription}
+                      </p>
+                    </div>
+                  </div>
+
+                  <ol className="grid gap-4 sm:grid-cols-2">
+                    {role.serviceJourney.steps.map((step, index) => (
+                      <li
+                        key={step.title}
+                        className="public-surface-card group relative overflow-hidden rounded-3xl border border-default-200/70 bg-background p-6 shadow-2xs transition-all hover:-translate-y-0.5 hover:border-orange-500/35 hover:shadow-md"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-sm font-black text-orange-500 transition-colors group-hover:bg-orange-500 group-hover:text-white">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-foreground/35">
+                            Step {index + 1}
+                          </span>
+                        </div>
+                        <h3 className="mt-5 text-xl font-black tracking-tight">{step.title}</h3>
+                        <p className="mt-3 text-sm leading-6 text-foreground/65">{step.description}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Capabilities & Features Section */}
           <section

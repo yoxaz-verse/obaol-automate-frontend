@@ -476,17 +476,17 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                   key="profile" 
                   startContent={<FiUser size={16} className="text-obaol-600 dark:text-obaol-300" />}
                   onClick={() => navigate("/dashboard/profile")}
-                  className="data-[hover=true]:bg-obaol-500/10 data-[hover=true]:text-obaol-700 dark:data-[hover=true]:text-obaol-300"
+                  className="text-[rgb(var(--foreground-rgb))] data-[hover=true]:bg-obaol-500/10 data-[hover=true]:text-obaol-700 dark:data-[hover=true]:text-obaol-300"
                   textValue="Profile"
                 >
-                   <span className="font-bold">Profile</span>
+                   <span className="font-bold text-[rgb(var(--foreground-rgb))]">Profile</span>
                 </DropdownItem>
 
                 <DropdownItem key="lang" isReadOnly closeOnSelect={false} textValue="Language">
                    <div className="flex items-center justify-between gap-4 py-1">
                      <div className="flex items-center gap-2">
                        <FiGlobe size={16} className="text-primary-500" />
-                       <span className="text-xs font-semibold dark:text-white/60">Language</span>
+                       <span className="text-xs font-semibold text-[rgb(var(--foreground-rgb))]">Language</span>
                      </div>
                      <LanguageSwitcher />
                    </div>
@@ -496,7 +496,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                    <div className="flex items-center justify-between gap-4 py-1">
                      <div className="flex items-center gap-2">
                        <FiSettings size={16} className="text-success-500" />
-                       <span className="text-xs font-semibold dark:text-white/60">Theme</span>
+                       <span className="text-xs font-semibold text-[rgb(var(--foreground-rgb))]">Theme</span>
                      </div>
                      <ThemeSwitcher />
                    </div>
@@ -504,12 +504,12 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
 
                 <DropdownItem 
                    key="logout" 
-                   className="mt-4 bg-danger-500/5 hover:bg-danger-500 text-danger-500 hover:text-white transition-all group" 
+                   className="group mt-4 bg-danger-500/10 text-[rgb(var(--foreground-rgb))] transition-all data-[hover=true]:bg-danger-500 data-[hover=true]:text-white" 
                    onClick={async () => { await logout(); router.push("/auth"); }}
                    textValue="Sign out"
                    startContent={<FiLogOut size={16} className="group-hover:translate-x-0.5 transition-transform" />}
                 >
-                   <span className="text-[12px] font-semibold">Sign out</span>
+                   <span className="text-[12px] font-semibold text-[rgb(var(--foreground-rgb))] group-data-[hover=true]:text-white">Sign out</span>
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>

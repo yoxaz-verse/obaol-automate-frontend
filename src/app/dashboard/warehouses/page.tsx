@@ -18,6 +18,7 @@ import {
 import AuthContext from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useRouter, useSearchParams } from "next/navigation";
+import { OfferingShareDialog } from "@/components/referrals/OfferingShareDialog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Warehouse {
@@ -33,6 +34,8 @@ interface Warehouse {
     isActive: boolean;
     listingType?: string;
     isRentalActive?: boolean;
+    listingState?: "DRAFT" | "LIVE";
+    unit?: string;
     location?: {
         latitude?: number;
         longitude?: number;
@@ -372,6 +375,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                                         </div>
                                                     )}
                                                     <div className="pt-2">
+                                                        {wh.isActive && wh.listingType === "RENTAL" && wh.isRentalActive && wh.listingState !== "DRAFT" && <div className="mb-2"><OfferingShareDialog offeringType="WAREHOUSE" offeringId={wh._id} title={wh.name} rate={wh.storageRatePerUnit} formattedRate={formatRate(Number(wh.storageRatePerUnit || 0))} unit={wh.unit || "MT"} buttonClassName="w-full" /></div>}
                                                         <Button
                                                             color="warning"
                                                             size="sm"

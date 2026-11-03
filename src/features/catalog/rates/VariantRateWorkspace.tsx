@@ -92,6 +92,7 @@ import { invalidateListingQueries } from "@/utils/listingQueryCache";
 import { AddToCatalogAction, LiveStatusToggle } from "./RateActions";
 import { LISTING_ACTION_CLASS, LISTING_DELETE_WINDOW_MS } from "./constants";
 import { normalizeApiError } from "@/core/api/apiErrors";
+import { OfferingShareDialog } from "@/components/referrals/OfferingShareDialog";
 import {
   canDeleteRate,
   canManageRate,
@@ -1694,6 +1695,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                             const secondaryActions = (
                               <div className="flex items-center gap-2 shrink-0">
+                                {rate === "catalogItem" && canManageRow(item) && isLive && <OfferingShareDialog offeringType="PRODUCT" offeringId={String(item._id)} title={toDisplayText(item.productVariant, "Product listing")} rate={Number(item.finalPrice ?? item.totalRate ?? item.rate)} formattedRate={formatRate(Number(item.finalPrice ?? item.totalRate ?? item.rate ?? 0))} unit={toDisplayText(item.unit || item.productVariantId?.unit, "unit")} buttonClassName={LISTING_ACTION_CLASS} />}
                                 {canAddInventory && (
                                   <Button
                                     size="sm"
@@ -1864,6 +1866,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               variantRate={item}
                             />
                           ) : null;
+                        const shareOffering = rate === "catalogItem" && canManageRow(item) && isLive ? (
+                          <OfferingShareDialog
+                            offeringType="PRODUCT"
+                            offeringId={String(item._id)}
+                            title={toDisplayText(item.productVariant, "Product listing")}
+                            rate={Number(item.finalPrice ?? item.totalRate ?? item.rate)}
+                            formattedRate={formatRate(Number(item.finalPrice ?? item.totalRate ?? item.rate ?? 0))}
+                            unit={toDisplayText(item.unit || item.productVariantId?.unit, "unit")}
+                            buttonClassName={`${LISTING_ACTION_CLASS} shrink-0`}
+                          />
+                        ) : null;
 
                         const actionButtons = (
                           <div className="flex items-center gap-2">
@@ -1940,6 +1953,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                         const secondaryActions = (
                           <div className="flex items-center gap-2 shrink-0">
+                            {shareOffering}
                             {canAddInventory && (
                               <Button
                                 size="sm"
@@ -2295,6 +2309,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               )}
                               <div className="catalog-card-standard-actions flex justify-between items-center w-full gap-2 overflow-x-auto pb-1 hide-scrollbar">
                                 {actionButtons}
+                                {shareOffering}
                                 {canAddInventory && (
                                   <Button
                                     size="sm"
@@ -2374,6 +2389,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                         )}
                                       </div>
                                       <div className="flex flex-wrap items-center justify-end gap-2">
+                                        {shareOffering}
                                         {item.isMarketplaceView && item.isOwnedByViewer ? (
                                           <Button
                                             size="sm"

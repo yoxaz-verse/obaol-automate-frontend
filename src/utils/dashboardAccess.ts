@@ -12,14 +12,12 @@ export type DashboardSection =
 export type DashboardNavGroup =
   | "Team & Users"
   | "Governance"
-  | "Documentation & Templates"
   | "Rules & Automation"
   | "Platform Setup";
 
 export const DASHBOARD_ADMIN_GROUP_ORDER: DashboardNavGroup[] = [
   "Team & Users",
   "Governance",
-  "Documentation & Templates",
   "Rules & Automation",
   "Platform Setup",
 ];
@@ -140,13 +138,13 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/rate-interest", label: "Rate Interest", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/sidebar-governance", label: "Sidebar Governance", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/payments", label: "Payment Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/documentation-rules", label: "Documentation Rules", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/documentation-conversions", label: "Document Conversions", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true, description: "Configure type-aware document and operational-order conversion actions." },
-  { path: "/dashboard/documentation-template-studio", label: "Template Studio", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true, description: "Edit, preview, version, and publish governed document templates." },
-  { path: "/dashboard/documentation-preview", label: "Documentation Preview", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], searchable: false, activeParent: "/dashboard/documentation-template-studio" },
-  { path: "/dashboard/documentation-templates", label: "Documentation Templates", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], searchable: false, activeParent: "/dashboard/documentation-template-studio" },
-  { path: "/dashboard/email-templates", label: "Email Templates", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/real-life-scenarios", label: "Real-Life Scenarios", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true, description: "Create, preview, and publish representative role scenarios." },
+  { path: "/dashboard/documentation-rules", label: "Documentation Rules", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/documentation-conversions", label: "Document Conversions", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true, description: "Configure type-aware document and operational-order conversion actions." },
+  { path: "/dashboard/documentation-template-studio", label: "Template Studio", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true, description: "Edit, preview, version, and publish governed document templates." },
+  { path: "/dashboard/documentation-preview", label: "Documentation Preview", section: "Operations/Admin", roles: ["admin"], searchable: false, activeParent: "/dashboard/documentation-template-studio" },
+  { path: "/dashboard/documentation-templates", label: "Documentation Templates", section: "Operations/Admin", roles: ["admin"], searchable: false, activeParent: "/dashboard/documentation-template-studio" },
+  { path: "/dashboard/email-templates", label: "Email Templates", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/real-life-scenarios", label: "Real-Life Scenarios", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true, description: "Create, preview, and publish representative role scenarios." },
   { path: "/dashboard/flow-rules", label: "Flow Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/order-rules", label: "Order Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/enquiry-rules", label: "Enquiry Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
@@ -223,7 +221,7 @@ export const DASHBOARD_ROUTE_MANIFEST: DashboardRouteDefinition[] = DASHBOARD_RO
   id: route.id || route.path.replace(/^\/dashboard\/?/, "").replace(/[:/]/g, "-") || "dashboard",
   navIcon: route.navIcon || navIconByPath[route.path] || "default",
   taskGroup: route.taskGroup || defaultTaskGroup(route),
-  activeParent: route.activeParent || route.breadcrumbParent,
+  activeParent: route.activeParent,
   description: route.description || `Open ${route.label.toLowerCase()} and continue the work relevant to your role.`,
   journeyStage: route.journeyStage || journeyStageBySection[route.section],
   requiredApprovalStates: route.requiredApprovalStates || (
@@ -311,7 +309,12 @@ export const isDashboardRouteActive = (pathname: string, routePath: string) => {
   if (!current) return false;
   if (routePath === "/dashboard/documentation" && current.path.startsWith("/dashboard/commercial-documents")) return true;
   if (routePath === "/dashboard") return current.path === "/dashboard";
-  return current.path === routePath || current.activeParent === routePath || current.breadcrumbParent === routePath;
+  if (current.path === routePath) return true;
+  if (current.activeParent === routePath) return true;
+  // Governed top-level pages are independent sidebar destinations. Parent
+  // highlighting is reserved for detail/edit routes that are not in navigation.
+  if (current.nav) return false;
+  return current.breadcrumbParent === routePath;
 };
 
 export const canAccessDashboardRoute = ({

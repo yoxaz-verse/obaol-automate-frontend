@@ -495,6 +495,14 @@ test("trade listings allow authorized users to add stock even when inventory exi
   assert.match(rates, /queryKey: \["inventory-status"\]/);
   assert.equal(rates.includes('message: "Stock added successfully."'), true);
   assert.equal(rates.includes('message: "Enter a valid quantity in MT."'), true);
+  assert.equal(rates.includes('label="Product Variant"'), true);
+  assert.equal(rates.includes('productVariantRoutes.getAll'), true);
+  assert.match(rates, /product:\s*productId/);
+  assert.equal(rates.includes('setSelectedVariantId(currentVariantId)'), true);
+  assert.equal(rates.includes('productVariant: selectedVariantId'), true);
+  assert.equal(rates.includes('message: "Select a valid product variant."'), true);
+  assert.equal(rates.includes('Unable to load product variants.'), true);
+  assert.equal(rates.includes('No available variants were found for this product.'), true);
 });
 
 test("past marketplace listings show last-live age to admins only", () => {

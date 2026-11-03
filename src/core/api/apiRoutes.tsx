@@ -374,6 +374,7 @@ export const sidebarGovernanceRoutes = {
   resetDraft: "/admin/sidebar-governance/reset-draft",
 };
 export const inlandTransportationRoutes = {
+  companies: "/inland-transportation/companies",
   overview: "/inland-transportation/overview",
   profile: "/inland-transportation/profile",
   vehicles: "/inland-transportation/vehicles",
@@ -387,6 +388,7 @@ export const inlandTransportationRoutes = {
   exceptions: (id: string) => `/inland-transportation/trips/${id}/exceptions`,
   resolveException: (id: string, exceptionId: string) => `/inland-transportation/trips/${id}/exceptions/${exceptionId}/resolve`,
   attachments: (id: string) => `/inland-transportation/trips/${id}/attachments`,
+  attachmentDownload: (id: string, attachmentId: string) => `/inland-transportation/trips/${id}/attachments/${attachmentId}/download`,
   documents: "/inland-transportation/documents",
 };
 export const labWorkItemRoutes = {

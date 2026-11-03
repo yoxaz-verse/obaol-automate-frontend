@@ -49,6 +49,9 @@ test("legacy Customer is normalized to an Associate without capability gating", 
 test("detail routes keep their parent navigation item active", () => {
   assert.equal(isDashboardRouteActive("/dashboard/enquiries/507f1f77bcf86cd799439011", "/dashboard/enquiries"), true);
   assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard/orders"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/inland-transportation/trips", "/dashboard/inland-transportation"), false);
+  assert.equal(isDashboardRouteActive("/dashboard/inland-transportation/trips", "/dashboard/inland-transportation/trips"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/inland-transportation/trips/507f1f77bcf86cd799439011", "/dashboard/inland-transportation/trips"), true);
   assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard"), false);
   assert.equal(isDashboardRouteActive("/dashboard/documentation/new", "/dashboard/documentation"), true);
   assert.equal(isDashboardRouteActive("/dashboard/documentation/507f1f77bcf86cd799439011", "/dashboard/documentation"), true);
@@ -334,6 +337,19 @@ test("Operations/Admin navigation is grouped in the intended order", () => {
     "/dashboard/enquiry-rules",
     "/dashboard/calculations",
   ]);
+  assert.equal(groups.some((group) => group.label === "Documentation & Templates"), false);
+  for (const path of [
+    "/dashboard/documentation-rules",
+    "/dashboard/documentation-conversions",
+    "/dashboard/documentation-template-studio",
+    "/dashboard/email-templates",
+    "/dashboard/real-life-scenarios",
+  ]) {
+    const route = routes.find((candidate) => candidate.path === path);
+    assert.ok(route, `${path} should remain admin-accessible and searchable`);
+    assert.equal(route.searchable, true);
+    assert.equal(route.navGroup, undefined);
+  }
 });
 
 test("Operations/Admin groups omit inaccessible and empty groups", () => {

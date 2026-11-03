@@ -11,7 +11,8 @@ export default function DashboardContextBar() {
   const { user } = useContext(AuthContext);
   const route = getDashboardRoute(pathname);
   if (!route || route.path === "/dashboard") return null;
-  const parentRoute = route.activeParent ? getDashboardRoute(route.activeParent) : null;
+  const parentPath = route.activeParent || route.breadcrumbParent;
+  const parentRoute = parentPath ? getDashboardRoute(parentPath) : null;
 
   return (
     <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border db-border-subtle db-subtle px-3 py-2 text-xs">

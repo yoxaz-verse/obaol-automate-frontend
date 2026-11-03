@@ -108,14 +108,15 @@ test("company-function requests are gated and fabricated updates are absent", ()
   assert.match(panel, /What you provide/);
   assert.doesNotMatch(panel, /aria-label="Associate overview"/);
   assert.doesNotMatch(panel, /Pending enquiries|Recent activity|Capabilities you provide|Capabilities you are seeking/);
-  assert.doesNotMatch(panel, /CompanyFunctionComponent/);
+  assert.match(panel, /CompanyFunctionComponent/);
   assert.match(panel, /model\.capabilityStats\[workspaceKind\]/);
   assert.match(panel, /Providing:<\/span> what your company offers/);
   assert.match(panel, /Seeking:<\/span> what your company needs/);
   assert.match(panel, /aria-describedby="dashboard-perspective-help"/);
   assert.match(panel, /bg-obaol-500 text-obaol-950 shadow-sm hover:bg-obaol-400/);
-  assert.match(panel, /border-obaol-500\/30 bg-obaol-500\/5/);
   assert.doesNotMatch(panel, /(?:blue|emerald)-(?:[0-9]|\[)/);
   assert.match(panel, /orderedFunctions\.length > 1 \? "lg:grid-cols-2" : ""/);
   assert.match(panel, /companyFunctionDashboard\.orderedFunctions\.map/);
+  assert.match(panel, /enabled: Boolean\(associateCompanyId\)/);
+  assert.doesNotMatch(panel, /definition\.actions\.slice\(0, 3\)/);
 });

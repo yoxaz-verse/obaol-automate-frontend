@@ -1,0 +1,8 @@
+"use client";
+import Link from "next/link";
+import { Card, CardBody } from "@nextui-org/react";
+import { useQuery } from "@tanstack/react-query";
+import { getData } from "@/core/api/apiHandler";
+import { inlandTransportationRoutes as api } from "@/core/api/apiRoutes";
+import { TransportEmpty, TransportError, TransportHeader, TransportLoading } from "@/components/inland-transportation/InlandWorkspace";
+export default function DocumentsPage(){const q=useQuery({queryKey:["inland-documents"],queryFn:async()=>(await getData(api.documents)).data.data||[]});return <main className="space-y-6 pb-16"><TransportHeader title="Transport Documents" description="Review transport records, exception evidence, and proof of delivery across every trip."/>{q.isLoading?<TransportLoading/>:q.isError?<TransportError retry={()=>q.refetch()}/>:q.data.length?<div className="grid gap-3 md:grid-cols-2">{q.data.map((d:any)=><Card key={d._id}><CardBody className="gap-2"><div className="flex justify-between"><b>{d.name}</b><span className="text-xs font-bold">{d.kind.replaceAll("_"," ")}</span></div><p className="text-xs text-default-500">{d.reference} · {d.segmentLabel}</p><div className="flex gap-4 text-sm font-bold text-obaol-700"><a href={d.url} target="_blank" rel="noreferrer">Open file</a><Link href={`/dashboard/inland-transportation/trips/${d.tripId}`}>Open trip</Link></div></CardBody></Card>)}</div>:<TransportEmpty title="No transport documents" description="Documents and proof of delivery added from trip control towers will appear here." href="/dashboard/inland-transportation/trips" label="Open trips"/>}</main>}

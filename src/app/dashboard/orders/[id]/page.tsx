@@ -51,6 +51,7 @@ import BrandedLoader from "@/components/ui/BrandedLoader";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
+import { OrderOverviewPanel, OrderPaymentsPanel } from "@/components/dashboard/orders/OrderWorkspacePanels";
 import { OWNER_OPTIONS, getOwnerLabel } from "@/features/trade-workflow/domain";
 import { normalizeApiError } from "@/core/api/apiErrors";
 import {
@@ -63,6 +64,7 @@ import {
 import {
     actionByLabel,
     companyName,
+    documentReadiness,
     executionBidLabel,
     executionTaskLabel,
     OrderRule,
@@ -99,6 +101,7 @@ export default function OrderDetailsPage() {
     const [docActionFileUrl, setDocActionFileUrl] = useState("");
     const [docViewerOpen, setDocViewerOpen] = useState(false);
     const [docViewerDoc, setDocViewerDoc] = useState<any>(null);
+    const [adminDrawerOpen, setAdminDrawerOpen] = useState(false);
     const [selectedSupplierOperatorId, setSelectedSupplierOperatorId] = useState("");
     const [selectedDealCloserOperatorId, setSelectedDealCloserOperatorId] = useState("");
     const [selectedProcurementOperatorId, setSelectedProcurementOperatorId] = useState("");
@@ -246,6 +249,15 @@ export default function OrderDetailsPage() {
         onError: (error: unknown) => {
             toast.error(normalizeApiError(error, "Unable to update operators").message);
         },
+    });
+    const updatePaymentStatusMutation = useMutation({
+        mutationFn: ({ index, status }: { index: number; status: "DUE" | "PAID" }) =>
+            patchData(apiRoutes.orders.paymentMilestoneStatus(String(orderId), index), { status }),
+        onSuccess: () => {
+            toast.success("Payment milestone updated");
+            queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+        },
+        onError: (error: unknown) => toast.error(normalizeApiError(error, "Unable to update payment milestone").message),
     });
     const incotermOptions = Array.isArray(incotermResponse?.data?.data?.data)
         ? incotermResponse.data.data.data
@@ -624,13 +636,14 @@ export default function OrderDetailsPage() {
         : (orderDocsResponse?.data?.data || []);
     const paymentPlan = (order as any)?.paymentPlan;
     const paymentMilestones = Array.isArray(paymentPlan?.milestones) ? paymentPlan.milestones : [];
+    const dealSnapshot = (order as any)?.dealSnapshot || (order as any)?.workspace?.dealSummary || null;
     const orderIncotermId = (order as any)?.incotermId || (linkedEnquiry as any)?.preferredIncoterm;
     const orderPaymentTermId = (order as any)?.paymentTermId || (linkedEnquiry as any)?.paymentTermId;
-    const incotermLabel =
+    const incotermLabel = dealSnapshot?.commercial?.incoterm ||
         incotermOptions.find((item: any) => String(item?._id) === String(orderIncotermId))?.code ||
         incotermOptions.find((item: any) => String(item?._id) === String(orderIncotermId))?.name ||
         "Not specified";
-    const paymentTermLabel =
+    const paymentTermLabel = dealSnapshot?.commercial?.paymentTerm ||
         paymentTermOptions.find((item: any) => String(item?._id) === String(orderPaymentTermId))?.label || "Not specified";
     const DOC_TYPE_LABELS = DOCUMENT_TYPE_LABELS;
     const SUBFLOW_DOC_MAP = SUBFLOW_DOCUMENT_TYPES;
@@ -894,42 +907,40 @@ export default function OrderDetailsPage() {
                 </div>
             </div>
 
-            <div className="sticky top-20 z-30 w-full rounded-2xl border border-divider bg-background/80 backdrop-blur-xl px-4 py-3 flex flex-wrap items-center gap-3">
+            <nav aria-label="Order workspace sections" className="sticky top-20 z-30 w-full rounded-2xl border border-divider bg-background/90 p-2 shadow-sm backdrop-blur-xl flex flex-wrap items-center gap-2">
                 <Link
                     href={ordersBackHref}
                     className="inline-flex items-center justify-center rounded-xl border border-divider bg-default-100/60 px-3 py-1.5 text-[10px] font-black  tracking-widest text-foreground hover:border-obaol-500/40 hover:text-obaol-500 transition-all"
                 >
                     Back To Orders
                 </Link>
-                <div className="text-[9px] font-black  tracking-widest text-default-400">Quick Jump</div>
+                <div className="hidden h-6 w-px bg-divider sm:block" />
                 <a
-                    href="#order-plan"
-                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black  tracking-widest text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 transition-all"
+                    href="#overview"
+                    className="rounded-xl px-3 py-2 text-xs font-black text-default-600 hover:bg-obaol-500/10 hover:text-obaol-600 transition-all"
                 >
-                    Plan
+                    Overview
                 </a>
                 <a
-                    href="#subflows"
-                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black  tracking-widest text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 transition-all"
+                    href="#execution"
+                    className="rounded-xl px-3 py-2 text-xs font-black text-default-600 hover:bg-obaol-500/10 hover:text-obaol-600 transition-all"
                 >
-                    Subflows
+                    Execution
                 </a>
                 <a
-                    href="#execution-bidding"
-                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black  tracking-widest text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 transition-all"
+                    href="#payments"
+                    className="rounded-xl px-3 py-2 text-xs font-black text-default-600 hover:bg-obaol-500/10 hover:text-obaol-600 transition-all"
                 >
-                    Bidding
+                    Payments
                 </a>
-                <a
-                    href="#order-docs"
-                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black  tracking-widest text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 transition-all"
-                >
-                    Documents
-                </a>
-            </div>
+                <a href="#order-docs" className="rounded-xl px-3 py-2 text-xs font-black text-default-600 hover:bg-obaol-500/10 hover:text-obaol-600 transition-all">Documents</a>
+                {(roleLower === "admin" || roleLower === "operator" || roleLower === "team") && <Button size="sm" variant="flat" className="ml-auto font-bold" onPress={() => setAdminDrawerOpen(true)}>Internal controls</Button>}
+            </nav>
+
+            <OrderOverviewPanel order={order} snapshot={dealSnapshot} />
 
             {(roleLower === "admin" || roleLower === "operator" || roleLower === "team") && (
-                <Card className="border border-divider bg-content1/60">
+                <Card className="hidden border border-divider bg-content1/60">
                     <CardBody className="flex flex-col gap-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                             <div>
@@ -1094,7 +1105,7 @@ export default function OrderDetailsPage() {
                     No flow rules configured for orders. Configure Flow Rules to unlock order stages.
                 </div>
             ) : (
-                <div className="w-full relative py-6">
+                <div id="execution" className="w-full relative py-6 scroll-mt-40">
                     <div className="absolute top-[38px] left-0 right-0 h-0.5 bg-divider" />
                     <div className="relative flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
                         {workflowStageOptions.map((step, index) => {
@@ -1728,7 +1739,7 @@ export default function OrderDetailsPage() {
                         ))}
                     </div>
 
-                    <div className="mt-8 pt-8 border-t border-divider">
+                    <div className="hidden mt-8 pt-8 border-t border-divider">
                         <h3 className="text-[10px] font-black text-default-400  tracking-widest px-1 mb-4">Payment Plan</h3>
                         <div className="rounded-2xl border border-divider bg-default-50/20 p-4 space-y-3">
                             <div className="flex flex-wrap items-center gap-3 text-[11px] font-black  tracking-widest">
@@ -1927,7 +1938,16 @@ export default function OrderDetailsPage() {
                 </div>
             )}
 
-            <div id="order-docs" className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <OrderPaymentsPanel
+                milestones={paymentMilestones}
+                incoterm={incotermLabel}
+                paymentTerm={paymentTermLabel}
+                canManage={roleLower === "admin" || roleLower === "operator" || roleLower === "team"}
+                busy={updatePaymentStatusMutation.isPending}
+                onStatus={(index, status) => updatePaymentStatusMutation.mutate({ index, status })}
+            />
+
+            <div id="order-docs" className="grid grid-cols-1 md:grid-cols-2 gap-8 scroll-mt-40">
                 {/* Order Core Documents */}
                 <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
                     <h2 className="text-xs font-black  tracking-widest text-obaol-500 mb-8 flex items-center gap-3">
@@ -1939,12 +1959,14 @@ export default function OrderDetailsPage() {
                         ) : (
                             orderCoreDocTypes.map((docType) => {
                                 const hasDoc = hasDocType(String(docType || ""));
+                                const latestDocument = getLatestDocByType(String(docType || ""));
+                                const readiness = documentReadiness(latestDocument);
                                 const rule = getDocRule(String(docType || ""));
                                 return (
                                     <div key={docType} className="p-4 rounded-xl bg-default-100/50 border border-divider flex items-center justify-between group hover:border-obaol-500/30 transition-all">
                                     <div className="flex items-center gap-4">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${hasDoc ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.5)]'}`} />
-                                        <div className="text-xs font-black text-foreground  tracking-wider">{DOC_TYPE_LABELS[String(docType || "").toUpperCase()] || String(docType).replaceAll("_", " ")}</div>
+                                        <div className={`w-1.5 h-1.5 rounded-full ${readiness === 'VERIFIED' ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : readiness === 'REJECTED' ? 'bg-danger-500' : 'bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.5)]'}`} />
+                                        <div><div className="text-xs font-black text-foreground tracking-wider">{DOC_TYPE_LABELS[String(docType || "").toUpperCase()] || String(docType).replaceAll("_", " ")}</div><div className="mt-1 text-[9px] font-bold text-default-400">{readiness.replaceAll("_", " ")}</div></div>
                                     </div>
                                         <div className="flex items-end gap-2">
                                             {hasDoc && (
@@ -1954,7 +1976,7 @@ export default function OrderDetailsPage() {
                                                     variant="flat"
                                                     className="h-7 text-xs font-black  px-4 rounded-lg"
                                                     onPress={() => {
-                                                        const doc = getLatestDocByType(String(docType || ""));
+                                                        const doc = latestDocument;
                                                         if (doc) {
                                                             setDocViewerDoc(doc);
                                                             setDocViewerOpen(true);
@@ -1984,6 +2006,42 @@ export default function OrderDetailsPage() {
                     </div>
                 </div>
             </div>
+            <Modal isOpen={adminDrawerOpen} onOpenChange={setAdminDrawerOpen} size="3xl" placement="center" scrollBehavior="inside">
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">Internal order controls<span className="text-xs font-normal text-default-500">Assignments and handler scoring are visible only to the OBAOL team.</span></ModalHeader>
+                    <ModalBody>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            {[
+                                { label: "Supplier ownership", value: selectedSupplierOperatorId, set: setSelectedSupplierOperatorId },
+                                { label: "Deal closer", value: selectedDealCloserOperatorId, set: setSelectedDealCloserOperatorId },
+                                { label: "Procurement", value: selectedProcurementOperatorId, set: setSelectedProcurementOperatorId },
+                                { label: "Order handler", value: selectedHandlerOperatorId, set: setSelectedHandlerOperatorId },
+                            ].map((field) => (
+                                <Select key={field.label} label={field.label} labelPlacement="outside" placeholder="Select operator" selectedKeys={field.value ? [field.value] : []} onSelectionChange={(keys) => field.set(String(Array.from(keys as Set<string>)[0] || ""))}>
+                                    {operatorOptions.map((op: any) => <SelectItem key={String(op._id)} value={String(op._id)}>{op.name || "Operator"}</SelectItem>)}
+                                </Select>
+                            ))}
+                            <Input type="number" min={1} max={5} step={1} label="Buyer rating" labelPlacement="outside" placeholder="1–5" value={handlerBuyerRating} onChange={(event) => setHandlerBuyerRating(event.target.value)} />
+                            <Input type="number" min={1} max={5} step={1} label="Supplier rating" labelPlacement="outside" placeholder="1–5" value={handlerSellerRating} onChange={(event) => setHandlerSellerRating(event.target.value)} />
+                        </div>
+                        <p className="rounded-xl bg-default-100 p-3 text-xs text-default-500">Handler payout = buyer stars + supplier stars, capped at 10%.</p>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="light" onPress={() => setAdminDrawerOpen(false)}>Cancel</Button>
+                        <Button color="warning" isLoading={updateOrderOperatorsMutation.isPending} onPress={() => {
+                            const parseRating = (raw: string) => raw === "" ? null : Number(raw);
+                            const buyer = parseRating(handlerBuyerRating);
+                            const seller = parseRating(handlerSellerRating);
+                            if ([buyer, seller].some((rating) => rating !== null && (!Number.isInteger(rating) || rating < 1 || rating > 5))) {
+                                toast.error("Ratings must be whole numbers from 1 to 5.");
+                                return;
+                            }
+                            updateOrderOperatorsMutation.mutate({ supplierOperatorId: selectedSupplierOperatorId || null, dealCloserOperatorId: selectedDealCloserOperatorId || null, procurementOperatorId: selectedProcurementOperatorId || null, handlerOperatorId: selectedHandlerOperatorId || null, handlerBuyerRating: buyer, handlerSellerRating: seller }, { onSuccess: () => setAdminDrawerOpen(false) });
+                        }}>Save assignments</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
             {/* @ts-ignore */}
             <Modal isOpen={docActionOpen} onOpenChange={setDocActionOpen} className="bg-background border border-divider">
                 <ModalContent>

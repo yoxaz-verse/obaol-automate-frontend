@@ -63,3 +63,28 @@ export const actionByLabel = (value: string): string => {
   if (normalized === "OBAOL" || normalized === "INTERNAL") return "OBAOL";
   return "";
 };
+
+export type DocumentReadiness = "MISSING" | "PENDING_VERIFICATION" | "VERIFIED" | "REJECTED";
+
+export const documentReadiness = (document: unknown): DocumentReadiness => {
+  if (!document) return "MISSING";
+  const status = String(asRecord(document).verifiedStatus ?? "PENDING").toUpperCase();
+  if (status === "VERIFIED") return "VERIFIED";
+  if (status === "REJECTED") return "REJECTED";
+  return "PENDING_VERIFICATION";
+};
+
+export const paymentProgress = (milestones: unknown): { paidPercent: number; duePercent: number; totalPercent: number } => {
+  const rows = Array.isArray(milestones) ? milestones : [];
+  return rows.reduce((result, raw) => {
+    const row = asRecord(raw);
+    const percent = Number(row.percent ?? 0) || 0;
+    result.totalPercent += percent;
+    if (row.status === "PAID") result.paidPercent += percent;
+    if (row.status === "DUE") result.duePercent += percent;
+    return result;
+  }, { paidPercent: 0, duePercent: 0, totalPercent: 0 });
+};
+
+export const isValidHandlerRating = (value: unknown): boolean =>
+  value === null || value === "" || (Number.isInteger(Number(value)) && Number(value) >= 1 && Number(value) <= 5);

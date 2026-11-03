@@ -446,7 +446,11 @@ test("marketplace rates are revealed explicitly and past enquiries warn buyers",
   assert.equal(rates.includes("Price and stock require confirmation"), true);
   assert.equal(rates.includes('className="flex-col-reverse sm:flex-row sm:justify-end"'), true);
   assert.equal(rates.includes("Continue with Enquiry"), true);
-  assert.equal(rates.includes("The seller has been asked to confirm the latest price and product availability."), true);
+  assert.equal(rates.includes("Enquiry Created"), true);
+  assert.equal(rates.includes("Open Enquiry Details"), true);
+  assert.equal(rates.includes("Go to Enquiries"), false);
+  assert.equal(rates.includes("Next Step"), false);
+  assert.equal(rates.includes("Our team will respond within 10 minutes"), false);
   assert.equal(access.includes('path: "/dashboard/rate-interest"'), true);
 });
 

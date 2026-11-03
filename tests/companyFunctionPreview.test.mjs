@@ -9,6 +9,7 @@ import {
   getPreviewDefinition,
 } from "../src/utils/companyFunctionPreview.ts";
 import { getDashboardRoute } from "../src/utils/dashboardAccess.ts";
+import { readFileSync } from "node:fs";
 
 test("preview contains the complete canonical taxonomy once", () => {
   assert.equal(COMPANY_FUNCTION_PREVIEW_DEFINITIONS.length, 11);
@@ -89,4 +90,18 @@ test("labs and imports expose their implemented workspaces", () => {
   assert.ok(getPreviewDefinition("testing")?.actions.some(({ href }) => href === "/dashboard/quality-labs"));
   assert.ok(getPreviewDefinition("testing")?.actions.some(({ href }) => href === "/dashboard/sample-requests"));
   assert.ok(getPreviewDefinition("importing-to-india")?.actions.some(({ href }) => href === "/dashboard/imports"));
+});
+
+test("function configuration and associate dashboard share persisted company cards", () => {
+  const configuration = readFileSync("src/app/dashboard/function-preview/page.tsx", "utf8");
+  const dashboard = readFileSync("src/components/dashboard/AssociateDashboard.tsx", "utf8");
+  const card = readFileSync("src/components/dashboard/CompanyFunctionComponent.tsx", "utf8");
+  assert.match(configuration, /associateCompanyId: companyId/);
+  assert.match(configuration, /providedFunctionIds: providedIds/);
+  assert.match(configuration, /soughtFunctionIds: soughtIds/);
+  assert.match(configuration, /activeIds\.length >= 6/);
+  assert.match(configuration, /CompanyFunctionComponent/);
+  assert.match(dashboard, /CompanyFunctionComponent/);
+  assert.match(card, /definition\.actions\.map/);
+  assert.doesNotMatch(card, /definition\.actions\.slice/);
 });

@@ -5,6 +5,9 @@ import {
   companyName,
   executionBidLabel,
   executionTaskLabel,
+  documentReadiness,
+  isValidHandlerRating,
+  paymentProgress,
   unwrapList,
 } from "../src/features/orders/readModel.ts";
 import {
@@ -25,6 +28,16 @@ test("unwraps every supported legacy order-list envelope", () => {
     rows,
   ]) assert.deepEqual(unwrapList(response), rows);
   assert.deepEqual(unwrapList({ data: null }), []);
+});
+
+test("normalizes payment, document, and handler states for the workspace", () => {
+  assert.deepEqual(paymentProgress([{ percent: 30, status: "PAID" }, { percent: 20, status: "DUE" }, { percent: 50, status: "PENDING" }]), { paidPercent: 30, duePercent: 20, totalPercent: 100 });
+  assert.equal(documentReadiness(null), "MISSING");
+  assert.equal(documentReadiness({ verifiedStatus: "VERIFIED" }), "VERIFIED");
+  assert.equal(documentReadiness({ verifiedStatus: "REJECTED" }), "REJECTED");
+  assert.equal(isValidHandlerRating(5), true);
+  assert.equal(isValidHandlerRating(2.5), false);
+  assert.equal(isValidHandlerRating(6), false);
 });
 
 test("preserves workflow-facing order labels", () => {

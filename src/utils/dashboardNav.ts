@@ -72,6 +72,12 @@ const ASSOCIATE_OTHER_SERVICE_PATHS = new Set([
   "/dashboard/quality-labs",
   "/dashboard/quality-labs/my",
   "/dashboard/quality-labs/execution",
+  "/dashboard/inland-transportation",
+  "/dashboard/inland-transportation/opportunities",
+  "/dashboard/inland-transportation/trips",
+  "/dashboard/inland-transportation/fleet",
+  "/dashboard/inland-transportation/documents",
+  "/dashboard/inland-transportation/profile",
 ]);
 
 export const getRoleFilteredSidebarOptions = (

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardBody, CardHeader, Chip } from "@nextui-org/react";
-import { LuArrowRight, LuCircleHelp, LuPackageCheck } from "react-icons/lu";
-import { getPreviewDefinition } from "@/utils/companyFunctionPreview";
+import { Card, CardBody, Chip } from "@nextui-org/react";
+import { LuArrowRight } from "react-icons/lu";
+import { getCompanyFunctionRoleContext, getPreviewDefinition } from "@/utils/companyFunctionPreview";
 
 type Props = {
   name: string;
@@ -15,46 +15,39 @@ type Props = {
   previewMode?: boolean;
   placeholderRecommended?: boolean;
   perspective?: "provided" | "sought";
+  stat?: { value: number; label: string; href: string } | null;
 };
 
-export default function CompanyFunctionComponent({ slug, priorityRank, perspective = "provided" }: Props) {
+export default function CompanyFunctionComponent({ slug, priorityRank, perspective = "provided", stat }: Props) {
   const definition = getPreviewDefinition(slug, perspective);
   if (!definition) return null;
+  const context = getCompanyFunctionRoleContext(slug, perspective);
 
   return (
-    <Card className="rounded-2xl border border-default-200 bg-content1 shadow-sm">
-      <CardHeader className="flex items-start justify-between gap-4 border-b border-default-200 px-6 py-5 sm:px-8">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h3 className="text-xl font-bold text-foreground sm:text-2xl">{definition.name}</h3>
+    <Card className="h-full rounded-2xl border border-obaol-500/30 bg-obaol-500/5 shadow-sm">
+      <CardBody className="flex h-full flex-col gap-4 p-5 sm:p-6">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-xl font-black text-foreground">{definition.name}</h3>
             {priorityRank ? <Chip size="sm" variant="flat">Priority {priorityRank}</Chip> : null}
+            <Chip size="sm" variant="flat" className="bg-obaol-500/15 font-bold text-obaol-700 dark:text-obaol-300">{context.perspectiveLabel}</Chip>
           </div>
-          <p className="max-w-3xl text-sm leading-6 text-default-600">{definition.description}</p>
+          <p className="mt-2 text-sm font-semibold text-obaol-700 dark:text-obaol-300">{context.roleLabel}</p>
+          <p className="mt-1 text-sm leading-6 text-default-600">{context.explanation}</p>
         </div>
-        <LuPackageCheck className="mt-1 hidden shrink-0 text-default-400 sm:block" size={24} />
-      </CardHeader>
-      <CardBody className="p-6 sm:p-8">
-        <h4 className="mb-4 text-sm font-semibold text-foreground">What you can do</h4>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {stat ? <Link href={stat.href} className="flex items-center justify-between rounded-xl border border-default-200 bg-content1/70 px-4 py-3 hover:bg-content1"><span><b className="text-xl text-foreground">{stat.value.toLocaleString()}</b><span className="ml-2 text-sm font-semibold text-default-600">{stat.label}</span></span><LuArrowRight /></Link> : null}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {definition.actions.map((action, index) => (
             <Link
               key={`${action.href}-${index}`}
               href={action.href}
-              className={`group flex min-h-32 flex-col justify-between rounded-xl border p-5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 ${action.primary ? "border-primary/40 bg-primary/5 hover:bg-primary/10" : "border-default-200 bg-content2/30 hover:border-default-300 hover:bg-content2/60"}`}
+              className={`group rounded-xl border px-4 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 ${action.primary ? "border-obaol-500/40 bg-obaol-500/10 hover:bg-obaol-500/15" : "border-default-200 bg-content1/60 hover:bg-content1"}`}
             >
-              <div>
-                {action.primary ? <span className="mb-2 block text-xs font-semibold text-primary">Recommended first step</span> : null}
-                <span className="inline-flex items-center gap-2 font-semibold text-foreground">
-                  {action.label}<LuArrowRight className="text-primary transition-transform group-hover:translate-x-1" size={15} />
-                </span>
-                <p className="mt-2 text-sm leading-5 text-default-500">{action.description}</p>
-              </div>
+              {action.primary ? <span className="mb-1 block text-[11px] font-semibold text-obaol-700 dark:text-obaol-300">Recommended first step</span> : null}
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">{action.label}<LuArrowRight className="transition-transform group-hover:translate-x-1" size={14} /></span>
+              <p className="mt-1 text-xs leading-5 text-default-500">{action.description}</p>
             </Link>
           ))}
-        </div>
-        <div className="mt-5 flex items-start gap-2 rounded-lg bg-default-100/60 px-4 py-3 text-xs leading-5 text-default-500">
-          <LuCircleHelp className="mt-0.5 shrink-0" size={15} />
-          These links open features that are currently available in OBAOL. No simulated activity or estimated performance is shown here.
         </div>
       </CardBody>
     </Card>

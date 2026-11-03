@@ -139,6 +139,12 @@ export const sidebarOptions = [
   { name: "Freight Shipments", icon: <LuTruck />, link: "/dashboard/freight-forwarding/shipments" },
   { name: "Freight Customs", icon: <FiClipboard />, link: "/dashboard/freight-forwarding/customs" },
   { name: "Freight Finance", icon: <LuWallet />, link: "/dashboard/freight-forwarding/finance" },
+  { name: "Transport Overview", icon: <LuTruck />, link: "/dashboard/inland-transportation" },
+  { name: "Transport Opportunities", icon: <RiAuctionLine />, link: "/dashboard/inland-transportation/opportunities" },
+  { name: "Transport Trips", icon: <LiaMapMarkedAltSolid />, link: "/dashboard/inland-transportation/trips" },
+  { name: "Fleet & Drivers", icon: <LuTruck />, link: "/dashboard/inland-transportation/fleet" },
+  { name: "Transport Documents", icon: <FiFileText />, link: "/dashboard/inland-transportation/documents" },
+  { name: "Transport Profile", icon: <LuBuilding2 />, link: "/dashboard/inland-transportation/profile" },
   {
     name: "My Company",
     icon: <GoOrganization />,

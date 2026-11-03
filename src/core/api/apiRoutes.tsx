@@ -373,6 +373,22 @@ export const sidebarGovernanceRoutes = {
   publish: "/admin/sidebar-governance/publish",
   resetDraft: "/admin/sidebar-governance/reset-draft",
 };
+export const inlandTransportationRoutes = {
+  overview: "/inland-transportation/overview",
+  profile: "/inland-transportation/profile",
+  vehicles: "/inland-transportation/vehicles",
+  vehicle: (id: string) => `/inland-transportation/vehicles/${id}`,
+  drivers: "/inland-transportation/drivers",
+  driver: (id: string) => `/inland-transportation/drivers/${id}`,
+  trips: "/inland-transportation/trips",
+  trip: (id: string) => `/inland-transportation/trips/${id}`,
+  status: (id: string) => `/inland-transportation/trips/${id}/status`,
+  location: (id: string) => `/inland-transportation/trips/${id}/location`,
+  exceptions: (id: string) => `/inland-transportation/trips/${id}/exceptions`,
+  resolveException: (id: string, exceptionId: string) => `/inland-transportation/trips/${id}/exceptions/${exceptionId}/resolve`,
+  attachments: (id: string) => `/inland-transportation/trips/${id}/attachments`,
+  documents: "/inland-transportation/documents",
+};
 export const labWorkItemRoutes = {
   list: "/lab-work-items",
   detail: (id: string) => `/lab-work-items/${id}`,
@@ -696,6 +712,7 @@ export const apiRoutes = {
     getAll: "/orders",
     update: "/orders",
     delete: "/orders",
+    paymentMilestoneStatus: (id: string, index: number) => `/orders/${id}/payment-milestones/${index}/status`,
   },
   pincodeEntry: pincodeEntryRoutes,
   state: stateRoutes,

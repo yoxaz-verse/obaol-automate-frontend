@@ -9,12 +9,12 @@ interface Props {
   update: <K extends keyof EnquiryFormState>(key: K, value: EnquiryFormState[K]) => void;
   selectBuyer: (id: string) => void; submit: () => void;
 }
-const inputClass = "h-9 w-full rounded-xl border border-default-300 bg-default-50 px-3 text-sm text-foreground outline-none transition-colors focus:border-primary";
+const inputClass = "h-8 w-full rounded-lg border border-default-300 bg-default-50 px-2.5 text-sm text-foreground outline-none transition-colors focus:border-primary";
 
 export const EnquiryFields = ({ form, buyers, incoterms, representsBuyer, buyerOptionsLoading, loading, disclosure, update, selectBuyer, submit }: Props) => (
-  <form onSubmit={(event) => { event.preventDefault(); submit(); }} className="flex flex-col gap-4">
-    <Card className="border border-default-200 bg-content1 shadow-sm"><CardBody className="p-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+  <form onSubmit={(event) => { event.preventDefault(); submit(); }} className="flex flex-col gap-3">
+    <Card className="border border-default-200 bg-content1 shadow-none"><CardBody className="p-3">
+      <div className="grid grid-cols-1 gap-x-3 gap-y-2.5 md:grid-cols-2">
         {representsBuyer && <Field label="Buyer Associate">
           <select value={form.buyerAssociateId} onChange={(event) => selectBuyer(event.target.value)} className={inputClass} required disabled={buyerOptionsLoading}>
             <option value="">{buyerOptionsLoading ? "Loading buyers..." : "Select buyer"}</option>
@@ -32,14 +32,14 @@ export const EnquiryFields = ({ form, buyers, incoterms, representsBuyer, buyerO
           </select>
         </Field>
       </div>
-      <div className="mt-4 flex flex-col gap-2">
+      <div className="mt-2.5 flex flex-col gap-1">
         <label className="text-xs font-semibold text-default-600">Specification (Optional)</label>
-        <textarea className={`min-h-[90px] w-full resize-y rounded-xl border bg-default-50 px-3 py-2 text-sm text-foreground outline-none ${disclosure ? "border-danger" : "border-default-300 focus:border-primary"}`} value={form.specification} onChange={(event) => update("specification", event.target.value)} aria-invalid={Boolean(disclosure)} aria-describedby={disclosure ? "enquiry-specification-error" : undefined} />
+        <textarea className={`min-h-[56px] w-full resize-y rounded-lg border bg-default-50 px-2.5 py-1.5 text-sm text-foreground outline-none ${disclosure ? "border-danger" : "border-default-300 focus:border-primary"}`} value={form.specification} onChange={(event) => update("specification", event.target.value)} aria-invalid={Boolean(disclosure)} aria-describedby={disclosure ? "enquiry-specification-error" : undefined} />
         {disclosure && <p id="enquiry-specification-error" role="alert" className="text-xs text-danger">{disclosure.message}</p>}
       </div>
     </CardBody></Card>
-    <div className="flex items-center justify-between gap-2"><span className="text-xs text-default-500">Tip: 1 Ton = 1,000 KG</span><Button type="submit" isLoading={loading} isDisabled={loading || Boolean(disclosure)} color="primary" size="sm" className="min-w-[160px] rounded-lg font-semibold" startContent={!loading && <FiMessageSquare size={14} />}>{loading ? "Submitting..." : "Create Enquiry"}</Button></div>
+    <div className="flex items-center justify-between gap-2"><span className="text-[11px] text-default-500">1 Ton = 1,000 KG</span><Button type="submit" isLoading={loading} isDisabled={loading || Boolean(disclosure)} color="primary" size="sm" className="min-w-[160px] rounded-lg font-semibold" startContent={!loading && <FiMessageSquare size={14} />}>{loading ? "Submitting..." : "Create Enquiry"}</Button></div>
   </form>
 );
 
-const Field = ({ label, children }: { label: string; children: React.ReactNode }) => <div className="flex flex-col gap-2"><label className="text-xs font-semibold text-default-600">{label}</label>{children}</div>;
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => <div className="flex flex-col gap-1"><label className="text-xs font-semibold text-default-600">{label}</label>{children}</div>;

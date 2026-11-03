@@ -156,6 +156,7 @@ test("Admin sidebar groups operational routes by workflow without duplicates", (
     "Labs",
     "Packaging",
     "Freight",
+    "Transportation",
     "Warehouse",
   ]);
   assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Buying")?.links, [

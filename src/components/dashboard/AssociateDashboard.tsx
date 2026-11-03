@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button, Card, CardBody, Skeleton } from "@nextui-org/react";
 import { LuArrowRight } from "react-icons/lu";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
-import { getCompanyFunctionRoleContext, getPreviewDefinition, normalizePreviewFunctionSlug } from "@/utils/companyFunctionPreview";
+import CompanyFunctionComponent from "./CompanyFunctionComponent";
+import { normalizePreviewFunctionSlug } from "@/utils/companyFunctionPreview";
 import { buildAssociateDashboardModel, getAssociateWorkspaceKind } from "./associateDashboardModel";
 
 type AssociateDashboardProps = {
@@ -43,20 +44,18 @@ export default function AssociateDashboard({
     perspective,
   }), [providedCapabilities, soughtCapabilities, actionRequired, sellingCount, metrics.liveProducts, perspective]);
 
-  const hasProvided = providedCapabilities.length > 0;
-  const hasSought = soughtCapabilities.length > 0;
-  const activeCapabilities = perspective === "provided" ? providedCapabilities : soughtCapabilities;
-
   const companyFunctionDashboard = useCompanyFunctionDashboard({
     companyId: associateCompanyId,
     isAdmin: false,
     perspective,
-    enabled: model.showFunctions && Boolean(associateCompanyId),
+    enabled: Boolean(associateCompanyId),
   });
+  const liveProvidedCapabilities = Array.isArray(companyFunctionDashboard.company?.providedCapabilities) ? companyFunctionDashboard.company.providedCapabilities : providedCapabilities;
+  const liveSoughtCapabilities = Array.isArray(companyFunctionDashboard.company?.soughtCapabilities) ? companyFunctionDashboard.company.soughtCapabilities : soughtCapabilities;
+  const hasProvided = liveProvidedCapabilities.length > 0;
+  const hasSought = liveSoughtCapabilities.length > 0;
+  const activeCapabilities = perspective === "provided" ? liveProvidedCapabilities : liveSoughtCapabilities;
   const isSeeking = perspective === "sought";
-  const perspectiveAccent = "border-obaol-500/30 bg-obaol-500/5 dark:border-obaol-400/25";
-  const perspectiveText = "text-obaol-700 dark:text-obaol-300";
-  const perspectiveButton = "bg-obaol-500 text-obaol-950 hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500/40";
   const activePerspectiveTab = "bg-obaol-500 text-obaol-950 shadow-sm hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500/40";
 
   return (
@@ -97,7 +96,7 @@ export default function AssociateDashboard({
         </div>
       </section>
 
-      {model.showFunctions && (
+      {Boolean(associateCompanyId) && (
         <section aria-labelledby="capability-summary-title" className="space-y-3">
           <div>
             <h2 id="capability-summary-title" className="text-lg font-black tracking-tight text-foreground">{isSeeking ? "What you are seeking" : "What you provide"}</h2>
@@ -114,45 +113,9 @@ export default function AssociateDashboard({
           ) : (
             <div className={`grid grid-cols-1 gap-3 ${companyFunctionDashboard.orderedFunctions.length > 1 ? "lg:grid-cols-2" : ""}`}>
               {companyFunctionDashboard.orderedFunctions.map((fn: any) => {
-                const definition = getPreviewDefinition(fn.slug, perspective);
-                if (!definition) return null;
-                const context = getCompanyFunctionRoleContext(fn.slug, perspective);
                 const workspaceKind = getAssociateWorkspaceKind(normalizePreviewFunctionSlug(fn.slug), perspective);
                 const capabilityStat = workspaceKind ? model.capabilityStats[workspaceKind] : null;
-                const visibleActions = definition.actions.slice(0, 3);
-                const primaryAction = visibleActions.find((action) => action.primary) || visibleActions[0];
-                const secondaryActions = visibleActions.filter((action) => action !== primaryAction).slice(0, 2);
-                return (
-                  <Card key={`summary-${fn._id}`} className={`border shadow-sm ${perspectiveAccent}`}>
-                    <CardBody className="flex h-full flex-col gap-4 p-5 sm:p-6">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-xl font-black text-foreground">{definition.name}</h3>
-                            {fn.priorityRank ? <span className="rounded-full bg-content2 px-2.5 py-1 text-xs font-semibold text-default-600">Priority {fn.priorityRank}</span> : null}
-                            <span className="rounded-full bg-obaol-500/15 px-2.5 py-1 text-xs font-bold text-obaol-700 dark:text-obaol-300">{context.perspectiveLabel}</span>
-                          </div>
-                          <p className={`mt-2 text-sm font-semibold ${perspectiveText}`}>{context.roleLabel}</p>
-                          <p className="mt-1 text-sm leading-6 text-default-600">{context.explanation}</p>
-                        </div>
-                      </div>
-                      {capabilityStat ? (
-                        <button
-                          type="button"
-                          onClick={() => router.push(capabilityStat.href)}
-                          className="flex w-full items-center justify-between gap-3 rounded-xl border border-default-200 bg-content1/70 px-4 py-3 text-left transition-colors hover:bg-content1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                        >
-                          <span><span className="text-xl font-black text-foreground">{capabilityStat.value.toLocaleString()}</span><span className="ml-2 text-sm font-semibold text-default-600">{capabilityStat.label}</span></span>
-                          <LuArrowRight className="shrink-0 text-default-400" aria-hidden="true" />
-                        </button>
-                      ) : null}
-                      <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                        {primaryAction ? <Button className={`min-h-10 font-bold ${perspectiveButton}`} endContent={<LuArrowRight />} onPress={() => router.push(primaryAction.href)}>{primaryAction.label}</Button> : null}
-                        {secondaryActions.map((action) => <Button key={`${fn._id}-${action.href}-${action.label}`} variant="light" className={`min-h-10 justify-start font-semibold ${perspectiveText}`} endContent={<LuArrowRight />} onPress={() => router.push(action.href)}>{action.label}</Button>)}
-                      </div>
-                    </CardBody>
-                  </Card>
-                );
+                return <CompanyFunctionComponent key={`summary-${fn._id}`} name={fn.name} slug={normalizePreviewFunctionSlug(fn.slug)} priorityRank={fn.priorityRank} metrics={fn.metrics} recentExecutionInquiries={fn.recentExecutionInquiries} recentOrders={fn.recentOrders} perspective={perspective} stat={capabilityStat} />;
               })}
             </div>
           )}

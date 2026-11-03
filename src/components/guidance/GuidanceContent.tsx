@@ -462,6 +462,7 @@ type GuidanceContentProps = {
 };
 
 export default function GuidanceContent({ roleView, showToggle = true }: GuidanceContentProps) {
+  // The shared manual now handles the former `if (!isOperator)` branch and the Operator branch together.
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const provided = user?.providedCapabilities || [];
@@ -503,15 +504,15 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
           ? "Service Provider Associate"
         : "Buying & Selling Associate";
 
-  if (!isOperator) {
-    return (
-      <AssociateGuidebook
-        profile={inferAssociateGuideProfile(provided, sought)}
-        registrationStatus={user?.registrationStatus}
-      />
-    );
-  }
+  return (
+    <AssociateGuidebook
+      role={isOperator ? "operator" : "associate"}
+      profile={inferAssociateGuideProfile(provided, sought)}
+      registrationStatus={user?.registrationStatus}
+    />
+  );
 
+  /* Legacy presentation retained below temporarily for source compatibility; the shared manual returns above. */
   return (
     <div className="min-h-screen px-6 py-12 md:px-12 lg:px-20 bg-background text-foreground transition-colors duration-500">
       <div className="max-w-7xl mx-auto flex flex-col gap-16">

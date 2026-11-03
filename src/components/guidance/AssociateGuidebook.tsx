@@ -8,17 +8,21 @@ import {
   LuExternalLink, LuListChecks, LuSearch, LuShieldCheck, LuSparkles, LuWrench,
 } from "react-icons/lu";
 import {
-  AssociateGuideCategory,
   AssociateGuideProfile,
-  AssociateGuideTopic,
-  associateGuideCategories,
-  getAssociateGuideTopics,
-  searchAssociateGuideTopics,
 } from "./associateGuideContent";
+import {
+  GuideCategory,
+  GuideRole,
+  RoleGuideTopic,
+  getRoleGuideTopics,
+  roleGuideCategories,
+  searchRoleGuideTopics,
+} from "./roleGuideContent";
 
 type Props = {
   profile: AssociateGuideProfile;
   registrationStatus?: string | null;
+  role?: GuideRole;
 };
 
 const profileLabels: Record<AssociateGuideProfile, string> = {
@@ -33,20 +37,21 @@ const approvalLabels = {
   ANY: "Available at every account stage",
   ONBOARDING: "For onboarding accounts",
   PENDING: "Available while approval is pending",
+  REJECTED: "Available when changes are requested",
   APPROVED: "Requires approved access",
 };
 
-const matchesApproval = (topic: AssociateGuideTopic, status?: string | null) => {
+const matchesApproval = (topic: RoleGuideTopic, status?: string | null) => {
   if (topic.approval === "ANY") return true;
   const normalized = String(status || "APPROVED").toUpperCase().replace("PENDING_REVIEW", "PENDING");
   return normalized === topic.approval;
 };
 
-function TopicDetails({ topic, status, topics }: { topic: AssociateGuideTopic; status?: string | null; topics: AssociateGuideTopic[] }) {
+function TopicDetails({ topic, status, topics }: { topic: RoleGuideTopic; status?: string | null; topics: RoleGuideTopic[] }) {
   const accessible = matchesApproval(topic, status);
   const related = topic.related
     .map((id) => topics.find((candidate) => candidate.id === id))
-    .filter(Boolean) as AssociateGuideTopic[];
+    .filter(Boolean) as RoleGuideTopic[];
 
   return (
     <div className="space-y-7 border-t border-divider px-5 pb-6 pt-6 md:px-7">
@@ -63,6 +68,16 @@ function TopicDetails({ topic, status, topics }: { topic: AssociateGuideTopic; s
           <figcaption className="px-4 py-3 text-xs leading-5 text-default-500">{topic.screenshot.caption}</figcaption>
         </figure>
       )}
+
+      <section>
+        <h4 className="mb-2 flex items-center gap-2 text-sm font-bold"><LuCircleCheck className="text-obaol-500" /> Your responsibility</h4>
+        <p className="text-sm leading-6 text-default-600">{topic.responsibility}</p>
+      </section>
+
+      <section>
+        <h4 className="mb-3 flex items-center gap-2 text-sm font-bold"><LuShieldCheck className="text-obaol-500" /> Important fields and controls</h4>
+        <div className="flex flex-wrap gap-2">{topic.importantFields.map((item) => <span key={item} className="rounded-full border border-divider bg-content2 px-3 py-1.5 text-xs font-semibold text-default-600">{item}</span>)}</div>
+      </section>
 
       <section>
         <h4 className="mb-3 flex items-center gap-2 text-sm font-bold"><LuShieldCheck className="text-obaol-500" /> Before you begin</h4>
@@ -89,10 +104,25 @@ function TopicDetails({ topic, status, topics }: { topic: AssociateGuideTopic; s
       </section>
 
       <section>
+        <h4 className="mb-3 text-sm font-bold">Status meanings</h4>
+        <ul className="space-y-2 text-sm leading-6 text-default-600">{topic.statusMeanings.map((item) => <li key={item} className="flex gap-2"><span aria-hidden="true">•</span><span>{item}</span></li>)}</ul>
+      </section>
+
+      <section>
+        <h4 className="mb-3 text-sm font-bold">Responsibility boundaries</h4>
+        <ul className="space-y-2 text-sm leading-6 text-default-600">{topic.boundaries.map((item) => <li key={item} className="flex gap-2"><LuCircleAlert className="mt-1 shrink-0 text-warning-500" size={15} /><span>{item}</span></li>)}</ul>
+      </section>
+
+      <section>
         <h4 className="mb-3 flex items-center gap-2 text-sm font-bold"><LuWrench className="text-warning-500" /> If something goes wrong</h4>
         <ul className="space-y-2 text-sm leading-6 text-default-600">
           {topic.troubleshooting.map((item) => <li key={item} className="flex gap-2"><LuCircleAlert className="mt-1 shrink-0 text-warning-500" size={15} /><span>{item}</span></li>)}
         </ul>
+      </section>
+
+      <section className="rounded-2xl border border-obaol-500/20 bg-obaol-500/5 p-4">
+        <h4 className="text-sm font-bold">When to escalate</h4>
+        <p className="mt-2 text-sm leading-6 text-default-600">{topic.escalation}</p>
       </section>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-divider pt-5">
@@ -115,13 +145,14 @@ function TopicDetails({ topic, status, topics }: { topic: AssociateGuideTopic; s
   );
 }
 
-export default function AssociateGuidebook({ profile, registrationStatus }: Props) {
+export default function AssociateGuidebook({ profile, registrationStatus, role = "associate" }: Props) {
+  // Compatibility/accessibility contract: aria-label="Search the Associate Guidebook" remains the Associate label.
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<AssociateGuideCategory | "all">("all");
+  const [category, setCategory] = useState<GuideCategory | "all">("all");
   const [openTopics, setOpenTopics] = useState<Set<string>>(new Set());
-  const allTopics = useMemo(() => getAssociateGuideTopics(profile), [profile]);
+  const allTopics = useMemo(() => getRoleGuideTopics(role, profile), [profile, role]);
   const filteredTopics = useMemo(() => {
-    const searched = searchAssociateGuideTopics(allTopics, query);
+    const searched = searchRoleGuideTopics(allTopics, query);
     return category === "all" ? searched : searched.filter((topic) => topic.category === category);
   }, [allTopics, category, query]);
 
@@ -147,7 +178,7 @@ export default function AssociateGuidebook({ profile, registrationStatus }: Prop
     if (window.location.hash !== `#${id}`) window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${id}`);
   };
 
-  const jumpToCategory = (next: AssociateGuideCategory | "all") => {
+  const jumpToCategory = (next: GuideCategory | "all") => {
     setCategory(next);
     setQuery("");
     document.getElementById("guide-topics")?.scrollIntoView({ behavior: "smooth" });
@@ -160,20 +191,25 @@ export default function AssociateGuidebook({ profile, registrationStatus }: Prop
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-obaol-500/10 px-3 py-1.5 text-xs font-bold text-obaol-600 dark:text-obaol-400">
-                <LuBookOpen /> Associate Guidebook
+                <LuBookOpen /> {role === "operator" ? "Operator & Team Manual" : "Associate Manual"}
               </div>
-              <h1 className="text-3xl font-black tracking-tight md:text-5xl">Learn the platform by completing real tasks</h1>
+              <h1 className="text-3xl font-black tracking-tight md:text-5xl">Navigate every page and complete real work with confidence</h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-default-600 md:text-base">
-                Follow an end-to-end journey or look up a page when you need help. Instructions are matched to your company capabilities and current access.
+                Follow an end-to-end journey or look up any page in your navigation. Every topic explains ownership, important fields, safe operating steps, expected results, and escalation.
               </p>
             </div>
             <div className="rounded-2xl border border-obaol-500/20 bg-obaol-500/5 p-4 lg:max-w-xs">
-              <p className="flex items-center gap-2 text-sm font-bold"><LuSparkles className="text-obaol-500" /> {profileLabels[profile]}</p>
+              <p className="flex items-center gap-2 text-sm font-bold"><LuSparkles className="text-obaol-500" /> {role === "operator" ? "Operator execution workspace" : profileLabels[profile]}</p>
               <p className="mt-1 text-xs leading-5 text-default-500">
-                {profile === "incomplete" ? "Complete your company capabilities to unlock a more relevant guide." : "Shared topics and the workflows relevant to your capabilities are shown."}
+                {role === "operator" ? "Team users follow this same manual. Coordinate assigned work and escalate decisions outside your authority." : profile === "incomplete" ? "Complete your company capabilities to unlock a more relevant guide." : "Shared topics and workflows relevant to your capabilities are shown."}
               </p>
             </div>
           </div>
+
+          <section className="mt-6 grid gap-3 rounded-2xl border border-divider bg-background/70 p-4 md:grid-cols-2" aria-label="Associate and operator responsibility comparison">
+            <div><p className="text-sm font-bold">Associates own business decisions</p><p className="mt-1 text-xs leading-5 text-default-500">They represent registered companies, maintain company and commercial information, and authorize listings, requirements, terms, and real-world confirmations.</p></div>
+            <div><p className="text-sm font-bold">Operators and Team users own coordination</p><p className="mt-1 text-xs leading-5 text-default-500">They verify evidence, maintain assigned operational records, coordinate handoffs, and escalate pricing, policy, compliance, disputes, and exceptions.</p></div>
+          </section>
 
           <div className="mt-8 relative">
             <LuSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-default-400" />
@@ -181,7 +217,7 @@ export default function AssociateGuidebook({ profile, registrationStatus }: Prop
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search tasks, pages, buttons, or problems"
-              aria-label="Search the Associate Guidebook"
+              aria-label={`Search the ${role === "operator" ? "Operator Manual" : "Associate Guidebook"}`}
               className="h-13 w-full rounded-2xl border border-divider bg-background py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-obaol-500 focus:ring-2 focus:ring-obaol-500/20"
             />
           </div>
@@ -191,7 +227,7 @@ export default function AssociateGuidebook({ profile, registrationStatus }: Prop
           <aside className="lg:sticky lg:top-8 lg:self-start" aria-label="Guidebook table of contents">
             <nav className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible">
               <button onClick={() => jumpToCategory("all")} aria-pressed={category === "all"} className={`min-w-max rounded-xl border px-4 py-3 text-left text-sm font-bold transition ${category === "all" ? "dashboard-selected-control" : "border-divider bg-content1 hover:border-obaol-500"}`}>All topics</button>
-              {associateGuideCategories.map((item) => (
+              {roleGuideCategories.map((item) => (
                 <button key={item.id} onClick={() => jumpToCategory(item.id)} aria-pressed={category === item.id} className={`min-w-max rounded-xl border px-4 py-3 text-left transition ${category === item.id ? "dashboard-selected-control" : "border-divider bg-content1 hover:border-obaol-500"}`}>
                   <span className="block text-sm font-bold">{item.label}</span>
                   <span className={`mt-1 hidden text-xs leading-5 lg:block ${category === item.id ? "text-[color:rgba(27,38,50,0.78)]" : "db-muted"}`}>{item.description}</span>
@@ -223,7 +259,7 @@ export default function AssociateGuidebook({ profile, registrationStatus }: Prop
                       >
                         <span>
                           <span className="mb-2 flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-obaol-600 dark:text-obaol-400">
-                            {associateGuideCategories.find((item) => item.id === topic.category)?.label}
+                  {roleGuideCategories.find((item) => item.id === topic.category)?.label}
                             <span aria-hidden="true">•</span>
                             {approvalLabels[topic.approval]}
                           </span>
@@ -243,7 +279,7 @@ export default function AssociateGuidebook({ profile, registrationStatus }: Prop
                 <h2 className="mt-3 text-lg font-bold">No guide topics match that search</h2>
                 <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-default-500">Try a page name such as Orders, a task such as publish a listing, or browse one of the guide sections.</p>
                 <div className="mt-5 flex flex-wrap justify-center gap-2">
-                  {associateGuideCategories.map((item) => <button key={item.id} onClick={() => jumpToCategory(item.id)} className="rounded-xl border border-divider px-3 py-2 text-sm font-semibold hover:border-obaol-500">{item.label}</button>)}
+                  {roleGuideCategories.map((item) => <button key={item.id} onClick={() => jumpToCategory(item.id)} className="rounded-xl border border-divider px-3 py-2 text-sm font-semibold hover:border-obaol-500">{item.label}</button>)}
                   <Link href="/dashboard/customer-support" className="rounded-xl bg-obaol-500 px-3 py-2 text-sm font-bold text-black">Contact support</Link>
                 </div>
               </div>

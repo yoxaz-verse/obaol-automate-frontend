@@ -36,6 +36,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import ExecutionBiddingPanel from "@/components/dashboard/enquiries/ExecutionBiddingPanel";
+import { useSearchParams } from "next/navigation";
 
 
 dayjs.extend(relativeTime);
@@ -59,6 +60,7 @@ const extractArray = (response: any) => {
 };
 
 export default function ExecutionEnquiriesPage() {
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { user } = useContext(AuthContext);
   const { formatRate } = useCurrency();
@@ -66,7 +68,7 @@ export default function ExecutionEnquiriesPage() {
   const roleLower = String(user?.role || "").toLowerCase();
   const myCompanyId = String((user as any)?.associateCompany?._id || (user as any)?.associateCompany || "");
 
-  const [activeTab, setActiveTab] = useState("deal-execution");
+  const [activeTab, setActiveTab] = useState(() => searchParams.get("tab") === "execution-bidding" ? "execution-bidding" : "deal-execution");
   const [searchQuery, setSearchQuery] = useState("");
   const [bidMap, setBidMap] = useState<Record<string, string>>({});
   const [noteMap, setNoteMap] = useState<Record<string, string>>({});
@@ -176,7 +178,9 @@ export default function ExecutionEnquiriesPage() {
 
   // Build the enquiry-grouped task list from embedded executionInquiries
   const enquiriesWithTasks = useMemo(() => {
+    const focusedEnquiryId = searchParams.get("enquiryId");
     const results = rawInquiries
+      .filter((inquiry: any) => !focusedEnquiryId || String(inquiry._id) === focusedEnquiryId)
       .map((inquiry: any) => {
         const tasks = (inquiry.executionInquiries || [])
           .filter((task: any) => String(task?.ownerBy || "").toLowerCase() === "obaol")
@@ -195,17 +199,16 @@ export default function ExecutionEnquiriesPage() {
           status: inquiry.status || "",
           buyer:
             resolveExecutionLocation(inquiry.executionContext, "destination") ||
-            resolveAddressLocation(inquiry.buyerAssociateId?.address) ||
-            "Unknown Destination",
+            resolveAddressLocation(inquiry.buyerAssociateId?.address) || "",
           seller:
             resolveExecutionLocation(inquiry.executionContext, "origin") ||
-            resolveAddressLocation(inquiry.sellerAssociateId?.address) ||
-            "Unknown Origin",
+            resolveAddressLocation(inquiry.sellerAssociateId?.address) || "",
           buyerCompanyId: String(inquiry.buyerAssociateId?._id || inquiry.buyerAssociateId || ""),
           sellerCompanyId: String(inquiry.sellerAssociateId?._id || inquiry.sellerAssociateId || ""),
           supplierOperatorId: String(inquiry.supplierOperatorId?._id || inquiry.supplierOperatorId || ""),
           dealCloserOperatorId: String(inquiry.dealCloserOperatorId?._id || inquiry.dealCloserOperatorId || ""),
           tasks,
+          completedTaskCount: tasks.filter((task: any) => String(task.status).toUpperCase() === "COMPLETED").length,
         };
       })
       .filter(Boolean) as any[];
@@ -221,7 +224,7 @@ export default function ExecutionEnquiriesPage() {
       );
     }
     return results;
-  }, [rawInquiries, searchQuery]);
+  }, [rawInquiries, searchQuery, searchParams]);
 
   const enquiriesWithOpenTasks = useMemo(() => {
     const results = rawInquiries
@@ -372,18 +375,18 @@ export default function ExecutionEnquiriesPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4"
           >
             {dealsLoading && <SectionLoader />}
             {!dealsLoading && enquiriesWithTasks.map((enq) => (
               <motion.div
                 key={enq.id}
                 layout
-                className="group relative overflow-hidden rounded-[2rem] border border-divider bg-default-50/50 backdrop-blur-xl hover:bg-default-100/50 transition-all duration-500"
+                className="group relative overflow-hidden rounded-2xl border border-divider bg-default-50/50 backdrop-blur-xl hover:bg-default-100/50 transition-colors"
               >
-                <div className="p-6 md:p-8">
+                <div className="p-4 md:p-5">
                   {/* Enquiry Header Card */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                     <div className="flex items-center gap-5">
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
@@ -406,41 +409,41 @@ export default function ExecutionEnquiriesPage() {
                             </div>
                           )}
                         </div>
-                        <h2 className="text-2xl font-black text-foreground  tracking-tighter leading-none">{enq.product}</h2>
+                        <h2 className="text-xl font-black text-foreground tracking-tight leading-none">{enq.product}</h2>
                         <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500  tracking-widest">
                           <span className="opacity-60">{enq.variant}</span>
                           <span className="w-1 h-1 rounded-full bg-divider" />
-                          <span className="text-obaol-500/80">{enq.tasks.length} Active Nodes</span>
+                          <span className="text-obaol-500/80">{enq.completedTaskCount}/{enq.tasks.length} completed</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-10">
-                      <div className="hidden lg:flex flex-col text-right">
+                    {(enq.seller || enq.buyer) && <div className="flex flex-wrap items-center gap-5 md:justify-end">
+                      {enq.seller && <div className="flex flex-col md:text-right">
                         <span className="mb-1 text-[10px] font-black tracking-[0.2em] db-muted">Origin</span>
                         <span className="text-sm font-black text-foreground  tracking-tight">{enq.seller}</span>
-                      </div>
-                      <div className="w-px h-10 bg-divider hidden lg:block" />
-                      <div className="flex flex-col text-right">
+                      </div>}
+                      {enq.seller && enq.buyer && <div className="w-px h-10 bg-divider hidden lg:block" />}
+                      {enq.buyer && <div className="flex flex-col md:text-right">
                         <span className="mb-1 text-[10px] font-black tracking-[0.2em] db-muted">Destination</span>
                         <span className="text-sm font-black text-foreground  tracking-tight">{enq.buyer}</span>
-                      </div>
-                    </div>
+                      </div>}
+                    </div>}
                   </div>
 
                   {/* Task Manifest (Flow View) */}
-                  <div className="relative flex flex-col gap-0 border-l-2 border-divider ml-8 pl-8">
+                  <div className="relative flex flex-col gap-0 border-l-2 border-divider ml-3 pl-5 md:ml-5 md:pl-7">
                     {enq.tasks.map((task: any, idx: number) => (
                       <div
                         key={task.key}
-                        className="relative pb-8 last:pb-0"
+                        className="relative pb-3 last:pb-0"
                       >
                         {/* Flow Node Pulse */}
-                        <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-background border-2 border-obaol-500 flex items-center justify-center z-10">
+                        <div className="absolute -left-[29px] top-3 w-4 h-4 rounded-full bg-background border-2 border-obaol-500 flex items-center justify-center z-10 md:-left-[37px]">
                           <div className={`w-1.5 h-1.5 rounded-full ${task.status === "COMPLETED" ? "bg-success-500" : "bg-warning-500 animate-pulse"}`} />
                         </div>
 
-                        <div className="flex items-start justify-between gap-4 p-5 rounded-2xl bg-background/40 border border-divider hover:border-obaol-500/30 transition-all duration-300 group/task">
+                        <div className="flex flex-col justify-between gap-3 rounded-xl border border-divider bg-background/40 p-3 transition-colors hover:border-obaol-500/30 sm:flex-row sm:items-center">
                           <div className="flex items-center gap-5 min-w-0">
                             <div className={`p-2.5 rounded-xl border border-divider ${task.status === "COMPLETED" ? "bg-success-500/10 text-success-500" : "bg-warning-500/10 text-warning-600"} shrink-0`}>
                               {(() => {
@@ -455,8 +458,8 @@ export default function ExecutionEnquiriesPage() {
                             </div>
                             <div className="min-w-0">
                               <h4 className="text-sm font-black text-foreground tracking-tight  leading-none mb-1">{String(task.type || "").replaceAll("_", " ")}</h4>
-                              <div className="flex items-center gap-2">
-                                <span className={`text-xs font-black  tracking-widest ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500 opacity-60"}`}>{task.status || "IDLE"}</span>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`text-xs font-black tracking-widest ${task.status === "COMPLETED" ? "text-success-500" : task.status === "CANCELLED" ? "text-danger-500" : task.status === "IN_PROGRESS" ? "text-primary-500" : "text-warning-500"}`}>{String(task.status || "OPEN").replaceAll("_", " ")}</span>
                                 {task.committedProvider && (
                                   <>
                                     <span className="text-xs text-default-400">•</span>
@@ -475,9 +478,9 @@ export default function ExecutionEnquiriesPage() {
                           </div>
 
                           <div className="flex items-center gap-3">
-                            <div className="flex flex-col text-right">
+                            <div className="flex flex-col sm:text-right">
                               <span className="text-[10px] font-black tracking-widest db-muted">State</span>
-                              <span className={`text-xs font-black  ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500"}`}>{task.status === "COMPLETED" ? "Verified" : "Syncing"}</span>
+                              <span className={`text-xs font-black ${task.status === "COMPLETED" ? "text-success-500" : task.status === "CANCELLED" ? "text-danger-500" : task.status === "IN_PROGRESS" ? "text-primary-500" : "text-warning-500"}`}>{task.status === "COMPLETED" ? "Provider selected" : task.status === "IN_PROGRESS" ? "In progress" : task.status === "CANCELLED" ? "Cancelled" : (task.bids?.length || 0) > 0 ? "Bidding" : "Open"}</span>
                             </div>
                           </div>
                         </div>

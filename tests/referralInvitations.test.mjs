@@ -9,10 +9,10 @@ test("referral dashboard offers tracked email, WhatsApp, and personal-link invit
   const page = read("../src/app/dashboard/referrals/page.tsx");
   for (const token of [
     "Invite someone", "Open email invitation", "Open WhatsApp invitation", "Copy personal invitation",
-    "mailto:", "https://wa.me/", "idempotencyKey", "People you invited",
+    "mailto:", "apiRoutes.whatsapp.status", "WhatsApp invitation accepted by Meta", "idempotencyKey", "People you invited",
     "Invited → Joined → Active this month → Earned",
   ]) assert.equal(page.includes(token), true, `missing ${token}`);
-  assert.equal(page.includes("OBAOL records the share attempt"), true);
+  assert.equal(page.includes("WhatsApp invitation delivery"), true);
   assert.equal(page.includes("realized profit"), true);
   assert.equal(page.includes("How to stay active"), true);
   assert.equal(page.includes("Logging in, browsing"), true);

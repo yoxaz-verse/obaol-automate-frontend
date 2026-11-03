@@ -93,19 +93,37 @@ export default function DocumentTemplatePreview({
     taxAmount: 0,
     grandTotal: Number(lineItems?.[0]?.amount || 0),
   };
+  const directionLabels: Record<string, string> = {
+    BUYER_TO_OBAOL: "Buyer → OBAOL",
+    OBAOL_TO_SELLER: "OBAOL → Seller",
+    SELLER_TO_OBAOL: "Seller → OBAOL",
+    OBAOL_TO_BUYER: "OBAOL → Buyer",
+  };
+  const direction = String(doc?.direction || "").toUpperCase();
+  const issuer = doc?.issuer || (["BUYER_TO_OBAOL", "OBAOL_TO_SELLER"].includes(direction) ? doc?.buyer : doc?.seller);
+  const recipient = doc?.recipient || (["BUYER_TO_OBAOL", "OBAOL_TO_SELLER"].includes(direction) ? doc?.seller : doc?.buyer);
 
   const normalizedData = {
     documentNumber: doc?.documentNumber || "DRAFT",
+    directionLabel: directionLabels[direction] || "",
+    issuer,
+    recipient,
     docDate: doc?.createdAt ? new Date(doc.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
     buyer: {
       name: doc?.buyer?.name || sourceEnquiry?.buyerAssociateCompanyName || sourceEnquiry?.buyerName || "—",
       email: doc?.buyer?.email || sourceEnquiry?.buyerAssociateId?.email || "—",
       phone: doc?.buyer?.phone || sourceEnquiry?.buyerAssociateId?.phone || "—",
+      address: doc?.buyer?.address || "—",
+      gstin: doc?.buyer?.gstin || "—",
+      logo: doc?.buyer?.logo || "",
     },
     seller: {
       name: doc?.seller?.name || sourceEnquiry?.sellerAssociateCompanyName || sourceEnquiry?.sellerName || "—",
       email: doc?.seller?.email || sourceEnquiry?.sellerAssociateId?.email || "—",
       phone: doc?.seller?.phone || sourceEnquiry?.sellerAssociateId?.phone || "—",
+      address: doc?.seller?.address || "—",
+      gstin: doc?.seller?.gstin || "—",
+      logo: doc?.seller?.logo || "",
     },
     lineItems,
     totals: {

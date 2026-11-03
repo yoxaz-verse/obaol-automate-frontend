@@ -1295,6 +1295,9 @@ export default function EnquiryDetailsPage() {
             setDocActionFileUrl("");
             queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
             const createdDoc = res?.data?.data || null;
+            const createdDocuments = Array.isArray(res?.data?.documents) && res.data.documents.length
+                ? res.data.documents
+                : createdDoc ? [createdDoc] : [];
             if (createdDoc) {
                 queryClient.setQueryData(["trade-documents", "enquiry", enquiryId], (prev: any) => {
                     const getRows = (raw: any): any[] => {
@@ -1307,11 +1310,8 @@ export default function EnquiryDetailsPage() {
                         return [];
                     };
                     const prevRows = getRows(prev);
-                    const createdId = String(createdDoc?._id || createdDoc?.id || "");
-                    const merged = [
-                        createdDoc,
-                        ...prevRows.filter((doc: any) => String(doc?._id || doc?.id || "") !== createdId),
-                    ];
+                    const createdIds = new Set(createdDocuments.map((doc: any) => String(doc?._id || doc?.id || "")));
+                    const merged = [...createdDocuments, ...prevRows.filter((doc: any) => !createdIds.has(String(doc?._id || doc?.id || "")))];
                     return {
                         ...(prev || {}),
                         data: {
@@ -1341,6 +1341,7 @@ export default function EnquiryDetailsPage() {
             if (!docViewerDoc?._id) throw new Error("No document selected.");
             return postData(apiRoutes.tradeDocuments.email(String(docViewerDoc._id)), {
                 enquiryId: enquiryId,
+                idempotencyKey: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${docViewerDoc._id}`,
             });
         },
         onSuccess: () => {
@@ -1349,6 +1350,17 @@ export default function EnquiryDetailsPage() {
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to email document.");
         },
+    });
+    const issueDocLegMutation = useMutation({
+        mutationFn: async (documentId: string) => patchData(apiRoutes.tradeDocuments.update(documentId), { status: "SENT" }),
+        onSuccess: (response: any) => {
+            const updated = response?.data?.data;
+            if (updated) setDocViewerDoc(updated);
+            toast.success("Document leg issued.");
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+        },
+        onError: (error: any) => toast.error(error?.response?.data?.message || "Failed to issue this document leg."),
     });
 
     const reopenRequestMutation = useMutation({
@@ -1900,6 +1912,7 @@ export default function EnquiryDetailsPage() {
         fileUrl: null,
         documentNumber: "LOI-AUTO",
         audienceScope: "OBAOL_BUYER",
+        direction: "BUYER_TO_OBAOL",
     }] : [];
     const combinedEnquiryDocs = [...syntheticLoiDoc, ...filteredEnquiryDocs];
     const canSeeDocByScope = (doc: any) => {
@@ -1976,8 +1989,14 @@ export default function EnquiryDetailsPage() {
         return "";
     };
     const getDocAudienceLabel = (doc: any) => {
-        const typeKey = String(doc?.type || "").toUpperCase();
-        if (typeKey === "LOI" || typeKey === "LETTER_OF_INTENT") return "Buyer ↔ OBAOL";
+        const directionLabels: Record<string, string> = {
+            BUYER_TO_OBAOL: "Buyer → OBAOL",
+            OBAOL_TO_SELLER: "OBAOL → Seller",
+            SELLER_TO_OBAOL: "Seller → OBAOL",
+            OBAOL_TO_BUYER: "OBAOL → Buyer",
+        };
+        const direction = String(doc?.direction || "").toUpperCase();
+        if (directionLabels[direction]) return directionLabels[direction];
         return getAudienceLabel(doc?.audienceScope);
     };
     const sortedEnquiryStages = enquiryRules
@@ -5150,6 +5169,14 @@ export default function EnquiryDetailsPage() {
                                 const docStatus = String(docViewerDoc?.status || "").toUpperCase();
                                 const canAdvance = canManageDocs || isSystemAdmin;
                                 const actionButtons: React.ReactNode[] = [];
+
+                                if (docViewerDoc?.direction && docStatus === "DRAFT" && canAdvance) {
+                                    actionButtons.push(
+                                        <Button key="issue-pair-leg" color="primary" onPress={() => issueDocLegMutation.mutate(String(docViewerDoc._id))} isLoading={issueDocLegMutation.isPending}>
+                                            Issue {getDocAudienceLabel(docViewerDoc)}
+                                        </Button>
+                                    );
+                                }
 
                                 if (docType === "QUOTATION" && canAdvance) {
                                     if (!(enquiry as any)?.quotationCreatedAt) {

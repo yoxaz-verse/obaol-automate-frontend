@@ -863,6 +863,24 @@ html {
   scrollbar-width: none;
 }
 
+.order-progress-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--brand-flame) 55%, transparent) transparent;
+}
+
+.order-progress-scrollbar::-webkit-scrollbar {
+  height: 5px;
+}
+
+.order-progress-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.order-progress-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--brand-flame) 55%, transparent);
+}
+
 /* Catalog cards can be embedded in full pages or narrow dashboard panels.
    Size them from their actual container instead of the browser viewport. */
 .catalog-responsive-grid {

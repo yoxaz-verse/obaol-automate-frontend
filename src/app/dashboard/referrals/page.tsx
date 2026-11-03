@@ -32,6 +32,7 @@ export default function AssociateReferralsPage() {
   const [destination, setDestination] = useState("");
   const [idempotencyKey, setIdempotencyKey] = useState(newKey);
   const query = useQuery({ queryKey: ["associate-referrals", page], queryFn: () => getData(apiRoutes.associateReferrals.dashboard, { page, limit: 20 }), refetchOnWindowFocus: false });
+  const whatsappConnection = useQuery({ queryKey: ["company-whatsapp-connection"], queryFn: async () => (await getData(apiRoutes.whatsapp.status)).data.data });
   const data = query.data?.data?.data || {}, summary = data.summary || {};
   const referrals = useMemo(() => Array.isArray(data.referrals) ? data.referrals : [], [data.referrals]);
   const invitations = useMemo(() => Array.isArray(data.invitations) ? data.invitations : [], [data.invitations]);
@@ -47,14 +48,14 @@ export default function AssociateReferralsPage() {
       const url = rawUrl.startsWith("/") ? `${window.location.origin}${rawUrl}` : rawUrl;
       const message = `Hi ${recipientName.trim()}, join ${data.company?.name || "our company"} on OBAOL using this personal invitation: ${url}\n\nAfter approval and activation, direct referrals can share in ${rewardPercent}% of OBAOL's realized profit from eligible later completed trades.`;
       if (channel === "EMAIL") window.location.href = `mailto:${encodeURIComponent(destination.trim())}?subject=${encodeURIComponent("Your OBAOL invitation")}&body=${encodeURIComponent(message)}`;
-      else if (channel === "WHATSAPP") window.location.href = `https://wa.me/${destination.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+      else if (channel === "WHATSAPP") showToastMessage({ type: "success", message: "WhatsApp invitation accepted by Meta." });
       else await copy(url, "Personal invitation link");
       setRecipientName(""); setDestination(""); setIdempotencyKey(newKey());
       await client.invalidateQueries({ queryKey: ["associate-referrals"] });
     },
     onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Invitation could not be created." }),
   });
-  const canInvite = Boolean(recipientName.trim() && (channel === "LINK" || destination.trim()));
+  const canInvite = Boolean(recipientName.trim() && (channel === "LINK" || destination.trim()) && (channel !== "WHATSAPP" || (whatsappConnection.data && !whatsappConnection.data.reconnectRequired)));
 
   const panel = "dashboard-panel text-foreground";
   const inputClasses = {
@@ -84,5 +85,7 @@ export default function AssociateReferralsPage() {
     <Card className={panel}><CardBody className="gap-4 p-5 md:p-6"><div className="flex items-center gap-2"><FiActivity className="text-obaol-700 dark:text-obaol-300" /><h2 className="font-bold">Referred companies</h2></div>{!referrals.length ? <p className="text-sm db-muted">No companies have used your referral code yet.</p> : referrals.map((row: any) => <div key={row.id} className="flex flex-col gap-3 border-b border-[var(--db-border-subtle)] py-4 last:border-0 md:flex-row md:items-center md:justify-between"><div className="min-w-0"><p className="break-words font-semibold">{row.name}</p><p className="text-xs db-muted">Referred {formatDate(row.referralCapturedAt || row.createdAt)}</p></div><div className="flex flex-wrap items-center gap-2"><Chip size="sm" className="db-inset db-muted-strong" variant="flat">{row.registrationStatus || "PENDING_REVIEW"}</Chip><Chip size="sm" color={row.activeThisMonth ? "success" : "warning"} variant="flat" startContent={row.activeThisMonth ? <FiCheck /> : undefined}>{row.activeThisMonth ? "Active this month" : "Activity required"}</Chip>{row.lastActivityAt && <span className="text-xs db-muted">{activityLabel(row.lastActivityType)} · {formatDate(row.lastActivityAt)}</span>}</div></div>)}</CardBody></Card>
 
     <Card className={panel}><CardBody className="gap-4 p-5 md:p-6"><h2 className="font-bold">Referral earnings</h2>{!earnings.length ? <p className="text-sm db-muted">No completed-trade referral earnings yet.</p> : earnings.map((row: any) => <div key={`${row.orderId}-${row.createdAt}`} className="grid gap-3 border-b border-[var(--db-border-subtle)] py-3 last:border-0 sm:grid-cols-2 md:grid-cols-4"><div><p className="text-xs db-muted">Date</p><p className="text-sm">{formatDate(row.createdAt)}</p></div><div><p className="text-xs db-muted">Companies</p><p className="text-sm">{row.referredCompanyCount}</p></div><div><p className="text-xs db-muted">Status</p><Chip size="sm" color="success" variant="flat">{row.status}</Chip></div><div className="md:text-right"><p className="text-xs db-muted">Earned</p><p className="break-words font-bold text-success-600 dark:text-success-400">{formatRate(Number(row.amount || 0))}</p></div></div>)}{(data.pagination?.totalPages || 1) > 1 && <Pagination page={page} total={data.pagination.totalPages} onChange={setPage} />}</CardBody></Card>
+    {channel === "WHATSAPP" && !whatsappConnection.data && <Card className={panel}><CardBody className="p-4 text-sm"><span className="text-warning-700">Connect your company WhatsApp Business number in </span><a href="/dashboard/settings/whatsapp" className="font-bold underline">WhatsApp Connection</a><span className="text-warning-700"> before sending invitations.</span></CardBody></Card>}
+    {invitations.some((row: any) => row.whatsappDelivery) && <Card className={panel}><CardBody className="gap-3 p-5 md:p-6"><h2 className="font-bold">WhatsApp invitation delivery</h2>{invitations.filter((row: any) => row.whatsappDelivery).map((row: any) => <div key={`wa-${row.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--db-border-subtle)] p-3"><div><p className="font-semibold">{row.recipientName}</p><p className="text-xs db-muted">{row.destination}</p></div><Chip size="sm" color={["SENT","DELIVERED","READ"].includes(row.whatsappDelivery.status) ? "success" : row.whatsappDelivery.status === "FAILED" ? "danger" : "warning"} variant="flat">{String(row.whatsappDelivery.status).replaceAll("_", " ")}</Chip></div>)}</CardBody></Card>}
   </div>;
 }

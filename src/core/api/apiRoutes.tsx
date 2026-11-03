@@ -622,6 +622,9 @@ export const apiRoutes = {
     getOne: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     update: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     email: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/email`,
+    emailDeliveries: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/email-deliveries`,
+    whatsapp: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/whatsapp`,
+    whatsappDeliveries: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/whatsapp-deliveries`,
     summary: `${BASE_PATHS.TRADE_DOCUMENT}/summary`,
     readiness: `${BASE_PATHS.TRADE_DOCUMENT}/readiness`,
     upload: `${BASE_PATHS.TRADE_DOCUMENT}/upload`,
@@ -631,6 +634,14 @@ export const apiRoutes = {
     selectTemplate: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/template`,
     render: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/render`,
     file: (id: string) => `/api/v1/web${BASE_PATHS.TRADE_DOCUMENT}/${id}/file`,
+  },
+  mailConnections: {
+    status: "/mail-connections/status",
+    authorize: (provider: "google" | "microsoft") => `/mail-connections/${provider}/authorize`,
+    disconnect: "/mail-connections",
+  },
+  whatsapp: {
+    status: "/whatsapp/status", signup: "/whatsapp/signup", complete: "/whatsapp/complete", test: "/whatsapp/test", disconnect: "/whatsapp",
   },
   documentTemplates: {
     list: `${BASE_PATHS.DOCUMENT_TEMPLATE}`,

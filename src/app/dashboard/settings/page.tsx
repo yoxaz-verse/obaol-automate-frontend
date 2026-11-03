@@ -2,12 +2,27 @@
 
 import { useContext } from "react";
 import Link from "next/link";
-import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiLock, FiSettings, FiUser } from "react-icons/fi";
+import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiLock, FiMail, FiSettings, FiUser } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
 import AuthContext from "@/context/AuthContext";
 
 const settingsLinks = [
+  {
+    title: "WhatsApp Connection",
+    description: "Connect your company WhatsApp Business number to send document PDFs and tracked invitations.",
+    href: "/dashboard/settings/whatsapp",
+    icon: FaWhatsapp,
+    associateOnly: true,
+  },
+  {
+    title: "Mail Connection",
+    description: "Connect your company Gmail or Outlook mailbox to send quotations and documents directly from OBAOL.",
+    href: "/dashboard/settings/mail",
+    icon: FiMail,
+    associateOnly: true,
+  },
   {
     title: "My Company",
     description: "Review your company profile and update what your company provides, what it is seeking, priorities, verification, and service details.",

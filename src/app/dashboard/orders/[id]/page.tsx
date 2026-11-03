@@ -48,6 +48,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import AuthContext from "@/context/AuthContext";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import AppSelect from "@/components/ui/AppSelect";
+import OrderStageTimeline from "@/components/dashboard/orders/OrderStageTimeline";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
@@ -630,7 +632,6 @@ export default function OrderDetailsPage() {
         orderStageRank.set(String(r.stageKey).toUpperCase(), Number(r.sortOrder || 0));
     });
     const workflowStageOptions = sortedOrderStages.length > 0 ? sortedOrderStages : [];
-    const currentStepIndex = Math.max(0, workflowStageOptions.indexOf(workflowStage));
     const docsForOrder = Array.isArray(orderDocsResponse?.data?.data?.data)
         ? orderDocsResponse?.data?.data?.data
         : (orderDocsResponse?.data?.data || []);
@@ -793,6 +794,13 @@ export default function OrderDetailsPage() {
             return bTime - aTime;
         })[0];
     };
+    const getDocsByType = (type: string) => (docsForOrder || [])
+        .filter((doc: any) => String(doc?.type || "").toUpperCase() === String(type || "").toUpperCase())
+        .sort((a: any, b: any) => new Date(b?.updatedAt || b?.createdAt || 0).getTime() - new Date(a?.updatedAt || a?.createdAt || 0).getTime());
+    const directionLabel = (direction: any) => ({
+        BUYER_TO_OBAOL: "Buyer → OBAOL", OBAOL_TO_SELLER: "OBAOL → Seller",
+        SELLER_TO_OBAOL: "Seller → OBAOL", OBAOL_TO_BUYER: "OBAOL → Buyer",
+    } as Record<string, string>)[String(direction || "").toUpperCase()] || "View";
     const classificationRateObj = (order as any)?.enquiry?.variantRateId || (order as any)?.variantRateId || null;
     const classificationBadges = getClassificationBadges(classificationRateObj);
     const classificationTheme = resolveActiveClassificationTheme(classificationBadges.map((item) => item.key));
@@ -1105,28 +1113,8 @@ export default function OrderDetailsPage() {
                     No flow rules configured for orders. Configure Flow Rules to unlock order stages.
                 </div>
             ) : (
-                <div id="execution" className="w-full relative py-6 scroll-mt-40">
-                    <div className="absolute top-[38px] left-0 right-0 h-0.5 bg-divider" />
-                    <div className="relative flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
-                        {workflowStageOptions.map((step, index) => {
-                            const isCompleted = index < currentStepIndex;
-                            const isCurrent = index === currentStepIndex;
-                            return (
-                                <div key={step} className="flex flex-col items-center gap-4 min-w-[120px] shrink-0 group">
-                                    <div className={`w-3 h-3 rounded-full border-2 transition-all duration-500 z-10 ${isCurrent ? 'bg-obaol-500 border-obaol-400 scale-125 shadow-[0_0_15px_rgba(207,152,60,0.6)]' :
-                                        isCompleted ? 'bg-success-500 border-success-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]' :
-                                            'bg-default-200 border-divider'
-                                        }`} />
-                                    <div className={`text-xs font-black  tracking-tight transition-colors text-center ${isCurrent ? 'text-obaol-500' :
-                                        isCompleted ? 'text-success-500/80' :
-                                            'text-default-500 group-hover:text-default-700 dark:group-hover:text-default-300'
-                                        }`}>
-                                        {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                <div id="execution" className="w-full scroll-mt-40 py-6">
+                    <OrderStageTimeline stages={workflowStageOptions} currentStage={workflowStage} labels={stageLabelMap} />
                 </div>
             )}
 
@@ -1153,7 +1141,7 @@ export default function OrderDetailsPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         {/* @ts-ignore */}
-                        <Select
+                        <AppSelect
                             label="SCHEDULING PROTOCOL"
                             selectedKeys={milestones.schedulingMode ? [milestones.schedulingMode] : []}
                             onSelectionChange={(keys) => {
@@ -1170,7 +1158,7 @@ export default function OrderDetailsPage() {
                             <SelectItem key="IMMEDIATE" value="IMMEDIATE" className=" font-black text-xs">Immediate</SelectItem>
                             <SelectItem key="PLANNED" value="PLANNED" className=" font-black text-xs">Planned</SelectItem>
                             <SelectItem key="PHASED" value="PHASED" className=" font-black text-xs">Phased</SelectItem>
-                        </Select>
+                        </AppSelect>
 
                         <Input
                             type="date"
@@ -1720,7 +1708,8 @@ export default function OrderDetailsPage() {
                                     )}
                                 </div>
                                 {/* @ts-ignore */}
-                                <Select
+                                <AppSelect
+                                    aria-label={`${resp.label} authority`}
                                     selectedKeys={responsibilities[resp.key] ? [responsibilities[resp.key]] : []}
                                     onSelectionChange={(keys) => {
                                         const arr = Array.from(keys as Set<string>);
@@ -1734,7 +1723,7 @@ export default function OrderDetailsPage() {
                                     {OWNER_OPTIONS.map((item) => (
                                         <SelectItem key={item.key} value={item.key} className=" font-black text-xs">{item.label}</SelectItem>
                                     ))}
-                                </Select>
+                                </AppSelect>
                             </div>
                         ))}
                     </div>
@@ -1969,23 +1958,22 @@ export default function OrderDetailsPage() {
                                         <div><div className="text-xs font-black text-foreground tracking-wider">{DOC_TYPE_LABELS[String(docType || "").toUpperCase()] || String(docType).replaceAll("_", " ")}</div><div className="mt-1 text-[9px] font-bold text-default-400">{readiness.replaceAll("_", " ")}</div></div>
                                     </div>
                                         <div className="flex items-end gap-2">
-                                            {hasDoc && (
-                                                <Button
+                                            {hasDoc && getDocsByType(String(docType || "")).map((doc: any) => (
+                                                <Button key={doc._id}
                                                     size="sm"
                                                     color="primary"
                                                     variant="flat"
                                                     className="h-7 text-xs font-black  px-4 rounded-lg"
                                                     onPress={() => {
-                                                        const doc = latestDocument;
                                                         if (doc) {
                                                             setDocViewerDoc(doc);
                                                             setDocViewerOpen(true);
                                                         }
                                                     }}
                                                 >
-                                                    View
+                                                    {directionLabel(doc.direction)}
                                                 </Button>
-                                            )}
+                                            ))}
                                             {!hasDoc && rule && canActOnRule(rule) && (
                                                 <div className="flex flex-col items-end gap-1">
                                                     <Button size="sm" color="warning" variant="flat" className="h-7 text-xs font-black  px-4 rounded-lg" onPress={() => { setDocActionRule(rule); setDocActionOpen(true); }}>
@@ -2063,6 +2051,7 @@ export default function OrderDetailsPage() {
                 <ModalContent>
                     <ModalHeader className="flex flex-col gap-1">
                         {DOC_TYPE_LABELS[String(docViewerDoc?.type || "").toUpperCase()] || String(docViewerDoc?.type || "Document").replaceAll("_", " ")}
+                        {docViewerDoc?.direction && <span className="text-[10px] font-black tracking-widest text-primary/80">{directionLabel(docViewerDoc.direction)}</span>}
                         <span className="text-[10px]  font-black tracking-widest text-default-400">
                             {docViewerDoc?.documentNumber || "Draft Preview"}
                         </span>

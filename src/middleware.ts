@@ -19,7 +19,7 @@ export function middleware(request: NextRequest) {
     }
 
     // Exclude shared routes from subdomain rewrites
-    const sharedRoutes = ["/auth", "/dashboard", "/developer", "/admin", "/login", "/register", "/forgot-password", "/documents/share"];
+    const sharedRoutes = ["/auth", "/dashboard", "/developer", "/admin", "/login", "/register", "/forgot-password", "/documents/share", "/share"];
     const isSharedRoute = sharedRoutes.some(route => url.pathname.startsWith(route));
 
     // Retire only platform-owned public sections; branded sites keep their routes.

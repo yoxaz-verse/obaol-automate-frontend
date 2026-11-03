@@ -119,6 +119,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const searchParams = useSearchParams();
   const referralParam = String(searchParams?.get("ref") || "").trim().toUpperCase();
   const referralInvitationToken = String(searchParams?.get("invite") || "").trim().toLowerCase();
+  const shareParam = String(searchParams?.get("share") || "").trim().toLowerCase();
+  const [trackedShareToken, setTrackedShareToken] = useState(shareParam);
   const AutocompleteAny = Autocomplete as any;
   const { user, refreshUser } = useContext(AuthContext);
   const isOnboarding = mode === "onboarding";
@@ -128,6 +130,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const [legacyDraftNeedsRoleSwap, setLegacyDraftNeedsRoleSwap] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  useEffect(() => {
+    if (shareParam) { setTrackedShareToken(shareParam); return; }
+    const cookieToken = document.cookie.split("; ").find((row) => row.startsWith("obaol_referral_share="))?.split("=")[1] || "";
+    if (/^[a-f0-9]{64}$/.test(cookieToken)) setTrackedShareToken(cookieToken);
+  }, [shareParam]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasAcceptedLegalTerms, setHasAcceptedLegalTerms] = useState(false);
@@ -1179,6 +1186,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         associatePincodeEntry: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? (formData.associatePincodeEntry || undefined) : undefined,
         referralCode: formData.referralCode.trim() || undefined,
         referralInvitationToken: referralInvitationToken || undefined,
+        trackedShareToken: trackedShareToken || undefined,
       };
 
       if (isNewCompany) {

@@ -63,6 +63,7 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
       "/dashboard/freight-forwarding/shipments",
       "/dashboard/freight-forwarding/customs",
       "/dashboard/freight-forwarding/finance",
+      "/dashboard/freight-forwarding/eway-bills",
     ],
   },
   {

@@ -7,6 +7,8 @@ import { Spacer } from "@nextui-org/react";
 import DeleteModal from "@/components/CurdTable/delete";
 import DetailsModal from "@/components/CurdTable/details";
 import EditModal from "@/components/CurdTable/edit-model";
+import EmptyState from "@/components/ui/EmptyState";
+import { FiUsers } from "react-icons/fi";
 import {
   apiRoutesByRole,
   generateColumns,
@@ -23,6 +25,35 @@ interface UserTabContentProps {
   showAdd?: boolean;
   showDelete?: boolean;
 }
+
+const EMPTY_STATE_COPY: Record<string, { label: string; title: string; description: string }> = {
+  associate: {
+    label: "associates",
+    title: "No associates yet",
+    description: "Associates will appear here after they are added and linked to a company.",
+  },
+  admin: {
+    label: "admins",
+    title: "No admins yet",
+    description: "Admin accounts will appear here after they are added to the platform.",
+  },
+  operator: {
+    label: "operators",
+    title: "No operators yet",
+    description: "Operator accounts will appear here after they are added to the platform.",
+  },
+  inventoryManager: {
+    label: "inventory managers",
+    title: "No inventory managers yet",
+    description: "Inventory manager accounts will appear here after they are added to the platform.",
+  },
+};
+
+const hasFilterValue = (value: any) => {
+  if (value === null || value === undefined || value === "") return false;
+  if (Array.isArray(value)) return value.length > 0;
+  return true;
+};
 
 const UserTabContent: React.FC<UserTabContentProps> = ({
   currentTable,
@@ -53,6 +84,20 @@ const UserTabContent: React.FC<UserTabContentProps> = ({
     setFilters(updatedFilters); // Update the filters
   };
   const tableLabel = currentTable;
+  const emptyStateCopy = EMPTY_STATE_COPY[currentTable] || {
+    label: "records",
+    title: "No records yet",
+    description: "Records will appear here after they are added to the platform.",
+  };
+  const hasActiveCriteria = search.trim().length > 0 || Object.values(filters).some(hasFilterValue);
+  const isFreightAssociates = currentTable === "associate" && lockedFilters.companyCapability === "freight-forwarding";
+
+  const clearSearchAndFilters = () => {
+    setSearch("");
+    setDebouncedSearch("");
+    setFilters({});
+    setPage(1);
+  };
 
   return (
     <div className="w-full max-w-full min-w-0">
@@ -136,6 +181,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({
                   searchValue={search}
                   onSearchChange={setSearch}
                   searchPlaceholder={`Search ${tableLabel}...`}
+                  appliedFilters={filters}
                   actionElement={(
                     <UsersExportButton
                       currentTable={currentTable}
@@ -188,7 +234,26 @@ const UserTabContent: React.FC<UserTabContentProps> = ({
                   />
                 </TableFrame>
               ) : (
-                <div>No data available</div> // Translate
+                <EmptyState
+                  icon={<FiUsers className="text-2xl" />}
+                  title={hasActiveCriteria ? `No matching ${emptyStateCopy.label}` : emptyStateCopy.title}
+                  description={
+                    hasActiveCriteria
+                      ? "Try a different search or clear the current filters to see more results."
+                      : isFreightAssociates
+                        ? "Associates will appear here after users are linked to companies that provide freight-forwarding services."
+                        : emptyStateCopy.description
+                  }
+                  action={hasActiveCriteria ? (
+                    <button
+                      type="button"
+                      onClick={clearSearchAndFilters}
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-5 py-2.5 text-sm font-bold text-obaol-950 outline-none transition hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2"
+                    >
+                      Clear search and filters
+                    </button>
+                  ) : undefined}
+                />
               )}
             </>
           );

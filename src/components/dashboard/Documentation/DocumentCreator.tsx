@@ -19,11 +19,11 @@ import { RecipientDialog, type Recipient } from "./RecipientManager";
 import { formatDocumentMoney } from "./documentMoney";
 import { showToastMessage } from "@/utils/utils";
 
-type Item = { productId: string; description: string; quantity: number; unit: string; unitPrice: number; taxRate: number };
+type Item = { productId: string; description: string; quantity: number; unit: string; unitPrice: number; taxRate: number; hsnSac?: string; cessRate?: number };
 type Package = { description: string; packageType: string; packageCount: number; grossWeight: number; netWeight: number; dimensions: string; marks: string };
 type Test = { parameter: string; result: string; unit: string; method: string; limit: string };
 type Errors = Record<string, string>;
-const blankItem = (): Item => ({ productId: "", description: "", quantity: 1, unit: "KG", unitPrice: 0, taxRate: 0 });
+const blankItem = (): Item => ({ productId: "", description: "", quantity: 1, unit: "KG", unitPrice: 0, taxRate: 0, hsnSac: "", cessRate: 0 });
 const blankPackage = (): Package => ({ description: "", packageType: "Carton", packageCount: 1, grossWeight: 0, netWeight: 0, dimensions: "", marks: "" });
 const blankTest = (): Test => ({ parameter: "", result: "", unit: "", method: "", limit: "" });
 const fieldClass = "doc-field px-3";

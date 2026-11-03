@@ -197,6 +197,7 @@ test("Freight navigation is registered for the sidebar and accessible to operati
     "/dashboard/freight-forwarding/shipments",
     "/dashboard/freight-forwarding/customs",
     "/dashboard/freight-forwarding/finance",
+    "/dashboard/freight-forwarding/eway-bills",
   ];
   assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Freight")?.links, freightLinks);
   for (const path of freightLinks) {

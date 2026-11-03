@@ -33,6 +33,7 @@ export interface DynamicFilterProps {
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
   actionElement?: React.ReactNode;
+  appliedFilters?: Record<string, any>;
   className?: string;
 }
 
@@ -66,12 +67,17 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   onSearchChange,
   searchPlaceholder = "Search records...",
   actionElement,
+  appliedFilters,
   className,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>({});
   const [optionErrors, setOptionErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (appliedFilters) setFilters(appliedFilters);
+  }, [appliedFilters]);
 
   const loadFieldOptions = useCallback(async (field: FormField, dependencyValue = "") => {
     if (!field.dynamicValuesFn) return;

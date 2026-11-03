@@ -45,7 +45,7 @@ import {
   LuWorkflow,
 } from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
-import { TbBuildingWarehouse, TbArrowsUpDown } from "react-icons/tb";
+import { TbBuildingWarehouse, TbArrowsUpDown, TbReceiptTax } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
@@ -169,6 +169,7 @@ export const sidebarOptions = [
   { name: "Freight Shipments", icon: <LuTruck />, link: "/dashboard/freight-forwarding/shipments" },
   { name: "Freight Customs", icon: <LuStamp />, link: "/dashboard/freight-forwarding/customs" },
   { name: "Freight Finance", icon: <LuWallet />, link: "/dashboard/freight-forwarding/finance" },
+  { name: "E-Way Bills", icon: <TbReceiptTax />, link: "/dashboard/freight-forwarding/eway-bills" },
   { name: "Transport Overview", icon: <LuMap />, link: "/dashboard/inland-transportation" },
   { name: "Transport Opportunities", icon: <LuRoute />, link: "/dashboard/inland-transportation/opportunities" },
   { name: "Transport Trips", icon: <LiaMapMarkedAltSolid />, link: "/dashboard/inland-transportation/trips" },

@@ -27,7 +27,7 @@ test("every active sidebar destination has a complete and unique icon assignment
   const entries = [...registry.matchAll(/name:\s*"([^"]+)"[\s\S]*?icon:\s*<([A-Za-z0-9_]+)\s*\/>[\s\S]*?link:\s*"([^"]+)"/g)]
     .map(([, name, icon, link]) => ({ name, icon, link }));
 
-  assert.equal(entries.length, 65, "all active sidebar entries should be covered by the icon contract");
+  assert.equal(entries.length, 66, "all active sidebar entries should be covered by the icon contract");
   assert.equal(entries.every(({ name, icon, link }) => name && icon && link), true);
   assert.equal(new Set(entries.map(({ icon }) => icon)).size, entries.length, "sidebar icons must be unique");
   assert.equal(new Set(entries.map(({ link }) => link)).size, entries.length, "sidebar routes must be unique");

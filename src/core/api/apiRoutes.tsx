@@ -607,6 +607,7 @@ export const apiRoutes = {
     update: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     email: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/email`,
     summary: `${BASE_PATHS.TRADE_DOCUMENT}/summary`,
+    readiness: `${BASE_PATHS.TRADE_DOCUMENT}/readiness`,
     upload: `${BASE_PATHS.TRADE_DOCUMENT}/upload`,
     extraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}`,
     confirmExtraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}/confirm`,

@@ -349,6 +349,7 @@ export default function CompanyWorkspacePage() {
   const obaolConfig = obaolConfigQuery.data;
   const obaolCompanyId = String(obaolConfig?.companyId || "");
   const obaolCompany = obaolConfig?.company || null;
+  const obaolConfigStatus = String(obaolConfig?.status || (obaolCompanyId ? "CONFIGURED" : "MISSING"));
   const obaolCompanies = useMemo(
     () => extractList(obaolCompanyDirectoryQuery.data),
     [obaolCompanyDirectoryQuery.data]
@@ -632,12 +633,17 @@ export default function CompanyWorkspacePage() {
             </p>
           </div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <Chip size="sm" color={obaolCompanyId ? "success" : "warning"} variant="flat">
-              {obaolCompanyId ? "Configured" : "Missing"}
+            <Chip size="sm" color={obaolConfigStatus === "CONFIGURED" ? "success" : obaolConfigStatus === "INVALID" ? "danger" : "warning"} variant="flat">
+              {obaolConfigStatus === "CONFIGURED" ? "Configured" : obaolConfigStatus === "INVALID" ? "Invalid" : "Missing"}
             </Chip>
             {obaolCompany?.name && (
               <span className="text-sm text-default-600">
                 Current: <span className="font-medium text-foreground">{obaolCompany.name}</span>
+              </span>
+            )}
+            {obaolConfigStatus === "INVALID" && (
+              <span className="text-sm font-medium text-danger-600">
+                The saved company no longer exists. Select and save a valid company below.
               </span>
             )}
           </div>

@@ -195,6 +195,8 @@ export default function CompanyProductPage() {
   const obaolConfig = obaolConfigQuery.data;
   const obaolCompanyId = String(obaolConfig?.companyId || "");
   const obaolCompany = obaolConfig?.company || null;
+  const obaolConfigStatus = String(obaolConfig?.status || (obaolCompanyId ? "CONFIGURED" : "MISSING"));
+  const isObaolConfigHealthy = obaolConfigStatus === "CONFIGURED";
   const companiesPayload = extractPagedPayload(companiesQuery.data);
   const companies = useMemo(() => extractList(companiesPayload), [companiesPayload]);
   const configCompanies = useMemo(
@@ -707,17 +709,17 @@ export default function CompanyProductPage() {
                 <span className="text-[9px] font-black  tracking-[0.25em] text-obaol-500">Configuration</span>
               </div>
               <p className="text-[10px] font-black  tracking-[0.25em] text-default-500">
-                {dashboardCopy(obaolCompanyId ? "PROTOCOL_SYNCHRONIZED" : "MAPPING_REQUIRED")}
+                {dashboardCopy(isObaolConfigHealthy ? "PROTOCOL_SYNCHRONIZED" : "MAPPING_REQUIRED")}
                 {toName(obaolCompany, "") ? ` | Active company: ${toName(obaolCompany, "")}` : ""}
               </p>
             </div>
             <div className="flex items-center gap-3">
               <div className={`px-3 py-2 rounded-xl border flex items-center gap-2 ${
-                obaolCompanyId ? "bg-success-500/10 border-success-500/20" : "bg-obaol-500/10 border-obaol-500/20"
+                isObaolConfigHealthy ? "bg-success-500/10 border-success-500/20" : obaolConfigStatus === "INVALID" ? "bg-danger-500/10 border-danger-500/20" : "bg-obaol-500/10 border-obaol-500/20"
               }`}>
-                <div className={`w-2 h-2 rounded-full ${obaolCompanyId ? "bg-success-500" : "bg-obaol-500"}`} />
-                <span className={`text-[10px] font-black  tracking-widest ${obaolCompanyId ? "text-success-500" : "text-obaol-500"}`}>
-                  {obaolCompanyId ? "Live" : "Pending"}
+                <div className={`w-2 h-2 rounded-full ${isObaolConfigHealthy ? "bg-success-500" : obaolConfigStatus === "INVALID" ? "bg-danger-500" : "bg-obaol-500"}`} />
+                <span className={`text-[10px] font-black  tracking-widest ${isObaolConfigHealthy ? "text-success-500" : obaolConfigStatus === "INVALID" ? "text-danger-500" : "text-obaol-500"}`}>
+                  {isObaolConfigHealthy ? "Live" : obaolConfigStatus === "INVALID" ? "Invalid" : "Pending"}
                 </span>
               </div>
               <div className={`transition-transform duration-300 ${isConfigExpanded ? "rotate-[-90deg]" : "rotate-180"}`}>
@@ -729,6 +731,11 @@ export default function CompanyProductPage() {
 
         {isConfigExpanded ? (
           <div className="px-5 md:px-7 pb-6 md:pb-7 border-t border-divider/70">
+            {obaolConfigStatus === "INVALID" && (
+              <div className="mt-5 rounded-2xl border border-danger-500/25 bg-danger-500/10 px-4 py-3 text-sm font-semibold text-danger-600 dark:text-danger-300">
+                The saved OBAOL company no longer exists. Select and save a valid company to restore quotation creation.
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] items-end gap-6 p-6 md:p-7 mt-5 rounded-[1.5rem] bg-content2/30 dark:bg-black/20 border border-divider shadow-inner relative overflow-hidden">
               <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-obaol-500/20 rounded-tl-sm" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-obaol-500/20 rounded-br-sm" />

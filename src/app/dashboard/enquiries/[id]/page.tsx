@@ -177,6 +177,17 @@ export default function EnquiryDetailsPage() {
         queryFn: () => getData(apiRoutes.tradeDocuments.list, { page: 1, limit: 20, enquiryId, type: "QUOTATION" }),
         enabled: isValidEnquiryId,
     });
+    const { data: quotationReadinessResponse, isError: isQuotationReadinessError } = useQuery({
+        queryKey: ["trade-document-readiness", "QUOTATION", enquiryId],
+        queryFn: () => getData(apiRoutes.tradeDocuments.readiness, { type: "QUOTATION", enquiryId }),
+        enabled: isValidEnquiryId,
+        retry: false,
+    });
+    const quotationReadiness = quotationReadinessResponse?.data?.data || null;
+    const quotationConfigReady = quotationReadiness?.canCreate === true;
+    useEffect(() => {
+        if (quotationReadiness?.canCreate) setDraftQuotationError("");
+    }, [quotationReadiness?.canCreate]);
     const { data: enquiryRulesResponse } = useQuery({
         queryKey: ["flow-rules", "TRADE_ENQUIRY"],
         queryFn: () => getData(apiRoutes.flowRules.list, { flowType: "TRADE_ENQUIRY" }),
@@ -884,8 +895,13 @@ export default function EnquiryDetailsPage() {
         },
         onError: (error: any) => {
             const details = error?.response?.data?.message || error?.message || "Failed to create quotation.";
-            toast.error(details);
-            setDraftQuotationError(details);
+            const code = String(error?.response?.data?.code || "");
+            const isConfigurationError = code === "CONFIG_MISSING" || code === "CONFIG_INVALID";
+            toast.error(isConfigurationError ? "Quotation creation is unavailable due to system configuration." : details);
+            setDraftQuotationError(isConfigurationError ? "" : details);
+            if (isConfigurationError) {
+                queryClient.invalidateQueries({ queryKey: ["trade-document-readiness", "QUOTATION", enquiryId] });
+            }
         },
     });
     const submitQuotationMutation = useMutation({
@@ -1747,6 +1763,15 @@ export default function EnquiryDetailsPage() {
         return isAssignedOperator;
     })();
     const canPerformAction = isSystemAdmin || canOperatorActByPerspective || canActByRole;
+    const isActionDisabled = (actionKey: string) =>
+        !canPerformAction ||
+        Boolean(actionStatus[actionKey]) ||
+        (actionKey === "QUOTATION_CREATED" && !quotationConfigReady);
+    const quotationConfigurationMessage = isQuotationReadinessError
+        ? "Quotation readiness could not be verified. Please refresh the page and try again."
+        : isSystemAdmin
+            ? "Quotation creation is unavailable because the OBAOL company configuration is missing or invalid. Select a valid company to continue."
+            : "Quotation creation is temporarily unavailable due to system configuration. Please contact an administrator.";
     const isActionLoading = (actionKey: string) => {
         if (applyActionMutation.isPending && pendingActionKey === actionKey) return true;
         if (actionKey === "QUOTATION_CREATED" && createQuotationMutation.isPending) return true;
@@ -2738,7 +2763,7 @@ export default function EnquiryDetailsPage() {
                                                 color="primary"
                                                 variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
                                                 className="font-bold px-4 rounded-xl h-9 text-[10px] tracking-widest "
-                                                isDisabled={!canPerformAction || Boolean(actionStatus[actionKey]) || isConvertingOrder}
+                                                isDisabled={isActionDisabled(actionKey) || isConvertingOrder}
                                                 onPress={() => handleActionPress(actionKey)}
                                                 isLoading={isActionLoading(actionKey)}
                                             >
@@ -2781,6 +2806,16 @@ export default function EnquiryDetailsPage() {
                             {draftQuotationError && (
                                 <div className="mt-3 rounded-xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200  tracking-wide">
                                     {draftQuotationError}
+                                </div>
+                            )}
+                            {!quotationConfigReady && (quotationReadiness || isQuotationReadinessError) && displayActions.includes("QUOTATION_CREATED") && (
+                                <div className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-[11px] font-semibold text-warning-700 dark:text-warning-300">
+                                    <div>{quotationConfigurationMessage}</div>
+                                    {isSystemAdmin && (
+                                        <Link href="/dashboard/company" className="mt-2 inline-flex font-black underline underline-offset-2">
+                                            Open OBAOL Company Configuration
+                                        </Link>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -4309,7 +4344,7 @@ export default function EnquiryDetailsPage() {
                                             color="primary"
                                             variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
                                             className="font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest "
-                                            isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
+                                            isDisabled={isActionDisabled(actionKey)}
                                             onPress={() => handleActionPress(actionKey)}
                                             isLoading={applyActionMutation.isPending && pendingActionKey === actionKey}
                                         >

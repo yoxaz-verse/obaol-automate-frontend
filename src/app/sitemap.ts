@@ -4,6 +4,7 @@ import { buildPublicWebApiUrl } from "@/utils/publicApi";
 import { associateRoleSlugs, getAssociateRolePath } from "@/data/associateRoles";
 import { BASE_URL } from "@/utils/seo";
 import { getAllPublishedScenarios } from "@/data/realLifeScenarios";
+import { getScenarioStoryPath } from "@/data/scenarioRoles";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const scenarios = await getAllPublishedScenarios();
   const scenarioEntries: MetadataRoute.Sitemap = scenarios.map((scenario) => ({
-    url: `${baseUrl}${getAssociateRolePath(scenario.roleSlug)}/real-life-scenarios/${scenario.slug}`,
+    url: `${baseUrl}${getScenarioStoryPath(scenario.roleSlug, scenario.slug)}`,
     lastModified: scenario.updatedAt ? new Date(scenario.updatedAt) : undefined,
     priority: 0.6,
     changeFrequency: "monthly" as const,

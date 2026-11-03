@@ -23,6 +23,23 @@ test("story pages are server rendered with article, breadcrumb and FAQ schema", 
   assert.doesNotMatch(view, /related\.filter\([^;]+\.slice\(0,\s*3\)/);
 });
 
+test("Operator scenarios are server rendered with Operator-specific URLs and schema", () => {
+  const rolePage = read("src/app/roles/operator/page.tsx");
+  const clientPage = read("src/app/roles/operator/OperatorRolePageClient.tsx");
+  const storyPage = read("src/app/roles/operator/real-life-scenarios/[storySlug]/page.tsx");
+  const previewPage = read("src/app/roles/operator/real-life-scenarios/preview/[id]/page.tsx");
+  assert.doesNotMatch(rolePage, /"use client"/);
+  assert.match(rolePage, /getPublishedRoleScenarios\("operator"\)/);
+  assert.match(clientPage, /Real-Life Scenarios for Operators/);
+  assert.match(clientPage, /scenarios\.map/);
+  assert.match(storyPage, /getPublishedScenario\("operator"/);
+  assert.match(storyPage, /"@type": "Article"/);
+  assert.match(storyPage, /"@type": "BreadcrumbList"/);
+  assert.match(storyPage, /"@type": "FAQPage"/);
+  assert.match(previewPage, /index: false/);
+  assert.match(previewPage, /scenario\.roleSlug !== "operator"/);
+});
+
 test("preview is explicitly noindex and sitemap includes published scenario records", () => {
   const preview = read("src/app/roles/associate/[roleSlug]/real-life-scenarios/preview/[id]/page.tsx");
   const sitemap = read("src/app/sitemap.ts");
@@ -37,6 +54,17 @@ test("admin editor exposes structured blocks and controlled publication", () => 
   for (const expected of ["Structured story blocks", "Search preview", "Save draft", "Preview", "Publish", "Schedule", "Archive", "disclosureAccepted"]) assert.match(admin, new RegExp(expected));
   assert.match(admin, /\{count\?\.total \|\| 0\} created/);
   assert.doesNotMatch(admin, /\/3 created|three scenarios|required three/i);
+  assert.match(admin, /scenarioRoleOptions/);
+  assert.match(admin, /getScenarioPreviewPath/);
+  assert.match(admin, /getScenarioStoryPath/);
+});
+
+test("shared scenario paths keep Associate URLs stable and route Operator stories correctly", () => {
+  const paths = read("src/data/scenarioRoles.ts");
+  const sitemap = read("src/app/sitemap.ts");
+  assert.match(paths, /isOperatorScenarioRole\(roleSlug\) \? "\/roles\/operator" : getAssociateRolePath/);
+  assert.match(paths, /getScenarioStoryPath/);
+  assert.match(sitemap, /getScenarioStoryPath\(scenario\.roleSlug, scenario\.slug\)/);
 });
 
 test("public scenario fetches report backend failures instead of failing silently", () => {

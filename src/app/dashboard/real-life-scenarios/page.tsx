@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Button, Chip, Input, Select, SelectItem, Spinner, Textarea } from "@nextui-org/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Title from "@/components/titles";
-import { associateRoleDefinitions } from "@/data/associateRoles";
+import { getScenarioPreviewPath, getScenarioStoryPath, scenarioRoleOptions } from "@/data/scenarioRoles";
 import { getData, postData, putData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import type { RealLifeScenario, ScenarioBlock, ScenarioBlockType } from "@/types/realLifeScenario";
@@ -27,7 +27,7 @@ const blockTypes: Array<{ value: ScenarioBlockType; label: string }> = [
   ["quote", "Quote"], ["callout", "Callout"], ["image", "Image"], ["workflow", "Workflow steps"],
   ["result", "Result summary"], ["faq", "FAQ callout"], ["cta", "CTA"],
 ].map(([value, label]) => ({ value: value as ScenarioBlockType, label }));
-const roleFilterOptions = [{ slug: "all", displayName: "All roles" }, ...associateRoleDefinitions];
+const roleFilterOptions = [{ slug: "all", displayName: "All roles" }, ...scenarioRoleOptions];
 const statusFilterOptions = ["all", "DRAFT", "SCHEDULED", "PUBLISHED", "ARCHIVED"];
 
 const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -69,20 +69,20 @@ export default function RealLifeScenariosAdminPage() {
 
   const openPreview = async () => {
     if (!editingId) return showToastMessage({ type: "warning", message: "Save the draft before previewing it." });
-    try { const response = await postData(apiRoutes.realLifeScenarios.previewToken(editingId), {}); const token = response.data.data.token; window.open(`/roles/associate/${draft.roleSlug}/real-life-scenarios/preview/${editingId}?token=${encodeURIComponent(token)}`, "_blank", "noopener,noreferrer"); }
+    try { const response = await postData(apiRoutes.realLifeScenarios.previewToken(editingId), {}); const token = response.data.data.token; window.open(`${getScenarioPreviewPath(draft.roleSlug || "traders", editingId)}?token=${encodeURIComponent(token)}`, "_blank", "noopener,noreferrer"); }
     catch (error) { showToastMessage({ type: "error", message: responseMessage(error) }); }
   };
 
   return <div className="space-y-6 p-4 md:p-6">
     <Title title="Real-Life Scenarios" visuallyHidden />
-    <header><h1 className="text-3xl font-black">Real-Life Scenarios</h1><p className="mt-2 text-sm text-default-500">Create safe, structured, crawlable representative stories for every Associate role.</p></header>
+    <header><h1 className="text-3xl font-black">Real-Life Scenarios</h1><p className="mt-2 text-sm text-default-500">Create structured, crawlable industry stories for every supported role.</p></header>
 
-    <section className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">{associateRoleDefinitions.map((role) => { const count = countMap.get(role.slug); return <button key={role.slug} onClick={() => setRoleFilter(role.slug)} className="rounded-2xl border border-default-200 bg-content1 p-3 text-left hover:border-primary"><span className="block text-sm font-bold">{role.displayName}</span><span className="mt-1 block text-xs text-default-500">{count?.total || 0} created · {count?.published || 0} live</span></button>; })}</section>
+    <section className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">{scenarioRoleOptions.map((role) => { const count = countMap.get(role.slug); return <button key={role.slug} onClick={() => setRoleFilter(role.slug)} className="rounded-2xl border border-default-200 bg-content1 p-3 text-left hover:border-primary"><span className="block text-sm font-bold">{role.displayName}</span><span className="mt-1 block text-xs text-default-500">{count?.total || 0} created · {count?.published || 0} live</span></button>; })}</section>
 
     <section className="rounded-3xl border border-default-200 bg-content1 p-5 md:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-black">{editingId ? "Edit scenario" : "New scenario"}</h2><p className="text-xs text-default-500">All saved content remains a draft until explicitly published.</p></div><Button variant="flat" onPress={() => { setEditingId(null); setDraft(emptyDraft()); }}>New draft</Button></div>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <Select label="Associate role" selectedKeys={[draft.roleSlug || "traders"]} onSelectionChange={(keys) => setField("roleSlug", Array.from(keys)[0])}>{associateRoleDefinitions.map((role) => <SelectItem key={role.slug}>{role.displayName}</SelectItem>)}</Select>
+        <Select label="Role" selectedKeys={[draft.roleSlug || "traders"]} onSelectionChange={(keys) => setField("roleSlug", Array.from(keys)[0])}>{scenarioRoleOptions.map((role) => <SelectItem key={role.slug}>{role.displayName}</SelectItem>)}</Select>
         <Input label="Internal title" value={draft.internalTitle || ""} onValueChange={(value) => setField("internalTitle", value)} />
         <Input label="Public H1" value={draft.h1 || ""} onValueChange={(value) => { setField("h1", value); if (!editingId && !draft.slug) setField("slug", slugify(value)); }} />
         <Input label="URL slug" value={draft.slug || ""} onValueChange={(value) => setField("slug", slugify(value))} />
@@ -104,7 +104,7 @@ export default function RealLifeScenariosAdminPage() {
 
       <div className="mt-8 grid gap-4 md:grid-cols-2"><Input label="SEO title" description={`${(draft.seoTitle || "").length}/60 recommended`} value={draft.seoTitle || ""} onValueChange={(value) => setField("seoTitle", value)} /><Textarea label="Meta description" description={`${(draft.seoDescription || "").length}/160 recommended`} value={draft.seoDescription || ""} onValueChange={(value) => setField("seoDescription", value)} /><Input label="Hero/social image URL (optional)" value={draft.heroImageUrl || ""} onValueChange={(value) => setField("heroImageUrl", value)} /><Input label="Hero image alt text" value={draft.heroImageAlt || ""} onValueChange={(value) => setField("heroImageAlt", value)} /><Input label="CTA label" value={draft.cta?.label || ""} onValueChange={(value) => setField("cta", { ...draft.cta, label: value })} /><Input label="CTA URL" value={draft.cta?.href || ""} onValueChange={(value) => setField("cta", { ...draft.cta, href: value })} /><Input type="number" min={0} label="Display order" value={String(draft.displayOrder || 0)} onValueChange={(value) => setField("displayOrder", Math.max(0, Number(value) || 0))} /></div>
       <Textarea className="mt-4" label="FAQs (one per line: Question | Answer)" value={draft.faqs.map((faq) => `${faq.question} | ${faq.answer}`).join("\n")} onValueChange={(value) => setField("faqs", value.split("\n").map((line) => { const [question, ...answer] = line.split("|"); return { question: question?.trim(), answer: answer.join("|").trim() }; }).filter((faq) => faq.question && faq.answer))} />
-      <div className="mt-5 rounded-2xl border border-default-200 p-4"><p className="text-xs font-bold uppercase tracking-wider text-default-500">Search preview</p><p className="mt-2 text-lg text-blue-600">{draft.seoTitle || draft.h1 || "Scenario title"}</p><p className="text-sm text-emerald-700">obaol.com/roles/associate/{draft.roleSlug}/real-life-scenarios/{draft.slug || "story-slug"}</p><p className="mt-1 text-sm text-default-600">{draft.seoDescription || "Add a concise, factual description."}</p></div>
+      <div className="mt-5 rounded-2xl border border-default-200 p-4"><p className="text-xs font-bold uppercase tracking-wider text-default-500">Search preview</p><p className="mt-2 text-lg text-blue-600">{draft.seoTitle || draft.h1 || "Scenario title"}</p><p className="text-sm text-emerald-700">obaol.com{getScenarioStoryPath(draft.roleSlug || "traders", draft.slug || "story-slug")}</p><p className="mt-1 text-sm text-default-600">{draft.seoDescription || "Add a concise, factual description."}</p></div>
       {warnings.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{warnings.map((warning) => <Chip key={warning} color="warning" variant="flat">{warning}</Chip>)}</div>}
       <label className="mt-5 flex items-start gap-3 rounded-2xl bg-default-100 p-4 text-sm"><input type="checkbox" className="mt-1" checked={Boolean(draft.disclosureAccepted)} onChange={(event) => setField("disclosureAccepted", event.target.checked)} /><span>I confirm this is a representative educational scenario, not a customer testimonial, verified case study, guarantee, or unsupported performance claim.</span></label>
       <div className="mt-6 flex flex-wrap gap-3"><Button color="primary" startContent={<FiSave />} isLoading={saveMutation.isPending} onPress={() => saveMutation.mutate()}>Save draft</Button><Button variant="flat" startContent={<FiEye />} onPress={openPreview}>Preview</Button>{editingId && <><Button color="success" startContent={<FiSend />} onPress={() => transitionMutation.mutate({ id: editingId, action: "PUBLISH" })}>Publish</Button><Input type="datetime-local" className="max-w-64" value={scheduleAt} onValueChange={setScheduleAt} /><Button variant="bordered" onPress={() => transitionMutation.mutate({ id: editingId, action: "SCHEDULE" })}>Schedule</Button>{draft.status === "PUBLISHED" && <Button variant="bordered" onPress={() => transitionMutation.mutate({ id: editingId, action: "UNPUBLISH" })}>Unpublish</Button>}<Button color="danger" variant="light" onPress={() => transitionMutation.mutate({ id: editingId, action: "ARCHIVE" })}>Archive</Button></>}</div>

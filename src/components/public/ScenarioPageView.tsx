@@ -3,14 +3,15 @@ import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 import ScenarioBody from "@/components/public/ScenarioBody";
-import { getAssociateRoleBySlug, getAssociateRolePath } from "@/data/associateRoles";
+import { getScenarioRole, getScenarioRolePath, getScenarioStoryPath, isOperatorScenarioRole } from "@/data/scenarioRoles";
 import type { RealLifeScenario } from "@/types/realLifeScenario";
 import { FiArrowLeft, FiArrowRight, FiUsers } from "react-icons/fi";
 
 export default function ScenarioPageView({ scenario, related = [], preview = false }: { scenario: RealLifeScenario; related?: RealLifeScenario[]; preview?: boolean }) {
-  const role = getAssociateRoleBySlug(scenario.roleSlug);
+  const role = getScenarioRole(scenario.roleSlug);
   if (!role) return null;
-  const rolePath = getAssociateRolePath(role.slug);
+  const rolePath = getScenarioRolePath(role.slug);
+  const operator = isOperatorScenarioRole(role.slug);
   return <section className="min-h-screen bg-background text-foreground">
     <Header />
     <ThemedContentWrapper>
@@ -21,7 +22,7 @@ export default function ScenarioPageView({ scenario, related = [], preview = fal
             <div className="container mx-auto max-w-5xl px-4 public-layout-container">
               <Link href={rolePath} className="public-back-link"><FiArrowLeft /> Back to {role.displayName}</Link>
               <nav aria-label="Breadcrumb" className="mt-8 text-sm text-foreground/55">
-                <Link href="/roles/associate" className="hover:text-orange-500">Associate roles</Link> <span aria-hidden> / </span>
+                <Link href={operator ? "/roles/operator" : "/roles/associate"} className="hover:text-orange-500">{operator ? "Operator role" : "Associate roles"}</Link> <span aria-hidden> / </span>
                 <Link href={rolePath} className="hover:text-orange-500">{role.displayName}</Link> <span aria-hidden> / </span>
                 <span>Real-life scenario</span>
               </nav>
@@ -48,14 +49,14 @@ export default function ScenarioPageView({ scenario, related = [], preview = fal
               </section>}
 
               <section className="mt-14 rounded-[2rem] border border-orange-500/25 bg-orange-500/[0.06] p-7 md:p-9">
-                <h2 className="text-2xl font-black">Explore the {role.displayName} role on OBAOL</h2>
+                <h2 className="text-2xl font-black">Explore the {operator ? "Operator" : role.displayName} role on OBAOL</h2>
                 <p className="mt-3 leading-7 text-foreground/65">Review eligibility, responsibilities, available capabilities, and registration steps for this business role.</p>
                 <Link href={scenario.cta?.href || rolePath} className="public-button public-button--primary mt-6 inline-flex items-center gap-2">{scenario.cta?.label || `Explore ${role.displayName}`} <FiArrowRight /></Link>
               </section>
             </div>
             <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
               <div className="rounded-3xl border border-default-200 bg-content1/40 p-5"><p className="text-xs font-black uppercase tracking-wider text-orange-500">Primary topic</p><p className="mt-2 font-bold">{scenario.primaryKeyword}</p></div>
-              {related.length > 0 && <div><h2 className="text-lg font-black">More {role.displayName} scenarios</h2><div className="mt-3 space-y-3">{related.filter((item) => item._id !== scenario._id).map((item) => <Link key={item._id} href={`${rolePath}/real-life-scenarios/${item.slug}`} className="block rounded-2xl border border-default-200 p-4 text-sm font-bold hover:border-orange-500/40 hover:text-orange-500">{item.h1}</Link>)}</div></div>}
+              {related.length > 0 && <div><h2 className="text-lg font-black">More {role.displayName} scenarios</h2><div className="mt-3 space-y-3">{related.filter((item) => item._id !== scenario._id).map((item) => <Link key={item._id} href={getScenarioStoryPath(role.slug, item.slug)} className="block rounded-2xl border border-default-200 p-4 text-sm font-bold hover:border-orange-500/40 hover:text-orange-500">{item.h1}</Link>)}</div></div>}
             </aside>
           </div>
         </article>

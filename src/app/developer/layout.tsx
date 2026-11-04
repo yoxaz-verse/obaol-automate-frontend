@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import DeveloperNav from "@/components/developer/DeveloperNav";
 
 export const metadata: Metadata = {
   robots: {
@@ -12,6 +13,6 @@ export default function DeveloperRouteLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return <><DeveloperNav />{children}</>;
 }
 

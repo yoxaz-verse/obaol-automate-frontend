@@ -43,6 +43,21 @@ export interface User {
   pendingSince?: string | null;
   companyApproval?: CompanyApproval | null;
   isAvailable?: boolean;
+  isEmailVerified?: boolean;
+  isPhoneVerified?: boolean;
+  fullyVerified?: boolean;
+  verificationGraceEndsAt?: string | null;
+  verificationRequired?: boolean;
+  verification?: {
+    emailVerified: boolean;
+    phoneVerified: boolean;
+    fullyVerified: boolean;
+    requiredNextChannel: "email" | "whatsapp" | null;
+    maskedEmail: string;
+    maskedPhone: string;
+    verificationGraceEndsAt: string | null;
+    verificationRequired: boolean;
+  };
   verified: {
     email: boolean;
     phone?: boolean;

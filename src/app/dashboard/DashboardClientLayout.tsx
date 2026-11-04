@@ -17,6 +17,7 @@ import { canAccessDashboardRoute } from "@/utils/dashboardAccess";
 import { isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import DashboardContextBar from "@/components/dashboard/DashboardContextBar";
 import CompanyApprovalBanner from "@/components/dashboard/CompanyApprovalBanner";
+import AccountVerificationBanner from "@/components/dashboard/AccountVerificationBanner";
 import LiveNotificationSubscriber from "@/components/dashboard/LiveNotificationSubscriber";
 import { SidebarGovernanceProvider, useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { DashboardNavigationProvider, useDashboardNavigation } from "@/context/DashboardNavigationContext";
@@ -227,6 +228,7 @@ function DashboardLayoutContent({
             >
               <div data-dashboard-content className="max-w-[var(--db-content-width)] mx-auto w-full px-3 pb-4 pt-1 md:p-6 min-w-0">
                 <DashboardContextBar />
+                <AccountVerificationBanner />
                 <CompanyApprovalBanner />
                 <div className="relative" aria-busy={isNavigating || undefined}>
                   {children}

@@ -1,22 +1,24 @@
 import { buildMetadata, buildWebPageJsonLd } from "@/utils/seo";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import Header from "@/components/home/header";
-import { FAQS, generateFaqSchema } from "./faqSchema";
+import Link from "next/link";
+import { generateFaqSchema } from "./faqSchema";
+import FaqExplorer from "./FaqExplorer";
 import Footer from "@/components/home/footer";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 
 export const metadata = buildMetadata({
-  title: "Frequently Asked Questions | OBAOL",
+  title: "OBAOL Platform Guide & Frequently Asked Questions",
   description:
-    "Starting in India, get clear answers to common questions about OBAOL, its execution model, and who it is built for as we expand globally.",
-  keywords: ["OBAOL FAQ", "trade execution questions", "commodity platform"],
+    "Understand OBAOL Supreme, its roles, verification, sourcing, documents, logistics, execution model, pricing, AI tools, and India-first global trade support.",
+  keywords: ["OBAOL FAQ", "trade execution platform guide", "commodity trade questions", "OBAOL roles", "trade verification"],
   path: "/faq",
 });
 
 const webPageJsonLd = buildWebPageJsonLd({
-  title: "Frequently Asked Questions | OBAOL",
+  title: "OBAOL Platform Guide & Frequently Asked Questions",
   description:
-    "Clear answers to common questions about OBAOL, its execution model, and who it is built for.",
+    "Clear answers about OBAOL Supreme, its participants, workflows, execution model, technology, responsibilities, and market coverage.",
   path: "/faq",
 });
 
@@ -40,42 +42,26 @@ export default function FAQPage() {
       />
 
       <ThemedContentWrapper>
-        {/* Page Header */}
-        <header className="mb-16">
-          <h1 className="text-3xl md:text-4xl font-semibold text-foreground">
-            Frequently Asked Questions
+        <header className="mb-12 max-w-5xl">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-primary">Platform guide</p>
+          <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-6xl">
+            Understand OBAOL, from first enquiry to trade closure
           </h1>
-          <p className="mt-4 text-default-500">
-            Clear answers to common questions about OBAOL and its
-            execution-focused trade system.
+          <p className="mt-6 max-w-4xl text-lg leading-8 text-default-500 md:text-xl">
+            OBAOL Supreme is an India-first B2B bulk-trade execution platform. This guide explains who it is for, how its workflows connect, where technology helps, and which responsibilities always remain with participating companies.
           </p>
           <div className="mt-6 max-w-3xl">
             <IndiaFirstNote />
           </div>
+          <nav aria-label="Related platform information" className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+            <Link href="/about" className="text-primary underline-offset-4 hover:underline">About the platform</Link>
+            <Link href="/roles" className="text-primary underline-offset-4 hover:underline">Choose your role</Link>
+            <Link href="/verification" className="text-primary underline-offset-4 hover:underline">Verification framework</Link>
+            <Link href="/disclaimer" className="text-primary underline-offset-4 hover:underline">Responsibilities and limitations</Link>
+          </nav>
         </header>
 
-        {/* FAQ List */}
-        <div className="space-y-4">
-          {FAQS.map((faq) => (
-            <details
-              key={faq.id}
-              className="group border border-default-200 rounded-lg bg-content1"
-            >
-              <summary className="cursor-pointer list-none px-6 py-4 flex justify-between items-center">
-                <span className="text-foreground font-medium">
-                  {faq.question}
-                </span>
-                <span className="text-default-500 group-open:rotate-45 transition-transform">
-                  +
-                </span>
-              </summary>
-
-              <div className="px-6 pb-6 text-default-600 leading-relaxed border-t border-default-100 mt-4 pt-4">
-                <p>{faq.answer}</p>
-              </div>
-            </details>
-          ))}
-        </div>
+        <FaqExplorer />
       </ThemedContentWrapper>
 
       <Footer />

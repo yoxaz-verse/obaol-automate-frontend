@@ -9,6 +9,7 @@ import {
   devGetKeyPresets,
   devListKeys,
   devListMcpConnectors,
+  devUpdateKey,
   devRevokeKey,
   devRevokeMcpConnector,
   getResolvedDeveloperApiBase,
@@ -53,7 +54,7 @@ export default function DeveloperKeysPage() {
   const [newRawKey, setNewRawKey] = useState<string>("");
   const [connectors, setConnectors] = useState<DevMcpConnector[]>([]);
   const [isConnectorCreating, setIsConnectorCreating] = useState(false);
-  const [connectorLabel, setConnectorLabel] = useState("ChatGPT Connector");
+  const [connectorLabel, setConnectorLabel] = useState("AI Platform Connector");
   const [connectorApiKeyId, setConnectorApiKeyId] = useState("");
   const [connectorExpiresInDays, setConnectorExpiresInDays] = useState<number>(30);
   const [newConnectorToken, setNewConnectorToken] = useState("");
@@ -184,6 +185,16 @@ export default function DeveloperKeysPage() {
     }
   };
 
+  const handleApplyPreset = async (id: string) => {
+    try {
+      setError("");
+      await devUpdateKey(id, { permissionPreset: preset });
+      await load();
+    } catch (e: any) {
+      setError(e?.message || "Failed to update key permissions.");
+    }
+  };
+
   const handleSignOut = () => {
     clearDeveloperToken();
     router.replace("/developer/login");
@@ -245,7 +256,7 @@ export default function DeveloperKeysPage() {
                   <th className="py-2">Rate</th>
                   <th className="py-2">Last Used</th>
                   <th className="py-2">Status</th>
-                  <th className="py-2 text-center">Action</th>
+                  <th className="py-2 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -259,9 +270,7 @@ export default function DeveloperKeysPage() {
                     <td className="py-3">{k.is_active ? "Active" : "Revoked"}</td>
                     <td className="py-3 text-center">
                       {k.is_active ? (
-                        <button onClick={() => handleRevoke(k.id)} className="rounded-md border border-danger-300 px-3 py-1 text-danger-700 dark:border-danger-500/50 dark:text-danger-300">
-                          Revoke
-                        </button>
+                        <div className="flex justify-center gap-2"><button onClick={() => handleApplyPreset(k.id)} className="rounded-md border border-default-300 px-3 py-1">Apply {preset}</button><button onClick={() => handleRevoke(k.id)} className="rounded-md border border-danger-300 px-3 py-1 text-danger-700 dark:border-danger-500/50 dark:text-danger-300">Revoke</button></div>
                       ) : (
                         <span className="text-default-500">-</span>
                       )}
@@ -282,7 +291,7 @@ export default function DeveloperKeysPage() {
         </div>
 
         <div className="rounded-2xl border border-default-200 bg-white p-4 dark:border-white/15 dark:bg-brand-blue md:p-6">
-          <h2 className="text-lg font-medium text-default-900 dark:text-white">ChatGPT App / MCP Connector</h2>
+          <h2 className="text-lg font-medium text-default-900 dark:text-white">AI Platform / MCP Connector</h2>
           <p className="mt-1 text-sm text-default-600 dark:text-white/80">
             Recommended setup uses a revocable connector token instead of exposing raw API keys in MCP URL.
           </p>
@@ -348,11 +357,12 @@ export default function DeveloperKeysPage() {
           ) : null}
 
           <div className="mt-4 rounded-lg border border-default-200/80 dark:border-white/15 bg-default-50/50 dark:bg-white/5 p-3 text-sm text-default-700 dark:text-white/80">
-            <p className="font-medium mb-1">ChatGPT App Setup</p>
+            <p className="font-medium mb-1">Universal MCP setup</p>
             <ol className="list-decimal pl-5 space-y-1">
               <li>MCP Server URL: <code className="font-mono">https://api.obaol.com/mcp?connectorToken=&lt;TOKEN&gt;</code></li>
               <li>Authentication mode: <strong>No Auth</strong></li>
               <li>Use <code>/mcp/info</code> and <code>/mcp/health</code> to verify endpoint readiness.</li>
+              <li>Copy platform-specific configuration from <a className="text-primary-500 hover:underline" href="/developer/integrations">Integrations</a>.</li>
             </ol>
           </div>
 

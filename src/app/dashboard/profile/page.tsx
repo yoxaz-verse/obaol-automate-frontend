@@ -21,7 +21,7 @@ import { deleteDataBody, getData, patchData, postData } from "@/core/api/apiHand
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractCount, extractList } from "@/core/data/queryUtils";
 import InsightCard from "@/components/dashboard/InsightCard";
-import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiKey, FiTrash2 } from "react-icons/fi";
+import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiKey, FiMail, FiPhone, FiTrash2 } from "react-icons/fi";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardField, DashboardPage, DashboardPanel, DashboardSectionHeader, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 
@@ -473,6 +473,39 @@ function PasskeySecurityPanel() {
   );
 }
 
+function AccountVerificationPanel({ profile }: { profile: any }) {
+  const { refreshUser } = useContext(AuthContext);
+  const [channel, setChannel] = useState<"email" | "whatsapp" | "">("");
+  const [code, setCode] = useState("");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const emailVerified = profile?.isEmailVerified === true;
+  const phoneVerified = profile?.isPhoneVerified === true;
+  const percent = Number(emailVerified) * 50 + Number(phoneVerified) * 50;
+  const send = async (method: "email" | "whatsapp") => {
+    setBusy(true); setMessage("");
+    try { await postData("/verification/send-otp", { method }); setChannel(method); setCode(""); setMessage(`Code sent by ${method === "email" ? "email" : "WhatsApp"}.`); }
+    catch (error: any) { setMessage(error?.response?.data?.message || "Unable to send verification code."); }
+    finally { setBusy(false); }
+  };
+  const verify = async () => {
+    if (!channel || code.length !== 6) return;
+    setBusy(true); setMessage("");
+    try { await postData("/verification/verify-otp", { method: channel, code }); setMessage(`${channel === "email" ? "Email" : "WhatsApp number"} verified.`); setChannel(""); setCode(""); await refreshUser(); window.location.reload(); }
+    catch (error: any) { setMessage(error?.response?.data?.message || "Invalid or expired verification code."); }
+    finally { setBusy(false); }
+  };
+  return <DashboardPanel className="p-5">
+    <div className="flex items-center justify-between gap-4"><div><p className="dashboard-label">Personal profile verification</p><h3 className="mt-1 text-lg font-bold">{percent}% complete</h3></div><DashboardStatusBadge tone={percent === 100 ? "success" : "warning"}>{percent === 100 ? "Fully verified" : "Action required"}</DashboardStatusBadge></div>
+    <div className="mt-4 h-2 overflow-hidden rounded-full bg-default-100"><div className="h-full bg-obaol-500 transition-all" style={{ width: `${percent}%` }} /></div>
+    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      {([{ method: "email" as const, label: "Email", value: profile?.email, verified: emailVerified, icon: <FiMail /> }, { method: "whatsapp" as const, label: "WhatsApp", value: profile?.phone, verified: phoneVerified, icon: <FiPhone /> }]).map((item) => <div key={item.method} className="rounded-xl border db-border-subtle p-4"><div className="flex items-center gap-2 font-bold">{item.icon}{item.label}</div><p className="mt-1 truncate text-xs db-muted">{item.value || "Not provided"}</p><Button className="mt-3" size="sm" color={item.verified ? "success" : "warning"} variant="flat" isDisabled={item.verified || busy || !item.value} onPress={() => send(item.method)}>{item.verified ? "Verified" : "Send OTP"}</Button></div>)}
+    </div>
+    {channel && <div className="mt-4 flex flex-wrap items-end gap-2"><Input className="max-w-xs" label={`${channel === "email" ? "Email" : "WhatsApp"} OTP`} value={code} inputMode="numeric" onValueChange={(value) => setCode(value.replace(/\D/g, "").slice(0, 6))} /><Button color="warning" isLoading={busy} isDisabled={code.length !== 6} onPress={verify}>Verify</Button></div>}
+    {message && <p className="mt-3 text-sm db-muted" role="status">{message}</p>}
+  </DashboardPanel>;
+}
+
 export default function ProfilePage() {
   const { user } = useContext(AuthContext);
   const roleKeyRaw = user?.role?.toLowerCase() as string;
@@ -510,6 +543,7 @@ export default function ProfilePage() {
 
           return (
             <div className="flex flex-col gap-6">
+              {(roleKey === "associate" || roleKey === "operator") && <AccountVerificationPanel profile={profile} />}
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
                 {/* Account summary */}
                 <div className="flex flex-col gap-4">

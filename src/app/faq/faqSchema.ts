@@ -1,190 +1,99 @@
-export const FAQS = [
-  {
-    id: "what-is-obaol",
-    question: "What is OBAOL Supreme?",
-    answer:
-      "OBAOL Supreme is a structured agro trade ecosystem focused on verified suppliers, disciplined execution, and modern market engagement. It helps genuine participants trade safely, transparently, and professionally.",
-  },
-  {
-    id: "is-obaol-free",
-    question: "Is OBAOL Supreme free to use?",
-    answer:
-      "Yes. OBAOL is completely free to use. There are no subscription fees, listing charges, or hidden costs. Participation is based on verification and genuineness, not payment.",
-  },
-  {
-    id: "how-obaol-sustains",
-    question: "If OBAOL is free, how does OBAOL benefit?",
-    answer:
-      "OBAOL focuses on building a trusted, long-term trade ecosystem. Our core requirement is genuineness, transparency, and discipline from participants. The value lies in creating a clean, credible network rather than charging fees.",
-  },
-  {
-    id: "is-obaol-marketplace",
-    question: "Is OBAOL a marketplace or listing website?",
-    answer:
-      "No. OBAOL is not a traditional marketplace or open listing platform. Only verified suppliers and genuine participants are allowed to engage within the ecosystem.",
-  },
-  {
-    id: "expanding-trade-industry",
-    question: "How is OBAOL expanding the agro trade industry?",
-    answer:
-      "OBAOL expands the agro trade industry by lowering entry barriers without lowering standards. Through verified participation, structured execution, and modern tools like AI-assisted engagement, OBAOL enables more genuine suppliers, traders, and new entrants to participate responsibly. This results in more exporters, more completed trades, and a healthier, more transparent trade ecosystem.",
-  },
-  
-  {
+export type FaqCategory = { id: string; title: string; description: string };
+export type FaqRelatedLink = { href: string; label: string };
+export type FaqItem = {
+  id: string;
+  category: string;
+  question: string;
+  answer: string;
+  keywords: string[];
+  relatedLink?: FaqRelatedLink;
+};
 
-    id: "verified-only",
-    question: "Are all suppliers on OBAOL verified?",
-    answer:
-      "Yes. OBAOL does not allow random or unverified suppliers. Every supplier goes through verification before being listed or allowed to engage.",
-  },
-  {
-    id: "why-verification",
-    question: "Why does OBAOL focus heavily on verification?",
-    answer:
-      "Most trade failures happen due to misrepresentation and lack of accountability. Verification protects buyers, supports genuine suppliers, and maintains trust across the ecosystem.",
-  },
-  {
-    id: "who-can-join",
-    question: "Who can join OBAOL?",
-    answer:
-      "OBAOL is open to verified suppliers, traders, exporters, buyers, procurement teams, and serious new entrants who are willing to operate with transparency and discipline.",
-  },
-  {
-    id: "new-entrants",
-    question: "Can new entrants join OBAOL?",
-    answer:
-      "Yes. New entrants are welcome as long as they are serious and willing to follow structured trade practices. Prior trade experience is not mandatory.",
-  },
-  {
-    id: "non-trade-background",
-    question: "Can people without an export-import background participate?",
-    answer:
-      "Yes. OBAOL supports participants from non-trade backgrounds by providing structure, guidance, and real execution exposure, as long as they operate genuinely.",
-  },
-  {
-    id: "does-obaol-sell-leads",
-    question: "Does OBAOL sell leads or contacts?",
-    answer:
-      "No. OBAOL does not sell leads or contacts. Engagement happens organically within a verified and structured environment.",
-  },
-  {
-    id: "execution-platform",
-    question: "Is OBAOL only a trade execution platform?",
-    answer:
-      "No. While execution discipline is core, OBAOL also supports verified supplier visibility, AI-assisted engagement, market protection, and responsible ecosystem access.",
-  },
-  {
-    id: "ai-usage",
-    question: "How does OBAOL use AI?",
-    answer:
-      "OBAOL uses AI to help verified suppliers communicate better, present their offerings professionally, and engage with the market efficiently without removing human control.",
-  },
-
-  {
-    id: "supplier-marketing",
-    question: "How does OBAOL help suppliers with marketing?",
-    answer:
-      "OBAOL helps verified suppliers adapt to the new era of trade by improving visibility, engagement quality, and communication standards using modern tools and AI support.",
-  },
-  {
-    id: "market-protection",
-    question: "What is market protection and how does OBAOL help?",
-    answer:
-      "Market protection means preventing misuse of prices, uncontrolled outreach, and misrepresentation. OBAOL provides structured engagement so suppliers can protect their market position.",
-  },
-  {
-    id: "ai-agents-and-automation",
-    question: "How do AI agents and automation actually work inside OBAOL?",
-    answer:
-      "OBAOL is building modular systems including APIs, MCP-style interfaces, and automation libraries that allow AI agents to perform tasks such as market outreach, supplier engagement, follow-ups, data enrichment, and execution coordination. These systems are designed to work with tools like n8n and future AI models, while keeping human oversight and verification at the core.",
-  },  
-  {
-    id: "ai-automators-sector",
-    question: "Does OBAOL support AI automators and automation builders?",
-    answer:
-      "Yes. OBAOL is intentionally designed to support AI automators and builders. We are creating a dedicated layer where automation-focused users can leverage OBAOL’s APIs, structured trade data, and workflows to build AI-driven automation, agents, and execution systems for agro trade.",
-  },
-  {
-    id: "obaol-api-access",
-    question: "Will OBAOL provide APIs for automation and AI integration?",
-    answer:
-      "Yes. OBAOL is building API access and modular interfaces designed for automation-first usage. These APIs are intended to be used with AI workflows, agent frameworks, and automation platforms, while maintaining verification, data discipline, and human oversight.",
-  },
-  {
-    id: "pricing-control",
-    question: "Does OBAOL control or influence prices?",
-    answer:
-      "No. OBAOL does not influence or control prices. Pricing decisions are entirely between trading parties.",
-  },
-  {
-    id: "guarantee",
-    question: "Does OBAOL guarantee trade success or profits?",
-    answer:
-      "No. OBAOL does not guarantee profits or outcomes. It focuses on verification, discipline, and execution support to reduce avoidable risks.",
-  },
-  {
-    id: "handle-everything",
-    question: "Does OBAOL handle everything end-to-end?",
-    answer:
-      "No. OBAOL does not replace your decision-making or operations. It supports execution, verification, and engagement while trade ownership remains with participants.",
-  },
-  {
-    id: "procurement-support",
-    question: "Does OBAOL support procurement?",
-    answer:
-      "Yes. OBAOL supports procurement coordination, execution discipline, and verification without owning inventory or acting as a supplier.",
-  },
-  {
-    id: "logistics-and-shipping",
-    question: "Does OBAOL support logistics and packaging?",
-    answer:
-      "Yes. OBAOL supports logistics and packaging through a network of trusted service partners. We help coordinate and align logistics, packaging, and movement as part of trade execution when required, while carriers and service providers handle physical operations.",
-  },
-  
-  {
-    id: "commodities",
-    question: "What types of commodities does OBAOL support?",
-    answer:
-      "OBAOL supports a wide range of agro and commodity products including spices, grains, plantation crops, and bulk agricultural commodities.",
-  },
-  {
-    id: "export-domestic",
-    question: "Does OBAOL support both domestic and export trade?",
-    answer:
-      "Yes. OBAOL supports both domestic and international trade contexts depending on execution complexity and participant readiness.",
-  },
-  {
-    id: "who-should-not-use",
-    question: "Who should not use OBAOL?",
-    answer:
-      "OBAOL is not suitable for fake listings, casual users, price fishing, or shortcut-driven behaviour. It is built for serious participants only.",
-  },
-  {
-    id: "relationships",
-    question: "Will OBAOL affect my existing trade relationships?",
-    answer:
-      "No. OBAOL works alongside existing relationships and helps strengthen them through better execution and professional coordination.",
-  },
-  {
-    id: "why-unique",
-    question: "What makes OBAOL different from other platforms?",
-    answer:
-      "OBAOL combines verified participation, free access, structured execution, AI-assisted engagement, and strict standards—without becoming a marketplace or lead-selling platform.",
-  },
-  {
-    id: "long-term-goal",
-    question: "What is OBAOL’s long-term vision?",
-    answer:
-      "OBAOL aims to create a repeatable, trusted transaction system for agro trade that makes business easier, safer, and more accessible without lowering standards.",
-  },
-  {
-    id: "expectations",
-    question: "What does OBAOL expect from participants?",
-    answer:
-      "OBAOL expects genuineness, transparency, seriousness, and respect for structured trade practices. The ecosystem works only when standards are maintained.",
-  },
+export const FAQ_CATEGORIES: FaqCategory[] = [
+  { id: "purpose", title: "Purpose and platform model", description: "What OBAOL is, why it exists, and how it differs from discovery-only platforms." },
+  { id: "roles", title: "Participants and roles", description: "Who can participate and how Associates and Operators fit into the platform." },
+  { id: "verification", title: "Registration and verification", description: "How readiness, legitimacy, and execution context are assessed." },
+  { id: "sourcing", title: "Enquiries, sourcing, and procurement", description: "How requirements move from initial intent into an executable opportunity." },
+  { id: "services", title: "Documents and partner services", description: "Quality, packaging, warehousing, logistics, customs, and supporting documents." },
+  { id: "execution", title: "Execution and trade closure", description: "Responsibilities, milestones, coordination, and completion." },
+  { id: "pricing", title: "Access, pricing, and engagement", description: "Free platform access and context-specific execution support." },
+  { id: "technology", title: "AI, automation, and APIs", description: "How technology supports coordination while people retain control." },
+  { id: "risk", title: "Risk and platform boundaries", description: "What OBAOL does not do, guarantee, own, or replace." },
+  { id: "markets", title: "India-first and global trade", description: "Where OBAOL operates today and how it supports international trade." },
 ];
 
+export const FAQS: FaqItem[] = [
+  { id: "what-is-obaol", category: "purpose", question: "What is OBAOL Supreme?", answer: "OBAOL Supreme is an India-first B2B bulk-trade execution platform for registered companies and execution partners. It connects sourcing, enquiries, samples, documents, procurement, partner services, milestones, and closure for domestic and international commodity trade.", keywords: ["platform", "agro", "commodity", "bulk trade"], relatedLink: { href: "/about", label: "Learn about OBAOL" } },
+  { id: "why-obaol-exists", category: "purpose", question: "Why does OBAOL exist?", answer: "Commodity trades can fail after buyer and supplier discovery because responsibilities, documents, services, and timelines become disconnected. OBAOL exists to make execution more structured, visible, and accountable without replacing the companies doing the work.", keywords: ["mission", "purpose", "trade failures", "accountability"] },
+  { id: "marketplace-or-listing", category: "purpose", question: "Is OBAOL a marketplace or listing website?", answer: "Discovery and listings can be parts of OBAOL, but they are not its full purpose. OBAOL keeps work connected after discovery, when companies must coordinate enquiries, documents, services, responsibilities, and milestones.", keywords: ["marketplace", "listing", "directory", "discovery"] },
+  { id: "difference-from-lead-platforms", category: "purpose", question: "How is OBAOL different from a lead-selling platform?", answer: "OBAOL does not sell contact lists or promise leads. It focuses on genuine trade intent, registered participants, structured workflows, and continued coordination where execution support adds value.", keywords: ["leads", "contacts", "difference", "genuine intent"] },
+  { id: "complete-trade-lifecycle", category: "purpose", question: "Which parts of the trade lifecycle can OBAOL connect?", answer: "The platform can connect company and product context, sourcing, enquiries, samples, procurement, documents, packaging, quality, warehousing, logistics, customs support, execution milestones, and closure. The exact workflow depends on the trade and participating companies.", keywords: ["workflow", "lifecycle", "end to end", "services"] },
+
+  { id: "who-can-participate", category: "roles", question: "Who can participate on OBAOL?", answer: "Registered businesses participate as Associates, while individuals who coordinate and support company workflows participate as Operators. The platform is intended for serious parties prepared to follow verification and execution discipline.", keywords: ["join", "participant", "business", "individual"], relatedLink: { href: "/roles", label: "Compare platform roles" } },
+  { id: "what-is-associate", category: "roles", question: "What is an Associate?", answer: "An Associate is a registered company or business entity represented on OBAOL. Associates may buy commodities, sell commodities, do both, or provide services needed during trade execution.", keywords: ["associate", "company", "registered business"], relatedLink: { href: "/roles/associate", label: "Explore Associate roles" } },
+  { id: "what-is-operator", category: "roles", question: "What is an Operator?", answer: "An Operator is an individual who manages and coordinates companies, relationships, and workflows on the platform. Operators support execution; they do not become the legal company performing a regulated or contracted service.", keywords: ["operator", "individual", "coordinate", "manage"], relatedLink: { href: "/roles/operator", label: "Explore the Operator role" } },
+  { id: "associate-business-types", category: "roles", question: "What kinds of businesses can join as Associates?", answer: "Relevant businesses include buyers, suppliers, traders, importers, exporters, procurement companies, packaging companies, quality laboratories, warehouse operators, transporters, freight forwarders, logistics providers, customs agencies, and other trade-service partners.", keywords: ["supplier", "buyer", "exporter", "logistics", "service provider"] },
+  { id: "new-entrants", category: "roles", question: "Can serious new entrants participate?", answer: "Yes. New entrants can participate within a structured process. They must still meet their role requirements, provide accurate information, complete relevant checks, and remain responsible for their own decisions and obligations.", keywords: ["beginner", "new exporter", "new entrant", "experience"] },
+
+  { id: "how-registration-works", category: "verification", question: "How does registration begin?", answer: "A participant chooses the role matching how they will use the platform and provides the requested identity, company, and operating information. Registration does not by itself guarantee approval or participation in a particular trade.", keywords: ["registration", "sign up", "approval", "onboarding"] },
+  { id: "are-participants-verified", category: "verification", question: "Are participants verified?", answer: "OBAOL applies verification to establish identity, legitimacy, relevance, and readiness. The depth and timing of checks can vary by role, commodity, value, volume, service, and execution stage; verification is not a permanent guarantee of future behavior.", keywords: ["verified", "identity", "legitimacy", "checks"], relatedLink: { href: "/verification", label: "Read the verification framework" } },
+  { id: "what-verification-covers", category: "verification", question: "What can OBAOL verification cover?", answer: "Depending on context, checks can cover business identity, operating history, trade relevance, stock or sourcing claims, capacity, specification alignment, communication consistency, and readiness to follow the required workflow.", keywords: ["documents", "capacity", "stock", "trade readiness"] },
+  { id: "why-contextual-verification", category: "verification", question: "Why is verification contextual rather than a one-time badge?", answer: "A company suitable for one commodity, volume, route, or service may not automatically be ready for another. OBAOL applies checks at relevant stages so verification reflects the actual execution context.", keywords: ["continuous", "badge", "trade specific", "stage aware"] },
+  { id: "what-to-prepare", category: "verification", question: "What should a business prepare before joining?", answer: "A business should provide accurate company and representative details, explain its role and capabilities, and supply relevant registrations, product or service information, and trade-specific documents when requested.", keywords: ["prepare", "requirements", "company documents", "onboarding"] },
+
+  { id: "how-enquiries-work", category: "sourcing", question: "How do enquiries work on OBAOL?", answer: "An enquiry records a genuine buying, selling, or service requirement with enough context for relevant participants to assess it. Follow-up can then connect clarifications, counterparties, documents, and execution steps around the same requirement.", keywords: ["enquiry", "requirement", "buy", "sell"] },
+  { id: "sourcing-support", category: "sourcing", question: "Does OBAOL support commodity sourcing?", answer: "Yes. OBAOL can support structured sourcing by connecting requirements with relevant company and product context and coordinating the information needed to evaluate whether an opportunity is executable.", keywords: ["sourcing", "supplier discovery", "commodity"] },
+  { id: "procurement-support", category: "sourcing", question: "Does OBAOL support procurement teams?", answer: "Yes. Procurement teams can organize requirements, supplier context, documentation, service dependencies, and execution progress. OBAOL supports coordination but does not become the buyer or own purchased inventory.", keywords: ["procurement", "buyer", "inventory", "requirements"], relatedLink: { href: "/procurement", label: "Explore procurement support" } },
+  { id: "sample-coordination", category: "sourcing", question: "Can OBAOL help coordinate samples?", answer: "Yes. A workflow can record the sample request, responsible parties, specifications, movement, review, and next decision. The supplier, buyer, laboratory, or service provider remains responsible for the sample and its representations.", keywords: ["sample", "specification", "testing", "approval"] },
+  { id: "commodity-coverage", category: "sourcing", question: "What commodities does OBAOL support?", answer: "OBAOL focuses on agricultural and related bulk commodities, including spices, grains, plantation crops, and other products represented in its current catalog. Practical support depends on participant readiness and the specific trade.", keywords: ["products", "spices", "grains", "agriculture", "catalog"], relatedLink: { href: "/trade-directory", label: "View commodity coverage" } },
+
+  { id: "document-coordination", category: "services", question: "How does OBAOL support trade documents?", answer: "OBAOL can keep document requests, preparation, sharing, and workflow status connected to the relevant trade. Participating companies remain responsible for accuracy, authorization, legal sufficiency, and submission.", keywords: ["documents", "compliance", "sharing", "records"] },
+  { id: "quality-support", category: "services", question: "Does OBAOL perform quality testing?", answer: "OBAOL can coordinate with quality-testing companies and connect reports to the workflow, but it is not itself the laboratory unless explicitly stated. The testing provider is responsible for its methods, findings, and certifications.", keywords: ["quality", "laboratory", "inspection", "report"] },
+  { id: "packaging-support", category: "services", question: "Can packaging requirements be coordinated through OBAOL?", answer: "Yes. Packaging specifications, providers, responsibilities, and milestones can be coordinated as part of execution. The packaging company and trading parties remain responsible for materials, compliance, performance, and approvals.", keywords: ["packaging", "materials", "specifications", "provider"] },
+  { id: "warehousing-support", category: "services", question: "Does OBAOL provide warehousing?", answer: "OBAOL can connect and coordinate with warehouse operators, but it does not claim to own or operate the warehouse. Storage contracts, handling, insurance, and facility obligations remain with the relevant parties.", keywords: ["warehouse", "storage", "facility", "inventory"] },
+  { id: "logistics-customs-support", category: "services", question: "How does OBAOL support logistics, freight, and customs work?", answer: "OBAOL can coordinate requirements and progress with transporters, logistics providers, freight forwarders, and customs agencies. Those providers perform the physical or regulated services and remain responsible under their own agreements.", keywords: ["logistics", "shipping", "freight", "customs", "transport"] },
+
+  { id: "execution-after-agreement", category: "execution", question: "What happens after trade intent is established?", answer: "The relevant parties can clarify requirements, confirm responsibilities, exchange needed information, coordinate services, and track milestones toward closure. The workflow adapts to the trade rather than forcing every transaction through identical steps.", keywords: ["execution", "intent", "workflow", "milestones"] },
+  { id: "milestone-tracking", category: "execution", question: "What are execution milestones?", answer: "Milestones are meaningful checkpoints such as requirement confirmation, sample review, document readiness, service coordination, dispatch, delivery, or closure. They clarify progress, ownership, and the next required action.", keywords: ["milestones", "status", "progress", "next action"] },
+  { id: "responsibility-ownership", category: "execution", question: "Who remains responsible for each part of a trade?", answer: "The companies and authorized representatives performing the work remain responsible for decisions, diligence, licenses, contracts, documents, goods, payments, and regulated services. OBAOL supports coordination and visibility; it does not transfer those obligations to itself.", keywords: ["responsibility", "ownership", "contracts", "obligations"] },
+  { id: "existing-relationships", category: "execution", question: "Can OBAOL support existing trade relationships?", answer: "Yes. Participants can add structure to relationships they already have. The platform is intended to improve coordination and continuity, not take ownership of a participant’s commercial relationship.", keywords: ["existing contacts", "relationships", "customers", "suppliers"] },
+  { id: "trade-closure", category: "execution", question: "What does trade closure mean on OBAOL?", answer: "Closure means the coordinated workflow has reached its agreed conclusion and the outcome, records, and remaining responsibilities are clear. It does not mean OBAOL guarantees payment, delivery, quality, or commercial success.", keywords: ["closure", "completion", "delivery", "outcome"] },
+
+  { id: "is-platform-free", category: "pricing", question: "Is basic access to OBAOL free?", answer: "OBAOL’s public engagement model states that sign-up, listings, basic participation, discovery, and ecosystem visibility do not carry subscription or listing fees. Any deeper execution engagement is context-specific and must be understood by the involved parties.", keywords: ["free", "subscription", "listing fee", "sign up"], relatedLink: { href: "/disclaimer", label: "Read the engagement terms" } },
+  { id: "hidden-fees", category: "pricing", question: "Does OBAOL impose hidden or automatic charges?", answer: "No. OBAOL’s stated model does not impose hidden or automatic execution charges. If an engagement requires commercial terms or third-party services, the relevant scope and responsibilities should be clear to the involved parties.", keywords: ["hidden fees", "charges", "cost", "commercial terms"] },
+  { id: "execution-based-engagement", category: "pricing", question: "What is execution-based engagement?", answer: "It is deeper, context-specific support when a genuine trade moves toward execution and coordination adds measurable value. It may involve verification, procurement assistance, follow-ups, or partner-service coordination, subject to the agreed scope.", keywords: ["engagement", "execution support", "success linked", "scope"] },
+  { id: "third-party-service-costs", category: "pricing", question: "Are third-party services automatically free?", answer: "No. Logistics, testing, warehousing, packaging, customs, finance, insurance, and other providers may charge under separate terms. Free basic platform access does not mean free physical or professional services.", keywords: ["service fees", "third party", "logistics cost", "testing cost"] },
+  { id: "how-obaol-benefits", category: "pricing", question: "If basic access is free, how does OBAOL benefit?", answer: "OBAOL prioritizes a credible execution network and may participate more deeply where genuine trades need structured support. Any commercial arrangement should be context-specific and transparent rather than based on selling access or contact lists.", keywords: ["business model", "revenue", "benefit", "free access"] },
+
+  { id: "how-ai-is-used", category: "technology", question: "How does OBAOL use AI?", answer: "AI-assisted tools can help organize information, improve communication, prepare content, follow up, and coordinate work. They support human users and do not independently make commercial commitments or trade decisions.", keywords: ["AI", "artificial intelligence", "communication", "assistant"] },
+  { id: "human-oversight", category: "technology", question: "Do AI and automation replace human oversight?", answer: "No. People remain responsible for reviewing information, making decisions, authorizing actions, and fulfilling company obligations. Automation does not replace commercial judgment, verification, or due diligence.", keywords: ["human control", "oversight", "decision", "automation"] },
+  { id: "automation-builders", category: "technology", question: "Can automation builders work with OBAOL workflows?", answer: "OBAOL is developing structured workflows and integration-oriented capabilities for automation use cases. Access depends on currently available interfaces, authorization, data controls, and human oversight.", keywords: ["builders", "n8n", "agents", "integration"], relatedLink: { href: "/developer", label: "Explore developer capabilities" } },
+  { id: "api-availability", category: "technology", question: "Does OBAOL provide API access?", answer: "OBAOL is building API and modular integration capabilities, but availability may vary by feature and participant. Developers should rely on current documented interfaces rather than assume every workflow is publicly accessible.", keywords: ["API", "developer", "integration", "MCP"] },
+  { id: "ai-data-accuracy", category: "technology", question: "Who is responsible for checking AI-assisted output?", answer: "The participant using the output must review it for accuracy, appropriateness, authorization, and compliance. AI-generated content is not verified trade data merely because the platform helped prepare it.", keywords: ["accuracy", "generated content", "review", "data"] },
+
+  { id: "guarantee-outcomes", category: "risk", question: "Does OBAOL guarantee trade success, profit, or timelines?", answer: "No. OBAOL does not guarantee a transaction, profit, margin, price realization, counterparty performance, or timelines outside an agreed coordination scope. Trade always involves commercial and operational risk.", keywords: ["guarantee", "profit", "success", "timeline"], relatedLink: { href: "/disclaimer", label: "Review platform limitations" } },
+  { id: "due-diligence", category: "risk", question: "Does OBAOL verification replace due diligence?", answer: "No. Verification reduces uncertainty; it does not eliminate it. Participants must exercise independent judgment and use appropriate contracts, legal safeguards, inspections, insurance, payment controls, and professional advice.", keywords: ["due diligence", "legal", "contracts", "risk"] },
+  { id: "price-control", category: "risk", question: "Does OBAOL set or control commodity prices?", answer: "No. Pricing and commercial terms are decided by the trading parties. OBAOL does not provide speculative recommendations or guarantee that a quoted or negotiated price will remain available.", keywords: ["price", "rates", "negotiation", "market"] },
+  { id: "inventory-and-goods", category: "risk", question: "Does OBAOL own inventory or physically handle goods?", answer: "No. OBAOL does not own traded inventory or present itself as the carrier, warehouse, or physical handler. The relevant companies retain custody, title, handling duties, and contractual responsibility.", keywords: ["inventory", "goods", "ownership", "custody"] },
+  { id: "financial-advice", category: "risk", question: "Does OBAOL provide financial or investment advice?", answer: "No. OBAOL supports real-world commodity trade execution and does not provide investment advice, speculative trading recommendations, or promises of financial return.", keywords: ["financial advice", "investment", "returns", "speculation"] },
+
+  { id: "india-first", category: "markets", question: "What does India-first mean?", answer: "India-first means OBAOL’s current operating foundation and on-ground execution focus are based in India. It does not mean India-only; the system supports Indian companies and trade flows connecting with global markets.", keywords: ["India", "India first", "location", "operations"] },
+  { id: "domestic-trade", category: "markets", question: "Does OBAOL support domestic Indian trade?", answer: "Yes. OBAOL supports domestic commodity workflows where registered companies need structured sourcing, services, documentation, milestones, and coordination within India.", keywords: ["domestic", "India trade", "local", "internal"] },
+  { id: "export-trade", category: "markets", question: "Does OBAOL support exports from India?", answer: "Yes. OBAOL can support coordination for exports from India, subject to the commodity, destination, participant readiness, documentation, service-provider coverage, and applicable legal requirements.", keywords: ["export", "international", "global buyer", "India"], relatedLink: { href: "/export-resources", label: "View export resources" } },
+  { id: "import-trade", category: "markets", question: "Can import-related workflows be coordinated?", answer: "Importers and relevant service companies can participate where OBAOL has the appropriate workflow and partner context. The importing company remains responsible for licenses, compliance, duties, documents, and commercial decisions.", keywords: ["import", "importer", "duties", "compliance"] },
+  { id: "global-presence", category: "markets", question: "Does OBAOL have physical operations in every country?", answer: "No such assumption should be made. OBAOL is India-first and expanding globally across relevant commodity corridors. Support in a market depends on actual platform, participant, and service-provider coverage.", keywords: ["global", "countries", "coverage", "expansion"] },
+];
+
+export function filterFaqs(faqs: FaqItem[], query: string, category = "all") {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const categoryTitles = new Map(FAQ_CATEGORIES.map((item) => [item.id, item.title]));
+  return faqs.filter((faq) => {
+    if (category !== "all" && faq.category !== category) return false;
+    if (!normalizedQuery) return true;
+    return [faq.question, faq.answer, categoryTitles.get(faq.category) || "", ...faq.keywords]
+      .join(" ").toLocaleLowerCase().includes(normalizedQuery);
+  });
+}
 
 export function generateFaqSchema() {
   return {
@@ -193,10 +102,7 @@ export function generateFaqSchema() {
     mainEntity: FAQS.map((faq) => ({
       "@type": "Question",
       name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
     })),
   };
 }

@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getData, patchData, postData } from "@/core/api/apiHandler";
+import { getData, patchData, postData, postMultipart } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { useCurrency } from "@/context/CurrencyContext";
 import {
@@ -100,7 +100,7 @@ export default function OrderDetailsPage() {
     const [workflowStage, setWorkflowStage] = useState("ORDER_CREATED");
     const [docActionOpen, setDocActionOpen] = useState(false);
     const [docActionRule, setDocActionRule] = useState<any>(null);
-    const [docActionFileUrl, setDocActionFileUrl] = useState("");
+    const [docActionFile, setDocActionFile] = useState<File | null>(null);
     const [docViewerOpen, setDocViewerOpen] = useState(false);
     const [docViewerDoc, setDocViewerDoc] = useState<any>(null);
     const [adminDrawerOpen, setAdminDrawerOpen] = useState(false);
@@ -331,18 +331,28 @@ export default function OrderDetailsPage() {
     const createDocMutation = useMutation({
         mutationFn: async () => {
             if (!docActionRule) throw new Error("No document rule selected.");
-            const payload: any = { type: docActionRule.docType, orderId };
             if (String(docActionRule.actionType) === "UPLOAD") {
-                payload.fileUrl = docActionFileUrl;
+                if (!docActionFile) throw new Error("Choose a PDF, PNG, or JPEG document.");
+                if (docActionFile.size > 15 * 1024 * 1024) throw new Error("The file must be 15 MB or smaller.");
+                const body = new FormData();
+                body.append("file", docActionFile);
+                body.append("type", String(docActionRule.docType));
+                body.append("orderId", orderId);
+                const firstParticipant = (order as any)?.participantCompanyIds?.[0];
+                const ownerCompanyId = String((order as any)?.associateCompanyId?._id || (order as any)?.associateCompanyId || firstParticipant?._id || firstParticipant || "");
+                if (ownerCompanyId) body.append("companyId", ownerCompanyId);
+                return postMultipart(apiRoutes.tradeDocuments.upload, body);
             }
-            return postData(apiRoutes.tradeDocuments.create, payload);
+            return postData(apiRoutes.tradeDocuments.create, { type: docActionRule.docType, orderId });
         },
         onSuccess: () => {
             toast.success("Document created.");
             setDocActionOpen(false);
             setDocActionRule(null);
-            setDocActionFileUrl("");
+            setDocActionFile(null);
             queryClient.invalidateQueries({ queryKey: ["trade-documents", "order", orderId] });
+            queryClient.invalidateQueries({ queryKey: ["documentation-library"] });
+            queryClient.invalidateQueries({ queryKey: ["documentation-summary"] });
         },
         onError: (error: unknown) => {
             toast.error(normalizeApiError(error, "Failed to create document.").message);
@@ -1507,10 +1517,10 @@ export default function OrderDetailsPage() {
                                                                                         {DOC_TYPE_LABELS[String(docType || "").toUpperCase()] || String(docType).replaceAll("_", " ")}
                                                                                     </div>
                                                                                 </div>
-                                                                                {!hasDoc && rule && canActOnRule(rule) && (
+                                                                                {(!hasDoc || ["BILL_OF_LADING", "AIR_WAYBILL"].includes(String(docType))) && rule && canActOnRule(rule) && (
                                                                                     <div className="flex flex-col items-end gap-1">
                                                                                         <Button size="sm" color="warning" variant="flat" className="h-7 text-xs font-black  px-4 rounded-lg" onPress={() => { setDocActionRule(rule); setDocActionOpen(true); }}>
-                                                                                            {String(rule.actionType || "") === "UPLOAD" ? "UPLOAD" : "GENERATE"}
+                                                                                            {String(rule.actionType || "") === "UPLOAD" ? (hasDoc ? "UPLOAD REVISION" : "UPLOAD") : "GENERATE"}
                                                                                         </Button>
                                                                                         {isSystemAdmin && formatActionByLabel(rule?.responsibleRole) && (
                                                                                             <span className="text-[9px] font-bold text-default-400  tracking-widest">
@@ -1974,10 +1984,10 @@ export default function OrderDetailsPage() {
                                                     {directionLabel(doc.direction)}
                                                 </Button>
                                             ))}
-                                            {!hasDoc && rule && canActOnRule(rule) && (
+                                            {(!hasDoc || ["BILL_OF_LADING", "AIR_WAYBILL"].includes(String(docType))) && rule && canActOnRule(rule) && (
                                                 <div className="flex flex-col items-end gap-1">
                                                     <Button size="sm" color="warning" variant="flat" className="h-7 text-xs font-black  px-4 rounded-lg" onPress={() => { setDocActionRule(rule); setDocActionOpen(true); }}>
-                                                        {String(rule.actionType || "") === "UPLOAD" ? "UPLOAD" : "GENERATE"}
+                                                        {String(rule.actionType || "") === "UPLOAD" ? (hasDoc ? "UPLOAD REVISION" : "UPLOAD") : "GENERATE"}
                                                     </Button>
                                                     {isSystemAdmin && formatActionByLabel(rule?.responsibleRole) && (
                                                         <span className="text-[9px] font-bold text-default-400  tracking-widest">
@@ -2036,13 +2046,17 @@ export default function OrderDetailsPage() {
                     <ModalHeader className="text-sm font-black  tracking-tighter text-foreground"> {docActionRule ? `${docActionRule.docType} ENTRY` : "Compliance Entry"} </ModalHeader>
                     <ModalBody>
                         {String(docActionRule?.actionType || "") === "UPLOAD" && (
-                            <Input label="REMOTE SECURE URL" placeholder="https://..." value={docActionFileUrl} onChange={(e) => setDocActionFileUrl(e.target.value)} variant="bordered" classNames={{ input: "text-foreground" }} />
+                            <label className="block rounded-xl border border-dashed border-divider p-4 text-xs font-bold text-foreground">
+                                <span className="mb-2 block">Carrier-issued original</span>
+                                <input type="file" accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" onChange={(event) => setDocActionFile(event.target.files?.[0] || null)} className="block w-full text-xs" />
+                                <span className="mt-2 block text-default-400">PDF, PNG, or JPEG up to 15 MB. The upload remains pending until verified.</span>
+                            </label>
                         )}
                         <div className="text-xs font-black text-obaol-500  tracking-widest mt-2">{docActionRule?.responsibleRole ? `PRIORITY: ${docActionRule.responsibleRole} AUTHORITY` : ""}</div>
                     </ModalBody>
                     <ModalFooter>
                         <Button variant="light" className="text-default-400 font-black text-xs " onPress={() => setDocActionOpen(false)}> CANCEL </Button>
-                        <Button color="warning" className="font-black text-xs  shadow-lg shadow-obaol-500/20" onPress={() => createDocMutation.mutate()}> COMMIT TO REGISTRY </Button>
+                        <Button color="warning" isLoading={createDocMutation.isPending} isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFile} className="font-black text-xs shadow-lg shadow-obaol-500/20" onPress={() => createDocMutation.mutate()}> {String(docActionRule?.actionType || "") === "UPLOAD" ? "UPLOAD ORIGINAL" : "CREATE DRAFT"} </Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

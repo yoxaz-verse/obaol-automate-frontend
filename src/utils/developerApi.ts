@@ -72,6 +72,14 @@ async function devFetch(path: string, init?: RequestInit) {
   }
 }
 
+export async function publicDeveloperFetch(path: string) {
+  return devFetch(`/public${path}`);
+}
+
+export async function developerHealth() {
+  return Promise.allSettled([devFetch("/health"), devFetch("/mcp/health")]);
+}
+
 export async function devAuthGoogle(idToken: string) {
   return devFetch("/v1/dev-auth/google", {
     method: "POST",

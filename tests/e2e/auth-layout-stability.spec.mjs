@@ -222,6 +222,77 @@ test("OTP sign-in uses a neutral response and reveals no account role", async ({
   await expect(page.getByText("If this email is eligible, a verification code has been sent.")).toBeVisible();
 });
 
+test("successful OTP sign-in replaces the form and offers recovery when navigation stalls", async ({ page }) => {
+  await page.clock.install();
+  let verificationRequests = 0;
+  await page.route(/\/verification\/send-otp-existing$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ success: true }),
+  }));
+  await page.route(/\/verification\/verify-otp-existing$/, (route) => {
+    verificationRequests += 1;
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ success: true, next: "#workspace" }),
+    });
+  });
+  await page.route(/\/verify-token(?:\?.*)?$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      success: true,
+      user: { id: "user-1", email: "member@example.com", role: "associate", onboardingComplete: true, registrationStatus: "APPROVED", verified: { email: true } },
+    }),
+  }));
+
+  await page.goto("/auth");
+  await page.getByLabel("Email address").fill("member@example.com");
+  await page.getByTestId("auth-submit").click();
+  await page.getByRole("button", { name: "Sign in with email code" }).click();
+  await page.getByLabel("Six-digit email code").fill("671906");
+  await page.getByRole("button", { name: "Verify and continue" }).click();
+
+  const transition = page.getByTestId("post-auth-transition");
+  await expect(transition).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign-in successful" })).toBeFocused();
+  await expect(page.getByText("Opening your workspace…")).toBeVisible();
+  await expect(page.getByLabel("Six-digit email code")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Verify and continue" })).toHaveCount(0);
+  expect(verificationRequests).toBe(1);
+
+  await page.clock.fastForward(10_000);
+  await expect(page.getByRole("heading", { name: "This is taking longer than expected" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open workspace again" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Reload page" })).toBeVisible();
+  expect(verificationRequests).toBe(1);
+});
+
+test("failed post-auth session refresh restores the OTP form with an actionable error", async ({ page }) => {
+  await page.route(/\/verification\/send-otp-existing$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ success: true }),
+  }));
+  await page.route(/\/verification\/verify-otp-existing$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ success: true, next: "/dashboard" }),
+  }));
+
+  await page.goto("/auth");
+  await page.getByLabel("Email address").fill("member@example.com");
+  await page.getByTestId("auth-submit").click();
+  await page.getByRole("button", { name: "Sign in with email code" }).click();
+  await page.getByLabel("Six-digit email code").fill("671906");
+  await page.getByRole("button", { name: "Verify and continue" }).click();
+
+  await expect(page.getByTestId("post-auth-transition")).toHaveCount(0);
+  await expect(page.getByLabel("Six-digit email code")).toBeVisible();
+  await expect(page.getByText("Your browser blocked the secure session cookie. Allow cookies for OBAOL and try again.")).toBeVisible();
+});
+
 test("signup chooses an account type and cannot continue before OTP verification", async ({ page }) => {
   await page.route(/\/auth\/onboarding\/start$/, async (route) => {
     expect(route.request().postDataJSON()).toEqual({ email: "new.operator@example.com", role: "Operator" });

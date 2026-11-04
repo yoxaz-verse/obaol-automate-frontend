@@ -59,8 +59,8 @@ export function WorkspaceNav({ active, isAdmin, onChange }: { active: Documentat
     <div className="flex min-w-max gap-1" role="tablist">
       {DOCUMENTATION_VIEWS.filter(item => isAdmin || item.key !== "configuration").map(item => <button
         key={item.key} role="tab" aria-selected={active === item.key} onClick={() => onChange(item.key)}
-        className={join("min-h-11 rounded-xl px-4 text-left outline-none transition-all focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2", active === item.key ? "bg-obaol-500 text-obaol-950 shadow-sm" : "db-muted-strong hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300")}
-      ><span className="block text-sm font-bold">{item.label}</span><span className={join("hidden text-[11px] lg:block", active === item.key ? "text-obaol-950/70" : "db-muted")}>{item.description}</span></button>)}
+        className={join("min-h-11 border-b-2 border-transparent px-4 text-left outline-none transition-all focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2", active === item.key ? "border-obaol-500 text-foreground" : "db-muted-strong hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300")}
+      ><span className="block text-sm font-bold">{item.label}</span><span className={join("hidden text-[11px] lg:block", active === item.key ? "db-muted-strong" : "db-muted")}>{item.description}</span></button>)}
     </div>
   </nav>;
 }

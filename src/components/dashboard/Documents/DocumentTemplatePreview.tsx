@@ -75,12 +75,62 @@ export default function DocumentTemplatePreview({
   const layoutSchema = selectedTemplate?.layoutSchema || fallbackSchema;
 
   const sourceEnquiry = enquiry || order?.enquiry || null;
+  const productVariant =
+    sourceEnquiry?.variantRateId?.productVariant ||
+    sourceEnquiry?.productVariant ||
+    null;
+  const buyerAssociate = sourceEnquiry?.buyerAssociateId || null;
+  const sellerAssociate = sourceEnquiry?.sellerAssociateId || null;
+  const buyerCompany =
+    buyerAssociate?.associateCompany ||
+    buyerAssociate?.associateCompanyId ||
+    buyerAssociate?.company ||
+    null;
+  const sellerCompany =
+    sellerAssociate?.associateCompany ||
+    sellerAssociate?.associateCompanyId ||
+    sellerAssociate?.company ||
+    null;
+  const getAddress = (party: any) =>
+    party?.address ||
+    party?.billingAddress ||
+    party?.registeredAddress ||
+    party?.officeAddress ||
+    "—";
+  const getGstin = (party: any) => party?.gstin || party?.gstNumber || party?.taxId || "—";
+  const buyerParty = {
+    name: doc?.buyer?.name || buyerCompany?.name || sourceEnquiry?.buyerAssociateCompanyName || sourceEnquiry?.buyerName || buyerAssociate?.name || "—",
+    contactName: doc?.buyer?.contactName || buyerAssociate?.name || "",
+    email: doc?.buyer?.email || buyerCompany?.email || buyerAssociate?.email || sourceEnquiry?.buyerEmail || "—",
+    phone: doc?.buyer?.phone || buyerCompany?.phone || buyerAssociate?.phone || sourceEnquiry?.buyerPhone || "—",
+    address: doc?.buyer?.address || getAddress(buyerCompany),
+    gstin: doc?.buyer?.gstin || getGstin(buyerCompany),
+    logo: doc?.buyer?.logo || buyerCompany?.logo || "",
+  };
+  const sellerParty = {
+    name: doc?.seller?.name || sellerCompany?.name || sourceEnquiry?.sellerAssociateCompanyName || sourceEnquiry?.sellerName || sellerAssociate?.name || "—",
+    contactName: doc?.seller?.contactName || sellerAssociate?.name || "",
+    email: doc?.seller?.email || sellerCompany?.email || sellerAssociate?.email || sourceEnquiry?.sellerEmail || "—",
+    phone: doc?.seller?.phone || sellerCompany?.phone || sellerAssociate?.phone || sourceEnquiry?.sellerPhone || "—",
+    address: doc?.seller?.address || getAddress(sellerCompany),
+    gstin: doc?.seller?.gstin || getGstin(sellerCompany),
+    logo: doc?.seller?.logo || sellerCompany?.logo || "",
+  };
+  const obaolParty = {
+    name: "OBAOL",
+    contactName: "OBAOL Desk",
+    email: "info@support.obaol.com",
+    phone: "",
+    address: "",
+    gstin: "",
+    logo: "",
+  };
   const lineItems = Array.isArray(doc?.lineItems)
     ? doc.lineItems
     : [
         {
-          productName: sourceEnquiry?.productVariant?.product?.name || sourceEnquiry?.productName || "—",
-          productVariantName: sourceEnquiry?.productVariant?.name || sourceEnquiry?.variantName || "—",
+          productName: productVariant?.product?.name || sourceEnquiry?.productName || "—",
+          productVariantName: productVariant?.name || sourceEnquiry?.variantName || "—",
           quantityMT: Number(sourceEnquiry?.quantity || 0),
           ratePerKg: Number(sourceEnquiry?.rate || 0),
           amount: Number(sourceEnquiry?.rate || 0) * Number(sourceEnquiry?.quantity || 0) * 1000,
@@ -100,8 +150,14 @@ export default function DocumentTemplatePreview({
     OBAOL_TO_BUYER: "OBAOL → Buyer",
   };
   const direction = String(doc?.direction || "").toUpperCase();
-  const issuer = doc?.issuer || (["BUYER_TO_OBAOL", "OBAOL_TO_SELLER"].includes(direction) ? doc?.buyer : doc?.seller);
-  const recipient = doc?.recipient || (["BUYER_TO_OBAOL", "OBAOL_TO_SELLER"].includes(direction) ? doc?.seller : doc?.buyer);
+  const directionParties: Record<string, { issuer: any; recipient: any }> = {
+    BUYER_TO_OBAOL: { issuer: buyerParty, recipient: obaolParty },
+    OBAOL_TO_SELLER: { issuer: obaolParty, recipient: sellerParty },
+    SELLER_TO_OBAOL: { issuer: sellerParty, recipient: obaolParty },
+    OBAOL_TO_BUYER: { issuer: obaolParty, recipient: buyerParty },
+  };
+  const issuer = doc?.issuer || directionParties[direction]?.issuer || sellerParty;
+  const recipient = doc?.recipient || directionParties[direction]?.recipient || buyerParty;
 
   const normalizedData = {
     documentNumber: doc?.documentNumber || "DRAFT",
@@ -109,22 +165,8 @@ export default function DocumentTemplatePreview({
     issuer,
     recipient,
     docDate: doc?.createdAt ? new Date(doc.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
-    buyer: {
-      name: doc?.buyer?.name || sourceEnquiry?.buyerAssociateCompanyName || sourceEnquiry?.buyerName || "—",
-      email: doc?.buyer?.email || sourceEnquiry?.buyerAssociateId?.email || "—",
-      phone: doc?.buyer?.phone || sourceEnquiry?.buyerAssociateId?.phone || "—",
-      address: doc?.buyer?.address || "—",
-      gstin: doc?.buyer?.gstin || "—",
-      logo: doc?.buyer?.logo || "",
-    },
-    seller: {
-      name: doc?.seller?.name || sourceEnquiry?.sellerAssociateCompanyName || sourceEnquiry?.sellerName || "—",
-      email: doc?.seller?.email || sourceEnquiry?.sellerAssociateId?.email || "—",
-      phone: doc?.seller?.phone || sourceEnquiry?.sellerAssociateId?.phone || "—",
-      address: doc?.seller?.address || "—",
-      gstin: doc?.seller?.gstin || "—",
-      logo: doc?.seller?.logo || "",
-    },
+    buyer: buyerParty,
+    seller: sellerParty,
     lineItems,
     totals: {
       ...computedTotals,

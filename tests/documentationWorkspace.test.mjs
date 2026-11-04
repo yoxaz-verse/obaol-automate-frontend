@@ -85,9 +85,12 @@ test("uploaded documents require an extraction review before completion", () => 
 
 test("documentation views are URL-backed and configuration remains admin-only", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
+  const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");
   assert.match(workspace, /useSearchParams/);
   assert.match(workspace, /next\.set\("view", nextView\)/);
   assert.match(workspace, /requestedView !== "configuration" \|\| isAdmin/);
+  assert.match(workspaceUi, /border-b-2 border-transparent/);
+  assert.match(workspaceUi, /active === item\.key \? "border-obaol-500 text-foreground"/);
 });
 
 test("creation workflows are compact, URL-backed, and immediately actionable", () => {

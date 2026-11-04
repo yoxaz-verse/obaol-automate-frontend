@@ -3,8 +3,8 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Button, Chip, Input, Select, SelectItem, Autocomplete, AutocompleteItem, 
+import {
+  Button, Chip, Input, Autocomplete, AutocompleteItem,
   Spinner, Card, Tabs, Tab, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter 
 } from "@nextui-org/react";
 import { 
@@ -41,6 +41,9 @@ export default function CompanyProductPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [directoryPage, setDirectoryPage] = useState(1);
   const [selectedObaolCompanyId, setSelectedObaolCompanyId] = useState("");
+  const [selectedObaolCompanyName, setSelectedObaolCompanyName] = useState("");
+  const [configCompanySearch, setConfigCompanySearch] = useState("");
+  const [debouncedConfigCompanySearch, setDebouncedConfigCompanySearch] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [focusedAssociateId, setFocusedAssociateId] = useState("");
   const focusedAssociateRowRef = useRef<HTMLTableRowElement | null>(null);
@@ -68,6 +71,13 @@ export default function CompanyProductPage() {
     }, 350);
     return () => window.clearTimeout(timer);
   }, [search]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedConfigCompanySearch(configCompanySearch.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [configCompanySearch]);
 
   const DIRECTORY_PAGE_SIZE = 24;
   const normalizedAssignmentFilter: "all" | "assigned" | "unassigned" = isOperatorFamily ? "assigned" : assignmentFilter;
@@ -125,16 +135,18 @@ export default function CompanyProductPage() {
   });
 
   const configCompaniesQuery = useQuery({
-    queryKey: ["company-config-selector-list", isAdmin],
+    queryKey: ["company-config-selector-list", debouncedConfigCompanySearch],
     queryFn: () =>
       getData(
         apiRoutes.associateCompany.getAll,
         buildCompanyQueryParams({
           page: 1,
-          limit: 200,
+          limit: 25,
+          searchValue: debouncedConfigCompanySearch,
         })
       ),
     enabled: isAdmin && isConfigExpanded,
+    placeholderData: (previousData) => previousData,
   });
 
   const totalCompaniesQuery = useQuery({
@@ -277,7 +289,12 @@ export default function CompanyProductPage() {
     if (!isAdmin) return;
     if (!obaolCompanyId) return;
     setSelectedObaolCompanyId((current) => current || obaolCompanyId);
-  }, [isAdmin, obaolCompanyId]);
+    const configuredName = toName(obaolCompany, "");
+    if (configuredName) {
+      setSelectedObaolCompanyName(configuredName);
+      setConfigCompanySearch((current) => current || configuredName);
+    }
+  }, [isAdmin, obaolCompanyId, obaolCompany]);
 
   useEffect(() => {
     if (!isOperatorFamily) return;
@@ -306,6 +323,11 @@ export default function CompanyProductPage() {
       return response?.data?.data || null;
     },
     onSuccess: (data: any) => {
+      const configuredCompanyId = String(data?.companyId || "");
+      const configuredCompanyName = toName(data?.company, "");
+      setSelectedObaolCompanyId(configuredCompanyId);
+      setSelectedObaolCompanyName(configuredCompanyName);
+      setConfigCompanySearch(configuredCompanyName);
       showToastMessage({
          type: "success",
          message: data?.company?.name ? `OBAOL company set to ${data.company.name}.` : "OBAOL company updated.",
@@ -739,16 +761,35 @@ export default function CompanyProductPage() {
             <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] items-end gap-6 p-6 md:p-7 mt-5 rounded-[1.5rem] bg-content2/30 dark:bg-black/20 border border-divider shadow-inner relative overflow-hidden">
               <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-obaol-500/20 rounded-tl-sm" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-obaol-500/20 rounded-br-sm" />
-              <Select
+              <Autocomplete
                 label="Select company"
                 labelPlacement="outside"
-                placeholder="Search companies..."
+                placeholder="Search by name, email, or phone..."
                 isLoading={configCompaniesQuery.isLoading}
-                selectedKeys={selectedObaolCompanyId ? new Set([selectedObaolCompanyId]) : new Set()}
-                onSelectionChange={(keys) => {
-                  const nextValue = Array.from(keys as Set<string>)[0] || "";
-                  setSelectedObaolCompanyId(nextValue);
+                isInvalid={configCompaniesQuery.isError}
+                errorMessage={configCompaniesQuery.isError ? "Companies could not be loaded. Try your search again." : undefined}
+                selectedKey={selectedObaolCompanyId || null}
+                inputValue={configCompanySearch}
+                onInputChange={(value) => {
+                  setConfigCompanySearch(value);
+                  if (selectedObaolCompanyId && value.trim() !== selectedObaolCompanyName.trim()) {
+                    setSelectedObaolCompanyId("");
+                    setSelectedObaolCompanyName("");
+                  }
                 }}
+                onSelectionChange={(key) => {
+                  const nextValue = String(key || "");
+                  const selectedCompany = configCompanies.find(
+                    (companyItem: any) => String(companyItem?._id || companyItem?.id || "") === nextValue
+                  );
+                  const nextName = selectedCompany ? toName(selectedCompany, "") : "";
+                  setSelectedObaolCompanyId(nextValue);
+                  setSelectedObaolCompanyName(nextName);
+                  setConfigCompanySearch(nextName);
+                }}
+                allowsCustomValue={false}
+                menuTrigger="input"
+                startContent={<LuSearch className="text-default-400" size={18} />}
                 popoverProps={{
                   classNames: {
                     base: "before:bg-divider",
@@ -757,6 +798,11 @@ export default function CompanyProductPage() {
                   offset: 12
                 }}
                 listboxProps={{
+                  emptyContent: configCompaniesQuery.isError
+                    ? "Companies could not be loaded. Try again."
+                    : debouncedConfigCompanySearch
+                      ? "No companies match your search."
+                      : "No companies available.",
                   itemClasses: {
                     base: [
                       "rounded-2xl",
@@ -772,27 +818,24 @@ export default function CompanyProductPage() {
                   },
                 }}
                 classNames={{
-                  trigger: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-obaol-500/50 transition-all h-14 rounded-2xl shadow-sm",
-                  label: "text-[10px] font-black  tracking-[0.3em] text-default-400 mb-3 ml-1",
-                  value: "text-sm font-black text-foreground  tracking-widest",
-                  base: "max-w-full"
+                  base: "max-w-full",
+                  selectorButton: "text-default-500",
                 }}
-                renderValue={(items) => {
-                  return items.map((item) => (
-                    <div key={item.key} className="flex items-center gap-3">
-                      <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-sm font-black  italic tracking-tighter">{toName(item.data, "Unnamed")}</span>
-                    </div>
-                  ));
+                inputProps={{
+                  classNames: {
+                    label: "text-[10px] font-black tracking-[0.3em] text-default-400 mb-3 ml-1",
+                    inputWrapper: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-obaol-500/50 transition-all h-14 rounded-2xl shadow-sm",
+                    input: "text-sm font-black text-foreground tracking-wide",
+                  },
                 }}
               >
                 {configCompanies.map((companyItem: any) => {
                   const cName = toName(companyItem, "Unnamed Entity");
                   const cEmail = toText(companyItem?.email, "not available");
                   return (
-                    <SelectItem
+                    <AutocompleteItem
                       key={companyItem?._id || companyItem?.id}
-                      textValue={cName}
+                      textValue={`${cName} ${cEmail} ${toText(companyItem?.phone, "")}`}
                       className="group"
                     >
                       <div className="flex items-center gap-4">
@@ -804,10 +847,10 @@ export default function CompanyProductPage() {
                           <span className="text-[9px] font-bold text-default-500 dark:text-default-400 lowercase tracking-[0.1em] opacity-60">{cEmail}</span>
                         </div>
                       </div>
-                    </SelectItem>
+                    </AutocompleteItem>
                   );
                 })}
-              </Select>
+              </Autocomplete>
 
               <Button
                 className="h-14 px-10 rounded-2xl bg-obaol-500 text-black font-black  tracking-[0.25em] italic text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(207,152,60,0.2)] hover:shadow-obaol-500/40"

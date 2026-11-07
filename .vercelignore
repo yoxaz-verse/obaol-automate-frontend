@@ -15,8 +15,8 @@ reports/
 .vscode/
 
 # Native applications live in separate repositories
-desktop/
-mobile/
+/desktop/
+/mobile/
 
 # Local-only files
 .git/

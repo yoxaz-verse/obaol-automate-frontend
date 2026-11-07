@@ -17,6 +17,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [desktop, setDesktop] = useState(false);
+  const [headerBottom, setHeaderBottom] = useState<number | null>(null);
   const headerRef = useRef<HTMLElement>(null);
   const desktopTrigger = useRef<HTMLButtonElement>(null);
   const mobileTrigger = useRef<HTMLButtonElement>(null);
@@ -91,6 +92,22 @@ export default function Header() {
     return () => { document.body.style.overflow = previousOverflow; };
   }, [open, desktop]);
 
+  useEffect(() => {
+    if (!open) return;
+    const updatePosition = () => {
+      if (headerRef.current) {
+        setHeaderBottom(headerRef.current.getBoundingClientRect().bottom);
+      }
+    };
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, { passive: true });
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition);
+    };
+  }, [open]);
+
   const soundButton = (
     <button type="button" role="switch" aria-checked={soundEnabled}
       aria-label={soundEnabled ? "Disable sound" : "Enable sound"}
@@ -158,7 +175,11 @@ export default function Header() {
             </div>
           </div>
           {open && (
-            <div id="public-page-directory" className="absolute left-4 right-4 top-full mt-2 max-h-[calc(100dvh-7rem-var(--safe-top)-var(--safe-bottom))] overflow-y-auto overscroll-contain rounded-2xl border border-obaol-500/20 bg-content1 p-4 shadow-[0_24px_70px_-24px_rgba(27,38,50,0.55)] dark:bg-brand-blue xl:p-6">
+            <div
+              id="public-page-directory"
+              style={headerBottom !== null ? { top: `${headerBottom + 8}px` } : undefined}
+              className="fixed left-4 right-4 top-[calc(5.75rem+var(--safe-top,0px))] z-[100] max-h-[calc(100dvh-7rem-var(--safe-top)-var(--safe-bottom))] overflow-y-auto overscroll-contain rounded-2xl border border-obaol-500/20 bg-content1 p-4 shadow-[0_24px_70px_-24px_rgba(27,38,50,0.55)] dark:bg-brand-blue xl:left-1/2 xl:right-auto xl:-translate-x-1/2 xl:w-[calc(100vw-2.5rem)] xl:max-w-[calc(1296px-2rem)] xl:p-6"
+            >
               <nav aria-label="All public pages" className="columns-1 gap-6 xl:columns-3">
                 {publicNavigation.map((group) => {
                   const Icon = groupIcons[group.icon];

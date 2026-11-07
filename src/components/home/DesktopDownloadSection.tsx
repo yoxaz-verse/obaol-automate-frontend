@@ -5,9 +5,9 @@ import { FaApple, FaWindows } from "react-icons/fa";
 import { FiArrowDown, FiArrowRight, FiGlobe, FiShield } from "react-icons/fi";
 
 const WINDOWS_DOWNLOAD_URL = process.env.NEXT_PUBLIC_WINDOWS_DESKTOP_URL
-  || "https://github.com/yoxaz-verse/obaol-automate-frontend/releases/latest/download/OBAOL-Supreme-Windows-x64.exe";
+  || "https://github.com/yoxaz-verse/obaol-automate-desktop/releases/latest/download/OBAOL-Supreme-Windows-x64.exe";
 const MACOS_DOWNLOAD_URL = process.env.NEXT_PUBLIC_MACOS_DESKTOP_URL
-  || "https://github.com/yoxaz-verse/obaol-automate-frontend/releases/latest/download/OBAOL-Supreme-macOS-Universal.dmg";
+  || "https://github.com/yoxaz-verse/obaol-automate-desktop/releases/latest/download/OBAOL-Supreme-macOS-Universal.dmg";
 
 type DownloadPlatform = "windows" | "macos";
 

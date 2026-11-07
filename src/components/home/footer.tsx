@@ -8,9 +8,9 @@ import { BUSINESS_IDENTITY } from "@/utils/businessIdentity";
 
 export default function Footer() {
   const windowsDownloadUrl = process.env.NEXT_PUBLIC_WINDOWS_DESKTOP_URL
-    || "https://github.com/yoxaz-verse/obaol-automate-frontend/releases/latest/download/OBAOL-Supreme-Windows-x64.exe";
+    || "https://github.com/yoxaz-verse/obaol-automate-desktop/releases/latest/download/OBAOL-Supreme-Windows-x64.exe";
   const macosDownloadUrl = process.env.NEXT_PUBLIC_MACOS_DESKTOP_URL
-    || "https://github.com/yoxaz-verse/obaol-automate-frontend/releases/latest/download/OBAOL-Supreme-macOS-Universal.dmg";
+    || "https://github.com/yoxaz-verse/obaol-automate-desktop/releases/latest/download/OBAOL-Supreme-macOS-Universal.dmg";
   const accentText = "text-obaol-700 dark:text-obaol-300";
   const accentHover = "hover:text-obaol-700 dark:hover:text-obaol-300";
   const accentLine = "bg-obaol-500";

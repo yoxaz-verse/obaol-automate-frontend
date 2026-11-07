@@ -1,0 +1,25 @@
+# Local dependencies and build output
+node_modules/
+.next/
+.next-dev/
+out/
+build/
+
+# Local reports, caches, and temporary work
+.tmp/
+coverage/
+playwright-report/
+test-results/
+reports/
+.cursor/
+.vscode/
+
+# Native applications live in separate repositories
+desktop/
+mobile/
+
+# Local-only files
+.git/
+.vercel/
+*.log
+.DS_Store

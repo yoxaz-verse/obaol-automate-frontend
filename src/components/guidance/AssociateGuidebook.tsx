@@ -181,7 +181,13 @@ export default function AssociateGuidebook({ profile, registrationStatus, role =
   const jumpToCategory = (next: GuideCategory | "all") => {
     setCategory(next);
     setQuery("");
-    document.getElementById("guide-topics")?.scrollIntoView({ behavior: "smooth" });
+    const topicsEl = document.getElementById("guide-topics");
+    if (topicsEl) {
+      const rect = topicsEl.getBoundingClientRect();
+      if (rect.top < 80 || rect.top > window.innerHeight) {
+        topicsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
   };
 
   return (
@@ -223,23 +229,34 @@ export default function AssociateGuidebook({ profile, registrationStatus, role =
           </div>
         </header>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[260px,minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-8 lg:self-start" aria-label="Guidebook table of contents">
-            <nav className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible">
-              <button onClick={() => jumpToCategory("all")} aria-pressed={category === "all"} className={`min-w-max rounded-xl border px-4 py-3 text-left text-sm font-bold transition ${category === "all" ? "dashboard-selected-control" : "border-divider bg-content1 hover:border-obaol-500"}`}>All topics</button>
+        <div className="mt-8 grid gap-8 lg:grid-cols-[280px,minmax(0,1fr)] items-start">
+          <aside className="w-full min-w-0 lg:sticky lg:top-4 lg:self-start" aria-label="Guidebook table of contents">
+            <nav className="flex w-full min-w-0 gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible">
+              <button
+                onClick={() => jumpToCategory("all")}
+                aria-pressed={category === "all"}
+                className={`w-auto min-w-max rounded-xl border px-4 py-3 text-left text-sm font-bold transition lg:min-w-0 lg:w-full ${category === "all" ? "dashboard-selected-control" : "border-divider bg-content1 hover:border-obaol-500"}`}
+              >
+                All topics
+              </button>
               {roleGuideCategories.map((item) => (
-                <button key={item.id} onClick={() => jumpToCategory(item.id)} aria-pressed={category === item.id} className={`min-w-max rounded-xl border px-4 py-3 text-left transition ${category === item.id ? "dashboard-selected-control" : "border-divider bg-content1 hover:border-obaol-500"}`}>
-                  <span className="block text-sm font-bold">{item.label}</span>
-                  <span className={`mt-1 hidden text-xs leading-5 lg:block ${category === item.id ? "text-[color:rgba(27,38,50,0.78)]" : "db-muted"}`}>{item.description}</span>
+                <button
+                  key={item.id}
+                  onClick={() => jumpToCategory(item.id)}
+                  aria-pressed={category === item.id}
+                  className={`w-auto min-w-max rounded-xl border px-4 py-3 text-left transition lg:min-w-0 lg:w-full ${category === item.id ? "dashboard-selected-control" : "border-divider bg-content1 hover:border-obaol-500"}`}
+                >
+                  <span className="block text-sm font-bold truncate lg:whitespace-normal">{item.label}</span>
+                  <span className={`mt-1 hidden text-xs leading-5 break-words lg:block ${category === item.id ? "text-[color:rgba(27,38,50,0.78)]" : "db-muted"}`}>{item.description}</span>
                 </button>
               ))}
             </nav>
-            <Link href="/dashboard/customer-support" className="mt-4 hidden items-center justify-between rounded-xl border border-divider bg-content1 px-4 py-3 text-sm font-semibold hover:border-obaol-500 lg:flex">
+            <Link href="/dashboard/customer-support" className="mt-4 hidden w-full items-center justify-between rounded-xl border border-divider bg-content1 px-4 py-3 text-sm font-semibold hover:border-obaol-500 lg:flex">
               Still need help? <LuArrowRight />
             </Link>
           </aside>
 
-          <section id="guide-topics" aria-live="polite">
+          <section id="guide-topics" aria-live="polite" className="min-w-0 scroll-mt-6 md:scroll-mt-8">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-bold">{filteredTopics.length} {filteredTopics.length === 1 ? "topic" : "topics"}</p>
               {(query || category !== "all") && <button onClick={() => { setQuery(""); setCategory("all"); }} className="text-xs font-bold text-obaol-600 hover:underline">Clear filters</button>}

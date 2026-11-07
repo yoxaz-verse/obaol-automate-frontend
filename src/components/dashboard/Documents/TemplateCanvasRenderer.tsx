@@ -84,7 +84,6 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
       {data?.issuer?.logo ? <img src={data.issuer.logo} alt="Issuing company logo" className="mb-2 h-8 w-auto object-contain" /> : null}
       <div className="text-[10px] tracking-widest opacity-80">{data?.issuer?.name || data?.seller?.name || "OBAOL"}</div>
       <div className="text-lg font-semibold">{docLabel}</div>
-      {data?.directionLabel ? <div className="inline-flex rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-900">{data.directionLabel}</div> : null}
       <div className="text-xs opacity-85">{data?.documentNumber || "Draft"}</div>
       <div className="text-xs opacity-85">{data?.docDate || "-"}</div>
     </div>

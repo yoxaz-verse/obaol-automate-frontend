@@ -752,10 +752,10 @@ export default function SampleRequestDetailPage() {
         isDismissable={false}
         isKeyboardDismissDisabled
         classNames={{
-          base: "bg-brand-abyssal/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
-          header: "border-b border-white/5",
-          footer: "border-t border-white/5",
-          closeButton: "hover:bg-white/5 active:scale-95 transition-all",
+          base: "db-panel border db-border-subtle shadow-2xl rounded-3xl text-foreground",
+          header: "border-b db-border-subtle",
+          footer: "border-t db-border-subtle",
+          closeButton: "hover:db-inset active:scale-95 transition-all text-default-400 hover:text-foreground",
         }}
       >
         <ModalContent>
@@ -764,12 +764,12 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-6 px-8">
                  <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-warning rounded-full shadow-[0_0_10px_rgba(207,152,60,0.5)]" />
-                    <span className="text-xl font-black  italic tracking-tight text-white">Project Quote Initiation</span>
+                    <span className="text-xl font-black italic tracking-tight text-foreground">Project Quote Initiation</span>
                  </div>
-                 <p className="text-[10px] font-black  tracking-[0.25em] text-obaol-500/60 mt-1 italic">Tactical Parameter Selection</p>
+                 <p className="text-[10px] font-black tracking-[0.25em] text-obaol-600 dark:text-obaol-400 mt-1 italic">Tactical Parameter Selection</p>
               </ModalHeader>
               <ModalBody className="px-8 py-8">
-                <div className="space-y-10">
+                <div className="space-y-8">
                   <Input
                     label="Supplier Min Qty (kg)"
                     type="number"
@@ -779,9 +779,9 @@ export default function SampleRequestDetailPage() {
                     value={quoteMinQty}
                     onChange={(e) => setQuoteMinQty(e.target.value)}
                     classNames={{
-                      inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                      label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
-                      input: "text-sm font-bold text-white"
+                      inputWrapper: "db-subtle border db-border-subtle hover:border-obaol-500 focus-within:!border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
+                      label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
+                      input: "text-sm font-bold text-foreground placeholder:text-default-400"
                     }}
                   />
                   <Input
@@ -793,9 +793,9 @@ export default function SampleRequestDetailPage() {
                     value={quotePrice}
                     onChange={(e) => setQuotePrice(e.target.value)}
                     classNames={{
-                      inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                      label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
-                      input: "text-sm font-bold text-white text-warning"
+                      inputWrapper: "db-subtle border db-border-subtle hover:border-obaol-500 focus-within:!border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
+                      label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
+                      input: "text-sm font-bold text-foreground placeholder:text-default-400"
                     }}
                   />
                   <Select
@@ -808,13 +808,14 @@ export default function SampleRequestDetailPage() {
                       setSamplePaymentTerm(String(nextValue));
                     }}
                     classNames={{
-                      trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                      label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
+                      trigger: "db-subtle border db-border-subtle hover:border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
+                      value: "text-sm font-bold text-foreground",
+                      label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
                       popoverContent: "db-panel border db-border-strong text-foreground",
                     }}
                   >
-                    <SelectItem key="ADVANCE" className="text-white font-bold text-xs  tracking-widest">Advance</SelectItem>
-                    <SelectItem key="COURIER_CHARGES" className="text-white font-bold text-xs  tracking-widest">Courier Charges</SelectItem>
+                    <SelectItem key="ADVANCE" className="text-foreground font-bold text-xs tracking-widest">Advance</SelectItem>
+                    <SelectItem key="COURIER_CHARGES" className="text-foreground font-bold text-xs tracking-widest">Courier Charges</SelectItem>
                   </Select>
                 </div>
               </ModalBody>
@@ -822,7 +823,7 @@ export default function SampleRequestDetailPage() {
                 <Button 
                    variant="light" 
                    onPress={onClose}
-                   className="px-8 h-12 rounded-xl font-black  text-[10px] tracking-widest text-white/40 hover:text-white"
+                   className="px-8 h-12 rounded-xl font-black text-[10px] tracking-widest text-default-500 hover:text-foreground hover:db-inset"
                 >
                    Abort
                 </Button>
@@ -831,7 +832,7 @@ export default function SampleRequestDetailPage() {
                    variant="shadow"
                    onPress={() => quoteMutation.mutate()} 
                    isDisabled={!quoteMinQty || !quotePrice}
-                   className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-[0.15em] shadow-[0_0_30px_rgba(207,152,60,0.2)] bg-gradient-to-r from-warning to-obaol-600"
+                   className="flex-1 h-12 rounded-xl font-black text-[10px] tracking-[0.15em] shadow-[0_0_30px_rgba(207,152,60,0.2)] bg-gradient-to-r from-warning to-obaol-600 text-brand-abyssal"
                 >
                    Execute Submission
                 </Button>
@@ -850,8 +851,10 @@ export default function SampleRequestDetailPage() {
          isDismissable={false}
          isKeyboardDismissDisabled
          classNames={{
-           base: "bg-brand-abyssal/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
-           closeButton: "hover:bg-white/5 active:scale-95 transition-all",
+           base: "db-panel border db-border-subtle shadow-2xl rounded-3xl text-foreground",
+           header: "border-b db-border-subtle",
+           footer: "border-t db-border-subtle",
+           closeButton: "hover:db-inset active:scale-95 transition-all text-default-400 hover:text-foreground",
          }}
       >
         <ModalContent>
@@ -860,9 +863,9 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-8 px-10">
                  <div className="flex items-center gap-3">
                     <LuWallet className="text-primary" size={24} />
-                    <span className="text-xl font-black  italic tracking-tight text-white">Payment Confirmation</span>
+                    <span className="text-xl font-black italic tracking-tight text-foreground">Payment Confirmation</span>
                  </div>
-                 <p className="text-[10px] font-black  tracking-[0.25em] text-primary/60 mt-1 italic">Select Payment Type</p>
+                 <p className="text-[10px] font-black tracking-[0.25em] text-primary/80 mt-1 italic">Select Payment Type</p>
               </ModalHeader>
               <ModalBody className="gap-8 px-10 pb-10">
                 <Select
@@ -876,13 +879,14 @@ export default function SampleRequestDetailPage() {
                     if (nextValue !== "ONLINE") setOnlinePaymentMethod("");
                   }}
                   classNames={{
-                    trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                    label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
+                    trigger: "db-subtle border db-border-subtle hover:border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
+                    value: "text-sm font-bold text-foreground",
+                    label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
                     popoverContent: "db-panel border db-border-strong text-foreground",
                   }}
                 >
-                  <SelectItem key="CASH" className="text-white font-bold text-xs  tracking-widest">Cash</SelectItem>
-                  <SelectItem key="ONLINE" className="text-white font-bold text-xs  tracking-widest">Online</SelectItem>
+                  <SelectItem key="CASH" className="text-foreground font-bold text-xs tracking-widest">Cash</SelectItem>
+                  <SelectItem key="ONLINE" className="text-foreground font-bold text-xs tracking-widest">Online</SelectItem>
                 </Select>
 
                 {paymentMode === "ONLINE" && (
@@ -896,13 +900,14 @@ export default function SampleRequestDetailPage() {
                       setOnlinePaymentMethod(nextValue);
                     }}
                     classNames={{
-                      trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                      label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
+                      trigger: "db-subtle border db-border-subtle hover:border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
+                      value: "text-sm font-bold text-foreground",
+                      label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
                       popoverContent: "db-panel border db-border-strong text-foreground",
                     }}
                   >
-                    <SelectItem key="GPAY" className="text-white font-bold text-xs  tracking-widest">GPay</SelectItem>
-                    <SelectItem key="CARD" className="text-white font-bold text-xs  tracking-widest">Card</SelectItem>
+                    <SelectItem key="GPAY" className="text-foreground font-bold text-xs tracking-widest">GPay</SelectItem>
+                    <SelectItem key="CARD" className="text-foreground font-bold text-xs tracking-widest">Card</SelectItem>
                   </Select>
                 )}
               </ModalBody>
@@ -910,7 +915,7 @@ export default function SampleRequestDetailPage() {
                 <Button 
                    variant="light" 
                    onPress={onClose}
-                   className="px-8 h-12 rounded-xl font-black  text-[10px] tracking-widest text-white/40 hover:text-white"
+                   className="px-8 h-12 rounded-xl font-black text-[10px] tracking-widest text-default-500 hover:text-foreground hover:db-inset"
                 >
                    Abort
                 </Button>
@@ -919,7 +924,7 @@ export default function SampleRequestDetailPage() {
                    variant="shadow"
                    onPress={() => paymentMutation.mutate()}
                    isDisabled={!paymentMode || (paymentMode === "ONLINE" && !onlinePaymentMethod)}
-                   className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600"
+                   className="flex-1 h-12 rounded-xl font-black text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600 text-brand-abyssal"
                 >
                    Confirm Payment
                 </Button>
@@ -938,8 +943,10 @@ export default function SampleRequestDetailPage() {
          isDismissable={false}
          isKeyboardDismissDisabled
          classNames={{
-           base: "bg-brand-abyssal/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
-           closeButton: "hover:bg-white/5 active:scale-95 transition-all",
+           base: "db-panel border db-border-subtle shadow-2xl rounded-3xl text-foreground",
+           header: "border-b db-border-subtle",
+           footer: "border-t db-border-subtle",
+           closeButton: "hover:db-inset active:scale-95 transition-all text-default-400 hover:text-foreground",
          }}
       >
         <ModalContent>
@@ -948,9 +955,9 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-8 px-10">
                  <div className="flex items-center gap-3">
                     <LuTruck className="text-primary" size={24} />
-                    <span className="text-xl font-black  italic tracking-tight text-white">Logistics Protocol</span>
+                    <span className="text-xl font-black italic tracking-tight text-foreground">Logistics Protocol</span>
                  </div>
-                 <p className="text-[10px] font-black  tracking-[0.25em] text-primary/60 mt-1 italic">Submit Distribution Data</p>
+                 <p className="text-[10px] font-black tracking-[0.25em] text-primary/80 mt-1 italic">Submit Distribution Data</p>
               </ModalHeader>
               <ModalBody className="gap-10 px-10 pb-10">
                 <Input
@@ -961,9 +968,9 @@ export default function SampleRequestDetailPage() {
                   value={courierAgencyName}
                   onChange={(e) => setCourierAgencyName(e.target.value)}
                   classNames={{
-                    inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                    label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
-                    input: "text-sm font-bold text-white text-primary"
+                    inputWrapper: "db-subtle border db-border-subtle hover:border-obaol-500 focus-within:!border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
+                    label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
+                    input: "text-sm font-bold text-foreground placeholder:text-default-400"
                   }}
                 />
                 <Input
@@ -974,9 +981,9 @@ export default function SampleRequestDetailPage() {
                   value={courierTrackingNumber}
                   onChange={(e) => setCourierTrackingNumber(e.target.value)}
                   classNames={{
-                    inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
-                    label: "text-[10px] font-black  tracking-widest text-white/40 mb-2",
-                    input: "text-sm font-bold text-white"
+                    inputWrapper: "db-subtle border db-border-subtle hover:border-obaol-500 focus-within:!border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
+                    label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
+                    input: "text-sm font-bold text-foreground placeholder:text-default-400"
                   }}
                 />
               </ModalBody>
@@ -984,7 +991,7 @@ export default function SampleRequestDetailPage() {
                 <Button 
                    variant="light" 
                    onPress={onClose}
-                   className="px-8 h-12 rounded-xl font-black  text-[10px] tracking-widest text-white/40 hover:text-white"
+                   className="px-8 h-12 rounded-xl font-black text-[10px] tracking-widest text-default-500 hover:text-foreground hover:db-inset"
                 >
                    Abort
                 </Button>
@@ -993,7 +1000,7 @@ export default function SampleRequestDetailPage() {
                    variant="shadow"
                    onPress={() => courierSubmitMutation.mutate()} 
                    isDisabled={!courierTrackingNumber}
-                   className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600"
+                   className="flex-1 h-12 rounded-xl font-black text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600 text-brand-abyssal"
                 >
                    Finalize Segment
                 </Button>
@@ -1012,8 +1019,10 @@ export default function SampleRequestDetailPage() {
          isDismissable={false}
          isKeyboardDismissDisabled
          classNames={{
-           base: "bg-brand-abyssal/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
-           closeButton: "hover:bg-white/5 active:scale-95 transition-all",
+           base: "db-panel border db-border-subtle shadow-2xl rounded-3xl text-foreground",
+           header: "border-b db-border-subtle",
+           footer: "border-t db-border-subtle",
+           closeButton: "hover:db-inset active:scale-95 transition-all text-default-400 hover:text-foreground",
          }}
       >
         <ModalContent>
@@ -1022,21 +1031,21 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-8 px-10">
                  <div className="flex items-center gap-3">
                     <LuCheck className="text-success" size={24} />
-                    <span className="text-xl font-black  italic tracking-tight text-white">Delivery Acceptance</span>
+                    <span className="text-xl font-black italic tracking-tight text-foreground">Delivery Acceptance</span>
                  </div>
-                 <p className="text-[10px] font-black  tracking-[0.25em] text-success-500/60 mt-1 italic">Confirmation Phase</p>
+                 <p className="text-[10px] font-black tracking-[0.25em] text-success-600 dark:text-success-400 mt-1 italic">Confirmation Phase</p>
               </ModalHeader>
               <ModalBody className="gap-6 px-10 pb-10">
-                <div className="p-6 rounded-[1.5rem] bg-white/[0.02] border border-white/5 space-y-4">
-                  <span className="text-[10px] font-black  tracking-widest text-white/40 block">Resource Verification</span>
-                  <p className="text-[10px] font-medium text-default-400 italic">No file required for this step.</p>
+                <div className="p-6 rounded-[1.5rem] db-subtle border db-border-subtle space-y-4">
+                  <span className="text-[10px] font-black tracking-widest text-default-600 dark:text-default-400 block">Resource Verification</span>
+                  <p className="text-[10px] font-medium text-default-500 italic">No file required for this step.</p>
                 </div>
               </ModalBody>
               <ModalFooter className="px-10 pb-10 pt-2 flex items-center justify-between gap-4">
                 <Button 
                    variant="light" 
                    onPress={onClose}
-                   className="px-8 h-12 rounded-xl font-black  text-[10px] tracking-widest text-white/40"
+                   className="px-8 h-12 rounded-xl font-black text-[10px] tracking-widest text-default-500 hover:text-foreground hover:db-inset"
                 >
                    Close
                 </Button>
@@ -1044,7 +1053,7 @@ export default function SampleRequestDetailPage() {
                    color="success" 
                    variant="shadow"
                    onPress={() => receiptMutation.mutate()}
-                   className="flex-1 h-12 rounded-xl font-black  text-[10px] tracking-[0.15em] text-white bg-gradient-to-r from-success to-success-600 shadow-[0_0_30px_rgba(34,197,94,0.2)]"
+                   className="flex-1 h-12 rounded-xl font-black text-[10px] tracking-[0.15em] text-white bg-gradient-to-r from-success to-success-600 shadow-[0_0_30px_rgba(34,197,94,0.2)]"
                 >
                    Accept Sequence
                 </Button>

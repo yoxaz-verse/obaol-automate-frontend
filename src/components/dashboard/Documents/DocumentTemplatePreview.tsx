@@ -96,22 +96,22 @@ export default function DocumentTemplatePreview({
     party?.billingAddress ||
     party?.registeredAddress ||
     party?.officeAddress ||
-    "—";
-  const getGstin = (party: any) => party?.gstin || party?.gstNumber || party?.taxId || "—";
+    "";
+  const getGstin = (party: any) => party?.gstin || party?.gstNumber || party?.taxId || "";
   const buyerParty = {
-    name: doc?.buyer?.name || buyerCompany?.name || sourceEnquiry?.buyerAssociateCompanyName || sourceEnquiry?.buyerName || buyerAssociate?.name || "—",
+    name: doc?.buyer?.name || buyerCompany?.name || sourceEnquiry?.buyerAssociateCompanyName || sourceEnquiry?.buyerName || buyerAssociate?.name || "",
     contactName: doc?.buyer?.contactName || buyerAssociate?.name || "",
-    email: doc?.buyer?.email || buyerCompany?.email || buyerAssociate?.email || sourceEnquiry?.buyerEmail || "—",
-    phone: doc?.buyer?.phone || buyerCompany?.phone || buyerAssociate?.phone || sourceEnquiry?.buyerPhone || "—",
+    email: doc?.buyer?.email || buyerCompany?.email || buyerAssociate?.email || sourceEnquiry?.buyerEmail || "",
+    phone: doc?.buyer?.phone || buyerCompany?.phone || buyerAssociate?.phone || sourceEnquiry?.buyerPhone || "",
     address: doc?.buyer?.address || getAddress(buyerCompany),
     gstin: doc?.buyer?.gstin || getGstin(buyerCompany),
     logo: doc?.buyer?.logo || buyerCompany?.logo || "",
   };
   const sellerParty = {
-    name: doc?.seller?.name || sellerCompany?.name || sourceEnquiry?.sellerAssociateCompanyName || sourceEnquiry?.sellerName || sellerAssociate?.name || "—",
+    name: doc?.seller?.name || sellerCompany?.name || sourceEnquiry?.sellerAssociateCompanyName || sourceEnquiry?.sellerName || sellerAssociate?.name || "",
     contactName: doc?.seller?.contactName || sellerAssociate?.name || "",
-    email: doc?.seller?.email || sellerCompany?.email || sellerAssociate?.email || sourceEnquiry?.sellerEmail || "—",
-    phone: doc?.seller?.phone || sellerCompany?.phone || sellerAssociate?.phone || sourceEnquiry?.sellerPhone || "—",
+    email: doc?.seller?.email || sellerCompany?.email || sellerAssociate?.email || sourceEnquiry?.sellerEmail || "",
+    phone: doc?.seller?.phone || sellerCompany?.phone || sellerAssociate?.phone || sourceEnquiry?.sellerPhone || "",
     address: doc?.seller?.address || getAddress(sellerCompany),
     gstin: doc?.seller?.gstin || getGstin(sellerCompany),
     logo: doc?.seller?.logo || sellerCompany?.logo || "",
@@ -129,8 +129,8 @@ export default function DocumentTemplatePreview({
     ? doc.lineItems
     : [
         {
-          productName: productVariant?.product?.name || sourceEnquiry?.productName || "—",
-          productVariantName: productVariant?.name || sourceEnquiry?.variantName || "—",
+          productName: productVariant?.product?.name || sourceEnquiry?.productName || "",
+          productVariantName: productVariant?.name || sourceEnquiry?.variantName || "",
           quantityMT: Number(sourceEnquiry?.quantity || 0),
           ratePerKg: Number(sourceEnquiry?.rate || 0),
           amount: Number(sourceEnquiry?.rate || 0) * Number(sourceEnquiry?.quantity || 0) * 1000,
@@ -176,9 +176,9 @@ export default function DocumentTemplatePreview({
       grandTotal: Number(computedTotals?.grandTotal || 0),
     },
     terms: {
-      paymentTerms: doc?.terms?.paymentTerms || "-",
-      deliveryTerms: doc?.terms?.deliveryTerms || "-",
-      notes: doc?.terms?.notes || sourceEnquiry?.specifications || "-",
+      paymentTerms: doc?.terms?.paymentTerms || "",
+      deliveryTerms: doc?.terms?.deliveryTerms || "",
+      notes: doc?.terms?.notes || sourceEnquiry?.specifications || "",
     },
     letterheadConfig: selectedTemplate?.letterheadConfig || {},
     manualInput: {},

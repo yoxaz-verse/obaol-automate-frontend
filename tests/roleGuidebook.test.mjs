@@ -5,6 +5,7 @@ import {
   getNavigableGuideRoutes,
   getRoleGuideTopics,
   hasCompleteGuideCoverage,
+  resolveRoleGuideTopic,
   searchRoleGuideTopics,
 } from "../src/components/guidance/roleGuideContent.ts";
 
@@ -36,6 +37,28 @@ test("manual search covers responsibilities, fields, controls, routes, and escal
   assert.ok(searchRoleGuideTopics(topics, "pricing, contract, compliance").some((topic) => topic.id === "operator-responsibilities"));
   assert.ok(searchRoleGuideTopics(topics, "record ID").some((topic) => topic.id === "operator-troubleshooting"));
   assert.ok(searchRoleGuideTopics(topics, "/dashboard/freight-forwarding/customs").some((topic) => topic.route === "/dashboard/freight-forwarding/customs"));
+});
+
+test("dashboard help ids resolve aliases to the available role-specific topic", () => {
+  const associateTopics = getRoleGuideTopics("associate", "both");
+  const operatorTopics = getRoleGuideTopics("operator");
+
+  assert.equal(resolveRoleGuideTopic(associateTopics, "orders")?.id, "orders-reference");
+  assert.equal(resolveRoleGuideTopic(associateTopics, "#orders-reference")?.id, "orders-reference");
+  assert.equal(resolveRoleGuideTopic(operatorTopics, "orders")?.id, "orders");
+  assert.equal(resolveRoleGuideTopic(operatorTopics, "customer-support")?.route, "/dashboard/customer-support");
+  assert.equal(resolveRoleGuideTopic(associateTopics, "unknown-topic"), null);
+});
+
+test("every navigable associate and operator help id resolves to an available reference", () => {
+  for (const role of ["associate", "operator"]) {
+    const topics = getRoleGuideTopics(role, "both");
+    for (const route of getNavigableGuideRoutes(role)) {
+      const topic = resolveRoleGuideTopic(topics, route.helpId);
+      assert.ok(topic, `${role} help is missing ${route.helpId}`);
+      assert.equal(topic.route, route.path);
+    }
+  }
 });
 
 test("operator manual includes Team guidance and the shared UI exposes responsibility comparison", () => {

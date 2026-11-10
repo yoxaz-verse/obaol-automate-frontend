@@ -780,7 +780,7 @@ export default function SampleRequestDetailPage() {
                     onChange={(e) => setQuoteMinQty(e.target.value)}
                     classNames={{
                       inputWrapper: "db-subtle border db-border-subtle hover:border-obaol-500 focus-within:!border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
-                      label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
+                      label: "text-[11px] font-black tracking-widest !text-slate-200 mb-2",
                       input: "text-sm font-bold text-foreground placeholder:text-default-400"
                     }}
                   />
@@ -794,7 +794,7 @@ export default function SampleRequestDetailPage() {
                     onChange={(e) => setQuotePrice(e.target.value)}
                     classNames={{
                       inputWrapper: "db-subtle border db-border-subtle hover:border-obaol-500 focus-within:!border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
-                      label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
+                      label: "text-[11px] font-black tracking-widest !text-slate-200 mb-2",
                       input: "text-sm font-bold text-foreground placeholder:text-default-400"
                     }}
                   />
@@ -810,7 +810,7 @@ export default function SampleRequestDetailPage() {
                     classNames={{
                       trigger: "db-subtle border db-border-subtle hover:border-obaol-500 transition-all rounded-2xl h-14 text-foreground",
                       value: "text-sm font-bold text-foreground",
-                      label: "text-[11px] font-black tracking-widest text-default-600 dark:text-default-400 mb-2",
+                      label: "text-[11px] font-black tracking-widest !text-slate-200 mb-2",
                       popoverContent: "db-panel border db-border-strong text-foreground",
                     }}
                   >

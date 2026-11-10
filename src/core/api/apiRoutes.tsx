@@ -336,12 +336,15 @@ export const freightForwardingRoutes = {
 };
 export const systemConfigRoutes = {
   obaolCompany: "/system-config/obaol-company",
+  obaolCompanySignature: "/system-config/obaol-company/signature",
   calculations: "/system-config/calculations",
   emailTemplates: "/system-config/email-templates",
   emailTemplatesDraft: "/system-config/email-templates/draft",
   emailTemplatesPublish: "/system-config/email-templates/publish",
   emailTemplatesTest: "/system-config/email-templates/test",
 };
+
+export const companySignatureRoutes = { current: "/company-signature" };
 
 export const realLifeScenarioRoutes = {
   admin: "/real-life-scenarios/admin",
@@ -742,6 +745,7 @@ export const apiRoutes = {
   },
   enquiry: enquiryRoutes,
   systemConfig: systemConfigRoutes,
+  companySignature: companySignatureRoutes,
   orders: {
     create: "/orders",
     createExternal: "/orders/external",

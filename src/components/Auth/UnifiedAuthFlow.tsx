@@ -156,7 +156,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       setStatus({ tone: "error", message: mode === "signin" ? "Enter a valid email address or international mobile number." : "Enter a valid email address." });
       return;
     }
-    if (mode === "signup" && !/^\+[1-9]\d{7,14}$/.test(phone.replace(/[\s()-]/g, ""))) {
+    if (mode === "signup" && role === "Operator" && !/^\+[1-9]\d{7,14}$/.test(phone.replace(/[\s()-]/g, ""))) {
       setStatus({ tone: "error", message: "Enter your WhatsApp number with country code, for example +919876543210." });
       return;
     }
@@ -167,7 +167,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
     }
     setBusy("signup");
     try {
-      await postData("/auth/onboarding/start", { email: email.trim().toLowerCase(), phone: phone.replace(/[\s()-]/g, ""), role });
+      await postData("/auth/onboarding/start", { email: email.trim().toLowerCase(), ...(role === "Operator" ? { phone: phone.replace(/[\s()-]/g, "") } : {}), role });
       setOtpMethod("email");
       beginOtpWindow();
       setStatus({ tone: "info", message: "If this email is eligible, a verification code has been sent." });
@@ -238,7 +238,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       const response = mode === "signin"
         ? await postData("/verification/verify-otp-existing", { code: otp, method: otpMethod, identifier: email.trim().toLowerCase(), rememberMe })
         : await postData("/verification/verify-otp", { code: otp, method: otpMethod });
-      if (mode === "signup" && otpMethod === "email" && !response.data?.verification?.fullyVerified) {
+      if (mode === "signup" && role === "Operator" && otpMethod === "email" && !response.data?.verification?.fullyVerified) {
         setPostAuthPhase("idle");
         setOtpMethod("whatsapp");
         await postData("/verification/send-otp", { method: "whatsapp" });
@@ -246,7 +246,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
         setStatus({ tone: "success", message: "Email verified. We sent the next code to your WhatsApp number." });
         return;
       }
-      setStatus({ tone: "success", message: mode === "signin" ? "Signed in. Opening your workspace…" : "Email and WhatsApp verified. Opening onboarding…" });
+      setStatus({ tone: "success", message: mode === "signin" ? "Signed in. Opening your workspace…" : role === "Associate" ? "Email verified. Opening onboarding…" : "Email and WhatsApp verified. Opening onboarding…" });
       await finishAuthentication(response.data?.next || (mode === "signup" ? "/dashboard/onboarding" : undefined));
     } catch (error) {
       setPostAuthPhase("idle");
@@ -284,10 +284,10 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       const result = await postData("/auth/google", {
         idToken: response.credential,
         intent: current.mode === "signup" ? "register" : "login",
-        ...(current.mode === "signup" ? { role: current.role, phone: phone.replace(/[\s()-]/g, "") } : {}),
+        ...(current.mode === "signup" ? { role: current.role, ...(current.role === "Operator" ? { phone: phone.replace(/[\s()-]/g, "") } : {}) } : {}),
         rememberMe: current.rememberMe,
       });
-      if (current.mode === "signup") {
+      if (current.mode === "signup" && current.role === "Operator") {
         setPostAuthPhase("idle");
         setOtpMethod("whatsapp");
         await postData("/verification/send-otp", { method: "whatsapp" });
@@ -395,8 +395,8 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
               <label htmlFor={emailId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">{mode === "signin" ? "Email or mobile number" : "Email address"}</label>
               <input ref={emailRef} id={emailId} className={fieldClass} type="text" value={email} autoComplete="username webauthn" placeholder={mode === "signin" ? "name@example.com or +919876543210" : "name@example.com"} disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
             </div>
-            {mode === "signup" && <div><label className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">WhatsApp mobile number</label><input className={fieldClass} type="tel" value={phone} autoComplete="tel" inputMode="tel" placeholder="+919876543210" disabled={isBusy} onChange={(event) => { setPhone(event.target.value); setStatus(null); }} required /></div>}
-            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || (mode === "signup" && !isValidEmail(email))} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely") : "Verify email and WhatsApp"}</button>
+            {mode === "signup" && role === "Operator" && <div><label className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">WhatsApp mobile number</label><input className={fieldClass} type="tel" value={phone} autoComplete="tel" inputMode="tel" placeholder="+919876543210" disabled={isBusy} onChange={(event) => { setPhone(event.target.value); setStatus(null); }} required /></div>}
+            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || (mode === "signup" && !isValidEmail(email))} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely") : role === "Associate" ? "Verify email" : "Verify email and WhatsApp"}</button>
             <div className="relative py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 lg:py-1"><span className="relative z-10 lg:bg-white lg:px-3 lg:dark:bg-content1">or</span><span className="absolute left-0 top-1/2 hidden h-px w-full bg-slate-200 dark:bg-white/10 lg:block" /></div>
             <div className="min-h-[52px] lg:rounded-xl lg:border lg:border-slate-200 lg:p-1.5 lg:dark:border-white/10">
               {googleClientId ? <><div id={googleContainerId} data-testid="google-auth-button" className="mx-auto flex min-h-10 w-full max-w-[340px] justify-center overflow-hidden rounded-full" />{!googleReady && !googleError && <div className="mx-auto h-10 max-w-[340px] animate-pulse rounded-full bg-slate-100 dark:bg-white/[0.05]" />}</> : <p className="py-3 text-center text-xs text-slate-500">Google sign-in is not configured.</p>}

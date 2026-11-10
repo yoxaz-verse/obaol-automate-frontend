@@ -21,10 +21,12 @@ export default function ScenarioPageView({ scenario, related = [], preview = fal
           <header className="public-hero border-b border-default-200/60">
             <div className="container mx-auto max-w-5xl px-4 public-layout-container">
               <Link href={rolePath} className="public-back-link"><FiArrowLeft /> Back to {role.displayName}</Link>
-              <nav aria-label="Breadcrumb" className="mt-8 text-sm text-foreground/55">
-                <Link href={operator ? "/roles/operator" : "/roles/associate"} className="hover:text-orange-500">{operator ? "Operator role" : "Associate roles"}</Link> <span aria-hidden> / </span>
-                <Link href={rolePath} className="hover:text-orange-500">{role.displayName}</Link> <span aria-hidden> / </span>
-                <span>Real-life scenario</span>
+              <nav aria-label="Breadcrumb" className="mt-8 flex flex-wrap items-center gap-2 text-sm text-default-700">
+                <Link href={operator ? "/roles/operator" : "/roles/associate"} className="rounded-sm font-semibold transition-colors hover:text-obaol-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2 dark:hover:text-obaol-300">{operator ? "Operator role" : "Associate roles"}</Link>
+                <span className="text-default-600" aria-hidden> / </span>
+                <Link href={rolePath} className="rounded-sm font-semibold transition-colors hover:text-obaol-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2 dark:hover:text-obaol-300">{role.displayName}</Link>
+                <span className="text-default-600" aria-hidden> / </span>
+                <span className="font-bold text-foreground" aria-current="page">Real-life scenario</span>
               </nav>
               <div className="mt-6 max-w-4xl">
                 <div className="flex flex-wrap gap-2">

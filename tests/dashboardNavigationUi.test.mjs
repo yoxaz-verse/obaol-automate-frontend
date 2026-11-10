@@ -64,6 +64,7 @@ test("dashboard context breadcrumbs contain only real navigation destinations", 
   assert.equal(contextBar.includes("roleLabel"), false);
   assert.equal(contextBar.includes("Company associate"), false);
   assert.equal(contextBar.includes("Help for this page"), true);
+  assert.equal(contextBar.includes("getDashboardHelpId(pathname)"), true);
 });
 
 test("desktop top bar keeps clocks and exposes identity only in the profile control", () => {

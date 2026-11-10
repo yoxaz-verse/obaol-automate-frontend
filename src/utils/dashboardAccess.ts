@@ -1,3 +1,5 @@
+import { featureFlags } from "../config/featureFlags.ts";
+
 export type DashboardRole = "admin" | "associate" | "operator" | "team" | "customer-support";
 export type DashboardSection =
   | "Overview"
@@ -126,7 +128,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Support" },
   { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true },
   { path: "/dashboard/settings/mail", label: "Mail Connection", section: "Organization", roles: ["associate"], searchable: true, activeParent: "/dashboard/settings", requiredApprovalStates: ["APPROVED"] },
-  { path: "/dashboard/settings/whatsapp", label: "WhatsApp Connection", section: "Organization", roles: ["associate"], searchable: true, activeParent: "/dashboard/settings", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/settings/whatsapp", label: "WhatsApp Connection", section: "Organization", roles: featureFlags.associateWhatsappIntegration ? ["admin", "associate"] : ["admin"], searchable: true, activeParent: "/dashboard/settings", requiredApprovalStates: ["APPROVED"] },
   { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], searchable: true, activeParent: "/dashboard/settings" },
   { path: "/dashboard/security", label: "Password & Security", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], searchable: true, activeParent: "/dashboard/settings" },
 
@@ -282,6 +284,22 @@ const routeMatches = (pattern: string, path: string) => {
 export const getDashboardRoute = (path: string) => {
   const normalized = normalizePath(path);
   return DASHBOARD_ROUTE_MANIFEST.find((route) => routeMatches(route.path, normalized)) || null;
+};
+
+export const getDashboardHelpId = (path: string) => {
+  let route = getDashboardRoute(path);
+  const visited = new Set<string>();
+
+  while (route && !visited.has(route.path)) {
+    visited.add(route.path);
+    if (route.nav) return route.helpId;
+
+    const parentPath = route.activeParent || route.breadcrumbParent;
+    if (!parentPath) return route.helpId;
+    route = getDashboardRoute(parentPath);
+  }
+
+  return getDashboardRoute(path)?.helpId || null;
 };
 
 export type DashboardAccessReason = "role" | "company-function" | "coming-soon";

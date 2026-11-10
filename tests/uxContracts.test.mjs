@@ -503,6 +503,8 @@ test("trade listings allow authorized users to add stock even when inventory exi
   assert.equal(rates.includes('message: "Select a valid product variant."'), true);
   assert.equal(rates.includes('Unable to load product variants.'), true);
   assert.equal(rates.includes('No available variants were found for this product.'), true);
+  assert.equal(rates.includes('Add a variant'), true);
+  assert.equal(rates.includes('/dashboard/catalog/additions?type=productVariant&returnTo=/dashboard/product'), true);
 });
 
 test("past marketplace listings show last-live age to admins only", () => {

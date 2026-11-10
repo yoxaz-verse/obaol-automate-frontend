@@ -85,7 +85,7 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
       <div className="text-[10px] tracking-widest opacity-80">{data?.issuer?.name || data?.seller?.name || "OBAOL"}</div>
       <div className="text-lg font-semibold">{docLabel}</div>
       <div className="text-xs opacity-85">{data?.documentNumber || "Draft"}</div>
-      <div className="text-xs opacity-85">{data?.docDate || "-"}</div>
+      <div className="text-xs opacity-85">{data?.docDate || ""}</div>
     </div>
   );
 
@@ -96,17 +96,17 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
       <div className="grid grid-cols-2 gap-3 text-xs">
         <div>
           <div className="font-semibold mb-1">Issued by</div>
-          <div className="font-medium">{data?.issuer?.name || "-"}</div>
-          <div>{data?.issuer?.contactName || data?.issuer?.email || "-"}</div>
-          <div>{data?.issuer?.email || "-"}</div><div>{data?.issuer?.phone || "-"}</div>
-          <div>{data?.issuer?.address || "-"}</div><div>GSTIN: {data?.issuer?.gstin || "-"}</div>
+          <div className="font-medium">{data?.issuer?.name || ""}</div>
+          <div>{data?.issuer?.contactName || data?.issuer?.email || ""}</div>
+          <div>{data?.issuer?.email || ""}</div><div>{data?.issuer?.phone || ""}</div>
+          <div>{data?.issuer?.address || ""}</div><div>GSTIN: {data?.issuer?.gstin || ""}</div>
         </div>
         <div>
           <div className="font-semibold mb-1">Issued to</div>
-          <div className="font-medium">{data?.recipient?.name || "-"}</div>
-          <div>{data?.recipient?.contactName || data?.recipient?.email || "-"}</div>
-          <div>{data?.recipient?.email || "-"}</div><div>{data?.recipient?.phone || "-"}</div>
-          <div>{data?.recipient?.address || "-"}</div><div>GSTIN: {data?.recipient?.gstin || "-"}</div>
+          <div className="font-medium">{data?.recipient?.name || ""}</div>
+          <div>{data?.recipient?.contactName || data?.recipient?.email || ""}</div>
+          <div>{data?.recipient?.email || ""}</div><div>{data?.recipient?.phone || ""}</div>
+          <div>{data?.recipient?.address || ""}</div><div>GSTIN: {data?.recipient?.gstin || ""}</div>
         </div>
       </div>
     );
@@ -129,8 +129,8 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
           <tbody>
             {items.slice(0, 10).map((item: any, idx: number) => (
               <tr key={idx} className="border-b border-default-100">
-                <td className="py-1">{item?.productName || item?.description || "-"}</td>
-                <td className="py-1">{item?.productVariantName || "-"}</td>
+                <td className="py-1">{item?.productName || item?.description || ""}</td>
+                <td className="py-1">{item?.productVariantName || ""}</td>
                 <td className="py-1 text-right">{fmt(item?.quantity || item?.quantityMT)} {item?.unit || "MT"}</td>
                 <td className="py-1 text-right">{fmt(item?.unitPrice || item?.ratePerKg, data?.totals?.currency)}</td>
                 <td className="py-1 text-right">{fmt(item?.total || item?.amount, data?.totals?.currency)}</td>
@@ -158,22 +158,22 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
     const terms = data?.terms || {};
     return (
       <div className="space-y-2 text-xs">
-        <div className="whitespace-pre-line"><span className="font-semibold">Payment:</span> {terms?.paymentTerms || "-"}</div>
-        <div className="whitespace-pre-line"><span className="font-semibold">Delivery:</span> {terms?.deliveryTerms || "-"}</div>
-        <div className="whitespace-pre-line"><span className="font-semibold">Terms and conditions:</span> {terms?.termsAndConditions || "-"}</div>
-        <div className="whitespace-pre-line"><span className="font-semibold">Recipient notes:</span> {terms?.notes || "-"}</div>
+        <div className="whitespace-pre-line"><span className="font-semibold">Payment:</span> {terms?.paymentTerms || ""}</div>
+        <div className="whitespace-pre-line"><span className="font-semibold">Delivery:</span> {terms?.deliveryTerms || ""}</div>
+        <div className="whitespace-pre-line"><span className="font-semibold">Terms and conditions:</span> {terms?.termsAndConditions || ""}</div>
+        <div className="whitespace-pre-line"><span className="font-semibold">Recipient notes:</span> {terms?.notes || ""}</div>
       </div>
     );
   }
 
   if (block.type === "CERTIFICATE") {
     const details = data?.documentData || {};
-    return <div className="space-y-4 text-xs"><div className="grid grid-cols-3 gap-3"><div><b>Commodity</b><br />{details.commodity || "-"}</div><div><b>Sample ID</b><br />{details.sampleId || "-"}</div><div><b>Batch / lot</b><br />{details.batchLot || "-"}</div></div><table className="w-full border-collapse"><thead><tr>{["Parameter", "Result", "Unit", "Method", "Limit"].map(label => <th key={label} className="border p-2 text-left">{label}</th>)}</tr></thead><tbody>{(details.tests || []).map((row: any, index: number) => <tr key={index}>{["parameter", "result", "unit", "method", "limit"].map(key => <td key={key} className="border p-2">{row[key] || "-"}</td>)}</tr>)}</tbody></table><p><b>Conclusion:</b> {details.conclusion || "-"}</p><p className="pt-8 text-right"><b>{details.authorizedSignatory || "Authorized signatory"}</b></p></div>;
+    return <div className="space-y-4 text-xs"><div className="grid grid-cols-3 gap-3"><div><b>Commodity</b><br />{details.commodity || ""}</div><div><b>Sample ID</b><br />{details.sampleId || ""}</div><div><b>Batch / lot</b><br />{details.batchLot || ""}</div></div><table className="w-full border-collapse"><thead><tr>{["Parameter", "Result", "Unit", "Method", "Limit"].map(label => <th key={label} className="border p-2 text-left">{label}</th>)}</tr></thead><tbody>{(details.tests || []).map((row: any, index: number) => <tr key={index}>{["parameter", "result", "unit", "method", "limit"].map(key => <td key={key} className="border p-2">{row[key] || ""}</td>)}</tr>)}</tbody></table><p><b>Conclusion:</b> {details.conclusion || ""}</p><p className="pt-8 text-right"><b>{details.authorizedSignatory || "Authorized signatory"}</b></p></div>;
   }
 
   if (block.type === "SHIPPING") {
     const details = data?.documentData || {};
-    return <div className="space-y-3 text-xs"><p><b>Shipment reference:</b> {details.shipmentReference || "-"}</p><table className="w-full border-collapse"><thead><tr>{["Description", "Package", "Count", "Gross", "Net", "Dimensions", "Marks"].map(label => <th key={label} className="border p-2 text-left">{label}</th>)}</tr></thead><tbody>{(details.packages || []).map((row: any, index: number) => <tr key={index}>{["description", "packageType", "packageCount", "grossWeight", "netWeight", "dimensions", "marks"].map(key => <td key={key} className="border p-2">{row[key] || "-"}</td>)}</tr>)}</tbody></table></div>;
+    return <div className="space-y-3 text-xs"><p><b>Shipment reference:</b> {details.shipmentReference || ""}</p><table className="w-full border-collapse"><thead><tr>{["Description", "Package", "Count", "Gross", "Net", "Dimensions", "Marks"].map(label => <th key={label} className="border p-2 text-left">{label}</th>)}</tr></thead><tbody>{(details.packages || []).map((row: any, index: number) => <tr key={index}>{["description", "packageType", "packageCount", "grossWeight", "netWeight", "dimensions", "marks"].map(key => <td key={key} className="border p-2">{row[key] || ""}</td>)}</tr>)}</tbody></table></div>;
   }
 
   return <div className="text-xs">{block.label}</div>;
@@ -210,8 +210,12 @@ const renderElement = (el: LayoutElement, data: any) => {
     );
   }
   if (el.type === "SIGNATURE") {
+    const signature = data?.issuerSignatureSnapshot || {};
     return (
       <div className="h-full w-full flex flex-col justify-end">
+        {signature.imageDataUrl ? <img src={signature.imageDataUrl} alt="Authorized signature" className="mx-auto max-h-[70%] max-w-full object-contain" /> : null}
+        {signature.signerName ? <div className="text-center text-[11px] font-semibold">{signature.signerName}</div> : null}
+        {signature.signerDesignation ? <div className="text-center text-[10px]">{signature.signerDesignation}</div> : null}
         <div className="border-t border-default-400 pt-1 text-center text-[11px]">{el.content || "Authorized Signatory"}</div>
       </div>
     );

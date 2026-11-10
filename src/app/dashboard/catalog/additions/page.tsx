@@ -79,6 +79,11 @@ export default function CatalogAdditionsPage() {
   const [editing, setEditing] = useState<CatalogRow | null>(null);
   const definition = definitionFor(type);
 
+  useEffect(() => {
+    const requestedType = new URLSearchParams(window.location.search).get("type");
+    if (TYPES.some((item) => item.key === requestedType)) setType(requestedType as EntityType);
+  }, []);
+
   const mine = useQuery({ queryKey: ["catalog-additions"], queryFn: async () => (await getData(catalogModerationRoutes.mine))?.data?.data || {} });
   const categories = useQuery({ queryKey: ["catalog-builder", "categories"], queryFn: () => fetchCatalogHierarchyOptions() });
   const subCategories = useQuery({ queryKey: ["catalog-builder", "subcategories", categoryId], enabled: Boolean(categoryId), queryFn: () => fetchCatalogHierarchyOptions({ key: "category", id: categoryId }) });

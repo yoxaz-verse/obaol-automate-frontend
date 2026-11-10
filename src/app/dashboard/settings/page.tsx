@@ -7,6 +7,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
 import AuthContext from "@/context/AuthContext";
+import { featureFlags } from "@/config/featureFlags";
 
 const settingsLinks = [
   {
@@ -14,7 +15,8 @@ const settingsLinks = [
     description: "Connect your company WhatsApp Business number to send document PDFs and tracked invitations.",
     href: "/dashboard/settings/whatsapp",
     icon: FaWhatsapp,
-    associateOnly: true,
+    associateOnly: false,
+    adminOnly: true,
   },
   {
     title: "Mail Connection",
@@ -63,7 +65,8 @@ const settingsLinks = [
 export default function SettingsPage() {
   const { user } = useContext(AuthContext);
   const isAssociate = String(user?.role || "").toLowerCase() === "associate";
-  const visibleSettingsLinks = settingsLinks.filter((item) => !item.associateOnly || isAssociate);
+  const isAdmin = String(user?.role || "").toLowerCase() === "admin";
+  const visibleSettingsLinks = settingsLinks.filter((item) => (!item.associateOnly || isAssociate) && (!("adminOnly" in item) || !item.adminOnly || isAdmin || (isAssociate && featureFlags.associateWhatsappIntegration)));
 
   return (
     <DashboardPage className="py-3 sm:py-5">

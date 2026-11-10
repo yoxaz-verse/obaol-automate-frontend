@@ -180,6 +180,21 @@ export function getRoleGuideTopics(role: GuideRole, profile: AssociateGuideProfi
   return [...starts, ...curated, ...references.filter((topic) => !curatedRoutes.has(topic.route))];
 }
 
+export function resolveRoleGuideTopic(topics: RoleGuideTopic[], target: string): RoleGuideTopic | null {
+  const normalized = String(target || "").trim().replace(/^#/, "");
+  if (!normalized) return null;
+
+  const direct = topics.find((topic) => topic.id === normalized);
+  if (direct) return direct;
+
+  const route = DASHBOARD_ROUTE_MANIFEST.find((candidate) => candidate.helpId === normalized);
+  if (!route) return null;
+
+  return topics.find((topic) => topic.category === "reference" && topic.route === route.path)
+    || topics.find((topic) => topic.route === route.path)
+    || null;
+}
+
 export function searchRoleGuideTopics(topics: RoleGuideTopic[], query: string): RoleGuideTopic[] {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return topics;

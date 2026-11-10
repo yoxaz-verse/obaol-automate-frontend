@@ -8,6 +8,7 @@ import {
   DASHBOARD_ADMIN_GROUP_ORDER,
   getAccessibleDashboardRoutes,
   getDashboardAdminGroups,
+  getDashboardHelpId,
   getDashboardRoute,
   hasWarehouseWorkspaceAccess,
   isDashboardRouteActive,
@@ -26,6 +27,13 @@ const collectPages = (directory) => readdirSync(directory, { withFileTypes: true
 test("unknown dashboard routes are denied", () => {
   assert.equal(getDashboardRoute("/dashboard/not-a-real-route"), null);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/not-a-real-route", role: "Admin" }), false);
+});
+
+test("contextual help uses the current page topic and documented parent fallbacks", () => {
+  assert.equal(getDashboardHelpId("/dashboard/orders"), "orders");
+  assert.equal(getDashboardHelpId("/dashboard/orders/507f1f77bcf86cd799439011"), "orders");
+  assert.equal(getDashboardHelpId("/dashboard/settings/mail"), "settings");
+  assert.equal(getDashboardHelpId("/dashboard/not-a-real-route"), null);
 });
 
 test("import reservation labels reflect the viewer scope", () => {

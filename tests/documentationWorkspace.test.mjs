@@ -93,6 +93,14 @@ test("documentation views are URL-backed and configuration remains admin-only", 
   assert.match(workspaceUi, /active === item\.key \? "border-obaol-500 text-foreground"/);
 });
 
+test("document library filters wrap within their panel without clipping sort", () => {
+  const workspace = read("src/app/dashboard/documentation/page.tsx");
+  assert.match(workspace, /repeat\(auto-fit,minmax\(min\(100%,10rem\),1fr\)\)/);
+  assert.match(workspace, /min-w-0 md:col-span-2/);
+  assert.match(workspace, /<SelectField label="Sort"/);
+  assert.doesNotMatch(workspace, /xl:grid-cols-\[minmax\(2(?:60|80)px,2fr\)_repeat/);
+});
+
 test("creation workflows are compact, URL-backed, and immediately actionable", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
   assert.match(workspace, /type CreateMode = "create" \| "upload"/);

@@ -42,11 +42,11 @@ export default function PageHeader({
   const content = (
     <>
       {breadcrumbs.length > 0 && (
-        <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-xs db-muted">
+        <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-xs text-default-700">
           {breadcrumbs.map((item, index) => (
             <span key={`${item.label}-${index}`} className="inline-flex items-center gap-2">
-              {index > 0 && <span aria-hidden="true">/</span>}
-              {item.href ? <Link className="font-semibold hover:text-foreground" href={item.href}>{item.label}</Link> : <span aria-current="page">{item.label}</span>}
+              {index > 0 && <span className="text-default-600" aria-hidden="true">/</span>}
+              {item.href ? <Link className="rounded-sm font-semibold transition-colors hover:text-obaol-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2 dark:hover:text-obaol-300" href={item.href}>{item.label}</Link> : <span className="font-bold text-foreground" aria-current="page">{item.label}</span>}
             </span>
           ))}
         </nav>

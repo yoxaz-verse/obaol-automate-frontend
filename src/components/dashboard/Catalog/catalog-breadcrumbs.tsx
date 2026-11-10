@@ -13,9 +13,9 @@ export default function CatalogBreadcrumbs({ paths, onNavigate }: CatalogBreadcr
     return (
         <div className="mb-6 flex items-center px-1">
             <Breadcrumbs
-                separator={<FiChevronRight className="text-default-400" size={14} />}
+                separator={<FiChevronRight className="text-default-600" size={14} />}
                 itemClasses={{
-                    item: "text-foreground/60 data-[current=true]:text-foreground data-[current=true]:font-bold hover:text-orange-500 transition-colors cursor-pointer",
+                    item: "cursor-pointer rounded-sm font-semibold text-default-700 transition-colors hover:text-obaol-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2 dark:hover:text-obaol-300 data-[current=true]:font-bold data-[current=true]:text-foreground",
                     separator: "px-2"
                 }}
             >

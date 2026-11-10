@@ -15,6 +15,7 @@ import {
   GuideRole,
   RoleGuideTopic,
   getRoleGuideTopics,
+  resolveRoleGuideTopic,
   roleGuideCategories,
   searchRoleGuideTopics,
 } from "./roleGuideContent";
@@ -159,10 +160,14 @@ export default function AssociateGuidebook({ profile, registrationStatus, role =
   useEffect(() => {
     const openFromLocation = () => {
       const params = new URLSearchParams(window.location.search);
-      const id = window.location.hash.slice(1) || params.get("topic") || "";
-      if (!id || !allTopics.some((topic) => topic.id === id)) return;
-      setOpenTopics((current) => new Set(current).add(id));
-      window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      const target = window.location.hash.slice(1) || params.get("topic") || "";
+      const topic = resolveRoleGuideTopic(allTopics, target);
+      if (!topic) return;
+
+      setQuery("");
+      setCategory("all");
+      setOpenTopics((current) => new Set(current).add(topic.id));
+      window.setTimeout(() => document.getElementById(topic.id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     };
     openFromLocation();
     window.addEventListener("hashchange", openFromLocation);

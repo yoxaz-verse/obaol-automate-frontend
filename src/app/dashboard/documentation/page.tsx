@@ -75,8 +75,10 @@ export default function DocumentationWorkspace() {
     {view === "library" && <section className="space-y-4">
       <DashboardPanel className="p-5">
         <DashboardSectionHeader title="Document library" description={`${filteredDocs.length} document${filteredDocs.length === 1 ? "" : "s"} match the current view.`} action={<ViewToggle value={display} onChange={setDisplay} />} />
-        <div className={`mt-5 grid items-end gap-3 md:grid-cols-2 lg:grid-cols-3 ${isAdmin ? "xl:grid-cols-[minmax(260px,2fr)_repeat(6,minmax(120px,1fr))]" : "xl:grid-cols-[minmax(280px,2fr)_repeat(5,minmax(130px,1fr))]"}`}>
-          <SearchField value={search} onChange={value => { setSearch(value); setPage(1); }} placeholder="Search number, party, enquiry, or order" />
+        <div className="mt-5 grid items-end gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr))]">
+          <div className="min-w-0 md:col-span-2">
+            <SearchField value={search} onChange={value => { setSearch(value); setPage(1); }} placeholder="Search number, party, enquiry, or order" />
+          </div>
           <SelectField label="Purpose" value={category} onChange={value => { setCategory(value); setPage(1); }}><option value="ALL">All purposes</option>{DOCUMENT_CATEGORIES.map(item => <option key={item.key} value={item.key}>{item.label}</option>)}</SelectField>
           <SelectField label="Type" value={type} onChange={value => { setType(value); setPage(1); }}><option value="">All types</option>{allowedTypes.map(value => <option key={value} value={value}>{DOCUMENT_LABELS[value]}</option>)}</SelectField>
           <SelectField label="Status" value={status} onChange={value => { setStatus(value); setPage(1); }}><option value="">All statuses</option>{["DRAFT", "SENT", "ACCEPTED", "REJECTED", "CANCELLED"].map(value => <option key={value}>{humanize(value)}</option>)}</SelectField>

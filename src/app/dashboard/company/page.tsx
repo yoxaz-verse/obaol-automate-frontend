@@ -29,6 +29,7 @@ import { CompanyMetricCard, CompanyProfileReadiness } from "@/components/dashboa
 import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPriorities";
 import { getCompanyFunctionPerspectiveDescription } from "@/utils/companyFunctionDescriptions";
 import { getCapabilityActions } from "@/utils/companyFunctionPreview";
+import DocumentSignatureCard from "@/components/dashboard/Company/DocumentSignatureCard";
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
@@ -677,6 +678,7 @@ export default function CompanyWorkspacePage() {
           <div className="mt-4 text-xs text-default-500">
             This configuration is required to draft quotations, proforma invoices, and purchase orders without errors.
           </div>
+          <DocumentSignatureCard endpoint={apiRoutes.systemConfig.obaolCompanySignature} title="OBAOL authorized signature" enabled={obaolConfigStatus === "CONFIGURED"} />
         </div>
       )}
 
@@ -885,6 +887,7 @@ export default function CompanyWorkspacePage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
+        <DocumentSignatureCard endpoint={apiRoutes.companySignature.current} />
         <CompanyProfileReadiness percentage={profileCompleteness} checks={profileChecks} />
         <div className="rounded-2xl border border-default-200 bg-content1 p-5 md:p-6">
           <h2 className="text-lg font-bold">Company actions</h2>

@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useContext } from "react";
 import { FiShield, FiArrowRight } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
+import { featureFlags } from "@/config/featureFlags";
 
 export default function AccountVerificationBanner() {
   const { user } = useContext(AuthContext);
   const role = String(user?.role || "").toLowerCase();
+  if (role === "associate" && !featureFlags.associateWhatsappIntegration) return null;
   if (!user || !["associate", "operator", "team"].includes(role) || user.fullyVerified) return null;
   const deadline = user.verificationGraceEndsAt ? new Date(user.verificationGraceEndsAt) : null;
   const deadlineLabel = deadline && !Number.isNaN(deadline.getTime()) ? deadline.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : null;

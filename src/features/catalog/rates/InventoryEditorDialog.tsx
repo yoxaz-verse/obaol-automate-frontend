@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getData, postData } from "@/core/api/apiHandler";
 import { associateRoutes, inventoryRoutes, productVariantRoutes } from "@/core/api/apiRoutes";
@@ -27,6 +28,7 @@ const id = (direct: unknown, populated: unknown) => direct || nested(populated, 
 const stringId = (value: unknown) => typeof value === "string" ? value : value ? String(value) : "";
 
 export const InventoryEditorDialog = ({ rate, companyId, onClose, onCreated }: Props) => {
+  const router = useRouter();
   const client = useQueryClient();
   const [quantity, setQuantity] = useState("");
   const [selectedVariantId, setSelectedVariantId] = useState("");
@@ -64,6 +66,10 @@ export const InventoryEditorDialog = ({ rate, companyId, onClose, onCreated }: P
       setSelectedVariantId("");
       onClose();
     }
+  };
+  const requestVariant = () => {
+    close();
+    router.push("/dashboard/catalog/additions?type=productVariant&returnTo=/dashboard/product");
   };
   const create = async () => {
     if (!rate) return;
@@ -123,7 +129,7 @@ export const InventoryEditorDialog = ({ rate, companyId, onClose, onCreated }: P
             {variants.map((item) => <SelectItem key={stringId(item._id || item.id)} textValue={String(item.name || "Unnamed variant")}>{String(item.name || "Unnamed variant")}</SelectItem>)}
           </Select>
           {variantsQuery.isError && <div className="flex items-center justify-between gap-3 rounded-xl border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger"><span>Unable to load product variants.</span><Button size="sm" variant="light" color="danger" onPress={() => void variantsQuery.refetch()}>Try again</Button></div>}
-          {!variantsQuery.isLoading && !variantsQuery.isError && variants.length === 0 && <div className="rounded-xl border border-warning/20 bg-warning/10 px-3 py-2 text-xs text-warning-700">No available variants were found for this product.</div>}
+          {!variantsQuery.isLoading && !variantsQuery.isError && variants.length === 0 && <div className="flex items-center justify-between gap-3 rounded-xl border border-warning/20 bg-warning/10 px-3 py-2 text-xs text-warning-700"><span>No available variants were found for this product.</span><Button size="sm" color="warning" variant="flat" className="shrink-0 font-bold" onPress={requestVariant}>Add a variant</Button></div>}
           <Input size="sm" label="Quantity (MT)" type="number" value={quantity} onValueChange={setQuantity} placeholder="e.g. 10" isDisabled={submitting} variant="bordered" labelPlacement="outside" startContent={<span className="text-sm font-semibold text-default-400">MT</span>} description="Enter the quantity available at this location in Metric Tonnes." />
           <div className="rounded-xl border border-divider/20 bg-default-100/40 px-3 py-2.5 text-xs text-default-400">Location, state, and district will be inherited from the rate record.</div>
         </ModalBody>

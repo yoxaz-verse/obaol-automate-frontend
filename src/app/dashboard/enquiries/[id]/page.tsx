@@ -1779,8 +1779,11 @@ export default function EnquiryDetailsPage() {
         !canPerformAction ||
         Boolean(actionStatus[actionKey]) ||
         (actionKey === "QUOTATION_CREATED" && !quotationConfigReady);
+    const quotationSignatureMissing = quotationReadiness?.reasonCode === "SIGNATURE_REQUIRED";
     const quotationConfigurationMessage = isQuotationReadinessError
         ? "Quotation readiness could not be verified. Please refresh the page and try again."
+        : quotationSignatureMissing
+            ? `${(quotationReadiness?.missingSignatures || []).map((item: any) => item.companyName).join(" and ")} must configure an authorized document signature before the quotation can be issued.`
         : isSystemAdmin
             ? "Quotation creation is unavailable because the OBAOL company configuration is missing or invalid. Select a valid company to continue."
             : "Quotation creation is temporarily unavailable due to system configuration. Please contact an administrator.";
@@ -2042,6 +2045,10 @@ export default function EnquiryDetailsPage() {
             : [];
     const openRevisionRound = [...derivedRevisionRounds].reverse().find((round: any) => String(round?.status || "").toUpperCase() === "OPEN");
     const activeRevisionRound = openRevisionRound || derivedRevisionRounds[derivedRevisionRounds.length - 1];
+    const activeRevisionStatus = String(activeRevisionRound?.status || "").toUpperCase();
+    const isRevisionOpen = activeRevisionStatus === "OPEN";
+    const isRevisionClosed = activeRevisionStatus === "CONFIRMED" || activeRevisionStatus === "SKIPPED";
+    const isRevisionDraft = normalizedStageKey === "QUOTATION_REVISION" && !openRevisionRound;
     const revisionItems = Array.isArray(activeRevisionRound?.items) ? activeRevisionRound.items : [];
     const revisionBuyerRequestedAt = activeRevisionRound?.buyerRequestedAt || (enquiry as any)?.revisionThread?.buyerRequestedAt || null;
     const revisionBuyerConfirmedAt = activeRevisionRound?.buyerConfirmedAt || (enquiry as any)?.revisionThread?.buyerConfirmedAt || null;
@@ -2050,7 +2057,12 @@ export default function EnquiryDetailsPage() {
         const hasRateCounter = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
         const hasPaymentCounter = Boolean(item?.supplierCounterPaymentTermId);
         const hasTimelineCounter = Boolean(item?.supplierCounterDeliveryMode) && Boolean(item?.supplierCounterDeliveryDate);
-        return acknowledged || hasRateCounter || hasPaymentCounter || hasTimelineCounter;
+        const replyStatus = String(item?.supplierReplyStatus || "").toUpperCase();
+        return ["ACCEPTED", "COUNTERED"].includes(replyStatus) || acknowledged || hasRateCounter || hasPaymentCounter || hasTimelineCounter;
+    });
+    const supplierResponseSubmitted = revisionItems.length > 0 && revisionItems.every((item: any) => {
+        const replyStatus = String(item?.supplierReplyStatus || "").toUpperCase();
+        return ["ACCEPTED", "COUNTERED"].includes(replyStatus) || Boolean(item?.repliedAt);
     });
     const revisionAcknowledgedLabels = revisionAcknowledgedItems.map((item: any) => {
         const rawKey = String(item?.key || "").toUpperCase();
@@ -2077,16 +2089,23 @@ export default function EnquiryDetailsPage() {
         const hasTimelineCounter = Boolean(item?.supplierCounterDeliveryMode) && Boolean(item?.supplierCounterDeliveryDate);
         return acknowledged || hasRateCounter || hasPaymentCounter || hasTimelineCounter;
     });
-    const hasAnySupplierReplyDraft = revisionReplies.some((item: any) => {
-        const key = String(item?.key || "").toUpperCase();
-        if (!item?.acknowledged) return false;
-        if (key === "RATE") return true;
-        if (key === "PAYMENT_TERMS") return true;
-        if (key === "DELIVERY_TIMELINE") return true;
-        return false;
+    const hasCompleteSupplierReplyDraft = revisionItems.length > 0 && revisionItems.every((revisionItem: any) => {
+        const key = String(revisionItem?.key || "").toUpperCase();
+        const reply = revisionReplies.find((item) => String(item?.key || "").toUpperCase() === key);
+        if (!reply) return false;
+        if (key === "RATE" && String(reply.counterRate || "").trim()) {
+            return Number.isFinite(Number(reply.counterRate)) && Number(reply.counterRate) > 0;
+        }
+        if (key === "PAYMENT_TERMS" && reply.counterPaymentTermId) return true;
+        if (key === "DELIVERY_TIMELINE" && (reply.counterDeliveryMode || reply.counterDeliveryDate)) {
+            return Boolean(reply.counterDeliveryMode && reply.counterDeliveryDate);
+        }
+        return Boolean(reply.acknowledged);
     });
     const revisionRoleStatus = (() => {
-        if (revisionBuyerConfirmedAt) return "Revision Confirmed";
+        if (isRevisionDraft) return "New Revision Draft";
+        if (activeRevisionStatus === "SKIPPED") return "Revision Skipped";
+        if (revisionBuyerConfirmedAt || activeRevisionStatus === "CONFIRMED") return "Revision Confirmed";
         if (revisionItems.length > 0 && allRevisionAcknowledged) return "Waiting for Buyer Acceptance";
         if (revisionItems.length > 0) return "Waiting for Seller Confirmation";
         return "Revision Draft";
@@ -2150,6 +2169,8 @@ export default function EnquiryDetailsPage() {
         : "";
     const canBuyerRevision = isBuyer || isSystemAdmin || isBuyerSideOperator;
     const canSupplierRevision = isSeller || isSystemAdmin || isSupplierSideOperator;
+    const shouldShowRevisionHub = normalizedStageKey === "QUOTATION_REVISION" ||
+        (isRevisionClosed && ["QUOTATION_CREATED", "QUOTATION_DECISION"].includes(normalizedStageKey));
     const fallbackProformaRule = {
         docType: "PROFORMA_INVOICE",
         actionType: "CREATE",
@@ -2235,6 +2256,28 @@ export default function EnquiryDetailsPage() {
         if (!isConvertedFlow) return "Waiting for OBAOL team to convert this enquiry into an order.";
         return "Enquiry is converted. Order execution is now in progress.";
     })();
+    const pendingOwner = (() => {
+        if (isCancelled) return { label: "No action required", tone: "danger" as const };
+        if (isCompletedFlow) return { label: "Completed", tone: "success" as const };
+        if (!requiredActions.length || isRequiredSatisfied) {
+            return { label: isConvertedFlow ? "In execution" : "OBAOL team", tone: "primary" as const };
+        }
+
+        const actionBy = String(pendingActionAudience.actionBy || "").toUpperCase();
+        if (pendingActionAudience.isUserResponsible) {
+            return {
+                label: actionBy === "BOTH" ? "You + other party" : "Your action",
+                tone: "warning" as const,
+            };
+        }
+        if (actionBy === "BUYER") return { label: "Buyer action", tone: "primary" as const };
+        if (actionBy === "SUPPLIER" || actionBy === "SELLER") return { label: "Supplier action", tone: "warning" as const };
+        if (actionBy === "BOTH") return { label: "Buyer + supplier", tone: "warning" as const };
+        if (actionBy === "EITHER") return { label: "Buyer or supplier", tone: "warning" as const };
+        return { label: "Stage action", tone: "default" as const };
+    })();
+    const currentStageLabel = String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ");
+    const visibleDocumentationRules = rulesForStage.filter(canSeeRule);
     const isAssociateResponsibilityLocked = hasResponsibilitiesFinalized && !isAdmin;
     const canEditResponsibilityPlan = (isAdmin || isBuyer || isSeller) && !isAssociateResponsibilityLocked && !isReadOnlyAfterConversion;
     const isHandlerOrAdmin = Boolean(isSystemAdmin || isHandlerAssigned);
@@ -2399,11 +2442,26 @@ export default function EnquiryDetailsPage() {
 
     return (
         <div className="w-full p-3 sm:p-4 md:p-6 flex flex-col gap-4 md:gap-6 max-w-none mx-0 text-left">
-            <div className="flex items-center gap-2 mb-2">
-                <Button isIconOnly size="sm" variant="light" radius="full" onPress={() => router.back()} className="text-default-500">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+                <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    radius="full"
+                    aria-label="Go back"
+                    onPress={() => router.back()}
+                    className="text-default-700 focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2"
+                >
                     <LuChevronLeft size={20} />
                 </Button>
-                <Breadcrumbs size="sm" variant="light" color="primary">
+                <Breadcrumbs
+                    size="sm"
+                    variant="light"
+                    itemClasses={{
+                        item: "font-semibold text-default-700 transition-colors hover:text-obaol-700 focus-visible:rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 focus-visible:ring-offset-2 dark:text-default-700 dark:hover:text-obaol-300 data-[current=true]:font-bold data-[current=true]:text-foreground",
+                        separator: "text-default-600",
+                    }}
+                >
                     <BreadcrumbItem href="/dashboard">Dashboard</BreadcrumbItem>
                     <BreadcrumbItem href="/dashboard/enquiries">Enquiries</BreadcrumbItem>
                     <BreadcrumbItem isCurrent>#{enquiryId.slice(-6).toUpperCase()}</BreadcrumbItem>
@@ -2637,7 +2695,7 @@ export default function EnquiryDetailsPage() {
                         </div>
                     </CardHeader>
                     <Divider />
-                    <CardBody className="px-4 md:px-6 py-6 md:py-10">
+                    <CardBody className="px-4 md:px-6 py-5 md:py-6">
                         {/* Status Stepper */}
                         {workflowStageOptions.length === 0 ? (
                             <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/5 px-4 py-3 text-xs font-bold text-obaol-600  tracking-widest">
@@ -2655,7 +2713,7 @@ export default function EnquiryDetailsPage() {
                             />
                         )}
                         {workflowStageOptions.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-2 mb-5">
+                            <div className="flex flex-wrap items-center gap-2 mb-4">
                                 {workflowStageOptions.map((step, index) => {
                                     const isCompleted = index < currentStepIndex;
                                     const isCurrent = index === currentStepIndex;
@@ -2682,20 +2740,20 @@ export default function EnquiryDetailsPage() {
                             </div>
                         )}
                         <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-left">
-                            <div className="flex items-center justify-between gap-2">
-                                <span className="text-[10px]  font-black tracking-widest text-primary-600">Current Progress</span>
-                                {isCancelled && <Chip size="sm" color="danger" variant="flat">Cancelled</Chip>}
-                            </div>
-                            <p className="text-sm font-medium text-default-700 mt-1">{waitingMessage}</p>
-                            <div className="mt-2 flex flex-wrap items-center gap-3 text-[9px] font-black  tracking-widest">
-                                <span className="inline-flex items-center gap-1.5 text-primary-600">
-                                    <span className="w-2 h-2 rounded-full bg-primary" />
-                                    Buyer Pending
-                                </span>
-                                <span className="inline-flex items-center gap-1.5 text-obaol-600">
-                                    <span className="w-2 h-2 rounded-full bg-obaol-500" />
-                                    Seller Pending
-                                </span>
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <span className="text-[10px] font-black tracking-widest text-primary-600">Current step</span>
+                                    <p className="text-sm font-semibold text-default-700 mt-1">{waitingMessage}</p>
+                                </div>
+                                <Chip
+                                    size="sm"
+                                    color={pendingOwner.tone}
+                                    variant="flat"
+                                    startContent={<LuClock size={12} />}
+                                    className="shrink-0 font-bold"
+                                >
+                                    {pendingOwner.label}
+                                </Chip>
                             </div>
                             {latestConfirmedRevisionRound && latestConfirmedDecisionRows.length > 0 && (
                                 <div className="mt-3 rounded-xl border border-success-500/25 bg-success-500/[0.06] px-3 py-3">
@@ -2756,10 +2814,10 @@ export default function EnquiryDetailsPage() {
                             )}
                         </div>
 
-                        <div className="mt-4 rounded-2xl border border-default-200/50 bg-foreground/[0.02] px-4 py-3">
+                        <div className="mt-3 rounded-xl border border-default-200/50 bg-foreground/[0.02] px-4 py-3">
                             <div className="flex items-center justify-between gap-2 mb-2">
                                 <span className="text-[10px]  font-black tracking-widest text-default-500">Stage Actions</span>
-                                <span className="text-[10px] font-bold text-default-400">{String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}</span>
+                                <span className="text-[10px] font-bold text-default-400">{currentStageLabel}</span>
                             </div>
                             {normalizedStageKey === "QUOTATION_REVISION" ? (
                                 <div className="text-xs text-default-500">
@@ -2827,19 +2885,19 @@ export default function EnquiryDetailsPage() {
                                     {draftQuotationError}
                                 </div>
                             )}
-                            {!quotationConfigReady && (quotationReadiness || isQuotationReadinessError) && displayActions.includes("QUOTATION_CREATED") && (
+                            {(!quotationConfigReady || quotationSignatureMissing) && (quotationReadiness || isQuotationReadinessError) && displayActions.includes("QUOTATION_CREATED") && (
                                 <div className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-[11px] font-semibold text-warning-700 dark:text-warning-300">
                                     <div>{quotationConfigurationMessage}</div>
                                     {isSystemAdmin && (
                                         <Link href="/dashboard/company" className="mt-2 inline-flex font-black underline underline-offset-2">
-                                            Open OBAOL Company Configuration
+                                            Open Company & Signature Configuration
                                         </Link>
                                     )}
                                 </div>
                             )}
                         </div>
 
-                        {normalizedStageKey === "QUOTATION_REVISION" && (
+                        {shouldShowRevisionHub && (
                             <div id="revision-panel" className="mt-8 rounded-[1.75rem] border border-default-200/50 bg-content1/50 backdrop-blur-3xl overflow-hidden shadow-xl relative group/rev">
                                 <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover/rev:opacity-[0.04] transition-opacity pointer-events-none rotate-12 duration-700">
                                     <FiTrendingDown size={140} />
@@ -2855,12 +2913,12 @@ export default function EnquiryDetailsPage() {
                                             Revision Hub
                                         </h3>
                                     </div>
-                                    {revisionItems.length > 0 && (
+                                    {activeRevisionRound && (
                                         <div className="px-4 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary-600 dark:text-primary-300 text-[10px] font-black  tracking-widest">
                                             {revisionRoleStatus}
                                         </div>
                                     )}
-                                    {revisionBuyerConfirmedAt && (
+                                    {revisionBuyerConfirmedAt && !isRevisionDraft && (
                                         <div className="px-4 py-2 rounded-2xl bg-success-500/10 border border-success-500/20 text-success-600 dark:text-success-400 text-[10px] font-black  tracking-widest flex items-center gap-2">
                                             <FiCheckCircle size={14} />
                                             Negotiation Finalized
@@ -2869,7 +2927,7 @@ export default function EnquiryDetailsPage() {
                                 </div>
 
                                 <div className="p-6">
-                                    {revisionItems.length === 0 && canBuyerRevision && (
+                                    {!openRevisionRound && normalizedStageKey === "QUOTATION_REVISION" && canBuyerRevision && (
                                         <div className="space-y-6">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 <button
@@ -2918,6 +2976,7 @@ export default function EnquiryDetailsPage() {
                                                         <Input
                                                             type="number"
                                                             label="Requested Rate"
+                                                            labelPlacement="outside"
                                                             variant="bordered"
                                                             placeholder="Enter preferred unit rate"
                                                             value={clarificationRate}
@@ -3103,7 +3162,7 @@ export default function EnquiryDetailsPage() {
                                         </div>
                                     )}
 
-                                    {revisionItems.length > 0 && (
+                                    {revisionItems.length > 0 && !isRevisionDraft && (
                                         <div className="space-y-6">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {revisionItems.map((item: any) => {
@@ -3168,7 +3227,7 @@ export default function EnquiryDetailsPage() {
                                                                 )}
                                                             </div>
 
-                                                            {canSupplierRevision && (
+                                                            {isRevisionOpen && !supplierResponseSubmitted && canSupplierRevision && (
                                                                 <div className="mt-2 flex flex-col gap-4 p-4 rounded-2xl bg-content1 dark:bg-black/40 border border-primary/20 shadow-lg shadow-primary/5">
                                                                     {itemKey === "RATE" ? (
                                                                         <div className="flex flex-col gap-3">
@@ -3198,8 +3257,8 @@ export default function EnquiryDetailsPage() {
                                                                                 onPress={() => {
                                                                                     setRevisionReplies((prev) => {
                                                                                         const existing = prev.find((r) => r.key === itemKey);
-                                                                                        if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
-                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true } : r);
+                                                                                        if (!existing) return [...prev, { key: itemKey, acknowledged: false, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: false } : r);
                                                                                     });
                                                                                     setRevisionConfirmError("");
                                                                                 }}
@@ -3211,6 +3270,7 @@ export default function EnquiryDetailsPage() {
                                                                                 type="number"
                                                                                 size="sm"
                                                                                 label="Maximum Rate (if proposing)"
+                                                                                labelPlacement="outside"
                                                                                 variant="bordered"
                                                                                 placeholder="Enter max rate"
                                                                                 value={reply.counterRate || ""}
@@ -3224,8 +3284,8 @@ export default function EnquiryDetailsPage() {
                                                                                 }}
                                                                                 classNames={{
                                                                                     label: "font-black  text-[10px] tracking-widest text-default-400 group-focus-within/input:text-primary transition-colors",
-                                                                                    inputWrapper: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-10 shadow-inner group-focus-within/input:border-primary",
-                                                                                    input: "font-black text-sm"
+                                                                                    inputWrapper: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-11 shadow-inner group-focus-within/input:border-primary",
+                                                                                    input: "pt-0 text-sm font-black"
                                                                                 }}
                                                                             />
                                                                         </div>
@@ -3259,8 +3319,8 @@ export default function EnquiryDetailsPage() {
                                                                                     onPress={() => {
                                                                                         setRevisionReplies((prev) => {
                                                                                             const existing = prev.find((r) => r.key === itemKey);
-                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
-                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true } : r);
+                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: false, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: false } : r);
                                                                                         });
                                                                                         setRevisionConfirmError("");
                                                                                     }}
@@ -3339,6 +3399,7 @@ export default function EnquiryDetailsPage() {
                                                 })}
                                             </div>
 
+                                            {isRevisionOpen && (
                                             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-default-100/30 border border-default-200/50 mt-4">
                                                 <div className="flex flex-col gap-0.5">
                                                     <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400">Negotiation Status</span>
@@ -3356,7 +3417,7 @@ export default function EnquiryDetailsPage() {
                                                 </div>
  
                                                 <div className="flex items-center gap-3">
-                                                    {canSupplierRevision && (
+                                                    {!supplierResponseSubmitted && canSupplierRevision && (
                                                         <div className="flex flex-col items-end gap-1">
                                                             <Button
                                                                 size="sm"
@@ -3364,7 +3425,7 @@ export default function EnquiryDetailsPage() {
                                                                 variant="shadow"
                                                                 className="px-6 h-10 rounded-xl font-black  tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all outline-none"
                                                                 isLoading={revisionReplyMutation.isPending}
-                                                                isDisabled={!hasAnySupplierReplyDraft}
+                                                                isDisabled={!hasCompleteSupplierReplyDraft}
                                                                 onPress={() => revisionReplyMutation.mutate()}
                                                                 startContent={!revisionReplyMutation.isPending && <LuFileCheck size={14} />}
                                                             >
@@ -3374,7 +3435,7 @@ export default function EnquiryDetailsPage() {
                                                         </div>
                                                     )}
 
-                                                    {canBuyerRevision && (
+                                                    {supplierResponseSubmitted && canBuyerRevision && (
                                                         <div className="flex flex-col items-end gap-1">
                                                             <Button
                                                                 size="sm"
@@ -3390,7 +3451,7 @@ export default function EnquiryDetailsPage() {
                                                             <span className="text-[8px] font-bold text-default-400  tracking-widest mr-1">Action by: Buyer</span>
                                                         </div>
                                                     )}
-                                                    {canBuyerRevision && (
+                                                    {!supplierResponseSubmitted && canBuyerRevision && (
                                                         <div className="flex flex-col items-end gap-1">
                                                             <Button
                                                                 size="sm"
@@ -3407,6 +3468,36 @@ export default function EnquiryDetailsPage() {
                                                     )}
                                                 </div>
                                             </div>
+                                            )}
+
+                                            {isRevisionClosed && !isRevisionDraft && (
+                                                <div className="flex flex-col gap-4 rounded-2xl border border-success-500/20 bg-success-500/5 p-5 md:flex-row md:items-center md:justify-between">
+                                                    <div className="flex items-start gap-3">
+                                                        <FiCheckCircle className="mt-0.5 shrink-0 text-success-600" size={20} />
+                                                        <div>
+                                                            <p className="text-sm font-black text-foreground">
+                                                                {activeRevisionStatus === "CONFIRMED" ? "Revision finalized" : "Revision skipped"}
+                                                            </p>
+                                                            <p className="mt-1 text-xs text-default-500">
+                                                                This round is read-only. Previous buyer requests and seller decisions are preserved above.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {canBuyerRevision && (
+                                                        <Button
+                                                            color="primary"
+                                                            variant="flat"
+                                                            className="shrink-0 font-bold"
+                                                            isLoading={applyActionMutation.isPending && applyActionMutation.variables?.actionKey === "RETURN_TO_REVISION"}
+                                                            isDisabled={applyActionMutation.isPending}
+                                                            onPress={() => applyActionMutation.mutate({ actionKey: "RETURN_TO_REVISION" })}
+                                                            startContent={!applyActionMutation.isPending && <FiEdit3 size={15} />}
+                                                        >
+                                                            Redo Revision
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            )}
 
                                             <div className="px-6 space-y-2">
                                                 {revisionReplyError && <div className="text-xs font-bold text-danger-500 animate-bounce">{revisionReplyError}</div>}
@@ -3421,13 +3512,13 @@ export default function EnquiryDetailsPage() {
                     </CardBody>
                 </Card>
 
-                <Card id="documentation-checklist" className="w-full border border-default-200/50 shadow-md rounded-2xl">
-                    <CardHeader className="flex flex-col items-start gap-2 px-5 pt-5">
+                <Card id="documentation-checklist" className="w-full border border-default-200/50 shadow-sm rounded-2xl">
+                    <CardHeader className="flex flex-col items-start gap-2 px-5 pt-4">
                         <div className="flex flex-wrap items-center justify-between gap-3 w-full">
                             <div className="flex flex-col gap-1">
                                 <span className="font-bold text-base tracking-tight">Documentation Checklist</span>
                                 <span className="text-[9px]  font-black tracking-widest text-default-400">
-                                    Stage: {String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}
+                                    Stage: {currentStageLabel}
                                 </span>
                             </div>
                             {canCreateProformaDoc && (
@@ -3444,12 +3535,20 @@ export default function EnquiryDetailsPage() {
                             )}
                         </div>
                     </CardHeader>
-                    <CardBody className="px-5 pb-5 pt-3">
-                        {rulesForStage.filter(canSeeRule).length === 0 ? (
-                            <div className="text-xs text-default-400 py-4 italic">No configuration for this stage.</div>
+                    <CardBody className="px-5 pb-4 pt-2">
+                        {visibleDocumentationRules.length === 0 ? (
+                            <div className="flex items-start gap-3 rounded-xl border border-default-200/60 bg-default-50/40 px-4 py-3">
+                                <FiInfo className="mt-0.5 shrink-0 text-default-400" size={15} />
+                                <div>
+                                    <div className="text-xs font-bold text-default-600">No documents are needed at this stage</div>
+                                    <div className="mt-0.5 text-[10px] leading-relaxed text-default-400">
+                                        Complete the current stage action above. Document requirements will appear here automatically when the workflow reaches a document stage.
+                                    </div>
+                                </div>
+                            </div>
                         ) : (
                             <div className="space-y-2">
-                                {rulesForStage.filter(canSeeRule).map((rule: any) => {
+                                {visibleDocumentationRules.map((rule: any) => {
                                     const docTypeKey = String(rule.docType || "").toUpperCase();
                                     const actionTypeKey = String(rule.actionType || "").toUpperCase();
                                     const isPurchaseOrder = docTypeKey === "PURCHASE_ORDER";

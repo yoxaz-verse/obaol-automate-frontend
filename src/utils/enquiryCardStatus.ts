@@ -1,5 +1,14 @@
-export type EnquiryPendingParty = "BUYER" | "SELLER" | null;
+export type EnquiryPendingParty = "BUYER" | "SELLER" | "BOTH" | "EITHER" | null;
 export type EnquiryViewerRole = "BUYER" | "SELLER" | "OTHER";
+
+export interface EnquiryWorkflowSummary {
+    pendingParty?: EnquiryPendingParty;
+    requiredActions?: string[];
+    completedActions?: string[];
+    pendingActions?: string[];
+    isSatisfied?: boolean;
+    hasWorkflowRule?: boolean;
+}
 
 export interface EnquiryCardStatusInput {
     status?: unknown;
@@ -7,6 +16,7 @@ export interface EnquiryCardStatusInput {
     sellerAcceptedAt?: unknown;
     buyerConfirmedAt?: unknown;
     viewerRole?: EnquiryViewerRole;
+    workflowSummary?: EnquiryWorkflowSummary | null;
 }
 
 export interface EnquiryCardStatusView {
@@ -31,6 +41,7 @@ export const getEnquiryCardStatus = ({
     sellerAcceptedAt,
     buyerConfirmedAt,
     viewerRole = "OTHER",
+    workflowSummary,
 }: EnquiryCardStatusInput): EnquiryCardStatusView => {
     const normalizedStatus = String(
         typeof status === "string" ? status : (status as any)?.name || ""
@@ -58,17 +69,26 @@ export const getEnquiryCardStatus = ({
         };
     }
 
-    const pendingParty: EnquiryPendingParty = !sellerAcceptedAt
-        ? "SELLER"
-        : !buyerConfirmedAt
-            ? "BUYER"
-            : null;
+    const hasWorkflowRule = Boolean(workflowSummary?.hasWorkflowRule);
+    const pendingParty: EnquiryPendingParty = hasWorkflowRule
+        ? (workflowSummary?.isSatisfied ? null : workflowSummary?.pendingParty || null)
+        : !sellerAcceptedAt
+            ? "SELLER"
+            : !buyerConfirmedAt
+                ? "BUYER"
+                : null;
 
-    const isViewerResponsible = pendingParty === viewerRole;
+    const isViewerResponsible = pendingParty === viewerRole ||
+        (pendingParty === "BOTH" && ["BUYER", "SELLER"].includes(viewerRole)) ||
+        (pendingParty === "EITHER" && ["BUYER", "SELLER"].includes(viewerRole));
     const responsibilityLabel = pendingParty
         ? isViewerResponsible
             ? "Your Action Pending"
-            : `${pendingParty === "BUYER" ? "Buyer" : "Seller"} Pending`
+            : pendingParty === "BOTH"
+                ? "Buyer + Seller Pending"
+                : pendingParty === "EITHER"
+                    ? "Buyer or Seller Pending"
+                    : `${pendingParty === "BUYER" ? "Buyer" : "Seller"} Pending`
         : null;
 
     return {

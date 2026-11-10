@@ -146,6 +146,15 @@ test("document draft validation always produces visible and accessible feedback"
   assert.doesNotMatch(creator, /disabled=\{saving \|\| customers\.isLoading \|\| !\(customers\.data \|\| \[\]\)\.length\}/);
 });
 
+test("document creation and inquiry preview expose an editable authorized signatory", () => {
+  const creator = read("src/components/dashboard/Documentation/DocumentCreator.tsx");
+  const enquiry = read("src/app/dashboard/enquiries/[id]/page.tsx");
+  assert.match(creator, /Authorized signatory name/);
+  assert.match(creator, /setData\("authorizedSignatory"/);
+  assert.match(enquiry, /document-authorized-signatory/);
+  assert.match(enquiry, /saveDocumentSignatoryMutation/);
+});
+
 test("purpose-built creator configuration covers every studio document type", () => {
   const studio = read("src/components/dashboard/CommercialDocuments/documentStudio.ts");
   const config = read("src/components/dashboard/Documentation/documentCreatorConfig.ts");

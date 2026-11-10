@@ -166,6 +166,19 @@ test("My Lab lists multiple profiles and only exposes aggregate contact counts",
   assert.doesNotMatch(source, /viewerEmail|viewerPhone|viewerName/);
 });
 
+test("lab review tracking exposes milestones, delay help, and configurable admin SLA", async () => {
+  const [mine, approvals] = await Promise.all([readFile(myLabsPath, "utf8"), readFile(approvalPath, "utf8")]);
+  assert.match(mine, /Review status and timeline/);
+  assert.match(mine, /businessDaysPending/);
+  assert.match(mine, /reviewTargetAt/);
+  assert.match(mine, /isReviewOverdue/);
+  assert.match(mine, /\/dashboard\/customer-support/);
+  assert.match(mine, /Changes requested/);
+  assert.match(approvals, /Review target \(business days\)/);
+  assert.match(approvals, /apiRoutes\.labProfiles\.reviewConfig/);
+  assert.match(approvals, /Overdue lab reviews/);
+});
+
 test("all public lab contact surfaces record a non-blocking aggregate event", async () => {
   const [directory, map, contact] = await Promise.all([readFile(directoryPath, "utf8"), readFile(mapPath, "utf8"), readFile(contactPath, "utf8")]);
   assert.match(directory, /trackLabContact\(lab\._id, "PHONE"\)/);

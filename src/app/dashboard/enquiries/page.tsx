@@ -22,6 +22,7 @@ import EnquiryCard from "@/components/dashboard/enquiries/EnquiryCard";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { useSoundEffect } from "@/context/SoundContext";
+import { getEnquiryCardStatus } from "@/utils/enquiryCardStatus";
 
 const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
 
@@ -280,9 +281,25 @@ export default function EnquiryPage() {
             return Boolean(item.isAssignedOperator || item.isCreatedByOperator);
           });
 
+          const pendingPartyFor = (item: any) => getEnquiryCardStatus({
+            status: item.rawStatus || item.status,
+            workflowStage: item.workflowStage,
+            sellerAcceptedAt: item.sellerAcceptedAt,
+            buyerConfirmedAt: item.buyerConfirmedAt,
+            viewerRole: item.isBuying ? "BUYER" : item.isSelling ? "SELLER" : "OTHER",
+            workflowSummary: item.workflowSummary,
+          }).pendingParty;
+          const pendingCountData = scopedData.filter((item: any) => selectedType === "All" || item.type === selectedType);
+          const buyerPendingCount = pendingCountData.filter((item: any) => ["BUYER", "BOTH", "EITHER"].includes(String(pendingPartyFor(item)))).length;
+          const sellerPendingCount = pendingCountData.filter((item: any) => ["SELLER", "BOTH", "EITHER"].includes(String(pendingPartyFor(item)))).length;
+
           const filteredData = scopedData.filter((item: any) => {
             const matchesType = selectedType === "All" || item.type === selectedType;
-            const matchesStage = selectedStage === "All" || item.status === selectedStage;
+            const pendingParty = pendingPartyFor(item);
+            const matchesStage = selectedStage === "All" ||
+              (selectedStage === "Buyer Pending" ? ["BUYER", "BOTH", "EITHER"].includes(String(pendingParty)) :
+                selectedStage === "Seller Pending" ? ["SELLER", "BOTH", "EITHER"].includes(String(pendingParty)) :
+                  item.status === selectedStage);
             return matchesType && matchesStage;
           });
 
@@ -336,6 +353,8 @@ export default function EnquiryPage() {
                   >
                     <Tab key="All" title="All" />
                     <Tab key="Pending" title="New" />
+                    <Tab key="Buyer Pending" title={`Buyer Pending (${buyerPendingCount})`} />
+                    <Tab key="Seller Pending" title={`Seller Pending (${sellerPendingCount})`} />
                     <Tab key="Converted" title="Converted" />
                     <Tab key="Completed" title="Closed" />
                     <Tab key="Cancelled" title="Dormant" />

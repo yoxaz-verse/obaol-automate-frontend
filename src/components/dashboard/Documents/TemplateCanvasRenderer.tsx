@@ -214,7 +214,7 @@ const renderElement = (el: LayoutElement, data: any) => {
     return (
       <div className="h-full w-full flex flex-col justify-end">
         {signature.imageDataUrl ? <img src={signature.imageDataUrl} alt="Authorized signature" className="mx-auto max-h-[70%] max-w-full object-contain" /> : null}
-        {signature.signerName ? <div className="text-center text-[11px] font-semibold">{signature.signerName}</div> : null}
+        {(data?.documentData?.authorizedSignatory || signature.signerName) ? <div className="text-center text-[11px] font-semibold">{data?.documentData?.authorizedSignatory || signature.signerName}</div> : null}
         {signature.signerDesignation ? <div className="text-center text-[10px]">{signature.signerDesignation}</div> : null}
         <div className="border-t border-default-400 pt-1 text-center text-[11px]">{el.content || "Authorized Signatory"}</div>
       </div>

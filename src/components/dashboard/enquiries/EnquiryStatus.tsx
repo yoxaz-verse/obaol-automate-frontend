@@ -22,6 +22,8 @@ const EnquiryStatus: React.FC<EnquiryStatusProps> = ({
                 ? "#6366f1"
                 : pendingParty === "SELLER"
                     ? "#d69e2e"
+                    : pendingParty === "BOTH" || pendingParty === "EITHER"
+                        ? "#f97316"
                     : "#06b6d4";
 
     return (

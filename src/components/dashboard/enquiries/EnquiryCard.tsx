@@ -43,6 +43,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({
         sellerAcceptedAt: data.sellerAcceptedAt,
         buyerConfirmedAt: data.buyerConfirmedAt,
         viewerRole: data.isBuying ? "BUYER" : data.isSelling ? "SELLER" : "OTHER",
+        workflowSummary: data.workflowSummary,
     });
     const tradeDirection = data.type === "Buying"
         ? {

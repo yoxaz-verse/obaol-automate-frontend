@@ -1362,6 +1362,22 @@ export default function EnquiryDetailsPage() {
         },
         onError: (error: any) => toast.error(error?.response?.data?.message || "Failed to issue this document leg."),
     });
+    const saveDocumentSignatoryMutation = useMutation({
+        mutationFn: async () => {
+            if (!docViewerDoc?._id) throw new Error("No document selected.");
+            return patchData(apiRoutes.tradeDocuments.update(String(docViewerDoc._id)), {
+                documentData: { ...(docViewerDoc.documentData || {}), authorizedSignatory: String(docViewerDoc.documentData?.authorizedSignatory || "").trim() },
+            });
+        },
+        onSuccess: (response: any) => {
+            const updated = response?.data?.data;
+            if (updated) setDocViewerDoc(updated);
+            toast.success("Authorized signatory saved.");
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
+        },
+        onError: (error: any) => toast.error(error?.response?.data?.message || "Could not save the authorized signatory."),
+    });
 
     const reopenRequestMutation = useMutation({
         mutationFn: async () => {
@@ -1729,7 +1745,11 @@ export default function EnquiryDetailsPage() {
     const safeDocs = Array.isArray(docsForEnquiry) ? docsForEnquiry : [];
     const hasDocType = (type: string) => safeDocs.some((doc: any) => String(doc?.type || "").toUpperCase() === type);
     const currentRule = enquiryRules.find((r: any) => String(r.stageKey || "").toUpperCase() === normalizedStageKey);
-    const requiredActions = Array.isArray(currentRule?.requiredActions) ? currentRule.requiredActions : [];
+    const workflowSummary = (enquiry as any)?.workflowSummary;
+    const hasAuthoritativeWorkflowSummary = Boolean(workflowSummary?.hasWorkflowRule);
+    const requiredActions = hasAuthoritativeWorkflowSummary && Array.isArray(workflowSummary?.requiredActions)
+        ? workflowSummary.requiredActions
+        : Array.isArray(currentRule?.requiredActions) ? currentRule.requiredActions : [];
     const canCreateProformaDoc =
         (isSystemAdmin || isOperatorUser) &&
         normalizedStageKey === "PROFORMA_ISSUED" &&
@@ -2169,20 +2189,28 @@ export default function EnquiryDetailsPage() {
         : "";
     const canBuyerRevision = isBuyer || isSystemAdmin || isBuyerSideOperator;
     const canSupplierRevision = isSeller || isSystemAdmin || isSupplierSideOperator;
-    const shouldShowRevisionHub = normalizedStageKey === "QUOTATION_REVISION" ||
+    const isRevisionStageRelevant = normalizedStageKey === "QUOTATION_REVISION" ||
         (isRevisionClosed && ["QUOTATION_CREATED", "QUOTATION_DECISION"].includes(normalizedStageKey));
+    const hasVisibleRevisionContent = Boolean(activeRevisionRound || revisionItems.length > 0);
+    const hasAvailableRevisionAction = normalizedStageKey === "QUOTATION_REVISION" &&
+        Boolean(canBuyerRevision || (openRevisionRound && canSupplierRevision));
+    const shouldShowRevisionHub = isRevisionStageRelevant && (hasVisibleRevisionContent || hasAvailableRevisionAction);
     const fallbackProformaRule = {
         docType: "PROFORMA_INVOICE",
         actionType: "CREATE",
     };
     const requiredActionMode = String((currentRule as any)?.requiredActionMode || "ALL").toUpperCase();
     const isRequiredSatisfied = (() => {
+        if (hasAuthoritativeWorkflowSummary) return Boolean(workflowSummary?.isSatisfied);
         if (!requiredActions.length) return true;
         if (requiredActionMode === "ANY") return requiredActions.some((action: string) => actionStatus[action]);
         return requiredActions.every((action: string) => actionStatus[action]);
     })();
     const pendingActionAudience = (() => {
-        const actionBy = String((currentRule as any)?.actionBy || "").toUpperCase();
+        const summaryPendingParty = String(workflowSummary?.pendingParty || "").toUpperCase();
+        const actionBy = hasAuthoritativeWorkflowSummary
+            ? summaryPendingParty === "SELLER" ? "SUPPLIER" : summaryPendingParty
+            : String((currentRule as any)?.actionBy || "").toUpperCase();
         const userCanActAsBuyer = Boolean(isBuyer || isBuyerSideOperator);
         const userCanActAsSupplier = Boolean(isSeller || isSupplierSideOperator);
         const userCanActAsEitherParty = userCanActAsBuyer || userCanActAsSupplier;
@@ -2229,6 +2257,12 @@ export default function EnquiryDetailsPage() {
     })();
     const workflowBlocker: "BUYER" | "SELLER" | "NEUTRAL" = (() => {
         if (!requiredActions.length || isRequiredSatisfied) return "NEUTRAL";
+        if (hasAuthoritativeWorkflowSummary) {
+            const pendingParty = String(workflowSummary?.pendingParty || "").toUpperCase();
+            if (pendingParty === "BUYER") return "BUYER";
+            if (pendingParty === "SELLER") return "SELLER";
+            return "NEUTRAL";
+        }
         const actionBy = String(pendingActionAudience.actionBy || "").toUpperCase();
         if (actionBy === "BUYER") return "BUYER";
         if (actionBy === "SUPPLIER" || actionBy === "SELLER") return "SELLER";
@@ -2278,6 +2312,7 @@ export default function EnquiryDetailsPage() {
     })();
     const currentStageLabel = String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ");
     const visibleDocumentationRules = rulesForStage.filter(canSeeRule);
+    const shouldShowDocumentationChecklist = visibleDocumentationRules.length > 0 || canCreateProformaDoc;
     const isAssociateResponsibilityLocked = hasResponsibilitiesFinalized && !isAdmin;
     const canEditResponsibilityPlan = (isAdmin || isBuyer || isSeller) && !isAssociateResponsibilityLocked && !isReadOnlyAfterConversion;
     const isHandlerOrAdmin = Boolean(isSystemAdmin || isHandlerAssigned);
@@ -2787,6 +2822,30 @@ export default function EnquiryDetailsPage() {
                                             </div>
                                         ))}
                                     </div>
+                                </div>
+                            )}
+                            {hasAuthoritativeWorkflowSummary && (
+                                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                                    {Array.isArray(workflowSummary?.completedActions) && workflowSummary.completedActions.length > 0 && (
+                                        <div className="rounded-xl border border-success-500/20 bg-success-500/[0.05] px-3 py-2">
+                                            <div className="text-[9px] font-black tracking-widest text-success-700 dark:text-success-300">Latest completed action</div>
+                                            <div className="mt-1 text-xs font-semibold text-default-600">
+                                                {String(workflowSummary.completedActions[workflowSummary.completedActions.length - 1]).replaceAll("_", " ")}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {Array.isArray(workflowSummary?.pendingActions) && workflowSummary.pendingActions.length > 0 && (
+                                        <div className="rounded-xl border border-warning-500/20 bg-warning-500/[0.05] px-3 py-2">
+                                            <div className="text-[9px] font-black tracking-widest text-warning-700 dark:text-warning-300">Waiting for</div>
+                                            <div className="mt-1 flex flex-wrap gap-1.5">
+                                                {workflowSummary.pendingActions.map((action: string) => (
+                                                    <span key={`pending-${action}`} className="rounded-full bg-warning-500/10 px-2 py-0.5 text-[9px] font-bold text-warning-700 dark:text-warning-300">
+                                                        {String(action).replaceAll("_", " ")}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {revisionItems.length > 0 && (
@@ -3512,6 +3571,7 @@ export default function EnquiryDetailsPage() {
                     </CardBody>
                 </Card>
 
+                {shouldShowDocumentationChecklist && (
                 <Card id="documentation-checklist" className="w-full border border-default-200/50 shadow-sm rounded-2xl">
                     <CardHeader className="flex flex-col items-start gap-2 px-5 pt-4">
                         <div className="flex flex-wrap items-center justify-between gap-3 w-full">
@@ -3536,17 +3596,6 @@ export default function EnquiryDetailsPage() {
                         </div>
                     </CardHeader>
                     <CardBody className="px-5 pb-4 pt-2">
-                        {visibleDocumentationRules.length === 0 ? (
-                            <div className="flex items-start gap-3 rounded-xl border border-default-200/60 bg-default-50/40 px-4 py-3">
-                                <FiInfo className="mt-0.5 shrink-0 text-default-400" size={15} />
-                                <div>
-                                    <div className="text-xs font-bold text-default-600">No documents are needed at this stage</div>
-                                    <div className="mt-0.5 text-[10px] leading-relaxed text-default-400">
-                                        Complete the current stage action above. Document requirements will appear here automatically when the workflow reaches a document stage.
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
                             <div className="space-y-2">
                                 {visibleDocumentationRules.map((rule: any) => {
                                     const docTypeKey = String(rule.docType || "").toUpperCase();
@@ -3604,9 +3653,9 @@ export default function EnquiryDetailsPage() {
                                     );
                                 })}
                             </div>
-                        )}
                     </CardBody>
                 </Card>
+                )}
 
                 <Card className="w-full border border-default-200/50 bg-content1/50 backdrop-blur-xl overflow-hidden rounded-[1.75rem] shadow-xl group/vault">
                     <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-6 pt-6 pb-0">
@@ -5225,6 +5274,16 @@ export default function EnquiryDetailsPage() {
                             )}
                         </ModalHeader>
                         <ModalBody>
+                            {String(docViewerDoc?.status || "").toUpperCase() === "DRAFT" && (canManageDocs || isSystemAdmin) && (
+                                <div className="rounded-2xl border border-default-200 bg-default-50 p-4 dark:bg-default-100/10">
+                                    <label className="block text-sm font-bold" htmlFor="document-authorized-signatory">Authorized signatory name</label>
+                                    <p className="mb-2 text-xs text-default-500">Type the name that should appear in the signature box, then save it before issuing this document.</p>
+                                    <div className="flex flex-col gap-2 sm:flex-row">
+                                        <input id="document-authorized-signatory" value={docViewerDoc?.documentData?.authorizedSignatory || ""} onChange={event => setDocViewerDoc((current: any) => ({ ...current, documentData: { ...(current?.documentData || {}), authorizedSignatory: event.target.value } }))} placeholder="Enter authorized signatory name" className="min-h-11 flex-1 rounded-xl border border-default-300 bg-background px-3 text-sm outline-none focus:border-primary" />
+                                        <Button color="primary" variant="flat" isLoading={saveDocumentSignatoryMutation.isPending} isDisabled={!String(docViewerDoc?.documentData?.authorizedSignatory || "").trim()} onPress={() => saveDocumentSignatoryMutation.mutate()}>Save signatory</Button>
+                                    </div>
+                                </div>
+                            )}
                             {docViewerDoc?.fileUrl ? (
                                 <div className="space-y-3">
                                     <a

@@ -227,6 +227,7 @@ export const labProfileRoutes = {
   taxonomyCreate: "/lab-profiles/taxonomy",
   taxonomyRequests: "/lab-profiles/taxonomy/requests",
   taxonomyAdmin: "/lab-profiles/taxonomy/admin",
+  reviewConfig: "/lab-profiles/review-config",
   directory: "/lab-profiles/directory",
   detail: (id: string) => `/lab-profiles/directory/${id}`,
   providerFacilities: (companyId: string) => `/lab-profiles/directory/provider/${companyId}`,

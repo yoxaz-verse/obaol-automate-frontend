@@ -67,6 +67,15 @@ export type LabProfile = {
   revision: number;
   archivedAt?: string | null;
   reviewNotes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  submittedAt?: string | null;
+  publishedAt?: string | null;
+  reviewTargetAt?: string | null;
+  businessDaysPending?: number;
+  isReviewOverdue?: boolean;
+  reviewSlaBusinessDays?: number;
+  statusHistory?: Array<{ status: LabProfile["status"]; at: string; actorType: "OWNER" | "ADMIN" | "SYSTEM"; note?: string }>;
   draft?: LabSnapshot;
   published?: LabSnapshot;
 };

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { getEnquiryCardStatus } from "../src/utils/enquiryCardStatus.ts";
+import { getEnquiryCardStatus, getEnquiryPendingOwnerLabel } from "../src/utils/enquiryCardStatus.ts";
 
 const cardSource = readFileSync(
     fileURLToPath(new URL("../src/components/dashboard/enquiries/EnquiryCard.tsx", import.meta.url)),
@@ -50,12 +50,17 @@ test("enquiry list exposes workflow-backed pending filters and counts", () => {
     assert.match(listSource, /workflowSummary: item\.workflowSummary/);
 });
 
+test("workflow updates invalidate both enquiry details and paginated card lists", () => {
+    assert.match(detailSource, /invalidateQueries\(\{ queryKey: \["enquiry"\] \}\)/);
+    assert.doesNotMatch(detailSource, /invalidateQueries\(\{ queryKey: \["enquiry", enquiryId\] \}\)/);
+});
+
 test("shows seller pending until the seller accepts", () => {
     assert.deepEqual(
         getEnquiryCardStatus({ workflowStage: "ENQUIRY_CREATED", viewerRole: "BUYER" }),
         {
             stageLabel: "Enquiry Created",
-            responsibilityLabel: "Seller Pending",
+            responsibilityLabel: "Action required from Supplier",
             pendingParty: "SELLER",
             terminalState: null,
         }
@@ -69,7 +74,7 @@ test("shows viewer-relative buyer action after seller acceptance", () => {
         viewerRole: "BUYER",
     });
     assert.equal(result.stageLabel, "Pre Clarification");
-    assert.equal(result.responsibilityLabel, "Your Action Pending");
+    assert.equal(result.responsibilityLabel, "Action required from Buyer (You)");
     assert.equal(result.pendingParty, "BUYER");
 });
 
@@ -78,7 +83,7 @@ test("shows buyer pending to the seller", () => {
         sellerAcceptedAt: "2026-10-30T10:00:00.000Z",
         viewerRole: "SELLER",
     });
-    assert.equal(result.responsibilityLabel, "Buyer Pending");
+    assert.equal(result.responsibilityLabel, "Action required from Buyer");
 });
 
 test("workflow summary overrides legacy milestones", () => {
@@ -94,7 +99,7 @@ test("workflow summary overrides legacy milestones", () => {
             pendingActions: ["REVISION_CONFIRMED"],
         },
     });
-    assert.equal(result.responsibilityLabel, "Buyer Pending");
+    assert.equal(result.responsibilityLabel, "Action required from Buyer");
     assert.equal(result.pendingParty, "BUYER");
 });
 
@@ -133,3 +138,17 @@ for (const [status, expected] of [
         assert.equal(result.pendingParty, null);
     });
 }
+
+test("pending owner labels are explicit and viewer-aware", () => {
+    assert.equal(getEnquiryPendingOwnerLabel("BUYER", "BUYER"), "Buyer (You)");
+    assert.equal(getEnquiryPendingOwnerLabel("SELLER", "SELLER"), "Supplier (You)");
+    assert.equal(getEnquiryPendingOwnerLabel("BOTH", "BUYER"), "Buyer and Supplier (You)");
+    assert.equal(getEnquiryPendingOwnerLabel("EITHER", "OTHER"), "Buyer or Supplier");
+    assert.equal(getEnquiryPendingOwnerLabel(null, "OTHER"), null);
+});
+
+test("details use explicit ownership copy without ambiguous standalone wording", () => {
+    assert.match(detailSource, /Action required from:/);
+    assert.doesNotMatch(detailSource, /Your action is pending/);
+    assert.doesNotMatch(detailSource, /Waiting for supplier action/);
+});

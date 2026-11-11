@@ -41,7 +41,7 @@ const EnquiryStatus: React.FC<EnquiryStatusProps> = ({
                 </span>
             </div>
             {responsibilityLabel && (
-                <span className="text-[9px] font-black tracking-widest db-muted pl-4">
+                <span className="text-[10px] font-black tracking-wide text-foreground pl-4">
                     {responsibilityLabel}
                 </span>
             )}

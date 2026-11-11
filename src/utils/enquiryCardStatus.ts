@@ -26,6 +26,26 @@ export interface EnquiryCardStatusView {
     terminalState: "CONVERTED" | "COMPLETED" | "CANCELLED" | null;
 }
 
+export const getEnquiryPendingOwnerLabel = (
+    pendingParty: EnquiryPendingParty,
+    viewerRole: EnquiryViewerRole = "OTHER"
+): string | null => {
+    if (!pendingParty) return null;
+
+    const ownerLabel = pendingParty === "BUYER"
+        ? "Buyer"
+        : pendingParty === "SELLER"
+            ? "Supplier"
+            : pendingParty === "BOTH"
+                ? "Buyer and Supplier"
+                : "Buyer or Supplier";
+    const isViewerResponsible = pendingParty === viewerRole ||
+        (pendingParty === "BOTH" && ["BUYER", "SELLER"].includes(viewerRole)) ||
+        (pendingParty === "EITHER" && ["BUYER", "SELLER"].includes(viewerRole));
+
+    return `${ownerLabel}${isViewerResponsible ? " (You)" : ""}`;
+};
+
 const humanizeStage = (value: unknown) => {
     const stage = String(value || "").trim();
     if (!stage) return "Enquiry Created";
@@ -78,18 +98,8 @@ export const getEnquiryCardStatus = ({
                 ? "BUYER"
                 : null;
 
-    const isViewerResponsible = pendingParty === viewerRole ||
-        (pendingParty === "BOTH" && ["BUYER", "SELLER"].includes(viewerRole)) ||
-        (pendingParty === "EITHER" && ["BUYER", "SELLER"].includes(viewerRole));
-    const responsibilityLabel = pendingParty
-        ? isViewerResponsible
-            ? "Your Action Pending"
-            : pendingParty === "BOTH"
-                ? "Buyer + Seller Pending"
-                : pendingParty === "EITHER"
-                    ? "Buyer or Seller Pending"
-                    : `${pendingParty === "BUYER" ? "Buyer" : "Seller"} Pending`
-        : null;
+    const ownerLabel = getEnquiryPendingOwnerLabel(pendingParty, viewerRole);
+    const responsibilityLabel = ownerLabel ? `Action required from ${ownerLabel}` : null;
 
     return {
         stageLabel: humanizeStage(workflowStage),

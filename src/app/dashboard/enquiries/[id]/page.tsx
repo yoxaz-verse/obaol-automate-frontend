@@ -61,6 +61,7 @@ import {
     sanitizeDisplayText,
     tradeInputLabel,
 } from "@/features/enquiries/display";
+import { getEnquiryPendingOwnerLabel, type EnquiryPendingParty, type EnquiryViewerRole } from "@/utils/enquiryCardStatus";
 
 // Defensive aliases to avoid runtime crashes if older JSX still references Lu* icons.
 const LuTrendingDown = FiTrendingDown;
@@ -76,6 +77,9 @@ export default function EnquiryDetailsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const queryClient = useQueryClient();
+    const refreshEnquiryCaches = React.useCallback(() => {
+        return queryClient.invalidateQueries({ queryKey: ["enquiry"] });
+    }, [queryClient]);
     const { convertRate, formatRate } = useCurrency();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isFinalizeOpen, onOpen: onFinalizeOpen, onOpenChange: onFinalizeOpenChange } = useDisclosure();
@@ -614,7 +618,7 @@ export default function EnquiryDetailsPage() {
         },
         onSuccess: (orderId) => {
             toast.success("Enquiry converted to Order!");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
             router.push(`/dashboard/orders/${orderId}`);
         },
         onError: (error: any) => {
@@ -712,7 +716,7 @@ export default function EnquiryDetailsPage() {
         onSuccess: () => {
             toast.success("Operator roles updated.");
             setAssignmentSavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             const msg = error?.response?.data?.message || "Failed to update operator roles.";
@@ -724,7 +728,7 @@ export default function EnquiryDetailsPage() {
             postData(`${apiRoutes.enquiry.getAll}/${enquiryId}/handler-volunteer`, {}),
         onSuccess: () => {
             toast.success("Handler volunteer request submitted. Awaiting admin approval.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             const msg = error?.response?.data?.message || "Failed to volunteer as handler.";
@@ -736,7 +740,7 @@ export default function EnquiryDetailsPage() {
             patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/handler-volunteer`, { action }),
         onSuccess: (_res, action) => {
             toast.success(action === "approve" ? "Volunteer request approved." : "Volunteer request rejected.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             const msg = error?.response?.data?.message || "Failed to review handler volunteer request.";
@@ -753,7 +757,7 @@ export default function EnquiryDetailsPage() {
         },
         onSuccess: () => {
             toast.success("Commit-until date updated.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: () => {
             toast.error("Failed to update commit-until date.");
@@ -820,7 +824,7 @@ export default function EnquiryDetailsPage() {
             setSelectedInventoryId("");
             setSelectedWarehouseOptionId("");
             setInlineQuantity("");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
             queryClient.invalidateQueries({ queryKey: ["seller-inventories", sellerCompanyId, productVariantId] });
             queryClient.invalidateQueries({ queryKey: ["seller-warehouses", sellerCompanyId] });
             queryClient.invalidateQueries({ queryKey: ["variantRate", variantRateId] });
@@ -835,6 +839,46 @@ export default function EnquiryDetailsPage() {
         setDocViewerDoc(doc);
         setDocViewerOpen(true);
     };
+    const documentsFromResponse = (response: any): any[] => {
+        if (Array.isArray(response?.data?.data?.data)) return response.data.data.data;
+        if (Array.isArray(response?.data?.data)) return response.data.data;
+        if (Array.isArray(response?.data)) return response.data;
+        return [];
+    };
+    const mergeDocumentsIntoQueryCache = (queryKey: readonly unknown[], documents: any[]) => {
+        if (!documents.length) return;
+        queryClient.setQueryData(queryKey, (current: any) => {
+            const existing = documentsFromResponse(current);
+            const merged = [...documents, ...existing].filter((document, index, rows) => {
+                const id = String(document?._id || document?.id || "");
+                return id ? rows.findIndex((row) => String(row?._id || row?.id || "") === id) === index : true;
+            });
+            if (!current) return { data: { success: true, data: { data: merged } } };
+            if (Array.isArray(current?.data?.data?.data)) {
+                return { ...current, data: { ...current.data, data: { ...current.data.data, data: merged } } };
+            }
+            if (Array.isArray(current?.data?.data)) {
+                return { ...current, data: { ...current.data, data: merged } };
+            }
+            if (Array.isArray(current?.data)) return { ...current, data: merged };
+            return { ...current, data: { ...(current.data || {}), data: { data: merged } } };
+        });
+    };
+    const cacheCreatedQuotation = (documents: any[]) => {
+        const quotationDocuments = documents.filter((document) => String(document?.type || "").toUpperCase() === "QUOTATION");
+        mergeDocumentsIntoQueryCache(["trade-documents", enquiryId], quotationDocuments);
+        mergeDocumentsIntoQueryCache(["trade-documents", "enquiry", enquiryId], documents);
+    };
+    const reconcileCreatedQuotation = async () => {
+        const refresh = await getData(
+            apiRoutes.tradeDocuments.list,
+            { page: 1, limit: 20, enquiryId, type: "QUOTATION" },
+            { cacheMode: "bypass" }
+        );
+        const rows = documentsFromResponse(refresh);
+        if (rows.length) cacheCreatedQuotation(rows);
+        return rows[0] || null;
+    };
     const scrollToDocumentationChecklist = () => {
         if (typeof window === "undefined") return;
         const target = document.getElementById("documentation-checklist");
@@ -843,60 +887,60 @@ export default function EnquiryDetailsPage() {
     };
 
     const createQuotationMutation = useMutation({
-        mutationFn: async () => {
-            const request = postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId });
-            const timeout = new Promise((_, reject) => {
-                const timer = setTimeout(() => {
-                    clearTimeout(timer);
-                    reject(new Error("Draft Quotation timed out. Please check server logs or OBAOL config."));
-                }, 15000);
-            });
-            return (await Promise.race([request, timeout])) as any;
-        },
-        onSuccess: (res: any) => {
+        mutationFn: () => postData(
+            apiRoutes.tradeDocuments.create,
+            { type: "QUOTATION", enquiryId },
+            {},
+            { timeoutMs: 15000 }
+        ),
+        onSuccess: async (res: any) => {
             toast.success("Quotation created.");
             setShowDocumentationGuidance(true);
             setDraftQuotationError("");
-            queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
-            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
             const createdDoc = res?.data?.data || null;
+            const createdDocuments = Array.isArray(res?.data?.documents) && res.data.documents.length
+                ? res.data.documents
+                : createdDoc ? [createdDoc] : [];
+            cacheCreatedQuotation(createdDocuments);
             if (createdDoc) {
                 openDocViewer(createdDoc);
                 setTimeout(() => {
                     scrollToDocumentationChecklist();
                 }, 200);
-                return;
-            }
-            (async () => {
+            } else {
                 try {
-                    const refresh = await getData(apiRoutes.tradeDocuments.list, { page: 1, limit: 5, enquiryId: enquiryId, type: "QUOTATION" });
-                    const rows = Array.isArray(refresh?.data?.data?.data)
-                        ? refresh.data.data.data
-                        : Array.isArray(refresh?.data?.data)
-                            ? refresh.data.data
-                            : Array.isArray(refresh?.data)
-                                ? refresh.data
-                                : [];
-                    if (rows?.[0]) {
-                        openDocViewer(rows[0]);
+                    const reconciled = await reconcileCreatedQuotation();
+                    if (reconciled) {
+                        openDocViewer(reconciled);
                         setTimeout(() => {
                             scrollToDocumentationChecklist();
                         }, 200);
-                        return;
                     }
                 } catch {
                     // ignore fallback failure
                 }
-                toast.info("Quotation drafted.");
-                setTimeout(() => {
-                    scrollToDocumentationChecklist();
-                }, 200);
-            })();
+            }
+            void queryClient.refetchQueries({ queryKey: ["trade-documents", enquiryId] });
+            void queryClient.refetchQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
         },
-        onError: (error: any) => {
+        onError: async (error: any) => {
             const details = error?.response?.data?.message || error?.message || "Failed to create quotation.";
             const code = String(error?.response?.data?.code || "");
             const isConfigurationError = code === "CONFIG_MISSING" || code === "CONFIG_INVALID";
+            if (!isConfigurationError) {
+                try {
+                    const reconciled = await reconcileCreatedQuotation();
+                    if (reconciled) {
+                        setDraftQuotationError("");
+                        setShowDocumentationGuidance(true);
+                        openDocViewer(reconciled);
+                        toast.success("Quotation created.");
+                        return;
+                    }
+                } catch {
+                    // Preserve the original creation error when reconciliation also fails.
+                }
+            }
             toast.error(isConfigurationError ? "Quotation creation is unavailable due to system configuration." : details);
             setDraftQuotationError(isConfigurationError ? "" : details);
             if (isConfigurationError) {
@@ -915,7 +959,7 @@ export default function EnquiryDetailsPage() {
             toast.success("Quotation submitted.");
             setShowDocumentationGuidance(true);
             queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
             setTimeout(() => {
                 scrollToDocumentationChecklist();
             }, 200);
@@ -932,7 +976,7 @@ export default function EnquiryDetailsPage() {
         onSuccess: () => {
             toast.success("Quotation reopened for revision.");
             queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || error?.message || "Failed to reopen quotation.");
@@ -944,7 +988,7 @@ export default function EnquiryDetailsPage() {
             patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/buyer-confirm`, {}),
         onSuccess: () => {
             toast.success("Marked as all good to go.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: () => {
             toast.error("Failed to confirm enquiry.");
@@ -955,7 +999,7 @@ export default function EnquiryDetailsPage() {
             patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/actions`, payload),
         onSuccess: () => {
             toast.success("Action applied.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to apply action.");
@@ -992,7 +1036,7 @@ export default function EnquiryDetailsPage() {
             setClarificationDeliveryMode("");
             setClarificationDeliveryDate("");
             setRevisionError("");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             const message = error?.response?.data?.message || "Failed to request revision.";
@@ -1054,7 +1098,7 @@ export default function EnquiryDetailsPage() {
                 // Ensure cached data structure matches what's expected by useQuery's select function
                 queryClient.setQueryData(["enquiry", enquiryId], { data: { data: savedInquiry } });
             }
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             const message = error?.response?.data?.message || error?.message || "Failed to save revision reply.";
@@ -1073,7 +1117,7 @@ export default function EnquiryDetailsPage() {
         onSuccess: (res: any) => {
             toast.success("Responsibilities finalized and execution inquiries generated.");
             setResponsibilitiesLockedOverride(true);
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: () => {
             toast.error("Failed to finalize responsibilities.");
@@ -1085,7 +1129,7 @@ export default function EnquiryDetailsPage() {
             patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/status`, { status: String(newStatus || "").toUpperCase() }),
         onSuccess: () => {
             toast.success("Status updated successfully!");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: () => { toast.error("Failed to update status."); },
     });
@@ -1094,7 +1138,7 @@ export default function EnquiryDetailsPage() {
             patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/workflow-stage`, { workflowStage: stage }),
         onSuccess: () => {
             toast.success("Workflow stage updated.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to update workflow stage.");
@@ -1123,7 +1167,7 @@ export default function EnquiryDetailsPage() {
         onSuccess: () => {
             toast.success("Specification updated.");
             setSpecSavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: () => { toast.error("Failed to update specification."); },
     });
@@ -1132,7 +1176,7 @@ export default function EnquiryDetailsPage() {
             patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, { importDeliveryMode: mode }),
         onSuccess: () => {
             toast.success("Import delivery mode updated.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to update import delivery mode.");
@@ -1178,7 +1222,7 @@ export default function EnquiryDetailsPage() {
         onSuccess: () => {
             toast.success("Responsibility plan saved.");
             setResponsibilitySavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: () => {
             toast.error("Failed to save responsibility plan.");
@@ -1261,7 +1305,7 @@ export default function EnquiryDetailsPage() {
         onSuccess: () => {
             toast.success("Trade terms updated.");
             setTradeTermsSavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: () => {
             toast.error("Failed to update trade terms.");
@@ -1358,7 +1402,7 @@ export default function EnquiryDetailsPage() {
             if (updated) setDocViewerDoc(updated);
             toast.success("Document leg issued.");
             queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
-            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            refreshEnquiryCaches();
         },
         onError: (error: any) => toast.error(error?.response?.data?.message || "Failed to issue this document leg."),
     });
@@ -1819,7 +1863,7 @@ export default function EnquiryDetailsPage() {
         REVISION_REQUESTED: "Request Revision",
         REVISION_CONFIRMED: "Confirm Revision",
         REVISION_SKIPPED: "Skip Revision",
-        QUOTATION_CREATED: "Create Quotation",
+        QUOTATION_CREATED: quotationId ? "View Quotation" : "Create Quotation",
         QUOTATION_ACCEPTED: "Accept Quotation",
         RETURN_TO_REVISION: "Return to Revision",
         RESPONSIBILITIES_FINALIZED: "Finalize Responsibilities",
@@ -1920,13 +1964,7 @@ export default function EnquiryDetailsPage() {
                 ? enquiryDocsResponse?.data
                 : [];
     const hasLoiDoc = (enquiryDocs || []).some((doc: any) => String(doc?.type || "").toUpperCase() === "LOI");
-    const showDraftQuotation = Boolean((enquiry as any)?.quotationCreatedAt);
-    const filteredEnquiryDocs = (enquiryDocs || []).filter((doc: any) => {
-        const type = String(doc?.type || "").toUpperCase();
-        const status = String(doc?.status || "").toUpperCase();
-        if (type === "QUOTATION" && status === "DRAFT" && !showDraftQuotation) return false;
-        return true;
-    });
+    const filteredEnquiryDocs = enquiryDocs || [];
     const syntheticLoiDoc = !hasLoiDoc && (enquiry as any)?.loiSubmittedAt ? [{
         _id: "synthetic-loi",
         type: "LOI",
@@ -2044,7 +2082,7 @@ export default function EnquiryDetailsPage() {
         enquiryRules.map((r: any) => [String(r.stageKey || "").toUpperCase(), r.label || r.stageKey])
     );
     const hasSubmittedQuotation = hasSubmittedDoc("QUOTATION");
-    const isPreClarification = normalizedStageKey === "QUOTATION_REVISION" && !hasSubmittedQuotation && !showDraftQuotation;
+    const isPreClarification = normalizedStageKey === "QUOTATION_REVISION" && !hasSubmittedQuotation && !quotationId;
     if (isPreClarification) {
         stageLabelMap.set("QUOTATION_REVISION", "Pre Clarification");
     }
@@ -2277,15 +2315,7 @@ export default function EnquiryDetailsPage() {
         if (isCancelled) return "This enquiry was cancelled.";
         if (isCompletedFlow) return "This enquiry is completed.";
         if (requiredActions.length && !isRequiredSatisfied) {
-            const { actionBy, isUserResponsible, includesOtherParty } = pendingActionAudience;
-            if (actionBy === "BUYER") return isUserResponsible ? "Your action is pending." : "Waiting for buyer action.";
-            if (actionBy === "SUPPLIER") return isUserResponsible ? "Your action is pending." : "Waiting for supplier action.";
-            if (actionBy === "BOTH") {
-                if (isUserResponsible && includesOtherParty) return "Your action is pending along with the other party.";
-                return "Waiting for buyer and supplier action.";
-            }
-            if (actionBy === "EITHER") return isUserResponsible ? "Your action is pending." : "Waiting for buyer or supplier action.";
-            return "Action pending for this stage.";
+            return "Complete the pending stage action to continue.";
         }
         if (!isConvertedFlow) return "Waiting for OBAOL team to convert this enquiry into an order.";
         return "Enquiry is converted. Order execution is now in progress.";
@@ -2298,16 +2328,27 @@ export default function EnquiryDetailsPage() {
         }
 
         const actionBy = String(pendingActionAudience.actionBy || "").toUpperCase();
-        if (pendingActionAudience.isUserResponsible) {
+        const pendingParty: EnquiryPendingParty = actionBy === "SUPPLIER" || actionBy === "SELLER"
+            ? "SELLER"
+            : ["BUYER", "BOTH", "EITHER"].includes(actionBy)
+                ? actionBy as EnquiryPendingParty
+                : null;
+        const viewerRole: EnquiryViewerRole = pendingActionAudience.isUserResponsible
+            ? actionBy === "BUYER"
+                ? "BUYER"
+                : actionBy === "SUPPLIER" || actionBy === "SELLER"
+                    ? "SELLER"
+                    : Boolean(isBuyer || isBuyerSideOperator)
+                        ? "BUYER"
+                        : "SELLER"
+            : "OTHER";
+        const ownerLabel = getEnquiryPendingOwnerLabel(pendingParty, viewerRole);
+        if (ownerLabel) {
             return {
-                label: actionBy === "BOTH" ? "You + other party" : "Your action",
-                tone: "warning" as const,
+                label: ownerLabel,
+                tone: workflowBlocker === "BUYER" ? "primary" as const : "warning" as const,
             };
         }
-        if (actionBy === "BUYER") return { label: "Buyer action", tone: "primary" as const };
-        if (actionBy === "SUPPLIER" || actionBy === "SELLER") return { label: "Supplier action", tone: "warning" as const };
-        if (actionBy === "BOTH") return { label: "Buyer + supplier", tone: "warning" as const };
-        if (actionBy === "EITHER") return { label: "Buyer or supplier", tone: "warning" as const };
         return { label: "Stage action", tone: "default" as const };
     })();
     const currentStageLabel = String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ");
@@ -2787,7 +2828,9 @@ export default function EnquiryDetailsPage() {
                                     startContent={<LuClock size={12} />}
                                     className="shrink-0 font-bold"
                                 >
-                                    {pendingOwner.label}
+                                    {requiredActions.length && !isRequiredSatisfied
+                                        ? `Action required from: ${pendingOwner.label}`
+                                        : pendingOwner.label}
                                 </Chip>
                             </div>
                             {latestConfirmedRevisionRound && latestConfirmedDecisionRows.length > 0 && (

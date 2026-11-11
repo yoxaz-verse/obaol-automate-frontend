@@ -9,6 +9,11 @@ type GetDataOptions = {
   timeoutMs?: number;
 };
 
+type PostDataOptions = {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+};
+
 const recordApiTiming = (url: string, startedAt: number, status: number, requestId?: string) => {
   if (typeof window === "undefined" || typeof performance === "undefined") return;
   const duration = performance.now() - startedAt;
@@ -60,7 +65,12 @@ export const getData = async (
 };
 
 // POST request to the API
-export const postData = async (url: string, data: unknown, params: RequestParams = {}) => {
+export const postData = async (
+  url: string,
+  data: unknown,
+  params: RequestParams = {},
+  options: PostDataOptions = {}
+) => {
 
   try {
     const headers = {
@@ -68,7 +78,12 @@ export const postData = async (url: string, data: unknown, params: RequestParams
       // "Content-Type" is managed by Axios instance or specific functions
     };
 
-    return await instance.post(url, data, { params, headers });
+    return await instance.post(url, data, {
+      params,
+      headers,
+      signal: options.signal,
+      timeout: options.timeoutMs,
+    });
   } catch (error) {
     console.error("Error in postData:", error);
     throw error;

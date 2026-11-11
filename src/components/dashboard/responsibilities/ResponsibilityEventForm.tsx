@@ -104,6 +104,14 @@ const ownerLabelByKey: Record<string, string> = {
   obaol: "OBAOL",
 };
 
+const tradeTermSelectClassNames = {
+  trigger: "h-14 min-h-14 items-center gap-3 rounded-2xl border-default-200 px-4 py-2 shadow-sm",
+  innerWrapper: "h-full min-h-0 items-center gap-2",
+  label: "font-black text-[10px] leading-none tracking-widest text-default-400",
+  value: "leading-5",
+  selectorIcon: "end-4 top-1/2 -translate-y-1/2",
+};
+
 const getOwnerStyles = (owner: string) => {
   switch (owner) {
     case "buyer":
@@ -244,7 +252,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 setSelectedIncotermId((arr[0] as string) || "");
               }}
               isDisabled={!canEditResponsibilityPlan || isReadOnlyAfterConversion}
-              classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
+              classNames={tradeTermSelectClassNames}
               startContent={<LuAnchor size={16} className="text-primary/70" />}
             >
               {incotermOptions.map((item: any) => (
@@ -264,7 +272,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 setSelectedPaymentTermId((arr[0] as string) || "");
               }}
               isDisabled={!canEditResponsibilityPlan || isReadOnlyAfterConversion}
-              classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black  text-[10px] tracking-widest text-default-400" }}
+              classNames={tradeTermSelectClassNames}
               startContent={<LuFileCheck size={16} className="text-success/70" />}
             >
               {(filteredPaymentTerms.length > 0 ? filteredPaymentTerms : paymentTermOptions).map((item: any) => (

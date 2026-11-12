@@ -4,7 +4,7 @@ import path from 'node:path';
 
 test.use({ browserName: 'webkit', isMobile: false, hasTouch: false, deviceScaleFactor: 1 });
 
-for (const width of [375, 390, 1024, 1280, 1440]) {
+for (const width of [375, 390, 1024, 1279, 1280, 1440]) {
   for (const signedIn of [false, true]) {
     test(`public navigation at ${width}px, ${signedIn ? 'signed in' : 'signed out'}`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width, height: 900 });
@@ -14,9 +14,9 @@ for (const width of [375, 390, 1024, 1280, 1440]) {
       }));
       await page.goto('/about');
       const header = page.locator('header').filter({ has: page.getByRole('navigation', { name: 'Primary navigation', includeHidden: true }) });
-      const mobile = width < 1024;
+      const mobile = width < 1280;
       const trigger = () => header.getByRole('button', { name: mobile ? /^(Open|Close) menu$/ : 'More', exact: !mobile });
-      await expect(header.getByRole('link', { name: signedIn ? 'Open workspace' : 'Get Started', exact: true })).toBeVisible();
+      await expect(header.getByRole('link', { name: signedIn ? 'Open workspace' : 'Join Platform', exact: true })).toBeVisible();
       if (signedIn) {
         await expect(header.getByRole('link', { name: 'Dashboard', exact: true })).toHaveCount(0);
         await expect(header.locator('a[href="/dashboard"]')).toHaveCount(1);
@@ -26,6 +26,7 @@ for (const width of [375, 390, 1024, 1280, 1440]) {
       await page.keyboard.press('Enter');
       const directory = page.getByRole('navigation', { name: 'All public pages' });
       await expect(directory).toBeVisible();
+      if (!signedIn && mobile) await expect(header.getByRole('link', { name: 'Get Started', exact: true })).toBeVisible();
       await expect(trigger()).toHaveAttribute('aria-expanded', 'true');
       await expect(directory.getByRole('link', { name: 'About OBAOL', exact: true })).toHaveAttribute('aria-current', 'page');
       const hrefs = await directory.getByRole('link').evaluateAll(links => links.map(link => link.getAttribute('href')));
@@ -44,7 +45,7 @@ for (const width of [375, 390, 1024, 1280, 1440]) {
         const panel = element.querySelector('#public-page-directory');
         const rect = panel.getBoundingClientRect();
         const children = Array.from(shell.children).filter(child => getComputedStyle(child).display !== 'none').map(child => child.getBoundingClientRect());
-        return { shellOverflow: shell.scrollWidth > shell.clientWidth, panelOverflow: panel.scrollWidth > panel.clientWidth, left: rect.left, right: rect.right, bottom: rect.bottom, overlaps: children.some((rect, i) => i > 0 && rect.left < children[i-1].right), columns: getComputedStyle(panel.querySelector('nav')).columnCount };
+        return { shellOverflow: shell.scrollWidth > shell.clientWidth, panelOverflow: panel.scrollWidth > panel.clientWidth, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, shellBottom: shell.getBoundingClientRect().bottom, overlaps: children.some((rect, i) => i > 0 && rect.left < children[i-1].right), columns: getComputedStyle(panel.querySelector('nav')).columnCount };
       });
       expect(geometry.shellOverflow).toBe(false);
       expect(geometry.panelOverflow).toBe(false);
@@ -52,8 +53,21 @@ for (const width of [375, 390, 1024, 1280, 1440]) {
       expect(geometry.left).toBeGreaterThanOrEqual(0);
       expect(geometry.right).toBeLessThanOrEqual(width);
       expect(geometry.bottom).toBeLessThanOrEqual(900);
+      expect(geometry.top - geometry.shellBottom).toBeCloseTo(8, 0);
       expect(geometry.columns).toBe(mobile ? '1' : '3');
-      if (mobile) await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+      const attachedGap = () => page.locator('#public-page-directory').evaluate(panel => {
+        const shell = document.querySelector('.public-header-shell');
+        return panel.getBoundingClientRect().top - shell.getBoundingClientRect().bottom;
+      });
+      if (mobile) {
+        await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+      } else {
+        await page.mouse.wheel(0, 500);
+        await expect.poll(attachedGap).toBeCloseTo(8, 0);
+      }
+      const resizedWidth = width === 1279 ? 1278 : width === 1280 ? 1281 : width + 1;
+      await page.setViewportSize({ width: resizedWidth, height: 900 });
+      await expect.poll(attachedGap).toBeCloseTo(8, 0);
       await page.screenshot({ path: testInfo.outputPath('menu-light.png') });
       await directory.getByRole('link', { name: 'Disclaimer', exact: true }).focus();
       await expect(directory.getByRole('link', { name: 'Disclaimer', exact: true })).toBeInViewport();

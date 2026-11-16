@@ -48,9 +48,6 @@ type Props = {
   selectedPaymentTermId: string;
   setSelectedPaymentTermId: (v: string) => void;
   isTradeTermsChanged: boolean;
-  onSaveTradeTerms?: () => void;
-  savingTradeTerms?: boolean;
-  tradeTermsSavedAt?: string;
 
   executionContext: any;
   setExecutionContext: (updater: any) => void;
@@ -96,7 +93,6 @@ type Props = {
   savingFramework?: boolean;
   responsibilitySavedAt?: string;
   showFinalizeButton?: boolean;
-  showSaveTermsButton?: boolean;
 };
 
 const ownerLabelByKey: Record<string, string> = {
@@ -178,9 +174,6 @@ const ResponsibilityEventForm: React.FC<Props> = ({
   selectedPaymentTermId,
   setSelectedPaymentTermId,
   isTradeTermsChanged,
-  onSaveTradeTerms,
-  savingTradeTerms,
-  tradeTermsSavedAt,
   executionContext,
   setExecutionContext,
   canToggleTradeType,
@@ -218,7 +211,6 @@ const ResponsibilityEventForm: React.FC<Props> = ({
   savingFramework,
   responsibilitySavedAt,
   showFinalizeButton = true,
-  showSaveTermsButton = true,
 }) => {
   const attributionLabel = (key: string) => {
     const contributor = String(tradeInputAttribution?.[key]?.contributor || "").toUpperCase();
@@ -257,26 +249,10 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               <span className="text-[10px]  font-black tracking-widest text-default-400">Trade Terms</span>
               <span className="text-base font-black text-foreground">Incoterms & Payment</span>
             </div>
-            {showSaveTermsButton && (
-              <div className="flex items-center gap-3">
-                <Button
-                  size="sm"
-                  color="primary"
-                  variant="flat"
-                  isDisabled={!canEditResponsibilityPlan || !isTradeTermsChanged || isReadOnlyAfterConversion}
-                  isLoading={Boolean(savingTradeTerms)}
-                  onPress={() => onSaveTradeTerms && onSaveTradeTerms()}
-                  className="font-bold"
-                >
-                  Save Terms
-                </Button>
-                {tradeTermsSavedAt && (
-                  <span className="text-xs text-default-400">
-                    Saved {dayjs(tradeTermsSavedAt).format("DD MMM, HH:mm")}
-                  </span>
-                )}
-              </div>
-            )}
+            <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold ${isTradeTermsChanged ? "border-warning-300/50 bg-warning-50 text-warning-700" : "border-success-300/40 bg-success-50 text-success-700"}`}>
+              <span className={`h-2 w-2 rounded-full ${isTradeTermsChanged ? "bg-warning animate-pulse" : "bg-success"}`} />
+              {isTradeTermsChanged ? "Terms have unsaved changes" : "Terms saved"}
+            </div>
           </div>
 
           <div className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-2">
@@ -854,18 +830,18 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         <Button
                           fullWidth
                           size="lg"
-                          className={`app-button h-16 rounded-[1.5rem] text-[11px] tracking-widest ${!isResponsibilityEventChanged && responsibilitySavedAt ? "app-button--success bg-success" : "app-button--primary"}`}
+                          className={`app-button h-16 rounded-[1.5rem] text-[11px] tracking-widest ${!isResponsibilityEventChanged && !isTradeTermsChanged ? "app-button--success bg-success" : "app-button--primary"}`}
                           isLoading={Boolean(savingFramework)}
-                          isDisabled={Boolean(packagingDisclosureError || routeNotesDisclosureError) || (!isResponsibilityEventChanged && !!responsibilitySavedAt) || isReadOnlyAfterConversion}
+                          isDisabled={Boolean(packagingDisclosureError || routeNotesDisclosureError) || (!isResponsibilityEventChanged && !isTradeTermsChanged) || isReadOnlyAfterConversion}
                           onPress={() => onSaveFramework()}
-                          startContent={!savingFramework && (isResponsibilityEventChanged ? <LuFileCheck size={18} /> : <LuCheck size={18} />)}
+                          startContent={!savingFramework && (isResponsibilityEventChanged || isTradeTermsChanged ? <LuFileCheck size={18} /> : <LuCheck size={18} />)}
                         >
-                          {!isResponsibilityEventChanged && responsibilitySavedAt ? "Workspace Synced" : "Synchronize Workspace"}
+                          Save All Changes
                         </Button>
                         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-foreground/[0.03] border border-foreground/5">
-                           <div className={`w-1.5 h-1.5 rounded-full ${isResponsibilityEventChanged ? "bg-obaol-500 animate-pulse" : "bg-success"}`} />
-                           <span className={`text-[9px] font-bold  tracking-widest italic leading-none ${isResponsibilityEventChanged ? "text-default-400" : "text-success"}`}>
-                             {isResponsibilityEventChanged ? "Awaiting Synchronization" : "Workspace Synchronized"}
+                           <div className={`w-1.5 h-1.5 rounded-full ${isResponsibilityEventChanged || isTradeTermsChanged ? "bg-obaol-500 animate-pulse" : "bg-success"}`} />
+                           <span className={`text-[9px] font-bold tracking-widest italic leading-none ${isResponsibilityEventChanged || isTradeTermsChanged ? "text-default-400" : "text-success"}`}>
+                             {isResponsibilityEventChanged || isTradeTermsChanged ? "Unsaved changes" : "All changes saved"}
                            </span>
                         </div>
                       </div>
@@ -904,7 +880,9 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                             ? "PARSING PROTOCOL..."
                             : isReadOnlyAfterConversion
                               ? "EXECUTION READY"
-                              : "AWAITING LOCAL SYNC"}
+                              : isResponsibilityEventChanged || isTradeTermsChanged
+                                ? "UNSAVED CHANGES"
+                                : "ALL CHANGES SAVED"}
                        </span>
                     </div>
                     {responsibilitySavedAt && (

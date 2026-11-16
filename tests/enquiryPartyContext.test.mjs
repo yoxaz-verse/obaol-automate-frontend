@@ -48,3 +48,19 @@ test("enquiry detail keeps constrained cards and trade terms responsive", () => 
   assert.match(form, /min-h-14 h-auto/);
   assert.match(form, /grid-cols-\[minmax\(0,1fr\)_auto\]/);
 });
+
+test("responsibility event uses one explicit save action for terms and responsibilities", () => {
+  const page = read("../src/app/dashboard/enquiries/[id]/page.tsx");
+  const form = read("../src/components/dashboard/responsibilities/ResponsibilityEventForm.tsx");
+
+  assert.match(form, /Save All Changes/);
+  assert.match(form, /Unsaved changes/);
+  assert.match(form, /All changes saved/);
+  assert.doesNotMatch(form, /Save Terms/);
+  assert.doesNotMatch(form, /Synchronize Workspace/);
+  assert.doesNotMatch(form, /Workspace Synchronized/);
+  assert.match(page, /preferredIncoterm: selectedIncotermId \|\| null/);
+  assert.match(page, /paymentTermId: selectedPaymentTermId \|\| null/);
+  assert.match(page, /hasUnsavedResponsibilityChanges = isResponsibilityEventChanged \|\| isTradeTermsChanged/);
+  assert.doesNotMatch(page, /updateTradeTermsMutation/);
+});

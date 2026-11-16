@@ -180,7 +180,6 @@ export default function EnquiryDetailsPage() {
     });
     const [selectedIncotermId, setSelectedIncotermId] = useState<string>("");
     const [selectedPaymentTermId, setSelectedPaymentTermId] = useState<string>("");
-    const [tradeTermsSavedAt, setTradeTermsSavedAt] = useState<string>("");
     const [assignmentSavedAt, setAssignmentSavedAt] = useState<string>("");
 
     // Fetch Enquiry Data
@@ -1229,6 +1228,8 @@ export default function EnquiryDetailsPage() {
                 finalDeliveryConfirmationBy: sanitizeObaolOnly(responsibilityPlan.finalDeliveryConfirmationBy),
             };
             return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, {
+                preferredIncoterm: selectedIncotermId || null,
+                paymentTermId: selectedPaymentTermId || null,
                 responsibilityPlan: normalizedPlan,
                 executionContext,
                 packagingSpecifications,
@@ -1244,12 +1245,12 @@ export default function EnquiryDetailsPage() {
             });
         },
         onSuccess: () => {
-            toast.success("Responsibility plan saved.");
+            toast.success("All responsibility details saved.");
             setResponsibilitySavedAt(new Date().toISOString());
             refreshEnquiryCaches();
         },
         onError: () => {
-            toast.error("Failed to save responsibility plan.");
+            toast.error("Failed to save responsibility details.");
         },
     });
 
@@ -1320,21 +1321,6 @@ export default function EnquiryDetailsPage() {
             packagingSpecs: packagingSpecifications || "No specifications added",
         };
     }, [responsibilityPlan, enquiry, executionContext, incotermOptions, paymentTermOptions, selectedIncotermId, selectedPaymentTermId, packagingSpecifications, getCountryNameById]);
-    const updateTradeTermsMutation = useMutation({
-        mutationFn: () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, {
-                preferredIncoterm: selectedIncotermId || null,
-                paymentTermId: selectedPaymentTermId || null,
-            }),
-        onSuccess: () => {
-            toast.success("Trade terms updated.");
-            setTradeTermsSavedAt(new Date().toISOString());
-            refreshEnquiryCaches();
-        },
-        onError: () => {
-            toast.error("Failed to update trade terms.");
-        },
-    });
     const createDocMutation = useMutation({
         mutationFn: async (ruleOverride?: any) => {
             const activeRule = ruleOverride || docActionRule;
@@ -2438,6 +2424,7 @@ export default function EnquiryDetailsPage() {
     const isTradeTermsChanged =
         String(selectedIncotermId || "") !== String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || "") ||
         String(selectedPaymentTermId || "") !== String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || "");
+    const hasUnsavedResponsibilityChanges = isResponsibilityEventChanged || isTradeTermsChanged;
     const hasPackagingSpecifications = Boolean(String(packagingSpecifications || "").trim());
     const hasRequiredTradeTerms = Boolean(selectedIncotermId && selectedPaymentTermId);
     const hasSavedTradeTerms = hasRequiredTradeTerms && !isTradeTermsChanged;
@@ -4209,9 +4196,6 @@ export default function EnquiryDetailsPage() {
                             selectedPaymentTermId={selectedPaymentTermId}
                             setSelectedPaymentTermId={setSelectedPaymentTermId}
                             isTradeTermsChanged={isTradeTermsChanged}
-                            onSaveTradeTerms={() => updateTradeTermsMutation.mutate()}
-                            savingTradeTerms={updateTradeTermsMutation.isPending}
-                            tradeTermsSavedAt={tradeTermsSavedAt}
                             executionContext={executionContext}
                             setExecutionContext={setExecutionContext}
                             canToggleTradeType={(isBuyer || isAdmin) && canEditResponsibilityPlan}
@@ -4246,7 +4230,7 @@ export default function EnquiryDetailsPage() {
                             onSaveFramework={!hasResponsibilitiesFinalized ? () => updateResponsibilityPlanMutation.mutate() : undefined}
                             savingFramework={updateResponsibilityPlanMutation.isPending}
                             onFinalize={() => {
-                                if (isResponsibilityEventChanged) {
+                                if (hasUnsavedResponsibilityChanges) {
                                     updateResponsibilityPlanMutation.mutate(undefined, {
                                         onSuccess: () => onFinalizeOpen()
                                     });
@@ -4257,7 +4241,6 @@ export default function EnquiryDetailsPage() {
                             finalizeLoading={finalizeResponsibilitiesMutation.isPending}
                             responsibilitySavedAt={responsibilitySavedAt}
                             showFinalizeButton={false}
-                            showSaveTermsButton={true}
                         />
                         </div>
                     )}
@@ -4552,7 +4535,7 @@ export default function EnquiryDetailsPage() {
                                                         isLoading={finalizeResponsibilitiesMutation.isPending}
                                                         isDisabled={isReadOnlyAfterConversion}
                                                         onPress={() => {
-                                                            if (isResponsibilityEventChanged) {
+                                                            if (hasUnsavedResponsibilityChanges) {
                                                                 updateResponsibilityPlanMutation.mutate(undefined, { onSuccess: () => onFinalizeOpen() });
                                                             } else {
                                                                 onFinalizeOpen();

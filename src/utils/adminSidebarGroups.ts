@@ -70,6 +70,7 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
     label: "Transportation",
     links: [
       "/dashboard/inland-transportation",
+      "/dashboard/inland-transportation/directory",
       "/dashboard/inland-transportation/opportunities",
       "/dashboard/inland-transportation/trips",
       "/dashboard/inland-transportation/fleet",

@@ -5040,10 +5040,10 @@ export default function EnquiryDetailsPage() {
                     backdrop="blur"
                     scrollBehavior="inside"
                     classNames={{
-                        base: "bg-content1 dark:bg-content1 border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(27,38,50,0.5)] rounded-[2.5rem] max-h-[92vh]",
+                        base: "bg-content1 text-foreground border border-divider backdrop-blur-3xl shadow-[0_0_80px_rgba(27,38,50,0.5)] rounded-[2.5rem] max-h-[92vh]",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-xl",
-                        closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",
+                        closeButton: "text-foreground hover:bg-default-100 active:scale-95 transition-all top-6 right-6",
                         body: "overflow-y-auto",
                     }}
                 >
@@ -5060,17 +5060,17 @@ export default function EnquiryDetailsPage() {
                                         </div>
                                         <div className="flex flex-col gap-0.5">
                                             <span className="text-[10px] font-black  tracking-[0.4em] text-primary/80 leading-none">COMMAND SEQUENCE INITIATED</span>
-                                            <span className="text-3xl font-black tracking-tight text-white italic leading-none mt-1">Convert to Order</span>
+                                            <span className="text-3xl font-black tracking-tight text-foreground italic leading-none mt-1">Convert to Order</span>
                                         </div>
                                     </div>
                                 </ModalHeader>
                                 <ModalBody className="px-10 py-8 overflow-y-auto">
-                                    <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/5 mb-6 flex items-start gap-4 relative overflow-hidden group">
+                                    <div className="p-5 rounded-3xl bg-default-100/70 border border-divider mb-6 flex items-start gap-4 relative overflow-hidden group">
                                         <div className="absolute top-0 left-0 w-1 h-full bg-primary/40 group-hover:bg-primary transition-all shadow-[0_0_15px_rgba(0,112,243,0.3)]" />
                                         <div className="mt-1 bg-primary/10 p-1.5 rounded-lg border border-primary/20">
                                             <FiInfo className="text-primary" size={20} />
                                         </div>
-                                        <p className="text-[11px] font-bold text-default-300 dark:text-default-400 leading-relaxed  tracking-wide">
+                                        <p className="text-[11px] font-bold text-default-700 leading-relaxed tracking-wide">
                                             WARNING: PROCEEDING WITH CONVERSION WILL LOCK ALL TRADE PARAMETERS. 
                                             THIS ACTION SYNCHRONIZES RESPONSIBILITIES AND FINALIZES THE EXECUTION PROTOCOL.
                                         </p>
@@ -5083,7 +5083,7 @@ export default function EnquiryDetailsPage() {
 
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(0,112,243,0.5)]" />
-                                        <span className="text-[11px]  font-black tracking-[0.25em] text-white/50 italic">FINAL_RESPONSIBILITY_MATRIX</span>
+                                        <span className="text-[11px] font-black tracking-[0.25em] text-default-700 italic">FINAL_RESPONSIBILITY_MATRIX</span>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
@@ -5102,12 +5102,12 @@ export default function EnquiryDetailsPage() {
                                                 { label: "Onward Transport", value: responsibilityPlan.destinationInlandTransportBy, icon: <LuTruck size={14} />, show: isToIndia && !isImportPortPickup },
                                             ] : [])
                                         ].filter(item => item.show !== false).map((item) => (
-                                            <div key={item.label} className="group flex items-center justify-between p-4 rounded-2xl bg-content2/60 border border-white/10 hover:border-primary/40 hover:bg-content2/80 transition-all duration-300">
+                                            <div key={item.label} className="group flex items-center justify-between p-4 rounded-2xl bg-content2/80 border border-divider hover:border-primary/40 hover:bg-content2 transition-all duration-300">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="text-primary/50 group-hover:text-primary transition-colors bg-black/40 p-2 rounded-xl border border-white/5 shadow-inner">
+                                                    <div className="text-primary group-hover:text-primary-600 transition-colors bg-default-100 p-2 rounded-xl border border-divider shadow-inner">
                                                         {item.icon}
                                                     </div>
-                                                    <span className="text-[10px] font-black text-default-200  tracking-widest">{item.label}</span>
+                                                    <span className="text-[10px] font-black text-default-800 tracking-widest">{item.label}</span>
                                                 </div>
                                                 <Chip 
                                                     size="sm" 
@@ -5125,9 +5125,9 @@ export default function EnquiryDetailsPage() {
                                         <div className="mb-10">
                                             <div className="flex items-center gap-3 mb-4">
                                                 <div className="w-1.5 h-6 bg-success-500 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
-                                                <span className="text-[11px]  font-black tracking-[0.25em] text-white/50 italic">PACKAGING_SPECIFICATIONS</span>
+                                                <span className="text-[11px] font-black tracking-[0.25em] text-default-700 italic">PACKAGING_SPECIFICATIONS</span>
                                             </div>
-                                            <div className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 text-[11px] font-bold text-default-300 italic whitespace-pre-line leading-relaxed shadow-inner">
+                                            <div className="p-6 rounded-[2rem] bg-default-100/70 border border-divider text-[11px] font-bold text-default-700 italic whitespace-pre-line leading-relaxed shadow-inner">
                                                 {packagingSpecifications}
                                             </div>
                                         </div>
@@ -5136,7 +5136,7 @@ export default function EnquiryDetailsPage() {
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-1.5 h-6 bg-obaol-500 rounded-full shadow-[0_0_15px_rgba(207,152,60,0.5)]" />
-                                            <span className="text-[11px]  font-black tracking-[0.25em] text-white/50 italic">ORDER_CONTEXT_METADATA</span>
+                                            <span className="text-[11px] font-black tracking-[0.25em] text-default-700 italic">ORDER_CONTEXT_METADATA</span>
                                         </div>
                                         <Textarea
                                             label="Initial Notes"
@@ -5148,9 +5148,9 @@ export default function EnquiryDetailsPage() {
                                             isInvalid={Boolean(conversionNoteViolation)}
                                             errorMessage={conversionNoteViolation?.message}
                                             classNames={{
-                                                inputWrapper: "bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all rounded-3xl p-6 min-h-[120px] shadow-inner focus-within:ring-1 focus-within:ring-primary/40",
+                                                inputWrapper: "bg-default-100/70 border border-divider hover:bg-default-100 transition-all rounded-3xl p-6 min-h-[120px] shadow-inner focus-within:ring-1 focus-within:ring-primary/40",
                                                 label: "hidden",
-                                                input: "text-[12px] font-bold text-white placeholder:text-white/20"
+                                                input: "text-[12px] font-bold text-foreground placeholder:text-default-500"
                                             }}
                                         />
                                     </div>
@@ -5159,7 +5159,7 @@ export default function EnquiryDetailsPage() {
                                     <Button 
                                         variant="light" 
                                         onPress={onClose}
-                                        className="px-8 h-8 rounded-full font-black  text-[9px] tracking-[0.3em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                                        className="px-8 h-8 rounded-full font-black text-[9px] tracking-[0.3em] text-default-600 hover:text-foreground hover:bg-default-100 transition-all"
                                     >
                                         Close
                                     </Button>

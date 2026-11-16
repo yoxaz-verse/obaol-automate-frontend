@@ -171,6 +171,7 @@ export const sidebarOptions = [
   { name: "Freight Finance", icon: <LuWallet />, link: "/dashboard/freight-forwarding/finance" },
   { name: "E-Way Bills", icon: <TbReceiptTax />, link: "/dashboard/freight-forwarding/eway-bills" },
   { name: "Transport Overview", icon: <LuMap />, link: "/dashboard/inland-transportation" },
+  { name: "Truck Directory", icon: <LuBusFront />, link: "/dashboard/inland-transportation/directory" },
   { name: "Transport Opportunities", icon: <LuRoute />, link: "/dashboard/inland-transportation/opportunities" },
   { name: "Transport Trips", icon: <LiaMapMarkedAltSolid />, link: "/dashboard/inland-transportation/trips" },
   { name: "Fleet & Drivers", icon: <LuBusFront />, link: "/dashboard/inland-transportation/fleet" },

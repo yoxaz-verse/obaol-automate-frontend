@@ -72,6 +72,7 @@ type Props = {
   responsibilityFieldConfig: ResponsibilityField[];
   canEditResponsibilityPlan: boolean;
   isReadOnlyAfterConversion?: boolean;
+  canEditTradeTermsWhenLocked?: boolean;
 
   inlandTransportSegments: Array<{ label: string; from: string; to: string }>;
   setInlandTransportSegments: (updater: any) => void;
@@ -194,6 +195,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
   responsibilityFieldConfig,
   canEditResponsibilityPlan,
   isReadOnlyAfterConversion,
+  canEditTradeTermsWhenLocked = false,
   inlandTransportSegments,
   setInlandTransportSegments,
   packagingSpecifications,
@@ -265,7 +267,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 const arr = Array.from(keys as Set<string>);
                 setSelectedIncotermId((arr[0] as string) || "");
               }}
-              isDisabled={!canEditResponsibilityPlan || isReadOnlyAfterConversion}
+              isDisabled={(!canEditResponsibilityPlan && !canEditTradeTermsWhenLocked) || (isReadOnlyAfterConversion && !canEditTradeTermsWhenLocked)}
               classNames={tradeTermSelectClassNames}
               startContent={<LuAnchor size={16} className="text-primary/70" />}
             >
@@ -285,7 +287,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 const arr = Array.from(keys as Set<string>);
                 setSelectedPaymentTermId((arr[0] as string) || "");
               }}
-              isDisabled={!canEditResponsibilityPlan || isReadOnlyAfterConversion}
+              isDisabled={(!canEditResponsibilityPlan && !canEditTradeTermsWhenLocked) || (isReadOnlyAfterConversion && !canEditTradeTermsWhenLocked)}
               classNames={tradeTermSelectClassNames}
               startContent={<LuFileCheck size={16} className="text-success/70" />}
             >
@@ -832,7 +834,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                           size="lg"
                           className={`app-button h-16 rounded-[1.5rem] text-[11px] tracking-widest ${!isResponsibilityEventChanged && !isTradeTermsChanged ? "app-button--success bg-success" : "app-button--primary"}`}
                           isLoading={Boolean(savingFramework)}
-                          isDisabled={Boolean(packagingDisclosureError || routeNotesDisclosureError) || (!isResponsibilityEventChanged && !isTradeTermsChanged) || isReadOnlyAfterConversion}
+                          isDisabled={Boolean(packagingDisclosureError || routeNotesDisclosureError) || (!isResponsibilityEventChanged && !isTradeTermsChanged) || (isReadOnlyAfterConversion && !canEditTradeTermsWhenLocked)}
                           onPress={() => onSaveFramework()}
                           startContent={!savingFramework && (isResponsibilityEventChanged || isTradeTermsChanged ? <LuFileCheck size={18} /> : <LuCheck size={18} />)}
                         >

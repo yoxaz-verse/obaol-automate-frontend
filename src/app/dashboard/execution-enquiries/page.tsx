@@ -31,6 +31,8 @@ import {
   FiZap,
   FiPackage,
   FiGlobe,
+  FiCalendar,
+  FiExternalLink,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
@@ -176,6 +178,29 @@ export default function ExecutionEnquiriesPage() {
     if (fromDistrict) parts.push(`From: ${fromDistrict}`);
     return parts.join(" • ");
   };
+  const latestExecutionActivity = (inquiry: any) => {
+    const timestamps: any[] = [];
+    for (const task of inquiry.executionInquiries || []) {
+      timestamps.push(task?.updatedAt, task?.createdAt, task?.committedAt);
+      for (const bid of task?.bids || []) timestamps.push(bid?.updatedAt, bid?.createdAt);
+    }
+    const valid = timestamps
+      .filter(Boolean)
+      .map((value) => dayjs(value))
+      .filter((value) => value.isValid())
+      .sort((a, b) => b.valueOf() - a.valueOf());
+    return valid[0]?.toISOString() || inquiry.updatedAt || inquiry.createdAt || null;
+  };
+  const linkedOrderSummary = (order: any) => {
+    if (!order) return null;
+    if (typeof order === "string") return { id: order, status: "", workflowStage: "", createdAt: null };
+    return {
+      id: String(order._id || order.id || ""),
+      status: String(order.status || ""),
+      workflowStage: String(order.workflowStage || ""),
+      createdAt: order.createdAt || null,
+    };
+  };
 
   // Build the enquiry-grouped task list from embedded executionInquiries
   const enquiriesWithTasks = useMemo(() => {
@@ -198,6 +223,9 @@ export default function ExecutionEnquiriesPage() {
           variant: inquiry.productVariant?.name || "Standard Variant",
           workflowStage: inquiry.workflowStage || "",
           status: inquiry.status || "",
+          createdAt: inquiry.createdAt || null,
+          latestActivityAt: latestExecutionActivity(inquiry),
+          order: linkedOrderSummary(inquiry.order),
           buyer:
             resolveExecutionLocation(inquiry.executionContext, "destination") ||
             resolveAddressLocation(inquiry.buyerAssociateId?.address) || "",
@@ -246,6 +274,9 @@ export default function ExecutionEnquiriesPage() {
           variant: inquiry.productVariant?.name || "Standard Variant",
           workflowStage: inquiry.workflowStage || "",
           status: inquiry.status || "",
+          createdAt: inquiry.createdAt || null,
+          latestActivityAt: latestExecutionActivity(inquiry),
+          order: linkedOrderSummary(inquiry.order),
           buyer:
             resolveExecutionLocation(inquiry.executionContext, "destination") ||
             resolveAddressLocation(inquiry.buyerAssociateId?.address) ||
@@ -307,6 +338,55 @@ export default function ExecutionEnquiriesPage() {
     });
   };
   const formatDate = (d: any) => (d ? dayjs(d).format("DD MMM, YYYY") : "-");
+  const LifecycleSummary = ({ enq }: { enq: any }) => (
+    <div className="mt-4 flex flex-col gap-3 border-t border-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] font-black tracking-widest text-default-500">
+        <span className="inline-flex items-center gap-1.5">
+          <FiCalendar className="text-obaol-500" /> Enquiry {formatDate(enq.createdAt)}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <FiCalendar className={enq.order ? "text-success-500" : "text-default-400"} />
+          {enq.order
+            ? enq.order.createdAt
+              ? `Converted ${formatDate(enq.order.createdAt)}`
+              : "Converted · date unavailable"
+            : "Not converted"}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <FiClock className="text-primary-500" /> Activity {formatDate(enq.latestActivityAt)}
+        </span>
+        {enq.order && (
+          <span className="rounded-full border border-success-500/30 bg-success-500/10 px-2 py-1 text-success-600">
+            Converted to order{enq.order.workflowStage ? ` · ${enq.order.workflowStage.replaceAll("_", " ")}` : ""}
+          </span>
+        )}
+      </div>
+      <div className="flex shrink-0 flex-wrap gap-2">
+        <Button
+          as={Link}
+          href={`/dashboard/enquiries/${enq.id}`}
+          size="sm"
+          variant="bordered"
+          className="h-8 rounded-lg px-3 text-[10px] font-black tracking-widest"
+          endContent={<FiExternalLink />}
+        >
+          View inquiry
+        </Button>
+        {enq.order?.id && (
+          <Button
+            as={Link}
+            href={`/dashboard/orders/${enq.order.id}`}
+            size="sm"
+            color="primary"
+            className="h-8 rounded-lg px-3 text-[10px] font-black tracking-widest"
+            endContent={<FiArrowRight />}
+          >
+            View order
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 
   const SectionLoader = () => (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -435,8 +515,10 @@ export default function ExecutionEnquiriesPage() {
                     </div>}
                   </div>
 
+                  <LifecycleSummary enq={enq} />
+
                   {/* Task Manifest (Flow View) */}
-                  <div className="relative flex flex-col gap-0 border-l-2 border-divider ml-3 pl-5 md:ml-5 md:pl-7">
+                  <div className="relative mt-4 flex flex-col gap-0 border-l-2 border-divider ml-3 pl-5 md:ml-5 md:pl-7">
                     {enq.tasks.map((task: any, idx: number) => (
                       <div
                         key={task.key}
@@ -574,6 +656,8 @@ export default function ExecutionEnquiriesPage() {
                       </div>
                     </div>
                   </div>
+
+                  <LifecycleSummary enq={enq} />
 
                   {buildRouteSummary(enq.tasks) && (
                     <div className="mb-6 text-[10px] font-black  tracking-widest text-default-500/80">

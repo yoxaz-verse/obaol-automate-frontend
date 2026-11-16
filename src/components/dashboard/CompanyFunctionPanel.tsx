@@ -66,9 +66,9 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
     { label: "Warehouses", href: "/dashboard/warehouses" },
   ],
   "finance-risk": [
-    { label: "Orders", href: "/dashboard/orders" },
-    { label: "Enquiries", href: "/dashboard/enquiries" },
-    { label: "Documents", href: "/dashboard/documents" },
+    { label: "Financial Partners", href: "/dashboard/financial-partners" },
+    { label: "My Financial Portfolio", href: "/dashboard/financial-partners/my" },
+    { label: "Finance Applications", href: "/dashboard/financial-partners/applications" },
   ],
 };
 

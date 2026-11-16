@@ -42,6 +42,8 @@ import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import AppButton from "@/components/ui/AppButton";
+import { DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 import QuickCreateWarehouseModal from "@/components/Warehouse/QuickCreateWarehouseModal";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import { detectOffPlatformDisclosure } from "@/utils/offPlatformDisclosure";
@@ -69,6 +71,21 @@ const LuCreditCard = FiPercent;
 const LuFileSignature = FiFileText;
 const LuEdit3 = FiEdit3;
 const LuCheckCircle = FiCheckCircle;
+
+const responsibilityOwnerLabel = (value?: string) => {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (normalized === "obaol") return "OBAOL";
+    if (normalized === "buyer") return "Buyer";
+    if (normalized === "seller") return "Supplier";
+    return "Pending";
+};
+
+const responsibilityOwnerTone = (value?: string): "brand" | "success" | "warning" => {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (normalized === "obaol") return "brand";
+    if (normalized === "buyer" || normalized === "seller") return "success";
+    return "warning";
+};
 
 export default function EnquiryDetailsPage() {
     const { id } = useParams();
@@ -2428,6 +2445,10 @@ export default function EnquiryDetailsPage() {
     const hasPackagingSpecifications = Boolean(String(packagingSpecifications || "").trim());
     const hasRequiredTradeTerms = Boolean(selectedIncotermId && selectedPaymentTermId);
     const hasSavedTradeTerms = hasRequiredTradeTerms && !isTradeTermsChanged;
+    const hasPersistedTradeTerms = Boolean((enquiry as any)?.preferredIncoterm && (enquiry as any)?.paymentTermId);
+    const canRepairFinalizedTradeTerms = Boolean(
+        isAdmin && hasResponsibilitiesFinalized && !isReadOnlyAfterConversion && !hasPersistedTradeTerms
+    );
     const isFinalizationReady = hasSavedTradeTerms && hasExecutionContext && hasFullResponsibilityPlan && hasPackagingSpecifications;
     const actorCompany = isBuyer
         ? (enquiry as any)?.buyerAssociateId?.associateCompany
@@ -4216,6 +4237,7 @@ export default function EnquiryDetailsPage() {
                             responsibilityFieldConfig={responsibilityFieldConfig}
                             canEditResponsibilityPlan={canEditResponsibilityPlan}
                             isReadOnlyAfterConversion={isReadOnlyAfterConversion || hasResponsibilitiesFinalized}
+                            canEditTradeTermsWhenLocked={canRepairFinalizedTradeTerms}
                             inlandTransportSegments={inlandTransportSegments}
                             setInlandTransportSegments={setInlandTransportSegments}
                             packagingSpecifications={packagingSpecifications}
@@ -4227,7 +4249,7 @@ export default function EnquiryDetailsPage() {
                             isInternational={executionContext.tradeType === "INTERNATIONAL"}
                             showCargoInsuranceNote={executionContext.tradeType === "INTERNATIONAL"}
                             isResponsibilityEventChanged={isResponsibilityEventChanged}
-                            onSaveFramework={!hasResponsibilitiesFinalized ? () => updateResponsibilityPlanMutation.mutate() : undefined}
+                            onSaveFramework={!hasResponsibilitiesFinalized || canRepairFinalizedTradeTerms ? () => updateResponsibilityPlanMutation.mutate() : undefined}
                             savingFramework={updateResponsibilityPlanMutation.isPending}
                             onFinalize={() => {
                                 if (hasUnsavedResponsibilityChanges) {
@@ -5023,53 +5045,52 @@ export default function EnquiryDetailsPage() {
                     backdrop="blur"
                     scrollBehavior="inside"
                     classNames={{
-                        base: "bg-content1 text-foreground border border-divider backdrop-blur-3xl shadow-[0_0_80px_rgba(27,38,50,0.5)] rounded-[2.5rem] max-h-[92vh]",
+                        base: "dashboard-panel bg-content1 text-foreground max-h-[92vh] rounded-3xl",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-xl",
-                        closeButton: "text-foreground hover:bg-default-100 active:scale-95 transition-all top-6 right-6",
+                        closeButton: "text-foreground hover:bg-default-100 active:scale-95 transition-all top-5 right-5",
                         body: "overflow-y-auto",
                     }}
                 >
                     <ModalContent>
                         {(onClose) => (
                             <>
-                                <ModalHeader className="flex flex-col gap-1 pt-12 px-10 shrink-0">
-                                    <div className="flex items-center gap-5">
-                                        <div className="relative group">
-                                            <div className="absolute inset-0 bg-primary/20 blur-xl group-hover:bg-primary/30 transition-all rounded-full" />
-                                            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-2xl border border-primary/20">
-                                                <FiArrowRight size={24} className="group-hover:translate-x-0.5 transition-transform" />
-                                            </div>
+                                <ModalHeader className="shrink-0 px-6 pb-3 pt-6 sm:px-8 sm:pt-8">
+                                    <div className="flex items-start gap-4 pr-10">
+                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-obaol-500/25 bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
+                                            <FiArrowRight size={20} />
                                         </div>
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="text-[10px] font-black  tracking-[0.4em] text-primary/80 leading-none">COMMAND SEQUENCE INITIATED</span>
-                                            <span className="text-3xl font-black tracking-tight text-foreground italic leading-none mt-1">Convert to Order</span>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300">Order creation</p>
+                                            <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground">Convert to order</h2>
+                                            <p className="mt-1 max-w-xl text-sm font-normal leading-6 db-muted">
+                                                Review the confirmed responsibilities and order details before creating the order.
+                                            </p>
                                         </div>
                                     </div>
                                 </ModalHeader>
-                                <ModalBody className="px-10 py-8 overflow-y-auto">
-                                    <div className="p-5 rounded-3xl bg-default-100/70 border border-divider mb-6 flex items-start gap-4 relative overflow-hidden group">
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-primary/40 group-hover:bg-primary transition-all shadow-[0_0_15px_rgba(0,112,243,0.3)]" />
-                                        <div className="mt-1 bg-primary/10 p-1.5 rounded-lg border border-primary/20">
-                                            <FiInfo className="text-primary" size={20} />
+                                <ModalBody className="overflow-y-auto px-6 py-4 sm:px-8">
+                                    <div className="mb-6 flex items-start gap-3 rounded-xl border border-warning-500/25 bg-warning-500/10 p-4">
+                                        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning-500/15 text-warning-700 dark:text-warning-400">
+                                            <FiInfo size={17} />
                                         </div>
-                                        <p className="text-[11px] font-bold text-default-700 leading-relaxed tracking-wide">
-                                            WARNING: PROCEEDING WITH CONVERSION WILL LOCK ALL TRADE PARAMETERS. 
-                                            THIS ACTION SYNCHRONIZES RESPONSIBILITIES AND FINALIZES THE EXECUTION PROTOCOL.
-                                        </p>
+                                        <div>
+                                            <p className="text-sm font-semibold text-foreground">Conversion locks the confirmed trade terms</p>
+                                            <p className="mt-1 text-sm leading-6 db-muted">Responsibilities and trade parameters cannot be edited after the order is created.</p>
+                                        </div>
                                     </div>
                                     {conversionError && (
-                                        <div className="mb-6 rounded-2xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200  tracking-wide">
+                                        <div className="mb-6 rounded-xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-sm font-semibold text-danger-700 dark:text-danger-300" role="alert">
                                             {conversionError}
                                         </div>
                                     )}
 
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(0,112,243,0.5)]" />
-                                        <span className="text-[11px] font-black tracking-[0.25em] text-default-700 italic">FINAL_RESPONSIBILITY_MATRIX</span>
+                                    <div className="mb-4">
+                                        <h3 className="dashboard-section-title">Responsibilities</h3>
+                                        <p className="mt-1 text-sm leading-6 db-muted">Confirmed ownership for each part of order execution.</p>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+                                    <div className="mb-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                         {[
                                             { label: "Procurement / Sourcing", value: responsibilityPlan.procurementBy, icon: <LuSearch size={14} /> },
                                             { label: "Quality Testing", value: responsibilityPlan.qualityTestingBy, icon: <LuClipboardCheck size={14} /> },
@@ -5085,78 +5106,64 @@ export default function EnquiryDetailsPage() {
                                                 { label: "Onward Transport", value: responsibilityPlan.destinationInlandTransportBy, icon: <LuTruck size={14} />, show: isToIndia && !isImportPortPickup },
                                             ] : [])
                                         ].filter(item => item.show !== false).map((item) => (
-                                            <div key={item.label} className="group flex items-center justify-between p-4 rounded-2xl bg-content2/80 border border-divider hover:border-primary/40 hover:bg-content2 transition-all duration-300">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="text-primary group-hover:text-primary-600 transition-colors bg-default-100 p-2 rounded-xl border border-divider shadow-inner">
+                                            <div key={item.label} className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-[var(--db-border-subtle)] bg-[var(--db-subtle)] p-4">
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-obaol-500/20 bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
                                                         {item.icon}
                                                     </div>
-                                                    <span className="text-[10px] font-black text-default-800 tracking-widest">{item.label}</span>
+                                                    <span className="min-w-0 text-sm font-semibold leading-5 text-foreground">{item.label}</span>
                                                 </div>
-                                                <Chip 
-                                                    size="sm" 
-                                                    variant="flat" 
-                                                    color={item.value === "obaol" ? "primary" : item.value === "buyer" ? "success" : "warning"}
-                                                    className="font-black  text-[8px] tracking-[0.2em] h-6 px-3 bg-opacity-20 border border-current/20 shadow-lg"
-                                                >
-                                                    {item.value || "PENDING"}
-                                                </Chip>
+                                                <DashboardStatusBadge tone={responsibilityOwnerTone(item.value)}>
+                                                    {responsibilityOwnerLabel(item.value)}
+                                                </DashboardStatusBadge>
                                             </div>
                                         ))}
                                     </div>
 
                                     {packagingSpecifications && (
-                                        <div className="mb-10">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-1.5 h-6 bg-success-500 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
-                                                <span className="text-[11px] font-black tracking-[0.25em] text-default-700 italic">PACKAGING_SPECIFICATIONS</span>
+                                        <div className="mb-7">
+                                            <div className="mb-3">
+                                                <h3 className="dashboard-section-title">Packaging specifications</h3>
+                                                <p className="mt-1 text-sm leading-6 db-muted">Packaging requirements that will be carried into the order.</p>
                                             </div>
-                                            <div className="p-6 rounded-[2rem] bg-default-100/70 border border-divider text-[11px] font-bold text-default-700 italic whitespace-pre-line leading-relaxed shadow-inner">
+                                            <div className="whitespace-pre-line rounded-xl border border-[var(--db-border-subtle)] bg-[var(--db-subtle)] p-4 text-sm leading-6 text-foreground">
                                                 {packagingSpecifications}
                                             </div>
                                         </div>
                                     )}
 
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-1.5 h-6 bg-obaol-500 rounded-full shadow-[0_0_15px_rgba(207,152,60,0.5)]" />
-                                            <span className="text-[11px] font-black tracking-[0.25em] text-default-700 italic">ORDER_CONTEXT_METADATA</span>
+                                    <div>
+                                        <div className="mb-3">
+                                            <h3 className="dashboard-section-title">Order notes</h3>
+                                            <p className="mt-1 text-sm leading-6 db-muted">Optional instructions for the execution team.</p>
                                         </div>
                                         <Textarea
-                                            label="Initial Notes"
+                                            aria-label="Order notes"
                                             variant="flat"
-                                            labelPlacement="outside"
-                                            placeholder="Inject tactical instructions for mission execution..."
+                                            placeholder="Add any instructions or context for order execution"
                                             value={conversionNote}
                                             onValueChange={setConversionNote}
                                             isInvalid={Boolean(conversionNoteViolation)}
                                             errorMessage={conversionNoteViolation?.message}
                                             classNames={{
-                                                inputWrapper: "bg-default-100/70 border border-divider hover:bg-default-100 transition-all rounded-3xl p-6 min-h-[120px] shadow-inner focus-within:ring-1 focus-within:ring-primary/40",
-                                                label: "hidden",
-                                                input: "text-[12px] font-bold text-foreground placeholder:text-default-500"
+                                                inputWrapper: "min-h-[112px] rounded-xl border border-[var(--db-border-subtle)] bg-[var(--db-subtle)] p-4 shadow-none hover:bg-[var(--db-subtle)] focus-within:ring-2 focus-within:ring-obaol-500/30",
+                                                input: "text-sm font-normal leading-6 text-foreground placeholder:text-default-500"
                                             }}
                                         />
                                     </div>
                                 </ModalBody>
-                                <ModalFooter className="px-10 pb-12 pt-4 flex flex-col items-center gap-8">
-                                    <Button 
-                                        variant="light" 
-                                        onPress={onClose}
-                                        className="px-8 h-8 rounded-full font-black text-[9px] tracking-[0.3em] text-default-600 hover:text-foreground hover:bg-default-100 transition-all"
-                                    >
-                                        Close
-                                    </Button>
-                                    <div className="flex items-center justify-between w-full gap-4">
-                                        <Button
-                                            variant="flat"
-                                            onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${enquiryId}`, "_blank")}
-                                            className="flex-1 max-w-[240px] h-14 rounded-2xl font-black  text-[10px] tracking-widest text-obaol-600 border border-obaol-500/30 bg-obaol-500/10 hover:bg-obaol-500/20 shadow-xl shadow-obaol-500/5"
+                                <ModalFooter className="flex flex-col-reverse gap-3 border-t border-[var(--db-border-subtle)] px-6 py-5 sm:flex-row sm:items-center sm:justify-end sm:px-8">
+                                        <AppButton intent="tertiary" onPress={onClose}>
+                                            Cancel
+                                        </AppButton>
+                                        <AppButton
+                                            intent="secondary"
+                                            onPress={() => window?.open(`/dashboard/execution-enquiries?tab=deal-execution&enquiryId=${enquiryId}`, "_blank")}
                                         >
-                                            Open Execution Panel
-                                        </Button>
-                                        <Button 
-                                            color="primary"
-                                            variant="shadow"
+                                            View execution workspace
+                                        </AppButton>
+                                        <AppButton
+                                            intent="primary"
                                             onPress={async () => {
                                                 setConversionError("");
                                                 if (!hasSellerAccepted || !enquiry?.buyerConfirmedAt) {
@@ -5169,6 +5176,10 @@ export default function EnquiryDetailsPage() {
                                                 }
                                                 if (!hasResponsibilitiesFinalized) {
                                                     setConversionError("Finalize responsibilities before order conversion.");
+                                                    return;
+                                                }
+                                                if (!hasPersistedTradeTerms || isTradeTermsChanged) {
+                                                    setConversionError("Select and save valid Incoterms and payment terms before order conversion.");
                                                     return;
                                                 }
                                                 if (!hasFullResponsibilityPlan || !hasExecutionContext || !hasPackagingSpecifications) {
@@ -5200,12 +5211,10 @@ export default function EnquiryDetailsPage() {
                                             }}
                                             isLoading={applyActionMutation.isPending || isConvertingOrder}
                                             isDisabled={Boolean(conversionNoteViolation)}
-                                            className="flex-1 max-w-[320px] h-14 rounded-2xl font-black  text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
                                             startContent={!applyActionMutation.isPending && !isConvertingOrder && <FiCheckCircle size={16} />}
                                         >
-                                            {isConvertingOrder ? "Converting..." : "ESTABLISH_ORDER_PROTOCOL"}
-                                        </Button>
-                                    </div>
+                                            {isConvertingOrder ? "Converting…" : "Confirm conversion"}
+                                        </AppButton>
                                 </ModalFooter>
                             </>
                         )}

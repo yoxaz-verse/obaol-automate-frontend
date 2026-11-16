@@ -164,8 +164,10 @@ test("Admin sidebar groups operational routes by workflow without duplicates", (
     "Buying",
     "Selling",
     "Trade",
+    "Agritech",
     "Labs",
     "Packaging",
+    "Finance",
     "Freight",
     "Transportation",
     "Warehouse",
@@ -186,6 +188,9 @@ test("Admin sidebar groups operational routes by workflow without duplicates", (
     "/dashboard/quality-labs",
     "/dashboard/quality-labs/my",
     "/dashboard/quality-labs/execution",
+  ]);
+  assert.deepEqual(DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Agritech")?.links, [
+    "/dashboard/agritech-startups",
   ]);
   const groupedLinks = DASHBOARD_ADMIN_WORKFLOW_GROUPS.flatMap((group) => group.links);
   const expectedOperationalLinks = getAccessibleDashboardRoutes({ role: "Admin" })

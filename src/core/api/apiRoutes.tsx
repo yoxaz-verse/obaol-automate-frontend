@@ -242,6 +242,16 @@ export const labProfileRoutes = {
   submit: "/lab-profiles/submit",
   approvals: "/lab-profiles/approvals",
 };
+export const agritechProfileRoutes = {
+  directory: "/agritech-profiles/directory",
+  detail: (id: string) => `/agritech-profiles/directory/${id}`,
+  mine: "/agritech-profiles/mine",
+  submit: "/agritech-profiles/mine/submit",
+  archive: "/agritech-profiles/mine/archive",
+  restore: "/agritech-profiles/mine/restore",
+  approvals: "/agritech-profiles/approvals",
+  review: (id: string) => `/agritech-profiles/approvals/${id}`,
+};
 export const companyTypeRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_TYPE);
 export const designationRoutes = createCRUDRoutes(BASE_PATHS.DESIGNATION);
 export const enquiryProcessStatusRoutes = createCRUDRoutes(
@@ -310,6 +320,22 @@ export const packagingRoutes = {
   workOrder: (id: string) => `/packaging/work-orders/${id}`,
   transition: (id: string) => `/packaging/work-orders/${id}/status`,
   documents: (id: string) => `/packaging/work-orders/${id}/documents`,
+};
+export const serviceDirectoryRoutes = {
+  list: "/service-directory",
+  detail: (companyId: string) => `/service-directory/${companyId}`,
+  vehicles: (companyId: string) => `/service-directory/${companyId}/vehicles`,
+};
+export const financialPartnerRoutes = {
+  portfolio: "/financial-partners/portfolio",
+  submitPortfolio: "/financial-partners/portfolio/submit",
+  approvals: "/financial-partners/approvals",
+  review: (id: string) => `/financial-partners/approvals/${id}`,
+  directory: "/financial-partners/directory",
+  profile: (id: string) => `/financial-partners/directory/${id}`,
+  apply: (id: string) => `/financial-partners/directory/${id}/applications`,
+  applications: "/financial-partners/applications",
+  transition: (id: string) => `/financial-partners/applications/${id}/status`,
 };
 export const freightForwardingRoutes = {
   taxonomy: "/freight-forwarding/taxonomy",
@@ -558,6 +584,7 @@ export const companyCapabilityChangeRequestRoutes = {
 
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
+  agritechProfiles: agritechProfileRoutes,
   analytics: dashboardRoutes,
   approvals: approvalRoutes,
   dataIntegrity: {

@@ -2,8 +2,10 @@ export type AdminWorkflowGroup =
   | "Buying"
   | "Selling"
   | "Trade"
+  | "Agritech"
   | "Labs"
   | "Packaging"
+  | "Finance"
   | "Freight"
   | "Transportation"
   | "Warehouse";
@@ -39,6 +41,12 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
     ],
   },
   {
+    label: "Agritech",
+    links: [
+      "/dashboard/agritech-startups",
+    ],
+  },
+  {
     label: "Labs",
     links: [
       "/dashboard/quality-labs",
@@ -52,6 +60,14 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
       "/dashboard/packaging",
       "/dashboard/packaging/my",
       "/dashboard/packaging/execution",
+    ],
+  },
+  {
+    label: "Finance",
+    links: [
+      "/dashboard/financial-partners",
+      "/dashboard/financial-partners/my",
+      "/dashboard/financial-partners/applications",
     ],
   },
   {

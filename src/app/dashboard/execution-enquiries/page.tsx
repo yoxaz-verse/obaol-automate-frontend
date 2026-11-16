@@ -37,6 +37,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import ExecutionBiddingPanel from "@/components/dashboard/enquiries/ExecutionBiddingPanel";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 
 dayjs.extend(relativeTime);
@@ -347,6 +348,9 @@ export default function ExecutionEnquiriesPage() {
               onPress={() => setActiveTab("execution-bidding")}
             >
               <FiZap className="mr-2" /> Execution Bidding
+            </Button>
+            <Button as={Link} href="/dashboard/requirements" size="sm" variant="light" className="h-9 rounded-xl px-6 text-xs font-black tracking-widest">
+              <FiPackage className="mr-2" /> Requirements
             </Button>
           </div>
         </div>

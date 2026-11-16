@@ -22,6 +22,13 @@ test("associate signup and profile use email-only verification while dormant", (
   assert.match(profile, /featureFlags\.associateWhatsappIntegration/);
 });
 
+test("authentication hints do not suggest phone numbers", () => {
+  const auth = read("src/components/Auth/UnifiedAuthFlow.tsx");
+  assert.match(auth, /placeholder="name@example\.com"/);
+  assert.match(auth, /placeholder="Include country code"/);
+  assert.doesNotMatch(auth, /\+919876543210/);
+});
+
 test("integration-dependent referral and document controls honor the flag", () => {
   const referrals = read("src/app/dashboard/referrals/page.tsx");
   const documents = read("src/app/dashboard/documentation/[id]/page.tsx");

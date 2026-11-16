@@ -82,7 +82,21 @@ export default function EnquiryDetailsPage() {
     }, [queryClient]);
     const { convertRate, formatRate } = useCurrency();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const { isOpen: isFinalizeOpen, onOpen: onFinalizeOpen, onOpenChange: onFinalizeOpenChange } = useDisclosure();
+    const { isOpen: isFinalizeOpen, onOpen: onFinalizeOpen, onClose: onFinalizeClose, onOpenChange: onFinalizeOpenChange } = useDisclosure();
+    const jumpToReadinessSection = React.useCallback((sectionId: string) => {
+        onFinalizeClose();
+        window.setTimeout(() => {
+            const target = document.getElementById(sectionId);
+            if (!target) return;
+            const disclosure = target.querySelector("details");
+            if (disclosure instanceof HTMLDetailsElement) disclosure.open = true;
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+            target.classList.add("ring-2", "ring-danger-400", "ring-offset-4", "rounded-2xl");
+            const focusTarget = target.querySelector<HTMLElement>("textarea, input, button, [tabindex]:not([tabindex='-1'])");
+            window.setTimeout(() => focusTarget?.focus(), 250);
+            window.setTimeout(() => target.classList.remove("ring-2", "ring-danger-400", "ring-offset-4", "rounded-2xl"), 2200);
+        }, 150);
+    }, [onFinalizeClose]);
     const [conversionNote, setConversionNote] = useState("");
     const { user } = useContext(AuthContext);
     const [selectedSupplierOperatorId, setSelectedSupplierOperatorId] = useState<string>("");
@@ -1119,8 +1133,18 @@ export default function EnquiryDetailsPage() {
             setResponsibilitiesLockedOverride(true);
             refreshEnquiryCaches();
         },
-        onError: () => {
-            toast.error("Failed to finalize responsibilities.");
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to finalize responsibilities.");
+            const missingFields = Array.isArray(error?.response?.data?.missingFields)
+                ? error.response.data.missingFields.map((field: any) => String(field))
+                : [];
+            if (missingFields.some((field: string) => field === "preferredIncoterm" || field === "paymentTermId")) {
+                jumpToReadinessSection("responsibility-trade-terms");
+            } else if (missingFields.includes("packagingSpecifications")) {
+                jumpToReadinessSection("responsibility-packaging");
+            } else if (missingFields.some((field: string) => field.startsWith("executionContext.") || field.startsWith("responsibilityPlan."))) {
+                jumpToReadinessSection("responsibility-execution-ownership");
+            }
         },
     });
 
@@ -2415,6 +2439,9 @@ export default function EnquiryDetailsPage() {
         String(selectedIncotermId || "") !== String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || "") ||
         String(selectedPaymentTermId || "") !== String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || "");
     const hasPackagingSpecifications = Boolean(String(packagingSpecifications || "").trim());
+    const hasRequiredTradeTerms = Boolean(selectedIncotermId && selectedPaymentTermId);
+    const hasSavedTradeTerms = hasRequiredTradeTerms && !isTradeTermsChanged;
+    const isFinalizationReady = hasSavedTradeTerms && hasExecutionContext && hasFullResponsibilityPlan && hasPackagingSpecifications;
     const actorCompany = isBuyer
         ? (enquiry as any)?.buyerAssociateId?.associateCompany
         : isSeller
@@ -2517,7 +2544,7 @@ export default function EnquiryDetailsPage() {
                     : "Participant assigned to the current milestone";
 
     return (
-        <div className="w-full p-3 sm:p-4 md:p-6 flex flex-col gap-4 md:gap-6 max-w-none mx-0 text-left">
+        <div className="w-full min-w-0 p-1 sm:p-2 md:p-3 flex flex-col gap-3 md:gap-5 max-w-none mx-0 text-left">
             <div className="mb-2 flex flex-wrap items-center gap-2">
                 <Button
                     isIconOnly
@@ -2543,7 +2570,7 @@ export default function EnquiryDetailsPage() {
                     <BreadcrumbItem isCurrent>#{enquiryId.slice(-6).toUpperCase()}</BreadcrumbItem>
                 </Breadcrumbs>
             </div>
-            <section aria-label="Your role and next action" className="rounded-2xl border border-obaol-500/25 bg-obaol-500/5 p-4">
+            <section aria-label="Your role and next action" className="rounded-xl border border-obaol-500/25 bg-obaol-500/5 px-3 py-3 sm:px-4">
                 <p className="text-sm font-bold text-foreground">You are the {transactionRole} in this transaction.</p>
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Next action:</strong> {nextActionSummary}</p>
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Responsible party:</strong> {nextResponsibleParty}</p>
@@ -2570,8 +2597,8 @@ export default function EnquiryDetailsPage() {
                 </Card>
             )}
 
-            <div className={isCancelled ? "opacity-60 pointer-events-none flex flex-col gap-10" : "flex flex-col gap-10"}>
-                <div className={`w-full rounded-3xl border px-5 py-4 ${classificationTheme.shellClass} ${classificationTheme.shellBorderClass}`}>
+            <div className={isCancelled ? "opacity-60 pointer-events-none flex flex-col gap-4 md:gap-6" : "flex flex-col gap-4 md:gap-6"}>
+                <div className={`w-full rounded-2xl border px-3 py-3 sm:px-4 ${classificationTheme.shellClass} ${classificationTheme.shellBorderClass}`}>
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[10px] font-black  tracking-widest text-default-500">Classification Signal</span>
                         {classificationBadges.map((badge) => (
@@ -2584,10 +2611,10 @@ export default function EnquiryDetailsPage() {
                 </div>
                 {/* Header & Status Card */}
                 <Card className={`w-full border overflow-visible ${classificationTheme.shellBorderClass} ${classificationTheme.shellClass}`}>
-                    <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-4 md:px-6 py-6 border-b border-divider/50">
-                        <div className="flex flex-col gap-2 text-left">
+                    <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-4 md:px-5 py-4 md:py-5 border-b border-divider/50">
+                        <div className="flex min-w-0 flex-col gap-2 text-left">
                             <div className="flex flex-wrap items-center gap-3">
-                                <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight break-all text-foreground">
+                                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight break-words text-foreground">
                                     Enquiry #{enquiryId.slice(-6).toUpperCase()}
                                 </h1>
                                 <Chip
@@ -2628,7 +2655,7 @@ export default function EnquiryDetailsPage() {
                         </div>
 
                         {/* Right Side: Contact & Actions */}
-                        <div className="flex flex-col gap-5 w-full md:w-auto items-end">
+                        <div className="flex min-w-0 flex-col gap-3 w-full md:w-auto items-stretch md:items-end">
                             {(isSystemAdmin || isOperatorUser) && (
                                 <Chip
                                     size="sm"
@@ -2696,7 +2723,7 @@ export default function EnquiryDetailsPage() {
                             )}
                             {/* Support Contact Point (Client/Supplier View) */}
                             {!isSystemAdmin && !isOperatorUser && (
-                                <div className="flex flex-col gap-2.5 p-3.5 bg-default-50/50 rounded-2xl border border-default-200/50 items-end text-right min-w-[220px]">
+                                <div className="flex min-w-0 w-full md:w-auto flex-col gap-2.5 p-3 bg-default-50/50 rounded-xl border border-default-200/50 items-start md:items-end text-left md:text-right md:min-w-[220px]">
                                     <div className="flex items-center gap-2 mb-0.5">
                                         <span className="text-[9px] font-black  tracking-widest text-default-400">Your Support Point</span>
                                         <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
@@ -2711,12 +2738,12 @@ export default function EnquiryDetailsPage() {
                                         const op = operators?.find((o: any) => String(o._id) === String(opId));
 
                                         return (
-                                            <div className="flex flex-col gap-2.5 items-end">
+                                            <div className="flex min-w-0 flex-col gap-2.5 items-start md:items-end">
                                                 {op && (
                                                     <div className="flex flex-col items-end gap-0.5">
                                                         <span className="text-xs font-black text-primary-600 dark:text-primary-400  tracking-tight">{op.name}</span>
                                                         <div className="flex flex-col items-end gap-0 text-right">
-                                                            {op.email && <span className="text-[10px] text-default-500 font-bold">{op.email}</span>}
+                                                            {op.email && <span className="max-w-full break-all text-[10px] text-default-500 font-bold">{op.email}</span>}
                                                             {op.phone && <span className="text-[10px] text-default-400 font-medium">{op.phone}</span>}
                                                         </div>
                                                     </div>
@@ -3814,7 +3841,7 @@ export default function EnquiryDetailsPage() {
                         </CardHeader>
                         <Divider className="mt-4" />
                         <CardBody className="px-4 md:px-6 py-4 md:py-5">
-                            <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 p-6 rounded-3xl border border-divider bg-content1/50">
+                            <Card className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4 md:p-5 rounded-2xl border border-divider bg-content1/50">
                                 {/* Enquiry Rate */}
                                 <div className="flex flex-col gap-1">
                                     <span className="text-[10px]  font-black tracking-widest text-default-400">Enquiry Rate</span>
@@ -3887,22 +3914,22 @@ export default function EnquiryDetailsPage() {
                 )}
 
                 {/* Details Grid */}
-                <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="w-full min-w-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {/* Parties Involved */}
                     {(canSeeBuyerSide || canSeeSupplierSide || isMediator) && (
-                        <Card className="md:col-span-1 border border-divider bg-content1/50">
-                            <CardHeader className="font-semibold text-base px-6 pt-6  tracking-wider text-default-400">Parties Involved</CardHeader>
+                        <Card className="md:col-span-1 min-w-0 border border-divider bg-content1/50">
+                            <CardHeader className="font-semibold text-base px-4 pt-4 sm:px-5 sm:pt-5 tracking-wider text-default-400">Parties Involved</CardHeader>
                             <Divider className="my-1" />
-                            <CardBody className="flex flex-col gap-4 px-6 pb-6">
+                            <CardBody className="flex min-w-0 flex-col gap-3 px-4 pb-4 sm:px-5 sm:pb-5">
                                 <div className="grid grid-cols-1 gap-3">
                                     {(canSeeBuyerSide || canSeeBoth || isMediator) && (
                                         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex flex-col gap-1">
                                             <span className="text-[10px]  font-black tracking-widest text-primary-600">Buyer</span>
-                                            <span className="font-semibold text-base">{buyerAssociateName}</span>
+                                            <span className="break-words font-semibold text-base">{buyerAssociateName}</span>
                                             <span className={`text-xs font-semibold ${buyerPresence.online ? "text-success-600" : "text-default-500"}`}>
                                                 {buyerPresence.online ? "Online" : `Last seen ${buyerPresence.lastSeenLabel}`}
                                             </span>
-                                            <span className="text-sm text-default-500 font-medium">{buyerCompanyName}</span>
+                                            <span className="break-words text-sm text-default-500 font-medium">{buyerCompanyName}</span>
                                             {buyerPhone && (
                                                 <span
                                                     className="font-medium text-primary hover:underline cursor-pointer text-sm mt-1 flex items-center gap-1"
@@ -3930,11 +3957,11 @@ export default function EnquiryDetailsPage() {
                                     {(canSeeSupplierSide || canSeeBoth || isMediator) && (
                                         <div className="rounded-xl border border-success/20 bg-success/5 p-3 flex flex-col gap-1">
                                             <span className="text-[10px]  font-black tracking-widest text-success-700">Supplier</span>
-                                            <span className="font-semibold text-base">{sellerAssociateName}</span>
+                                            <span className="break-words font-semibold text-base">{sellerAssociateName}</span>
                                             <span className={`text-xs font-semibold ${sellerPresence.online ? "text-success-600" : "text-default-500"}`}>
                                                 {sellerPresence.online ? "Online" : `Last seen ${sellerPresence.lastSeenLabel}`}
                                             </span>
-                                            <span className="text-sm text-default-500 font-medium">{sellerCompanyName}</span>
+                                            <span className="break-words text-sm text-default-500 font-medium">{sellerCompanyName}</span>
                                             {sellerPhone && (
                                                 <span
                                                     className="font-medium text-success hover:underline cursor-pointer text-sm mt-1 flex items-center gap-1"
@@ -3970,8 +3997,8 @@ export default function EnquiryDetailsPage() {
                                         <span><strong>Seller from:</strong> {sellerStateLabel}</span>
                                     </div>
                                     <Divider className="my-1" />
-                                    <a href={supportEmailUrl} className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
-                                        <LuMail size={14} /> Contact support: info@support.obaol.com
+                                    <a href={supportEmailUrl} className="inline-flex min-w-0 items-start gap-2 text-sm font-semibold text-primary hover:underline">
+                                        <LuMail size={14} className="mt-0.5 shrink-0" /> <span className="min-w-0 break-all">Contact support: info@support.obaol.com</span>
                                     </a>
                                 </div>
                             </CardBody>
@@ -3979,10 +4006,10 @@ export default function EnquiryDetailsPage() {
                     )}
 
                     {/* Product Info */}
-                    <Card className="md:col-span-1 border border-divider bg-content1/50">
-                        <CardHeader className="font-bold text-lg px-6 pt-6">Product Details</CardHeader>
+                    <Card className="md:col-span-1 min-w-0 border border-divider bg-content1/50">
+                        <CardHeader className="font-bold text-lg px-4 pt-4 sm:px-5 sm:pt-5">Product Details</CardHeader>
                         <Divider className="my-1" />
-                        <CardBody className="flex flex-col gap-4 md:gap-5 px-6 pb-6">
+                        <CardBody className="flex min-w-0 flex-col gap-3 px-4 pb-4 sm:px-5 sm:pb-5">
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px]  font-bold text-default-400">Product</span>
                                 <span className="font-semibold text-lg">{enquiry.productId?.name || "N/A"}</span>
@@ -4039,7 +4066,7 @@ export default function EnquiryDetailsPage() {
                                         </span>
                                     </div>
                                 ) : (
-                                    <span className="text-sm text-default-600 whitespace-pre-line">
+                                    <span className="break-words text-sm leading-5 text-default-600 whitespace-pre-line">
                                         {specificationText || "No buyer specification shared yet."}
                                     </span>
                                 )}
@@ -4060,13 +4087,13 @@ export default function EnquiryDetailsPage() {
                     </Card>
 
                     {/* Pricing Scenario */}
-                    <Card className="md:col-span-1 border border-divider bg-success-50/20">
-                        <CardHeader className="flex flex-col items-start gap-1 px-6 pt-6 pb-2">
+                    <Card className="md:col-span-1 min-w-0 border border-divider bg-success-50/20">
+                        <CardHeader className="flex flex-col items-start gap-1 px-4 pt-4 pb-2 sm:px-5 sm:pt-5">
                             <span className="font-bold text-lg">Pricing Scenario</span>
                             <span className="text-[10px]  font-black tracking-wider text-success-600">Excludes GST & Transportation</span>
                         </CardHeader>
                         <Divider />
-                        <CardBody className="px-6 pb-6 pt-4">
+                        <CardBody className="px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
                             <div className="mt-3 text-[11px] text-default-500 font-medium leading-relaxed">
                                 Base price only (Ex-Mill / EXW / Ex-Factory). Execution services (procurement/logistics/packaging/etc.) have separate charges.
                             </div>
@@ -4127,9 +4154,9 @@ export default function EnquiryDetailsPage() {
 
                     {/* Responsibility Arena */}
                     {isImportPortPickup ? (
-                        <Card className="md:col-span-2 lg:col-span-3 order-12 border border-obaol-500/20 bg-obaol-500/[0.02] backdrop-blur-3xl p-1 shadow-2xl rounded-[2.5rem] relative overflow-hidden group w-full">
+                        <Card className="md:col-span-2 xl:col-span-3 order-12 border border-obaol-500/20 bg-obaol-500/[0.02] backdrop-blur-3xl p-1 shadow-xl rounded-2xl relative overflow-hidden group w-full">
                             <div className="absolute top-0 right-0 w-80 h-80 bg-obaol-500/5 blur-[100px] rounded-full -mr-40 -mt-40 transition-all duration-700 group-hover:scale-110" />
-                            <CardBody className="flex flex-col md:flex-row items-center gap-8 px-8 py-10 relative z-10">
+                            <CardBody className="flex flex-col md:flex-row items-center gap-4 px-4 py-5 sm:px-5 relative z-10">
                                 <div className="w-24 h-24 rounded-[2rem] bg-obaol-500/10 flex items-center justify-center text-obaol-600 border border-obaol-500/10 shadow-inner group-hover:rotate-6 transition-transform duration-500">
                                     <LuAnchor size={40} />
                                 </div>
@@ -4164,7 +4191,7 @@ export default function EnquiryDetailsPage() {
                             </CardBody>
                         </Card>
                     ) : (
-                        <div className={`md:col-span-2 lg:col-span-3 relative transition-all duration-500 w-full ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-obaol-500/40 shadow-[0_0_40px_rgba(207,152,60,0.08)]" : ""}`}>
+                        <div className={`md:col-span-2 xl:col-span-3 min-w-0 relative transition-all duration-500 w-full ${workflowStage === "PROFORMA_ISSUED" ? "rounded-2xl ring-2 ring-obaol-500/40 shadow-[0_0_40px_rgba(207,152,60,0.08)]" : ""}`}>
                             {!hasResponsibilitiesFinalized && workflowStage === "PROFORMA_ISSUED" && (
                                 <div className="flex items-center gap-3 px-6 pt-5 pb-0">
                                     <div className="w-2 h-2 rounded-full bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
@@ -4483,7 +4510,7 @@ export default function EnquiryDetailsPage() {
                 <motion.div 
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col md:flex-row justify-between items-center gap-10 bg-foreground/[0.02] backdrop-blur-3xl p-10 md:p-12 rounded-[3.5rem] border border-foreground/5 shadow-2xl relative overflow-hidden group"
+                    className="flex flex-col lg:flex-row justify-between items-center gap-5 bg-foreground/[0.02] backdrop-blur-3xl p-4 sm:p-5 md:p-6 rounded-2xl border border-foreground/5 shadow-xl relative overflow-hidden group"
                 >
                     <div className="absolute top-0 left-0 w-64 h-64 bg-primary-500/5 blur-[80px] rounded-full -ml-32 -mt-32" />
                     
@@ -4492,11 +4519,11 @@ export default function EnquiryDetailsPage() {
                              <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(var(--heroui-primary-rgb),0.5)]" />
                              <span className="text-[10px] font-bold tracking-widest  text-primary">Readiness Protocol</span>
                         </div>
-                        <h2 className="text-3xl font-bold tracking-tight leading-none text-foreground">Finalize & Execute</h2>
+                        <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-none text-foreground">Finalize & Execute</h2>
                         <p className="text-default-500 text-[11px] font-medium max-w-md opacity-80 decoration-transparent">Review performance parameters and logistics framework before authorizing mission-critical execution.</p>
                     </div>
 
-                    <div className="flex flex-wrap gap-6 justify-center md:justify-end items-center relative z-10 w-full">
+                    <div className="flex flex-wrap gap-3 justify-center md:justify-end items-center relative z-10 w-full">
                         {isAdmin && (
                             <div className="flex flex-wrap gap-4 justify-center md:justify-start mr-auto">
                                 {!isConvertedFlow && !isCompletedFlow && !isCancelled && workflowStage === "PROFORMA_ISSUED" && hasSellerAccepted && enquiry.buyerConfirmedAt && (
@@ -4513,7 +4540,7 @@ export default function EnquiryDetailsPage() {
                                                         </ul>
                                                     </div>
                                                 }
-                                                isDisabled={hasFullResponsibilityPlan && hasExecutionContext && hasPackagingSpecifications}
+                                                isDisabled={isFinalizationReady}
                                                 placement="top"
                                                 showArrow
                                                 closeDelay={0}
@@ -4523,8 +4550,14 @@ export default function EnquiryDetailsPage() {
                                                         color="warning"
                                                         className="w-full sm:w-auto font-bold px-10 rounded-2xl h-14 text-[11px] tracking-widest  bg-warning text-black shadow-xl"
                                                         isLoading={finalizeResponsibilitiesMutation.isPending}
-                                                        isDisabled={isReadOnlyAfterConversion || !hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
-                                                        onPress={() => onFinalizeOpen()}
+                                                        isDisabled={isReadOnlyAfterConversion}
+                                                        onPress={() => {
+                                                            if (isResponsibilityEventChanged) {
+                                                                updateResponsibilityPlanMutation.mutate(undefined, { onSuccess: () => onFinalizeOpen() });
+                                                            } else {
+                                                                onFinalizeOpen();
+                                                            }
+                                                        }}
                                                         startContent={<LuFileCheck size={20} />}
                                                     >
                                                         Finalize Framework
@@ -4624,7 +4657,15 @@ export default function EnquiryDetailsPage() {
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-3 rounded-full bg-primary shadow-[0_0_10px_rgba(27,38,50,0.2)] dark:shadow-[0_0_10px_rgba(238,233,223,0.1)]" />
                                             <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Global Trade Terms</span>
+                                            {!hasSavedTradeTerms && (
+                                                <Button size="sm" variant="flat" color="danger" className="ml-auto font-bold" onPress={() => jumpToReadinessSection("responsibility-trade-terms")}>Specify</Button>
+                                            )}
                                         </div>
+                                        {hasRequiredTradeTerms && isTradeTermsChanged && (
+                                            <div className="rounded-xl border border-warning-300/50 bg-warning-50 px-3 py-2 text-xs font-semibold text-warning-700">
+                                                Save the selected Incoterm and payment terms before finalizing.
+                                            </div>
+                                        )}
                                         <div className="grid grid-cols-1 gap-2">
                                             { [
                                                 { label: "From", value: responsibilitySummary.originLabel, icon: <LuMapPin size={14} className="text-blue-500" /> },
@@ -4652,6 +4693,9 @@ export default function EnquiryDetailsPage() {
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-3 rounded-full bg-success-500 shadow-[0_0_10px_rgba(27,38,50,0.1)]" />
                                             <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Packaging Specifications</span>
+                                            {!hasPackagingSpecifications && (
+                                                <Button size="sm" variant="flat" color="danger" className="ml-auto font-bold" onPress={() => jumpToReadinessSection("responsibility-packaging")}>Specify</Button>
+                                            )}
                                         </div>
                                         <div className={`p-4 rounded-xl border text-xs font-bold italic whitespace-pre-line leading-relaxed shadow-sm ${!responsibilitySummary.packagingSpecs || responsibilitySummary.packagingSpecs.includes("No specifications") 
                                             ? "bg-danger-500/5 border-danger-500/20 text-danger-500" 
@@ -4664,6 +4708,9 @@ export default function EnquiryDetailsPage() {
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-3 rounded-full bg-obaol-500 shadow-[0_0_10px_rgba(27,38,50,0.1)]" />
                                             <span className="text-[10px]  font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Responsibility Matrix</span>
+                                            {(!hasExecutionContext || !hasFullResponsibilityPlan) && (
+                                                <Button size="sm" variant="flat" color="danger" className="ml-auto font-bold" onPress={() => jumpToReadinessSection("responsibility-execution-ownership")}>Specify</Button>
+                                            )}
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                             {responsibilitySummary.listItems.map((item) => {
@@ -4710,7 +4757,7 @@ export default function EnquiryDetailsPage() {
                                         color="warning"
                                         className="font-bold"
                                         isLoading={finalizeResponsibilitiesMutation.isPending}
-                                        isDisabled={isReadOnlyAfterConversion || !hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
+                                        isDisabled={isReadOnlyAfterConversion || !isFinalizationReady}
                                         onPress={() => {
                                             finalizeResponsibilitiesMutation.mutate();
                                             onClose();
@@ -5186,17 +5233,36 @@ export default function EnquiryDetailsPage() {
                     isOpen={quickWarehouseOpen}
                     onClose={() => setQuickWarehouseOpen(false)}
                     ownerCompanyId={isSystemAdmin ? sellerCompanyId : undefined}
-                    onCreated={async (warehouse) => {
+                    stockContext={productVariantId && sellerCompanyId ? {
+                        productId: String(enquiry?.productVariant?.product?._id || enquiry?.productId?._id || ""),
+                        productVariantId: String(productVariantId),
+                        productName: productNameLabel,
+                        variantName: variantNameLabel,
+                        associateId: String((enquiry as any)?.sellerAssociateId?._id || (enquiry as any)?.sellerAssociateId || ""),
+                        associateCompanyId: String(sellerCompanyId),
+                        initialQuantity: requiredQty,
+                        unit: "MT",
+                    } : null}
+                    onCreated={async (warehouse, stockResult) => {
                         const warehouseId = String(warehouse?._id || warehouse?.id || "");
                         await queryClient.invalidateQueries({ queryKey: ["seller-warehouses", sellerCompanyId] });
+                        await queryClient.invalidateQueries({ queryKey: ["seller-inventories", sellerCompanyId, productVariantId] });
                         await queryClient.refetchQueries({ queryKey: ["seller-warehouses", sellerCompanyId] });
+                        await queryClient.refetchQueries({ queryKey: ["seller-inventories", sellerCompanyId, productVariantId] });
                         if (warehouseId) {
                             setSelectedWarehouseOptionId(`warehouse:${warehouseId}`);
-                            setSelectedInventoryId("");
-                            setInlineQuantity(String(requiredQty || ""));
+                            setSelectedInventoryId(String(stockResult?.inventory?._id || stockResult?.inventory?.id || ""));
+                            const createdQuantity = Number(stockResult?.quantity || 0);
+                            setInlineQuantity(stockResult?.inventory
+                                ? String(Math.max(0, requiredQty - createdQuantity) || "")
+                                : String(createdQuantity || requiredQty || ""));
                             setAcceptAttempted(false);
                         }
-                        toast.success("Private warehouse created and selected.");
+                        if (stockResult?.error) {
+                            toast.error(`${stockResult.error} The warehouse is selected so you can retry adding stock.`);
+                        } else {
+                            toast.success("Private warehouse and product stock created and selected.");
+                        }
                     }}
                 />
 

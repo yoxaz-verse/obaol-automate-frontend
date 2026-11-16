@@ -34,3 +34,17 @@ test("trade inputs render contributor attribution with a neutral legacy fallback
   assert.match(form, /attributionLabel\("routeNotes"\)/);
   assert.match(form, /attributionLabel\("inlandTransportSegments"\)/);
 });
+
+test("enquiry detail keeps constrained cards and trade terms responsive", () => {
+  const page = read("../src/app/dashboard/enquiries/[id]/page.tsx");
+  const form = read("../src/components/dashboard/responsibilities/ResponsibilityEventForm.tsx");
+
+  assert.match(page, /xl:grid-cols-3/);
+  assert.match(page, /Contact support: info@support\.obaol\.com/);
+  assert.match(page, /break-all/);
+  assert.match(form, /ResponsiveDisclosure title="Incoterms & Payment"/);
+  assert.match(form, /ResponsiveDisclosure title="Execution & Ownership"/);
+  assert.match(form, /ResponsiveDisclosure title="Packaging & Route Notes"/);
+  assert.match(form, /min-h-14 h-auto/);
+  assert.match(form, /grid-cols-\[minmax\(0,1fr\)_auto\]/);
+});

@@ -157,7 +157,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       return;
     }
     if (mode === "signup" && role === "Operator" && !/^\+[1-9]\d{7,14}$/.test(phone.replace(/[\s()-]/g, ""))) {
-      setStatus({ tone: "error", message: "Enter your WhatsApp number with country code, for example +919876543210." });
+      setStatus({ tone: "error", message: "Enter your WhatsApp number with country code." });
       return;
     }
     setStatus(null);
@@ -393,9 +393,9 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
             )}
             <div>
               <label htmlFor={emailId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">{mode === "signin" ? "Email or mobile number" : "Email address"}</label>
-              <input ref={emailRef} id={emailId} className={fieldClass} type="text" value={email} autoComplete="username webauthn" placeholder={mode === "signin" ? "name@example.com or +919876543210" : "name@example.com"} disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
+              <input ref={emailRef} id={emailId} className={fieldClass} type="text" value={email} autoComplete="username webauthn" placeholder="name@example.com" disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
             </div>
-            {mode === "signup" && role === "Operator" && <div><label className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">WhatsApp mobile number</label><input className={fieldClass} type="tel" value={phone} autoComplete="tel" inputMode="tel" placeholder="+919876543210" disabled={isBusy} onChange={(event) => { setPhone(event.target.value); setStatus(null); }} required /></div>}
+            {mode === "signup" && role === "Operator" && <div><label className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">WhatsApp mobile number</label><input className={fieldClass} type="tel" value={phone} autoComplete="tel" inputMode="tel" placeholder="Include country code" disabled={isBusy} onChange={(event) => { setPhone(event.target.value); setStatus(null); }} required /></div>}
             <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || (mode === "signup" && !isValidEmail(email))} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely") : role === "Associate" ? "Verify email" : "Verify email and WhatsApp"}</button>
             <div className="relative py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 lg:py-1"><span className="relative z-10 lg:bg-white lg:px-3 lg:dark:bg-content1">or</span><span className="absolute left-0 top-1/2 hidden h-px w-full bg-slate-200 dark:bg-white/10 lg:block" /></div>
             <div className="min-h-[52px] lg:rounded-xl lg:border lg:border-slate-200 lg:p-1.5 lg:dark:border-white/10">

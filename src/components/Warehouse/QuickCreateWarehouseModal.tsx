@@ -12,36 +12,60 @@ import {
 } from "@nextui-org/react";
 import { LuWarehouse } from "react-icons/lu";
 import { postData } from "@/core/api/apiHandler";
-import { apiRoutes } from "@/core/api/apiRoutes";
+import { apiRoutes, inventoryRoutes } from "@/core/api/apiRoutes";
 import { normalizeApiError } from "@/core/api/apiErrors";
+
+type WarehouseStockContext = {
+  productId: string;
+  productVariantId: string;
+  productName: string;
+  variantName?: string;
+  associateId: string;
+  associateCompanyId: string;
+  initialQuantity: number;
+  unit?: "MT";
+};
+
+export type QuickWarehouseStockResult = {
+  inventory: any | null;
+  quantity: number;
+  error?: string;
+};
 
 type QuickCreateWarehouseModalProps = {
   isOpen: boolean;
   onClose: () => void;
   ownerCompanyId?: string | null;
-  onCreated: (warehouse: any) => void | Promise<void>;
+  stockContext?: WarehouseStockContext | null;
+  onCreated: (warehouse: any, stockResult?: QuickWarehouseStockResult) => void | Promise<void>;
 };
 
 export default function QuickCreateWarehouseModal({
   isOpen,
   onClose,
   ownerCompanyId,
+  stockContext,
   onCreated,
 }: QuickCreateWarehouseModalProps) {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [phone, setPhone] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) return;
+    if (isOpen) {
+      setQuantity(stockContext ? String(stockContext.initialQuantity || "") : "");
+      return;
+    }
     setName("");
     setCity("");
     setPhone("");
+    setQuantity("");
     setError("");
     setSubmitting(false);
-  }, [isOpen]);
+  }, [isOpen, stockContext]);
 
   const submit = async () => {
     const warehouseName = name.trim();
@@ -49,6 +73,11 @@ export default function QuickCreateWarehouseModal({
     const contactPhone = phone.trim();
     if (!warehouseName || !warehouseCity || !contactPhone) {
       setError("Warehouse name, city, and contact phone are required.");
+      return;
+    }
+    const stockQuantity = Number(quantity);
+    if (stockContext && (!quantity || !Number.isFinite(stockQuantity) || stockQuantity <= 0)) {
+      setError("Available product quantity must be greater than 0 MT.");
       return;
     }
 
@@ -69,7 +98,27 @@ export default function QuickCreateWarehouseModal({
         ...(ownerCompanyId ? { ownerCompanyId } : {}),
       });
       const warehouse = response?.data?.data || response?.data;
-      await onCreated(warehouse);
+      if (stockContext) {
+        try {
+          const inventoryResponse = await postData(inventoryRoutes.getAll, {
+            product: stockContext.productId,
+            productVariant: stockContext.productVariantId,
+            associate: stockContext.associateId,
+            associateCompany: stockContext.associateCompanyId,
+            storageLocation: "MY",
+            warehouseId: warehouse?._id || warehouse?.id,
+            quantity: stockQuantity,
+            unit: stockContext.unit || "MT",
+          });
+          const inventory = inventoryResponse?.data?.data || inventoryResponse?.data;
+          await onCreated(warehouse, { inventory, quantity: stockQuantity });
+        } catch (inventoryError) {
+          const message = normalizeApiError(inventoryError, "Warehouse created, but its product stock could not be added.").message;
+          await onCreated(warehouse, { inventory: null, quantity: stockQuantity, error: message });
+        }
+      } else {
+        await onCreated(warehouse);
+      }
       onClose();
     } catch (submissionError) {
       setError(normalizeApiError(submissionError, "Unable to create the warehouse. Please try again.").message);
@@ -97,6 +146,29 @@ export default function QuickCreateWarehouseModal({
           <Input label="Warehouse name" value={name} onValueChange={(value) => { setName(value); setError(""); }} isRequired isDisabled={submitting} variant="bordered" />
           <Input label="City" value={city} onValueChange={(value) => { setCity(value); setError(""); }} isRequired isDisabled={submitting} variant="bordered" />
           <Input label="Contact phone" value={phone} onValueChange={(value) => { setPhone(value); setError(""); }} isRequired isDisabled={submitting} type="tel" inputMode="tel" variant="bordered" />
+          {stockContext && (
+            <div className="flex flex-col gap-3 rounded-xl border border-default-200/70 bg-default-50/60 p-3">
+              <div>
+                <div className="text-xs font-medium text-default-500">Selected product</div>
+                <div className="font-semibold text-foreground">
+                  {stockContext.productName}{stockContext.variantName ? ` • ${stockContext.variantName}` : ""}
+                </div>
+              </div>
+              <Input
+                label={`Available quantity in this warehouse (${stockContext.unit || "MT"})`}
+                value={quantity}
+                onValueChange={(value) => { setQuantity(value); setError(""); }}
+                isRequired
+                isDisabled={submitting}
+                type="number"
+                inputMode="decimal"
+                min="0.01"
+                step="any"
+                variant="bordered"
+                description="Enter the total quantity of this product currently available at this warehouse."
+              />
+            </div>
+          )}
         </ModalBody>
         <ModalFooter>
           <Button variant="light" onPress={onClose} isDisabled={submitting}>Cancel</Button>

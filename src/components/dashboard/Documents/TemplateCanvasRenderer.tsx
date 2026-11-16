@@ -78,6 +78,12 @@ const resolveTextColor = (value?: string) => {
   return isValidHexColor(color) ? color : "#000000";
 };
 
+const contactNameForDisplay = (party: any) => {
+  const contactName = String(party?.contactName || "").trim();
+  const email = String(party?.email || "").trim();
+  return contactName && contactName.toLocaleLowerCase() !== email.toLocaleLowerCase() ? contactName : "";
+};
+
 const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
   const header = (
     <div className="space-y-1 text-xs">
@@ -97,14 +103,14 @@ const renderContent = (block: LayoutBlock, data: any, docLabel: string) => {
         <div>
           <div className="font-semibold mb-1">Issued by</div>
           <div className="font-medium">{data?.issuer?.name || ""}</div>
-          <div>{data?.issuer?.contactName || data?.issuer?.email || ""}</div>
+          {contactNameForDisplay(data?.issuer) ? <div>{contactNameForDisplay(data.issuer)}</div> : null}
           <div>{data?.issuer?.email || ""}</div><div>{data?.issuer?.phone || ""}</div>
           <div>{data?.issuer?.address || ""}</div><div>GSTIN: {data?.issuer?.gstin || ""}</div>
         </div>
         <div>
           <div className="font-semibold mb-1">Issued to</div>
           <div className="font-medium">{data?.recipient?.name || ""}</div>
-          <div>{data?.recipient?.contactName || data?.recipient?.email || ""}</div>
+          {contactNameForDisplay(data?.recipient) ? <div>{contactNameForDisplay(data.recipient)}</div> : null}
           <div>{data?.recipient?.email || ""}</div><div>{data?.recipient?.phone || ""}</div>
           <div>{data?.recipient?.address || ""}</div><div>GSTIN: {data?.recipient?.gstin || ""}</div>
         </div>

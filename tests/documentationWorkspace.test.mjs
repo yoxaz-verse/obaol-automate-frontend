@@ -188,6 +188,8 @@ test("manual terms and Indian document-money formatting are shared across docume
   assert.match(money, /minimumFractionDigits: 2/);
   assert.match(sheet, /formatDocumentMoney/);
   assert.match(preview, /termsAndConditions/);
+  assert.match(preview, /contactNameForDisplay/);
+  assert.match(preview, /contactName\.toLocaleLowerCase\(\) !== email\.toLocaleLowerCase\(\)/);
 });
 
 test("document preview and sharing use dynamic published templates and canonical rendering", () => {

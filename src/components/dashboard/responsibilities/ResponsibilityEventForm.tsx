@@ -27,6 +27,7 @@ import {
   LuUser,
   LuStore,
   LuShieldCheck,
+  LuChevronDown,
 } from "react-icons/lu";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiAlertCircle, FiInfo, FiCheckCircle } from "react-icons/fi";
@@ -105,11 +106,46 @@ const ownerLabelByKey: Record<string, string> = {
 };
 
 const tradeTermSelectClassNames = {
-  trigger: "h-14 min-h-14 items-center gap-3 rounded-2xl border-default-200 px-4 py-2 shadow-sm",
-  innerWrapper: "h-full min-h-0 items-center gap-2",
-  label: "font-black text-[10px] leading-none tracking-widest text-default-400",
-  value: "leading-5",
+  base: "min-w-0",
+  trigger: "min-h-14 h-auto items-center gap-2 rounded-xl border-default-200 px-3 py-2 shadow-sm sm:px-4",
+  innerWrapper: "min-w-0 items-start gap-0.5 overflow-hidden py-0.5",
+  label: "relative top-auto block max-w-full truncate font-bold text-[10px] leading-4 tracking-wide text-default-400",
+  value: "block max-w-full truncate text-sm leading-5",
+  mainWrapper: "min-w-0",
   selectorIcon: "end-4 top-1/2 -translate-y-1/2",
+};
+
+const ResponsiveDisclosure = ({
+  title,
+  subtitle,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) => {
+  const [isOpen, setIsOpen] = React.useState(defaultOpen);
+
+  return (
+    <details
+      open={isOpen}
+      onToggle={(event) => setIsOpen(event.currentTarget.open)}
+      className="group rounded-2xl border border-default-200/60 bg-content1/30 md:contents"
+    >
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 md:hidden">
+        <span className="min-w-0">
+          <span className="block text-sm font-bold text-foreground">{title}</span>
+          <span className="block truncate text-[11px] text-default-500">{subtitle}</span>
+        </span>
+        <LuChevronDown className="shrink-0 transition-transform group-open:rotate-180" aria-hidden="true" />
+      </summary>
+      <div className="border-t border-divider/60 p-3 group-open:block md:!block md:border-0 md:p-0">
+        {children}
+      </div>
+    </details>
+  );
 };
 
 const getOwnerStyles = (owner: string) => {
@@ -206,14 +242,16 @@ const ResponsibilityEventForm: React.FC<Props> = ({
     || paymentTermOptions?.find((term: any) => String(term?._id || term?.id) === String(selectedPaymentTermId));
 
   return (
-    <Card className="lg:col-span-3 order-12 border border-divider bg-content1/50">
-      <CardHeader className="px-6 pt-6 pb-0 flex flex-col items-start gap-1">
-        <span className="font-bold text-lg tracking-tight whitespace-nowrap">Responsibility Event</span>
+    <Card className="lg:col-span-3 order-12 min-w-0 border border-divider bg-content1/50">
+      <CardHeader className="px-4 pt-4 pb-0 sm:px-5 sm:pt-5 flex flex-col items-start gap-1">
+        <span className="font-bold text-base sm:text-lg tracking-tight">Responsibility Event</span>
         <span className="text-[10px]  font-black tracking-widest text-default-400">Execution Ownership Allocation</span>
       </CardHeader>
-      <Divider className="mt-4" />
-      <CardBody className="flex flex-col gap-10 px-6 py-6 transition-all duration-300">
-        <div className="flex flex-col gap-4 p-5 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/60 to-white dark:from-default-100/5 dark:to-transparent shadow-sm">
+      <Divider className="mt-3 sm:mt-4" />
+      <CardBody className="flex flex-col gap-4 px-3 py-3 transition-all duration-300 sm:px-5 sm:py-5 md:gap-6">
+        <div id="responsibility-trade-terms" data-readiness-section>
+        <ResponsiveDisclosure title="Incoterms & Payment" subtitle="Trade terms and payment milestones" defaultOpen>
+        <div className="flex min-w-0 flex-col gap-3 p-3 rounded-2xl border border-default-200/60 bg-gradient-to-br from-default-50/60 to-white dark:from-default-100/5 dark:to-transparent shadow-sm sm:p-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-col gap-1">
               <span className="text-[10px]  font-black tracking-widest text-default-400">Trade Terms</span>
@@ -241,7 +279,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-2">
             <Select
               size="sm"
               label="Incoterm Protocol"
@@ -289,11 +327,11 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                 {selectedPaymentTerm.milestones.map((milestone: any, idx: number) => (
                   <div
                     key={`${milestone.label}-${idx}`}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-divider px-3 py-2 bg-background/40"
+                    className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-divider px-3 py-2 bg-background/40"
                   >
-                    <div className="flex flex-col">
-                      <span className="text-xs font-black text-foreground  tracking-tight">{milestone.label}</span>
-                      <span className="text-[11px] text-default-500">
+                    <div className="flex min-w-0 flex-col">
+                      <span className="break-words text-xs font-black text-foreground tracking-tight">{milestone.label}</span>
+                      <span className="break-words text-[11px] leading-4 text-default-500">
                         {String(milestone.triggerType || "").toUpperCase() === "STAGE"
                           ? `Stage: ${String(milestone.triggerValue || "").replaceAll("_", " ")}`
                           : `Doc: ${String(milestone.triggerValue || "").replaceAll("_", " ")}`}
@@ -306,13 +344,17 @@ const ResponsibilityEventForm: React.FC<Props> = ({
             </div>
           )}
         </div>
+        </ResponsiveDisclosure>
+        </div>
 
-        <div className="flex flex-col gap-8 p-6 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
+        <div id="responsibility-execution-ownership" data-readiness-section>
+        <ResponsiveDisclosure title="Execution & Ownership" subtitle="Logistics, responsibility owners, and inland segments">
+        <div className="flex flex-col gap-5 p-3 sm:p-4 rounded-2xl border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
           <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none rotate-12 group-hover:rotate-0 duration-700">
             <LuNavigation size={140} />
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 border-b border-divider/50 pb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 relative z-10 border-b border-divider/50 pb-4">
             <div className="flex flex-col gap-1">
               <h3 className="text-lg font-black text-foreground inline-flex items-center gap-2 tracking-tighter">
                 <LuNavigation className="text-primary" size={20} />
@@ -351,7 +393,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 relative z-10">
             {executionContext.tradeType === "DOMESTIC" ? (
               <>
                 {showOriginLogisticsFields && (
@@ -571,7 +613,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
             )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
             {responsibilityFieldConfig
               .filter((field) => field.show !== false)
               .map((field) => {
@@ -715,8 +757,12 @@ const ResponsibilityEventForm: React.FC<Props> = ({
             </div>
           )}
         </div>
+        </ResponsiveDisclosure>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 rounded-3xl border border-white/80 dark:border-default-200/10 bg-white/40 dark:bg-default-100/5 relative overflow-hidden shadow-sm">
+        <div id="responsibility-packaging" data-readiness-section>
+        <ResponsiveDisclosure title="Packaging & Route Notes" subtitle="Product handling requirements and logistics notes">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 p-3 sm:p-4 rounded-2xl border border-white/80 dark:border-default-200/10 bg-white/40 dark:bg-default-100/5 relative overflow-hidden shadow-sm">
           <div className="lg:col-span-2 flex flex-col gap-6">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-2xl bg-warning/10 flex items-center justify-center text-warning shadow-inner">
@@ -871,6 +917,8 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               )}
             </div>
           </div>
+        </div>
+        </ResponsiveDisclosure>
         </div>
       </CardBody>
     </Card>

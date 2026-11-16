@@ -212,9 +212,9 @@ export const sidebarOptions = [
     link: "/dashboard/orders",
   },
   {
-    name: "External Orders",
+    name: "Requirements",
     icon: <LuPackageCheck />,
-    link: "/dashboard/external-orders",
+    link: "/dashboard/requirements",
   },
   {
     name: "Documentation",

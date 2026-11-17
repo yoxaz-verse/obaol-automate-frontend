@@ -406,7 +406,7 @@ export default function ExecutionEnquiriesPage() {
             </div>
             <div>
               <h1 className="text-3xl font-black text-foreground  tracking-tighter leading-none">Agro Trading Ecosystem</h1>
-              <p className="text-xs font-bold text-default-500 mt-2  tracking-widest opacity-80">Autonomous Service Routing & Logistics Terminal</p>
+              <p className="mt-2 text-sm font-medium text-default-500">Coordinate services, responsibilities, and logistics in one place.</p>
             </div>
           </div>
 
@@ -640,7 +640,7 @@ export default function ExecutionEnquiriesPage() {
                           <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500  tracking-widest">
                             <span className="opacity-60">{enq.variant}</span>
                             <span className="w-1 h-1 rounded-full bg-divider" />
-                            <span className="text-obaol-500/80">{enq.tasks.length} Open Nodes</span>
+                            <span className="text-obaol-500/80">{enq.tasks.length} open tasks</span>
                           </div>
                         </div>
                       </div>

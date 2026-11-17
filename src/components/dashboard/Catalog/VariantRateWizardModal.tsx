@@ -1134,7 +1134,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1.5 sm:gap-2">
           <div className="flex items-center gap-2 text-[10px] sm:text-xs  tracking-[0.18em] sm:tracking-[0.4em] text-obaol-400">
-            Trade Mission • Step {step} of 4
+            Trade listing • Step {step} of 4
           </div>
           <div className="flex items-center gap-2.5 sm:gap-3">
             {stepLabel?.icon && <stepLabel.icon size={22} className="text-obaol-400 sm:w-7 sm:h-7" />}
@@ -1578,7 +1578,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       <div className="border-b border-default-200 pb-4">
                         <div className="text-[10px] sm:text-xs font-bold  tracking-[0.18em] text-default-400">Product</div>
                         <h4 className="mt-1 text-xl sm:text-2xl font-black text-foreground capitalize">{listingProductName}</h4>
-                        <p className="mt-1 text-xs sm:text-sm text-default-500">Review your trade mission before launch.</p>
+                        <p className="mt-1 text-xs sm:text-sm text-default-500">Review your trade listing before publishing.</p>
                       </div>
                       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>

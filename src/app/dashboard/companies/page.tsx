@@ -526,7 +526,7 @@ export default function CompanyProductPage() {
   const selectedCompanyPhone = toText(selectedCompany?.phone, "Not available");
   const selectedCompanyAddress = toText(selectedCompany?.address, "Address not available");
   const selectedCompanyWebsite = toText(selectedCompany?.website, "");
-  const selectedCompanyDescription = toText(selectedCompany?.description, "No mission statement recorded.");
+  const selectedCompanyDescription = toText(selectedCompany?.description, "No company description provided.");
   const selectedCompanyAbout = toText(
     selectedCompany?.aboutUs,
     "Awaiting profile finalization and entity narrative baseline..."
@@ -740,7 +740,7 @@ export default function CompanyProductPage() {
                 <span className="text-[9px] font-black  tracking-[0.25em] text-obaol-500">Configuration</span>
               </div>
               <p className="text-[10px] font-black  tracking-[0.25em] text-default-500">
-                {dashboardCopy(isObaolConfigHealthy ? "PROTOCOL_SYNCHRONIZED" : "MAPPING_REQUIRED")}
+                {isObaolConfigHealthy ? "Configuration complete" : "Configuration required"}
                 {toName(obaolCompany, "") ? ` | Active company: ${toName(obaolCompany, "")}` : ""}
               </p>
             </div>
@@ -874,7 +874,7 @@ export default function CompanyProductPage() {
             <div className="mt-5 flex items-center justify-center gap-4 opacity-50">
               <LuTerminal className="text-default-400" size={12} />
               <p className="text-[9px] font-black text-default-400  tracking-[0.3em] italic">
-                {dashboardCopy("SECURE_CONFIG_CHAIN_V4_2")} | {dashboardCopy("OBAOL_SYSTEM_CORE")}
+                Secure company configuration | OBAOL workspace
               </p>
             </div>
           </div>
@@ -1286,7 +1286,7 @@ export default function CompanyProductPage() {
                           <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyLastLiveAt}</p>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-[9px] font-black  text-default-500 tracking-[0.2em] opacity-60">Mission Profile</p>
+                          <p className="text-xs font-semibold text-default-500">Company profile</p>
                           <p className="text-[11px] font-bold text-default-500 dark:text-default-400 leading-relaxed">
                             {selectedCompanyDescription}
                           </p>

@@ -353,7 +353,7 @@ export default function WarehouseLocationPage() {
           <CardBody className="px-6 pb-6 space-y-4">
             {form.location && (
               <div className="text-[10px] font-bold  tracking-widest text-default-500 dark:text-white/50 flex flex-wrap gap-x-2 gap-y-1">
-                <span className="text-obaol-500">Detected Node:</span> {locationLabel}
+                <span className="text-obaol-500">Selected location:</span> {locationLabel}
                 {form.location.district && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.district}</>}
                 {form.location.pincode && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.pincode}</>}
                 {form.location.city && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.city}</>}
@@ -445,9 +445,9 @@ export default function WarehouseLocationPage() {
                 }}
                 popoverProps={{ shouldCloseOnBlur: false }}
               >
-                <SelectItem key="GENERAL" className="text-foreground">General Logistic Node</SelectItem>
+                <SelectItem key="GENERAL" className="text-foreground">General warehouse</SelectItem>
                 <SelectItem key="COLD_STORAGE" className="text-foreground">Cold Chain Facility</SelectItem>
-                <SelectItem key="BONDED" className="text-foreground">Bonded Secure Node</SelectItem>
+                <SelectItem key="BONDED" className="text-foreground">Bonded warehouse</SelectItem>
                 <SelectItem key="AGRO" className="text-foreground">Agricultural Asset</SelectItem>
               </Select>
             </div>
@@ -521,7 +521,7 @@ export default function WarehouseLocationPage() {
             </div>
             <div className="flex flex-col gap-1.5">
               <Input
-                label="Mission Pincode"
+                label="Postal code"
                 variant="flat"
                 placeholder="e.g. 600001"
                 value={form.pincode}
@@ -546,7 +546,7 @@ export default function WarehouseLocationPage() {
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Infrastructure Capacity</label>
               <Input
-                label="Total Mission Volume (MT)"
+                label="Total capacity (MT)"
                 variant="flat"
                 placeholder="00.00"
                 type="number"
@@ -562,7 +562,7 @@ export default function WarehouseLocationPage() {
             <div className="flex items-center justify-between px-2 py-4 rounded-2xl db-subtle border db-border-subtle">
               <div>
                 <p className="text-xs font-bold text-foreground  tracking-wider">List for Rental</p>
-                <p className="text-[10px] text-default-400  tracking-widest mt-1">Open node to associate network</p>
+                <p className="mt-1 text-sm text-default-400">Make this warehouse available to associates</p>
               </div>
               <Switch
                 isSelected={form.listingType === "RENTAL" && form.isRentalActive}

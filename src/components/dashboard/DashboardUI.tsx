@@ -59,15 +59,17 @@ export function DashboardEmptyState({
   icon,
   action,
   className,
+  compact = false,
 }: {
   title: string;
   description?: string;
   icon?: ReactNode;
   action?: ReactNode;
   className?: string;
+  compact?: boolean;
 }) {
   return (
-    <StateDisplay title={title} description={description} icon={icon} action={action} className={className} />
+    <StateDisplay title={title} description={description} icon={icon} action={action} className={className} compact={compact} />
   );
 }
 

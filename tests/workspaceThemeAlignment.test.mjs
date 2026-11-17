@@ -33,6 +33,10 @@ test("Warehouse Directory and map chrome use palette-based controls and markers"
   assert.match(page, /dashboard-segmented-control/);
   assert.match(page, /color=\{isSelected \? "primary" : "default"\}/);
   assert.match(page, /app-button--primary[\s\S]*Search/);
+  assert.match(page, /<PageHeader[\s\S]*eyebrow="Warehouse network"[\s\S]*title="Warehouse Contact Directory"/);
+  assert.match(page, /Loading warehouses…/);
+  assert.match(page, /filteredWarehouses\.length === 1 \? "warehouse" : "warehouses"/);
+  assert.doesNotMatch(page, /Operations_Terminal|Node_Catalog|Initializing_Nodes|Nodes Found|font-mono/);
   assert.doesNotMatch(page, /color="warning"|text-orange|bg-orange|border-orange/);
   assert.match(map, /warehouseMarkerColors/);
   assert.match(map, /themed-leaflet-map/);

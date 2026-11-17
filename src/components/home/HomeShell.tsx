@@ -31,7 +31,7 @@ export default function HomeShell() {
                   Build products, run enquiries, move orders, and manage documents with execution panels for each function.
                 </p>
                 <p className="text-sm md:text-base text-foreground/60 font-medium leading-relaxed">
-                  Importer Service and Warehouse Rent Management stay connected end to end in one agro execution system.
+                  Importer services and warehouse rental management stay connected end to end in one workspace.
                 </p>
               </div>
             </div>

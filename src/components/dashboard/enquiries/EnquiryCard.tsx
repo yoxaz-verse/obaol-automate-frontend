@@ -147,7 +147,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({
                                 </div>
                             </div>
                             <div className="flex flex-col gap-0.5 items-end text-right">
-                                 <span className="text-[8px] font-black  tracking-widest db-muted">Mission Volume</span>
+                                 <span className="text-xs font-semibold db-muted">Quantity</span>
                                  <span className="text-xs font-black text-foreground  tracking-tight">
                                     {quantity || "TBD"}
                                  </span>

@@ -396,7 +396,7 @@ export default function OnboardingModal({
       });
     },
     onSuccess: () => {
-      showToastMessage({ type: "success", message: "Company protocol deployed." });
+      showToastMessage({ type: "success", message: "Company created successfully." });
       setOperatorCompanyForm(EMPTY_OPERATOR_COMPANY_FORM);
       queryClient.invalidateQueries();
       onSuccess?.();
@@ -424,7 +424,7 @@ export default function OnboardingModal({
         email: data?.payload?.email || "",
         password: data?.tempPass || "Contact Admin",
       });
-      showToastMessage({ type: "success", message: "Associate protocol deployed." });
+      showToastMessage({ type: "success", message: "Associate created successfully." });
       setOperatorAssociateForm(EMPTY_OPERATOR_ASSOCIATE_FORM);
       queryClient.invalidateQueries();
       onSuccess?.();
@@ -492,7 +492,7 @@ export default function OnboardingModal({
                 <div className="w-1.5 h-8 bg-primary-500 rounded-full shadow-[0_0_15px_rgba(0,111,238,0.5)]" />
                 <div>
                   <h2 className="text-2xl font-black italic  tracking-tighter">Identity <span className="text-primary-500">Onboarding</span></h2>
-                  <p className="text-[10px] text-default-500 font-bold tracking-widest ">Establish new associate and company protocols</p>
+                  <p className="text-sm font-medium text-default-500">Create a new associate and company</p>
                 </div>
               </div>
             </ModalHeader>
@@ -541,7 +541,7 @@ export default function OnboardingModal({
                       {combinedStep === 1 && (
                         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                           <Input label="Associate Name" labelPlacement="outside" placeholder="Legal full name" variant="bordered" radius="lg" size="lg" value={combinedAssociateForm.name} onValueChange={(value) => setCombinedAssociateForm((current) => ({ ...current, name: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
-                          <Input label="Associate Email" type="email" labelPlacement="outside" placeholder="Business email protocol" variant="bordered" radius="lg" size="lg" value={combinedAssociateForm.email} onValueChange={(value) => setCombinedAssociateForm((current) => ({ ...current, email: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
+                          <Input label="Associate Email" type="email" labelPlacement="outside" placeholder="Business email address" variant="bordered" radius="lg" size="lg" value={combinedAssociateForm.email} onValueChange={(value) => setCombinedAssociateForm((current) => ({ ...current, email: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
                           <Input label="Phone" labelPlacement="outside" placeholder="+X (XXX) XXX-XXXX" variant="bordered" radius="lg" size="lg" value={combinedAssociateForm.phone} onValueChange={(value) => setCombinedAssociateForm((current) => ({ ...current, phone: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
                           <Input label="Backup Phone" labelPlacement="outside" placeholder="Recovery contact" variant="bordered" radius="lg" size="lg" value={combinedAssociateForm.phoneSecondary} onValueChange={(value) => setCombinedAssociateForm((current) => ({ ...current, phoneSecondary: value }))} classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
                         </div>
@@ -550,7 +550,7 @@ export default function OnboardingModal({
                       {combinedStep === 2 && (
                         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                             <Input label="Company Name" labelPlacement="outside" placeholder="Entity registered name" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.name} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, name: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
-                           <Input label="Corporate Email" type="email" labelPlacement="outside" placeholder="Billing email protocol" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.email} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, email: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
+                           <Input label="Corporate Email" type="email" labelPlacement="outside" placeholder="Billing email address" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.email} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, email: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
                            <Input label="Desk Phone" labelPlacement="outside" placeholder="HQ contact number" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.phone} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, phone: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
                            <Input label="Backup Phone" labelPlacement="outside" placeholder="Recovery contact" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.phoneSecondary} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, phoneSecondary: value }))} isRequired classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
                            <Select 
@@ -575,7 +575,7 @@ export default function OnboardingModal({
                             </Select>
                           ) : (
                             <>
-                              <Select label="State Protocol" labelPlacement="outside" variant="bordered" radius="lg" size="lg" selectedKeys={operatorCompanyForm.state ? new Set([operatorCompanyForm.state]) : new Set()} onSelectionChange={(keys) => setOperatorCompanyForm((current) => ({ ...current, state: String(Array.from(keys as Set<string>)[0] || "") }))} isLoading={statesQuery.isLoading} classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", trigger: "h-14 bg-default-100/50 border-divider" }}>
+                              <Select label="State" labelPlacement="outside" variant="bordered" radius="lg" size="lg" selectedKeys={operatorCompanyForm.state ? new Set([operatorCompanyForm.state]) : new Set()} onSelectionChange={(keys) => setOperatorCompanyForm((current) => ({ ...current, state: String(Array.from(keys as Set<string>)[0] || "") }))} isLoading={statesQuery.isLoading} classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", trigger: "h-14 bg-default-100/50 border-divider" }}>
                                 {locationStates.map((state: any) => (<SelectItem key={state?._id || state?.id}>{state?.name}</SelectItem>))}
                               </Select>
                               <Select label="District Unit" labelPlacement="outside" variant="bordered" radius="lg" size="lg" selectedKeys={operatorCompanyForm.district ? new Set([operatorCompanyForm.district]) : new Set()} onSelectionChange={(keys) => setOperatorCompanyForm((current) => ({ ...current, district: String(Array.from(keys as Set<string>)[0] || "") }))} isDisabled={!operatorCompanyForm.state} isLoading={districtsQuery.isLoading} classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", trigger: "h-14 bg-default-100/50 border-divider" }}>
@@ -678,7 +678,7 @@ export default function OnboardingModal({
                         <div className="space-y-8">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="rounded-[1.5rem] border border-primary-500/20 bg-primary-500/5 p-6 space-y-4">
-                              <h4 className="text-[10px] font-black  text-primary-500 tracking-[0.3em] italic mb-2">Associate Protocol Summary</h4>
+                              <h4 className="mb-2 text-sm font-bold text-primary-500">Associate details</h4>
                               <div className="space-y-3">
                                 <div><p className="text-[9px] font-black text-default-400  tracking-widest leading-none mb-1">Identity</p><p className="text-sm font-black text-foreground italic  tracking-tighter">{combinedAssociateForm.name}</p></div>
                                 <div><p className="text-[9px] font-black text-default-400  tracking-widest leading-none mb-1">Contact</p><p className="text-[11px] font-bold text-default-500">{combinedAssociateForm.email} • {combinedAssociateForm.phone}</p></div>
@@ -696,7 +696,7 @@ export default function OnboardingModal({
                           </div>
                           <div className="p-6 rounded-2xl border border-primary-500/20 bg-primary-500/10 text-center relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                            <p className="text-[11px] font-black  italic text-primary-500 tracking-[0.25em]">Awaiting execution deployment on submit</p>
+                            <p className="text-sm font-semibold text-primary-500">Ready to create the associate and company</p>
                           </div>
                         </div>
                       )}
@@ -710,7 +710,7 @@ export default function OnboardingModal({
                           {combinedStep < 4 ? (
                             <Button color="primary" isDisabled={(combinedStep === 1 && !isCombinedAssociateStepValid) || (combinedStep === 2 && !isCompanyFormValid) || (combinedStep === 3 && !isFunctionStepValid)} onPress={() => setCombinedStep((prev) => (prev + 1) as 1 | 2 | 3 | 4)} className="font-black  text-[10px] tracking-widest h-12 px-12 rounded-2xl shadow-[0_10px_40px_-5px_rgba(0,111,238,0.3)] bg-gradient-to-tr from-primary-600 to-primary-400">Continue Discovery</Button>
                           ) : (
-                            <Button color="primary" isLoading={combinedOnboardingMutation.isPending} isDisabled={!isCombinedAssociateStepValid || !isCompanyFormValid || !isFunctionStepValid} onPress={() => combinedOnboardingMutation.mutate()} className="font-black  text-[11px] tracking-widest italic h-12 px-14 rounded-2xl bg-primary-600 shadow-[0_20px_50px_-5px_rgba(0,111,238,0.4)]">Activate Protocol Deployment</Button>
+                            <Button color="primary" isLoading={combinedOnboardingMutation.isPending} isDisabled={!isCombinedAssociateStepValid || !isCompanyFormValid || !isFunctionStepValid} onPress={() => combinedOnboardingMutation.mutate()} className="h-12 rounded-2xl bg-primary-600 px-14 text-sm font-bold shadow-[0_20px_50px_-5px_rgba(0,111,238,0.4)]">Create associate and company</Button>
                           )}
                         </div>
                       </div>
@@ -732,8 +732,8 @@ export default function OnboardingModal({
 
                     <div className="group relative z-10 max-w-md w-full p-10 rounded-[3rem] border border-success-500/20 bg-black/60 backdrop-blur-3xl shadow-2xl space-y-8 transition-all hover:border-success-500/40">
                       <div className="flex items-center justify-between border-b border-divider/50 pb-5">
-                        <span className="text-[10px] font-black  text-default-500 tracking-[0.3em]">Protocol Hash</span>
-                        <span className="text-[10px] font-black  text-success-500 tracking-[0.3em] italic">Combined-Init-01</span>
+                        <span className="text-sm font-semibold text-default-500">Account setup</span>
+                        <span className="text-sm font-semibold text-success-500">Completed</span>
                       </div>
                       
                       <div className="space-y-6 text-left">
@@ -777,7 +777,7 @@ export default function OnboardingModal({
                 <div className="space-y-6">
                 {(allowCompanyMode || allowAssociateMode) ? (
                 <div className="flex items-center gap-6">
-                   <h3 className="text-sm font-black  italic tracking-[0.25em] text-default-400">Alternative Protocol Pathways</h3>
+                   <h3 className="text-sm font-bold text-default-400">Other setup options</h3>
                    <div className="flex-1 h-px bg-gradient-to-r from-divider via-divider/20 to-transparent" />
                 </div>
                 ) : null}
@@ -797,7 +797,7 @@ export default function OnboardingModal({
                   <div className="p-8 rounded-[2rem] border border-divider/50 bg-content2/30 space-y-6 shadow-inner">
                     <div className="flex items-center gap-3">
                        <div className="w-1.5 h-4 bg-primary-500 rounded-full" />
-                       <h4 className="text-xs font-black  italic text-foreground tracking-widest">Isolated Company Initialization</h4>
+                       <h4 className="text-sm font-bold text-foreground">Create a company</h4>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        <Input label="Entity Name" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.name} onValueChange={(v) => setOperatorCompanyForm(c => ({...c, name: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black  text-default-500 tracking-widest ml-1 mb-2" }} />
@@ -859,7 +859,7 @@ export default function OnboardingModal({
                   <div className="p-8 rounded-[2rem] border border-divider/50 bg-content2/30 space-y-6 shadow-inner">
                     <div className="flex items-center gap-3">
                        <div className="w-1.5 h-4 bg-secondary-500 rounded-full shadow-[0_0_8px_rgba(147,51,234,0.5)]" />
-                       <h4 className="text-xs font-black  italic text-foreground tracking-widest">Isolated Associate Initialization</h4>
+                       <h4 className="text-sm font-bold text-foreground">Create an associate</h4>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        <Input label="Associate Name" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorAssociateForm.name} onValueChange={(v) => setOperatorAssociateForm(c => ({...c, name: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black  text-default-500 tracking-widest ml-1 mb-2" }} />
@@ -926,7 +926,7 @@ export default function OnboardingModal({
             )}
           </ModalBody>
           <ModalFooter>
-            <Button variant="light" onPress={onClose} className="font-black  text-[10px] tracking-widest italic opacity-40 hover:opacity-100 h-10 px-8">Return to Mission Control</Button>
+            <Button variant="light" onPress={onClose} className="h-10 px-8 text-sm font-bold opacity-70 hover:opacity-100">Close</Button>
           </ModalFooter>
         </>
       )}

@@ -330,7 +330,7 @@ const operatorFeatureSections = [
         name: "Hierarchy",
         route: "/dashboard/operator/hierarchy",
         what: "Understand reporting structure and coverage areas.",
-        actions: "Inspect chain of responsibility and assigned nodes.",
+        actions: "Inspect the chain of responsibility and assigned people.",
       },
       {
         name: "Team",
@@ -530,7 +530,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-obaol-500/10 border border-obaol-500/20 mb-8">
               <LuBookOpen className="text-obaol-500 animate-pulse" size={14} />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-500">
-                System Protocol: Training // Orientation
+                Product training and orientation
               </span>
             </div>
 
@@ -541,7 +541,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
 
             <p className="text-sm md:text-lg font-bold text-default-600 dark:text-default-400 uppercase tracking-widest max-w-3xl leading-relaxed opacity-90">
               Reference checklist for operational mastery and guidance recording.
-              Organized by the exact dashboard nodes activated upon approval.
+              Organized by the dashboard sections available after approval.
             </p>
 
             {showToggle && (
@@ -578,7 +578,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                         </div>
                       </div>
                       <span className="text-[10px] font-black text-obaol-500/60 uppercase tracking-[0.3em]">
-                        [{section.items.length} ACTIVE NODES]
+                        [{section.items.length} active sections]
                       </span>
                     </div>
 
@@ -605,7 +605,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                               </p>
                               <div className="flex items-center gap-3">
                                 <span className="text-[10px] font-black text-obaol-600 dark:text-obaol-500 uppercase tracking-widest italic leading-none opacity-80">
-                                  Protocol Actions:
+                                  Recommended actions:
                                 </span>
                                 <span className="text-[11px] font-black text-default-500 uppercase tracking-widest leading-none">
                                   {item.actions}
@@ -718,10 +718,10 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
               <div className="p-6 rounded-[2rem] bg-obaol-500/[0.05] dark:bg-obaol-500/[0.02] border border-obaol-500/30 backdrop-blur-xl group">
                 <div className="flex items-center gap-3 mb-3 text-obaol-500">
                   <LuCircleCheck size={16} />
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">System Advisory</span>
+                  <span className="text-sm font-bold">Guidance</span>
                 </div>
                 <p className="text-[11px] font-bold text-default-600 dark:text-default-400 uppercase tracking-widest leading-relaxed italic opacity-90">
-                  Limit each section to 30–60 seconds. Use active telemetry data to visualize enquire/order flow transitions across the command node.
+                  Limit each section to 30–60 seconds. Use current enquiry and order data to explain how work moves between stages.
                 </p>
               </div>
 

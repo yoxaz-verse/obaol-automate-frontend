@@ -478,7 +478,7 @@ export default function HeroSection() {
                 className="w-full space-y-6 lg:sticky lg:top-28 lg:self-start lg:space-y-5 lg:pr-3"
               >
                 <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.45em] text-obaol-700 dark:text-obaol-300 sm:text-xs">
-                  The Agro Execution System for Agro Trade
+                  The Connected Workspace for Agro Trade
                 </p>
 
                 <h1
@@ -515,7 +515,7 @@ export default function HeroSection() {
 
                 <div className="pt-2 md:pt-5 max-w-3xl space-y-6 md:space-y-8">
                   <p className="text-base sm:text-lg md:text-xl text-foreground/70 font-medium leading-relaxed">
-                    Plan procurement, manage logistics, run verification, and move orders in one agro execution system.
+                    Plan procurement, manage logistics, run verification, and move orders in one connected workspace.
                     <span className="text-foreground font-bold"> Built for real B2B agro trade operations.</span>
                   </p>
 

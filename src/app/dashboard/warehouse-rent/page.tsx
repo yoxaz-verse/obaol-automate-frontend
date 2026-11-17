@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, CardBody, Chip, Input, Select, SelectItem } from "@nextui-org/react";
-import Title from "@/components/titles";
+import PageHeader from "@/components/ui/PageHeader";
 import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
@@ -259,7 +259,7 @@ export default function WarehouseRentPage() {
       return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl">
           <FiLoader className="mb-4 animate-spin text-obaol-700 dark:text-obaol-300" size={24} />
-          <span className="text-[10px] font-black  tracking-[0.2em] text-default-500 font-mono">Initializing_Nodes...</span>
+          <span className="text-sm font-semibold text-default-500">Loading warehouses…</span>
           {isWarehouseLoadSlow ? (
             <div className="mt-4 flex flex-col items-center gap-3">
               <span className="text-[11px] text-default-400">Still loading. You can retry now.</span>
@@ -275,7 +275,7 @@ export default function WarehouseRentPage() {
     if (isWarehousesError) {
       return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-danger-500/30 rounded-3xl text-center px-6">
-          <span className="text-[10px] font-black  tracking-[0.2em] text-danger-300 font-mono">{warehousesErrorMessage}</span>
+          <span className="text-sm font-semibold text-danger-500">{warehousesErrorMessage}</span>
         </motion.div>
       );
     }
@@ -283,7 +283,7 @@ export default function WarehouseRentPage() {
     if (filteredWarehouses.length === 0) {
       return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl text-center px-6">
-          <span className="text-[10px] font-black  tracking-[0.2em] text-default-500 font-mono">No_Available_Capacity_Detected</span>
+          <span className="text-sm font-semibold text-default-500">No warehouses match these filters.</span>
         </motion.div>
       );
     }
@@ -360,18 +360,12 @@ export default function WarehouseRentPage() {
   return (
     <section className="w-full min-h-screen p-4 md:p-8 bg-background text-foreground">
       <div className="max-w-[1400px] mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-1">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="mb-2 flex items-center gap-2 text-obaol-700 dark:text-obaol-300">
-              <div className="h-2 w-2 rounded-full bg-obaol-400" />
-              <span className="text-[10px] font-black  tracking-[0.3em] font-mono">Operations_Terminal</span>
-            </motion.div>
-            <Title title="Warehouse Contact Directory" visuallyHidden />
-            <p className="text-sm text-default-400 max-w-xl">
-              Contact warehouse operators directly for rental coordination. Booking automation remains visible as coming soon.
-            </p>
-          </div>
-          {canAdd ? (
+        <PageHeader
+          variant="plain"
+          eyebrow="Warehouse network"
+          title="Warehouse Contact Directory"
+          description="Contact warehouse operators directly for rental coordination. Booking automation remains visible as coming soon."
+          actions={canAdd ? (
             <Button
               color="primary"
               className="h-11 px-6 font-black  tracking-widest text-[11px] rounded-xl"
@@ -381,7 +375,7 @@ export default function WarehouseRentPage() {
               Add Warehouse
             </Button>
           ) : null}
-        </div>
+        />
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="dashboard-segmented-control flex w-full overflow-x-auto rounded-xl p-1 lg:w-auto">
@@ -405,10 +399,9 @@ export default function WarehouseRentPage() {
               );
             })}
           </div>
-          <div className="flex items-center justify-between lg:justify-end gap-4">
-            <h2 className="text-xs font-black  tracking-[0.3em] text-default-400 font-mono">Node_Catalog</h2>
-            <span className="font-mono text-[10px] text-obaol-700/70 dark:text-obaol-300/80">{filteredWarehouses.length} Nodes Found</span>
-          </div>
+          <p className="text-sm font-semibold text-default-500" aria-live="polite">
+            {filteredWarehouses.length} {filteredWarehouses.length === 1 ? "warehouse" : "warehouses"} found
+          </p>
         </div>
 
         <AnimatePresence mode="wait">
@@ -428,7 +421,7 @@ export default function WarehouseRentPage() {
                 <div className="flex flex-col lg:flex-row gap-4">
                   {needsCompanySelect ? (
                     <div className="flex-1">
-                      <div className="text-[10px] font-black  tracking-widest text-default-400 mb-2 font-mono">Trade Entity</div>
+                      <div className="mb-2 text-sm font-semibold text-default-500">Associate company</div>
                       <Select
                         variant="bordered"
                         classNames={{
@@ -453,7 +446,7 @@ export default function WarehouseRentPage() {
                   ) : null}
 
                   <div className="flex-1">
-                    <div className="text-[10px] font-black  tracking-widest text-default-400 mb-2 font-mono">Strategic Location</div>
+                    <div className="mb-2 text-sm font-semibold text-default-500">Location</div>
                     <Input
                       placeholder="Search city, district, or state"
                       variant="bordered"

@@ -42,7 +42,7 @@ export default function StateDisplay({
       role={variant === "error" ? "alert" : "status"}
       className={join(
         "flex w-full flex-col items-center justify-center rounded-2xl border px-5 text-center",
-        compact ? "py-8" : "py-12",
+        compact ? "min-h-36 py-8" : "min-h-64 py-12 sm:min-h-72 sm:px-8",
         toneClasses[variant],
         className,
       )}

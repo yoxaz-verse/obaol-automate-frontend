@@ -61,7 +61,7 @@ function AdminDashboardPanel() {
         <div className="w-2 h-8 bg-obaol-500 rounded-full" />
         <div>
           <h3 className="text-2xl font-black text-foreground tracking-tighter ">Platform Command Overview</h3>
-          <p className="text-[10px] font-bold text-default-400  tracking-[0.2em] mt-0.5">High-level System Metrics & Global Assets</p>
+          <p className="mt-0.5 text-sm font-medium text-default-400">Account activity and shared resources</p>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

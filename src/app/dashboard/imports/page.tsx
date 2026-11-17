@@ -1061,7 +1061,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px]  tracking-[0.2em] text-obaol-500 font-bold">Inception Phase</span>
+                <span className="text-xs font-bold text-obaol-500">New import listing</span>
                 <h3 className="text-xl font-bold text-white  tracking-tight">Create Import Listing</h3>
               </ModalHeader>
               <ModalBody className="gap-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
@@ -1070,7 +1070,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Mission Parameters</span>
+                      <span className="text-sm font-semibold text-default-400">Listing details</span>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4">
@@ -1245,7 +1245,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Logistics Initialization</span>
+                      <span className="text-sm font-semibold text-default-400">Logistics details</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1420,7 +1420,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                       )}
 
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold  tracking-widest text-default-400 px-1">Mission Volume</label>
+                        <label className="px-1 text-sm font-semibold text-default-400">Quantity</label>
                         <Input
                           label="Allocation (MT)"
                           type="number"
@@ -1448,7 +1448,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                       </div>
                       <p className="text-xs text-default-300 font-medium leading-relaxed">
                         Secure up to <span className="text-white font-bold">{maxReservableQty} MT</span> for this shipment. 
-                        Once submitted, the mission authority will review your request.
+                        Once submitted, the OBAOL team will review your request.
                       </p>
                     </div>
                   </>
@@ -1798,7 +1798,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px]  tracking-[0.2em] text-obaol-500 font-bold">Node Configuration</span>
+                <span className="text-xs font-bold text-obaol-500">Import listing</span>
                 <h3 className="text-xl font-bold text-white  tracking-tight">Edit Import Listing</h3>
               </ModalHeader>
               <ModalBody className="gap-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
@@ -1807,7 +1807,7 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-1 h-3 bg-obaol-500 rounded-full" />
-                      <span className="text-[10px] font-bold  tracking-widest text-default-400">Mission Identity</span>
+                      <span className="text-sm font-semibold text-default-400">Listing details</span>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

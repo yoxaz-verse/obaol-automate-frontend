@@ -284,7 +284,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
       </div>
       <div>
         <h3 className="text-3xl font-black text-foreground tracking-tight ">Operational Deadlock</h3>
-        <p className="text-default-400 text-sm max-w-[320px] leading-relaxed mt-2 font-medium">Select a commodity from the master catalog system to initialize the detailed variant registry.</p>
+        <p className="mt-2 max-w-[320px] text-sm font-medium leading-relaxed text-default-400">Select a commodity to view and manage its product variants.</p>
       </div>
     </div>
   );

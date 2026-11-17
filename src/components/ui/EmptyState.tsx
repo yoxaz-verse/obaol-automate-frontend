@@ -10,6 +10,7 @@ interface EmptyStateProps {
     icon?: React.ReactNode;
     action?: { label: string; href: string } | React.ReactNode;
     className?: string;
+    compact?: boolean;
 }
 
 export default function EmptyState({
@@ -19,6 +20,7 @@ export default function EmptyState({
     icon = <FiInbox className="text-default-300" size={48} />,
     action,
     className,
+    compact = false,
 }: EmptyStateProps) {
     const actionNode = React.isValidElement(action)
         ? action
@@ -27,6 +29,6 @@ export default function EmptyState({
           : undefined;
 
     return (
-        <StateDisplay title={title} description={description ?? message} icon={icon} action={actionNode} className={className} />
+        <StateDisplay title={title} description={description ?? message} icon={icon} action={actionNode} className={className} compact={compact} />
     );
 }

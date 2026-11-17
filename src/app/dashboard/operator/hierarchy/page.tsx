@@ -273,7 +273,7 @@ function HierarchyBranch({
               <div className="mt-3 flex items-center gap-4">
                 <div className="flex items-center gap-1.5 opacity-40">
                   <FiUsers size={11} />
-                  <span className="text-[9px] font-black  tracking-widest">{String(node.attributes?.teamSize || node.__meta.teamSize || 0)} NODES</span>
+                  <span className="text-[9px] font-black tracking-widest">{String(node.attributes?.teamSize || node.__meta.teamSize || 0)} people</span>
                 </div>
                 {node.__meta.totalCommission > 0 && (
                   <div className="flex items-center gap-1.5 text-primary-500">
@@ -802,8 +802,8 @@ export default function OperatorHierarchyPage() {
           {/* Diagnostic Hub Header */}
           <div className="absolute top-6 left-6 z-40 bg-content1 border border-divider p-4 rounded-xl shadow-xl space-y-4 pointer-events-auto backdrop-blur-md max-w-[240px]">
             <div>
-              <h3 className="text-[10px] font-black  tracking-[0.2em] text-primary-500 leading-none mb-1.5">Network Telemetry</h3>
-              <p className="text-[9px] font-bold text-default-400  tracking-widest leading-relaxed">Direct Pointer Control • Multi-Axis Scaling</p>
+              <h3 className="mb-1.5 text-sm font-bold leading-none text-primary-500">Team network</h3>
+              <p className="text-xs font-medium leading-relaxed text-default-400">Drag to move • Scroll to zoom</p>
             </div>
             <div className="flex items-center gap-4 pt-3 border-t border-divider">
               <div className="flex items-center gap-1.5">
@@ -890,7 +890,7 @@ export default function OperatorHierarchyPage() {
             >
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-sm font-black  tracking-[0.2em] text-primary-500 mb-1">Node Inspector</h3>
+                  <h3 className="mb-1 text-sm font-bold text-primary-500">Team member details</h3>
                   <p className="text-xl font-black text-foreground tracking-tight ">Agent Intelligence</p>
                 </div>
                 <Button isIconOnly size="md" variant="light" radius="full" className="hover:bg-default-100" onPress={() => setSelectedMeta(null)}>
@@ -916,27 +916,27 @@ export default function OperatorHierarchyPage() {
                   </div>
                   <div className="p-4 rounded-2xl border border-divider bg-default-50/50">
                     <p className="text-[10px] font-black  tracking-widest text-default-400 mb-1">Direct Force</p>
-                    <p className="font-black text-foreground  truncate">{toNumber(selectedNode.teamSize)} Nodes</p>
+                    <p className="truncate font-black text-foreground">{toNumber(selectedNode.teamSize)} people</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h5 className="text-[10px] font-black  tracking-[0.25em] text-primary-500 border-b border-divider pb-2">Yield Telemetry</h5>
+                  <h5 className="border-b border-divider pb-2 text-sm font-bold text-primary-500">Earnings overview</h5>
 
                   {selectedSummaryQuery.isFetching ? (
                     <div className="rounded-2xl border border-divider p-6 text-default-500 flex flex-col items-center gap-3 animate-pulse">
                       <FiRefreshCw className="animate-spin text-primary" size={24} />
-                      <span className="text-[10px] font-black  tracking-widest">Synchronizing...</span>
+                      <span className="text-sm font-semibold">Loading summary…</span>
                     </div>
                   ) : hasRestrictedMetrics ? (
                     <div className="rounded-2xl border border-obaol-500/20 bg-obaol-500/5 p-6 text-center space-y-2">
                       <FiShield className="mx-auto text-obaol-500" size={24} />
                       <p className="text-[10px] font-black text-obaol-600  tracking-widest">Access Restricted</p>
-                      <p className="text-[11px] font-medium text-default-500 leading-relaxed">Financial metrics are isolated for nodes outside your immediate leadership scope.</p>
+                      <p className="text-[11px] font-medium text-default-500 leading-relaxed">Financial metrics are hidden for people outside your immediate leadership scope.</p>
                     </div>
                   ) : selectedSummaryQuery.isError ? (
                     <div className="rounded-2xl border border-danger-500/20 bg-danger-500/5 p-6 text-center">
-                      <p className="text-[10px] font-black text-danger-600 ">Telemetry Link Failed</p>
+                      <p className="text-sm font-semibold text-danger-600">Unable to load the earnings summary.</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -964,7 +964,7 @@ export default function OperatorHierarchyPage() {
                   className="app-button app-button--primary h-14 w-full rounded-2xl text-sm tracking-widest"
                   onPress={() => setSelectedMeta(null)}
                 >
-                  Mission Complete
+                  Close
                 </Button>
               </div>
             </motion.div>

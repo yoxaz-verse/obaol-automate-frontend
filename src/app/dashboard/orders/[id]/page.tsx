@@ -1152,7 +1152,7 @@ export default function OrderDetailsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         {/* @ts-ignore */}
                         <AppSelect
-                            label="SCHEDULING PROTOCOL"
+                            label="Scheduling"
                             selectedKeys={milestones.schedulingMode ? [milestones.schedulingMode] : []}
                             onSelectionChange={(keys) => {
                                 const arr = Array.from(keys as Set<string>);
@@ -1260,7 +1260,7 @@ export default function OrderDetailsPage() {
 
                         <h2 className="text-xs font-black  tracking-widest text-obaol-500 mb-6 flex items-center gap-3">
                             <span className="w-2 h-2 rounded-full bg-obaol-500 block shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
-                            Next Step Protocol
+                            Next steps
                         </h2>
 
                         <div className="flex-grow space-y-6">
@@ -1354,10 +1354,10 @@ export default function OrderDetailsPage() {
                                     Synchronized Pipelines
                                 </h2>
                                 <p className="text-[11px] font-black text-default-400  tracking-widest max-w-xs leading-relaxed">
-                                    Consolidated telemetry for parallel subflow execution and gate-locking.
+                                    A consolidated view of parallel workflows, dependencies, and approvals.
                                 </p>
                             </div>
-                            <div className="text-[10px] font-black text-default-500  tracking-[0.1em] bg-default-100/50 px-4 py-1.5 rounded-full border border-divider">Global Telemetry Active</div>
+                            <div className="rounded-full border border-divider bg-default-100/50 px-4 py-1.5 text-xs font-semibold text-default-500">Live workflow status</div>
                         </div>
                         <div className="p-6">
                             {/* @ts-ignore */}
@@ -1668,7 +1668,7 @@ export default function OrderDetailsPage() {
                                                                             </div>
                                                                             <div className="text-center">
                                                                                 <div className="text-lg font-black text-success-600  tracking-tighter leading-none mb-1">Pipeline Integrated</div>
-                                                                                <div className="text-[10px] font-black text-success-500 opacity-70  tracking-[0.2em]">All nodes fully synchronized and operational</div>
+                                                                                <div className="text-sm font-semibold text-success-500 opacity-80">All workflow steps are up to date</div>
                                                                             </div>
                                                                         </div>
                                                                     )}

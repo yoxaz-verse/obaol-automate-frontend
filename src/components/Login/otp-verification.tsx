@@ -41,7 +41,7 @@ export default function OtpVerification({ user }: IVerification) {
     onError: (error: any) => {
       showToastMessage({
         type: "error",
-        message: error.response?.data?.message || "Transmission failure",
+        message: error.response?.data?.message || "Could not send the verification code.",
         position: "top-right",
       });
       setLoading(false);
@@ -67,7 +67,7 @@ export default function OtpVerification({ user }: IVerification) {
     onError: (error: any) => {
       showToastMessage({
         type: "error",
-        message: error.response?.data?.message || "Protocol verification failed",
+        message: error.response?.data?.message || "Verification failed. Please try again.",
         position: "top-right",
       });
       setLoading(false);
@@ -115,7 +115,7 @@ export default function OtpVerification({ user }: IVerification) {
             <div className="p-4 rounded-xl bg-content2/50 border border-divider w-full flex items-center gap-4">
                <FiMail className="text-xl text-obaol-600 dark:text-obaol-300" />
                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-default-400">Target Protocol</span>
+                  <span className="text-xs font-bold text-default-400">Verification email</span>
                   <span className="text-sm font-bold">{maskEmail(user.email)}</span>
                </div>
             </div>
@@ -169,7 +169,7 @@ export default function OtpVerification({ user }: IVerification) {
                   isLoading={loading}
                      className="h-14 w-full rounded-2xl bg-gradient-to-r from-obaol-400 to-obaol-600 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10"
                 >
-                  Verify Protocol Access
+                  Verify code
                 </Button>
                 
                 <button
@@ -177,7 +177,7 @@ export default function OtpVerification({ user }: IVerification) {
                   onClick={() => sendOtpMutation.mutate()}
                   className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-default-400 transition-colors hover:text-obaol-700 dark:hover:text-obaol-300"
                 >
-                  Re-transmit Sequence
+                  Send a new code
                 </button>
               </div>
             </motion.form>

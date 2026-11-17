@@ -13,16 +13,16 @@ type BrandedLoaderProps = {
   message?: string;
 };
 
-type MissionStage = {
+type LoadingStage = {
     title: string;
     icon: React.ElementType;
     status: string;
 };
 
-const MISSION_STAGES: MissionStage[] = [
-    { title: "Initializing Protocol", icon: LuScan, status: "Agro Source Validated" },
-    { title: "Logistics Sync", icon: LuTruck, status: "Fleet Orchestration Active" },
-    { title: "Finalizing Ecosystem", icon: LuShieldCheck, status: "Mission Parameters Locked" },
+const LOADING_STAGES: LoadingStage[] = [
+    { title: "Checking details", icon: LuScan, status: "Source information confirmed" },
+    { title: "Preparing logistics", icon: LuTruck, status: "Transport information ready" },
+    { title: "Finishing setup", icon: LuShieldCheck, status: "Almost ready" },
 ];
 
 const INTERVAL_MS = 2400;
@@ -32,7 +32,7 @@ export default function BrandedLoader({
   className = "",
   variant = "default",
   size = "md",
-  message = "Initializing System",
+  message = "Loading your workspace",
 }: BrandedLoaderProps) {
   const sizeMap = {
     sm: { frame: "w-[120px] h-[120px]", logo: 32, iconSize: 18 },
@@ -52,14 +52,14 @@ export default function BrandedLoader({
     timerRef.current = setInterval(() => {
       setTextVisible(false);
       setTimeout(() => {
-        setStage((prev) => (prev + 1) % MISSION_STAGES.length);
+        setStage((prev) => (prev + 1) % LOADING_STAGES.length);
         setTextVisible(true);
       }, 300);
     }, INTERVAL_MS);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
-  const active = MISSION_STAGES[stage];
+  const active = LOADING_STAGES[stage];
   const ActiveIcon = active.icon;
 
   const containerBase = fullScreen
@@ -166,7 +166,7 @@ export default function BrandedLoader({
 
         {/* ── Progress bar ── */}
         <div className="w-full flex gap-1.5 mt-8 px-8">
-          {MISSION_STAGES.map((_, i) => (
+          {LOADING_STAGES.map((_, i) => (
             <div key={i} className="flex-1 h-[2px] rounded-full bg-default-100 relative overflow-hidden">
               {i < stage && (
                 <div className="absolute inset-0 rounded-full bg-obaol-500/40" />
@@ -185,7 +185,7 @@ export default function BrandedLoader({
         </div>
 
         <span className="mt-6 text-[8px] font-black text-default-400/50 tracking-[0.4em] italic">
-          OBAOL Mission Control // Status Normal
+          OBAOL workspace
         </span>
       </div>
     </div>

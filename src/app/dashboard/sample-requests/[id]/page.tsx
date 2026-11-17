@@ -554,7 +554,7 @@ export default function SampleRequestDetailPage() {
                   <LuActivity className="group-hover:animate-pulse" size={20} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black  tracking-[0.2em] text-foreground">Operational Protocol</h3>
+                  <h3 className="text-sm font-bold text-foreground">Request progress</h3>
                   <p className="text-[9px] font-black text-default-400  tracking-widest mt-1 italic">Tactical Fulfillment Sequence</p>
                 </div>
               </div>
@@ -628,7 +628,7 @@ export default function SampleRequestDetailPage() {
                 {status === "PAYMENT_RECEIVED" && canBuyer && !canSupplier && (
                   <div className="p-5 rounded-2xl bg-primary-500/5 border border-primary-500/10">
                     <p className="text-[11px] font-bold text-primary-200/80  tracking-widest leading-relaxed">
-                      Payment recorded ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). Supplier will now continue with packaging protocol.
+                      Payment recorded ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). The supplier can now continue with packaging.
                     </p>
                   </div>
                 )}
@@ -637,7 +637,7 @@ export default function SampleRequestDetailPage() {
                   <div className="space-y-4">
                     <div className="p-5 rounded-2xl bg-obaol-500/5 border border-obaol-500/10">
                       <p className="text-[11px] font-bold text-obaol-200/80  tracking-widest leading-relaxed">
-                        Buyer payment received ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). Next step: initiate packaging protocol.
+                        Buyer payment received ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). Next step: start packaging.
                       </p>
                     </div>
                     <Button 
@@ -646,7 +646,7 @@ export default function SampleRequestDetailPage() {
                       onPress={() => packagingStartMutation.mutate()}
                       startContent={<LuPackageOpen size={18} />}
                     >
-                      INITIATE PACKAGING PROTOCOL
+                      Start packaging
                     </Button>
                   </div>
                 )}
@@ -669,7 +669,7 @@ export default function SampleRequestDetailPage() {
                     onPress={() => setCourierModalOpen(true)}
                     startContent={<LuTruck size={18} />}
                   >
-                    SUBMIT COURIER TELEMETRY
+                    Save courier details
                   </Button>
                 )}
 
@@ -715,7 +715,7 @@ export default function SampleRequestDetailPage() {
                        <LuX size={32} />
                     </div>
                     <div>
-                       <p className="text-xs font-black  tracking-[0.3em] text-danger-500">Flow Terminated</p>
+                       <p className="text-sm font-bold text-danger-500">Request cancelled</p>
                        <p className="text-[9px] font-bold text-default-400  tracking-widest mt-2">Operational inhibitors detected.</p>
                     </div>
                   </div>
@@ -727,7 +727,7 @@ export default function SampleRequestDetailPage() {
                        <LuCheck size={32} />
                     </div>
                     <div>
-                       <p className="text-xs font-black  tracking-[0.3em] text-success-500">Mission Complete</p>
+                       <p className="text-sm font-bold text-success-500">Request completed</p>
                        <p className="text-[9px] font-bold text-default-400  tracking-widest mt-2">Delivery handshake successful.</p>
                     </div>
                   </div>
@@ -737,7 +737,7 @@ export default function SampleRequestDetailPage() {
           </Card>
 
            <div className="mt-6 flex justify-center">
-              <p className="text-[9px] font-bold text-default-400  tracking-[0.3em] opacity-40">Obaol Core Telemetry // {id.slice(-8).toUpperCase()}</p>
+              <p className="text-xs font-medium text-default-400">Sample request {id.slice(-8).toUpperCase()}</p>
            </div>
         </div>
       </div>
@@ -955,7 +955,7 @@ export default function SampleRequestDetailPage() {
               <ModalHeader className="flex flex-col gap-1 py-8 px-10">
                  <div className="flex items-center gap-3">
                     <LuTruck className="text-primary" size={24} />
-                    <span className="text-xl font-black italic tracking-tight text-foreground">Logistics Protocol</span>
+                    <span className="text-xl font-black tracking-tight text-foreground">Logistics details</span>
                  </div>
                  <p className="text-[10px] font-black tracking-[0.25em] text-primary/80 mt-1 italic">Submit Distribution Data</p>
               </ModalHeader>

@@ -262,7 +262,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
           <div className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-2">
             <Select
               size="sm"
-              label="Incoterm Protocol"
+              label="Incoterm responsibilities"
               variant="bordered"
               placeholder="Select an Incoterm"
               selectedKeys={selectedIncotermId ? [selectedIncotermId] : []}
@@ -886,7 +886,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                           )}
                         >
                           {!isReadOnlyAfterConversion && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_2s_infinite] pointer-events-none" />}
-                          {isReadOnlyAfterConversion ? "PROTOCOL LOCKED" : "FINALIZE FRAMEWORK"}
+                          {isReadOnlyAfterConversion ? "Editing locked" : "Finalize responsibilities"}
                         </Button>
                       </div>
                     )}
@@ -896,7 +896,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                        <div className={`w-1.5 h-1.5 rounded-full ${isReadOnlyAfterConversion ? "bg-success animate-pulse" : "bg-obaol-500 animate-pulse"} shadow-[0_0_8px_rgba(234,179,8,0.5)]`} />
                        <span className="text-[9px] font-black  tracking-[0.5em] text-white/40 italic">
                           {finalizeLoading || savingFramework
-                            ? "PARSING PROTOCOL..."
+                            ? "Reading document…"
                             : isReadOnlyAfterConversion
                               ? "EXECUTION READY"
                               : isResponsibilityEventChanged || isTradeTermsChanged

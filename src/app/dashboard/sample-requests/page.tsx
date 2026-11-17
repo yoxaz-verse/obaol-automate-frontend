@@ -95,7 +95,7 @@ export default function SampleRequestsPage() {
               </div>
               <h2 className="text-4xl font-black text-foreground tracking-tight ">Sample <span className="text-obaol-500">Hub</span></h2>
            </div>
-           <p className="text-xs font-bold text-default-600 tracking-[0.12em] ml-1">Protocol Initialization &amp; Sample Logistics Lifecycle</p>
+           <p className="ml-1 text-sm font-medium text-default-600">Manage sample requests, dispatch, delivery, and approval.</p>
         </div>
         
         <div className="relative w-full max-w-lg group">
@@ -121,15 +121,15 @@ export default function SampleRequestsPage() {
              <div className="w-20 h-20 bg-obaol-500/10 rounded-3xl flex items-center justify-center mb-8 text-obaol-500 shadow-inner">
                <LuPackage size={36} />
              </div>
-             <h4 className="text-2xl font-black text-foreground  tracking-tight">System Empty</h4>
+             <h4 className="text-2xl font-black text-foreground tracking-tight">No sample requests yet</h4>
              <p className="text-sm font-medium text-default-600 tracking-wide mt-4 max-w-xl mx-auto leading-6 mb-10">
-               No active sample tracking protocols detected. Follow the sampling protocol below to initialize your first dispatch.
+               Create a sample request to start tracking its dispatch and delivery.
              </p>
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16 text-left">
                 {[
                   { step: "01", title: "EXPLORE LISTINGS", desc: "Open Trade Listings or the Commodity Directory to browse current cargo rates.", icon: LuSearch, color: "text-blue-500" },
-                  { step: "02", title: "INITIATE PROTOCOL", desc: "Select the 'Request Sample' icon on any live product to start the dispatch sequence.", icon: LuBox, color: "text-obaol-500" },
+                  { step: "02", title: "Request a sample", desc: "Select the 'Request Sample' icon on any live product to start the dispatch process.", icon: LuBox, color: "text-obaol-500" },
                   { step: "03", title: "TRACK DISPATCH", desc: "Monitor your sample's logistics lifecycle right here in the Sample Hub.", icon: LuActivity, color: "text-emerald-500" }
                 ].map((item, i) => (
                   <div key={i} className="p-6 rounded-[2rem] bg-foreground/[0.03] border border-white/5 relative group hover:bg-foreground/[0.05] transition-all">

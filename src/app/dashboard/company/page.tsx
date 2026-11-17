@@ -711,7 +711,7 @@ export default function CompanyWorkspacePage() {
                 <div className="w-1.5 h-8 bg-primary-500 rounded-full shadow-[0_0_15px_rgba(0,111,238,0.5)]" />
                 <div>
                   <h2 className="text-xl font-black italic  tracking-tighter">Assigned <span className="text-primary-500">Entities</span></h2>
-                  <p className="text-[10px] text-default-500 font-bold tracking-widest ">Currently authorized under your operator protocol</p>
+                  <p className="text-sm font-medium text-default-500">Currently assigned to your operator account</p>
                 </div>
               </div>
             {operatorAssignedCompaniesQuery.isLoading ? (

@@ -94,7 +94,7 @@ export default function CinematicIntro() {
               transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
               className="text-[10px] md:text-xs font-bold uppercase text-white/70 mb-4 tracking-widest"
             >
-              Agro Execution System
+              Agro Trade Workspace
             </motion.p>
             
             <div className="overflow-hidden py-2">

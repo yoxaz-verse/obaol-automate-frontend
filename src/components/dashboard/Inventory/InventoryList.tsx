@@ -1381,7 +1381,7 @@ const InventoryList: React.FC = () => {
                                                         New Trade Enquiry
                                                     </h3>
                                                     <p className="text-xs text-default-400 font-bold  tracking-widest mt-0.5">
-                                                        Direct Inventory Protocol
+                                                        Direct inventory
                                                     </p>
                                                 </div>
                                             </div>

@@ -210,7 +210,7 @@ export default function ResponsibilityTransferSection() {
                   Traditional B2B Platforms
                 </div>
                 <div className="p-5 text-sm font-bold tracking-wider uppercase text-orange-400">
-                  OBAOL – Trade Execution System
+                  OBAOL – Trade Execution Workspace
                 </div>
               </div>
 
@@ -429,7 +429,7 @@ export default function ResponsibilityTransferSection() {
 
           <p className="mt-4 text-foreground/60 leading-relaxed">
             OBAOL replaces fragmented tools and informal coordination with a
-            single structured execution system built for real-world commodity
+            single structured workspace built for real-world commodity
             trade.
           </p>
         </div>

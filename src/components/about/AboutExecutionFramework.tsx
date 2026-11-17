@@ -30,7 +30,7 @@ export default function AboutExecutionFramework() {
                 <div className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
                     <motion.div {...fadeIn} className="max-w-4xl space-y-8">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 font-bold uppercase tracking-widest text-[10px]">
-                            System Core Philosophy
+                            How the platform works
                         </div>
                         <h2 className="text-4xl md:text-7xl font-black text-foreground tracking-tight leading-[0.95]">
                             Discovery starts the conversation. <br />

@@ -172,7 +172,7 @@ function OnboardingApprovalQueue() {
         <div className="flex flex-col gap-2">
           <Title title="ApprovalsHub" visuallyHidden />
           <p className="text-[12px] font-bold text-default-400  tracking-[0.3em] opacity-70">
-            Onboarding Verification & Entity Authorization Protocol
+            Review onboarding details and approve organizations
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -297,7 +297,7 @@ function OnboardingApprovalQueue() {
           <Textarea
             value={notes}
             onValueChange={setNotes}
-            label={<span className="text-[10px] font-bold  tracking-widest text-default-400">Decision Telemetry (Optional)</span>}
+            label={<span className="text-sm font-semibold text-default-400">Review notes (optional)</span>}
             labelPlacement="outside"
             placeholder="Technical justification or feedback for this authorization action..."
             minRows={1}
@@ -336,7 +336,7 @@ function OnboardingApprovalQueue() {
                   ) : (
                     <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest">Tier / Designation</th>
                   )}
-                  <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest text-center">Protocol Status</th>
+                  <th className="px-6 py-4 text-center text-xs font-bold text-default-400">Status</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest text-center">Approval Timeline</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-default-400  tracking-widest text-right pr-10">Actions</th>
                 </tr>
@@ -481,7 +481,7 @@ function OnboardingApprovalQueue() {
 
       <div className="flex items-center justify-between gap-6 bg-foreground/[0.02] p-6 rounded-[2rem] border border-foreground/5 backdrop-blur-xl">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] font-bold  tracking-widest text-default-400 opacity-60">System Registry Meta</span>
+          <span className="text-sm font-semibold text-default-400">Record details</span>
           <div className="text-xs font-bold text-default-500">
             Page {meta.page} of {meta.pages} <span className="mx-2 text-default-300">|</span> Total Entities: {meta.total}
             <span className="mx-2 text-default-300">|</span> Newest approvals first

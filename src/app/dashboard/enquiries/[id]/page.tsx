@@ -1581,7 +1581,7 @@ export default function EnquiryDetailsPage() {
             </div>
         );
     }
-    if (isLoading) return <BrandedLoader fullScreen message="SYNCING TRADE PROTOCOL" />;
+    if (isLoading) return <BrandedLoader fullScreen message="Loading enquiry details" />;
     if (isEnquiryError) {
         const message = (enquiryError as any)?.response?.data?.message || (enquiryError as any)?.message || "Unable to load enquiry details right now.";
         return (
@@ -3167,7 +3167,7 @@ export default function EnquiryDetailsPage() {
                                                 {clarificationReasonTimeline && (
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <Select
-                                                            label="Delivery Protocol"
+                                                            label="Delivery method"
                                                             variant="bordered"
                                                             placeholder="Select milestone"
                                                             selectedKeys={clarificationDeliveryMode ? [clarificationDeliveryMode] : []}
@@ -3254,7 +3254,7 @@ export default function EnquiryDetailsPage() {
                                                     {!clarificationCommunicated && (
                                                         <span className="text-[9px] font-black text-obaol-600  tracking-widest ml-8 animate-pulse mt-1 inline-flex items-center gap-2">
                                                             <FiAlertCircle size={10} />
-                                                            Protocol confirmation required
+                                                            Confirmation required
                                                         </span>
                                                     )}
                                                 </div>
@@ -4174,10 +4174,10 @@ export default function EnquiryDetailsPage() {
                                             <div className="w-1.5 h-1.5 bg-obaol-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.5)]" />
                                             <span className="text-[10px] font-black  tracking-[0.3em] text-obaol-600 opacity-80">Logistics Profile</span>
                                          </div>
-                                        <h3 className="text-2xl font-bold tracking-tight text-foreground">Port Pickup Protocol</h3>
+                                        <h3 className="text-2xl font-bold tracking-tight text-foreground">Port pickup</h3>
                                     </div>
                                     <p className="text-sm font-medium text-default-500 max-w-2xl leading-relaxed">
-                                        Responsibility events and inland transport segments are <span className="text-foreground font-bold">automatically decoupled</span> for port-delivery frameworks. The mission transition point is established at the port of arrival.
+                                        Responsibility events and inland transport segments are <span className="text-foreground font-bold">separated automatically</span> for port-delivery workflows. Responsibility transfers at the port of arrival.
                                     </p>
                                     <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                                         <div className="px-4 py-2 rounded-xl bg-foreground/5 border border-foreground/5 text-[10px] font-bold  tracking-wider text-default-500">
@@ -4456,13 +4456,13 @@ export default function EnquiryDetailsPage() {
                                         isDisabled={isReadOnlyAfterConversion}
                                         startContent={updateOperatorRolesMutation.isSuccess ? <FiCheckCircle size={16} /> : undefined}
                                     >
-                                        {updateOperatorRolesMutation.isSuccess ? "PROTOCOL_AUTHORIZED" : "Save Operator Roles"}
+                                        {updateOperatorRolesMutation.isSuccess ? "Roles saved" : "Save Operator Roles"}
                                     </Button>
                                     
                                     {updateOperatorRolesMutation.isSuccess && (
                                         <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-success-500/5 border border-success-500/10 self-start animate-in fade-in slide-in-from-left-2 duration-500">
                                             <div className="w-1 h-1 bg-success rounded-full animate-pulse" />
-                                            <span className="text-[9px] font-black  tracking-[0.3em] text-success-600 italic">MISSION_SUCCESS // SYSTEM_SYNCED</span>
+                                            <span className="text-sm font-semibold text-success-600">Changes saved</span>
                                         </div>
                                     )}
                                 </div>
@@ -4522,10 +4522,10 @@ export default function EnquiryDetailsPage() {
                     <div className="flex flex-col gap-2 text-center md:text-left relative z-10">
                         <div className="flex items-center gap-3 justify-center md:justify-start">
                              <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(var(--heroui-primary-rgb),0.5)]" />
-                             <span className="text-[10px] font-bold tracking-widest  text-primary">Readiness Protocol</span>
+                             <span className="text-sm font-bold text-primary">Final review</span>
                         </div>
                         <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-none text-foreground">Finalize & Execute</h2>
-                        <p className="text-default-500 text-[11px] font-medium max-w-md opacity-80 decoration-transparent">Review performance parameters and logistics framework before authorizing mission-critical execution.</p>
+                        <p className="max-w-md text-sm font-medium text-default-500 opacity-80">Review the commercial and logistics details before creating the order.</p>
                     </div>
 
                     <div className="flex flex-wrap gap-3 justify-center md:justify-end items-center relative z-10 w-full">
@@ -4610,7 +4610,7 @@ export default function EnquiryDetailsPage() {
                         {normalizedStatus === "CONVERTED" && (
                             <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-success-500/10 bg-success-500/5 text-success-600 text-[10px] font-bold  tracking-widest">
                                 <LuCheck size={14} />
-                                Mission Finalized • Order Active
+                                Enquiry finalized • Order active
                             </div>
                         )}
                         {normalizedStatus === "CLOSED" && (
@@ -4635,7 +4635,7 @@ export default function EnquiryDetailsPage() {
                                 onPress={() => enquiryOrderId && router.push(`/dashboard/orders/${enquiryOrderId}`)}
                                 startContent={<LuTruck size={18} />}
                             >
-                                View Mission Order
+                                View order
                             </Button>
                         )}
                     </div>
@@ -5313,7 +5313,7 @@ export default function EnquiryDetailsPage() {
                                         <FiInfo className="text-obaol-500" size={18} />
                                     </div>
                                     <p className="text-[11px] font-bold text-default-400 leading-relaxed  tracking-wide">
-                                        Initiating automated generation protocol for {docActionRule?.docType?.replaceAll('_', ' ')}. 
+                                        Preparing {docActionRule?.docType?.replaceAll('_', ' ')} automatically. 
                                         The document will be constructed based on current trade parameters and responsibility matrix.
                                     </p>
                                 </div>
@@ -5322,7 +5322,7 @@ export default function EnquiryDetailsPage() {
                             <div className="mt-6 flex items-center justify-between p-4 rounded-xl bg-black/40 border border-white/5">
                                 <div className="flex items-center gap-3">
                                     <LuUser className="text-default-500" size={14} />
-                                    <span className="text-[10px] font-black text-default-400  tracking-widest leading-none">Authority Protocol</span>
+                                    <span className="text-sm font-semibold leading-none text-default-400">Approval</span>
                                 </div>
                                 <Chip 
                                     size="sm" 

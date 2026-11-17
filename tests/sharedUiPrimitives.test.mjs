@@ -31,8 +31,17 @@ test("shared state components use one server-compatible renderer", () => {
   assert.match(state, /role=\{variant === "error" \? "alert" : "status"\}/);
   assert.match(state, /aria-busy=\{variant === "loading" \? true : undefined\}/);
   assert.match(state, /motion-safe:animate-pulse/);
+  assert.match(state, /min-h-64/);
+  assert.match(state, /min-h-36/);
   assert.match(empty, /description\?: string/);
+  assert.match(empty, /compact\?: boolean/);
   assert.match(error, /onRetry/);
+});
+
+test("dashboard empty states expose the shared compact density", () => {
+  const dashboard = read("src/components/dashboard/DashboardUI.tsx");
+  assert.match(dashboard, /compact\?: boolean/);
+  assert.match(dashboard, /compact=\{compact\}/);
 });
 
 test("the first route batch adopts shared headers and states", () => {

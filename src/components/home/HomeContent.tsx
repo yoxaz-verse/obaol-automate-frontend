@@ -59,7 +59,7 @@ export default function HomeContent() {
                                     Each verified entity handles its own role through dedicated execution panels: sourcing partners source, labs verify, packers prepare, warehouses store, and transport and freight partners move the cargo.
                                 </p>
                                 <p className="text-sm md:text-base text-foreground/60 font-medium leading-relaxed">
-                                    OBAOL connects their enquiries, documents, handoffs, and progress in one India-first agro execution system supporting global trade.
+                                    OBAOL connects their enquiries, documents, handoffs, and progress in one India-first workspace supporting global agro trade.
                                 </p>
                             </div>
                         </div>

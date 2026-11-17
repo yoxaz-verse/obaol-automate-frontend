@@ -13,11 +13,11 @@ export default function HeroLite() {
 
         <h1 className="mt-6 max-w-4xl text-4xl font-black tracking-tight md:text-6xl">
           From Enquiry To Delivery, One
-          <span className="bg-gradient-to-r from-orange-300 to-orange-500 bg-clip-text text-transparent"> Agro Execution System</span>
+          <span className="bg-gradient-to-r from-orange-300 to-orange-500 bg-clip-text text-transparent"> Agro Trade Workspace</span>
         </h1>
 
         <p className="mt-6 max-w-2xl text-base text-white/75 md:text-lg">
-          OBAOL helps teams run procurement, verification, logistics, and order execution in one disciplined operating system built for real commodity trade.
+          OBAOL helps teams run procurement, verification, logistics, and order execution in one connected workspace built for real commodity trade.
         </p>
 
         <div className="mt-10 flex flex-wrap gap-3">

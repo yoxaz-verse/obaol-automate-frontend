@@ -16,6 +16,8 @@ test("Packaging screens retain sealed bidding and milestone UX", () => {
   const execution = readFileSync("src/app/dashboard/packaging/execution/page.tsx", "utf8");
   assert.match(services, /Provider identities and prices unlock after closing/);
   assert.match(services, /Submit sealed offer/);
+  assert.match(services, /<EmptyState/);
+  assert.match(readFileSync("src/components/packaging/PackagingDirectory.tsx", "utf8"), /<EmptyState/);
   assert.match(profile, /Submit for review/);
   assert.match(profile, /Approval queue/);
   assert.match(execution, /MATERIALS_CONFIRMED/);

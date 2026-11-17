@@ -315,9 +315,9 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
     const closesAt = new Date(draft.closesAt);
     const titleViolation = detectOffPlatformDisclosure(draft.title);
     const specificationsViolation = detectOffPlatformDisclosure(draft.specifications);
-    if (isAdmin && !buyerCompany) errors.buyerCompany = "Select the company that owns this buying request.";
+    if (isAdmin && !buyerCompany) errors.buyerCompany = "Select the company that owns this purchase request.";
     if (isAdmin && !buyerContact) errors.buyer = "Select an approved buyer contact for the company.";
-    if (!draft.title.trim()) errors.title = "Enter a title for the buying request.";
+    if (!draft.title.trim()) errors.title = "Enter a title for the purchase request.";
     else if (titleViolation) errors.title = titleViolation.message;
     if (!draft.product) errors.product = "Search for and select a product.";
     if (!draft.productVariant) errors.productVariant = "Select the required variant or grade.";
@@ -436,10 +436,10 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
               <FiLock />
               <span className="text-xs font-black  tracking-[.2em]">Sealed product offers</span>
             </div>
-            <h1 className="text-3xl font-black">{mode === "buyer" ? "Buying Requests" : "Buyer Requests"}</h1>
+            <h1 className="text-3xl font-black">{mode === "buyer" ? "My Purchase Requests" : "Purchase Opportunities"}</h1>
             <p className="mt-1 max-w-2xl text-sm text-default-500">
               {mode === "buyer"
-                ? "Create and manage sealed buying requests, compare offers after closing, and select a winning seller."
+                ? "Create and manage sealed purchase requests, compare offers after closing, and select a winning seller."
                 : "Find product requests created by buyers and submit a confidential price offer from your company."}
             </p>
           </div>
@@ -452,7 +452,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                 setShowCreate(true);
               }}
             >
-              Create buying request
+              Create purchase request
             </AppButton>
           )}
         </div>
@@ -471,11 +471,11 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
       )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        {mode === "seller" ? <Tabs selectedKey={sellerView} onSelectionChange={(key) => setSellerView(String(key) as SellerView)} color="primary" variant="underlined" aria-label="Buying request offer views">
+        {mode === "seller" ? <Tabs selectedKey={sellerView} onSelectionChange={(key) => setSellerView(String(key) as SellerView)} color="primary" variant="underlined" aria-label="Purchase opportunity views">
           <Tab key="available" title="Open" />
           <Tab key="participating" title="My Offers" />
           <Tab key="history" title="Closed" />
-        </Tabs> : <div className="text-sm font-semibold text-default-500">Buyer requests</div>}
+        </Tabs> : <div className="text-sm font-semibold text-default-500">My purchase requests</div>}
         <Button isIconOnly variant="light" aria-label="Refresh" onPress={() => refresh()}>
           <FiRefreshCw />
         </Button>
@@ -503,12 +503,12 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
       ) : rows.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-divider px-5 py-20 text-center">
           <FiLock className="mx-auto mb-3 text-3xl text-default-300" />
-          <h2 className="font-bold">{mode === "buyer" ? "No buying requests here" : sellerView === "available" ? "No available bidding opportunities" : sellerView === "participating" ? "You are not participating in any bidding events" : "No bidding history yet"}</h2>
+          <h2 className="font-bold">{mode === "buyer" ? "No purchase requests here" : sellerView === "available" ? "No available purchase opportunities" : sellerView === "participating" ? "You are not participating in any purchase opportunities" : "No purchase opportunity history yet"}</h2>
           <p className="mx-auto mt-1 max-w-xl text-sm text-default-500">{mode === "buyer" ? "Post what your company needs, then return here to compare confidential seller offers and choose a supplier." : "Open requests appear when their product and grade match one of your company’s approved trade listings."}</p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
-            {mode === "buyer" && canBuy ? <AppButton intent="primary" startContent={<FiPlus />} onPress={() => { resetCreateForm(); setShowCreate(true); }}>Create buying request</AppButton> : null}
+            {mode === "buyer" && canBuy ? <AppButton intent="primary" startContent={<FiPlus />} onPress={() => { resetCreateForm(); setShowCreate(true); }}>Create purchase request</AppButton> : null}
             {mode === "seller" ? <Button as={Link} href="/dashboard/product" variant="flat">Manage trade listings</Button> : null}
-            {mode === "seller" && canBuy ? <Button as={Link} href="/dashboard/bidding/my" variant="light">Post a buying request</Button> : null}
+            {mode === "seller" && canBuy ? <Button as={Link} href="/dashboard/bidding/my" variant="light">Create a purchase request</Button> : null}
           </div>
         </div>
       ) : (
@@ -706,7 +706,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                   <FiLock size={13} />
                   <span>Sealed Procurement</span>
                 </div>
-                <h2 className="text-xl font-black text-foreground sm:text-2xl">Create sealed buying request</h2>
+                <h2 className="text-xl font-black text-foreground sm:text-2xl">Create sealed purchase request</h2>
                 <p className="text-xs font-normal text-default-500 sm:text-sm">
                   Prices remain strictly confidential and sealed until the scheduled event close.
                 </p>
@@ -1012,7 +1012,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                   className="font-bold"
                   startContent={!create.isPending && <FiPlus />}
                 >
-                  Schedule buying request
+                  Schedule purchase request
                 </Button>
               </ModalFooter>
             </form>

@@ -96,12 +96,12 @@ export const sidebarOptions = [
     link: "/dashboard/enquiries",
   },
   {
-    name: "Buyer Requests",
+    name: "Purchase Opportunities",
     icon: <RiAuctionLine />,
     link: "/dashboard/bidding",
   },
   {
-    name: "Buying Requests",
+    name: "My Purchase Requests",
     icon: <LuListChecks />,
     link: "/dashboard/bidding/my",
   },

@@ -21,9 +21,18 @@ test("requirement wizard exposes an accessible compact layout control", () => {
 });
 
 test("compact density reduces wizard cards, panels, and summary spacing", () => {
-  assert.match(page, /compact \? "min-h-52 rounded-2xl p-5" : "min-h-72 rounded-\[2rem\] p-7"/);
+  assert.match(page, /compact \? "sm:min-h-52 sm:rounded-2xl sm:p-5" : "sm:min-h-72 sm:rounded-\[2rem\] sm:p-7"/);
   assert.match(page, /compact \? "gap-4 xl:grid-cols-\[1fr_280px\]" : "gap-8 xl:grid-cols-\[1fr_330px\]"/);
   assert.match(compactStyles, /main \.p-6/);
   assert.match(compactStyles, /main \.md\\:p-8/);
   assert.match(compactStyles, /aside \.space-y-4/);
+});
+
+test("mobile journey choices use compact accessible selection rows", () => {
+  assert.match(page, /aria-pressed=\{isSelected\}/);
+  assert.match(page, /min-h-\[84px\]/);
+  assert.match(page, /items-center gap-3 sm:flex-col/);
+  assert.match(page, /line-clamp-2[\s\S]*sm:line-clamp-none/);
+  assert.match(page, /isSelected \? <LuCheck\/> : <LuArrowRight\/>/);
+  assert.match(page, /hidden items-center gap-2[\s\S]*sm:flex/);
 });

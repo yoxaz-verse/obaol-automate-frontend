@@ -11,6 +11,8 @@ import { apiRoutes, stateRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import dynamic from "next/dynamic";
 import { toStructuredLocation } from "@/types/location";
+import CompanyDetailsSourcePanel from "@/components/dashboard/CompanyDetailsSourcePanel";
+import { useCompanyProfileSource } from "@/hooks/useCompanyProfileSource";
 
 const LocationSelector = dynamic(() => import("@/components/location/LocationSelector"), { ssr: false });
 
@@ -18,10 +20,11 @@ const stages = ["SOURCING", "PREPARATION", "QUALITY_TESTING", "TRACEABILITY", "L
 const label = (value: string) => value.replaceAll("_", " ").toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 const blank = { displayName: "", website: "", shortDescription: "", companyDescription: "", workflowStages: [] as string[], otherProblem: "", hasApi: false, apiDocumentationUrl: "", apiSummary: "", coverageMode: "ALL_INDIA", coverageStates: [] as string[], contactEmail: "", contactPhone: "", whatsappPhone: "", headquarters: { address: "", city: "", state: "", latitude: "", longitude: "" } };
 export default function MyAgritechStartupPage() {
-  const client = useQueryClient(); const [form, setForm] = useState<any>(blank);
+  const client = useQueryClient(); const [form, setForm] = useState<any>(blank); const company=useCompanyProfileSource();
   const query = useQuery({ queryKey: ["my-agritech-profile"], queryFn: async () => (await getData(apiRoutes.agritechProfiles.mine)).data.data, retry: false });
   const states = useQuery({ queryKey: ["agritech-states"], queryFn: async () => (await getData(stateRoutes.getAll, { limit: 100 })).data?.data || [] });
-  useEffect(() => { if (query.data) setForm(query.data.draft || query.data.published || blank); }, [query.data]);
+  const applyCompany=()=>{const c=company.data;if(c)setForm((old:any)=>({...old,displayName:c.name,website:c.website,shortDescription:c.summary.slice(0,300),companyDescription:c.summary,contactEmail:c.email,contactPhone:c.phone,whatsappPhone:c.whatsappPhone,headquarters:{...old.headquarters,address:c.address,city:c.city,state:c.state,latitude:c.latitude??"",longitude:c.longitude??""}}))};
+  useEffect(() => { if (query.data) setForm(query.data.draft || query.data.published || blank); else if(company.data)applyCompany(); }, [query.data,company.data]);
   const update = (key: string, value: any) => setForm((old: any) => ({ ...old, [key]: value })); const location = (key: string, value: any) => setForm((old: any) => ({ ...old, headquarters: { ...old.headquarters, [key]: value } }));
   const done = (message: string) => { client.invalidateQueries({ queryKey: ["my-agritech-profile"] }); showToastMessage({ type: "success", message }); };
   const save = useMutation({ mutationFn: () => putData(apiRoutes.agritechProfiles.mine, { snapshot: form, expectedRevision: query.data?.revision }), onSuccess: () => done("Agritech profile draft saved."), onError: (e: any) => showToastMessage({ type: "error", message: e?.response?.data?.message || "Unable to save the profile." }) });
@@ -30,6 +33,7 @@ export default function MyAgritechStartupPage() {
   if (query.isLoading) return <LoadingState title="Loading your agritech profile" />; if (query.isError && (query.error as any)?.response?.status !== 404) return <ErrorState title="Unable to load your agritech profile" onRetry={() => query.refetch()} />;
   const locked = query.data?.status === "PENDING_REVIEW" || query.data?.status === "ARCHIVED";
   return <section className="min-h-screen bg-background p-4 md:p-8"><div className="mx-auto max-w-5xl space-y-6"><PageHeader variant="plain" eyebrow="Startup profile" eyebrowTone="brand" title="My Agritech Startup" description="Explain the problem your company solves, its integration capability, and where it operates." actions={query.data?.status ? <Chip color={query.data.status === "PUBLISHED" ? "success" : query.data.status === "REJECTED" ? "danger" : "warning"} variant="flat">{label(query.data.status)}</Chip> : null} />
+  <CompanyDetailsSourcePanel source={company.data} onApply={applyCompany} isLoading={company.isLoading}/>
   {query.data?.status === "REJECTED" && query.data.reviewNotes ? <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-danger-800"><b>Changes requested</b><p>{query.data.reviewNotes}</p></div> : null}
   {query.data?.status === "PENDING_REVIEW" ? <div className="rounded-xl border border-warning-200 bg-warning-50 p-4 text-warning-800">This submission is under review. Editing is locked until an administrator makes a decision.</div> : null}
   <Card><CardBody className="gap-5 p-6"><h2 className="text-lg font-black">1. Company information</h2><div className="grid gap-4 md:grid-cols-2"><Input label="Startup name" isRequired value={form.displayName} onValueChange={(v) => update("displayName", v)} isDisabled={locked} /><Input label="Website link" type="url" isRequired placeholder="https://example.com" value={form.website} onValueChange={(v) => update("website", v)} isDisabled={locked} /></div><Textarea label="Short description" isRequired maxLength={300} value={form.shortDescription} onValueChange={(v) => update("shortDescription", v)} isDisabled={locked} /><Textarea label="What does the company do?" isRequired minRows={5} maxLength={3000} value={form.companyDescription} onValueChange={(v) => update("companyDescription", v)} isDisabled={locked} /></CardBody></Card>

@@ -302,6 +302,7 @@ export const packagingRoutes = {
   approvals: "/packaging/profiles/approvals",
   reviewProfile: (id: string) => `/packaging/profiles/approvals/${id}`,
   units: "/packaging/units",
+  unitDrafts: "/packaging/units/drafts",
   unit: (id: string) => `/packaging/units/${id}`,
   submitUnit: (id: string) => `/packaging/units/${id}/submit`,
   archiveUnit: (id: string) => `/packaging/units/${id}/archive`,

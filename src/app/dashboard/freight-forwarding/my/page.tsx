@@ -14,6 +14,8 @@ import { EMPTY_FREIGHT_PROFILE, FreightCredential, FreightProfileSnapshot, freig
 import { showToastMessage } from "@/utils/utils";
 import dynamic from "next/dynamic";
 import { toStructuredLocation } from "@/types/location";
+import CompanyDetailsSourcePanel from "@/components/dashboard/CompanyDetailsSourcePanel";
+import { useCompanyProfileSource } from "@/hooks/useCompanyProfileSource";
 
 const LocationSelector = dynamic(() => import("@/components/location/LocationSelector"), { ssr: false });
 
@@ -28,11 +30,12 @@ const countryOptionsWithLegacyValues = (countries: any[], values: string[]): Sea
 
 export default function FreightProfilePage() {
   const { user } = useContext(AuthContext); const role = String(user?.role || "").toLowerCase(), admin = role === "admin", staff = ["admin", "operator", "team"].includes(role);
-  const [companyId, setCompanyId] = useState(""), [tab, setTab] = useState(admin ? "approvals" : "profile"), [form, setForm] = useState<FreightProfileSnapshot>(EMPTY_FREIGHT_PROFILE), [notice, setNotice] = useState(""), [submitErrors, setSubmitErrors] = useState<string[]>([]); const qc = useQueryClient(), router = useRouter(), submitFeedbackRef = useRef<HTMLDivElement>(null);
+  const [companyId, setCompanyId] = useState(""), [tab, setTab] = useState(admin ? "approvals" : "profile"), [form, setForm] = useState<FreightProfileSnapshot>(EMPTY_FREIGHT_PROFILE), [notice, setNotice] = useState(""), [submitErrors, setSubmitErrors] = useState<string[]>([]); const qc = useQueryClient(), router = useRouter(), submitFeedbackRef = useRef<HTMLDivElement>(null); const company=useCompanyProfileSource(companyId);
   const profile = useQuery({ queryKey: ["freight-profile", companyId], queryFn: async () => (await getData(api.draft, companyId ? { companyId } : undefined)).data.data, enabled: !staff || !!companyId, retry: false });
   const approvals = useQuery({ queryKey: ["freight-profile-approvals"], queryFn: async () => (await getData(api.approvals)).data.data || [], enabled: admin });
   const taxonomy = useQuery({ queryKey: ["freight-taxonomy"], queryFn: async () => (await getData(api.taxonomy)).data.data });
-  useEffect(() => { if (profile.data?.draft) setForm({ ...EMPTY_FREIGHT_PROFILE, ...profile.data.draft, customsDetails: { ...EMPTY_FREIGHT_PROFILE.customsDetails, ...profile.data.draft.customsDetails } }); }, [profile.data]);
+  const applyCompany=()=>{const c=company.data;if(!c)return;setForm(current=>({...current,displayName:c.name,summary:c.summary,contactEmail:c.email,contactPhone:c.phone,whatsappPhone:c.whatsappPhone,website:c.website,locations:[{...(current.locations[0]||{}),label:c.locationLabel||"Head office",address:c.address,city:c.city,state:c.state,country:c.country,latitude:c.latitude,longitude:c.longitude}]}))};
+  useEffect(() => { if (profile.data?.draft) setForm({ ...EMPTY_FREIGHT_PROFILE, ...profile.data.draft, customsDetails: { ...EMPTY_FREIGHT_PROFILE.customsDetails, ...profile.data.draft.customsDetails } }); else if(company.data)applyCompany(); }, [profile.data,company.data]);
   const refresh = () => { qc.invalidateQueries({ queryKey: ["freight-profile"] }); qc.invalidateQueries({ queryKey: ["freight-profile-approvals"] }); };
   const save = useMutation({ mutationFn: () => putData(api.draft, { companyId: companyId || undefined, snapshot: form }), onSuccess: () => { setNotice("Draft saved."); refresh(); }, onError: (e) => setNotice(freightMessage(e)) });
   const submit = useMutation({ mutationFn: () => postData(api.submitProfile, { companyId: companyId || undefined, snapshot: form }), onMutate: () => setSubmitErrors([]), onSuccess: () => { refresh(); showToastMessage({ type: "success", message: "Freight profile submitted for review." }); router.push("/dashboard/freight-forwarding"); }, onError: (e: any) => { const errors = Array.isArray(e?.response?.data?.errors) && e.response.data.errors.length ? e.response.data.errors : [freightMessage(e)]; setSubmitErrors(errors); requestAnimationFrame(() => submitFeedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })); } });
@@ -56,7 +59,7 @@ export default function FreightProfilePage() {
   const addCredential = () => setForm((current) => ({ ...current, credentials: [...current.credentials, { type: "" }] }));
   const removeCredential = (index: number) => setForm((current) => ({ ...current, credentials: current.credentials.filter((_, itemIndex) => itemIndex !== index) }));
   return <main className="space-y-6 pb-16"><FreightHeader eyebrow="Providing · Freight" title="My Freight Profile" description="Publish countries, lanes, responsibilities, customs arrangements, credentials, and operating capabilities." />
-    {staff && <Card><CardBody><p className="mb-2 text-sm font-bold">Manage an authorized company</p><CompanySearch onSelect={(value) => setCompanyId(value || "")} /></CardBody></Card>}{notice && <p className="rounded-xl bg-default-100 p-3 text-sm">{notice}</p>}
+    {staff && <Card><CardBody><p className="mb-2 text-sm font-bold">Manage an authorized company</p><CompanySearch onSelect={(value) => setCompanyId(value || "")} /></CardBody></Card>}<CompanyDetailsSourcePanel source={company.data} onApply={applyCompany} isLoading={company.isLoading}/>{notice && <p className="rounded-xl bg-default-100 p-3 text-sm">{notice}</p>}
     <Tabs selectedKey={tab} onSelectionChange={(key) => setTab(String(key))} color="primary" variant="underlined"><Tab key="profile" title="Profile & capabilities" />{admin && <Tab key="approvals" title={`Approval queue (${approvals.data?.length || 0})`} />}</Tabs>
     {tab === "approvals" ? <div className="grid gap-3">{(approvals.data || []).map((p: any) => <Card key={p._id}><CardBody className="flex-row items-center justify-between"><div><b>{p.draft?.displayName || p.companyId?.name}</b><p className="text-sm text-default-500">{(p.draft?.modes || []).join(", ")} · {p.draft?.lanes?.length || 0} lanes</p></div><div className="flex gap-2"><Button color="success" onPress={() => review.mutate({ id: p._id, action: "APPROVE" })}>Approve</Button><Button color="danger" variant="flat" onPress={() => review.mutate({ id: p._id, action: "REJECT" })}>Reject</Button></div></CardBody></Card>)}</div> : profile.isLoading || taxonomy.isLoading ? <Spinner /> : <Card><CardBody className="gap-8 p-6">
       <div className="flex justify-end"><StatusChip value={profile.data?.status} /></div>

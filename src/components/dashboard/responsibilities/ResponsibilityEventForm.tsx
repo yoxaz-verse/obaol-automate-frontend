@@ -103,11 +103,11 @@ const ownerLabelByKey: Record<string, string> = {
 };
 
 const tradeTermSelectClassNames = {
-  base: "min-w-0",
-  trigger: "min-h-14 h-auto items-center gap-2 rounded-xl border-default-200 px-3 py-2 shadow-sm sm:px-4",
+  base: "min-w-0 w-full max-w-full",
+  trigger: "min-h-16 h-auto w-full max-w-full items-center gap-2 rounded-xl border-default-300 bg-background/70 px-3 py-2.5 shadow-sm transition-colors hover:border-primary/40 sm:px-4",
   innerWrapper: "min-w-0 items-start gap-0.5 overflow-hidden py-0.5",
-  label: "relative top-auto block max-w-full truncate font-bold text-[10px] leading-4 tracking-wide text-default-400",
-  value: "block max-w-full truncate text-sm leading-5",
+  label: "relative top-auto block max-w-full truncate font-bold text-[10px] leading-4 tracking-wide text-default-500",
+  value: "block max-w-full overflow-hidden text-sm leading-5 text-foreground",
   mainWrapper: "min-w-0",
   selectorIcon: "end-4 top-1/2 -translate-y-1/2",
 };
@@ -236,24 +236,26 @@ const ResponsibilityEventForm: React.FC<Props> = ({
     || paymentTermOptions?.find((term: any) => String(term?._id || term?.id) === String(selectedPaymentTermId));
 
   return (
-    <Card className="lg:col-span-3 order-12 min-w-0 border border-divider bg-content1/50">
+    <Card className="lg:col-span-3 order-12 w-full max-w-full min-w-0 overflow-hidden border border-divider bg-content1/50">
       <CardHeader className="px-4 pt-4 pb-0 sm:px-5 sm:pt-5 flex flex-col items-start gap-1">
         <span className="font-bold text-base sm:text-lg tracking-tight">Responsibility Event</span>
         <span className="text-[10px]  font-black tracking-widest text-default-400">Execution Ownership Allocation</span>
       </CardHeader>
       <Divider className="mt-3 sm:mt-4" />
       <CardBody className="flex flex-col gap-4 px-3 py-3 transition-all duration-300 sm:px-5 sm:py-5 md:gap-6">
-        <div id="responsibility-trade-terms" data-readiness-section>
+        <div id="responsibility-trade-terms" data-readiness-section className="w-full max-w-full min-w-0 overflow-hidden">
         <ResponsiveDisclosure title="Incoterms & Payment" subtitle="Trade terms and payment milestones" defaultOpen>
         <div className="flex min-w-0 flex-col gap-3 p-3 rounded-2xl border border-default-200/60 bg-gradient-to-br from-default-50/60 to-white dark:from-default-100/5 dark:to-transparent shadow-sm sm:p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-1">
               <span className="text-[10px]  font-black tracking-widest text-default-400">Trade Terms</span>
               <span className="text-base font-black text-foreground">Incoterms & Payment</span>
             </div>
-            <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold ${isTradeTermsChanged ? "border-warning-300/50 bg-warning-50 text-warning-700" : "border-success-300/40 bg-success-50 text-success-700"}`}>
-              <span className={`h-2 w-2 rounded-full ${isTradeTermsChanged ? "bg-warning animate-pulse" : "bg-success"}`} />
+            <div className={`flex max-w-full self-start items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold sm:ml-auto ${isTradeTermsChanged ? "border-warning-300/50 bg-warning-50 text-warning-700" : "border-success-300/40 bg-success-50 text-success-700"}`}>
+              <span className={`h-2 w-2 shrink-0 rounded-full ${isTradeTermsChanged ? "bg-warning animate-pulse" : "bg-success"}`} />
+              <span className="min-w-0 break-words">
               {isTradeTermsChanged ? "Terms have unsaved changes" : "Terms saved"}
+              </span>
             </div>
           </div>
 
@@ -262,6 +264,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               size="sm"
               label="Incoterm Protocol"
               variant="bordered"
+              placeholder="Select an Incoterm"
               selectedKeys={selectedIncotermId ? [selectedIncotermId] : []}
               onSelectionChange={(keys) => {
                 const arr = Array.from(keys as Set<string>);
@@ -270,9 +273,15 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               isDisabled={(!canEditResponsibilityPlan && !canEditTradeTermsWhenLocked) || (isReadOnlyAfterConversion && !canEditTradeTermsWhenLocked)}
               classNames={tradeTermSelectClassNames}
               startContent={<LuAnchor size={16} className="text-primary/70" />}
+              renderValue={() => selectedIncoterm ? (
+                <span className="flex min-w-0 items-baseline gap-1.5 overflow-hidden">
+                  <span className="shrink-0 font-black text-foreground">{selectedIncoterm.code || "Incoterm"}</span>
+                  {selectedIncoterm.name && <span className="min-w-0 truncate text-default-600">— {selectedIncoterm.name}</span>}
+                </span>
+              ) : <span className="text-default-400">Select an Incoterm</span>}
             >
               {incotermOptions.map((item: any) => (
-                <SelectItem key={item._id} value={item._id}>
+                <SelectItem key={item._id} value={item._id} textValue={[item.code, item.name].filter(Boolean).join(" — ")}>
                   {[item.code, item.name].filter(Boolean).join(" // ")}
                 </SelectItem>
               ))}
@@ -282,6 +291,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               size="sm"
               label="Payment Framework"
               variant="bordered"
+              placeholder="Select payment terms"
               selectedKeys={selectedPaymentTermId ? [selectedPaymentTermId] : []}
               onSelectionChange={(keys) => {
                 const arr = Array.from(keys as Set<string>);
@@ -290,32 +300,39 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               isDisabled={(!canEditResponsibilityPlan && !canEditTradeTermsWhenLocked) || (isReadOnlyAfterConversion && !canEditTradeTermsWhenLocked)}
               classNames={tradeTermSelectClassNames}
               startContent={<LuFileCheck size={16} className="text-success/70" />}
+              renderValue={() => selectedPaymentTerm ? (
+                <span className="block min-w-0 truncate font-semibold text-foreground">
+                  {selectedPaymentTerm.label || "Payment Term"}
+                </span>
+              ) : <span className="text-default-400">Select payment terms</span>}
             >
               {(filteredPaymentTerms.length > 0 ? filteredPaymentTerms : paymentTermOptions).map((item: any) => (
-                <SelectItem key={item._id} value={item._id}>
+                <SelectItem key={item._id} value={item._id} textValue={item.label || "Payment Term"}>
                   {item.label || "Payment Term"}
                 </SelectItem>
               ))}
             </Select>
           </div>
           {selectedPaymentTerm && Array.isArray(selectedPaymentTerm?.milestones) && selectedPaymentTerm.milestones.length > 0 && (
-            <div className="mt-3 rounded-2xl border border-default-200/60 bg-background/60 p-3">
-              <div className="text-[10px]  font-black tracking-widest text-default-400 mb-2">Payment Framework Milestones</div>
+            <div className="mt-1 min-w-0 rounded-2xl border border-default-200/60 bg-background/60 p-3 sm:p-4">
+              <div className="mb-3 text-[10px] font-black tracking-widest text-default-500">Payment Framework Milestones</div>
               <div className="flex flex-col gap-2">
                 {selectedPaymentTerm.milestones.map((milestone: any, idx: number) => (
                   <div
                     key={`${milestone.label}-${idx}`}
-                    className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-divider px-3 py-2 bg-background/40"
+                    className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-divider bg-background/70 px-3 py-3 sm:px-4"
                   >
                     <div className="flex min-w-0 flex-col">
-                      <span className="break-words text-xs font-black text-foreground tracking-tight">{milestone.label}</span>
-                      <span className="break-words text-[11px] leading-4 text-default-500">
+                      <span className="break-words text-sm font-black tracking-tight text-foreground">{milestone.label}</span>
+                      <span className="mt-0.5 break-words text-[11px] leading-4 text-default-600">
                         {String(milestone.triggerType || "").toUpperCase() === "STAGE"
                           ? `Stage: ${String(milestone.triggerValue || "").replaceAll("_", " ")}`
                           : `Doc: ${String(milestone.triggerValue || "").replaceAll("_", " ")}`}
                       </span>
                     </div>
-                    <span className="text-xs font-black text-default-600">{Number(milestone.percent || 0)}%</span>
+                    <span className="shrink-0 rounded-full border border-success-300/40 bg-success-50 px-2.5 py-1 text-xs font-black text-success-700">
+                      {Number(milestone.percent || 0)}%
+                    </span>
                   </div>
                 ))}
               </div>

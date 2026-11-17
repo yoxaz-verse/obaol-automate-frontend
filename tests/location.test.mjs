@@ -39,6 +39,19 @@ test("multi-location selector supports caller-defined slots on one map", async (
   assert.equal((source.match(/<MapContainer/g) || []).length, 1);
 });
 
+test("shared location selector exposes search, address, and map loading feedback", async () => {
+  const source = await readFile(new URL("../src/components/location/LocationSelector.tsx", import.meta.url), "utf8");
+  assert.match(source, /setIsSearching\(true\)/);
+  assert.match(source, /Searching locations…/);
+  assert.match(source, /Finding address…/);
+  assert.match(source, /Loading map…/);
+  assert.match(source, /aria-live="polite"/);
+  assert.match(source, /No matching locations found\./);
+  assert.match(source, /loading: \(\) =>/);
+  assert.match(source, /tileerror: \(\) =>/);
+  assert.match(source, /fetch\(url, \{ signal \}\)/);
+});
+
 test("manual trips submit structured origin and destination route points", async () => {
   const source = await readFile(new URL("../src/app/dashboard/inland-transportation/trips/page.tsx", import.meta.url), "utf8");
   assert.match(source, /MultiLocationSelector/);

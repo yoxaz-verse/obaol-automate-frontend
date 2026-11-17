@@ -45,7 +45,15 @@ test("enquiry detail keeps constrained cards and trade terms responsive", () => 
   assert.match(form, /ResponsiveDisclosure title="Incoterms & Payment"/);
   assert.match(form, /ResponsiveDisclosure title="Execution & Ownership"[^>]*defaultOpen/);
   assert.match(form, /ResponsiveDisclosure title="Packaging & Route Notes"/);
-  assert.match(form, /min-h-14 h-auto/);
+  assert.match(form, /min-h-16 h-auto w-full max-w-full/);
+  assert.match(form, /renderValue=\{\(\) => selectedIncoterm/);
+  assert.match(form, /renderValue=\{\(\) => selectedPaymentTerm/);
+  assert.match(form, /placeholder="Select an Incoterm"/);
+  assert.match(form, /placeholder="Select payment terms"/);
+  assert.match(form, /textValue=\{\[item\.code, item\.name\]/);
+  assert.match(form, /textValue=\{item\.label \|\| "Payment Term"\}/);
+  assert.match(form, /w-full max-w-full min-w-0 overflow-hidden/);
+  assert.match(form, /max-w-full self-start items-center/);
   assert.match(form, /grid-cols-\[minmax\(0,1fr\)_auto\]/);
 });
 

@@ -14,6 +14,8 @@ import SearchableSelect from "@/components/ui/SearchableSelect";
 import type { CountryOption, LabCountryAssignment, LabCredential, LabOption, LabProductCapabilityTemplate, LabSnapshot } from "@/types/labProfile";
 import { optionId, optionName } from "@/types/labProfile";
 import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import CompanyDetailsSourcePanel from "@/components/dashboard/CompanyDetailsSourcePanel";
+import { useCompanyProfileSource } from "@/hooks/useCompanyProfileSource";
 
 const STEPS = ["Lab identity", "Credential library", "Product capabilities", "Country product coverage", "Review"];
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(12)), (byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -65,6 +67,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   const { user } = useContext(AuthContext);
   const isAdmin = String(user?.role || "").toLowerCase() === "admin";
   const [companyId, setCompanyId] = useState(managedCompanyId);
+  const companySource = useCompanyProfileSource(companyId);
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<LabSnapshot>(emptyProfile);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -84,6 +87,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   const [mapSearch, setMapSearch] = useState("");
   const locationPanelRef = useRef<HTMLDivElement>(null);
   const createdLabRef = useRef<CreatedLab | null>(null);
+  const applyCompanySource = () => { const c=companySource.data; if(!c)return; setProfile((current)=>({...current,displayName:c.name,summary:c.summary,contactEmail:c.email,contactPhone:c.phone,whatsappPhone:c.whatsappPhone,contactPhoneSecondary:c.phoneSecondary,address:c.address,state:c.state,city:c.city,location:c.latitude!=null&&c.longitude!=null?{latitude:c.latitude,longitude:c.longitude,label:c.locationLabel}:current.location})); setWhatsappSameAsPrimary(true); };
 
   const companiesQuery = useQuery({ queryKey: ["lab-admin-companies"], queryFn: async () => { const response: any = await getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 500, sort: "name:asc" }); const root = response?.data?.data; return Array.isArray(root?.data) ? root.data : Array.isArray(root) ? root : []; }, enabled: isAdmin });
   const taxonomyQuery = useQuery({ queryKey: ["lab-taxonomy"], queryFn: async () => (await getData(apiRoutes.labProfiles.taxonomy)).data.data });
@@ -360,6 +364,7 @@ export default function LabProfileWizard({ labId, managedCompanyId = "", returnT
   if (taxonomyQuery.isError || (labId && draftQuery.isError)) return statePage(<Card className="border border-danger-200"><CardBody className="items-center gap-3 p-10 text-center"><h2 className="text-xl font-black">Unable to load the lab profile</h2><p className="text-sm text-default-500">The selected company’s panel could not be loaded. Try again before making changes.</p><Button color="danger" variant="flat" onPress={() => { taxonomyQuery.refetch(); if (labId) draftQuery.refetch(); }}>Try again</Button></CardBody></Card>);
   return <section className="min-h-screen bg-background p-4 md:p-8"><div className="mx-auto max-w-6xl space-y-6">
     {header}
+    <CompanyDetailsSourcePanel source={companySource.data} onApply={applyCompanySource} isLoading={companySource.isLoading}/>
     <div className="grid grid-cols-5 gap-2" aria-label="Lab setup progress">{STEPS.map((name, index) => <button key={name} type="button" onClick={() => { if (step === 0 && index > 0 && !validateStep()) return; setStep(index); }} aria-current={step === index ? "step" : undefined} className={`min-h-16 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold leading-4 tracking-normal transition-colors ${step === index ? "border-primary-500 bg-primary-500/10 text-primary-600" : stepErrors[index] ? "border-danger bg-danger-50 text-danger" : index < step ? "border-primary-300 bg-primary-50 text-primary-600" : "border-default-200 text-default-500"}`}><span className="flex items-center justify-between text-[11px] leading-none"><span className="tabular-nums">{String(index + 1).padStart(2, "0")}</span>{index === 1 ? <span className="hidden font-medium text-default-400 sm:inline">Optional</span> : index < step ? <FiCheck aria-label="Completed" /> : null}</span><span className="mt-2 hidden md:block">{name}</span></button>)}</div>
     <Card className="border border-default-200"><CardBody className="gap-5 p-5 md:p-8">
       {step === 0 ? <>

@@ -21,7 +21,7 @@ import Title from "@/components/titles";
 import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
-import { WarehouseLocationValue } from "@/components/Warehouse/WarehouseLocationPicker";
+import type { StructuredLocation } from "@/types/location";
 import { FiLoader } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 
@@ -68,10 +68,11 @@ const EMPTY_FORM: WarehouseForm = {
   location: null,
 };
 
-const WarehouseLocationPicker = dynamic(
-  () => import("@/components/Warehouse/WarehouseLocationPicker"),
+const LocationSelector = dynamic(
+  () => import("@/components/location/LocationSelector"),
   { ssr: false }
 );
+type WarehouseLocationValue = Pick<StructuredLocation, "latitude" | "longitude">;
 
 const reverseGeocode = async (latitude: number, longitude: number) => {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`;
@@ -234,6 +235,14 @@ export default function WarehouseLocationPage() {
       }, 0);
     }
   };
+  const handleStructuredLocation = (selected: StructuredLocation) => {
+    suppressLinkRef.current = true;
+    skipForwardUntilRef.current = Date.now() + 1500;
+    setPendingLocation({ latitude: selected.latitude, longitude: selected.longitude });
+    setForm((prev) => ({ ...prev, address: selected.address, pincode: selected.postalCode || prev.pincode, location: { latitude: selected.latitude, longitude: selected.longitude, label: selected.label, district: selected.district, pincode: selected.postalCode, city: selected.city, state: selected.state, country: selected.country } }));
+    setLocationError(null);
+    setTimeout(() => { suppressLinkRef.current = false; }, 0);
+  };
 
   useEffect(() => {
     if (suppressLinkRef.current) return;
@@ -352,7 +361,7 @@ export default function WarehouseLocationPage() {
               </div>
             )}
             <div className="rounded-[2rem] overflow-hidden border db-border-strong shadow-lg shadow-obaol-500/10 warehouse-location-map">
-              <WarehouseLocationPicker value={pendingLocation} onChange={setPendingLocation} height={460} />
+              <LocationSelector markerVariant="warehouse" value={form.location && Number.isFinite(form.location.latitude) && Number.isFinite(form.location.longitude) ? { latitude: Number(form.location.latitude), longitude: Number(form.location.longitude), label: form.location.label || form.address || "Selected location", address: form.address, city: form.location.city || "", district: form.location.district || "", state: form.location.state || "", country: form.location.country || "", countryCode: "", postalCode: form.location.pincode || form.pincode || "" } : null} onChange={handleStructuredLocation} height={460} />
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               {pendingLocation && (

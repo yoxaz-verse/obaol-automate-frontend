@@ -28,8 +28,12 @@ export const COMPANY_FUNCTION_PERSPECTIVE_COPY: Record<string, PerspectiveCopy> 
     sought: "We need warehouse space or storage services.",
   },
   "finance-risk": {
-    provided: "We provide trade finance, payment, or insurance solutions.",
-    sought: "We need financing, payment, or insurance support.",
+    provided: "We provide trade finance, payment, or advisory solutions.",
+    sought: "We need financing, payment, or advisory support.",
+  },
+  "insurance-risk": {
+    provided: "We provide regulated trade insurance or insurance brokerage services.",
+    sought: "We need insurance protection for cargo, storage, credit, or commercial trade risk.",
   },
   "importing-to-india": {
     provided: "We import products from other countries into India.",

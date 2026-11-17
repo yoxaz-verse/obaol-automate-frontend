@@ -80,6 +80,7 @@ const MAIN_CATEGORY_SLUGS = new Set([
   "testing",
   "warehouse-storage",
   "finance-risk",
+  "insurance-risk",
   "importing-to-india",
   "exporting-from-india",
   "freight-forwarding",

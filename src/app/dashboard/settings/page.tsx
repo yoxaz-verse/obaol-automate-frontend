@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import Link from "next/link";
-import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiLock, FiMail, FiSettings, FiUser } from "react-icons/fi";
+import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiDatabase, FiLock, FiMail, FiSettings, FiUser } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
@@ -10,6 +10,14 @@ import AuthContext from "@/context/AuthContext";
 import { featureFlags } from "@/config/featureFlags";
 
 const settingsLinks = [
+  {
+    title: "AWS S3 Storage",
+    description: "Review private bucket setup and verify upload, read, and delete access without exposing credentials.",
+    href: "/dashboard/settings/storage",
+    icon: FiDatabase,
+    associateOnly: false,
+    adminOnly: true,
+  },
   {
     title: "WhatsApp Connection",
     description: "Connect your company WhatsApp Business number to send document PDFs and tracked invitations.",

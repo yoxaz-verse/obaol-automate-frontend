@@ -50,6 +50,16 @@ test("enquiry list exposes workflow-backed pending filters and counts", () => {
     assert.match(listSource, /workflowSummary: item\.workflowSummary/);
 });
 
+test("enquiry type and stage filters use full-width icon tabs", () => {
+    assert.match(listSource, /aria-label="Enquiry types"/);
+    assert.match(listSource, /grid-cols-3/);
+    assert.match(listSource, /grid-cols-7/);
+    assert.match(listSource, /EnquiryTabTitle icon=\{FiShoppingCart\}/);
+    assert.match(listSource, /EnquiryTabTitle icon=\{FiTag\}/);
+    assert.match(listSource, /EnquiryTabTitle compact icon=\{FiUser\}/);
+    assert.match(listSource, /EnquiryTabTitle compact icon=\{FiCheckCircle\}/);
+});
+
 test("workflow updates invalidate both enquiry details and paginated card lists", () => {
     assert.match(detailSource, /invalidateQueries\(\{ queryKey: \["enquiry"\] \}\)/);
     assert.doesNotMatch(detailSource, /invalidateQueries\(\{ queryKey: \["enquiry", enquiryId\] \}\)/);

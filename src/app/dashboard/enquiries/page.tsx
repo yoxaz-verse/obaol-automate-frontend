@@ -4,7 +4,18 @@ import React, { useContext, useEffect } from "react";
 import { Button } from "@nextui-org/react";
 import { Tabs, Tab, Tooltip } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiArrowRight } from "react-icons/fi";
+import {
+  FiArchive,
+  FiArrowRight,
+  FiCheckCircle,
+  FiClock,
+  FiGrid,
+  FiInbox,
+  FiRepeat,
+  FiShoppingCart,
+  FiTag,
+  FiUser,
+} from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -25,6 +36,28 @@ import { useSoundEffect } from "@/context/SoundContext";
 import { getEnquiryCardStatus } from "@/utils/enquiryCardStatus";
 
 const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
+
+function EnquiryTabTitle({
+  icon: Icon,
+  label,
+  compact = false,
+}: {
+  icon: React.ElementType;
+  label: React.ReactNode;
+  compact?: boolean;
+}) {
+  return (
+    <span className="flex min-w-0 items-center justify-center gap-2 whitespace-nowrap">
+      <span
+        aria-hidden="true"
+        className={`flex shrink-0 items-center justify-center rounded-lg bg-default-100 text-default-500 transition-colors group-data-[selected=true]:bg-obaol-500/15 group-data-[selected=true]:text-obaol-500 ${compact ? "h-7 w-7" : "h-8 w-8"}`}
+      >
+        <Icon size={compact ? 14 : 16} />
+      </span>
+      <span className="truncate">{label}</span>
+    </span>
+  );
+}
 
 /**
  * The main Enquiry page
@@ -308,8 +341,9 @@ export default function EnquiryPage() {
               <div className="w-full">
                 <StatsHeader data={enquiriesData} />
 
-                <div className="flex justify-between items-center mb-6 overflow-x-auto pb-2 no-scrollbar touch-pan-x">
+                <div className="mb-6 w-full overflow-x-auto pb-2 no-scrollbar touch-pan-x">
                   <Tabs
+                    aria-label="Enquiry types"
                     selectedKey={selectedType}
                     onSelectionChange={(key) => {
                       setIsTransitioning(true);
@@ -318,21 +352,22 @@ export default function EnquiryPage() {
                     }}
                     variant="underlined"
                     color="primary"
-                    className="w-fit"
+                    className="w-full min-w-[620px]"
                     classNames={{
-                      tabList: "gap-6 relative rounded-none p-0 border-b db-border-subtle",
+                      base: "w-full",
+                      tabList: "grid w-full grid-cols-3 gap-3 relative rounded-none p-0 border-b db-border-subtle",
                       cursor: "bg-obaol-500 w-full h-[3px] rounded-t-full",
-                      tab: "max-w-fit px-2 h-12 transition-all duration-300",
-                      tabContent: "font-black  tracking-[0.15em] text-[10px] db-muted group-data-[selected=true]:text-obaol-500"
+                      tab: "w-full max-w-none px-3 h-14 transition-all duration-300",
+                      tabContent: "w-full font-black tracking-[0.12em] text-[10px] db-muted group-data-[selected=true]:text-obaol-500"
                     }}
                   >
-                    <Tab key="All" title="All Enquiries" />
-                    <Tab key="Buying" title="Buying Inventory" />
-                    <Tab key="Selling" title="Selling Inventory" />
+                    <Tab key="All" title={<EnquiryTabTitle icon={FiGrid} label="All Enquiries" />} />
+                    <Tab key="Buying" title={<EnquiryTabTitle icon={FiShoppingCart} label="Buying Inventory" />} />
+                    <Tab key="Selling" title={<EnquiryTabTitle icon={FiTag} label="Selling Inventory" />} />
                   </Tabs>
                 </div>
 
-                <div className="flex justify-between items-center mb-8 overflow-x-auto pb-2 no-scrollbar touch-pan-x">
+                <div className="mb-8 w-full overflow-x-auto pb-2 no-scrollbar touch-pan-x">
                   <Tabs
                     aria-label="Enquiry Stages"
                     color="primary"
@@ -343,21 +378,22 @@ export default function EnquiryPage() {
                       setSelectedStage(key as string);
                       setTimeout(() => setIsTransitioning(false), 400);
                     }}
-                    className="w-fit"
+                    className="w-full min-w-[980px]"
                     classNames={{
-                      tabList: "gap-6 relative rounded-none p-0 border-b db-border-subtle",
+                      base: "w-full",
+                      tabList: "grid w-full grid-cols-7 gap-2 relative rounded-none p-0 border-b db-border-subtle",
                       cursor: "bg-obaol-500/60 w-full h-[2px] rounded-t-full",
-                      tab: "max-w-fit px-2 h-10 transition-all duration-300",
-                      tabContent: "font-black  tracking-[0.12em] text-[9px] db-muted group-data-[selected=true]:text-obaol-500"
+                      tab: "w-full max-w-none px-2 h-12 transition-all duration-300",
+                      tabContent: "w-full font-black tracking-[0.08em] text-[9px] db-muted group-data-[selected=true]:text-obaol-500"
                     }}
                   >
-                    <Tab key="All" title="All" />
-                    <Tab key="Pending" title="New" />
-                    <Tab key="Buyer Pending" title={`Buyer Pending (${buyerPendingCount})`} />
-                    <Tab key="Seller Pending" title={`Seller Pending (${sellerPendingCount})`} />
-                    <Tab key="Converted" title="Converted" />
-                    <Tab key="Completed" title="Closed" />
-                    <Tab key="Cancelled" title="Dormant" />
+                    <Tab key="All" title={<EnquiryTabTitle compact icon={FiInbox} label="All" />} />
+                    <Tab key="Pending" title={<EnquiryTabTitle compact icon={FiClock} label="New" />} />
+                    <Tab key="Buyer Pending" title={<EnquiryTabTitle compact icon={FiUser} label={`Buyer Pending (${buyerPendingCount})`} />} />
+                    <Tab key="Seller Pending" title={<EnquiryTabTitle compact icon={FiTag} label={`Seller Pending (${sellerPendingCount})`} />} />
+                    <Tab key="Converted" title={<EnquiryTabTitle compact icon={FiRepeat} label="Converted" />} />
+                    <Tab key="Completed" title={<EnquiryTabTitle compact icon={FiCheckCircle} label="Closed" />} />
+                    <Tab key="Cancelled" title={<EnquiryTabTitle compact icon={FiArchive} label="Dormant" />} />
                   </Tabs>
                 </div>
 

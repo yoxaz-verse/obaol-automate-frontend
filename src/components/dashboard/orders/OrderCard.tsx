@@ -135,8 +135,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                 <div key={party.label} className="flex min-w-0 items-center gap-2.5 rounded-xl bg-content1/70 p-2">
                                     <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-bold ${party.tone}`}>{party.initial}</div>
                                     <div className="min-w-0">
-                                        <p className="mb-0.5 text-[10px] font-semibold leading-none text-default-500">{party.label}</p>
-                                        <p className="line-clamp-2 text-xs font-bold leading-tight text-foreground" title={party.name}>{party.name}</p>
+                                        <p className="mb-0.5 whitespace-nowrap text-[10px] font-semibold leading-none text-default-500">{party.label}</p>
+                                        <p className="truncate text-xs font-bold leading-tight text-foreground" title={party.name}>{party.name}</p>
                                     </div>
                                 </div>
                             ))}

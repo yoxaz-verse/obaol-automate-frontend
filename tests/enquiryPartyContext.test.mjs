@@ -43,10 +43,25 @@ test("enquiry detail keeps constrained cards and trade terms responsive", () => 
   assert.match(page, /Contact support: info@support\.obaol\.com/);
   assert.match(page, /break-all/);
   assert.match(form, /ResponsiveDisclosure title="Incoterms & Payment"/);
-  assert.match(form, /ResponsiveDisclosure title="Execution & Ownership"/);
+  assert.match(form, /ResponsiveDisclosure title="Execution & Ownership"[^>]*defaultOpen/);
   assert.match(form, /ResponsiveDisclosure title="Packaging & Route Notes"/);
   assert.match(form, /min-h-14 h-auto/);
   assert.match(form, /grid-cols-\[minmax\(0,1fr\)_auto\]/);
+});
+
+test("responsibility owner selection is visible by default and remains permission-aware", () => {
+  const page = read("../src/app/dashboard/enquiries/[id]/page.tsx");
+  const form = read("../src/components/dashboard/responsibilities/ResponsibilityEventForm.tsx");
+
+  assert.match(form, /ResponsiveDisclosure title="Execution & Ownership"[^>]*defaultOpen/);
+  assert.match(form, /responsibilityFieldConfig[\s\S]*\.map\(\(field\)/);
+  assert.match(form, /canSelect = canEditResponsibilityPlan/);
+  assert.match(form, /disabled=\{!canSelect\}/);
+  assert.match(page, /label: "Procurement \/ Sourcing"/);
+  assert.match(page, /label: "Quality Testing"/);
+  assert.match(page, /label: "Packaging & Labelling"/);
+  assert.match(page, /label: "Inland Transportation"/);
+  assert.match(page, /label: "Freight Forwarding & Shipping"/);
 });
 
 test("responsibility event uses one explicit save action for terms and responsibilities", () => {

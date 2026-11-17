@@ -326,7 +326,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
         </div>
 
         <div id="responsibility-execution-ownership" data-readiness-section>
-        <ResponsiveDisclosure title="Execution & Ownership" subtitle="Logistics, responsibility owners, and inland segments">
+        <ResponsiveDisclosure title="Execution & Ownership" subtitle="Logistics, responsibility owners, and inland segments" defaultOpen>
         <div className="flex flex-col gap-5 p-3 sm:p-4 rounded-2xl border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
           <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none rotate-12 group-hover:rotate-0 duration-700">
             <LuNavigation size={140} />

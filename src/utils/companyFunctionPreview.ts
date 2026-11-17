@@ -53,10 +53,15 @@ export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinit
     { label: "Inventory", href: "/dashboard/inventory", description: "Track stock held for trading and fulfillment." },
     { label: "Warehouse booking", href: "/dashboard/warehouse-rent", description: "Find or allocate additional storage space." },
   ] },
-  { slug: "finance-risk", name: "Finance & Insurance", description: "Review the existing payment, order, and commercial-document workflows.", actions: [
+  { slug: "finance-risk", name: "Finance & Advisory", description: "Review finance, payment, and commercial-document workflows.", actions: [
     { label: "Payments", href: "/dashboard/payments", description: "Review payment activity available in OBAOL.", primary: true },
     { label: "Orders", href: "/dashboard/orders", description: "Review commercial status by order." },
     { label: "Documentation", href: "/dashboard/documentation", description: "Create, upload, and manage trade documents." },
+  ] },
+  { slug: "insurance-risk", name: "Insurance", description: "Publish trade insurance products and manage structured coverage requests.", actions: [
+    { label: "Insurance Companies", href: "/dashboard/insurance-partners", description: "Compare approved insurers, brokers, clauses, and coverage.", primary: true },
+    { label: "My Insurance Portfolio", href: "/dashboard/insurance-partners/my", description: "Maintain regulated provider details and insurance products." },
+    { label: "Insurance Requests", href: "/dashboard/insurance-partners/requests", description: "Review underwriting requests and offered terms." },
   ] },
   { slug: "importing-to-india", name: "Importing into India", description: "Manage inbound imports to India using the current shipment and trade workflows.", actions: [
     { label: "Import Opportunities", href: "/dashboard/imports", description: "Browse incoming import listings and reserve available quantities.", primary: true },

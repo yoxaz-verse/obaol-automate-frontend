@@ -11,7 +11,7 @@ import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPrior
 import { showToastMessage } from "@/utils/utils";
 
 const MAIN_CATEGORY_SLUGS = new Set([
-  "buyer", "seller", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk",
+  "buyer", "seller", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk", "insurance-risk",
   "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics",
 ]);
 

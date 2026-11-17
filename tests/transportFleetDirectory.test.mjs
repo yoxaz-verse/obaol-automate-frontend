@@ -19,3 +19,17 @@ test("truck directory communicates privacy and fleet publication controls", () =
   assert.match(fleet, /Publish on truck map/);
   assert.match(fleet, /Update exact truck position/);
 });
+
+test("transportation uses lifecycle navigation and list-first fleet editing", () => {
+  const workspace = readFileSync("src/components/inland-transportation/InlandWorkspace.tsx", "utf8");
+  const overview = readFileSync("src/app/dashboard/inland-transportation/page.tsx", "utf8");
+  const fleet = readFileSync("src/app/dashboard/inland-transportation/fleet/page.tsx", "utf8");
+  assert.match(workspace, /Discover/);
+  assert.match(workspace, /Operate/);
+  assert.match(workspace, /Manage/);
+  assert.match(workspace, /aria-current/);
+  assert.match(overview, /Transportation lifecycle/);
+  assert.match(overview, /Needs attention/);
+  assert.match(fleet, /Search \$\{tab\}/);
+  assert.match(fleet, /EditorDrawer/);
+});

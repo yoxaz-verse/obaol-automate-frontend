@@ -26,6 +26,15 @@ import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import OrderCard from "@/components/dashboard/orders/OrderCard";
 import EnquiryCard from "@/components/dashboard/enquiries/EnquiryCard";
 import { dashboardCopy } from "@/utils/dashboardCopy";
+import AppButton from "@/components/ui/AppButton";
+import PageHeader from "@/components/ui/PageHeader";
+import CompanyBrandMark from "@/components/dashboard/Company/CompanyBrandMark";
+import {
+  DashboardPage,
+  DashboardPanel,
+  DashboardSectionHeader,
+  DashboardStatusBadge,
+} from "@/components/dashboard/DashboardUI";
 
 export default function CompanyProductPage() {
   const searchParams = useSearchParams();
@@ -710,7 +719,7 @@ export default function CompanyProductPage() {
   }
 
   return (
-    <div className="w-full p-4 md:p-6 space-y-10">
+    <DashboardPage className="p-4 md:p-6">
       
       {/* Configuration */}
       {isAdmin ? (
@@ -874,7 +883,7 @@ export default function CompanyProductPage() {
       ) : null}
 
       {/* Directory Section */}
-      <div className="relative space-y-8">
+      <div className="relative space-y-6">
         {hasMetricsError ? (
           <div className="rounded-2xl border border-danger-500/30 bg-danger-500/10 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <p className="text-xs font-bold  tracking-wider text-danger-600">
@@ -926,50 +935,45 @@ export default function CompanyProductPage() {
           </Card>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-2">
-          <div className="space-y-3">
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-6 bg-obaol-500 rounded-full shadow-[0_0_12px_rgba(207,152,60,0.5)]" />
-              <h2 className="text-xl md:text-2xl font-black  tracking-tight text-foreground italic">Company <span className="text-default-400">Directory</span></h2>
-            </div>
-            <p className="text-[10px] font-bold text-default-500  tracking-widest opacity-80">
-              Search companies by name, email, or phone.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <PageHeader
+          variant="plain"
+          eyebrow="Organization"
+          title="Companies"
+          description="Search and manage company profiles, assignments, capabilities, and live product activity."
+          reserveCompanionSpace={false}
+          actions={(
+            <div className="flex flex-col gap-3 sm:flex-row">
             <Input
-              placeholder="Search records..."
+              aria-label="Search companies"
+              placeholder="Search by name, email, or phone"
               value={search}
               onValueChange={(value) => {
                 setSearch(value);
                 setDirectoryPage(1);
               }}
-              radius="full"
               className="sm:w-80"
               startContent={<LuSearch className="text-default-400" size={18} />}
               classNames={{
-                 inputWrapper: "bg-content1/50 border-divider backdrop-blur-xl h-12 shadow-inner",
+                 inputWrapper: "h-11 rounded-xl border border-[var(--db-border-subtle)] bg-[var(--db-panel)] shadow-none",
                  input: "text-sm font-medium"
               }}
             />
-            <Button
-              color="primary"
-              variant="shadow"
-              radius="full"
+            <AppButton
+              intent="primary"
               onPress={() => setIsOnboardModalOpen(true)}
-              className="h-12 px-8 font-black  text-[10px] tracking-tighter italic bg-gradient-to-tr from-primary-600 to-primary-400 shadow-[0_10px_40px_-10px_rgba(0,111,238,0.5)]"
               startContent={<LuPlus size={16} />}
             >
-              Add New Associate + Company
-            </Button>
-          </div>
-        </div>
+              Add company and associate
+            </AppButton>
+            </div>
+          )}
+        />
 
-        <div className="rounded-2xl border border-divider bg-content1/40 backdrop-blur-xl p-4 md:p-5 space-y-4">
+        <DashboardPanel className="space-y-5 p-4 md:p-5">
           {isAdmin ? (
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-[10px] font-black  tracking-[0.25em] text-default-500">Assignment Filter</p>
+                <p className="dashboard-label">Assignment</p>
                 {companiesQuery.isFetching ? (
                   <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/20 bg-obaol-500/10 px-3 py-1">
                     <Spinner size="sm" color="warning" />
@@ -985,28 +989,25 @@ export default function CompanyProductPage() {
                   { key: "assigned", label: "Assigned" },
                   { key: "unassigned", label: "Unassigned" },
                 ].map((item) => (
-                  <Button
+                  <button
                     key={item.key}
-                    size="sm"
-                    radius="full"
-                    variant={assignmentFilter === item.key ? "solid" : "flat"}
-                    color={assignmentFilter === item.key ? "primary" : "default"}
-                    className="font-black  tracking-wider text-[10px]"
-                    isDisabled={companiesQuery.isFetching}
-                    onPress={() => {
+                    type="button"
+                    disabled={companiesQuery.isFetching}
+                    className={`min-h-9 rounded-lg border px-4 text-sm font-semibold transition-colors ${assignmentFilter === item.key ? "border-obaol-500/30 bg-obaol-500/15 text-obaol-700 dark:text-obaol-300" : "border-[var(--db-border-subtle)] bg-[var(--db-subtle)] text-[var(--db-muted-strong)] hover:border-obaol-500/40"}`}
+                    onClick={() => {
                       setAssignmentFilter(item.key as "all" | "assigned" | "unassigned");
                       setDirectoryPage(1);
                     }}
                   >
                     {item.label}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
           ) : null}
           <div className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-[10px] font-black  tracking-[0.25em] text-default-500">Live Product Filter</p>
+              <p className="dashboard-label">Product activity</p>
               {companiesQuery.isFetching ? (
                 <p className="text-[9px] font-black  tracking-[0.2em] text-obaol-500/80">
                   Applying filters...
@@ -1019,25 +1020,22 @@ export default function CompanyProductPage() {
                 { key: "live", label: "Live Products" },
                 { key: "not_live", label: "No Live Products" },
               ].map((item) => (
-                <Button
+                <button
                   key={item.key}
-                  size="sm"
-                  radius="full"
-                  variant={liveProductFilter === item.key ? "solid" : "flat"}
-                  color={liveProductFilter === item.key ? "secondary" : "default"}
-                  className="font-black  tracking-wider text-[10px]"
-                  isDisabled={companiesQuery.isFetching}
-                  onPress={() => {
+                  type="button"
+                  disabled={companiesQuery.isFetching}
+                  className={`min-h-9 rounded-lg border px-4 text-sm font-semibold transition-colors ${liveProductFilter === item.key ? "border-obaol-500/30 bg-obaol-500/15 text-obaol-700 dark:text-obaol-300" : "border-[var(--db-border-subtle)] bg-[var(--db-subtle)] text-[var(--db-muted-strong)] hover:border-obaol-500/40"}`}
+                  onClick={() => {
                     setLiveProductFilter(item.key as "all" | "live" | "not_live");
                     setDirectoryPage(1);
                   }}
                 >
                   {item.label}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
-        </div>
+        </DashboardPanel>
 
         <OnboardingModal 
           isOpen={isOnboardModalOpen} 
@@ -1081,7 +1079,7 @@ export default function CompanyProductPage() {
                     ) : null}
                     <div className="flex-1 h-px bg-gradient-to-r from-divider to-transparent" />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {directoryRows.map((company: any, idx: number) => {
                       const name = String(company?.name || "Unnamed Company");
                       const companyIsAssigned = hasAssignment(company);
@@ -1096,60 +1094,42 @@ export default function CompanyProductPage() {
                             if (companiesQuery.isFetching) return;
                             setSelectedCompanyId(company?._id || null);
                           }}
-                          className="group relative text-left flex flex-col gap-6 rounded-[2.5rem] border border-divider bg-content1/30 p-6 hover:border-obaol-500/40 hover:bg-content1 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-obaol-500/[0.05] backdrop-blur-xl"
+                          className="dashboard-panel group relative flex min-h-64 flex-col gap-5 p-5 text-left transition hover:-translate-y-0.5 hover:border-obaol-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500"
                         >
                           <div className="flex items-start justify-between gap-4">
-                            <div
-                              className={`shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-sm font-black shadow-inner border border-white/5 ${colourFor(
-                                name
-                              )}`}
-                            >
-                              {initials(name)}
-                            </div>
-                            <div className="grow flex flex-col min-w-0 pt-1">
-                              <span className="text-base font-black text-foreground leading-tight line-clamp-2 group-hover:text-obaol-600 transition-colors  tracking-tight italic">
+                            <CompanyBrandMark name={name} logo={toText(company?.logo, "")} size="md" />
+                            <div className="flex min-w-0 grow flex-col pt-1">
+                              <span className="line-clamp-2 text-base font-bold leading-tight text-foreground transition-colors group-hover:text-obaol-700 dark:group-hover:text-obaol-300">
                                 {name}
                               </span>
-                              <span className="text-[10px] font-black text-default-500  tracking-widest mt-2 bg-default-100 dark:bg-white/5 w-fit px-2 py-0.5 rounded-lg border border-divider">
+                              <span className="mt-2 w-fit rounded-md border border-[var(--db-border-subtle)] bg-[var(--db-subtle)] px-2 py-1 text-xs font-semibold db-muted">
                                 {company?.providedCapabilities?.length ? `${company.providedCapabilities.length} capabilities` : "Capabilities pending"}
                               </span>
                             </div>
                           </div>
                           
                           <div className="space-y-2 mt-auto">
-                            <div className="flex items-center gap-3 text-[10px] text-default-500 font-black  tracking-widest truncate">
-                              <LuGlobe size={14} className="shrink-0 text-obaol-500/40" />
+                            <div className="flex items-center gap-2 truncate text-sm db-muted">
+                              <LuMail size={15} className="shrink-0 text-obaol-600 dark:text-obaol-300" />
                               {toText(company?.email, "Not available")}
                             </div>
-                            <div className="flex items-center gap-3 text-[10px] text-default-500 font-black  tracking-widest">
-                              <LuPhone size={14} className="shrink-0 text-primary-500/40" />
+                            <div className="flex items-center gap-2 text-sm db-muted">
+                              <LuPhone size={15} className="shrink-0 text-obaol-600 dark:text-obaol-300" />
                               {toText(company?.phone, "Not available")}
                             </div>
                             <div className="flex flex-wrap items-center gap-2 pt-1">
-                              <Chip
-                                size="sm"
-                                variant="flat"
-                                color={companyIsAssigned ? "success" : "warning"}
-                                className="text-[9px] font-black  tracking-wider"
-                              >
+                              <DashboardStatusBadge tone={companyIsAssigned ? "success" : "warning"}>
                                 {companyIsAssigned ? "Assigned" : "Unassigned"}
-                              </Chip>
-                              <Chip
-                                size="sm"
-                                variant="flat"
-                                color={companyIsLive ? "success" : "danger"}
-                                className="text-[9px] font-black  tracking-wider"
-                              >
+                              </DashboardStatusBadge>
+                              <DashboardStatusBadge tone={companyIsLive ? "success" : "danger"}>
                                 {companyIsLive ? "Live Products" : "No Live Products"}
-                              </Chip>
+                              </DashboardStatusBadge>
                             </div>
                           </div>
 
-                          <div className="pt-4 border-t border-divider flex items-center justify-between">
-                            <span className="text-[9px] font-black text-obaol-500  tracking-[0.2em] opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
-                              Open details
-                            </span>
-                            <div className="w-8 h-8 rounded-xl bg-default-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-obaol-500 group-hover:text-black transition-all">
+                          <div className="flex items-center justify-between border-t border-[var(--db-border-subtle)] pt-4">
+                            <span className="text-sm font-semibold text-obaol-700 dark:text-obaol-300">View company</span>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--db-inset)] transition group-hover:bg-obaol-500 group-hover:text-brand-abyssal">
                               <LuChevronLeft size={16} className="rotate-180" />
                             </div>
                           </div>
@@ -1199,41 +1179,26 @@ export default function CompanyProductPage() {
             </div>
           ) : (
             <div className="w-full space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-              <header className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-8 border-b border-divider">
-                <div className="flex items-center gap-6">
-                  <Button 
-                    isIconOnly 
-                    variant="flat" 
-                    radius="full" 
-                    size="lg" 
-                    className="bg-content2/50 hover:bg-obaol-500 hover:text-black transition-all shadow-sm"
-                    onPress={() => setSelectedCompanyId(null)}
-                  >
-                    <LuChevronLeft size={24} />
-                  </Button>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-1.5 bg-obaol-500 rounded-full shadow-[0_0_12px_rgba(255,193,7,0.6)]" />
-                      <span className="text-[11px] font-black  tracking-[0.4em] text-obaol-600 dark:text-obaol-500 italic">Company Details</span>
-                    </div>
-                    <h3 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground italic">{selectedCompanyName}</h3>
+              <DashboardPanel className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between md:p-6" feature>
+                <div className="flex min-w-0 items-center gap-4">
+                  <AppButton intent="icon" isIconOnly aria-label="Back to companies" onPress={() => setSelectedCompanyId(null)}>
+                    <LuChevronLeft size={20} />
+                  </AppButton>
+                  <CompanyBrandMark name={selectedCompanyName} logo={selectedCompanyLogo} size="lg" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300">Company profile</p>
+                    <h1 className="mt-1 break-words text-2xl font-bold tracking-tight text-foreground md:text-3xl">{selectedCompanyName}</h1>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                   {typeof selectedCompany?.isWebsiteLive === "boolean" && (
-                    <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border transition-all ${
-                      selectedCompany.isWebsiteLive 
-                        ? "border-success-500/10 bg-success-500/5 text-success-600 dark:text-success-400" 
-                        : "border-obaol-500/10 bg-obaol-500/5 text-obaol-600 dark:text-obaol-400"
-                    }`}>
-                      <div className={`w-1 h-3 rounded-full ${selectedCompany.isWebsiteLive ? "bg-success-500/30" : "bg-obaol-500/30"}`} />
-                      <span className="text-[9px] font-black  tracking-[0.25em]">
-                        {selectedCompany.isWebsiteLive ? "Website Active" : "Internal Sync Only"}
-                      </span>
-                    </div>
+                    <DashboardStatusBadge tone={selectedCompany.isWebsiteLive ? "success" : "neutral"}>
+                      {selectedCompany.isWebsiteLive ? "Website active" : "Internal profile"}
+                    </DashboardStatusBadge>
                   )}
+                  {selectedCompanyWebsite ? <AppButton intent="secondary" size="sm" startContent={<LuExternalLink size={15} />} onPress={() => window.open(selectedCompanyWebsite, "_blank", "noopener,noreferrer")}>Open website</AppButton> : null}
                 </div>
-              </header>
+              </DashboardPanel>
 
               {selectedCompanyQuery.isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -1245,14 +1210,11 @@ export default function CompanyProductPage() {
                   <p className="text-default-500 text-sm italic font-bold">Company not found.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-12">
                   <div className="lg:col-span-4 space-y-4">
-                    <Card className="rounded-2xl bg-content2/30 dark:bg-white/[0.02] border border-divider p-4 shadow-sm backdrop-blur-xl">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3 mb-2">
-                          <LuGlobe className="text-obaol-500" size={16} />
-                          <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Contact Information</span>
-                        </div>
+                    <DashboardPanel className="p-5">
+                      <div className="space-y-5">
+                        <DashboardSectionHeader title="Contact information" description="Primary company contact details." />
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                           <div className="flex flex-col">
                             <span className="text-[9px] font-black  text-default-500 tracking-[0.2em] mb-1 opacity-60">Email</span>
@@ -1282,24 +1244,23 @@ export default function CompanyProductPage() {
                           </div>
                         </div>
                       </div>
-                    </Card>
+                    </DashboardPanel>
 
-                    <Card className="rounded-2xl bg-content2/30 dark:bg-white/[0.02] border border-divider p-4 shadow-sm backdrop-blur-xl">
+                    <DashboardPanel className="p-5">
                       <div className="space-y-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <LuUser className="text-primary-500" size={16} />
-                            <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Execution Proxy</span>
+                            <h2 className="dashboard-section-title">Company operations</h2>
                           </div>
                           {isAdmin ? (
-                            <Button
+                            <AppButton
                               size="sm"
-                              variant="flat"
-                              color="warning"
+                              intent="secondary"
                               onPress={() => setIsAssignModalOpen(true)}
                             >
                               Assign Operator
-                            </Button>
+                            </AppButton>
                           ) : null}
                         </div>
                         <div className="space-y-2">
@@ -1336,19 +1297,8 @@ export default function CompanyProductPage() {
                             {selectedCompanyAbout}
                           </p>
                         </div>
-                        {selectedCompanyWebsite ? (
-                          <Button
-                            size="sm"
-                            variant="flat"
-                            color="primary"
-                            startContent={<LuExternalLink size={14} />}
-                            onPress={() => window.open(selectedCompanyWebsite, "_blank", "noopener,noreferrer")}
-                          >
-                            Open Website
-                          </Button>
-                        ) : null}
                       </div>
-                    </Card>
+                    </DashboardPanel>
 
                   </div>
 
@@ -1365,17 +1315,13 @@ export default function CompanyProductPage() {
                         queryClient.invalidateQueries({ queryKey: ["company-directory"] });
                       }}
                     />
-                    <Card className="rounded-2xl bg-content2/30 dark:bg-white/[0.02] border border-divider p-4 shadow-sm backdrop-blur-xl">
+                    <DashboardPanel className="p-5">
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <LuUsers className="text-obaol-500" size={16} />
-                            <span className="text-[10px] font-black  tracking-[0.3em] text-default-400 italic">Personnel Network</span>
-                          </div>
-                          <Chip size="sm" color="primary" variant="flat">
-                            {associatesTotal || associates.length} Associates
-                          </Chip>
-                        </div>
+                        <DashboardSectionHeader
+                          title="Associates"
+                          description="People linked to this company profile."
+                          action={<DashboardStatusBadge tone="brand">{associatesTotal || associates.length} associates</DashboardStatusBadge>}
+                        />
                         {selectedCompanyAssociatesQuery.isLoading ? (
                           <div className="flex items-center justify-center py-8">
                             <Spinner />
@@ -1438,9 +1384,9 @@ export default function CompanyProductPage() {
                           </div>
                         )}
                       </div>
-                    </Card>
+                    </DashboardPanel>
 
-                    <Card className="rounded-2xl bg-content2/30 dark:bg-white/[0.02] border border-divider p-4 shadow-sm backdrop-blur-xl">
+                    <DashboardPanel className="p-5">
                       <Tabs
                         selectedKey={activeDetailTab}
                         onSelectionChange={(key) => setActiveDetailTab(String(key))}
@@ -1538,7 +1484,7 @@ export default function CompanyProductPage() {
                           </div>
                         </Tab>
                       </Tabs>
-                    </Card>
+                    </DashboardPanel>
                   </div>
                 </div>
               )}
@@ -1629,6 +1575,6 @@ export default function CompanyProductPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
+    </DashboardPage>
   );
 }

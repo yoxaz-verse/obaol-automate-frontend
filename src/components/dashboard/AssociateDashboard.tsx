@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, CardBody, Skeleton } from "@nextui-org/react";
-import { LuArrowRight } from "react-icons/lu";
+import { LuArrowRight, LuCircleCheck, LuCompass, LuSparkles } from "react-icons/lu";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
 import CompanyFunctionComponent from "./CompanyFunctionComponent";
 import { normalizePreviewFunctionSlug } from "@/utils/companyFunctionPreview";
@@ -57,9 +57,89 @@ export default function AssociateDashboard({
   const activeCapabilities = perspective === "provided" ? liveProvidedCapabilities : liveSoughtCapabilities;
   const isSeeking = perspective === "sought";
   const activePerspectiveTab = "bg-obaol-500 text-obaol-950 shadow-sm hover:bg-obaol-400 focus-visible:ring-2 focus-visible:ring-obaol-500/40";
+  const formatCapability = (capability: string) => capability
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const heroTitle = isSeeking
+    ? "Find the right partners for what comes next."
+    : activeCapabilities.length > 0
+      ? "Your services have a place to grow."
+      : "Build your company workspace."
+  const heroDescription = isSeeking
+    ? "Explore the OBAOL network, connect with verified specialists, and turn your next requirement into a coordinated trade."
+    : activeCapabilities.length > 0
+      ? "Show buyers and trade partners what you do best. OBAOL brings every enquiry, handoff, and execution step into one calm, connected workspace."
+      : "Tell us what your company provides and we will shape this space around the services, enquiries, and actions that matter to you."
+  const heroAction = isSeeking
+    ? { label: "Explore opportunities", href: "/dashboard/marketplace" }
+    : activeCapabilities.length > 0
+      ? { label: "View enquiries", href: "/dashboard/enquiries" }
+      : { label: "Add your services", href: "/dashboard/company" };
 
   return (
     <div className="space-y-6">
+      <section
+        aria-labelledby="associate-welcome-title"
+        className="relative isolate overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-content1 px-6 py-8 shadow-[0_24px_70px_-48px_rgba(117,78,24,0.5)] sm:px-8 sm:py-10 lg:px-12 lg:py-12"
+      >
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_8%_15%,rgba(255,177,98,0.2),transparent_28%),radial-gradient(circle_at_92%_82%,rgba(207,152,60,0.14),transparent_30%)]" />
+        <div className="pointer-events-none absolute -right-16 -top-20 -z-10 h-64 w-64 rounded-full border border-obaol-500/10" />
+        <div className="pointer-events-none absolute -right-6 -top-10 -z-10 h-44 w-44 rounded-full border border-obaol-500/15" />
+
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(280px,0.75fr)] lg:items-end">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/20 bg-obaol-500/10 px-3 py-1.5 text-xs font-bold text-obaol-700 dark:text-obaol-300">
+              <LuSparkles aria-hidden="true" size={14} />
+              {isSeeking ? "Your partner network" : "Your OBAOL workspace"}
+            </div>
+            <h1 id="associate-welcome-title" className="mt-5 max-w-2xl text-3xl font-black leading-[1.08] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+              {heroTitle}
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-default-600 sm:text-base">
+              {heroDescription}
+            </p>
+
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Button
+                className="min-h-12 bg-obaol-500 px-6 font-bold text-obaol-950 shadow-lg shadow-obaol-500/15"
+                endContent={<LuArrowRight aria-hidden="true" />}
+                onPress={() => router.push(heroAction.href)}
+              >
+                {heroAction.label}
+              </Button>
+              {activeCapabilities.length > 0 && (
+                <Button variant="bordered" className="min-h-12 border-default-300 px-6 font-semibold" onPress={() => router.push("/dashboard/company")}>
+                  Update company profile
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-default-200/80 bg-background/70 p-5 backdrop-blur-sm sm:p-6">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-obaol-500/15 text-obaol-700 dark:text-obaol-300">
+                {isSeeking ? <LuCompass aria-hidden="true" size={20} /> : <LuCircleCheck aria-hidden="true" size={20} />}
+              </span>
+              <div>
+                <p className="text-sm font-black text-foreground">{isSeeking ? "Services you are looking for" : "Services you provide"}</p>
+                <p className="mt-0.5 text-xs text-default-500">{activeCapabilities.length || "No"} {activeCapabilities.length === 1 ? "service" : "services"} selected</p>
+              </div>
+            </div>
+            {activeCapabilities.length > 0 ? (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {activeCapabilities.map((capability) => (
+                  <span key={capability} className="rounded-full border border-obaol-500/20 bg-obaol-500/[0.08] px-3 py-1.5 text-xs font-bold text-foreground">
+                    {formatCapability(capability)}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-5 text-sm leading-6 text-default-500">Add your first service so this dashboard can guide you to the right work.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
       <section aria-label="Dashboard perspective controls" className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-col items-stretch gap-2 sm:items-start">

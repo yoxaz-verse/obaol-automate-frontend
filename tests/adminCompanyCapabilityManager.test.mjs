@@ -8,7 +8,7 @@ const read = (path) => readFileSync(fileURLToPath(new URL(path, import.meta.url)
 test("admin company workspace uses the compact capability manager", () => {
   const page = read("../src/app/dashboard/companies/page.tsx");
   assert.equal(page.includes("CompanyCapabilityManager"), true);
-  assert.equal(page.includes('className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start"'), true);
+  assert.match(page, /className="grid grid-cols-1 [^"]*lg:grid-cols-12"/);
   assert.equal(page.includes("Sector Affiliations"), false);
   assert.equal(page.includes("CompanyInterestsModal"), false);
   for (const tab of ['key="catalog"', 'key="orders"', 'key="enquiries"', 'key="activity"']) {

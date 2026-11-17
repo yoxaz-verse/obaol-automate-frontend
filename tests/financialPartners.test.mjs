@@ -22,3 +22,15 @@ test("financial partner UI includes directory, map, criteria, applications, and 
   assert.match(applications, /MORE_INFORMATION_REQUIRED/);
   assert.match(applications, /Withdraw/);
 });
+
+test("financial portfolio uses dashboard styling without an overlapping action bar", () => {
+  const portfolio = read("../src/app/dashboard/financial-partners/my/page.tsx");
+  const directory = read("../src/app/dashboard/financial-partners/page.tsx");
+  assert.doesNotMatch(portfolio, /sticky bottom/);
+  assert.match(portfolio, /DashboardPanel/);
+  assert.match(portfolio, /app-button--primary/);
+  assert.match(portfolio, /FiDollarSign/);
+  assert.match(portfolio, /<details/);
+  assert.doesNotMatch(directory, /emerald-/);
+  assert.match(directory, /dashboard-feature-panel|DashboardPanel/);
+});

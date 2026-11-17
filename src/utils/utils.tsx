@@ -45,7 +45,7 @@ import {
   LuWorkflow,
 } from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
-import { TbBuildingWarehouse, TbArrowsUpDown, TbReceiptTax, TbBuildingBank, TbReportMoney, TbFileDollar } from "react-icons/tb";
+import { TbBuildingWarehouse, TbArrowsUpDown, TbReceiptTax, TbBuildingBank, TbReportMoney, TbFileDollar, TbShieldDollar } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
@@ -167,6 +167,9 @@ export const sidebarOptions = [
   { name: "Financial Partners", icon: <TbBuildingBank />, link: "/dashboard/financial-partners" },
   { name: "My Financial Portfolio", icon: <TbReportMoney />, link: "/dashboard/financial-partners/my" },
   { name: "Finance Applications", icon: <TbFileDollar />, link: "/dashboard/financial-partners/applications" },
+  { name: "Insurance Companies", icon: <TbShieldDollar />, link: "/dashboard/insurance-partners" },
+  { name: "My Insurance Portfolio", icon: <TbShieldDollar />, link: "/dashboard/insurance-partners/my" },
+  { name: "Insurance Requests", icon: <FiClipboard />, link: "/dashboard/insurance-partners/requests" },
   { name: "Freight Forwarding", icon: <LuContainer />, link: "/dashboard/freight-forwarding" },
   { name: "My Freight Profile", icon: <LuContact />, link: "/dashboard/freight-forwarding/my" },
   { name: "Freight Associates", icon: <FiUsers />, link: "/dashboard/freight-forwarding/associates" },

@@ -23,6 +23,10 @@ import { extractList } from "@/core/data/queryUtils";
 import { showToastMessage } from "@/utils/utils";
 import { useContext } from "react";
 import AuthContext from "@/context/AuthContext";
+import dynamic from "next/dynamic";
+import { toStructuredLocation } from "@/types/location";
+
+const LocationSelector = dynamic(() => import("@/components/location/LocationSelector"), { ssr: false });
 
 const EMPTY_COMBINED_ASSOCIATE_FORM = {
   name: "",
@@ -37,6 +41,7 @@ const EMPTY_OPERATOR_COMPANY_FORM = {
   phone: "",
   phoneSecondary: "",
   address: "",
+  location: null as any,
   geoType: "INDIAN",
   country: "",
   state: "",
@@ -562,7 +567,7 @@ export default function OnboardingModal({
                             <SelectItem key="INDIAN" value="INDIAN">Indian Market</SelectItem>
                             <SelectItem key="INTERNATIONAL" value="INTERNATIONAL">Global Market</SelectItem>
                           </Select>
-                          <Textarea label="Corporate Headquarters" labelPlacement="outside" placeholder="Full physical address" minRows={2} variant="bordered" radius="lg" size="lg" value={operatorCompanyForm.address} onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, address: value }))} className="md:col-span-2" classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "bg-default-100/50 border-divider" }} />
+                          <div className="md:col-span-2"><LocationSelector required markerVariant="company" value={toStructuredLocation(operatorCompanyForm.location)} onChange={(selected) => setOperatorCompanyForm((current) => ({ ...current, address: selected.address, location: selected }))} /></div>
 
                           {operatorCompanyForm.geoType === "INTERNATIONAL" ? (
                             <Select label="Jurisdiction (Country)" labelPlacement="outside" variant="bordered" radius="lg" size="lg" selectedKeys={operatorCompanyForm.country ? new Set([operatorCompanyForm.country]) : new Set()} onSelectionChange={(keys) => setOperatorCompanyForm((current) => ({ ...current, country: String(Array.from(keys as Set<string>)[0] || "") }))} isLoading={countriesQuery.isLoading} classNames={{ label: "text-[10px] font-black  tracking-[0.2em] text-default-500 ml-1 mb-2", trigger: "h-14 bg-default-100/50 border-divider" }}>

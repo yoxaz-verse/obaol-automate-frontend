@@ -7,6 +7,7 @@ export type DashboardSection =
   | "Documentation"
   | "Products"
   | "Services"
+  | "Insurance"
   | "Warehouse"
   | "Organization"
   | "Operations/Admin";
@@ -114,6 +115,10 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/financial-partners/my", label: "My Financial Portfolio", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, breadcrumbParent: "/dashboard/financial-partners" },
   { path: "/dashboard/financial-partners/applications", label: "Finance Applications", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, breadcrumbParent: "/dashboard/financial-partners" },
   { path: "/dashboard/financial-partners/:id", label: "Financial Partner Profile", section: "Services", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/financial-partners" },
+  { path: "/dashboard/insurance-partners", label: "Insurance Companies", section: "Insurance", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, description: "Compare approved trade insurers and brokers by coverage, clauses, territory, and eligibility." },
+  { path: "/dashboard/insurance-partners/my", label: "My Insurance Portfolio", section: "Insurance", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, breadcrumbParent: "/dashboard/insurance-partners" },
+  { path: "/dashboard/insurance-partners/requests", label: "Insurance Requests", section: "Insurance", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, breadcrumbParent: "/dashboard/insurance-partners" },
+  { path: "/dashboard/insurance-partners/:id", label: "Insurance Company Profile", section: "Insurance", roles: ["admin", "associate", "operator", "team"], breadcrumbParent: "/dashboard/insurance-partners" },
   { path: "/dashboard/freight-forwarding", label: "Freight Forwarding", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, description: "Source, quote, award, and operate multimodal freight." },
   { path: "/dashboard/freight-forwarding/my", label: "My Freight Profile", section: "Services", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, breadcrumbParent: "/dashboard/freight-forwarding" },
   { path: "/dashboard/freight-forwarding/associates", label: "Freight Associates", section: "Services", roles: ["admin"], nav: true, searchable: true, breadcrumbParent: "/dashboard/freight-forwarding", description: "View and manage associates at freight-forwarding companies." },
@@ -146,6 +151,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true },
   { path: "/dashboard/settings/mail", label: "Mail Connection", section: "Organization", roles: ["associate"], searchable: true, activeParent: "/dashboard/settings", requiredApprovalStates: ["APPROVED"] },
   { path: "/dashboard/settings/whatsapp", label: "WhatsApp Connection", section: "Organization", roles: featureFlags.associateWhatsappIntegration ? ["admin", "associate"] : ["admin"], searchable: true, activeParent: "/dashboard/settings", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/settings/storage", label: "AWS S3 Storage", section: "Organization", roles: ["admin"], searchable: true, activeParent: "/dashboard/settings" },
   { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], searchable: true, activeParent: "/dashboard/settings" },
   { path: "/dashboard/security", label: "Password & Security", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], searchable: true, activeParent: "/dashboard/settings" },
 
@@ -191,6 +197,7 @@ const journeyStageBySection: Record<DashboardSection, DashboardJourneyStage> = {
   Documentation: "execute",
   Products: "discover",
   Services: "service",
+  Insurance: "service",
   Warehouse: "service",
   Organization: "organize",
   "Operations/Admin": "administer",

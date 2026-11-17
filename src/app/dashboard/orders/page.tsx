@@ -105,7 +105,7 @@ export default function OrdersPage() {
 
                     return (
                         <div className="flex flex-col items-center w-full">
-                            <div className="w-full px-1.5 sm:px-4 md:px-0 md:w-[95%]">
+                            <div className="w-full px-1.5 sm:px-4 md:px-0">
                                 {canUseDemo && (
                                     <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-default-200/40 bg-content1 px-4 py-3">
                                         <div>
@@ -229,7 +229,7 @@ export default function OrdersPage() {
                                 </div>
 
                                 <section className="py-1.5 sm:py-2 w-full">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4">
+                                    <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                                         {scopedFiltered
                                             .filter((item: any) => selectedTab === "All" || (String(item?.status || "") === selectedTab))
                                             .map((item: any) => (

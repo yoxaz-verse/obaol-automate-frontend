@@ -38,7 +38,7 @@ export function TransportCompanyScope({ children }: { children: React.ReactNode 
 
   const value = useMemo<Scope>(() => ({ companyId, companies, loading: companiesQuery.isLoading, staff, selectCompany, params: companyId ? { companyId } : {} }), [companyId, companies, companiesQuery.isLoading, staff, selectCompany]);
   return <ScopeContext.Provider value={value}>
-    {staff && <div className="mb-5 rounded-2xl border border-default-200 bg-content1 p-4">
+    {staff && !pathname.startsWith("/dashboard/inland-transportation/directory") && <div className="mb-5 rounded-2xl border border-default-200 bg-content1 p-4">
       <Select label="Transport company" placeholder="Select a company to manage" selectedKeys={companyId ? new Set([companyId]) : new Set()} onSelectionChange={keys => selectCompany(String(Array.from(keys as Set<string>)[0] || ""))} isDisabled={companiesQuery.isLoading} startContent={companiesQuery.isLoading ? <Spinner size="sm" /> : undefined}>
         {companies.map(row => <SelectItem key={row.id} textValue={row.name}>{row.name}{row.registrationStatus ? ` · ${row.registrationStatus.replaceAll("_", " ")}` : ""}</SelectItem>)}
       </Select>

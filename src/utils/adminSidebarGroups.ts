@@ -6,6 +6,7 @@ export type AdminWorkflowGroup =
   | "Labs"
   | "Packaging"
   | "Finance"
+  | "Insurance"
   | "Freight"
   | "Transportation"
   | "Warehouse";
@@ -68,6 +69,14 @@ export const DASHBOARD_ADMIN_WORKFLOW_GROUPS: Array<{ label: AdminWorkflowGroup;
       "/dashboard/financial-partners",
       "/dashboard/financial-partners/my",
       "/dashboard/financial-partners/applications",
+    ],
+  },
+  {
+    label: "Insurance",
+    links: [
+      "/dashboard/insurance-partners",
+      "/dashboard/insurance-partners/my",
+      "/dashboard/insurance-partners/requests",
     ],
   },
   {

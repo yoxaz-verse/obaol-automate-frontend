@@ -337,6 +337,17 @@ export const financialPartnerRoutes = {
   applications: "/financial-partners/applications",
   transition: (id: string) => `/financial-partners/applications/${id}/status`,
 };
+export const insurancePartnerRoutes = {
+  portfolio: "/insurance-partners/portfolio",
+  submitPortfolio: "/insurance-partners/portfolio/submit",
+  approvals: "/insurance-partners/approvals",
+  review: (id: string) => `/insurance-partners/approvals/${id}`,
+  directory: "/insurance-partners/directory",
+  profile: (id: string) => `/insurance-partners/directory/${id}`,
+  request: (id: string) => `/insurance-partners/directory/${id}/requests`,
+  requests: "/insurance-partners/requests",
+  transition: (id: string) => `/insurance-partners/requests/${id}/status`,
+};
 export const freightForwardingRoutes = {
   taxonomy: "/freight-forwarding/taxonomy",
   draft: "/freight-forwarding/profiles/draft",
@@ -373,6 +384,8 @@ export const systemConfigRoutes = {
   obaolCompany: "/system-config/obaol-company",
   obaolCompanySignature: "/system-config/obaol-company/signature",
   calculations: "/system-config/calculations",
+  storage: "/system-config/storage",
+  storageVerify: "/system-config/storage/verify",
   emailTemplates: "/system-config/email-templates",
   emailTemplatesDraft: "/system-config/email-templates/draft",
   emailTemplatesPublish: "/system-config/email-templates/publish",
@@ -805,6 +818,9 @@ export const apiRoutes = {
     bid: (id: string, itemId: string) => `/requirements/${id}/items/${itemId}/bids`,
     award: (id: string, itemId: string) => `/requirements/${id}/items/${itemId}/award`,
     itemStatus: (id: string, itemId: string) => `/requirements/${id}/items/${itemId}/status`,
+    stageStatus: (id: string, stageId: string) => `/requirements/${id}/stages/${stageId}/status`,
+    messages: (id: string) => `/requirements/${id}/messages`,
+    activateTracking: (id: string) => `/requirements/${id}/tracking/activate`,
     cancel: (id: string) => `/requirements/${id}/cancel`,
   },
   pincodeEntry: pincodeEntryRoutes,

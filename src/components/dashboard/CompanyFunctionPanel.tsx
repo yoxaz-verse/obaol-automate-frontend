@@ -70,6 +70,11 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
     { label: "My Financial Portfolio", href: "/dashboard/financial-partners/my" },
     { label: "Finance Applications", href: "/dashboard/financial-partners/applications" },
   ],
+  "insurance-risk": [
+    { label: "Insurance Companies", href: "/dashboard/insurance-partners" },
+    { label: "My Insurance Portfolio", href: "/dashboard/insurance-partners/my" },
+    { label: "Insurance Requests", href: "/dashboard/insurance-partners/requests" },
+  ],
 };
 
 const defaultActions: ActionLink[] = [

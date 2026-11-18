@@ -410,16 +410,24 @@ export default function EnquiryDetailsPage() {
         return [];
     };
     const getEntityId = (value: any): string => String(value?._id || value?.id || value || "");
-    const states = parseMasterRows(statesResponse).filter((item: any) => !item?.isDeleted);
-    const districts = parseMasterRows(districtsResponse).filter((item: any) => !item?.isDeleted);
+    const sortMasterByName = (rows: any[]) =>
+        [...rows].sort((a: any, b: any) =>
+            String(a?.name || a?.label || "").trim().localeCompare(
+                String(b?.name || b?.label || "").trim(),
+                "en",
+                { sensitivity: "base" }
+            )
+        );
+    const states = sortMasterByName(parseMasterRows(statesResponse).filter((item: any) => !item?.isDeleted));
+    const districts = sortMasterByName(parseMasterRows(districtsResponse).filter((item: any) => !item?.isDeleted));
     const countries = parseMasterRows(countriesResponse).filter((item: any) => !item?.isDeleted);
     const getCountryLabel = (country: any): string =>
         String(country?.name || country?.label || country?.countryName || country?.country || "");
     const sortedCountries = [...countries].sort((a: any, b: any) =>
         getCountryLabel(a).localeCompare(getCountryLabel(b), "en", { sensitivity: "base" })
     );
-    const originSeaPorts = parseMasterRows(originPortsResponse).filter((item: any) => !item?.isDeleted);
-    const destinationSeaPorts = parseMasterRows(destinationPortsResponse).filter((item: any) => !item?.isDeleted);
+    const originSeaPorts = sortMasterByName(parseMasterRows(originPortsResponse).filter((item: any) => !item?.isDeleted));
+    const destinationSeaPorts = sortMasterByName(parseMasterRows(destinationPortsResponse).filter((item: any) => !item?.isDeleted));
     const enquirySpecificationValue = (enquiry as any)?.specifications || (enquiry as any)?.specification || "";
     const enquiryPackagingSpecificationsValue = (enquiry as any)?.packagingSpecifications || "";
     const isImportEnquiry = String((enquiry as any)?.sourceType || "").toUpperCase() === "IMPORT" || Boolean((enquiry as any)?.importListingId);

@@ -169,6 +169,17 @@ const getOwnerIcons = (owner: string) => {
     }
 };
 
+const sortOptionsByName = (list: any[]) =>
+  Array.isArray(list)
+    ? [...list].sort((a, b) =>
+        String(a?.name || a?.label || "").trim().localeCompare(
+          String(b?.name || b?.label || "").trim(),
+          "en",
+          { sensitivity: "base" }
+        )
+      )
+    : [];
+
 const ResponsibilityEventForm: React.FC<Props> = ({
   incotermOptions,
   paymentTermOptions,
@@ -238,6 +249,13 @@ const ResponsibilityEventForm: React.FC<Props> = ({
     : [];
   const selectedPaymentTerm = filteredPaymentTerms.find((term: any) => String(term?._id || term?.id) === String(selectedPaymentTermId))
     || paymentTermOptions?.find((term: any) => String(term?._id || term?.id) === String(selectedPaymentTermId));
+  const sortedStates = React.useMemo(() => sortOptionsByName(states), [states]);
+  const sortedOriginDistricts = React.useMemo(() => sortOptionsByName(originDistrictOptions), [originDistrictOptions]);
+  const sortedDestinationDistricts = React.useMemo(() => sortOptionsByName(destinationDistrictOptions), [destinationDistrictOptions]);
+  const sortedOriginCountries = React.useMemo(() => sortOptionsByName(originCountryOptions), [originCountryOptions]);
+  const sortedDestinationCountries = React.useMemo(() => sortOptionsByName(destinationCountryOptions), [destinationCountryOptions]);
+  const sortedOriginPorts = React.useMemo(() => sortOptionsByName(originPortOptions), [originPortOptions]);
+  const sortedDestinationPorts = React.useMemo(() => sortOptionsByName(destinationPortOptions), [destinationPortOptions]);
 
   return (
     <Card className="lg:col-span-3 order-12 w-full max-w-full min-w-0 overflow-hidden border border-divider bg-content1/50">
@@ -437,7 +455,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         }}
                         isDisabled={!canEditOriginLogistics}
                       >
-                        {states.map((item: any) => (
+                        {sortedStates.map((item: any) => (
                           <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                         ))}
                       </Select>
@@ -453,7 +471,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         }}
                         isDisabled={!canEditOriginLogistics || !executionContext.originState}
                       >
-                        {originDistrictOptions.map((item: any) => (
+                        {sortedOriginDistricts.map((item: any) => (
                           <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                         ))}
                       </Select>
@@ -489,7 +507,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         }}
                         isDisabled={!canEditDestinationLogistics}
                       >
-                        {states.map((item: any) => (
+                        {sortedStates.map((item: any) => (
                           <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                         ))}
                       </Select>
@@ -505,7 +523,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         }}
                         isDisabled={!canEditDestinationLogistics || !executionContext.destinationState}
                       >
-                        {destinationDistrictOptions.map((item: any) => (
+                        {sortedDestinationDistricts.map((item: any) => (
                           <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                         ))}
                       </Select>
@@ -544,7 +562,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         }}
                         isDisabled={!canEditOriginLogistics}
                       >
-                        {originCountryOptions.map((item: any) => (
+                        {sortedOriginCountries.map((item: any) => (
                           <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                         ))}
                       </Select>
@@ -561,7 +579,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         isDisabled={!canEditOriginLogistics || !executionContext.originCountry}
                         startContent={<LuAnchor size={16} className="text-primary/60" />}
                       >
-                        {originPortOptions.map((item: any) => (
+                        {sortedOriginPorts.map((item: any) => (
                           <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                         ))}
                       </Select>
@@ -597,7 +615,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         }}
                         isDisabled={!canEditDestinationLogistics}
                       >
-                        {destinationCountryOptions.map((item: any) => (
+                        {sortedDestinationCountries.map((item: any) => (
                           <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                         ))}
                       </Select>
@@ -614,7 +632,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         isDisabled={!canEditDestinationLogistics || !executionContext.destinationCountry}
                         startContent={<LuAnchor size={16} className="text-secondary/60" />}
                       >
-                        {destinationPortOptions.map((item: any) => (
+                        {sortedDestinationPorts.map((item: any) => (
                           <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                         ))}
                       </Select>

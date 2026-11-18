@@ -90,8 +90,10 @@ type Props = {
   isResponsibilityEventChanged: boolean;
   onFinalize?: () => void;
   onSaveFramework?: () => void;
+  onSaveTradeTerms?: () => void;
   finalizeLoading?: boolean;
   savingFramework?: boolean;
+  savingTradeTerms?: boolean;
   responsibilitySavedAt?: string;
   showFinalizeButton?: boolean;
 };
@@ -209,8 +211,10 @@ const ResponsibilityEventForm: React.FC<Props> = ({
   isResponsibilityEventChanged,
   onFinalize,
   onSaveFramework,
+  onSaveTradeTerms,
   finalizeLoading,
   savingFramework,
+  savingTradeTerms,
   responsibilitySavedAt,
   showFinalizeButton = true,
 }) => {
@@ -313,6 +317,19 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               ))}
             </Select>
           </div>
+          {onSaveTradeTerms && (
+            <div className="flex justify-end">
+              <Button
+                color="primary"
+                isLoading={Boolean(savingTradeTerms)}
+                isDisabled={!isTradeTermsChanged || !selectedIncotermId || !selectedPaymentTermId}
+                onPress={onSaveTradeTerms}
+                startContent={!savingTradeTerms && <LuFileCheck size={16} />}
+              >
+                Save Incoterms & Payment
+              </Button>
+            </div>
+          )}
           {selectedPaymentTerm && Array.isArray(selectedPaymentTerm?.milestones) && selectedPaymentTerm.milestones.length > 0 && (
             <div className="mt-1 min-w-0 rounded-2xl border border-default-200/60 bg-background/60 p-3 sm:p-4">
               <div className="mb-3 text-[10px] font-black tracking-widest text-default-500">Payment Framework Milestones</div>

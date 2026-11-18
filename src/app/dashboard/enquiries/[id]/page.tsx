@@ -1255,6 +1255,20 @@ export default function EnquiryDetailsPage() {
             toast.error("Failed to save responsibility details.");
         },
     });
+    const updateTradeTermsMutation = useMutation({
+        mutationFn: () => patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, {
+            preferredIncoterm: selectedIncotermId,
+            paymentTermId: selectedPaymentTermId,
+        }),
+        onSuccess: () => {
+            toast.success("Incoterms and payment terms saved.");
+            setResponsibilitySavedAt(new Date().toISOString());
+            refreshEnquiryCaches();
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to save Incoterms and payment terms.");
+        },
+    });
 
     const responsibilitySummary = React.useMemo(() => {
         const plan = (responsibilityPlan || (enquiry as any)?.responsibilityPlan || {}) as any;
@@ -4245,6 +4259,8 @@ export default function EnquiryDetailsPage() {
                             isResponsibilityEventChanged={isResponsibilityEventChanged}
                             onSaveFramework={!hasResponsibilitiesFinalized || canRepairFinalizedTradeTerms ? () => updateResponsibilityPlanMutation.mutate() : undefined}
                             savingFramework={updateResponsibilityPlanMutation.isPending}
+                            onSaveTradeTerms={!hasResponsibilitiesFinalized || canRepairFinalizedTradeTerms ? () => updateTradeTermsMutation.mutate() : undefined}
+                            savingTradeTerms={updateTradeTermsMutation.isPending}
                             onFinalize={() => {
                                 if (hasUnsavedResponsibilityChanges) {
                                     updateResponsibilityPlanMutation.mutate(undefined, {

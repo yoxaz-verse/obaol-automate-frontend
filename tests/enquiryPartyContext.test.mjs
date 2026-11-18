@@ -72,11 +72,12 @@ test("responsibility owner selection is visible by default and remains permissio
   assert.match(page, /label: "Freight Forwarding & Shipping"/);
 });
 
-test("responsibility event uses one explicit save action for terms and responsibilities", () => {
+test("responsibility event can save trade terms independently from the full framework", () => {
   const page = read("../src/app/dashboard/enquiries/[id]/page.tsx");
   const form = read("../src/components/dashboard/responsibilities/ResponsibilityEventForm.tsx");
 
   assert.match(form, /Save All Changes/);
+  assert.match(form, /Save Incoterms & Payment/);
   assert.match(form, /Unsaved changes/);
   assert.match(form, /All changes saved/);
   assert.doesNotMatch(form, /Save Terms/);
@@ -85,5 +86,6 @@ test("responsibility event uses one explicit save action for terms and responsib
   assert.match(page, /preferredIncoterm: selectedIncotermId \|\| null/);
   assert.match(page, /paymentTermId: selectedPaymentTermId \|\| null/);
   assert.match(page, /hasUnsavedResponsibilityChanges = isResponsibilityEventChanged \|\| isTradeTermsChanged/);
-  assert.doesNotMatch(page, /updateTradeTermsMutation/);
+  assert.match(page, /updateTradeTermsMutation/);
+  assert.match(page, /Incoterms and payment terms saved/);
 });

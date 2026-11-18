@@ -36,6 +36,7 @@ import { parsePhoneValue } from "@/utils/phone";
 import { useCompanyAccess } from "@/utils/companyAccess";
 import { uploadFormFile } from "@/utils/uploadFormFile";
 import { normalizeApiError } from "@/core/api/apiErrors";
+import AsyncActionButton from "@/components/ui/AsyncActionButton";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -952,14 +953,19 @@ export default function EditModal({
 
                 <div className={`flex justify-end gap-3 mt-4 ${isAssociateDrawer ? "sticky bottom-0 -mx-5 mt-auto border-t border-default-200/70 bg-content1/95 px-5 py-4 backdrop-blur sm:-mx-7 sm:px-7 dark:border-white/10" : ""}`}>
                   {isAssociateDrawer && <Button type="button" variant="flat" onPress={handleClose}>Cancel</Button>}
-                  <Button
+                  <AsyncActionButton
                     type="submit"
-                    color={isAssociateDrawer ? "warning" : "default"}
-                    disabled={!actionsAllowed || loading || (isLocked && !formData.isLive)}
+                    intent={isAssociateDrawer ? "warning" : "primary"}
+                    isDisabled={!actionsAllowed || loading || (isLocked && !formData.isLive)}
                     title={!actionsAllowed ? "Your company must be accepted before you can update records." : undefined}
-                  >
-                    {loading ? "Saving…" : isAssociateDrawer ? "Save changes" : "Update"}
-                  </Button>
+                    state={loading ? "processing" : "idle"}
+                    labels={{
+                      idle: isAssociateDrawer ? "Save Changes" : "Update",
+                      processing: "Saving Changes…",
+                      success: "Changes Saved",
+                      error: "Unable to Save — Retry",
+                    }}
+                  />
                 </div>
               </form>
             </ModalBody>

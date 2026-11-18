@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { buildDashboardAccessInfoUrl, canAccessDashboardRoute } from "@/utils/dashboardAccess";
-import { getDashboardRoute } from "@/utils/dashboardAccess";
+import { getDashboardGovernedPath } from "@/utils/dashboardAccess";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { SIDEBAR_RECOVERY_ROUTES } from "@/utils/sidebarGovernance";
 
@@ -17,8 +17,7 @@ const PrivateRoute = ({
   const { isAuthenticated, loading, user } = useContext(AuthContext);
   const router = useRouter();
   const governance = useSidebarGovernance();
-  const route = getDashboardRoute(pathname);
-  const governedPath = route?.activeParent || route?.breadcrumbParent || route?.path || pathname;
+  const governedPath = getDashboardGovernedPath(pathname);
   const governedStatus = governance.isAssociate ? governance.getRouteStatus(governedPath) : "LIVE";
   const governancePending = governance.isAssociate && governance.isLoading;
 

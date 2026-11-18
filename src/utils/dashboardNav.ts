@@ -56,6 +56,7 @@ const ASSOCIATE_EXECUTE_PATHS = [
   "/dashboard/orders",
   "/dashboard/documents",
   "/dashboard/documentation",
+  "/dashboard/requirements",
   "/dashboard/execution-enquiries",
 ];
 const DOCUMENTATION_PATHS = ["/dashboard/documentation"];

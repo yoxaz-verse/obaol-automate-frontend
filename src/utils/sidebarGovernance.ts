@@ -6,18 +6,21 @@ export const SIDEBAR_RECOVERY_ROUTES = new Set([
   "/dashboard/pending-approval",
   "/dashboard/rejected",
   "/dashboard/access-info",
+  "/dashboard/notifications",
   "/dashboard/guidance",
   "/dashboard/settings",
   "/dashboard/customer-support",
 ]);
 export const SIDEBAR_COMMON_ROUTES = [
   "/dashboard",
+  "/dashboard/notifications",
   "/dashboard/guidance",
   "/dashboard/settings",
   "/dashboard/customer-support",
 ] as const;
 export const SIDEBAR_HOME_ROUTES = ["/dashboard"] as const;
 export const SIDEBAR_UTILITY_ROUTES = [
+  "/dashboard/notifications",
   "/dashboard/guidance",
   "/dashboard/settings",
   "/dashboard/customer-support",
@@ -25,9 +28,13 @@ export const SIDEBAR_UTILITY_ROUTES = [
 const STATUS_WEIGHT: Record<SidebarPageStatus, number> = { HIDDEN: 0, COMING_SOON: 1, LIVE: 2 };
 export const DOCUMENTATION_ROUTE = "/dashboard/documentation";
 export const LEGACY_DOCUMENT_STUDIO_ROUTE = "/dashboard/commercial-documents";
+export const REQUIREMENTS_ROUTE = "/dashboard/requirements";
+export const LEGACY_EXTERNAL_ORDERS_ROUTE = "/dashboard/external-orders";
 export const canonicalizeSidebarRoutePath = (value: unknown) => {
   const routePath = String(value || "").trim();
-  return routePath === LEGACY_DOCUMENT_STUDIO_ROUTE ? DOCUMENTATION_ROUTE : routePath;
+  if (routePath === LEGACY_DOCUMENT_STUDIO_ROUTE) return DOCUMENTATION_ROUTE;
+  if (routePath === LEGACY_EXTERNAL_ORDERS_ROUTE || routePath === `${LEGACY_EXTERNAL_ORDERS_ROUTE}/new`) return REQUIREMENTS_ROUTE;
+  return routePath;
 };
 
 const normalizeSlug = (value: unknown) => String(value || "").trim().toLowerCase().replace(/_/g, "-");

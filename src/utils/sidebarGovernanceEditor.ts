@@ -10,7 +10,19 @@ export type AssignmentPanelPlacement = Exclude<SidebarPlacement, "BOTH">;
 export type AssignmentPanelStatus = SidebarPageStatus | "MIXED";
 export type GovernanceSection = "IMPORTANT" | "SEEKING" | "PROVIDING" | "OTHER_SERVICES";
 export type GovernanceFunctionRow = { _id: string; name: string; slug: string };
-export type GovernanceRouteRow = { id: string; path: string; label: string; position?: "TOP" | "BOTTOM" };
+export type GovernanceRouteRow = {
+  id: string;
+  pageId?: string;
+  path: string;
+  label: string;
+  parentPageId?: string;
+  section?: string;
+  permissionKey?: string;
+  order?: number;
+  active?: boolean;
+  governanceMode?: "CONFIGURABLE" | "ALWAYS_AVAILABLE";
+  position?: "TOP" | "BOTTOM";
+};
 export type AssignmentMatrix = Record<string, Record<string, FunctionAssignment>>;
 export type SectionOrder = Record<GovernanceSection, string[]>;
 export type SidebarGovernanceEditorState = {

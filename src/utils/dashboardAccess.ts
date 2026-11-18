@@ -149,6 +149,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/notifications", label: "Notifications", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true, hiddenFromAssociateNav: true },
   { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], nav: true, searchable: true, taskGroup: "Support" },
   { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], nav: true, searchable: true },
+  { path: "/dashboard/settings/signature-management", label: "Signature Management", section: "Organization", roles: ["admin", "associate", "operator", "team", "customer-support"], searchable: true, activeParent: "/dashboard/settings" },
   { path: "/dashboard/settings/mail", label: "Mail Connection", section: "Organization", roles: ["associate"], searchable: true, activeParent: "/dashboard/settings", requiredApprovalStates: ["APPROVED"] },
   { path: "/dashboard/settings/whatsapp", label: "WhatsApp Connection", section: "Organization", roles: featureFlags.associateWhatsappIntegration ? ["admin", "associate"] : ["admin"], searchable: true, activeParent: "/dashboard/settings", requiredApprovalStates: ["APPROVED"] },
   { path: "/dashboard/settings/storage", label: "AWS S3 Storage", section: "Organization", roles: ["admin"], searchable: true, activeParent: "/dashboard/settings" },
@@ -309,6 +310,21 @@ const routeMatches = (pattern: string, path: string) => {
 export const getDashboardRoute = (path: string) => {
   const normalized = normalizePath(path);
   return DASHBOARD_ROUTE_MANIFEST.find((route) => routeMatches(route.path, normalized)) || null;
+};
+
+/** Resolves detail/edit and legacy routes to the navigation destination governed by Sidebar Governance. */
+export const getDashboardGovernedPath = (path: string) => {
+  const normalized = normalizePath(path);
+  if (normalized === "/dashboard/external-orders" || normalized === "/dashboard/external-orders/new") return "/dashboard/requirements";
+  let route = getDashboardRoute(normalized);
+  const visited = new Set<string>();
+  while (route && !route.nav && !visited.has(route.path)) {
+    visited.add(route.path);
+    const parent = route.activeParent || route.breadcrumbParent;
+    if (!parent) break;
+    route = getDashboardRoute(parent);
+  }
+  return route?.path || normalized;
 };
 
 export const getDashboardHelpId = (path: string) => {

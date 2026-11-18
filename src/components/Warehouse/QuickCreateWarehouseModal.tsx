@@ -14,6 +14,8 @@ import { LuWarehouse } from "react-icons/lu";
 import { postData } from "@/core/api/apiHandler";
 import { apiRoutes, inventoryRoutes } from "@/core/api/apiRoutes";
 import { normalizeApiError } from "@/core/api/apiErrors";
+import AsyncActionButton, { type AsyncActionState } from "@/components/ui/AsyncActionButton";
+import ActionFeedback from "@/components/ui/ActionFeedback";
 
 type WarehouseStockContext = {
   productId: string;
@@ -53,6 +55,7 @@ export default function QuickCreateWarehouseModal({
   const [quantity, setQuantity] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [actionState, setActionState] = useState<AsyncActionState>("idle");
 
   useEffect(() => {
     if (isOpen) {
@@ -65,6 +68,7 @@ export default function QuickCreateWarehouseModal({
     setQuantity("");
     setError("");
     setSubmitting(false);
+    setActionState("idle");
   }, [isOpen, stockContext]);
 
   const submit = async () => {
@@ -82,6 +86,7 @@ export default function QuickCreateWarehouseModal({
     }
 
     setSubmitting(true);
+    setActionState("processing");
     setError("");
     try {
       const response = await postData(apiRoutes.warehouses.create, {
@@ -119,9 +124,11 @@ export default function QuickCreateWarehouseModal({
       } else {
         await onCreated(warehouse);
       }
-      onClose();
+      setActionState("success");
+      window.setTimeout(onClose, 700);
     } catch (submissionError) {
       setError(normalizeApiError(submissionError, "Unable to create the warehouse. Please try again.").message);
+      setActionState("error");
     } finally {
       setSubmitting(false);
     }
@@ -143,6 +150,9 @@ export default function QuickCreateWarehouseModal({
               {error}
             </div>
           )}
+          <ActionFeedback state={actionState}>
+            {actionState === "processing" ? "Creating the warehouse and saving its stock…" : actionState === "success" ? "Warehouse created successfully." : null}
+          </ActionFeedback>
           <Input label="Warehouse name" value={name} onValueChange={(value) => { setName(value); setError(""); }} isRequired isDisabled={submitting} variant="bordered" />
           <Input label="City" value={city} onValueChange={(value) => { setCity(value); setError(""); }} isRequired isDisabled={submitting} variant="bordered" />
           <Input label="Contact phone" value={phone} onValueChange={(value) => { setPhone(value); setError(""); }} isRequired isDisabled={submitting} type="tel" inputMode="tel" variant="bordered" />
@@ -172,7 +182,12 @@ export default function QuickCreateWarehouseModal({
         </ModalBody>
         <ModalFooter>
           <Button variant="light" onPress={onClose} isDisabled={submitting}>Cancel</Button>
-          <Button color="primary" onPress={submit} isLoading={submitting}>Create Warehouse</Button>
+          <AsyncActionButton
+            intent="primary"
+            onPress={submit}
+            state={actionState}
+            labels={{ idle: "Create Warehouse", validating: "Checking Warehouse Details…", processing: "Creating Warehouse…", success: "Warehouse Created", error: "Unable to Create — Retry" }}
+          />
         </ModalFooter>
       </ModalContent>
     </Modal>

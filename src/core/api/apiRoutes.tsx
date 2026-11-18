@@ -272,6 +272,7 @@ export const variantRateRoutes = addCustomRoutes(
     marketplaceVisibilitySummary: `${BASE_PATHS.VARIANT_RATE}/marketplace-visibility-summary`,
     reveal: (id: string) => `${BASE_PATHS.VARIANT_RATE}/${id}/reveal`,
     rateInterestAnalytics: `${BASE_PATHS.VARIANT_RATE}/rate-interest/analytics`,
+    interaction: (id: string) => `${BASE_PATHS.VARIANT_RATE}/${id}/interactions`,
   }
 );
 export const displayedRateRoutes = createCRUDRoutes(BASE_PATHS.DISPLAYED_RATE);
@@ -481,6 +482,9 @@ export const dashboardRoutes = {
   companyFunctionMetrics: `${ANALYTICS_BASE}/metrics/company-functions`,
   companyFunctionComponents: `${ANALYTICS_BASE}/components/company-functions`,
   companyFunctionComponentsGlobal: `${ANALYTICS_BASE}/components/company-functions/global`,
+  productDetails: (listingId: string) => `${ANALYTICS_BASE}/products/${listingId}`,
+  productInquiries: (listingId: string) => `${ANALYTICS_BASE}/products/${listingId}/inquiries`,
+  productSimilar: (listingId: string) => `${ANALYTICS_BASE}/products/${listingId}/similar`,
 };
 
 export const approvalRoutes = {

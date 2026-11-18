@@ -18,6 +18,9 @@ import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
 import { DeleteModalProps } from "@/data/interface-data";
 import { invalidateListingQueries } from "@/utils/listingQueryCache";
+import AsyncActionButton, { type AsyncActionState } from "@/components/ui/AsyncActionButton";
+import ActionFeedback from "@/components/ui/ActionFeedback";
+import { normalizeApiError } from "@/core/api/apiErrors";
 
 export default function DeleteModal({
   _id,
@@ -37,6 +40,8 @@ export default function DeleteModal({
   const isOpen = isControlled ? controlledOpen : disclosureOpen;
 
   const [loading, setLoading] = useState(false);
+  const [actionState, setActionState] = useState<AsyncActionState>("idle");
+  const [actionError, setActionError] = useState("");
   const submittingRef = useRef(false);
 
   const closeModal = () => {
@@ -53,6 +58,7 @@ export default function DeleteModal({
       deleteData(`${deleteApiEndpoint}/${_id}`, useBody ? { _id } : undefined),
 
     onSuccess: () => {
+      setActionState("success");
       if (deleteApiEndpoint.includes("variant-rate")) {
         void invalidateListingQueries(queryClient);
       }
@@ -67,20 +73,23 @@ export default function DeleteModal({
       });
       submittingRef.current = false;
       setLoading(false);
-      if (isControlled) {
-        controlledClose?.();
-      } else {
-        disclosureOnOpenChange();
-      }
+      window.setTimeout(() => {
+        if (isControlled) controlledClose?.();
+        else disclosureOnOpenChange();
+        setActionState("idle");
+      }, 700);
     },
     onError: (error: any) => {
+      const message = normalizeApiError(error, "Unable to delete this record. Please try again.").message;
       showToastMessage({
         type: "error",
-        message: error.response?.data?.message || "An error occurred",
+        message,
         position: "top-right",
       });
       submittingRef.current = false;
       setLoading(false);
+      setActionState("error");
+      setActionError(message);
     },
   });
 
@@ -88,6 +97,8 @@ export default function DeleteModal({
     if (submittingRef.current) return;
     submittingRef.current = true;
     setLoading(true);
+    setActionState("processing");
+    setActionError("");
     deleteItem.mutate();
   };
 
@@ -165,6 +176,9 @@ export default function DeleteModal({
                 <p className="text-[11px] text-danger-400 mt-1 uppercase tracking-wider font-semibold">
                   {description || "This action cannot be undone."}
                 </p>
+                <ActionFeedback state={actionState}>
+                  {actionState === "processing" ? "Deleting this record…" : actionState === "success" ? "Record deleted." : actionError}
+                </ActionFeedback>
               </ModalBody>
               <ModalFooter className="flex flex-col-reverse sm:flex-row gap-2">
                 <Button 
@@ -175,16 +189,15 @@ export default function DeleteModal({
                 >
                   Cancel
                 </Button>
-                <Button
+                <AsyncActionButton
                   className="w-full sm:w-auto font-black tracking-widest uppercase text-[11px] shadow-lg shadow-danger-500/30"
-                  color="danger"
+                  intent="danger"
                   onPress={handleDelete}
-                  isLoading={loading}
+                  state={actionState}
+                  labels={{ idle: "Delete", processing: "Deleting Record…", success: "Record Deleted", error: "Unable to Delete — Retry" }}
                   isDisabled={loading}
                   startContent={!loading && <FiTrash2 size={16} />}
-                >
-                  Delete
-                </Button>
+                />
               </ModalFooter>
             </>
           )}

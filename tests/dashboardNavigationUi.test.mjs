@@ -131,6 +131,20 @@ test("documents workspace is live for every authenticated dashboard user", () =>
   assert.equal(warehouseBookingLayout.includes('<RoleGatedComingSoon feature="warehouse-booking">'), true);
 });
 
+test("requirements workspace is live while legacy external-order routes remain redirects", () => {
+  const requirementsLayout = read("../src/app/dashboard/requirements/layout.tsx");
+  const legacyList = read("../src/app/dashboard/external-orders/page.tsx");
+  const legacyCreate = read("../src/app/dashboard/external-orders/new/page.tsx");
+  const adminGroups = read("../src/utils/adminSidebarGroups.ts");
+
+  assert.equal(requirementsLayout.includes("RoleGatedComingSoon"), false);
+  assert.equal(requirementsLayout.includes("return <>{children}</>"), true);
+  assert.equal(legacyList.includes('redirect("/dashboard/requirements")'), true);
+  assert.equal(legacyCreate.includes('redirect("/dashboard/requirements/new")'), true);
+  assert.equal(adminGroups.includes('"/dashboard/requirements"'), true);
+  assert.equal(adminGroups.includes('"/dashboard/external-orders"'), false);
+});
+
 test("notifications use the compact inbox and role-aware composer", () => {
   const page = read("../src/app/dashboard/notifications/page.tsx");
   assert.equal(page.includes("Telemetry Inbox"), false);

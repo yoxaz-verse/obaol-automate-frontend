@@ -58,10 +58,21 @@ test("legacy Document Studio governance immediately resolves to Documentation", 
   assert.equal(getGovernedRouteStatus(resolved, "/dashboard/commercial-documents"), "LIVE");
 });
 
+test("legacy External Orders governance immediately resolves to Requirements", () => {
+  const resolved = resolveSidebarGovernance([
+    row("buyer", "/dashboard/external-orders", "SEEKING", "COMING_SOON", 8),
+    row("buyer", "/dashboard/requirements", "PROVIDING", "LIVE", 2),
+  ], ["buyer"], ["buyer"], { resolutionVersion: 3 });
+  assert.equal(resolved.some((item) => item.routePath === "/dashboard/external-orders"), false);
+  assert.deepEqual(resolved, [{ routePath: "/dashboard/requirements", placement: "IMPORTANT", status: "LIVE", order: 2 }]);
+  assert.equal(getGovernedRouteStatus(resolved, "/dashboard/external-orders"), "LIVE");
+});
+
 test("unmapped routes fail closed while recovery routes remain live", () => {
   assert.equal(getGovernedRouteStatus([], "/dashboard/product"), "HIDDEN");
   assert.equal(getGovernedRouteStatus([], "/dashboard"), "LIVE");
   assert.equal(getGovernedRouteStatus([], "/dashboard/settings"), "LIVE");
+  assert.equal(getGovernedRouteStatus([], "/dashboard/notifications"), "LIVE");
   assert.equal(getGovernedRouteStatus([], "/dashboard/customer-support"), "LIVE");
   assert.equal(getGovernedRouteStatus([], "/dashboard/onboarding"), "LIVE");
 });

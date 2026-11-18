@@ -49,6 +49,7 @@ import {
   FiSearch,
   FiRefreshCw,
   FiTrash2,
+  FiBarChart2,
 } from "react-icons/fi";
 import { LuMessageSquare, LuBox } from "react-icons/lu";
 import { motion } from "framer-motion";
@@ -1609,6 +1610,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                             const actionButtons = (
                               <div className="flex items-center gap-2">
+                                {roleLower === "admin" && rate === "variantRate" && (
+                                  <Button size="sm" variant="flat" color="primary" className={LISTING_ACTION_CLASS} onPress={() => router.push(`/dashboard/product/${item._id}`)} startContent={<FiBarChart2 size={14} />}>Analytics</Button>
+                                )}
                                 {canManageRow(item) ? (
                                   isTradeListingRate ? (
                                     canDeleteTradeListing(item) ? (
@@ -1880,6 +1884,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                         const actionButtons = (
                           <div className="flex items-center gap-2">
+                            {roleLower === "admin" && rate === "variantRate" && (
+                              <Button size="sm" variant="flat" color="primary" className={`${LISTING_ACTION_CLASS} shrink-0`} onPress={() => router.push(`/dashboard/product/${item._id}`)} startContent={<FiBarChart2 size={14} />}>Analytics</Button>
+                            )}
                             {canManageRow(item) ? (
                               isTradeListingRate ? (
                                 canDeleteTradeListing(item) ? (

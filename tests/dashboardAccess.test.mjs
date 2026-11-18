@@ -10,6 +10,7 @@ import {
   getDashboardAdminGroups,
   getDashboardHelpId,
   getDashboardRoute,
+  getDashboardGovernedPath,
   hasWarehouseWorkspaceAccess,
   isDashboardRouteActive,
   isWarehouseDashboardPath,
@@ -64,6 +65,13 @@ test("detail routes keep their parent navigation item active", () => {
   assert.equal(isDashboardRouteActive("/dashboard/documentation/new", "/dashboard/documentation"), true);
   assert.equal(isDashboardRouteActive("/dashboard/documentation/507f1f77bcf86cd799439011", "/dashboard/documentation"), true);
   assert.equal(isDashboardRouteActive("/dashboard/commercial-documents", "/dashboard/documentation"), true);
+});
+
+test("governance resolves nested and legacy Requirements routes to the canonical destination", () => {
+  assert.equal(getDashboardGovernedPath("/dashboard/requirements/new"), "/dashboard/requirements");
+  assert.equal(getDashboardGovernedPath("/dashboard/requirements/507f1f77bcf86cd799439011"), "/dashboard/requirements");
+  assert.equal(getDashboardGovernedPath("/dashboard/external-orders"), "/dashboard/requirements");
+  assert.equal(getDashboardGovernedPath("/dashboard/external-orders/new"), "/dashboard/requirements");
 });
 
 test("settings owns account subpages while notifications stays independently active", () => {
@@ -249,6 +257,24 @@ test("Associate coming-soon navigation excludes the legacy Document Studio entry
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/commercial-documents", role: "Associate" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/documents", role: "Associate" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/external-orders", role: "Associate" }), true);
+});
+
+test("Requirements stays accessible and visible in Associate fallback navigation", () => {
+  const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
+  const executePaths = navigation.slice(
+    navigation.indexOf("const ASSOCIATE_EXECUTE_PATHS"),
+    navigation.indexOf("const DOCUMENTATION_PATHS"),
+  );
+  assert.ok(executePaths.indexOf('"/dashboard/requirements"') < executePaths.indexOf('"/dashboard/execution-enquiries"'));
+  const tradeLinks = DASHBOARD_ADMIN_WORKFLOW_GROUPS.find((group) => group.label === "Trade")?.links || [];
+  assert.equal(tradeLinks.includes("/dashboard/requirements"), true);
+  assert.equal(tradeLinks.includes("/dashboard/external-orders"), false);
+  assert.equal(tradeLinks.indexOf("/dashboard/requirements") + 1, tradeLinks.indexOf("/dashboard/execution-enquiries"));
+  for (const role of ["Admin", "Associate", "Operator", "Team"]) {
+    assert.equal(canAccessDashboardRoute({ path: "/dashboard/requirements", role }), true);
+    assert.equal(canAccessDashboardRoute({ path: "/dashboard/requirements/test-id", role }), true);
+  }
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/requirements", role: "CustomerSupport" }), false);
 });
 
 test("SERVICE Associates receive both contact-based service directories", () => {

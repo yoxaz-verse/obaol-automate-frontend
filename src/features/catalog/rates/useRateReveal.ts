@@ -34,7 +34,9 @@ export const useRateReveal = (enabled: boolean) => {
     if (!rateId || revealingId) return;
     setRevealingId(rateId);
     try {
-      const response = await postData(variantRateRoutes.reveal(rateId), { sessionId: revealSessionId() });
+      const sessionId = revealSessionId();
+      void postData(variantRateRoutes.interaction(rateId), { type: "LISTING_CLICK", sessionId }).catch(() => undefined);
+      const response = await postData(variantRateRoutes.reveal(rateId), { sessionId });
       const record = adaptMutationRecord(response);
       const finalPrice = Number(record.finalPrice);
       if (!Number.isFinite(finalPrice)) throw new Error("The rate could not be loaded.");

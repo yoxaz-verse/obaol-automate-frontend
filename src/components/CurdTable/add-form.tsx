@@ -34,6 +34,7 @@ import { parsePhoneValue } from "@/utils/phone";
 import { uploadFormFile } from "@/utils/uploadFormFile";
 import { normalizeApiError } from "@/core/api/apiErrors";
 import { useCompanyAccess } from "@/utils/companyAccess";
+import AsyncActionButton from "@/components/ui/AsyncActionButton";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -1121,14 +1122,19 @@ const AddForm: React.FC<AddFormProps> = ({
             </div>
 
             <div className="flex justify-end w-full mt-4">
-              <Button
+              <AsyncActionButton
                 className="min-w-[100px] bg-obaol-400 rounded-3xl text-white h-[38px] text-sm"
                 type="submit"
-                disabled={loading || !actionsAllowed}
+                isDisabled={loading || !actionsAllowed}
                 title={!actionsAllowed ? "Your company must be accepted before you can add records." : undefined}
-              >
-                {loading ? `Adding ${name ?? ""} ...` : `Add ${name ?? ""}`}
-              </Button>
+                state={loading ? "processing" : "idle"}
+                labels={{
+                  idle: `Add ${name ?? "Record"}`,
+                  processing: `Creating ${name ?? "Record"}…`,
+                  success: `${name ?? "Record"} Created`,
+                  error: `Unable to Create — Retry`,
+                }}
+              />
             </div>
           </form>
         )}

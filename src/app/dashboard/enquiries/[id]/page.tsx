@@ -43,6 +43,9 @@ import ResponsibilityEventForm from "@/components/dashboard/responsibilities/Res
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import AppButton from "@/components/ui/AppButton";
+import AsyncActionButton, { type AsyncActionState } from "@/components/ui/AsyncActionButton";
+import ActionFeedback from "@/components/ui/ActionFeedback";
+import { normalizeApiError } from "@/core/api/apiErrors";
 import { DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 import QuickCreateWarehouseModal from "@/components/Warehouse/QuickCreateWarehouseModal";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
@@ -134,6 +137,9 @@ export default function EnquiryDetailsPage() {
     const [selectedWarehouseOptionId, setSelectedWarehouseOptionId] = useState<string>("");
     const [inlineQuantity, setInlineQuantity] = useState("");
     const [acceptAttempted, setAcceptAttempted] = useState(false);
+    const [acceptActionState, setAcceptActionState] = useState<AsyncActionState>("idle");
+    const [acceptActionError, setAcceptActionError] = useState("");
+    const acceptIdempotencyKey = React.useRef("");
     const [docActionOpen, setDocActionOpen] = useState(false);
     const [docActionRule, setDocActionRule] = useState<any>(null);
     const [docActionFileUrl, setDocActionFileUrl] = useState("");
@@ -799,68 +805,47 @@ export default function EnquiryDetailsPage() {
             if (!selectedWarehouseOption) {
                 throw new Error("Select a warehouse to proceed.");
             }
-
-            // Create stock in the selected warehouse, or top up its existing inventory.
-            if (!selectedInventory || (selectedInventoryId && Number(inlineQuantity) > 0)) {
-                const qty = Number(inlineQuantity);
-                let targetInvId = selectedInventoryId;
-
-                if (!selectedInventory) {
-                    if (!selectedWarehouseOption.warehouseId) {
-                        throw new Error("Legacy inventory cannot be used to create warehouse stock.");
-                    }
-                    if (!qty || qty <= 0) throw new Error("Please enter a valid quantity.");
-
-                    const invRes = await postData(inventoryRoutes.getAll, {
-                        productVariant: productVariantId,
-                        product: enquiry?.productVariant?.product?._id || enquiry?.productId?._id,
-                        associateCompany: sellerCompanyId,
-                        associate: (enquiry as any)?.sellerAssociateId?._id || (enquiry as any)?.sellerAssociateId,
-                        storageLocation: "MY",
-                        warehouseId: selectedWarehouseOption.warehouseId,
-                        quantity: qty,
-                        unit: "MT",
-                    });
-                    targetInvId = (invRes as any)?.data?.data?._id || (invRes as any)?.data?._id;
-                } else if (selectedInventoryId && qty > 0) {
-                    const currentQty = Number(selectedInventory?.quantity || 0);
-                    await patchData(`${inventoryRoutes.getAll}/${selectedInventoryId}`, {
-                        quantity: currentQty + qty,
-                    });
-                }
-
-                if (!targetInvId) throw new Error("Failed to resolve inventory ID.");
-
-                // 2. Finally Accept with the target inventory
-                return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/seller-accept`, {
-                    inventoryId: targetInvId,
-                });
-            }
-
-            // Normal flow: just accept with selected inventory
-            if (!selectedInventoryId) {
-                throw new Error("Select an inventory or add new stock to proceed.");
-            }
             if (selectedInventory && (selectedInventory.availableQty || 0) < Number(enquiry?.quantity || 0)) {
-                throw new Error("Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.");
+                const projected = Number(selectedInventory.availableQty || 0) + Number(inlineQuantity || 0);
+                if (projected < Number(enquiry?.quantity || 0)) {
+                    throw new Error("Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.");
+                }
             }
+            if (!acceptIdempotencyKey.current) {
+                acceptIdempotencyKey.current = typeof crypto !== "undefined" && crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : `${Date.now()}-${enquiryId}`;
+            }
+            setAcceptActionState("processing");
             return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/seller-accept`, {
-                inventoryId: selectedInventoryId,
+                ...(selectedInventoryId ? { inventoryId: selectedInventoryId } : { warehouseId: selectedWarehouseOption.warehouseId }),
+                addQuantity: Number(inlineQuantity || 0),
+                idempotencyKey: acceptIdempotencyKey.current,
             });
         },
         onSuccess: () => {
-            toast.success("Enquiry accepted and inventory updated.");
-            setInventoryAcceptOpen(false);
-            setSelectedInventoryId("");
-            setSelectedWarehouseOptionId("");
-            setInlineQuantity("");
+            setAcceptActionState("success");
+            setAcceptActionError("");
+            toast.success("Enquiry accepted successfully.");
             refreshEnquiryCaches();
             queryClient.invalidateQueries({ queryKey: ["seller-inventories", sellerCompanyId, productVariantId] });
             queryClient.invalidateQueries({ queryKey: ["seller-warehouses", sellerCompanyId] });
             queryClient.invalidateQueries({ queryKey: ["variantRate", variantRateId] });
+            window.setTimeout(() => {
+                setInventoryAcceptOpen(false);
+                setSelectedInventoryId("");
+                setSelectedWarehouseOptionId("");
+                setInlineQuantity("");
+                setAcceptAttempted(false);
+                setAcceptActionState("idle");
+                acceptIdempotencyKey.current = "";
+            }, 1000);
         },
         onError: (error: any) => {
-            toast.error(error?.response?.data?.message || error?.message || "Failed to accept enquiry.");
+            const message = normalizeApiError(error, "Unable to accept enquiry. Please try again.").message;
+            setAcceptActionState("error");
+            setAcceptActionError(message);
+            toast.error(message);
         },
     });
 
@@ -1594,16 +1579,25 @@ export default function EnquiryDetailsPage() {
     if (!enquiry) return <div className="p-10 text-center">Enquiry not found</div>;
 
     const handleInventoryAccept = () => {
+        if (sellerAcceptMutation.isPending) return;
+        setAcceptActionState("validating");
+        setAcceptActionError("");
         setAcceptAttempted(true);
         if (!selectedWarehouseOption) {
+            setAcceptActionState("error");
+            setAcceptActionError("Select a warehouse to proceed.");
             toast.error("Select a warehouse to proceed.");
             return;
         }
         if (!selectedInventory && (!inlineQuantity || Number(inlineQuantity) <= 0)) {
+            setAcceptActionState("error");
+            setAcceptActionError("Enter the stock quantity for this warehouse.");
             toast.error("Enter the stock quantity for this warehouse.");
             return;
         }
         if (hasInsufficientStock) {
+            setAcceptActionState("error");
+            setAcceptActionError("Please add enough stock for this enquiry or select another warehouse.");
             toast.error("Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.");
             return;
         }
@@ -4903,16 +4897,20 @@ export default function EnquiryDetailsPage() {
                 <Modal
                     isOpen={inventoryAcceptOpen}
                     onOpenChange={(open) => {
+                        if (sellerAcceptMutation.isPending) return;
                         setInventoryAcceptOpen(open);
                         if (!open) setSelectedInventoryId("");
                         if (!open) {
                             setSelectedWarehouseOptionId("");
                             setAcceptAttempted(false);
                             setInlineQuantity("");
+                            setAcceptActionState("idle");
+                            setAcceptActionError("");
+                            acceptIdempotencyKey.current = "";
                         }
                     }}
-                    isDismissable={false}
-                    isKeyboardDismissDisabled
+                    isDismissable={!sellerAcceptMutation.isPending}
+                    isKeyboardDismissDisabled={sellerAcceptMutation.isPending}
                 >
                     <ModalContent>
                         <ModalHeader className="flex flex-col gap-1">Select Inventory for Supplier Acceptance</ModalHeader>
@@ -4945,7 +4943,10 @@ export default function EnquiryDetailsPage() {
                                             setSelectedInventoryId(picked?.inventory?.invId || "");
                                             setInlineQuantity(available < requiredQty ? String(requiredQty - available) : "");
                                             setAcceptAttempted(false);
+                                            setAcceptActionState("idle");
+                                            setAcceptActionError("");
                                         }}
+                                        isDisabled={sellerAcceptMutation.isPending}
                                     >
                                         {warehouseInventoryOptions.map((row: any) => (
                                             <SelectItem key={row.optionId} value={row.optionId} textValue={row.warehouseName}>
@@ -4987,6 +4988,7 @@ export default function EnquiryDetailsPage() {
                                             onValueChange={setInlineQuantity}
                                             variant="bordered"
                                             min="0"
+                                            isDisabled={sellerAcceptMutation.isPending}
                                         />
                                         {selectedInventory && selectedInventory.availableQty < requiredQty && (
                                             <div className="text-[10px] text-obaol-600 font-bold px-1 italic">
@@ -5014,25 +5016,37 @@ export default function EnquiryDetailsPage() {
                                         Please add the missing quantity to proceed.
                                     </div>
                                 )}
+                                <ActionFeedback state={acceptActionState}>
+                                    {acceptActionState === "processing"
+                                        ? "Your stock is being reserved and the enquiry is being accepted. Keep this window open."
+                                        : acceptActionState === "success"
+                                            ? "Enquiry accepted successfully."
+                                            : acceptActionError}
+                                </ActionFeedback>
                             </div>
                         </ModalBody>
                         <ModalFooter className="border-t border-divider">
-                            <Button variant="light" onPress={() => setInventoryAcceptOpen(false)}>
+                            <Button variant="light" onPress={() => setInventoryAcceptOpen(false)} isDisabled={sellerAcceptMutation.isPending || acceptActionState === "success"}>
                                 Cancel
                             </Button>
-                            <Button
-                                color="success"
+                            <AsyncActionButton
+                                intent="success"
                                 className="font-bold"
                                 onPress={handleInventoryAccept}
-                                isLoading={sellerAcceptMutation.isPending}
+                                state={acceptActionState}
+                                labels={{
+                                    idle: "Save & Accept Enquiry",
+                                    validating: "Checking Inventory…",
+                                    processing: "Reserving Stock & Accepting Enquiry…",
+                                    success: "Enquiry Accepted Successfully",
+                                    error: "Unable to Accept Enquiry — Retry",
+                                }}
                                 isDisabled={
                                     !selectedWarehouseOption ||
                                     (!selectedInventory && !inlineQuantity) ||
                                     (selectedInventory && Number(selectedInventory.availableQty || 0) < requiredQty && !inlineQuantity)
                                 }
-                            >
-                                Save & Accept Enquiry
-                            </Button>
+                            />
                         </ModalFooter>
                     </ModalContent>
                 </Modal>

@@ -12,7 +12,8 @@ import {
   Spacer,
   Tooltip,
 } from "@nextui-org/react";
-import { FiEye } from "react-icons/fi";
+import { FiEye, FiUser, FiMail, FiPhone, FiBriefcase, FiCheckCircle, FiClock } from "react-icons/fi";
+import { DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 import RevealImage from "@/components/ui/RevealImage";
 import { DetailsModalProps } from "@/data/interface-data";
 import StatusHistoryTabContent from "../StatusHistory/statusHistory";
@@ -30,6 +31,7 @@ export default function DetailsModal({
 }: DetailsModalCustomProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { formatRate } = useCurrency();
+  const isAssociate = currentTable === "associate";
 
   // List of fields you want to exclude from being displayed
   const excludeFields = [
@@ -228,25 +230,36 @@ export default function DetailsModal({
           {customTrigger}
         </div>
       ) : (
-        <Tooltip content="View">
-          <span
+        <Tooltip content="View associate">
+          <button
+            type="button"
+            aria-label="View associate"
             onClick={onOpen}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-primary-500/10 hover:bg-primary-500/20 cursor-pointer active:opacity-50 group transition-all"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary-500/10 p-2 text-xs font-bold text-primary-600 hover:bg-primary-500/20 cursor-pointer active:opacity-50 group transition-all"
           >
             <FiEye size={20} className="text-primary-500/80 group-hover:text-primary-600 transition-colors" />
-            <div className="h-[2px]" />
-          </span>
+            {isAssociate && <span className="hidden xl:inline">View</span>}
+          </button>
         </Tooltip>
       )}
-      <Modal size="full" isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal size="full" isOpen={isOpen} onOpenChange={onOpenChange} classNames={isAssociate ? { wrapper: "justify-end p-0", base: "m-0 h-dvh max-h-dvh w-full max-w-[680px] rounded-none sm:rounded-l-[2rem] bg-content1", header: "border-b border-default-200/70 px-6 py-5 dark:border-white/10", body: "px-5 py-6 sm:px-7", footer: "border-t border-default-200/70 px-6 py-4 dark:border-white/10" } : undefined}>
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                {currentTable && toTitleCase(currentTable)} Details
-                {/* Translate */}
+              <ModalHeader className="flex items-center gap-3 pr-12">
+                {isAssociate ? <><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-500/10 text-primary-600"><FiUser /></span><span><span className="block text-lg font-bold">Associate details</span><span className="block text-xs font-medium text-default-400">Profile, company, and account status</span></span></> : <>{currentTable && toTitleCase(currentTable)} Details</>}
               </ModalHeader>
               <ModalBody className="space-y-4 overflow-y-auto max-h-[90vh] text-foreground">
+                {isAssociate ? (
+                  <div className="space-y-5">
+                    <div className="rounded-2xl border border-default-200/70 bg-default-50/70 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+                      <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xl font-bold">{String(data.name || "Unnamed associate")}</p><p className="mt-1 text-sm text-default-500">{String(data.designation || "Designation not provided")}</p></div><div className="flex flex-wrap gap-2"><DashboardStatusBadge tone={data.isActive ? "success" : "danger"}>{data.isActive ? "Active" : "Inactive"}</DashboardStatusBadge><DashboardStatusBadge tone={data.registrationStatus === "APPROVED" ? "success" : "warning"}>{String(data.registrationStatus || "Pending")}</DashboardStatusBadge></div></div>
+                    </div>
+                    <section><h3 className="mb-3 text-sm font-bold">Contact information</h3><dl className="grid gap-3 sm:grid-cols-2"><Detail icon={<FiMail />} label="Email" value={String(data.email || "")} /><Detail icon={<FiPhone />} label="Primary phone" value={String(data.phone || "")} /><Detail icon={<FiPhone />} label="Secondary phone" value={String(data.phoneSecondary || "")} /><Detail icon={<FiBriefcase />} label="Company" value={String(data.associateCompany || "")} /></dl></section>
+                    <section><h3 className="mb-3 text-sm font-bold">Verification</h3><div className="grid gap-3 sm:grid-cols-2"><StatusDetail label="Email" value={Boolean(data.isEmailVerified)} /><StatusDetail label="Company" value={Boolean(data.isCompanyVerified)} /></div></section>
+                    <section><h3 className="mb-3 text-sm font-bold">Recent activity</h3><dl className="grid gap-3 sm:grid-cols-2"><Detail icon={<FiClock />} label="Last seen" value={formatValue("lastSeenAt", data.lastSeenAt)} /><Detail icon={<FiClock />} label="Last login" value={formatValue("lastLoginAt", data.lastLoginAt)} /><Detail icon={<FiClock />} label="Created" value={formatValue("createdAt", data.createdAt)} /></dl></section>
+                  </div>
+                ) : <>
                 {/* Display User Details */}
                 {Object.keys(data).map((key) => {
                   // Skip rendering excluded fields
@@ -282,6 +295,7 @@ export default function DetailsModal({
                   entityId={String(data._id || "")}
                   entityType="Location"
                 />{" "}
+                </>}
               </ModalBody>
               <ModalFooter>
                 <Button color="primary" variant="light" onPress={onClose}>
@@ -294,4 +308,12 @@ export default function DetailsModal({
       </Modal>
     </>
   );
+}
+
+function Detail({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+  return <div className="rounded-2xl border border-default-200/70 p-4 dark:border-white/10"><div className="flex items-center gap-2 text-xs font-semibold text-default-400">{icon}{label}</div><div className="mt-2 break-words text-sm font-semibold text-foreground">{value || "Not provided"}</div></div>;
+}
+
+function StatusDetail({ label, value }: { label: string; value: boolean }) {
+  return <div className="flex items-center justify-between rounded-2xl border border-default-200/70 p-4 dark:border-white/10"><span className="flex items-center gap-2 text-sm font-semibold"><FiCheckCircle className={value ? "text-success-500" : "text-warning-500"} />{label}</span><DashboardStatusBadge tone={value ? "success" : "warning"}>{value ? "Verified" : "Pending"}</DashboardStatusBadge></div>;
 }

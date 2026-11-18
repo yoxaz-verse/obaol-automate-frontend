@@ -1,5 +1,6 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { Button,Card,CardBody,Chip,Input,Select,SelectItem,Switch,Tab,Tabs,Textarea } from "@nextui-org/react";
 import { useMutation,useQuery,useQueryClient } from "@tanstack/react-query";
@@ -37,7 +38,46 @@ export default function FleetPage(){
   {locating&&<EditorDrawer title="Update exact truck position" onClose={()=>setLocating(null)}><p className="mb-4 text-sm text-default-500">Exact coordinates remain private. The public directory receives only a coarse 3–5 km area.</p><div className="space-y-4"><Input label="Latitude" type="number" value={position.latitude} onValueChange={value=>setPosition({...position,latitude:value})}/><Input label="Longitude" type="number" value={position.longitude} onValueChange={value=>setPosition({...position,longitude:value})}/><Input label="Accuracy (meters)" type="number" value={position.accuracyMeters} onValueChange={value=>setPosition({...position,accuracyMeters:value})}/><Button className="w-full" color="primary" isLoading={savePosition.isPending} onPress={()=>savePosition.mutate()}>Save position</Button></div></EditorDrawer>}
  </main>;
 }
-function EditorDrawer({title,onClose,children}:{title:string;onClose:()=>void;children:React.ReactNode}){return <div className="fixed inset-0 z-50 bg-foreground/40" role="dialog" aria-modal="true" aria-label={title} onMouseDown={event=>{if(event.target===event.currentTarget)onClose()}}><aside className="ml-auto h-full w-full max-w-3xl overflow-y-auto bg-content1 p-5 shadow-2xl md:p-7"><div className="mb-6 flex items-center justify-between"><div><p className="text-xs font-black tracking-wider text-obaol-600">Fleet readiness</p><h2 className="text-2xl font-black">{title}</h2></div><Button isIconOnly variant="light" aria-label="Close editor" onPress={onClose}><FiX/></Button></div>{children}</aside></div>}
+function EditorDrawer({title,onClose,children}:{title:string;onClose:()=>void;children:React.ReactNode}){
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  if (!mounted || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] bg-foreground/45 backdrop-blur-[2px]"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <aside className="ml-auto h-full w-full max-w-3xl overflow-y-auto bg-content1 p-5 shadow-[-20px_0_50px_rgba(0,0,0,0.35)] border-l border-default-200/60 md:p-7">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-black tracking-wider text-obaol-600">Fleet readiness</p>
+            <h2 className="text-2xl font-black">{title}</h2>
+          </div>
+          <Button isIconOnly variant="light" aria-label="Close editor" onPress={onClose}>
+            <FiX />
+          </Button>
+        </div>
+        {children}
+      </aside>
+    </div>,
+    document.body
+  );
+}
 function Section({title,children}:{title:string;children:React.ReactNode}){return <section><h3 className="mb-3 font-black">{title}</h3><div className="grid gap-3 md:grid-cols-2">{children}</div></section>}
 function VehicleForm({vehicle,setVehicle}:{vehicle:any;setVehicle:(value:any)=>void}){const set=(key:string,value:any)=>setVehicle({...vehicle,[key]:value});return <><Section title="Identity"><Input label="Full registration number (private)" value={vehicle.registrationNumber} onValueChange={value=>set("registrationNumber",value)} isRequired/><Input label="Public fleet alias" placeholder="e.g. Green Hauler 12" value={vehicle.publicAlias} onValueChange={value=>set("publicAlias",value)}/><Select label="Ownership" selectedKeys={[vehicle.ownership]} onSelectionChange={keys=>set("ownership",String(Array.from(keys)[0]))}><SelectItem key="OWNED">Owned</SelectItem><SelectItem key="CONTRACTED">Contracted</SelectItem></Select><Input label="Carrier name" value={vehicle.carrierName} onValueChange={value=>set("carrierName",value)}/><Input label="Manufacturer / brand" value={vehicle.manufacturer} onValueChange={value=>set("manufacturer",value)}/><Input label="Model" value={vehicle.model} onValueChange={value=>set("model",value)}/><Input label="Model year" type="number" value={vehicle.modelYear} onValueChange={value=>set("modelYear",value)}/><Input label="Fuel type" value={vehicle.fuelType} onValueChange={value=>set("fuelType",value)}/></Section><Section title="Capacity"><Input label="Vehicle type" value={vehicle.vehicleType} onValueChange={value=>set("vehicleType",value)}/><Input label="Body type" value={vehicle.bodyType} onValueChange={value=>set("bodyType",value)}/><Input label="Axle configuration" value={vehicle.axleConfiguration} onValueChange={value=>set("axleConfiguration",value)}/><Input label="Capacity" type="number" value={vehicle.capacity} onValueChange={value=>set("capacity",value)}/><Input className="md:col-span-2" label="Supported cargo" description="Comma-separated" value={vehicle.supportedCargo} onValueChange={value=>set("supportedCargo",value)}/><Textarea className="md:col-span-2" label="Truck image URLs" description="Comma-separated" value={vehicle.imageUrls} onValueChange={value=>set("imageUrls",value)}/></Section><Section title="Base location"><Input label="City" value={vehicle.baseCity} onValueChange={value=>set("baseCity",value)}/><Input label="State" value={vehicle.baseState} onValueChange={value=>set("baseState",value)}/><Input label="Country" value={vehicle.baseCountry} onValueChange={value=>set("baseCountry",value)}/><div/><Input label="Latitude" type="number" value={vehicle.baseLatitude} onValueChange={value=>set("baseLatitude",value)}/><Input label="Longitude" type="number" value={vehicle.baseLongitude} onValueChange={value=>set("baseLongitude",value)}/></Section><Section title="Compliance & publication">{[["Insurance expiry","insuranceExpiresAt"],["Permit expiry","permitExpiresAt"],["Fitness expiry","fitnessExpiresAt"],["Pollution expiry","pollutionExpiresAt"]].map(([label,key])=><Input key={key} label={label} type="date" value={vehicle[key]} onValueChange={value=>set(key,value)}/>)}<Select label="Availability" selectedKeys={[vehicle.status]} onSelectionChange={keys=>set("status",String(Array.from(keys)[0]))}>{["AVAILABLE","ASSIGNED","MAINTENANCE","INACTIVE"].map(value=><SelectItem key={value}>{value}</SelectItem>)}</Select><div className="rounded-xl bg-default-100 p-3"><Switch isSelected={vehicle.publiclyListed} onValueChange={value=>set("publiclyListed",value)}>Publish on truck map</Switch><p className="mt-1 text-xs text-default-500">Requires an active transport profile, valid compliance, and a fresh position.</p></div></Section></>}
 function DriverForm({driver,setDriver}:{driver:any;setDriver:(value:any)=>void}){const set=(key:string,value:any)=>setDriver({...driver,[key]:value});return <Section title="Driver readiness"><Input label="Driver name" value={driver.name} onValueChange={value=>set("name",value)} isRequired/><Input label="Phone" value={driver.phone} onValueChange={value=>set("phone",value)} isRequired/><Input label="Licence number" value={driver.licenceNumber} onValueChange={value=>set("licenceNumber",value)} isRequired/><Input label="Licence expiry" type="date" value={driver.licenceExpiresAt} onValueChange={value=>set("licenceExpiresAt",value)}/><Select label="Availability" selectedKeys={[driver.status]} onSelectionChange={keys=>set("status",String(Array.from(keys)[0]))}>{["AVAILABLE","ASSIGNED","INACTIVE"].map(value=><SelectItem key={value}>{value}</SelectItem>)}</Select></Section>}

@@ -21,7 +21,7 @@ import {
   Autocomplete,
   Tooltip,
 } from "@nextui-org/react";
-import { FiEdit2 } from "react-icons/fi";
+import { FiEdit2, FiUser, FiPhone, FiBriefcase } from "react-icons/fi";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
@@ -94,11 +94,14 @@ export default function EditModal({
   initialData,
   isOpen: controlledOpen,
   onClose: controlledClose,
+  presentation,
+  triggerLabel,
 }: EditModalProps) {
   const { actionsAllowed } = useCompanyAccess();
   const [open, setOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const isOpenActual = isControlled ? controlledOpen : open;
+  const isAssociateDrawer = presentation === "drawer" || currentTable === "associate";
 
   const handleClose = () => {
     if (isControlled && controlledClose) {
@@ -225,7 +228,8 @@ export default function EditModal({
       refetchData();
       toast.success(`${capitalize(currentTable)} updated successfully`);
       setLoading(false);
-      setOpen(false);
+      if (isControlled && controlledClose) controlledClose();
+      else setOpen(false);
     },
     onError: (err: any) => {
       const msg = normalizeApiError(err, "Update failed").message;
@@ -873,14 +877,16 @@ export default function EditModal({
   return (
     <>
       {!isControlled && (
-        <Tooltip content="Edit Record" closeDelay={0}>
-          <span
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-obaol-500/10 hover:bg-obaol-500/20 cursor-pointer active:opacity-50 group transition-all"
+        <Tooltip content={triggerLabel || "Edit associate"} closeDelay={0}>
+          <button
+            type="button"
+            aria-label={triggerLabel || "Edit associate"}
+            className={`flex items-center justify-center rounded-xl bg-obaol-500/10 hover:bg-obaol-500/20 cursor-pointer active:opacity-50 group transition-all ${triggerLabel ? "min-h-10 gap-2 px-4 text-sm font-bold text-obaol-700 dark:text-obaol-300" : "p-2"}`}
             onClick={() => setOpen(true)}
           >
             <FiEdit2 size={20} className="text-obaol-500/80 group-hover:text-obaol-600 transition-colors" />
-            <div className="h-[2px]" />
-          </span>
+            {triggerLabel && <span>{triggerLabel}</span>}
+          </button>
         </Tooltip>
       )}
 
@@ -888,14 +894,26 @@ export default function EditModal({
         isDismissable={false}
         isOpen={isOpenActual}
         onClose={handleClose}
-        size="lg"
+        size={isAssociateDrawer ? "full" : "lg"}
+        placement={isAssociateDrawer ? "center" : undefined}
         classNames={{
+          wrapper: isAssociateDrawer ? "justify-end p-0" : undefined,
+          base: isAssociateDrawer ? "m-0 h-dvh max-h-dvh w-full max-w-[720px] rounded-none sm:rounded-l-[2rem] bg-content1" : undefined,
+          header: isAssociateDrawer ? "border-b border-default-200/70 px-6 py-5 dark:border-white/10" : undefined,
+          body: isAssociateDrawer ? "px-5 py-5 sm:px-7" : undefined,
           closeButton: "text-foreground-500 hover:bg-default-100 active:bg-default-200",
         }}
         scrollBehavior="inside"
       >
         <ModalContent>
-          <ModalHeader>Edit {capitalize(currentTable)}</ModalHeader>
+          <ModalHeader className={isAssociateDrawer ? "flex items-center gap-3 pr-12" : undefined}>
+            {isAssociateDrawer ? (
+              <>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-obaol-500/12 text-obaol-600 dark:text-obaol-300"><FiEdit2 /></span>
+                <span><span className="block text-lg font-bold">Edit associate profile</span><span className="mt-0.5 block text-xs font-medium text-default-400">Update personal, contact, and company details</span></span>
+              </>
+            ) : `Edit ${capitalize(currentTable)}`}
+          </ModalHeader>
 
           {isLocked && unlockAt && (
             <ModalBody>
@@ -914,22 +932,33 @@ export default function EditModal({
             <Spinner />
           ) : (
             <ModalBody>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className={isAssociateDrawer ? "flex min-h-full flex-col" : undefined}>
+                {isAssociateDrawer && (
+                  <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl border border-default-200/70 bg-default-50/70 p-2 text-center text-[11px] font-bold text-default-500 dark:border-white/10 dark:bg-white/[0.03]">
+                    <span className="flex items-center justify-center gap-1.5 rounded-xl bg-content1 px-2 py-2 shadow-sm"><FiUser /> Personal</span>
+                    <span className="flex items-center justify-center gap-1.5 px-2 py-2"><FiPhone /> Contact</span>
+                    <span className="flex items-center justify-center gap-1.5 px-2 py-2"><FiBriefcase /> Company</span>
+                  </div>
+                )}
+                <div className={isAssociateDrawer ? "grid grid-cols-1 gap-x-4 sm:grid-cols-2" : undefined}>
                 {formFields
                   .filter((f) => (f.inEdit ?? f.inForm) && f.type !== "password" && isFieldVisible(f, formData))
                   .map((f, i) => (
-                    <div key={i} className="mb-4">
+                    <div key={i} className={`mb-4 ${isAssociateDrawer && ["name", "email", "associateCompany"].includes(f.key) ? "sm:col-span-2" : ""}`}>
                       {renderField(f)}
                     </div>
                   ))}
+                </div>
 
-                <div className="flex justify-end mt-4">
+                <div className={`flex justify-end gap-3 mt-4 ${isAssociateDrawer ? "sticky bottom-0 -mx-5 mt-auto border-t border-default-200/70 bg-content1/95 px-5 py-4 backdrop-blur sm:-mx-7 sm:px-7 dark:border-white/10" : ""}`}>
+                  {isAssociateDrawer && <Button type="button" variant="flat" onPress={handleClose}>Cancel</Button>}
                   <Button
                     type="submit"
+                    color={isAssociateDrawer ? "warning" : "default"}
                     disabled={!actionsAllowed || loading || (isLocked && !formData.isLive)}
                     title={!actionsAllowed ? "Your company must be accepted before you can update records." : undefined}
                   >
-                    {loading ? "Updating…" : "Update"}
+                    {loading ? "Saving…" : isAssociateDrawer ? "Save changes" : "Update"}
                   </Button>
                 </div>
               </form>

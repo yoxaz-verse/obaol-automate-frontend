@@ -21,7 +21,7 @@ import { deleteDataBody, getData, patchData, postData } from "@/core/api/apiHand
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractCount, extractList } from "@/core/data/queryUtils";
 import InsightCard from "@/components/dashboard/InsightCard";
-import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiKey, FiMail, FiPhone, FiTrash2 } from "react-icons/fi";
+import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiKey, FiMail, FiPhone, FiTrash2, FiMapPin } from "react-icons/fi";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardField, DashboardPage, DashboardPanel, DashboardSectionHeader, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 import { featureFlags } from "@/config/featureFlags";
@@ -501,8 +501,8 @@ function AccountVerificationPanel({ profile }: { profile: any }) {
     catch (error: any) { setMessage(error?.response?.data?.message || "Invalid or expired verification code."); }
     finally { setBusy(false); }
   };
-  return <DashboardPanel className="p-5">
-    <div className="flex items-center justify-between gap-4"><div><p className="dashboard-label">Personal profile verification</p><h3 className="mt-1 text-lg font-bold">{percent}% complete</h3></div><DashboardStatusBadge tone={percent === 100 ? "success" : "warning"}>{percent === 100 ? "Fully verified" : "Action required"}</DashboardStatusBadge></div>
+  return <DashboardPanel className="p-5 sm:p-6">
+    <div className="flex items-start justify-between gap-4"><div><p className="dashboard-label">Verification</p><h3 className="mt-1 text-base font-bold">Profile checks</h3><p className="mt-1 text-xs db-muted">Keep your contact methods verified for secure account access.</p></div><DashboardStatusBadge tone={percent === 100 ? "success" : "warning"}>{percent === 100 ? "Complete" : `${percent}% complete`}</DashboardStatusBadge></div>
     <div className="mt-4 h-2 overflow-hidden rounded-full bg-default-100"><div className="h-full bg-obaol-500 transition-all" style={{ width: `${percent}%` }} /></div>
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
       {methods.map((item) => <div key={item.method} className="rounded-xl border db-border-subtle p-4"><div className="flex items-center gap-2 font-bold">{item.icon}{item.label}</div><p className="mt-1 truncate text-xs db-muted">{item.value || "Not provided"}</p><Button className="mt-3" size="sm" color={item.verified ? "success" : "warning"} variant="flat" isDisabled={item.verified || busy || !item.value} onPress={() => send(item.method)}>{item.verified ? "Verified" : "Send OTP"}</Button></div>)}
@@ -549,54 +549,40 @@ export default function ProfilePage() {
 
           return (
             <div className="flex flex-col gap-6">
-              {(roleKey === "associate" || roleKey === "operator") && <AccountVerificationPanel profile={profile} />}
+              <DashboardPanel className="overflow-hidden" feature>
+                <div className="relative overflow-hidden px-5 py-6 sm:px-7 sm:py-7">
+                  <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-obaol-500/10 blur-3xl" />
+                  <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+                      <div className="shrink-0 rounded-2xl border db-border-subtle db-panel p-1.5 shadow-sm">
+                        <Avatar className="h-16 w-16 rounded-xl text-xl sm:h-20 sm:w-20" showFallback name={profile.name} src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || "User")}&background=18181b&color=eab308&size=256&bold=true&font-size=0.35`} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="mb-2 flex flex-wrap items-center gap-2"><DashboardStatusBadge tone="brand">{displayRole}</DashboardStatusBadge><DashboardStatusBadge tone={profile.isActive === false ? "danger" : "success"}>{profile.isActive === false ? "Inactive" : "Active"}</DashboardStatusBadge></div>
+                        <h2 className="truncate text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{profile.name || "Associate"}</h2>
+                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm db-muted">
+                          <span className="inline-flex items-center gap-1.5"><FiMail />{profile.email || "Email not provided"}</span>
+                          <span className="inline-flex items-center gap-1.5"><FiBriefcase />{profile.designation?.name || profile.designationName || "Designation not provided"}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      <EditModal _id={profile._id} initialData={profile} currentTable={roleKey} formFields={formFields} apiEndpoint={apiRoutesByRole[roleKey]} refetchData={() => { }} presentation="drawer" triggerLabel="Edit profile" />
+                    </div>
+                  </div>
+                </div>
+              </DashboardPanel>
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
                 {/* Account summary */}
                 <div className="flex flex-col gap-4">
-                  <DashboardPanel className="overflow-hidden" feature>
-                    <div className="flex items-center justify-between border-b db-border-subtle bg-obaol-500/[0.04] px-5 py-4">
-                      <span className="dashboard-label">Account</span>
-                      <DashboardStatusBadge tone="brand">{displayRole}</DashboardStatusBadge>
-                    </div>
+                  {(roleKey === "associate" || roleKey === "operator") && <AccountVerificationPanel profile={profile} />}
 
-                    <div className="flex flex-col items-center px-5 py-6">
-                      <div className="relative mb-4 rounded-2xl border db-border-subtle db-panel p-1">
-                        <Avatar
-                          className="h-24 w-24 rounded-xl border border-foreground/5 text-2xl"
-                          showFallback
-                          name={profile.name}
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || "User")}&background=18181b&color=eab308&size=256&bold=true&font-size=0.35`}
-                        />
-                      </div>
-
-                      <div className="mb-6 text-center">
-                        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                          {profile.name}
-                        </h2>
-                        <p className="mt-1 break-all text-sm db-muted">{profile.email}</p>
-                      </div>
-
-                      <div className="grid w-full grid-cols-2 gap-3">
-                        <div className="rounded-xl border db-border-subtle db-inset p-3 text-center">
-                          <p className="dashboard-label">Account status</p>
-                          <p className="mt-1 text-sm font-semibold text-success-600 dark:text-success-400">Verified</p>
-                        </div>
-                        <div className="rounded-xl border db-border-subtle db-inset p-3 text-center">
-                          <p className="dashboard-label">Membership</p>
-                          <p className="mt-1 text-sm font-semibold text-obaol-700 dark:text-obaol-300">Active</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 w-full">
-                        <EditModal
-                          _id={profile._id}
-                          initialData={profile}
-                          currentTable={roleKey}
-                          formFields={formFields}
-                          apiEndpoint={apiRoutesByRole[roleKey]}
-                          refetchData={() => { }}
-                        />
-                      </div>
+                  <DashboardPanel className="p-5 sm:p-6">
+                    <p className="dashboard-label">Account overview</p>
+                    <div className="mt-4 space-y-4">
+                      <div className="flex items-start gap-3"><span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-obaol-500/10 text-obaol-600"><FiBriefcase /></span><div><p className="text-xs db-muted">Company</p><p className="mt-0.5 font-semibold text-foreground">{profile.associateCompany?.name || "Not linked"}</p></div></div>
+                      <div className="flex items-start gap-3"><span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-obaol-500/10 text-obaol-600"><FiPhone /></span><div><p className="text-xs db-muted">Primary phone</p><p className="mt-0.5 font-semibold text-foreground">{profile.phone || "Not provided"}</p></div></div>
+                      <div className="flex items-start gap-3"><span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-obaol-500/10 text-obaol-600"><FiMapPin /></span><div><p className="text-xs db-muted">Location</p><p className="mt-0.5 font-semibold text-foreground">{[profile.associateCompany?.district?.name, profile.associateCompany?.state?.name].filter(Boolean).join(", ") || "Not provided"}</p></div></div>
                     </div>
                   </DashboardPanel>
 

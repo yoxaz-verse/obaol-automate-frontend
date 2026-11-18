@@ -8,7 +8,8 @@ import DeleteModal from "@/components/CurdTable/delete";
 import DetailsModal from "@/components/CurdTable/details";
 import EditModal from "@/components/CurdTable/edit-model";
 import EmptyState from "@/components/ui/EmptyState";
-import { FiUsers } from "react-icons/fi";
+import { FiUsers, FiMail, FiBriefcase, FiClock } from "react-icons/fi";
+import { DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 import {
   apiRoutesByRole,
   generateColumns,
@@ -62,7 +63,15 @@ const UserTabContent: React.FC<UserTabContentProps> = ({
   showDelete = true,
 }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
-  const columns = generateColumns(currentTable, tableConfig);
+  const generatedColumns = generateColumns(currentTable, tableConfig);
+  const columns = currentTable === "associate" ? [
+    { name: "ASSOCIATE", uid: "associateProfile" },
+    { name: "COMPANY & ROLE", uid: "companyRole" },
+    { name: "VERIFICATION", uid: "verificationSummary" },
+    { name: "ACCOUNT", uid: "accountSummary" },
+    { name: "RECENT ACTIVITY", uid: "activitySummary" },
+    { name: "ACTIONS", uid: "actions2", type: "action" },
+  ] : generatedColumns;
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -151,12 +160,22 @@ const UserTabContent: React.FC<UserTabContentProps> = ({
               const presenceStatus = item.presenceStatus || getPresenceStatus(item.lastSeenAt);
               return {
                 ...rest,
+                associateProfile: (
+                  <div className="flex min-w-[220px] items-center gap-3 py-1">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-obaol-500/12 text-sm font-black text-obaol-700 dark:text-obaol-300">{String(item.name || "A").split(/\s+/).slice(0, 2).map((part: string) => part[0]).join("").toUpperCase()}</span>
+                    <span className="min-w-0"><span className="block truncate font-bold text-foreground">{item.name || "Unnamed associate"}</span><span className="mt-0.5 flex items-center gap-1 truncate text-xs text-default-400"><FiMail />{item.email || "No email"}</span></span>
+                  </div>
+                ),
                 associateCompany: item.associateCompany
                   ? item.associateCompany.name
                   : "N/A",
                 designation: designationName || "Unknown",
                 designationId: designationId || "",
                 presenceStatus,
+                companyRole: <div className="min-w-[190px]"><span className="flex items-center gap-1.5 font-semibold text-foreground"><FiBriefcase className="text-obaol-500" />{item.associateCompany?.name || "Not linked"}</span><span className="mt-1 block text-xs text-default-400">{designationName || "Designation not provided"}</span></div>,
+                verificationSummary: <div className="flex min-w-[170px] flex-wrap gap-2"><DashboardStatusBadge tone={item.isEmailVerified ? "success" : "warning"}>Email {item.isEmailVerified ? "verified" : "pending"}</DashboardStatusBadge><DashboardStatusBadge tone={item.isCompanyVerified ? "success" : "warning"}>Company {item.isCompanyVerified ? "verified" : "pending"}</DashboardStatusBadge></div>,
+                accountSummary: <div className="flex min-w-[140px] flex-wrap gap-2"><DashboardStatusBadge tone={item.isActive ? "success" : "danger"}>{item.isActive ? "Active" : "Inactive"}</DashboardStatusBadge><DashboardStatusBadge tone={String(item.registrationStatus).toUpperCase() === "APPROVED" ? "success" : "warning"}>{item.registrationStatus || "Pending"}</DashboardStatusBadge></div>,
+                activitySummary: <div className="min-w-[165px]"><span className="flex items-center gap-1.5 text-sm font-semibold text-foreground"><FiClock className="text-default-400" />{presenceStatus}</span><span className="mt-1 block text-xs text-default-400">{item.lastSeenAt ? `Seen ${new Date(item.lastSeenAt).toLocaleDateString("en-GB")}` : "Never seen"}</span></div>,
               };
             }
             // Handle other user types similarly if needed
@@ -220,6 +239,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({
                         formFields={formFields}
                         apiEndpoint={apiRoutesByRole[currentTable]} // Assuming API endpoint for update
                         refetchData={refetch}
+                        presentation={currentTable === "associate" ? "drawer" : "modal"}
                       />
                     )}
                     deleteModal={showDelete ? (item: any) => (

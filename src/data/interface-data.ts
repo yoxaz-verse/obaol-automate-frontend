@@ -116,6 +116,8 @@ export interface EditModalProps {
   initialData?: Record<string, unknown>; // Existing data to populate the form
   isOpen?: boolean;
   onClose?: () => void;
+  presentation?: "modal" | "drawer";
+  triggerLabel?: string;
 }
 
 export interface QueryComponentMeta {

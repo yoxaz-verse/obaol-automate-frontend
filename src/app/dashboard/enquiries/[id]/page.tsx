@@ -132,6 +132,8 @@ export default function EnquiryDetailsPage() {
     const [workflowStage, setWorkflowStage] = useState<string>("ENQUIRY_CREATED");
     const [importDeliveryMode, setImportDeliveryMode] = useState<string>("");
     const [inventoryAcceptOpen, setInventoryAcceptOpen] = useState(false);
+    const [warehouseSelectOpen, setWarehouseSelectOpen] = useState(false);
+    const inventoryModalContentRef = React.useRef<HTMLDivElement | null>(null);
     const [quickWarehouseOpen, setQuickWarehouseOpen] = useState(false);
     const [selectedInventoryId, setSelectedInventoryId] = useState<string>("");
     const [selectedWarehouseOptionId, setSelectedWarehouseOptionId] = useState<string>("");
@@ -150,6 +152,8 @@ export default function EnquiryDetailsPage() {
     const [reopenRequestOpen, setReopenRequestOpen] = useState(false);
     const [reopenReason, setReopenReason] = useState("");
     const [clarificationOpen, setClarificationOpen] = useState(false);
+    const [clarificationSelectOpen, setClarificationSelectOpen] = useState(false);
+    const clarificationModalContentRef = React.useRef<HTMLDivElement | null>(null);
     const [clarificationRate, setClarificationRate] = useState("");
     const [clarificationReasonRate, setClarificationReasonRate] = useState(false);
     const [clarificationReasonPayment, setClarificationReasonPayment] = useState(false);
@@ -4788,7 +4792,12 @@ export default function EnquiryDetailsPage() {
 
                 <Modal
                     isOpen={clarificationOpen}
-                    onOpenChange={setClarificationOpen}
+                    onOpenChange={(open) => {
+                        setClarificationOpen(open);
+                        if (!open) setClarificationSelectOpen(false);
+                    }}
+                    isDismissable={false}
+                    isKeyboardDismissDisabled={clarificationSelectOpen}
                     size="lg"
                     placement="center"
                     scrollBehavior="inside"
@@ -4800,6 +4809,7 @@ export default function EnquiryDetailsPage() {
                                     <span className="text-sm font-black  tracking-widest text-default-400">Revision Checklist</span>
                                     <span className="text-lg font-black">Request quotation revision</span>
                                 </ModalHeader>
+                                <div ref={clarificationModalContentRef} className="flex flex-1 flex-col min-h-0">
                                 <ModalBody className="flex flex-col gap-4">
                                     <Checkbox isSelected={clarificationReasonRate} onValueChange={setClarificationReasonRate}>
                                         Rate
@@ -4821,6 +4831,13 @@ export default function EnquiryDetailsPage() {
                                             label="Requested Payment Term"
                                             placeholder="Select payment term"
                                             selectedKeys={clarificationPaymentTermId ? [clarificationPaymentTermId] : []}
+                                            onOpenChange={(isSelectOpen) => setClarificationSelectOpen(isSelectOpen)}
+                                            popoverProps={{
+                                                portalContainer: clarificationModalContentRef.current || undefined,
+                                                classNames: {
+                                                    content: "max-h-72 overflow-y-auto",
+                                                },
+                                            }}
                                             onSelectionChange={(keys) => {
                                                 const value = Array.from(keys)[0] as string | undefined;
                                                 setClarificationPaymentTermId(value || "");
@@ -4848,6 +4865,7 @@ export default function EnquiryDetailsPage() {
                                         <div className="text-xs font-bold text-danger-500">{revisionError}</div>
                                     )}
                                 </ModalBody>
+                                </div>
                                 <ModalFooter className="flex items-center justify-between">
                                     <Button variant="light" onPress={onClose}>Cancel</Button>
                                     <div className="flex flex-col items-end gap-1">
@@ -4914,9 +4932,11 @@ export default function EnquiryDetailsPage() {
                     isOpen={inventoryAcceptOpen}
                     onOpenChange={(open) => {
                         if (sellerAcceptMutation.isPending) return;
+                        if (!open && quickWarehouseOpen) return;
                         setInventoryAcceptOpen(open);
-                        if (!open) setSelectedInventoryId("");
                         if (!open) {
+                            setWarehouseSelectOpen(false);
+                            setSelectedInventoryId("");
                             setSelectedWarehouseOptionId("");
                             setAcceptAttempted(false);
                             setInlineQuantity("");
@@ -4925,11 +4945,13 @@ export default function EnquiryDetailsPage() {
                             acceptIdempotencyKey.current = "";
                         }
                     }}
-                    isDismissable={!sellerAcceptMutation.isPending}
-                    isKeyboardDismissDisabled={sellerAcceptMutation.isPending}
+                    isDismissable={false}
+                    isKeyboardDismissDisabled={sellerAcceptMutation.isPending || warehouseSelectOpen || quickWarehouseOpen}
+                    classNames={{ base: "overflow-visible" }}
                 >
                     <ModalContent>
                         <ModalHeader className="flex flex-col gap-1">Select Inventory for Supplier Acceptance</ModalHeader>
+                        <div ref={inventoryModalContentRef}>
                         <ModalBody>
                             <div className="flex flex-col gap-4">
                                 <div className="text-sm text-default-500">
@@ -4948,6 +4970,13 @@ export default function EnquiryDetailsPage() {
                                         label="Select Warehouse"
                                         placeholder="Choose a warehouse"
                                         selectedKeys={selectedWarehouseOptionId ? new Set([selectedWarehouseOptionId]) : new Set()}
+                                        onOpenChange={(isSelectOpen) => setWarehouseSelectOpen(isSelectOpen)}
+                                        popoverProps={{
+                                            portalContainer: inventoryModalContentRef.current || undefined,
+                                            classNames: {
+                                                content: "max-h-72 overflow-y-auto",
+                                            },
+                                        }}
                                         renderValue={() => selectedWarehouseOption
                                             ? `${selectedWarehouseOption.warehouseName} • ${selectedWarehouseOption.availableQty} MT available`
                                             : "Choose a warehouse"}
@@ -5041,8 +5070,23 @@ export default function EnquiryDetailsPage() {
                                 </ActionFeedback>
                             </div>
                         </ModalBody>
+                        </div>
                         <ModalFooter className="border-t border-divider">
-                            <Button variant="light" onPress={() => setInventoryAcceptOpen(false)} isDisabled={sellerAcceptMutation.isPending || acceptActionState === "success"}>
+                            <Button
+                                variant="light"
+                                onPress={() => {
+                                    setWarehouseSelectOpen(false);
+                                    setInventoryAcceptOpen(false);
+                                    setSelectedInventoryId("");
+                                    setSelectedWarehouseOptionId("");
+                                    setAcceptAttempted(false);
+                                    setInlineQuantity("");
+                                    setAcceptActionState("idle");
+                                    setAcceptActionError("");
+                                    acceptIdempotencyKey.current = "";
+                                }}
+                                isDisabled={sellerAcceptMutation.isPending || acceptActionState === "success"}
+                            >
                                 Cancel
                             </Button>
                             <AsyncActionButton

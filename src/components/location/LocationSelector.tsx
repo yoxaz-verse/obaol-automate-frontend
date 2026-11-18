@@ -6,7 +6,7 @@ import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-lea
 import L from "leaflet";
 import { FiMapPin, FiSearch } from "react-icons/fi";
 import type { StructuredLocation } from "@/types/location";
-import { isValidCoordinate, toStructuredLocation } from "@/types/location";
+import { DEFAULT_INDIA_CENTER, DEFAULT_INDIA_ZOOM, isValidCoordinate, toStructuredLocation } from "@/types/location";
 import "leaflet/dist/leaflet.css";
 
 type Props = {
@@ -45,14 +45,18 @@ function MapSync({ value }: { value: StructuredLocation | null }) {
   const longitude = value?.longitude;
   useEffect(() => {
     setTimeout(() => map.invalidateSize(), 0);
-    if (latitude !== undefined && longitude !== undefined) map.setView([latitude, longitude], Math.max(map.getZoom(), 13), { animate: true });
+    if (latitude !== undefined && longitude !== undefined) {
+      map.setView([latitude, longitude], Math.max(map.getZoom(), 13), { animate: true });
+    } else {
+      map.setView(DEFAULT_INDIA_CENTER, DEFAULT_INDIA_ZOOM, { animate: false });
+    }
   }, [map, latitude, longitude]);
   return null;
 }
 
 export default function LocationSelector({ value, onChange, disabled = false, required = false, height = 360, countryCode, label = "Search address or place" }: Props) {
   const normalized = useMemo(() => toStructuredLocation(value), [value]);
-  const [query, setQuery] = useState(value?.address || value?.label || "");
+  const [query, setQuery] = useState(normalized?.address || normalized?.label || "");
   const [results, setResults] = useState<StructuredLocation[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
@@ -98,7 +102,7 @@ export default function LocationSelector({ value, onChange, disabled = false, re
     } finally { setIsResolvingAddress(false); }
   };
 
-  const center: [number, number] = normalized ? [normalized.latitude, normalized.longitude] : [20.5937, 78.9629];
+  const center: [number, number] = normalized ? [normalized.latitude, normalized.longitude] : DEFAULT_INDIA_CENTER;
   const trimmedQuery = query.trim();
   const noResults = !isSearching && !error && searchedQuery === trimmedQuery && trimmedQuery.length >= 3 && results.length === 0;
   const status = isResolvingAddress ? "Finding address…" : isSearching ? "Searching locations…" : isMapLoading ? "Loading map…" : "";
@@ -113,7 +117,7 @@ export default function LocationSelector({ value, onChange, disabled = false, re
     <p className="sr-only" role="status" aria-live="polite">{status}</p>
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     <div className="relative overflow-hidden rounded-2xl border border-divider" style={{ height }}>
-      <MapContainer center={center} zoom={normalized ? 13 : 4} scrollWheelZoom={!disabled} dragging={!disabled} attributionControl={false} style={{ height: "100%", width: "100%" }}>
+      <MapContainer center={center} zoom={normalized ? 13 : DEFAULT_INDIA_ZOOM} scrollWheelZoom={!disabled} dragging={!disabled} attributionControl={false} style={{ height: "100%", width: "100%" }}>
         <MapSync value={normalized} /><MapEvents disabled={disabled} onPick={reverse} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" eventHandlers={{ loading: () => { setMapError(""); setIsMapLoading(true); }, load: () => setIsMapLoading(false), tileerror: () => { setIsMapLoading(false); setMapError("The map could not finish loading. You can still search for or place a location."); } }} />
         {normalized && isValidCoordinate(normalized.latitude, normalized.longitude) && <Marker position={[normalized.latitude, normalized.longitude]} icon={icon} draggable={!disabled} eventHandlers={{ dragend: event => { const point = event.target.getLatLng(); reverse(point.lat, point.lng); } }} />}

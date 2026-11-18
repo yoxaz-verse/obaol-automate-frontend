@@ -52,6 +52,7 @@ export default function QuickCreateWarehouseModal({
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [phone, setPhone] = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("");
   const [quantity, setQuantity] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -65,6 +66,7 @@ export default function QuickCreateWarehouseModal({
     setName("");
     setCity("");
     setPhone("");
+    setWhatsappPhone("");
     setQuantity("");
     setError("");
     setSubmitting(false);
@@ -92,6 +94,7 @@ export default function QuickCreateWarehouseModal({
       const response = await postData(apiRoutes.warehouses.create, {
         name: warehouseName,
         contactPhone,
+        whatsappPhone: whatsappPhone.trim(),
         address: warehouseCity,
         category: "GENERAL",
         totalCapacity: 0,
@@ -156,6 +159,7 @@ export default function QuickCreateWarehouseModal({
           <Input label="Warehouse name" value={name} onValueChange={(value) => { setName(value); setError(""); }} isRequired isDisabled={submitting} variant="bordered" />
           <Input label="City" value={city} onValueChange={(value) => { setCity(value); setError(""); }} isRequired isDisabled={submitting} variant="bordered" />
           <Input label="Contact phone" value={phone} onValueChange={(value) => { setPhone(value); setError(""); }} isRequired isDisabled={submitting} type="tel" inputMode="tel" variant="bordered" />
+          <Input label="WhatsApp number (optional)" description="Include the international country code" value={whatsappPhone} onValueChange={(value) => { setWhatsappPhone(value); setError(""); }} isDisabled={submitting} type="tel" inputMode="tel" variant="bordered" />
           {stockContext && (
             <div className="flex flex-col gap-3 rounded-xl border border-default-200/70 bg-default-50/60 p-3">
               <div>

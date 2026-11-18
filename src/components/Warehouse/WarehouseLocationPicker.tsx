@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { LuFlaskConical } from "react-icons/lu";
 import { renderToStaticMarkup } from "react-dom/server";
 import { mapTheme } from "@/utils/mapTheme";
+import { DEFAULT_INDIA_CENTER, DEFAULT_INDIA_ZOOM, isValidCoordinate } from "@/types/location";
 
 export type WarehouseLocationValue = {
   latitude: number;
@@ -95,10 +96,11 @@ export default function WarehouseLocationPicker({
 }: WarehouseLocationPickerProps) {
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
   const tileAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-  const center: [number, number] = value
-    ? [value.latitude, value.longitude]
-    : [20.5937, 78.9629];
-  const zoom = value ? 9 : 4.5;
+  const validValue = value && isValidCoordinate(value.latitude, value.longitude) ? value : null;
+  const center: [number, number] = validValue
+    ? [validValue.latitude, validValue.longitude]
+    : DEFAULT_INDIA_CENTER;
+  const zoom = validValue ? 9 : DEFAULT_INDIA_ZOOM;
 
   return (
     <div className="warehouse-location-picker" style={{ height }}>
@@ -109,14 +111,14 @@ export default function WarehouseLocationPicker({
         attributionControl={false}
         style={{ height: "100%", width: "100%" }}
       >
-        <SyncView value={value} />
+        <SyncView value={validValue} />
         <ClickHandler onPick={onChange} />
         <TileLayer
           url={tileUrl}
           attribution={tileAttribution}
         />
-        {value && (
-          <Marker position={[value.latitude, value.longitude]} icon={markerVariant === "lab" ? labMarkerIcon : warehouseMarkerIcon} />
+        {validValue && (
+          <Marker position={[validValue.latitude, validValue.longitude]} icon={markerVariant === "lab" ? labMarkerIcon : warehouseMarkerIcon} />
         )}
       </MapContainer>
       <style jsx global>{`

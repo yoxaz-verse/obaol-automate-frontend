@@ -16,6 +16,8 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Autocomplete,
+  AutocompleteItem,
   Select,
   SelectItem,
   Chip,
@@ -244,6 +246,16 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
     refetchOnWindowFocus: false,
   });
   const products = extractList(productsResponse?.data);
+  const sortedProducts = useMemo(
+    () =>
+      [...products].sort((left: any, right: any) =>
+        String(left?.name || "").localeCompare(String(right?.name || ""), undefined, {
+          sensitivity: "base",
+          numeric: true,
+        })
+      ),
+    [products]
+  );
 
   const { data: companiesResponse } = useQuery({
     queryKey: ["associate-companies"],
@@ -1100,28 +1112,40 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                       )}
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Select
+                        <Autocomplete
                           label="Commodity Type"
                           variant="flat"
-                          selectedKeys={createForm.productId ? [createForm.productId] : []}
-                          onSelectionChange={(keys) => {
-                            const key = Array.from(keys)[0] as string | undefined;
-                            setCreateForm((prev) => ({ ...prev, productId: key || "", productVariant: "" }));
+                          placeholder="Search commodities"
+                          items={sortedProducts}
+                          selectedKey={createForm.productId || null}
+                          allowsCustomValue={false}
+                          defaultFilter={(textValue, inputValue) =>
+                            String(textValue || "").toLocaleLowerCase().includes(String(inputValue || "").trim().toLocaleLowerCase())
+                          }
+                          listboxProps={{ emptyContent: "No matching commodities found." }}
+                          onSelectionChange={(key) => {
+                            setCreateForm((prev) => ({ ...prev, productId: String(key || ""), productVariant: "" }));
                           }}
                           classNames={{
-                            trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                            label: "text-default-400 font-medium",
-                            value: "text-white font-bold  text-xs",
-                            popoverContent: "bg-brand-blue border border-white/10 rounded-2xl",
+                            base: "w-full",
+                            listboxWrapper: "text-foreground",
+                            popoverContent: "bg-content1 text-foreground border border-default-200 rounded-2xl",
                           }}
-                          popoverProps={{ shouldCloseOnBlur: false }}
+                          inputProps={{
+                            classNames: {
+                              inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                              label: "text-default-500 font-medium",
+                              input: "text-foreground font-bold text-xs placeholder:text-default-400",
+                            },
+                          }}
+                          popoverProps={{ shouldCloseOnBlur: false, placement: "bottom-start" }}
                         >
-                          {products.map((product: any) => (
-                            <SelectItem key={product._id} value={product._id} className="text-white hover:bg-white/5 rounded-xl">
+                          {(product: any) => (
+                            <AutocompleteItem key={product._id} textValue={product.name} className="text-foreground hover:bg-default-100 rounded-xl">
                               {product.name}
-                            </SelectItem>
-                          ))}
-                        </Select>
+                            </AutocompleteItem>
+                          )}
+                        </Autocomplete>
                         <Select
                           label="Variant Specification"
                           variant="flat"
@@ -1287,14 +1311,15 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         }}
                         classNames={{
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                          label: "text-default-400 font-medium",
-                          value: "text-white font-bold  text-xs",
-                          popoverContent: "bg-brand-blue border border-white/10 rounded-2xl",
+                          label: "text-default-500 font-medium",
+                          value: "text-foreground font-bold text-xs",
+                          popoverContent: "bg-content1 text-foreground border border-default-200 rounded-2xl",
+                          listbox: "text-foreground",
                         }}
                         popoverProps={{ shouldCloseOnBlur: false }}
                       >
                         {ports.map((port: any) => (
-                          <SelectItem key={port._id} value={port._id} className="text-white hover:bg-white/5 rounded-xl">
+                          <SelectItem key={port._id} value={port._id} className="text-foreground hover:bg-default-100 rounded-xl">
                             {port.name} ({port.loCode})
                           </SelectItem>
                         ))}
@@ -1308,8 +1333,8 @@ export function ImportsWorkspace({ mode = "all" }: { mode?: ImportTab }) {
                         onValueChange={(value) => setCreateForm((prev) => ({ ...prev, portName: value }))}
                         classNames={{
                           inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                          label: "text-default-400 font-medium",
-                          input: "text-white font-bold  text-sm placeholder:text-white/20"
+                          label: "text-default-500 font-medium",
+                          input: "text-foreground font-bold text-sm placeholder:text-default-400"
                         }}
                       />
                     )}

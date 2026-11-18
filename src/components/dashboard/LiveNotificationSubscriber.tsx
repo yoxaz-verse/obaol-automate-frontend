@@ -16,12 +16,27 @@ type LiveNotification = {
   [key: string]: unknown;
 };
 
+type WorkflowUpdate = {
+  eventId: string;
+  entityType: "INQUIRY" | "ORDER" | "DOCUMENT";
+  entityId: string;
+  parentEntityIds?: { enquiryId?: string; orderId?: string };
+  changedResources?: string[];
+};
+
+const workflowQueryPrefixes = new Set([
+  "enquiry", "enquiries", "order", "orders", "order-enquiry", "trade-documents",
+  "trade-document-readiness", "seller-inventories", "seller-reservations", "notifications",
+  "dashboard-summary", "dashboard-metrics",
+]);
+
 const streamUrl = () => `${String(baseUrl).replace(/\/+$/, "")}${notificationRoutes.stream}`;
 
 export default function LiveNotificationSubscriber({ userId }: { userId?: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const desktopNotificationIds = useRef(new Set<string>());
+  const workflowEventIds = useRef(new Set<string>());
 
   useEffect(() => {
     if (!userId) return;
@@ -73,9 +88,55 @@ export default function LiveNotificationSubscriber({ userId }: { userId?: string
       }
     };
 
+    const handleWorkflowUpdate = (event: MessageEvent<string>) => {
+      try {
+        const update = JSON.parse(event.data) as WorkflowUpdate;
+        if (!update?.eventId || workflowEventIds.current.has(update.eventId)) return;
+        workflowEventIds.current.add(update.eventId);
+        if (workflowEventIds.current.size > 500) {
+          const oldestId = workflowEventIds.current.values().next().value;
+          if (oldestId) workflowEventIds.current.delete(oldestId);
+        }
+        const ids = new Set([
+          update.entityId,
+          update.parentEntityIds?.enquiryId,
+          update.parentEntityIds?.orderId,
+        ].filter(Boolean));
+        void queryClient.invalidateQueries({
+          predicate: (query) => {
+            const key = query.queryKey;
+            const prefix = String(key[0] || "");
+            if (!workflowQueryPrefixes.has(prefix)) return false;
+            if (["enquiry", "order", "order-enquiry"].includes(prefix) && key.length > 1) {
+              return key.some((part) => ids.has(String(part)));
+            }
+            return true;
+          },
+          refetchType: "active",
+        });
+        window.dispatchEvent(new CustomEvent("obaol:workflow-update", { detail: update }));
+      } catch {
+        void queryClient.invalidateQueries({
+          predicate: (query) => workflowQueryPrefixes.has(String(query.queryKey[0] || "")),
+          refetchType: "active",
+        });
+      }
+    };
+
+    const handleSyncRequired = () => {
+      void queryClient.invalidateQueries({
+        predicate: (query) => workflowQueryPrefixes.has(String(query.queryKey[0] || "")),
+        refetchType: "active",
+      });
+    };
+
     source.addEventListener("notification", handleNotification as EventListener);
+    source.addEventListener("workflow-update", handleWorkflowUpdate as EventListener);
+    source.addEventListener("sync-required", handleSyncRequired);
     return () => {
       source.removeEventListener("notification", handleNotification as EventListener);
+      source.removeEventListener("workflow-update", handleWorkflowUpdate as EventListener);
+      source.removeEventListener("sync-required", handleSyncRequired);
       source.close();
     };
   }, [queryClient, router, userId]);

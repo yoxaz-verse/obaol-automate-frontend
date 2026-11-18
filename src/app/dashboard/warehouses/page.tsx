@@ -19,6 +19,8 @@ import AuthContext from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { OfferingShareDialog } from "@/components/referrals/OfferingShareDialog";
+import { FaWhatsapp } from "react-icons/fa";
+import { warehouseWhatsAppHref } from "@/utils/warehouseContact";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Warehouse {
@@ -26,6 +28,7 @@ interface Warehouse {
     name: string;
     contactPhone?: string;
     contactPhoneSecondary?: string;
+    whatsappPhone?: string;
     address?: string;
     category?: string;
     allowedCategoryIds?: string[];
@@ -51,6 +54,7 @@ const EMPTY_WAREHOUSE = {
     name: "",
     contactPhone: "",
     contactPhoneSecondary: "",
+    whatsappPhone: "",
     address: "",
     category: "GENERAL",
     allowedCategoryIds: [] as string[],
@@ -219,6 +223,7 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
             name: wh.name,
             contactPhone: wh.contactPhone || "",
             contactPhoneSecondary: wh.contactPhoneSecondary || "",
+            whatsappPhone: wh.whatsappPhone || "",
             address: wh.address || "",
             category: wh.category || "GENERAL",
             allowedCategoryIds: Array.isArray(wh.allowedCategoryIds) ? wh.allowedCategoryIds : [],
@@ -376,17 +381,35 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                                     )}
                                                     <div className="pt-2">
                                                         {wh.isActive && wh.listingType === "RENTAL" && wh.isRentalActive && wh.listingState !== "DRAFT" && <div className="mb-2"><OfferingShareDialog offeringType="WAREHOUSE" offeringId={wh._id} title={wh.name} rate={wh.storageRatePerUnit} formattedRate={formatRate(Number(wh.storageRatePerUnit || 0))} unit={wh.unit || "MT"} buttonClassName="w-full" /></div>}
-                                                        <Button
-                                                            color="warning"
-                                                            size="sm"
-                                                            fullWidth
-                                                            isDisabled={!String(wh.contactPhone || "").trim()}
-                                                            onPress={() => contactWarehouse(wh)}
-                                                            startContent={<FiPhoneCall size={14} />}
-                                                            className="font-bold"
-                                                        >
-                                                            {wh.contactPhone ? "Contact" : "Contact unavailable"}
-                                                        </Button>
+                                                        <div className="grid gap-2 sm:grid-cols-2">
+                                                            <Button
+                                                                color="warning"
+                                                                size="sm"
+                                                                fullWidth
+                                                                isDisabled={!String(wh.contactPhone || "").trim()}
+                                                                onPress={() => contactWarehouse(wh)}
+                                                                startContent={<FiPhoneCall size={14} />}
+                                                                className="font-bold"
+                                                            >
+                                                                {wh.contactPhone ? "Contact" : "Contact unavailable"}
+                                                            </Button>
+                                                            {warehouseWhatsAppHref(wh.name, wh.whatsappPhone) ? (
+                                                                <Button
+                                                                    as="a"
+                                                                    href={warehouseWhatsAppHref(wh.name, wh.whatsappPhone)}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    color="success"
+                                                                    variant="flat"
+                                                                    size="sm"
+                                                                    fullWidth
+                                                                    startContent={<FaWhatsapp size={15} />}
+                                                                    className="font-bold"
+                                                                >
+                                                                    Contact on WhatsApp
+                                                                </Button>
+                                                            ) : null}
+                                                        </div>
                                                     </div>
                                                 </CardBody>
                                             </Card>
@@ -519,13 +542,24 @@ export function WarehousesWorkspace({ mode = "owned" }: { mode?: "owned" | "oper
                                 </SelectItem>
                             </Select>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-xs font-bold text-foreground pl-0.5">Primary Contact <span className="text-danger-500">*</span></label>
                                 <Input
                                     placeholder="e.g. +919876543210"
                                     value={warehouseForm.contactPhone}
                                     onValueChange={(v) => setWarehouseForm(f => ({ ...f, contactPhone: v }))}
+                                    classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold text-foreground pl-0.5">WhatsApp Number</label>
+                                <Input
+                                    placeholder="Optional, e.g. +919876543210"
+                                    value={warehouseForm.whatsappPhone}
+                                    onValueChange={(v) => setWarehouseForm(f => ({ ...f, whatsappPhone: v }))}
+                                    type="tel"
+                                    inputMode="tel"
                                     classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
                                 />
                             </div>

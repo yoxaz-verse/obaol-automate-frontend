@@ -8,6 +8,9 @@ test("validates geographic coordinate ranges", () => {
   assert.equal(isValidCoordinate(-91, 76.28), false);
   assert.equal(isValidCoordinate(9.98, 181), false);
   assert.equal(isValidCoordinate("not-a-number", 76.28), false);
+  assert.equal(isValidCoordinate(null, null), false);
+  assert.equal(isValidCoordinate("", ""), false);
+  assert.equal(isValidCoordinate(0, 0), false);
 });
 
 test("normalizes a partial saved location", () => {
@@ -27,6 +30,8 @@ test("normalizes a partial saved location", () => {
 
 test("rejects incomplete saved locations", () => {
   assert.equal(toStructuredLocation({ latitude: 9.98 }), null);
+  assert.equal(toStructuredLocation({ latitude: null, longitude: null }), null);
+  assert.equal(toStructuredLocation({ latitude: 0, longitude: 0, label: "Selected location" }), null);
   assert.equal(toStructuredLocation(null), null);
 });
 

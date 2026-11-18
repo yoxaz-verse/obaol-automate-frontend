@@ -16,6 +16,22 @@ test("seller and buyer actions are gated by persisted decisions", () => {
   assert.match(page, /!supplierResponseSubmitted && canBuyerRevision/);
 });
 
+test("mixed seller responses use an explicit decision per revision item", () => {
+  assert.match(page, /decision\?: "ACCEPTED" \| "COUNTERED"/);
+  assert.match(page, /decision: item\.decision/);
+  assert.match(page, /acknowledged: item\.decision === "ACCEPTED"/);
+  assert.match(page, /item\.key === "RATE" && item\.decision === "COUNTERED"/);
+  assert.match(page, /item\.key === "PAYMENT_TERMS" && item\.decision === "COUNTERED"/);
+  assert.match(page, /item\.key === "DELIVERY_TIMELINE" && item\.decision === "COUNTERED"/);
+});
+
+test("accept and counter controls update only their own item decision", () => {
+  assert.match(page, /decision: "ACCEPTED", acknowledged: true/);
+  assert.match(page, /decision: "COUNTERED", acknowledged: false/);
+  assert.match(page, /if \(reply\.decision === "ACCEPTED"\) return true/);
+  assert.match(page, /if \(reply\.decision !== "COUNTERED"\) return false/);
+});
+
 test("closed rounds are read-only and offer buyer redo", () => {
   assert.match(page, /This round is read-only/);
   assert.match(page, />\s*Redo Revision\s*</);

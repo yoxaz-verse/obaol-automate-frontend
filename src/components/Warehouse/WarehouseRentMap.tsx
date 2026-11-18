@@ -5,7 +5,10 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@nextui-org/react";
+import { FaWhatsapp } from "react-icons/fa";
+import { FiPhoneCall } from "react-icons/fi";
 import { warehouseMarkerColors } from "@/utils/mapTheme";
+import { warehouseWhatsAppHref } from "@/utils/warehouseContact";
 
 export type WarehouseMapItem = {
   _id: string;
@@ -15,6 +18,7 @@ export type WarehouseMapItem = {
   unit?: "KG" | "MT";
   contactPhone?: string;
   contactPhoneSecondary?: string;
+  whatsappPhone?: string;
   location?: {
     latitude?: number;
     longitude?: number;
@@ -92,10 +96,12 @@ const WarehouseMarkers = React.memo(function WarehouseMarkers({
 }) {
   return (
     <>
-      {warehouses.map((warehouse) => (
-        <Marker key={warehouse._id} position={[warehouse.lat, warehouse.lng]} icon={mkWarehouseIcon(warehouse.color)}>
-          <Popup className="tactical-popup">
-            <div className="themed-map-popup min-w-[220px] space-y-3 rounded-lg border p-2">
+      {warehouses.map((warehouse) => {
+        const whatsAppHref = warehouseWhatsAppHref(warehouse.name, warehouse.whatsappPhone);
+        return (
+          <Marker key={warehouse._id} position={[warehouse.lat, warehouse.lng]} icon={mkWarehouseIcon(warehouse.color)}>
+            <Popup className="tactical-popup">
+              <div className="themed-map-popup min-w-[220px] space-y-3 rounded-lg border p-2">
               <div className="space-y-1">
                 <div className="font-mono text-[9px] font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">
                   W_Node_{warehouse._id.slice(-4)}
@@ -116,9 +122,26 @@ const WarehouseMarkers = React.memo(function WarehouseMarkers({
                 isDisabled={!warehouse.contactPhone}
                 onPress={() => onContact(warehouse)}
                 className="font-black uppercase tracking-wider text-[10px]"
+                startContent={<FiPhoneCall />}
               >
                 Contact
               </Button>
+              {whatsAppHref ? (
+                <Button
+                  as="a"
+                  href={whatsAppHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="success"
+                  variant="flat"
+                  size="sm"
+                  fullWidth
+                  className="font-black uppercase tracking-wider text-[10px]"
+                  startContent={<FaWhatsapp />}
+                >
+                  Contact on WhatsApp
+                </Button>
+              ) : null}
               {showBookNow ? (
                 <Button
                   color="default"
@@ -131,10 +154,11 @@ const WarehouseMarkers = React.memo(function WarehouseMarkers({
                   Book Now (Coming Soon)
                 </Button>
               ) : null}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
     </>
   );
 });

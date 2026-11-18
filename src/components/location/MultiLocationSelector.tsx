@@ -6,6 +6,7 @@ import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-lea
 import L from "leaflet";
 import { FiMapPin, FiSearch } from "react-icons/fi";
 import type { LocationSlot, StructuredLocation } from "@/types/location";
+import { DEFAULT_INDIA_CENTER, DEFAULT_INDIA_ZOOM, isValidCoordinate } from "@/types/location";
 import "leaflet/dist/leaflet.css";
 
 type Props = {
@@ -35,9 +36,10 @@ function FitPoints({ slots }: { slots: LocationSlot[] }) {
   const signature = slots.map(slot => slot.value ? `${slot.value.latitude},${slot.value.longitude}` : "").join("|");
   useEffect(() => {
     setTimeout(() => map.invalidateSize(), 0);
-    const points = slots.flatMap(slot => slot.value ? [[slot.value.latitude, slot.value.longitude] as [number, number]] : []);
+    const points = slots.flatMap(slot => slot.value && isValidCoordinate(slot.value.latitude, slot.value.longitude) ? [[slot.value.latitude, slot.value.longitude] as [number, number]] : []);
     if (points.length === 1) map.setView(points[0], 13, { animate: true });
     else if (points.length > 1) map.fitBounds(points, { padding: [45, 45], maxZoom: 13, animate: true });
+    else map.setView(DEFAULT_INDIA_CENTER, DEFAULT_INDIA_ZOOM, { animate: false });
   }, [map, signature, slots]);
   return null;
 }
@@ -87,8 +89,8 @@ export default function MultiLocationSelector({ slots, onChange, disabled = fals
     } finally { setBusyId(""); }
   };
   const center = useMemo<[number, number]>(() => {
-    const selected = slots.find(slot => slot.value)?.value;
-    return selected ? [selected.latitude, selected.longitude] : [20.5937, 78.9629];
+    const selected = slots.find(slot => slot.value && isValidCoordinate(slot.value.latitude, slot.value.longitude))?.value;
+    return selected ? [selected.latitude, selected.longitude] : DEFAULT_INDIA_CENTER;
   }, [slots]);
 
   return <div className="space-y-4">
@@ -104,10 +106,10 @@ export default function MultiLocationSelector({ slots, onChange, disabled = fals
     </div>
     <p className="text-xs text-default-500">Select a field above, then search or click the map to place that point.</p>
     <div className="overflow-hidden rounded-2xl border border-divider" style={{ height }}>
-      <MapContainer center={center} zoom={slots.some(slot => slot.value) ? 12 : 4} scrollWheelZoom={!disabled} dragging={!disabled} attributionControl={false} style={{ height: "100%", width: "100%" }}>
+      <MapContainer center={center} zoom={slots.some(slot => slot.value && isValidCoordinate(slot.value.latitude, slot.value.longitude)) ? 12 : DEFAULT_INDIA_ZOOM} scrollWheelZoom={!disabled} dragging={!disabled} attributionControl={false} style={{ height: "100%", width: "100%" }}>
         <FitPoints slots={slots} /><MapClick disabled={disabled || !slots[activeIndex]} onPick={(lat, lng) => reverse(slots[activeIndex].id, lat, lng)} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-        {slots.map((slot, index) => slot.value && <Marker key={slot.id} position={[slot.value.latitude, slot.value.longitude]} icon={markerIcon(index, slot.label)} draggable={!disabled} eventHandlers={{ click: () => setActiveId(slot.id), dragend: event => { const point = event.target.getLatLng(); void reverse(slot.id, point.lat, point.lng); } }} />)}
+        {slots.map((slot, index) => slot.value && isValidCoordinate(slot.value.latitude, slot.value.longitude) && <Marker key={slot.id} position={[slot.value.latitude, slot.value.longitude]} icon={markerIcon(index, slot.label)} draggable={!disabled} eventHandlers={{ click: () => setActiveId(slot.id), dragend: event => { const point = event.target.getLatLng(); void reverse(slot.id, point.lat, point.lng); } }} />)}
       </MapContainer>
     </div>
     <style jsx global>{`.multi-location-pin{background:transparent;border:0}.multi-location-pin__shape{display:grid;width:34px;height:34px;place-items:center;border:4px solid #fff;border-radius:50% 50% 50% 0;box-shadow:0 5px 16px rgba(0,0,0,.35);color:#fff;font-weight:900;transform:rotate(-45deg)}.multi-location-pin__shape span{transform:rotate(45deg)}.multi-location-pin__label{position:absolute;left:40px;top:5px;white-space:nowrap;border-radius:8px;background:rgba(17,24,39,.88);padding:3px 7px;color:#fff;font-size:11px;font-weight:700}`}</style>

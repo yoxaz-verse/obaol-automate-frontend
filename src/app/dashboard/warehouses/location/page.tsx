@@ -29,6 +29,7 @@ type WarehouseForm = {
   name: string;
   contactPhone: string;
   contactPhoneSecondary: string;
+  whatsappPhone: string;
   address: string;
   pincode: string;
   totalCapacity: number;
@@ -55,6 +56,7 @@ const EMPTY_FORM: WarehouseForm = {
   name: "",
   contactPhone: "",
   contactPhoneSecondary: "",
+  whatsappPhone: "",
   address: "",
   pincode: "",
   totalCapacity: 0,
@@ -403,7 +405,7 @@ export default function WarehouseLocationPage() {
                 }}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Input
                 label="Primary Contact Number"
                 variant="flat"
@@ -423,6 +425,21 @@ export default function WarehouseLocationPage() {
                 placeholder="e.g. +919900112233"
                 value={form.contactPhoneSecondary}
                 onValueChange={(v) => setForm((f) => ({ ...f, contactPhoneSecondary: v }))}
+                classNames={{
+                  inputWrapper: fieldBaseClass,
+                  label: fieldLabelClass,
+                  input: "text-white font-bold text-sm placeholder:text-white/35"
+                }}
+              />
+              <Input
+                label="WhatsApp Number (Optional)"
+                variant="flat"
+                placeholder="e.g. +919876543210"
+                value={form.whatsappPhone}
+                onValueChange={(v) => setForm((f) => ({ ...f, whatsappPhone: v }))}
+                type="tel"
+                inputMode="tel"
+                description="Include the international country code"
                 classNames={{
                   inputWrapper: fieldBaseClass,
                   label: fieldLabelClass,

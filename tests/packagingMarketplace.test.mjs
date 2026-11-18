@@ -10,6 +10,17 @@ test("Packaging registers the seeker, provider, and execution workspaces", () =>
   }
 });
 
+test("Associate packaging unit wizard routes inherit the provider workspace access", () => {
+  for (const path of [
+    "/dashboard/packaging/my/new/details",
+    "/dashboard/packaging/my/507f1f77bcf86cd799439011/capabilities",
+    "/dashboard/packaging/my/507f1f77bcf86cd799439011/review",
+  ]) {
+    assert.ok(getDashboardRoute(path));
+    assert.equal(canAccessDashboardRoute({ path, role: "Associate" }), true);
+  }
+});
+
 test("Packaging screens retain sealed bidding and milestone UX", () => {
   const services = readFileSync("src/app/dashboard/packaging/page.tsx", "utf8");
   const profile = readFileSync("src/app/dashboard/packaging/my/page.tsx", "utf8");
@@ -20,6 +31,8 @@ test("Packaging screens retain sealed bidding and milestone UX", () => {
   assert.match(readFileSync("src/components/packaging/PackagingDirectory.tsx", "utf8"), /<EmptyState/);
   assert.match(profile, /Submit for review/);
   assert.match(profile, /Approval queue/);
+  assert.match(readFileSync("src/components/packaging/PackagingUnitEditor.tsx", "utf8"), /Submit option for approval/);
+  assert.match(readFileSync("src/components/dashboard/Approvals/CatalogServiceApprovalQueues.tsx", "utf8"), /Packaging options/);
   assert.match(execution, /MATERIALS_CONFIRMED/);
   assert.match(execution, /READY_FOR_DISPATCH/);
 });

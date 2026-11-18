@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner, Tab, Tabs, Textarea } from "@nextui-org/react";
 import { deleteDataBody, getData, patchData } from "@/core/api/apiHandler";
-import { apiRoutes, packagingRoutes } from "@/core/api/apiRoutes";
+import { apiRoutes, financialPartnerRoutes, freightForwardingRoutes, insurancePartnerRoutes, packagingRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { LuSearch, LuClipboardCheck, LuUserCheck, LuBuilding2, LuUserCog, LuCheck, LuX, LuChevronLeft, LuChevronRight, LuCalendar, LuMail, LuPhone, LuTag, LuArrowUpRight, LuTrash2, LuFlaskConical, LuLayers3, LuSparkles } from "react-icons/lu";
 import Title from "@/components/titles";
@@ -557,22 +557,28 @@ export default function ApprovalsPage() {
     return (profiles?.data?.data?.length || 0) + (taxonomy?.data?.data?.length || 0);
   }, staleTime: 30000 });
   const catalogServiceCount = useQuery({ queryKey: ["approval-summary", "catalog-services"], queryFn: async () => {
-    const [packaging, ...catalog] = await Promise.all([getData(packagingRoutes.approvals), ...["category", "subCategory", "product", "productVariant"].map((type) => getData(apiRoutes.approvals.catalogList(type), { status: "PENDING_REVIEW", limit: 100 }))]);
-    return Number(packaging?.data?.data?.length || 0) + catalog.reduce((sum, response) => sum + Number(response?.data?.data?.length || 0), 0);
+    const [packaging, taxonomy, finance, insurance, freight, agritech, ...catalog] = await Promise.all([
+      getData(packagingRoutes.approvals), getData(packagingRoutes.taxonomy), getData(financialPartnerRoutes.approvals),
+      getData(insurancePartnerRoutes.approvals), getData(freightForwardingRoutes.approvals), getData(apiRoutes.agritechProfiles.approvals, { status: "PENDING_REVIEW" }),
+      ...["category", "subCategory", "product", "productVariant"].map((type) => getData(apiRoutes.approvals.catalogList(type), { status: "PENDING_REVIEW", limit: 100 })),
+    ]);
+    const serviceProfiles = [packaging, finance, insurance, freight, agritech].reduce((sum, response) => sum + Number(response?.data?.data?.length || 0), 0);
+    const packagingOptions = (taxonomy?.data?.data || []).filter((row: any) => row.status === "REQUESTED").length;
+    return serviceProfiles + packagingOptions + catalog.reduce((sum, response) => sum + Number(response?.data?.data?.length || 0), 0);
   }, staleTime: 30000 });
   const onboardingTotal = onboardingCounts.reduce((sum, item) => sum + Number(item.data || 0), 0);
   const items: Array<{ key: Workflow; title: string; description: string; count: number; icon: any }> = [
     { key: "onboarding", title: "Onboarding", description: "Registration and entity authorization", count: onboardingTotal, icon: LuUserCheck },
     { key: "capabilities", title: "Company Capabilities", description: "Provided and sought category changes", count: Number(capabilityCount.data || 0), icon: LuSparkles },
     { key: "labs", title: "Lab & Taxonomy", description: "Lab profiles, credentials, and taxonomy", count: Number(labCount.data || 0), icon: LuFlaskConical },
-    { key: "catalog", title: "Catalog & Service Profiles", description: "Catalog entries and service publication", count: Number(catalogServiceCount.data || 0), icon: LuLayers3 },
+    { key: "catalog", title: "Catalog & Service Profiles", description: "All catalog, option, and provider publication reviews", count: Number(catalogServiceCount.data || 0), icon: LuLayers3 },
   ];
 
   return <main className="w-full min-w-0 space-y-6 p-6 md:p-10">
     <header className="rounded-3xl border border-warning-300/30 bg-content1 p-6 shadow-sm">
       <p className="text-[10px] font-bold  tracking-[.3em] text-warning-600">Governance workspace</p>
       <h1 className="mt-2 text-3xl font-black text-foreground">Approvals</h1>
-      <p className="mt-2 max-w-3xl text-sm text-default-500">Review registration, capability, laboratory, catalog, and packaging publication requests in their proper workflow.</p>
+      <p className="mt-2 max-w-3xl text-sm text-default-500">Review registration, capability, laboratory, catalog, packaging, finance, insurance, freight, and agritech publication requests.</p>
     </header>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{items.map((item) => { const Icon = item.icon; const active = workflow === item.key; return <button key={item.key} type="button" onClick={() => router.replace(`/dashboard/approvals?workflow=${item.key}`)} className={`rounded-2xl border p-4 text-left transition ${active ? "border-warning-500 bg-warning-50 shadow-sm dark:bg-warning-900/10" : "border-default-200 bg-content1 hover:border-warning-300"}`}><div className="flex items-start justify-between gap-3"><span className={`rounded-xl p-2 ${active ? "bg-warning-500 text-white" : "bg-default-100 text-default-600"}`}><Icon size={20} /></span><Chip size="sm" color={item.count ? "warning" : "default"} variant="flat">{item.count} pending</Chip></div><h2 className="mt-4 font-bold">{item.title}</h2><p className="mt-1 text-xs text-default-500">{item.description}</p></button>; })}</div>
     <section className="rounded-3xl border border-default-200 bg-content1/70 p-4 md:p-6">

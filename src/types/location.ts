@@ -18,10 +18,27 @@ export type LocationSlot = {
   value: StructuredLocation | null;
 };
 
+export const DEFAULT_INDIA_CENTER: [number, number] = [20.5937, 78.9629];
+export const DEFAULT_INDIA_ZOOM = 5;
+
 export const isValidCoordinate = (latitude: unknown, longitude: unknown) => {
+  if (
+    latitude === null ||
+    latitude === undefined ||
+    longitude === null ||
+    longitude === undefined ||
+    typeof latitude === "boolean" ||
+    typeof longitude === "boolean" ||
+    (typeof latitude === "string" && latitude.trim() === "") ||
+    (typeof longitude === "string" && longitude.trim() === "")
+  ) {
+    return false;
+  }
   const lat = Number(latitude);
   const lng = Number(longitude);
-  return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+  if (lat === 0 && lng === 0) return false;
+  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 };
 
 export const toStructuredLocation = (value?: Partial<StructuredLocation> | null): StructuredLocation | null => {

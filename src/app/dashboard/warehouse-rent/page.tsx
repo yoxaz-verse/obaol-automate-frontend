@@ -11,9 +11,11 @@ import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { FiGrid, FiLoader, FiMap, FiMapPin, FiPhoneCall, FiSearch } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 import { LuPlus } from "react-icons/lu";
 import { motion, AnimatePresence } from "framer-motion";
 import type { WarehouseMapItem } from "@/components/Warehouse/WarehouseRentMap";
+import { warehouseWhatsAppHref } from "@/utils/warehouseContact";
 
 const WarehouseRentMap = dynamic(() => import("@/components/Warehouse/WarehouseRentMap"), {
   ssr: false,
@@ -32,6 +34,7 @@ type Warehouse = {
   isActive?: boolean;
   contactPhone?: string;
   contactPhoneSecondary?: string;
+  whatsappPhone?: string;
   location?: {
     latitude?: number;
     longitude?: number;
@@ -179,6 +182,7 @@ export default function WarehouseRentPage() {
         unit: warehouse.unit,
         contactPhone: warehouse.contactPhone,
         contactPhoneSecondary: warehouse.contactPhoneSecondary,
+        whatsappPhone: warehouse.whatsappPhone,
         location: warehouse.location,
       })),
     [filteredWarehouses]
@@ -293,6 +297,7 @@ export default function WarehouseRentPage() {
 
   const renderWarehouseCard = (warehouse: Warehouse, idx: number) => {
     const color = CATEGORY_COLOR[warehouse.category || "GENERAL"];
+    const whatsAppHref = warehouseWhatsAppHref(warehouse.name, warehouse.whatsappPhone);
 
     return (
       <motion.div key={warehouse._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04, duration: 0.22 }} whileHover={{ y: -1 }}>
@@ -345,6 +350,22 @@ export default function WarehouseRentPage() {
               >
                 Contact
               </Button>
+              {whatsAppHref ? (
+                <Button
+                  as="a"
+                  href={whatsAppHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="success"
+                  variant="flat"
+                  size="md"
+                  fullWidth
+                  className="font-bold tracking-wide text-sm rounded-xl h-11"
+                  startContent={<FaWhatsapp />}
+                >
+                  Contact on WhatsApp
+                </Button>
+              ) : null}
               {isAdmin ? (
                 <Button color="default" variant="bordered" size="md" fullWidth isDisabled className="font-bold tracking-wide text-sm rounded-xl h-11">
                   Book Now (Coming Soon)

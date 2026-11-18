@@ -169,6 +169,7 @@ export default function EnquiryDetailsPage() {
     const [revisionReplies, setRevisionReplies] = useState<Array<{
         key: string;
         acknowledged: boolean;
+        decision?: "ACCEPTED" | "COUNTERED";
         counterRate?: string;
         counterPaymentTermId?: string;
         counterDeliveryMode?: "DELIVER_TO_LOCATION" | "PRODUCT_READY" | "";
@@ -543,6 +544,11 @@ export default function EnquiryDetailsPage() {
             setRevisionReplies(currentItems.map((item: any) => ({
                 key: String(item?.key || "").toUpperCase(),
                 acknowledged: Boolean(item?.supplierAcknowledged),
+                decision: String(item?.supplierReplyStatus || "").toUpperCase() === "COUNTERED"
+                    ? "COUNTERED"
+                    : String(item?.supplierReplyStatus || "").toUpperCase() === "ACCEPTED" || item?.supplierAcknowledged
+                        ? "ACCEPTED"
+                        : undefined,
                 counterRate: item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined ? String(item.supplierCounterRate) : "",
                 counterPaymentTermId: item?.supplierCounterPaymentTermId ? String(item.supplierCounterPaymentTermId) : "",
                 counterDeliveryMode: item?.supplierCounterDeliveryMode ? String(item.supplierCounterDeliveryMode) as any : "",
@@ -1079,8 +1085,9 @@ export default function EnquiryDetailsPage() {
             return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/revision-reply`, {
             replies: revisionReplies.map((item) => ({
                 key: String(item.key || "").toUpperCase(),
-                acknowledged: item.acknowledged,
-                counterRate: item.key === "RATE" && item.acknowledged
+                decision: item.decision,
+                acknowledged: item.decision === "ACCEPTED",
+                counterRate: item.key === "RATE" && item.decision === "COUNTERED"
                     ? (() => {
                             const raw = String(item.counterRate ?? "").trim();
                             if (!raw) return undefined;
@@ -1088,13 +1095,13 @@ export default function EnquiryDetailsPage() {
                             return Number.isNaN(parsed) ? undefined : parsed;
                         })()
                         : undefined,
-                counterPaymentTermId: item.key === "PAYMENT_TERMS" && item.acknowledged
+                counterPaymentTermId: item.key === "PAYMENT_TERMS" && item.decision === "COUNTERED"
                     ? (String(item.counterPaymentTermId || "").trim() || undefined)
                     : undefined,
-                counterDeliveryMode: item.key === "DELIVERY_TIMELINE" && item.acknowledged
+                counterDeliveryMode: item.key === "DELIVERY_TIMELINE" && item.decision === "COUNTERED"
                     ? (String(item.counterDeliveryMode || "").trim() || undefined)
                     : undefined,
-                counterDeliveryDate: item.key === "DELIVERY_TIMELINE" && item.acknowledged
+                counterDeliveryDate: item.key === "DELIVERY_TIMELINE" && item.decision === "COUNTERED"
                     ? (String(item.counterDeliveryDate || "").trim() || undefined)
                     : undefined,
                 })),
@@ -1113,6 +1120,7 @@ export default function EnquiryDetailsPage() {
                 setRevisionReplies(savedItems.map((item: any) => ({
                     key: String(item?.key || "").toUpperCase(),
                     acknowledged: Boolean(item?.supplierAcknowledged),
+                    decision: String(item?.supplierReplyStatus || "").toUpperCase() === "COUNTERED" ? "COUNTERED" : "ACCEPTED",
                     counterRate: item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined ? String(item.supplierCounterRate) : "",
                     counterPaymentTermId: item?.supplierCounterPaymentTermId ? String(item.supplierCounterPaymentTermId) : "",
                     counterDeliveryMode: item?.supplierCounterDeliveryMode ? String(item.supplierCounterDeliveryMode) as any : "",
@@ -1890,11 +1898,11 @@ export default function EnquiryDetailsPage() {
         !canPerformAction ||
         Boolean(actionStatus[actionKey]) ||
         (actionKey === "QUOTATION_CREATED" && !quotationConfigReady);
-    const quotationSignatureMissing = quotationReadiness?.reasonCode === "SIGNATURE_REQUIRED";
+    const quotationSignatureWarning = quotationReadiness?.signatureWarning || null;
     const quotationConfigurationMessage = isQuotationReadinessError
         ? "Quotation readiness could not be verified. Please refresh the page and try again."
-        : quotationSignatureMissing
-            ? `${(quotationReadiness?.missingSignatures || []).map((item: any) => item.companyName).join(" and ")} must configure an authorized document signature before the quotation can be issued.`
+        : quotationSignatureWarning
+            ? quotationSignatureWarning.message
         : isSystemAdmin
             ? "Quotation creation is unavailable because the OBAOL company configuration is missing or invalid. Select a valid company to continue."
             : "Quotation creation is temporarily unavailable due to system configuration. Please contact an administrator.";
@@ -2198,6 +2206,8 @@ export default function EnquiryDetailsPage() {
         const key = String(revisionItem?.key || "").toUpperCase();
         const reply = revisionReplies.find((item) => String(item?.key || "").toUpperCase() === key);
         if (!reply) return false;
+        if (reply.decision === "ACCEPTED") return true;
+        if (reply.decision !== "COUNTERED") return false;
         if (key === "RATE" && String(reply.counterRate || "").trim()) {
             return Number.isFinite(Number(reply.counterRate)) && Number(reply.counterRate) > 0;
         }
@@ -2205,7 +2215,7 @@ export default function EnquiryDetailsPage() {
         if (key === "DELIVERY_TIMELINE" && (reply.counterDeliveryMode || reply.counterDeliveryDate)) {
             return Boolean(reply.counterDeliveryMode && reply.counterDeliveryDate);
         }
-        return Boolean(reply.acknowledged);
+        return false;
     });
     const revisionRoleStatus = (() => {
         if (isRevisionDraft) return "New Revision Draft";
@@ -3042,7 +3052,7 @@ export default function EnquiryDetailsPage() {
                                     {draftQuotationError}
                                 </div>
                             )}
-                            {(!quotationConfigReady || quotationSignatureMissing) && (quotationReadiness || isQuotationReadinessError) && displayActions.includes("QUOTATION_CREATED") && (
+                            {(!quotationConfigReady || quotationSignatureWarning) && (quotationReadiness || isQuotationReadinessError) && displayActions.includes("QUOTATION_CREATED") && (
                                 <div className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-[11px] font-semibold text-warning-700 dark:text-warning-300">
                                     <div>{quotationConfigurationMessage}</div>
                                     {isSystemAdmin && (
@@ -3188,6 +3198,7 @@ export default function EnquiryDetailsPage() {
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <Select
                                                             label="Delivery method"
+                                                            labelPlacement="outside"
                                                             variant="bordered"
                                                             placeholder="Select milestone"
                                                             selectedKeys={clarificationDeliveryMode ? [clarificationDeliveryMode] : []}
@@ -3195,10 +3206,11 @@ export default function EnquiryDetailsPage() {
                                                                 const value = Array.from(keys)[0] as string | undefined;
                                                                 setClarificationDeliveryMode((value as any) || "");
                                                             }}
+                                                            popoverProps={{ classNames: { content: "min-w-[220px]" } }}
                                                             classNames={{
-                                                                label: "font-black  text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
-                                                                trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-14 shadow-inner",
-                                                                value: "font-black text-xs "
+                                                                label: "font-black text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
+                                                                trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-12 shadow-inner",
+                                                                value: "font-black text-xs"
                                                             }}
                                                         >
                                                             <SelectItem key="DELIVER_TO_LOCATION">DELIVER TO LOCATION</SelectItem>
@@ -3207,13 +3219,14 @@ export default function EnquiryDetailsPage() {
                                                         <Input
                                                             type="date"
                                                             label="Precision Date"
+                                                            labelPlacement="outside"
                                                             variant="bordered"
                                                             value={clarificationDeliveryDate}
                                                             onValueChange={setClarificationDeliveryDate}
                                                             classNames={{
-                                                                label: "font-black  text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
-                                                                inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-14 shadow-inner",
-                                                                input: "font-black text-xs "
+                                                                label: "font-black text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
+                                                                inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-12 shadow-inner",
+                                                                input: "font-black text-xs"
                                                             }}
                                                         />
                                                     </div>
@@ -3222,6 +3235,7 @@ export default function EnquiryDetailsPage() {
                                                     <div className="max-w-md">
                                                         <Select
                                                             label="Requested Payment Term"
+                                                            labelPlacement="outside"
                                                             variant="bordered"
                                                             placeholder="Select payment term"
                                                             selectedKeys={clarificationPaymentTermId ? [clarificationPaymentTermId] : []}
@@ -3229,9 +3243,10 @@ export default function EnquiryDetailsPage() {
                                                                 const value = Array.from(keys)[0] as string | undefined;
                                                                 setClarificationPaymentTermId(value || "");
                                                             }}
+                                                            popoverProps={{ classNames: { content: "min-w-[240px]" } }}
                                                             classNames={{
-                                                                label: "font-black  text-[10px] tracking-widest text-success-600 mb-1 pl-1",
-                                                                trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-success transition-all h-14 shadow-inner",
+                                                                label: "font-black text-[10px] tracking-widest text-success-600 mb-1 pl-1",
+                                                                trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-success transition-all h-12 shadow-inner",
                                                                 value: "font-black text-xs",
                                                             }}
                                                         >
@@ -3325,6 +3340,7 @@ export default function EnquiryDetailsPage() {
                                                 {revisionItems.map((item: any) => {
                                                     const itemKey = String(item.key || "").toUpperCase();
                                                     const reply = revisionReplies.find((r) => r.key === itemKey) || {
+                                                        decision: undefined,
                                                         acknowledged: false,
                                                         counterRate: "",
                                                         counterPaymentTermId: "",
@@ -3392,14 +3408,14 @@ export default function EnquiryDetailsPage() {
                                                                             <div className="flex flex-wrap gap-2">
                                                                                 <Button
                                                                                     size="sm"
-                                                                                    variant={reply.acknowledged && !reply.counterRate ? "solid" : "flat"}
+                                                                                    variant={reply.decision === "ACCEPTED" ? "solid" : "flat"}
                                                                                     color="success"
                                                                                 className="font-black  tracking-widest text-[10px] px-4 h-8 rounded-xl"
                                                                                 onPress={() => {
                                                                                     setRevisionReplies((prev) => {
                                                                                         const existing = prev.find((r) => r.key === itemKey);
-                                                                                        if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
-                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" } : r);
+                                                                                        if (!existing) return [...prev, { key: itemKey, decision: "ACCEPTED", acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, decision: "ACCEPTED", acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" } : r);
                                                                                     });
                                                                                     setRevisionConfirmError("");
                                                                                 }}
@@ -3408,14 +3424,14 @@ export default function EnquiryDetailsPage() {
                                                                                 </Button>
                                                                                 <Button
                                                                                     size="sm"
-                                                                                    variant={reply.counterRate ? "solid" : "flat"}
+                                                                                    variant={reply.decision === "COUNTERED" ? "solid" : "flat"}
                                                                                     color="warning"
                                                                                 className="font-black  tracking-widest text-[10px] px-4 h-8 rounded-xl"
                                                                                 onPress={() => {
                                                                                     setRevisionReplies((prev) => {
                                                                                         const existing = prev.find((r) => r.key === itemKey);
-                                                                                        if (!existing) return [...prev, { key: itemKey, acknowledged: false, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
-                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: false } : r);
+                                                                                        if (!existing) return [...prev, { key: itemKey, decision: "COUNTERED", acknowledged: false, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, decision: "COUNTERED", acknowledged: false } : r);
                                                                                     });
                                                                                     setRevisionConfirmError("");
                                                                                 }}
@@ -3434,8 +3450,8 @@ export default function EnquiryDetailsPage() {
                                                                                 onValueChange={(val) => {
                                                                                     setRevisionReplies((prev) => {
                                                                                         const existing = prev.find((r) => r.key === itemKey);
-                                                                                        if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: val }];
-                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterRate: val } : r);
+                                                                                        if (!existing) return [...prev, { key: itemKey, decision: "COUNTERED", acknowledged: false, counterRate: val }];
+                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, decision: "COUNTERED", acknowledged: false, counterRate: val } : r);
                                                                                     });
                                                                                     setRevisionConfirmError("");
                                                                                 }}
@@ -3452,15 +3468,15 @@ export default function EnquiryDetailsPage() {
                                                                             <div className="flex flex-wrap gap-2">
                                                                                 <Button
                                                                                     size="sm"
-                                                                                    variant={reply.acknowledged && ((itemKey === "PAYMENT_TERMS" && !reply.counterPaymentTermId) || (itemKey === "DELIVERY_TIMELINE" && !reply.counterDeliveryMode && !reply.counterDeliveryDate)) ? "solid" : "flat"}
+                                                                                    variant={reply.decision === "ACCEPTED" ? "solid" : "flat"}
                                                                                     color="success"
                                                                                     className="font-black  tracking-widest text-[10px] px-4 h-8 rounded-xl"
                                                                                     onPress={() => {
                                                                                         setRevisionReplies((prev) => {
                                                                                             const existing = prev.find((r) => r.key === itemKey);
-                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                            if (!existing) return [...prev, { key: itemKey, decision: "ACCEPTED", acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
                                                                                             return prev.map((r) => r.key === itemKey
-                                                                                                ? { ...r, acknowledged: true, counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }
+                                                                                                ? { ...r, decision: "ACCEPTED", acknowledged: true, counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }
                                                                                                 : r);
                                                                                         });
                                                                                         setRevisionConfirmError("");
@@ -3470,14 +3486,14 @@ export default function EnquiryDetailsPage() {
                                                                                 </Button>
                                                                                 <Button
                                                                                     size="sm"
-                                                                                    variant={(itemKey === "PAYMENT_TERMS" && Boolean(reply.counterPaymentTermId)) || (itemKey === "DELIVERY_TIMELINE" && Boolean(reply.counterDeliveryMode || reply.counterDeliveryDate)) ? "solid" : "flat"}
+                                                                                    variant={reply.decision === "COUNTERED" ? "solid" : "flat"}
                                                                                     color="warning"
                                                                                     className="font-black  tracking-widest text-[10px] px-4 h-8 rounded-xl"
                                                                                     onPress={() => {
                                                                                         setRevisionReplies((prev) => {
                                                                                             const existing = prev.find((r) => r.key === itemKey);
-                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: false, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
-                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: false } : r);
+                                                                                            if (!existing) return [...prev, { key: itemKey, decision: "COUNTERED", acknowledged: false, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, decision: "COUNTERED", acknowledged: false } : r);
                                                                                         });
                                                                                         setRevisionConfirmError("");
                                                                                     }}
@@ -3489,15 +3505,22 @@ export default function EnquiryDetailsPage() {
                                                                                 <Select
                                                                                     size="sm"
                                                                                     label="Counter Payment Term"
+                                                                                    labelPlacement="outside"
                                                                                     variant="bordered"
                                                                                     placeholder="Select alternative term"
                                                                                     selectedKeys={reply.counterPaymentTermId ? [reply.counterPaymentTermId] : []}
+                                                                                    popoverProps={{ classNames: { content: "min-w-[240px]" } }}
+                                                                                    classNames={{
+                                                                                        label: "font-black text-[10px] tracking-widest text-default-400 pb-1",
+                                                                                        trigger: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-11 shadow-inner",
+                                                                                        value: "text-xs font-bold text-foreground",
+                                                                                    }}
                                                                                     onSelectionChange={(keys) => {
                                                                                         const value = Array.from(keys)[0] as string | undefined;
                                                                                         setRevisionReplies((prev) => {
                                                                                             const existing = prev.find((r) => r.key === itemKey);
-                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: value || "", counterDeliveryMode: "", counterDeliveryDate: "" }];
-                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterPaymentTermId: value || "" } : r);
+                                                                                            if (!existing) return [...prev, { key: itemKey, decision: "COUNTERED", acknowledged: false, counterRate: "", counterPaymentTermId: value || "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, decision: "COUNTERED", acknowledged: false, counterPaymentTermId: value || "" } : r);
                                                                                         });
                                                                                         setRevisionConfirmError("");
                                                                                     }}
@@ -3510,19 +3533,26 @@ export default function EnquiryDetailsPage() {
                                                                                 </Select>
                                                                             )}
                                                                             {itemKey === "DELIVERY_TIMELINE" && (
-                                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                                <div className="flex flex-col gap-3.5 pt-1">
                                                                                     <Select
                                                                                         size="sm"
                                                                                         label="Counter Delivery Mode"
+                                                                                        labelPlacement="outside"
                                                                                         variant="bordered"
                                                                                         placeholder="Select mode"
                                                                                         selectedKeys={reply.counterDeliveryMode ? [reply.counterDeliveryMode] : []}
+                                                                                        popoverProps={{ classNames: { content: "min-w-[220px]" } }}
+                                                                                        classNames={{
+                                                                                            label: "font-black text-[10px] tracking-widest text-default-400 pb-1",
+                                                                                            trigger: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-11 shadow-inner",
+                                                                                            value: "text-xs font-bold text-foreground",
+                                                                                        }}
                                                                                         onSelectionChange={(keys) => {
                                                                                             const value = Array.from(keys)[0] as string | undefined;
                                                                                             setRevisionReplies((prev) => {
                                                                                                 const existing = prev.find((r) => r.key === itemKey);
-                                                                                                if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: (value as any) || "", counterDeliveryDate: "" }];
-                                                                                                return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterDeliveryMode: (value as any) || "" } : r);
+                                                                                                if (!existing) return [...prev, { key: itemKey, decision: "COUNTERED", acknowledged: false, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: (value as any) || "", counterDeliveryDate: "" }];
+                                                                                                return prev.map((r) => r.key === itemKey ? { ...r, decision: "COUNTERED", acknowledged: false, counterDeliveryMode: (value as any) || "" } : r);
                                                                                             });
                                                                                             setRevisionConfirmError("");
                                                                                         }}
@@ -3534,13 +3564,19 @@ export default function EnquiryDetailsPage() {
                                                                                         type="date"
                                                                                         size="sm"
                                                                                         label="Counter Date"
+                                                                                        labelPlacement="outside"
                                                                                         variant="bordered"
                                                                                         value={reply.counterDeliveryDate || ""}
+                                                                                        classNames={{
+                                                                                            label: "font-black text-[10px] tracking-widest text-default-400 pb-1",
+                                                                                            inputWrapper: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-11 shadow-inner",
+                                                                                            input: "pt-0 text-xs font-bold text-foreground",
+                                                                                        }}
                                                                                         onValueChange={(val) => {
                                                                                             setRevisionReplies((prev) => {
                                                                                                 const existing = prev.find((r) => r.key === itemKey);
-                                                                                                if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: val }];
-                                                                                                return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterDeliveryDate: val } : r);
+                                                                                                if (!existing) return [...prev, { key: itemKey, decision: "COUNTERED", acknowledged: false, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: val }];
+                                                                                                return prev.map((r) => r.key === itemKey ? { ...r, decision: "COUNTERED", acknowledged: false, counterDeliveryDate: val } : r);
                                                                                             });
                                                                                             setRevisionConfirmError("");
                                                                                         }}

@@ -8,6 +8,11 @@ const COMPANY_APPROVAL_REQUIRED = "COMPANY_APPROVAL_REQUIRED";
 const COMPANY_APPROVAL_MESSAGE = "Your company is not accepted yet. You can browse the platform, but business actions are disabled until approval.";
 
 const toAbsoluteBaseUrl = () => {
+  // Keep browser traffic same-origin in production. The Next.js proxy can
+  // return structured gateway failures instead of opaque CORS/network errors.
+  if (process.env.NODE_ENV === "production" && typeof window !== "undefined") {
+    return "/api/v1/web";
+  }
   const apiBase =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||

@@ -55,6 +55,8 @@ test("shared location selector exposes search, address, and map loading feedback
   assert.match(source, /loading: \(\) =>/);
   assert.match(source, /tileerror: \(\) =>/);
   assert.match(source, /fetch\(url, \{ signal \}\)/);
+  assert.match(source, /countryCode=\$\{encodeURIComponent\(countryCode\)\}/);
+  assert.match(source, /if \(countryCode\)/);
 });
 
 test("manual trips submit structured origin and destination route points", async () => {

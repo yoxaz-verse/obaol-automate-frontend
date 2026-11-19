@@ -3,7 +3,7 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Chip, Input, Select, SelectItem, Switch, Textarea } from "@nextui-org/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FiCheckCircle, FiClock, FiHeadphones, FiMessageCircle, FiRefreshCw, FiSend, FiStar, FiUserCheck, FiUsers } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiHeadphones, FiMessageCircle, FiPlus, FiRefreshCw, FiSend, FiStar, FiUserCheck, FiUsers, FiX } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { supportChatRoutes } from "@/core/api/apiRoutes";
@@ -38,6 +38,7 @@ export default function SupportWorkspace() {
   const [selectedId, setSelectedId] = useState("");
   const [subject, setSubject] = useState("");
   const [openingMessage, setOpeningMessage] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const [message, setMessage] = useState("");
   const [reassignTo, setReassignTo] = useState("");
   const [ratingScore, setRatingScore] = useState(0);
@@ -118,9 +119,19 @@ export default function SupportWorkspace() {
     onSuccess: async (response: any) => { if (response?.data?.data?._id) setSelectedId(response.data.data._id); await refresh(); showToastMessage({ type: "success" as const, message: success }); },
     onError: (error: any) => showToastMessage({ type: "error", message: normalizeApiError(error).message }),
   });
-  const createConversation = useMutation(action(
-    () => postData(supportChatRoutes.conversations, { subject, message: openingMessage }), "Your request is in the support queue."
-  ));
+  const createConversation = useMutation({
+    mutationFn: () => postData(supportChatRoutes.conversations, { subject, message: openingMessage }),
+    onSuccess: async (response: any) => {
+      const createdId = response?.data?.data?._id;
+      if (createdId) setSelectedId(createdId);
+      setSubject("");
+      setOpeningMessage("");
+      setIsCreating(false);
+      await refresh();
+      showToastMessage({ type: "success", message: "Your request is in the support queue." });
+    },
+    onError: (error: any) => showToastMessage({ type: "error", message: normalizeApiError(error).message }),
+  });
   const claim = useMutation(action(() => postData(supportChatRoutes.claim(selectedConversationId), {}), "Conversation claimed."));
   const resolve = useMutation(action(() => postData(supportChatRoutes.resolve(selectedConversationId), {}), "Conversation resolved."));
   const reopen = useMutation(action(() => postData(supportChatRoutes.reopen(selectedConversationId), {}), "Conversation returned to the queue."));
@@ -161,11 +172,11 @@ export default function SupportWorkspace() {
         {[{ label: "Waiting", value: waiting.length, icon: <FiClock /> }, { label: "Active", value: active.length, icon: <FiMessageCircle /> }, { label: "Online agents", value: availability.data?.onlineAgentCount || 0, icon: <FiUsers /> }, { label: "Can accept", value: availability.data?.availableAgentCount || 0, icon: <FiUserCheck /> }].map((item) => <div key={item.label} className="rounded-2xl border border-default-200 bg-content1 p-4"><div className="text-obaol-500">{item.icon}</div><div className="mt-2 text-2xl font-black">{item.value}</div><div className="text-xs font-bold  tracking-wider text-default-400">{item.label}</div></div>)}
       </div>}
 
-      {!isStaff && rows.every((row) => row.status === "RESOLVED") && <div className="rounded-3xl border border-default-200 bg-content1 p-6"><h2 className="font-black">Start a support conversation</h2><div className="mt-4 grid gap-4"><Input label="Subject" maxLength={160} value={subject} onValueChange={setSubject} classNames={{ inputWrapper: "focus-within:!border-obaol-500 focus-within:!ring-0 focus-within:!shadow-none group-data-[focus=true]:!border-obaol-500 group-data-[focus=true]:!ring-0", input: "focus:!outline-none" }} /><Textarea label="How can we help?" minRows={4} maxLength={4000} value={openingMessage} onValueChange={setOpeningMessage} classNames={{ inputWrapper: "focus-within:!border-obaol-500 focus-within:!ring-0 focus-within:!shadow-none group-data-[focus=true]:!border-obaol-500 group-data-[focus=true]:!ring-0", input: "focus:!outline-none focus:!ring-0" }} /><Button color="warning" className="font-bold sm:w-fit" startContent={<FiHeadphones />} isLoading={createConversation.isPending} isDisabled={!subject.trim() || !openingMessage.trim()} onPress={() => createConversation.mutate()}>Join support queue</Button></div></div>}
+      {!isStaff && (isCreating || rows.length === 0) && <div className="rounded-3xl border border-default-200 bg-content1 p-6"><div className="flex items-center justify-between gap-3"><h2 className="font-black">Start a support conversation</h2>{rows.length > 0 && <Button isIconOnly size="sm" variant="light" aria-label="Cancel new conversation" onPress={() => setIsCreating(false)}><FiX /></Button>}</div><div className="mt-4 grid gap-4"><Input label="Subject" maxLength={160} value={subject} onValueChange={setSubject} classNames={{ inputWrapper: "focus-within:!border-obaol-500 focus-within:!ring-0 focus-within:!shadow-none group-data-[focus=true]:!border-obaol-500 group-data-[focus=true]:!ring-0", input: "focus:!outline-none" }} /><Textarea label="How can we help?" minRows={4} maxLength={4000} value={openingMessage} onValueChange={setOpeningMessage} classNames={{ inputWrapper: "focus-within:!border-obaol-500 focus-within:!ring-0 focus-within:!shadow-none group-data-[focus=true]:!border-obaol-500 group-data-[focus=true]:!ring-0", input: "focus:!outline-none focus:!ring-0" }} /><Button color="warning" className="font-bold sm:w-fit" startContent={<FiHeadphones />} isLoading={createConversation.isPending} isDisabled={!subject.trim() || !openingMessage.trim()} onPress={() => createConversation.mutate()}>Join support queue</Button></div></div>}
 
       <div className="grid min-h-[540px] gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
         <aside className="rounded-3xl border border-default-200 bg-content1 p-4">
-          <div className="mb-3 flex items-center justify-between"><h2 className="font-black">{isStaff ? "Conversations" : "Your conversations"}</h2><Button isIconOnly size="sm" variant="light" aria-label="Refresh conversations" onPress={() => refresh()}><FiRefreshCw /></Button></div>
+          <div className="mb-3 flex items-center justify-between gap-2"><h2 className="font-black">{isStaff ? "Conversations" : "Your conversations"}</h2><div className="flex items-center gap-1">{!isStaff && rows.length > 0 && <Button isIconOnly size="sm" color="warning" variant="flat" aria-label="New support conversation" onPress={() => setIsCreating(true)}><FiPlus /></Button>}<Button isIconOnly size="sm" variant="light" aria-label="Refresh conversations" onPress={() => refresh()}><FiRefreshCw /></Button></div></div>
           <div className="max-h-[480px] space-y-2 overflow-y-auto">
             {rows.map((row) => <button key={row._id} type="button" onClick={() => setSelectedId(row._id)} className={`w-full rounded-2xl border p-3 text-left transition ${selected?._id === row._id ? "border-obaol-500 bg-obaol-500/10" : "border-default-200 hover:border-obaol-500/40"}`}><div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-bold">{row.subject}</span><Chip size="sm" color={row.status === "WAITING" ? "warning" : row.status === "ACTIVE" ? "success" : "default"} variant="flat">{row.status}</Chip></div>{row.requester && <p className="mt-1 truncate text-xs text-default-500">{row.requester.name} · {row.requester.role}</p>}<p className="mt-2 line-clamp-2 text-xs text-default-400">{row.lastMessagePreview}</p></button>)}
             {!rows.length && <p className="py-12 text-center text-sm text-default-400">No conversations yet.</p>}

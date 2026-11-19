@@ -97,7 +97,7 @@ export default function SearchableSelect({
       {multiple && selected.length ? (
         <div className="flex flex-wrap gap-1">
           {selected.slice(0, 3).map((option) => (
-            <Chip key={option.key} size="sm" variant="flat" onClose={() => toggle(option.key)}>
+            <Chip key={option.key} size="sm" variant="flat" onClose={disabled ? undefined : () => toggle(option.key)}>
               {option.label}
             </Chip>
           ))}

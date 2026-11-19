@@ -19,6 +19,7 @@ import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import TableFrame from "@/components/CurdTable/table-frame";
 import { getPresenceStatus } from "@/utils/presence";
 import UsersExportButton from "./users-export-button";
+import UserAvatar, { accountPictureUrl } from "@/components/profile/UserAvatar";
 
 interface UserTabContentProps {
   currentTable: string;
@@ -162,7 +163,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({
                 ...rest,
                 associateProfile: (
                   <div className="flex min-w-[220px] items-center gap-3 py-1">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-obaol-500/12 text-sm font-black text-obaol-700 dark:text-obaol-300">{String(item.name || "A").split(/\s+/).slice(0, 2).map((part: string) => part[0]).join("").toUpperCase()}</span>
+                    <UserAvatar name={item.name} src={accountPictureUrl("associate", item)} className="h-10 w-10 shrink-0 rounded-xl text-sm" />
                     <span className="min-w-0"><span className="block truncate font-bold text-foreground">{item.name || "Unnamed associate"}</span><span className="mt-0.5 flex items-center gap-1 truncate text-xs text-default-400"><FiMail />{item.email || "No email"}</span></span>
                   </div>
                 ),

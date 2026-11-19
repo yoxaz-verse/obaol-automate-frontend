@@ -17,3 +17,16 @@ test("freight profile supports adding and removing multiple certifications", () 
   assert.match(source, /form\.credentials\.map/);
   assert.match(source, />Add certification<\/Button>/);
 });
+
+test("freight profile draft save applies the server snapshot and reports outcomes", () => {
+  assert.match(source, /response\?\.data\?\.data\?\.draft/);
+  assert.match(source, /Freight profile draft saved/);
+  assert.match(source, /isDisabled=\{locked \|\| submit\.isPending\}/);
+});
+
+test("pending review status is presented prominently", () => {
+  assert.match(source, /Your submitted profile is read-only while it is being reviewed/);
+  const chip = readFileSync(new URL("../src/components/ui/ReviewStatusChip.tsx", import.meta.url), "utf8");
+  assert.match(chip, /Pending Review/);
+  assert.match(chip, /FiClock/);
+});

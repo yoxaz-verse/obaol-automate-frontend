@@ -217,6 +217,7 @@ const renderElement = (el: LayoutElement, data: any) => {
   }
   if (el.type === "SIGNATURE") {
     const signature = data?.issuerSignatureSnapshot || {};
+    if (!signature.imageDataUrl) return null;
     return (
       <div className="h-full w-full flex flex-col justify-end">
         {signature.imageDataUrl ? <img src={signature.imageDataUrl} alt="Authorized signature" className="mx-auto max-h-[70%] max-w-full object-contain" /> : null}

@@ -1,11 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Autocomplete, AutocompleteItem, Avatar } from "@nextui-org/react";
+import { Autocomplete, AutocompleteItem } from "@nextui-org/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateRoutes } from "@/core/api/apiRoutes";
 import InlineLoader from "@/components/ui/InlineLoader";
 import { useEffect, useRef, useState, useMemo } from "react";
+import UserAvatar, { accountPictureUrl } from "@/components/profile/UserAvatar";
 
 // 🔎 search icon
 const SearchIcon = ({
@@ -48,6 +49,7 @@ interface Associate {
   _id: string;
   name: string;
   phone?: string;
+  profilePicture?: { objectKey?: string; updatedAt?: string };
   associateCompanyId?: {
     _id: string;
     name: string;
@@ -201,13 +203,7 @@ export default function AssociateSearch({
           className="flex items-center gap-2 py-2"
         >
           <div className="flex items-center gap-2 py-2">
-            <Avatar
-              className="flex-shrink-0"
-              size="sm"
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                item.name
-              )}&background=random`}
-            />
+            <UserAvatar className="flex-shrink-0" size="sm" name={item.name} src={accountPictureUrl("associate", item)} />
             <div className="flex flex-col">
               <span className="text-small font-medium">{item.name}</span>
               <span className="text-tiny text-default-400">

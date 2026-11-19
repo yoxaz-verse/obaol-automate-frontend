@@ -83,6 +83,23 @@ test("uploaded documents require an extraction review before completion", () => 
   assert.match(workspaceUi, /application\/pdf,image\/png,image\/jpeg/);
 });
 
+test("document upload collects and submits governed metadata", () => {
+  const workspace = read("src/app/dashboard/documentation/page.tsx");
+  for (const field of ["selectedTemplateId", "issueDate", "customerId", "orderId", "notes"]) assert.match(workspace, new RegExp(`body\\.append\\(\"${field}\"`));
+  assert.match(workspace, /Published template/);
+  assert.match(workspace, /Recipient \/ customer/);
+  assert.match(workspace, /upload\.isError \? "danger" : "success"/);
+});
+
+test("continue preserves workflow state and preview failures remain actionable", () => {
+  const workspace = read("src/app/dashboard/documentation/page.tsx");
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  assert.match(workspace, /navigate\("create", \{ mode \}, false\)/);
+  assert.match(detail, /empty or invalid preview/);
+  assert.match(detail, /previewError\?\.response\?\.data\?\.message/);
+  assert.match(detail, /Template changed and the preview was refreshed/);
+});
+
 test("documentation views are URL-backed and configuration remains admin-only", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
   const workspaceUi = read("src/components/dashboard/Documentation/DocumentationUI.tsx");

@@ -225,7 +225,7 @@ export default function CustomerSupportPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5">
             {filteredContacts.map((contact) => {
               const links = supportContactLinks(contact);
               const initials = contact.label
@@ -271,14 +271,14 @@ export default function CustomerSupportPage() {
                   </div>
 
                   {!isAdmin && (
-                    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="mt-6 grid grid-cols-1 2xl:grid-cols-2 gap-3">
                       <Button
                         as="a"
                         href={links.call}
                         color="warning"
                         variant="flat"
                         className="font-bold tracking-tight h-10 rounded-xl hover:bg-obaol-500 hover:text-obaol-950 transition-all text-xs sm:text-sm"
-                        startContent={<FiPhone size={15} />}
+                        startContent={<FiPhone size={15} className="shrink-0" />}
                       >
                         Call Now
                       </Button>
@@ -288,7 +288,7 @@ export default function CustomerSupportPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="font-bold tracking-tight h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-emerald-950 transition-all text-xs sm:text-sm"
-                        startContent={<FaWhatsapp size={17} />}
+                        startContent={<FaWhatsapp size={17} className="shrink-0" />}
                       >
                         Chat on WhatsApp
                       </Button>

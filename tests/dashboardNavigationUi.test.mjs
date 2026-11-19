@@ -178,3 +178,15 @@ test("resolved support conversations expose accessible ratings and private staff
   assert.equal(routes.includes('ratingsMine: "/support/ratings/me"'), true);
   assert.equal(routes.includes("/rating`"), true);
 });
+
+test("customers can start additional support conversations and contact actions stay responsive", () => {
+  const workspace = read("../src/components/dashboard/SupportWorkspace.tsx");
+  const page = read("../src/app/dashboard/customer-support/page.tsx");
+  assert.equal(workspace.includes('aria-label="New support conversation"'), true);
+  assert.equal(workspace.includes("setSelectedId(createdId)"), true);
+  assert.equal(workspace.includes('setSubject("")'), true);
+  assert.equal(workspace.includes('setOpeningMessage("")'), true);
+  assert.equal(page.includes("md:grid-cols-2 2xl:grid-cols-3"), true);
+  assert.equal(page.includes("grid-cols-1 2xl:grid-cols-2"), true);
+  assert.equal(page.includes('className="shrink-0"'), true);
+});

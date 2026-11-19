@@ -4,7 +4,6 @@ import React, { useContext, useState } from "react";
 import dynamic from "next/dynamic";
 import AuthContext from "@/context/AuthContext";
 import {
-  Avatar as HeroAvatar,
   Card,
   CardBody,
   CardHeader,
@@ -12,11 +11,10 @@ import {
   Input,
 } from "@nextui-org/react";
 
-const Avatar = HeroAvatar as any;
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import dayjs from "dayjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteDataBody, getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractCount, extractList } from "@/core/data/queryUtils";
@@ -25,6 +23,7 @@ import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, 
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardField, DashboardPage, DashboardPanel, DashboardSectionHeader, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 import { featureFlags } from "@/config/featureFlags";
+import ProfilePictureManager from "@/components/profile/ProfilePictureManager";
 
 const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
 const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
@@ -506,7 +505,8 @@ function AccountVerificationPanel({ profile }: { profile: any }) {
 }
 
 export default function ProfilePage() {
-  const { user } = useContext(AuthContext);
+  const { user, refreshUser } = useContext(AuthContext);
+  const queryClient = useQueryClient();
   const roleKeyRaw = user?.role?.toLowerCase() as string;
 
   if (!roleKeyRaw) return null;
@@ -535,6 +535,9 @@ export default function ProfilePage() {
       >
         {(response: any) => {
           const profile = response?.data || response;
+          const profilePictureUrl = profile?.profilePicture?.objectKey
+            ? `/v1/web/profile-pictures/${roleKey}/${profile._id}?v=${new Date(profile.profilePicture.updatedAt || 0).getTime()}`
+            : user?.profilePictureUrl;
           const associateEditableFields = new Set([
             "name", "phone", "address", "geoType", "country",
             "state", "district", "division", "pincodeEntry",
@@ -551,9 +554,7 @@ export default function ProfilePage() {
                   <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-obaol-500/10 blur-3xl" />
                   <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-                      <div className="shrink-0 rounded-2xl border db-border-subtle db-panel p-1.5 shadow-sm">
-                        <Avatar className="h-16 w-16 rounded-xl text-xl sm:h-20 sm:w-20" showFallback name={profile.name} src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || "User")}&background=18181b&color=eab308&size=256&bold=true&font-size=0.35`} />
-                      </div>
+                      <ProfilePictureManager name={profile.name} pictureUrl={profilePictureUrl} onChanged={async () => { await refreshUser(); await queryClient.invalidateQueries({ queryKey: [roleKey, user?.id] }); }} />
                       <div className="min-w-0">
                         <div className="mb-2 flex flex-wrap items-center gap-2"><DashboardStatusBadge tone="brand">{displayRole}</DashboardStatusBadge><DashboardStatusBadge tone={profile.isActive === false ? "danger" : "success"}>{profile.isActive === false ? "Inactive" : "Active"}</DashboardStatusBadge></div>
                         <h2 className="truncate text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{profile.name || "Associate"}</h2>

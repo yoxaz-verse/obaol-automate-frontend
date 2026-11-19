@@ -20,6 +20,7 @@ export type QualityLabMapItem = {
   whatsappPhone?: string;
   contactEmail?: string;
   contactPhoneSecondary?: string;
+  summary?: string;
   certificatesSummary?: string;
   capabilityStatus?: string;
   source?: string;
@@ -122,6 +123,7 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom }: Prop
                 </div>
                 {lab.contactPhone ? <div className="themed-map-popup-muted text-[11px] font-semibold">{lab.contactPhone}</div> : null}
                 {lab.contactPhoneSecondary ? <div className="themed-map-popup-muted text-[10px]">Alt: {lab.contactPhoneSecondary}</div> : null}
+                <div className="themed-map-popup-muted max-h-28 overflow-y-auto whitespace-pre-wrap break-words pr-1 text-[11px] leading-5">{lab.summary || "No public description provided."}</div>
                 {lab.certificatesSummary ? <div className="themed-map-popup-muted line-clamp-3 text-[10px]">{lab.certificatesSummary}</div> : null}
                 <div className="flex flex-wrap gap-1">
                   {lab.capabilityStatus === "LEGACY_REQUIRES_MAPPING" ? <span className="rounded-full bg-amber-100 px-2 py-1 text-[9px] font-bold text-amber-800">Requires mapping</span> : <span className="rounded-full bg-emerald-100 px-2 py-1 text-[9px] font-bold text-emerald-800">Structured</span>}
@@ -132,6 +134,7 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom }: Prop
                   <Button as="a" href={whatsAppUrl} target={whatsAppUrl ? "_blank" : undefined} rel={whatsAppUrl ? "noopener noreferrer" : undefined} isDisabled={!whatsAppUrl} size="sm" color="success" variant="flat" isIconOnly aria-label="Chat on WhatsApp" onPress={() => trackLabContact(lab._id, "WHATSAPP")}><FaWhatsapp /></Button>
                   <Button as="a" href={lab.contactEmail ? `mailto:${lab.contactEmail}` : undefined} isDisabled={!lab.contactEmail} size="sm" variant="flat" isIconOnly aria-label="Email lab" onPress={() => trackLabContact(lab._id, "EMAIL")}><FiMail /></Button>
                 </div>
+                {lab.capabilityStatus !== "LEGACY_REQUIRES_MAPPING" ? <Button as="a" href={`/dashboard/quality-labs/${lab._id}`} size="sm" color="primary" variant="flat" className="w-full">View full profile</Button> : null}
               </div>
             </Popup>
           </Marker>

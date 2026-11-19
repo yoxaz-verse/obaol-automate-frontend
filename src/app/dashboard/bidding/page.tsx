@@ -367,44 +367,37 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
 
   const handleProductInputChange = (value: string) => {
     setProductSearch(value);
-    const selected = productOptions.find((option) => option.id === String(draft.product || ""));
-    if (draft.product && value.trim().toLocaleLowerCase() !== selected?.name.trim().toLocaleLowerCase()) {
-      clearProductSelection();
-    }
   };
 
   const handleProductSelection = (key: React.Key | null) => {
     if (key == null) {
-      if (!productSearch.trim()) clearProductSelection();
+      clearProductSelection();
       return;
     }
     const selected = productOptions.find((option) => option.id === String(key));
     if (!selected) return;
-    setDraft((current: any) => ({ ...current, product: selected.id, productVariant: "" }));
+    const productChanged = String(draft.product || "") !== selected.id;
+    setDraft((current: any) => productChanged
+      ? { ...current, product: selected.id, productVariant: "" }
+      : { ...current, product: selected.id });
     setProductSearch(selected.name);
-    setVariantSearch("");
-    productInputRef.current?.blur();
+    if (productChanged) setVariantSearch("");
     clearCreateFieldError("product");
   };
 
   const handleVariantInputChange = (value: string) => {
     setVariantSearch(value);
-    const selected = variantOptions.find((option) => option.id === String(draft.productVariant || ""));
-    if (draft.productVariant && value.trim().toLocaleLowerCase() !== selected?.name.trim().toLocaleLowerCase()) {
-      setDraft((current: any) => ({ ...current, productVariant: "" }));
-    }
   };
 
   const handleVariantSelection = (key: React.Key | null) => {
     if (key == null) {
-      if (!variantSearch.trim()) setDraft((current: any) => ({ ...current, productVariant: "" }));
+      setDraft((current: any) => ({ ...current, productVariant: "" }));
       return;
     }
     const selected = variantOptions.find((option) => option.id === String(key));
     if (!selected) return;
     setDraft((current: any) => ({ ...current, productVariant: selected.id }));
     setVariantSearch(selected.name);
-    variantInputRef.current?.blur();
     clearCreateFieldError("productVariant");
   };
 
@@ -837,6 +830,7 @@ export default function BiddingPage({ fixedMode = "seller" }: { fixedMode?: Mode
                     variant="bordered"
                     isRequired
                     isDisabled={!draft.product}
+                    isLoading={Boolean(draft.product) && variantSearchPending}
                     className="md:col-span-2"
                     items={variantOptions}
                     selectedKey={draft.productVariant || null}

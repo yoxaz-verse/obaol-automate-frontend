@@ -75,13 +75,6 @@ const LuFileSignature = FiFileText;
 const LuEdit3 = FiEdit3;
 const LuCheckCircle = FiCheckCircle;
 
-type SignatureGate = {
-    state: "PENDING_VERIFICATION" | "MISSING";
-    message: string;
-    url: string;
-    ownerType?: "USER" | "COMPANY";
-};
-
 const responsibilityOwnerLabel = (value?: string) => {
     const normalized = String(value || "").trim().toLowerCase();
     if (normalized === "obaol") return "OBAOL";
@@ -148,7 +141,6 @@ export default function EnquiryDetailsPage() {
     const [acceptAttempted, setAcceptAttempted] = useState(false);
     const [acceptActionState, setAcceptActionState] = useState<AsyncActionState>("idle");
     const [acceptActionError, setAcceptActionError] = useState("");
-    const [signatureGate, setSignatureGate] = useState<SignatureGate | null>(null);
     const acceptIdempotencyKey = React.useRef("");
     const [docActionOpen, setDocActionOpen] = useState(false);
     const [docActionRule, setDocActionRule] = useState<any>(null);
@@ -852,7 +844,6 @@ export default function EnquiryDetailsPage() {
         onSuccess: () => {
             setAcceptActionState("success");
             setAcceptActionError("");
-            setSignatureGate(null);
             toast.success("Enquiry accepted successfully.");
             refreshEnquiryCaches();
             queryClient.invalidateQueries({ queryKey: ["seller-inventories", sellerCompanyId, productVariantId] });
@@ -870,22 +861,6 @@ export default function EnquiryDetailsPage() {
         },
         onError: (error: any) => {
             const message = normalizeApiError(error, "Unable to accept enquiry. Please try again.").message;
-            const data = error?.response?.data;
-            if (data?.code === "ACTIVE_SIGNATURE_REQUIRED") {
-                const suppliedUrl = String(data?.signatureManagementUrl || "");
-                setSignatureGate({
-                    state: data?.signatureState === "PENDING_VERIFICATION" ? "PENDING_VERIFICATION" : "MISSING",
-                    message,
-                    url: suppliedUrl.startsWith("/dashboard/") && !suppliedUrl.startsWith("//")
-                        ? suppliedUrl
-                        : "/dashboard/settings/signature-management",
-                    ownerType: data?.signatureOwnerType === "COMPANY" ? "COMPANY" : data?.signatureOwnerType === "USER" ? "USER" : undefined,
-                });
-                setAcceptActionState("error");
-                setAcceptActionError(message);
-                return;
-            }
-            setSignatureGate(null);
             setAcceptActionState("error");
             setAcceptActionError(message);
             toast.error(message);
@@ -1641,7 +1616,6 @@ export default function EnquiryDetailsPage() {
         if (sellerAcceptMutation.isPending) return;
         setAcceptActionState("validating");
         setAcceptActionError("");
-        setSignatureGate(null);
         setAcceptAttempted(true);
         if (!selectedWarehouseOption) {
             setAcceptActionState("error");
@@ -1937,8 +1911,8 @@ export default function EnquiryDetailsPage() {
             : "";
     const quotationConfigurationMessage = isQuotationReadinessError
         ? "Quotation readiness could not be verified. Please refresh the page and try again."
-        : quotationSignatureWarning
-            ? quotationSignatureWarning.message
+        : quotationConfigReady && (missingObaolSignature || missingSellerSignature)
+            ? "Quotation creation is available without signatures. Add verified signatures only if you want them shown on the issued documents."
         : isSystemAdmin
             ? ["CONFIG_MISSING", "CONFIG_INVALID"].includes(quotationReasonCode)
                 ? "Quotation creation is unavailable because the OBAOL company configuration is missing or invalid. Select a valid company to continue."
@@ -1988,7 +1962,6 @@ export default function EnquiryDetailsPage() {
             return;
         }
         if (actionKey === "SUPPLIER_QTY_CONFIRMED") {
-            setSignatureGate(null);
             setAcceptActionState("idle");
             setAcceptActionError("");
             setInventoryAcceptOpen(true);
@@ -3109,9 +3082,7 @@ export default function EnquiryDetailsPage() {
                                                 : "Configure OBAOL Company Signature"}
                                         </Link>
                                     )}
-                                    {isSystemAdmin && missingSellerSignature && (
-                                        <div className="mt-2 font-bold">Seller action is still required for the seller-side signature.</div>
-                                    )}
+                                    {quotationConfigReady && (missingObaolSignature || missingSellerSignature) && <div className="mt-2 font-normal">Unsigned documents omit the complete authorized-signature section.</div>}
                                 </div>
                             )}
                         </div>
@@ -5038,7 +5009,6 @@ export default function EnquiryDetailsPage() {
                             setInlineQuantity("");
                             setAcceptActionState("idle");
                             setAcceptActionError("");
-                            setSignatureGate(null);
                             acceptIdempotencyKey.current = "";
                         }
                     }}
@@ -5180,29 +5150,13 @@ export default function EnquiryDetailsPage() {
                                     setInlineQuantity("");
                                     setAcceptActionState("idle");
                                     setAcceptActionError("");
-                                    setSignatureGate(null);
                                     acceptIdempotencyKey.current = "";
                                 }}
                                 isDisabled={sellerAcceptMutation.isPending || acceptActionState === "success"}
                             >
                                 Cancel
                             </Button>
-                            {signatureGate ? <Button
-                                color="warning"
-                                className="font-bold"
-                                startContent={<FiShield />}
-                                onPress={() => {
-                                    const returnParams = new URLSearchParams(searchParams.toString());
-                                    returnParams.set("inventoryAccept", "1");
-                                    if (selectedWarehouseOption?.warehouseId) returnParams.set("warehouseId", selectedWarehouseOption.warehouseId);
-                                    const returnTo = `/dashboard/enquiries/${enquiryId}?${returnParams.toString()}`;
-                                    const params = new URLSearchParams({ returnTo });
-                                    if (signatureGate.ownerType) params.set("ownerType", signatureGate.ownerType);
-                                    router.push(`${signatureGate.url}?${params.toString()}`);
-                                }}
-                            >
-                                {signatureGate.state === "PENDING_VERIFICATION" ? "Verify signature to continue" : "Register signature to continue"}
-                            </Button> : <AsyncActionButton
+                            <AsyncActionButton
                                 intent="success"
                                 className="font-bold"
                                 onPress={handleInventoryAccept}
@@ -5219,7 +5173,7 @@ export default function EnquiryDetailsPage() {
                                     (!selectedInventory && !inlineQuantity) ||
                                     (selectedInventory && Number(selectedInventory.availableQty || 0) < requiredQty && !inlineQuantity)
                                 }
-                            />}
+                            />
                         </ModalFooter>
                     </ModalContent>
                 </Modal>

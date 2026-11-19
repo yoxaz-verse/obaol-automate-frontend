@@ -51,6 +51,17 @@ test("buying request catalog pickers use controlled debounced server search", ()
   assert.match(page, /allowsCustomValue=\{false\}/);
 });
 
+test("buying request catalog selection is owned by selection events", () => {
+  assert.match(page, /const handleProductInputChange = \(value: string\) => \{\s*setProductSearch\(value\);\s*\};/);
+  assert.match(page, /if \(key == null\) \{\s*clearProductSelection\(\);\s*return;/);
+  assert.match(page, /productChanged[\s\S]*productVariant: ""/);
+  assert.match(page, /const handleVariantInputChange = \(value: string\) => \{\s*setVariantSearch\(value\);\s*\};/);
+  assert.match(page, /if \(key == null\) \{\s*setDraft\(\(current: any\) => \(\{ \.\.\.current, productVariant: "" \}\)\);/);
+  assert.doesNotMatch(page, /productInputRef\.current\?\.blur\(\);\s*clearCreateFieldError\("product"\)/);
+  assert.doesNotMatch(page, /variantInputRef\.current\?\.blur\(\);\s*clearCreateFieldError\("productVariant"\)/);
+  assert.match(page, /isLoading=\{Boolean\(draft\.product\) && variantSearchPending\}/);
+});
+
 test("buying request modal exposes useful catalog states and flat surfaces", () => {
   assert.match(page, /Searching products\.\.\./);
   assert.match(page, /Unable to load products\./);

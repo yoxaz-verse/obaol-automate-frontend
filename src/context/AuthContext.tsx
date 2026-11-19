@@ -30,6 +30,7 @@ export interface User {
   name?: string;
   phone?: string;
   role: string;
+  profilePictureUrl?: string | null;
   associateCompanyId?: string | null;
   companyCapabilitiesConfigured?: boolean;
   providedCapabilities?: string[];

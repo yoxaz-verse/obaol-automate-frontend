@@ -32,6 +32,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSoundEffect } from "@/context/SoundContext";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
+import UserAvatar from "@/components/profile/UserAvatar";
 
 const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => {
   const { logout, user } = useContext(AuthContext);
@@ -435,9 +436,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
             >
               <DropdownTrigger>
                 <button className="group flex items-center gap-3 rounded-2xl border border-obaol-500/25 bg-gradient-to-br from-obaol-500/10 to-black/[0.02] p-1.5 pr-4 outline-none ring-0 transition-all hover:border-obaol-500/50 dark:to-white/5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-obaol-400 to-obaol-600 text-xs font-bold text-obaol-950">
-                    {username?.slice(0, 1).toUpperCase()}
-                  </div>
+                  <UserAvatar name={username} src={user?.profilePictureUrl} className="h-9 w-9 rounded-xl text-xs" />
                   <div className="flex flex-col items-start sr-only sm:not-sr-only">
                     <span className="mb-1 text-[11px] font-bold leading-none text-foreground">{username?.split('@')[0]}</span>
                     <span className="text-[9px] font-semibold leading-none text-obaol-700 opacity-80 dark:text-obaol-300">{displayRole}</span>
@@ -462,9 +461,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                   textValue="User Profile Header"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-obaol-400 to-obaol-600 flex items-center justify-center text-obaol-950 text-lg font-bold">
-                      {username?.slice(0, 1).toUpperCase()}
-                    </div>
+                    <UserAvatar name={username} src={user?.profilePictureUrl} className="h-12 w-12 rounded-2xl text-lg" />
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-foreground">{username?.split('@')[0]}</span>
                       <span className="mt-1 text-[10px] font-semibold text-obaol-700 dark:text-obaol-300">{displayRole}</span>

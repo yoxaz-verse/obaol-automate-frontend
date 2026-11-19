@@ -594,6 +594,24 @@ canvas {
     transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
   }
 
+  /* Dashboard icon contract: action icons share one optical box regardless of
+     whether an older screen still imports Feather or Lucide glyphs. Brand
+     marks can opt out with data-brand-icon. */
+  [data-dashboard-shell] :where(button, a, [role="button"]) > svg:not([data-brand-icon]),
+  [data-dashboard-shell] .doc-icon:not([data-brand-icon]) {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: 0 0 auto;
+    stroke-width: 1.75;
+    vertical-align: middle;
+  }
+
+  [data-dashboard-shell] :where(.h-10, .h-11, .h-12) > svg:not([data-brand-icon]) {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke-width: 1.75;
+  }
+
   .doc-action:focus-visible, .doc-interactive-card:focus-visible {
     outline: none;
     box-shadow: 0 0 0 2px var(--db-panel), 0 0 0 4px rgba(255, 177, 98, .65);

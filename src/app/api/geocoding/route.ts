@@ -24,6 +24,7 @@ const normalize = (row: any) => {
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const mode = params.get("mode") === "reverse" ? "reverse" : "search";
+  const requestedCountryCode = String(params.get("countryCode") || "").trim().toUpperCase();
   let url: string;
   if (mode === "reverse") {
     const latitude = Number(params.get("lat"));
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
   } else {
     const query = String(params.get("q") || "").trim().slice(0, 200);
     if (query.length < 3) return NextResponse.json({ results: [] });
-    const countryCode = String(params.get("countryCode") || "").trim().toLowerCase();
+    const countryCode = requestedCountryCode.toLowerCase();
     const countryFilter = /^[a-z]{2}$/.test(countryCode) ? `&countrycodes=${countryCode}` : "";
     url = `${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=6&q=${encodeURIComponent(query)}${countryFilter}`;
   }
@@ -44,7 +45,13 @@ export async function GET(request: NextRequest) {
     const response = await fetch(url, { headers, next: { revalidate: 300 } });
     if (!response.ok) throw new Error(`Geocoder returned ${response.status}`);
     const body = await response.json();
-    if (mode === "reverse") return NextResponse.json({ result: normalize(body) });
+    if (mode === "reverse") {
+      const result = normalize(body);
+      if (/^[A-Z]{2}$/.test(requestedCountryCode) && result.countryCode !== requestedCountryCode) {
+        return NextResponse.json({ message: `Choose a location within ${requestedCountryCode === "IN" ? "India" : requestedCountryCode}.` }, { status: 422 });
+      }
+      return NextResponse.json({ result });
+    }
     return NextResponse.json({ results: (Array.isArray(body) ? body : []).map(normalize) });
   } catch {
     return NextResponse.json({ message: "Location lookup is temporarily unavailable." }, { status: 502 });

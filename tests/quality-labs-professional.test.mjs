@@ -152,6 +152,31 @@ test("lab map fits all markers when no search point is active", async () => {
   assert.match(source, /Requires mapping/);
 });
 
+test("public lab descriptions remain visible across creation, search, map, and details", async () => {
+  const [directory, wizard, map, detail] = await Promise.all([
+    readFile(directoryPath, "utf8"),
+    readFile(wizardPath, "utf8"),
+    readFile(mapPath, "utf8"),
+    readFile(detailPath, "utf8"),
+  ]);
+  assert.match(wizard, /label="Public description"/);
+  assert.match(wizard, /minRows=\{5\}/);
+  assert.match(wizard, /Paragraphs and line breaks will be preserved/);
+  assert.match(directory, /Search names, descriptions, cities, or addresses/);
+  assert.match(directory, /expandedDescriptions/);
+  assert.match(directory, /aria-expanded=\{descriptionExpanded\}/);
+  assert.match(directory, /Show less/);
+  assert.match(directory, /Show more/);
+  assert.match(directory, /whitespace-pre-wrap break-words/);
+  assert.match(map, /summary\?: string/);
+  assert.match(map, /lab\.summary \|\| "No public description provided\."/);
+  assert.match(map, /max-h-28 overflow-y-auto whitespace-pre-wrap/);
+  assert.match(map, /View full profile/);
+  assert.match(detail, /About this laboratory/);
+  assert.match(detail, /whitespace-pre-wrap break-words/);
+  assert.match(detail, /profile\.summary \|\| "No public description provided\."/);
+});
+
 test("My Lab lists multiple profiles and only exposes aggregate contact counts", async () => {
   const source = await readFile(myLabsPath, "utf8");
   assert.match(source, /apiRoutes\.labProfiles\.mine/);

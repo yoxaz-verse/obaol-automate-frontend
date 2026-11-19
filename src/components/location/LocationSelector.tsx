@@ -94,9 +94,14 @@ export default function LocationSelector({ value, onChange, disabled = false, re
   const reverse = async (latitude: number, longitude: number) => {
     setIsResolvingAddress(true); setError(""); setResults([]); setSearchedQuery("");
     try {
-      const data = await lookup(`/api/geocoding?mode=reverse&lat=${latitude}&lng=${longitude}`);
+      const suffix = countryCode ? `&countryCode=${encodeURIComponent(countryCode)}` : "";
+      const data = await lookup(`/api/geocoding?mode=reverse&lat=${latitude}&lng=${longitude}${suffix}`);
       select(data.result);
     } catch (cause: any) {
+      if (countryCode) {
+        setError(cause?.message || "Choose a location within the supported country.");
+        return;
+      }
       const fallback = { latitude, longitude, label: "Selected location", address: query, city: "", district: "", state: "", country: "", countryCode: "", postalCode: "" };
       setMapError(""); setIsMapLoading(true); onChange(fallback); setError(cause?.message || "The pin was saved, but its address could not be resolved.");
     } finally { setIsResolvingAddress(false); }

@@ -21,7 +21,10 @@ export default function CatalogApprovalQueues() {
   const [editing, setEditing] = useState<any>(null);
   const [audit, setAudit] = useState<Record<string, any[]>>({});
   const query = useQuery({ queryKey: ["catalog-approvals", entityType, status, search], queryFn: async () => (await getData(apiRoutes.approvals.catalogList(entityType), { status, search, limit: 100 }))?.data?.data || [] });
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["catalog-approvals"] });
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["catalog-approvals"] });
+    queryClient.invalidateQueries({ queryKey: ["approval-summary", "catalog"] });
+  };
   const action = useMutation({
     mutationFn: ({ id, kind }: any) => kind === "CHAIN" ? postData(apiRoutes.approvals.catalogApproveChain(entityType, id), { notes: notes[id] || "" }) : patchData(apiRoutes.approvals.catalogAction(entityType, id), { action: kind, notes: String(notes[id] || "").trim() }),
     onSuccess: () => { showToastMessage({ type: "success", message: "Catalog review updated." }); refresh(); },

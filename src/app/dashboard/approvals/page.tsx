@@ -8,11 +8,12 @@ import { Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, Modal
 import { deleteDataBody, getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes, financialPartnerRoutes, freightForwardingRoutes, insurancePartnerRoutes, packagingRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
-import { LuSearch, LuClipboardCheck, LuUserCheck, LuBuilding2, LuUserCog, LuCheck, LuX, LuChevronLeft, LuChevronRight, LuCalendar, LuMail, LuPhone, LuTag, LuArrowUpRight, LuTrash2, LuFlaskConical, LuLayers3, LuSparkles } from "react-icons/lu";
+import { LuSearch, LuClipboardCheck, LuUserCheck, LuBuilding2, LuUserCog, LuCheck, LuX, LuChevronLeft, LuChevronRight, LuCalendar, LuMail, LuPhone, LuTag, LuArrowUpRight, LuTrash2, LuFlaskConical, LuLayers3, LuSparkles, LuBriefcase } from "react-icons/lu";
 import Title from "@/components/titles";
 import LabApprovalQueues from "@/components/dashboard/Approvals/LabApprovalQueues";
 import CompanyCapabilityApprovalQueue from "@/components/dashboard/Approvals/CompanyCapabilityApprovalQueue";
 import CatalogServiceApprovalQueues from "@/components/dashboard/Approvals/CatalogServiceApprovalQueues";
+import ServiceProfileApprovalQueues from "@/components/dashboard/Approvals/ServiceProfileApprovalQueues";
 
 type StatusFilter = "PENDING_REVIEW" | "APPROVED" | "REJECTED";
 
@@ -537,13 +538,13 @@ function OnboardingApprovalQueue() {
   );
 }
 
-type Workflow = "onboarding" | "capabilities" | "labs" | "catalog";
+type Workflow = "onboarding" | "capabilities" | "labs" | "catalog" | "services";
 
 export default function ApprovalsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const requested = String(searchParams.get("workflow") || "onboarding") as Workflow;
-  const workflow: Workflow = ["onboarding", "capabilities", "labs", "catalog"].includes(requested) ? requested : "onboarding";
+  const workflow: Workflow = ["onboarding", "capabilities", "labs", "catalog", "services"].includes(requested) ? requested : "onboarding";
   useEffect(() => { patchData(apiRoutes.notifications.markSectionRead("approvals"), {}).catch(() => undefined); }, []);
   const onboardingCounts = [
     useQuery(approvalCountOptions("associates", apiRoutes.approvals.associatesList)),
@@ -556,22 +557,25 @@ export default function ApprovalsPage() {
     const [profiles, taxonomy] = await Promise.all([getData(apiRoutes.labProfiles.approvals, { status: "PENDING_REVIEW" }), getData(apiRoutes.labProfiles.taxonomyAdmin, { status: "REQUESTED" })]);
     return (profiles?.data?.data?.length || 0) + (taxonomy?.data?.data?.length || 0);
   }, staleTime: 30000 });
-  const catalogServiceCount = useQuery({ queryKey: ["approval-summary", "catalog-services"], queryFn: async () => {
-    const [packaging, taxonomy, finance, insurance, freight, agritech, ...catalog] = await Promise.all([
+  const catalogCount = useQuery({ queryKey: ["approval-summary", "catalog"], queryFn: async () => {
+    const catalog = await Promise.all(["category", "subCategory", "product", "productVariant"].map((type) => getData(apiRoutes.approvals.catalogList(type), { status: "PENDING_REVIEW", limit: 100 })));
+    return catalog.reduce((sum, response) => sum + Number(response?.data?.meta?.total ?? response?.data?.data?.length ?? 0), 0);
+  }, staleTime: 30000 });
+  const serviceCount = useQuery({ queryKey: ["approval-summary", "services"], queryFn: async () => {
+    const [packaging, taxonomy, finance, insurance, freight, agritech] = await Promise.all([
       getData(packagingRoutes.approvals), getData(packagingRoutes.taxonomy), getData(financialPartnerRoutes.approvals),
       getData(insurancePartnerRoutes.approvals), getData(freightForwardingRoutes.approvals), getData(apiRoutes.agritechProfiles.approvals, { status: "PENDING_REVIEW" }),
-      ...["category", "subCategory", "product", "productVariant"].map((type) => getData(apiRoutes.approvals.catalogList(type), { status: "PENDING_REVIEW", limit: 100 })),
     ]);
-    const serviceProfiles = [packaging, finance, insurance, freight, agritech].reduce((sum, response) => sum + Number(response?.data?.data?.length || 0), 0);
-    const packagingOptions = (taxonomy?.data?.data || []).filter((row: any) => row.status === "REQUESTED").length;
-    return serviceProfiles + packagingOptions + catalog.reduce((sum, response) => sum + Number(response?.data?.data?.length || 0), 0);
+    const profiles = [packaging, finance, insurance, freight, agritech].reduce((sum, response) => sum + Number(response?.data?.data?.length || 0), 0);
+    return profiles + (taxonomy?.data?.data || []).filter((row: any) => row.status === "REQUESTED").length;
   }, staleTime: 30000 });
   const onboardingTotal = onboardingCounts.reduce((sum, item) => sum + Number(item.data || 0), 0);
   const items: Array<{ key: Workflow; title: string; description: string; count: number; icon: any }> = [
     { key: "onboarding", title: "Onboarding", description: "Registration and entity authorization", count: onboardingTotal, icon: LuUserCheck },
     { key: "capabilities", title: "Company Capabilities", description: "Provided and sought category changes", count: Number(capabilityCount.data || 0), icon: LuSparkles },
     { key: "labs", title: "Lab & Taxonomy", description: "Lab profiles, credentials, and taxonomy", count: Number(labCount.data || 0), icon: LuFlaskConical },
-    { key: "catalog", title: "Catalog & Service Profiles", description: "All catalog, option, and provider publication reviews", count: Number(catalogServiceCount.data || 0), icon: LuLayers3 },
+    { key: "catalog", title: "Catalog", description: "Category, product, and variant publication reviews", count: Number(catalogCount.data || 0), icon: LuLayers3 },
+    { key: "services", title: "Service Profiles", description: "Packaging, finance, insurance, freight, and agritech reviews", count: Number(serviceCount.data || 0), icon: LuBriefcase },
   ];
 
   return <main className="w-full min-w-0 space-y-6 p-6 md:p-10">
@@ -580,9 +584,9 @@ export default function ApprovalsPage() {
       <h1 className="mt-2 text-3xl font-black text-foreground">Approvals</h1>
       <p className="mt-2 max-w-3xl text-sm text-default-500">Review registration, capability, laboratory, catalog, packaging, finance, insurance, freight, and agritech publication requests.</p>
     </header>
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{items.map((item) => { const Icon = item.icon; const active = workflow === item.key; return <button key={item.key} type="button" onClick={() => router.replace(`/dashboard/approvals?workflow=${item.key}`)} className={`rounded-2xl border p-4 text-left transition ${active ? "border-warning-500 bg-warning-50 shadow-sm dark:bg-warning-900/10" : "border-default-200 bg-content1 hover:border-warning-300"}`}><div className="flex items-start justify-between gap-3"><span className={`rounded-xl p-2 ${active ? "bg-warning-500 text-white" : "bg-default-100 text-default-600"}`}><Icon size={20} /></span><Chip size="sm" color={item.count ? "warning" : "default"} variant="flat">{item.count} pending</Chip></div><h2 className="mt-4 font-bold">{item.title}</h2><p className="mt-1 text-xs text-default-500">{item.description}</p></button>; })}</div>
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{items.map((item) => { const Icon = item.icon; const active = workflow === item.key; return <button key={item.key} type="button" onClick={() => router.replace(`/dashboard/approvals?workflow=${item.key}`)} className={`rounded-2xl border p-4 text-left transition ${active ? "border-warning-500 bg-warning-50 shadow-sm dark:bg-warning-900/10" : "border-default-200 bg-content1 hover:border-warning-300"}`}><div className="flex items-start justify-between gap-3"><span className={`rounded-xl p-2 ${active ? "bg-warning-500 text-white" : "bg-default-100 text-default-600"}`}><Icon size={20} /></span><Chip size="sm" color={item.count ? "warning" : "default"} variant="flat">{item.count} pending</Chip></div><h2 className="mt-4 font-bold">{item.title}</h2><p className="mt-1 text-xs text-default-500">{item.description}</p></button>; })}</div>
     <section className="rounded-3xl border border-default-200 bg-content1/70 p-4 md:p-6">
-      {workflow === "onboarding" ? <OnboardingApprovalQueue /> : workflow === "capabilities" ? <CompanyCapabilityApprovalQueue /> : workflow === "labs" ? <LabApprovalQueues /> : <CatalogServiceApprovalQueues />}
+      {workflow === "onboarding" ? <OnboardingApprovalQueue /> : workflow === "capabilities" ? <CompanyCapabilityApprovalQueue /> : workflow === "labs" ? <LabApprovalQueues /> : workflow === "services" ? <ServiceProfileApprovalQueues /> : <CatalogServiceApprovalQueues />}
     </section>
   </main>;
 }

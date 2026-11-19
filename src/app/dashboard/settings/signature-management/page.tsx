@@ -8,6 +8,7 @@ import { FiCheckCircle, FiEdit3, FiKey, FiMail, FiShield, FiTrash2, FiUpload } f
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
 import { deleteDataBody, getData, postData, postMultipart } from "@/core/api/apiHandler";
+import { baseUrl } from "@/core/api/axiosInstance";
 
 type Signature = { id: string; ownerType: "USER" | "COMPANY"; signerName: string; signerDesignation: string; status: string; version: number; checksum: string; registeredAt: string; verifiedAt?: string; updatedAt: string; previewUrl: string };
 const message = (error: any, fallback: string) => {
@@ -17,6 +18,11 @@ const message = (error: any, fallback: string) => {
   return `${text}${reference}`;
 };
 const date = (value?: string) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "Not yet verified";
+const signaturePreviewUrl = (value: string) => {
+  if (/^https?:\/\//i.test(value)) return value;
+  const apiPath = value.replace(/^\/?(?:api\/)?v1\/web/i, "");
+  return `${baseUrl.replace(/\/$/, "")}/${apiPath.replace(/^\//, "")}`;
+};
 
 async function authorize(action: string, payload: any, method: "PASSKEY" | "EMAIL_OTP", setPrompt: (value: any) => void) {
   const created = await postData("/authorization-intents", { action, payload, idempotencyKey: crypto.randomUUID() });
@@ -63,7 +69,7 @@ export default function SignatureManagementPage() {
           {uploadStatus && <p role="status" className="rounded-xl border db-border-subtle p-3 text-sm">{uploadStatus}</p>}
           <p className="text-xs leading-5 db-muted">This is an authenticated visual signature, not a certified DSC or CCA-backed eSign.</p></div></DashboardPanel>
       <DashboardPanel className="p-5 sm:p-6"><DashboardSectionHeader title="Saved signatures" description="Passkeys are preferred. Email OTP remains available as a fallback." />
-        <div className="mt-5 space-y-4">{query.isLoading ? <p className="db-muted">Loading signatures…</p> : current.length === 0 ? <p className="rounded-xl border border-dashed db-border-subtle p-6 text-sm db-muted">No {ownerType.toLowerCase()} signature has been registered.</p> : current.map(row => <article key={row.id} className="rounded-2xl border db-border-subtle p-4"><div className="flex flex-col gap-4 sm:flex-row"><div className="grid h-32 min-w-52 place-items-center rounded-xl bg-white p-3">{/* eslint-disable-next-line @next/next/no-img-element -- private authenticated preview */}<img src={row.previewUrl} alt={`Signature of ${row.signerName}`} className="max-h-full max-w-full object-contain" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><div><h2 className="font-semibold">{row.signerName}</h2><p className="text-sm db-muted">{row.signerDesignation || "No designation"} · Version {row.version}</p></div><Chip color={row.status === "ACTIVE" ? "success" : "warning"} variant="flat">{row.status.replaceAll("_", " ")}</Chip></div><dl className="mt-3 grid gap-1 text-xs db-muted"><div>Registered: {date(row.registeredAt)}</div><div>Verified: {date(row.verifiedAt)}</div><div>Updated: {date(row.updatedAt)}</div></dl></div></div>
+        <div className="mt-5 space-y-4">{query.isLoading ? <p className="db-muted">Loading signatures…</p> : current.length === 0 ? <p className="rounded-xl border border-dashed db-border-subtle p-6 text-sm db-muted">No {ownerType.toLowerCase()} signature has been registered.</p> : current.map(row => <article key={row.id} className="rounded-2xl border db-border-subtle p-4"><div className="flex flex-col gap-4 sm:flex-row"><div className="grid h-32 min-w-52 place-items-center rounded-xl bg-white p-3">{/* eslint-disable-next-line @next/next/no-img-element -- private authenticated preview */}<img src={signaturePreviewUrl(row.previewUrl)} alt={`Signature of ${row.signerName}`} className="max-h-full max-w-full object-contain" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><div><h2 className="font-semibold">{row.signerName}</h2><p className="text-sm db-muted">{row.signerDesignation || "No designation"} · Version {row.version}</p></div><Chip color={row.status === "ACTIVE" ? "success" : "warning"} variant="flat">{row.status.replaceAll("_", " ")}</Chip></div><dl className="mt-3 grid gap-1 text-xs db-muted"><div>Registered: {date(row.registeredAt)}</div><div>Verified: {date(row.verifiedAt)}</div><div>Updated: {date(row.updatedAt)}</div></dl></div></div>
             <div className="mt-4 flex flex-wrap gap-2">{row.status === "PENDING_VERIFICATION" && <><Button size="sm" color="warning" startContent={<FiKey />} isLoading={busy === `activate-${row.id}`} onPress={() => activate(row, "PASSKEY")}>Verify with passkey</Button><Button size="sm" variant="bordered" startContent={<FiMail />} onPress={() => activate(row, "EMAIL_OTP")}>Use email OTP</Button></>}<Button size="sm" color="danger" variant="light" startContent={<FiTrash2 />} onPress={() => remove(row, browserSupportsWebAuthn() ? "PASSKEY" : "EMAIL_OTP")}>Remove securely</Button>{row.status === "ACTIVE" && <span className="inline-flex items-center gap-1 text-xs text-success-700"><FiCheckCircle /> Ready for signing</span>}</div></article>)}</div>
         {status && <p role="status" className="mt-4 rounded-xl border db-border-subtle p-3 text-sm">{status}</p>}</DashboardPanel>
     </div>

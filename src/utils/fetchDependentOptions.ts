@@ -95,7 +95,12 @@ const getOptions = async (
 
     if (lowerKey === "associatecompany") {
       if (context?.mode === "associateForm") {
-        params = { ...params };
+        params = {
+          ...params,
+          registrationStatus: "APPROVED",
+          isApproved: true,
+          isDeleted: false,
+        };
       }
       const res = await getData(associateCompanyRoutes.getAll, params);
       return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));

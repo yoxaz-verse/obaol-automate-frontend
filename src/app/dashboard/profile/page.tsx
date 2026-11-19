@@ -29,13 +29,6 @@ import { featureFlags } from "@/config/featureFlags";
 const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
 const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
 
-const ASSOCIATE_ADMIN_CONTROLLED_FIELDS = new Set([
-  "isActive",
-  "isCompanyVerified",
-  "isEmailVerified",
-  "registrationStatus",
-]);
-
 function AdminDashboardPanel() {
   const { data: globalStats } = useQuery({
     queryKey: ["adminGlobalStats"],
@@ -544,7 +537,7 @@ export default function ProfilePage() {
           const profile = response?.data || response;
           const formFields = initialTableConfig[roleKey]?.filter((field: any) =>
             field.key !== "password" &&
-            !(roleKey === "associate" && ASSOCIATE_ADMIN_CONTROLLED_FIELDS.has(field.key))
+            (roleKey !== "associate" || field.key === "associateCompany")
           ) || [];
 
           return (

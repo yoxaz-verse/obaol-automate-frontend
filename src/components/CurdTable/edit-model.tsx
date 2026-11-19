@@ -119,6 +119,10 @@ export default function EditModal({
     {}
   );
   const [autocompleteInput, setAutocompleteInput] = useState<Record<string, string>>({});
+  const isAssociateCompanyOnly =
+    currentTable === "associate" &&
+    formFields.length === 1 &&
+    formFields[0]?.key === "associateCompany";
 
   // 1) Fetch the record when modal opens
   const { data: fetched } = useQuery({
@@ -273,7 +277,14 @@ export default function EditModal({
       }
     }
     setLoading(true);
-    const basePayload = currentTable === "inventories" ? { ...formData, unit: "MT" } : formData;
+    const associatePayload = currentTable === "associate"
+      ? Object.fromEntries(
+          formFields
+            .filter((field) => Object.prototype.hasOwnProperty.call(formData, field.key))
+            .map((field) => [field.key, formData[field.key]])
+        )
+      : formData;
+    const basePayload = currentTable === "inventories" ? { ...formData, unit: "MT" } : associatePayload;
     const payload = { ...basePayload };
     if (currentTable === "associate") {
       const editableFieldKeys = new Set(formFields.map((field) => field.key));
@@ -911,7 +922,7 @@ export default function EditModal({
             {isAssociateDrawer ? (
               <>
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-obaol-500/12 text-obaol-600 dark:text-obaol-300"><FiEdit2 /></span>
-                <span><span className="block text-lg font-bold">Edit associate profile</span><span className="mt-0.5 block text-xs font-medium text-default-400">Update personal, contact, and company details</span></span>
+                <span><span className="block text-lg font-bold">{isAssociateCompanyOnly ? "Change associate company" : "Edit associate profile"}</span><span className="mt-0.5 block text-xs font-medium text-default-400">{isAssociateCompanyOnly ? "Choose the approved company linked to your profile" : "Update personal, contact, and company details"}</span></span>
               </>
             ) : `Edit ${capitalize(currentTable)}`}
           </ModalHeader>
@@ -934,7 +945,7 @@ export default function EditModal({
           ) : (
             <ModalBody>
               <form onSubmit={handleSubmit} className={isAssociateDrawer ? "flex min-h-full flex-col" : undefined}>
-                {isAssociateDrawer && (
+                {isAssociateDrawer && !isAssociateCompanyOnly && (
                   <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl border border-default-200/70 bg-default-50/70 p-2 text-center text-[11px] font-bold text-default-500 dark:border-white/10 dark:bg-white/[0.03]">
                     <span className="flex items-center justify-center gap-1.5 rounded-xl bg-content1 px-2 py-2 shadow-sm"><FiUser /> Personal</span>
                     <span className="flex items-center justify-center gap-1.5 px-2 py-2"><FiPhone /> Contact</span>

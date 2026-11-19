@@ -419,7 +419,7 @@ test("associate directory exposes participation paths, grouped roles, and role g
 
   const paths = page.locator('[data-testid="associate-participation-paths"]');
   await expect(paths.getByRole("heading")).toHaveCount(4);
-  for (const label of ["Buy commodities", "Sell commodities", "Buy & sell", "Provide trade services"]) {
+  for (const label of ["Commodity trade", "Logistics & movement", "Quality & compliance", "Finance & technology"]) {
     await expect(paths.getByRole("heading", { name: label, exact: true })).toBeVisible();
   }
   await expect(page.locator("[data-associate-group]")) .toHaveCount(4);

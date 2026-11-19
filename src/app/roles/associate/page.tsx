@@ -32,10 +32,10 @@ const iconByRoleKey: Record<AssociateRoleIconKey, JSX.Element> = {
 };
 
 const participationPaths = [
-  { key: "BUY", title: "Buy commodities", text: "Create requirements, evaluate supply, and follow buyer-side execution.", icon: <FiShoppingBag /> },
-  { key: "SELL", title: "Sell commodities", text: "Present credible supply, respond to demand, and coordinate fulfilment.", icon: <FiArchive /> },
-  { key: "BOTH", title: "Buy & sell", text: "Operate on both sides through one verified company profile.", icon: <FiBriefcase /> },
-  { key: "SERVICE", title: "Provide trade services", text: "Support storage, movement, quality, compliance, finance, or technology needs.", icon: <FiLayers /> },
+  { key: "TRADE", title: "Commodity trade", text: "Buy, sell, import, export, or source commodities through one verified company profile.", icon: <FiBriefcase /> },
+  { key: "LOGISTICS", title: "Logistics & movement", text: "Support storage, packaging, inland transport, freight, and execution handoffs.", icon: <FiTruck /> },
+  { key: "ASSURANCE", title: "Quality & compliance", text: "Provide testing, inspection, customs, documentation, and trade-readiness services.", icon: <FiShield /> },
+  { key: "ENABLEMENT", title: "Finance & technology", text: "Enable trade through funding, risk protection, procurement, and specialist technology.", icon: <FiCpu /> },
 ];
 
 export default function AssociateRolePage() {
@@ -57,7 +57,7 @@ export default function AssociateRolePage() {
                 </div>
                 <h1 className="public-hero-title">Your company&apos;s role in <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 italic">commodity execution.</span></h1>
                 <p className="public-hero-description max-w-3xl">
-                  Associates are registered businesses that use OBAOL to buy commodities, sell commodities, do both, or deliver the specialist services a trade needs from enquiry to completion.
+                  Associates are registered businesses across the complete commodity trade ecosystem—from trading and procurement to logistics, quality, compliance, finance, and technology.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Link href="/auth/register" className="public-button public-button--primary group">Register your company <FiArrowRight className="transition-transform group-hover:translate-x-1" /></Link>
@@ -73,9 +73,9 @@ export default function AssociateRolePage() {
           <section id="choose-path" aria-labelledby="participation-heading" className="public-standard-section border-y border-default-200/60 bg-content1/30 scroll-mt-24">
             <div className="container mx-auto max-w-7xl px-4 public-layout-container">
               <div className="mb-10 max-w-3xl">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Start with your purpose</span>
-                <h2 id="participation-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">How will your company participate?</h2>
-                <p className="mt-4 text-lg leading-8 text-foreground/65">Choose the path that reflects what the registered business actually does. Service companies select their specific capabilities during onboarding.</p>
+                <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">The complete trade ecosystem</span>
+                <h2 id="participation-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Every company that makes trade happen has a place here.</h2>
+                <p className="mt-4 text-lg leading-8 text-foreground/65">Choose the area that best reflects your company&apos;s work. Buying and selling are capabilities within the wider network of services that takes a trade from requirement to completion.</p>
               </div>
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4" data-testid="associate-participation-paths">
                 {participationPaths.map((path, index) => (

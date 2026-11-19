@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
 import { Button, Chip, Input } from "@nextui-org/react";
@@ -40,12 +42,17 @@ async function authorize(action: string, payload: any, method: "PASSKEY" | "EMAI
 
 export default function SignatureManagementPage() {
   const client = useQueryClient();
+  const searchParams = useSearchParams();
+  const requestedReturnTo = searchParams.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/dashboard/") && !requestedReturnTo.startsWith("//") ? requestedReturnTo : "";
+  const requestedOwnerType = searchParams.get("ownerType");
   const query = useQuery({ queryKey: ["signatures"], queryFn: async () => (await getData("/signatures", {}, { cacheMode: "bypass" })).data });
   const signatures: Signature[] = useMemo(() => query.data?.data || [], [query.data?.data]), company = query.data?.company;
   const storageConfigured = query.data?.storage?.configured !== false;
-  const [ownerType, setOwnerType] = useState<"USER" | "COMPANY">("USER"), [file, setFile] = useState<File | null>(null), [signerName, setSignerName] = useState(""), [designation, setDesignation] = useState("");
+  const [ownerType, setOwnerType] = useState<"USER" | "COMPANY">(requestedOwnerType === "COMPANY" ? "COMPANY" : "USER"), [file, setFile] = useState<File | null>(null), [signerName, setSignerName] = useState(""), [designation, setDesignation] = useState("");
   const [busy, setBusy] = useState(""), [status, setStatus] = useState(""), [uploadStatus, setUploadStatus] = useState(""), [prompt, setPrompt] = useState<any>(null), [otp, setOtp] = useState("");
   const current = useMemo(() => signatures.filter(row => row.ownerType === ownerType).sort((a, b) => b.version - a.version), [signatures, ownerType]);
+  const hasActiveSignature = signatures.some(row => row.status === "ACTIVE");
   const refresh = () => Promise.all([
     client.invalidateQueries({ queryKey: ["signatures"] }),
     client.invalidateQueries({ queryKey: ["trade-document-readiness"] }),
@@ -71,7 +78,8 @@ export default function SignatureManagementPage() {
       <DashboardPanel className="p-5 sm:p-6"><DashboardSectionHeader title="Saved signatures" description="Passkeys are preferred. Email OTP remains available as a fallback." />
         <div className="mt-5 space-y-4">{query.isLoading ? <p className="db-muted">Loading signatures…</p> : current.length === 0 ? <p className="rounded-xl border border-dashed db-border-subtle p-6 text-sm db-muted">No {ownerType.toLowerCase()} signature has been registered.</p> : current.map(row => <article key={row.id} className="min-w-0 overflow-hidden rounded-2xl border db-border-subtle p-4"><div className="flex min-w-0 flex-col gap-4 sm:flex-row"><div className="grid h-32 w-full flex-none place-items-center overflow-hidden rounded-xl bg-white p-3 sm:w-52">{/* eslint-disable-next-line @next/next/no-img-element -- private authenticated preview */}<img src={signaturePreviewUrl(row.previewUrl)} alt={`Signature of ${row.signerName}`} className="block h-full w-full object-contain" /></div><div className="min-w-0 flex-1 overflow-hidden"><div className="flex min-w-0 flex-wrap items-start justify-between gap-2"><div className="min-w-0"><h2 className="break-words font-semibold">{row.signerName}</h2><p className="break-words text-sm db-muted">{row.signerDesignation || "No designation"} · Version {row.version}</p></div><Chip className="max-w-full" color={row.status === "ACTIVE" ? "success" : "warning"} variant="flat">{row.status.replaceAll("_", " ")}</Chip></div><dl className="mt-3 grid min-w-0 gap-1 break-words text-xs db-muted"><div>Registered: {date(row.registeredAt)}</div><div>Verified: {date(row.verifiedAt)}</div><div>Updated: {date(row.updatedAt)}</div></dl></div></div>
             <div className="mt-4 flex min-w-0 flex-wrap gap-2">{row.status === "PENDING_VERIFICATION" && <><Button size="sm" color="warning" startContent={<FiKey />} isLoading={busy === `activate-${row.id}`} onPress={() => activate(row, "PASSKEY")}>Verify with passkey</Button><Button size="sm" variant="bordered" startContent={<FiMail />} onPress={() => activate(row, "EMAIL_OTP")}>Use email OTP</Button></>}<Button size="sm" color="danger" variant="light" startContent={<FiTrash2 />} onPress={() => remove(row, browserSupportsWebAuthn() ? "PASSKEY" : "EMAIL_OTP")}>Remove securely</Button>{row.status === "ACTIVE" && <span className="inline-flex items-center gap-1 text-xs text-success-700"><FiCheckCircle /> Ready for signing</span>}</div></article>)}</div>
-        {status && <p role="status" className="mt-4 rounded-xl border db-border-subtle p-3 text-sm">{status}</p>}</DashboardPanel>
+        {status && <p role="status" className="mt-4 rounded-xl border db-border-subtle p-3 text-sm">{status}</p>}
+        {returnTo && hasActiveSignature && <Button as={Link} href={returnTo} color="success" className="mt-4 font-semibold" startContent={<FiCheckCircle />}>Return to enquiry</Button>}</DashboardPanel>
     </div>
     {prompt && <div className="fixed inset-0 z-[120] grid place-items-center bg-black/60 p-4"><section role="dialog" aria-modal="true" className="w-full max-w-md rounded-2xl bg-background p-6"><FiShield size={28} className="text-obaol-600" /><h2 className="mt-3 text-xl font-bold">Confirm with email code</h2><p className="mt-1 text-sm db-muted">A one-time code was sent to {prompt.maskedEmail}.</p><Input className="mt-5" label="6-digit code" inputMode="numeric" value={otp} onValueChange={value => setOtp(value.replace(/\D/g, "").slice(0, 6))} /><div className="mt-5 flex justify-end gap-2"><Button variant="light" onPress={() => { prompt.reject(new Error("Verification cancelled.")); setPrompt(null); setBusy(""); }}>Cancel</Button><Button color="warning" isLoading={busy === "otp"} isDisabled={otp.length !== 6} onPress={verifyOtp}>Verify</Button></div></section></div>}
   </DashboardPage>;

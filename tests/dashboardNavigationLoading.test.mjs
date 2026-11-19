@@ -144,9 +144,13 @@ test("production container exposes readiness and bounded warmup", () => {
   const health = read("../src/app/api/health/route.ts");
   const dockerfile = read("../Dockerfile");
   const startup = read("../scripts/start-with-warmup.sh");
+  const warmup = read("../scripts/warm-dashboard.mjs");
   assert.match(health, /status: "ok"/);
   assert.match(dockerfile, /HEALTHCHECK/);
   assert.match(dockerfile, /start-with-warmup\.sh/);
   assert.match(startup, /warm-dashboard\.mjs/);
+  assert.doesNotMatch(startup, /warm-dashboard\.mjs \|\| true/);
   assert.match(startup, /attempt.*-ge 30/);
+  assert.match(warmup, /"\/dashboard\/reports"/);
+  assert.match(warmup, /response\.status >= 400/);
 });

@@ -559,6 +559,17 @@ test("variant rate wizard Commodity Directory CTA opens Commodity Directory", ()
   assert.equal(wizard.includes('onClick={() => router.push("/dashboard/product")}'), false);
 });
 
+test("variant rate wizard opens as a responsive right-side drawer", () => {
+  const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
+  assert.equal(wizard.includes('wrapper: "!items-stretch !justify-end overflow-hidden"'), true);
+  assert.equal(wizard.includes("sm:max-w-[900px]"), true);
+  assert.equal(wizard.includes("h-[100dvh] max-h-[100dvh] w-screen"), true);
+  assert.equal(wizard.includes('x: "100%"'), true);
+  assert.equal(wizard.includes("sm:rounded-l-2xl"), true);
+  assert.equal(wizard.includes('isDismissable={false}'), true);
+  assert.equal(wizard.includes('isKeyboardDismissDisabled={true}'), true);
+});
+
 test("published variant rates are status-only and expose a one-hour delete window", () => {
   const listing = read("../src/features/catalog/rates/VariantRateWorkspace.tsx")
     + read("../src/features/catalog/rates/constants.ts");

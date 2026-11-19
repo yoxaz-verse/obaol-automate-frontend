@@ -19,5 +19,5 @@ until node -e "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)proce
   sleep 1
 done
 
-node scripts/warm-dashboard.mjs || true
+node scripts/warm-dashboard.mjs
 wait "$server_pid"

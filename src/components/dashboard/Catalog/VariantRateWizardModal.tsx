@@ -1120,12 +1120,28 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       size="full"
+      radius="none"
       scrollBehavior="inside"
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       backdrop="blur"
+      motionProps={{
+        variants: {
+          enter: {
+            x: 0,
+            opacity: 1,
+            transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+          },
+          exit: {
+            x: "100%",
+            opacity: 1,
+            transition: { duration: 0.22, ease: [0.4, 0, 1, 1] },
+          },
+        },
+      }}
       classNames={{
-        base: "bg-background border border-default-200 w-screen h-[100dvh] max-h-[100dvh] rounded-none sm:w-[94vw] sm:h-auto sm:max-h-[92vh] sm:rounded-2xl lg:max-w-[1100px] backdrop-blur-3xl shadow-2xl",
+        wrapper: "!items-stretch !justify-end overflow-hidden",
+        base: "!m-0 h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none border-l border-default-200 bg-background shadow-2xl backdrop-blur-3xl sm:w-full sm:max-w-[900px] sm:rounded-l-2xl",
         header: "border-b border-default-100 px-4 py-3 sm:px-6 sm:py-4",
         footer: "border-t border-default-100 px-4 pt-3 pb-24 sm:px-6 sm:py-4 bg-background/95 backdrop-blur-md sticky bottom-0 z-20",
         body: "overflow-y-auto px-4 py-3 sm:px-6 sm:py-4 pb-28 sm:pb-8",

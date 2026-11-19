@@ -1925,12 +1925,30 @@ export default function EnquiryDetailsPage() {
         Boolean(actionStatus[actionKey]) ||
         (actionKey === "QUOTATION_CREATED" && !quotationConfigReady);
     const quotationSignatureWarning = quotationReadiness?.signatureWarning || null;
+    const quotationReasonCode = String(quotationReadiness?.reasonCode || "");
+    const missingQuotationSignatures = Array.isArray(quotationReadiness?.missingSignatures) ? quotationReadiness.missingSignatures : [];
+    const missingObaolSignature = missingQuotationSignatures.some((item: any) => String(item?.leg || "") === "OBAOL_TO_BUYER");
+    const missingSellerSignature = missingQuotationSignatures.some((item: any) => String(item?.leg || "") === "SELLER_TO_OBAOL");
+    const enquiryReturnTo = `/dashboard/enquiries/${enquiryId}`;
+    const adminQuotationConfigurationHref = ["CONFIG_MISSING", "CONFIG_INVALID"].includes(quotationReasonCode)
+        ? `/dashboard/companies?${new URLSearchParams({ configureObaol: "1", returnTo: enquiryReturnTo }).toString()}`
+        : missingObaolSignature
+            ? `/dashboard/settings/signature-management?${new URLSearchParams({ scope: "obaol", returnTo: enquiryReturnTo }).toString()}`
+            : "";
     const quotationConfigurationMessage = isQuotationReadinessError
         ? "Quotation readiness could not be verified. Please refresh the page and try again."
         : quotationSignatureWarning
             ? quotationSignatureWarning.message
         : isSystemAdmin
-            ? "Quotation creation is unavailable because the OBAOL company configuration is missing or invalid. Select a valid company to continue."
+            ? ["CONFIG_MISSING", "CONFIG_INVALID"].includes(quotationReasonCode)
+                ? "Quotation creation is unavailable because the OBAOL company configuration is missing or invalid. Select a valid company to continue."
+                : missingObaolSignature && missingSellerSignature
+                    ? "The OBAOL company and seller must each verify an authorized company signature before quotation creation."
+                    : missingObaolSignature
+                        ? "Verify the configured OBAOL company signature before quotation creation."
+                        : missingSellerSignature
+                            ? "The seller must verify a personal or company signature before quotation creation."
+                            : "Quotation creation is temporarily unavailable. Refresh the readiness check and try again."
             : "Quotation creation is temporarily unavailable due to system configuration. Please contact an administrator.";
     const isActionLoading = (actionKey: string) => {
         if (applyActionMutation.isPending && pendingActionKey === actionKey) return true;
@@ -3084,10 +3102,15 @@ export default function EnquiryDetailsPage() {
                             {(!quotationConfigReady || quotationSignatureWarning) && (quotationReadiness || isQuotationReadinessError) && displayActions.includes("QUOTATION_CREATED") && (
                                 <div className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-[11px] font-semibold text-warning-700 dark:text-warning-300">
                                     <div>{quotationConfigurationMessage}</div>
-                                    {isSystemAdmin && (
-                                        <Link href="/dashboard/company" className="mt-2 inline-flex font-black underline underline-offset-2">
-                                            Open Company & Signature Configuration
+                                    {isSystemAdmin && adminQuotationConfigurationHref && (
+                                        <Link href={adminQuotationConfigurationHref} className="mt-2 inline-flex font-black underline underline-offset-2">
+                                            {["CONFIG_MISSING", "CONFIG_INVALID"].includes(quotationReasonCode)
+                                                ? "Open OBAOL Company Configuration"
+                                                : "Configure OBAOL Company Signature"}
                                         </Link>
+                                    )}
+                                    {isSystemAdmin && missingSellerSignature && (
+                                        <div className="mt-2 font-bold">Seller action is still required for the seller-side signature.</div>
                                     )}
                                 </div>
                             )}

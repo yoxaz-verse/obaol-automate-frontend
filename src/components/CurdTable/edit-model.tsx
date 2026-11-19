@@ -21,7 +21,7 @@ import {
   Autocomplete,
   Tooltip,
 } from "@nextui-org/react";
-import { FiEdit2, FiUser, FiPhone, FiBriefcase } from "react-icons/fi";
+import { FiEdit2, FiUser, FiPhone, FiBriefcase, FiMapPin } from "react-icons/fi";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
@@ -123,6 +123,10 @@ export default function EditModal({
     currentTable === "associate" &&
     formFields.length === 1 &&
     formFields[0]?.key === "associateCompany";
+  const isAssociatePersonalProfile =
+    currentTable === "associate" &&
+    formFields.some((field) => field.key === "name") &&
+    !formFields.some((field) => field.key === "associateCompany");
 
   // 1) Fetch the record when modal opens
   const { data: fetched } = useQuery({
@@ -278,11 +282,18 @@ export default function EditModal({
     }
     setLoading(true);
     const associatePayload = currentTable === "associate"
-      ? Object.fromEntries(
-          formFields
-            .filter((field) => Object.prototype.hasOwnProperty.call(formData, field.key))
-            .map((field) => [field.key, formData[field.key]])
-        )
+      ? formFields.reduce((result: Record<string, any>, field) => {
+          if (Object.prototype.hasOwnProperty.call(formData, field.key)) {
+            result[field.key] = formData[field.key];
+          }
+          const isPhoneField = /phone/i.test(field.key);
+          if (isPhoneField) {
+            [`${field.key}CountryCode`, `${field.key}National`].forEach((key) => {
+              if (Object.prototype.hasOwnProperty.call(formData, key)) result[key] = formData[key];
+            });
+          }
+          return result;
+        }, {})
       : formData;
     const basePayload = currentTable === "inventories" ? { ...formData, unit: "MT" } : associatePayload;
     const payload = { ...basePayload };
@@ -922,7 +933,7 @@ export default function EditModal({
             {isAssociateDrawer ? (
               <>
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-obaol-500/12 text-obaol-600 dark:text-obaol-300"><FiEdit2 /></span>
-                <span><span className="block text-lg font-bold">{isAssociateCompanyOnly ? "Change associate company" : "Edit associate profile"}</span><span className="mt-0.5 block text-xs font-medium text-default-400">{isAssociateCompanyOnly ? "Choose the approved company linked to your profile" : "Update personal, contact, and company details"}</span></span>
+                <span><span className="block text-lg font-bold">{isAssociateCompanyOnly ? "Change associate company" : "Edit associate profile"}</span><span className="mt-0.5 block text-xs font-medium text-default-400">{isAssociateCompanyOnly ? "Choose the approved company linked to your profile" : isAssociatePersonalProfile ? "Update your personal, contact, and location details" : "Update personal, contact, and company details"}</span></span>
               </>
             ) : `Edit ${capitalize(currentTable)}`}
           </ModalHeader>
@@ -949,7 +960,7 @@ export default function EditModal({
                   <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl border border-default-200/70 bg-default-50/70 p-2 text-center text-[11px] font-bold text-default-500 dark:border-white/10 dark:bg-white/[0.03]">
                     <span className="flex items-center justify-center gap-1.5 rounded-xl bg-content1 px-2 py-2 shadow-sm"><FiUser /> Personal</span>
                     <span className="flex items-center justify-center gap-1.5 px-2 py-2"><FiPhone /> Contact</span>
-                    <span className="flex items-center justify-center gap-1.5 px-2 py-2"><FiBriefcase /> Company</span>
+                    <span className="flex items-center justify-center gap-1.5 px-2 py-2">{isAssociatePersonalProfile ? <><FiMapPin /> Location</> : <><FiBriefcase /> Company</>}</span>
                   </div>
                 )}
                 <div className={isAssociateDrawer ? "grid grid-cols-1 gap-x-4 sm:grid-cols-2" : undefined}>

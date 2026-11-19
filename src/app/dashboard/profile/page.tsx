@@ -535,9 +535,13 @@ export default function ProfilePage() {
       >
         {(response: any) => {
           const profile = response?.data || response;
+          const associateEditableFields = new Set([
+            "name", "phone", "address", "geoType", "country",
+            "state", "district", "division", "pincodeEntry",
+          ]);
           const formFields = initialTableConfig[roleKey]?.filter((field: any) =>
             field.key !== "password" &&
-            (roleKey !== "associate" || field.key === "associateCompany")
+            (roleKey !== "associate" || associateEditableFields.has(field.key))
           ) || [];
 
           return (
@@ -575,7 +579,7 @@ export default function ProfilePage() {
                     <div className="mt-4 space-y-4">
                       <div className="flex items-start gap-3"><span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-obaol-500/10 text-obaol-600"><FiBriefcase /></span><div><p className="text-xs db-muted">Company</p><p className="mt-0.5 font-semibold text-foreground">{profile.associateCompany?.name || "Not linked"}</p></div></div>
                       <div className="flex items-start gap-3"><span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-obaol-500/10 text-obaol-600"><FiPhone /></span><div><p className="text-xs db-muted">Primary phone</p><p className="mt-0.5 font-semibold text-foreground">{profile.phone || "Not provided"}</p></div></div>
-                      <div className="flex items-start gap-3"><span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-obaol-500/10 text-obaol-600"><FiMapPin /></span><div><p className="text-xs db-muted">Location</p><p className="mt-0.5 font-semibold text-foreground">{[profile.associateCompany?.district?.name, profile.associateCompany?.state?.name].filter(Boolean).join(", ") || "Not provided"}</p></div></div>
+                      <div className="flex items-start gap-3"><span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-obaol-500/10 text-obaol-600"><FiMapPin /></span><div><p className="text-xs db-muted">Location</p><p className="mt-0.5 font-semibold text-foreground">{profile.geoType === "INTERNATIONAL" ? (profile.country?.name || profile.address || "Not provided") : ([profile.district?.name, profile.state?.name].filter(Boolean).join(", ") || profile.address || "Not provided")}</p></div></div>
                     </div>
                   </DashboardPanel>
 

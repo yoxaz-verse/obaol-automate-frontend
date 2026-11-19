@@ -2,6 +2,7 @@
 
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button, Chip, Input, Autocomplete, AutocompleteItem,
@@ -38,6 +39,9 @@ import {
 
 export default function CompanyProductPage() {
   const searchParams = useSearchParams();
+  const requestedReturnTo = searchParams.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/dashboard/") && !requestedReturnTo.startsWith("//") ? requestedReturnTo : "";
+  const configureObaol = searchParams.get("configureObaol") === "1";
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const isAdmin = roleLower === "admin";
@@ -325,6 +329,10 @@ export default function CompanyProductPage() {
       setActiveDetailTab(preselectedTab);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (isAdmin && configureObaol) setIsConfigExpanded(true);
+  }, [isAdmin, configureObaol]);
 
   const obaolConfigMutation = useMutation({
     mutationFn: async (companyId: string) => {
@@ -877,6 +885,23 @@ export default function CompanyProductPage() {
                 Secure company configuration | OBAOL workspace
               </p>
             </div>
+            {isObaolConfigHealthy && (
+              <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-success-500/25 bg-success-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-bold text-success-700">OBAOL company selected</p>
+                  <p className="text-sm text-default-600">Continue by registering and verifying this company&apos;s authorized document signature.</p>
+                </div>
+                <Button
+                  as={Link}
+                  color="success"
+                  className="font-bold"
+                  href={`/dashboard/settings/signature-management?${new URLSearchParams({ scope: "obaol", ...(returnTo ? { returnTo } : {}) }).toString()}`}
+                  endContent={<LuArrowRight />}
+                >
+                  Configure OBAOL signature
+                </Button>
+              </div>
+            )}
           </div>
         ) : null}
       </motion.div>

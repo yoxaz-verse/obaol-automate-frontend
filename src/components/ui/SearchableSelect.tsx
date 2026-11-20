@@ -6,7 +6,7 @@ import { FiChevronDown, FiSearch } from "react-icons/fi";
 
 export type SearchableOption = { key: string; label: string; description?: string };
 
-type Props = {
+export type SearchableSelectProps = {
   label: string;
   options: SearchableOption[];
   value: string[];
@@ -34,7 +34,7 @@ export default function SearchableSelect({
   disabled,
   emptyActionLabel,
   onEmptyAction,
-}: Props) {
+}: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);

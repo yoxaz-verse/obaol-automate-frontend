@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   if (mode === "reverse") {
     const latitude = Number(params.get("lat"));
     const longitude = Number(params.get("lng"));
-    if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+    if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180 || (latitude === 0 && longitude === 0)) {
       return NextResponse.json({ message: "Valid coordinates are required." }, { status: 400 });
     }
     url = `${NOMINATIM}/reverse?format=jsonv2&addressdetails=1&lat=${latitude}&lon=${longitude}`;

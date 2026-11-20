@@ -35,6 +35,9 @@ import { uploadFormFile } from "@/utils/uploadFormFile";
 import { normalizeApiError } from "@/core/api/apiErrors";
 import { useCompanyAccess } from "@/utils/companyAccess";
 import AsyncActionButton from "@/components/ui/AsyncActionButton";
+import SearchableSelect from "@/components/ui/SearchableSelect";
+import ImagePicker from "@/components/ui/ImagePicker";
+import FileDropzone from "@/components/ui/FileDropzone";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -826,86 +829,27 @@ const AddForm: React.FC<AddFormProps> = ({
           value: String(o?.value ?? o?.label ?? o?.name ?? o?._id ?? ""),
         }));
 
-        // Find the label for the currently selected key so the Autocomplete
-        // shows the right text in the input box even when it's pre-populated.
         const currentKey = formData[field.key] ? String(formData[field.key]) : null;
-        const currentLabel = currentKey
-          ? (normalizedOptions.find((o: any) => String(o.key) === currentKey)?.value ?? "")
-          : "";
-        const inputValue = autocompleteInput[field.key] ?? currentLabel;
 
         return (
           <div className="w-full">
-            {/* @ts-ignore */}
-            <Autocomplete
-              aria-label={`Select ${field.label}`}
-              name={field.key}
-              className="w-full text-foreground"
-              label={`Select ${field.label}`}
+            <SearchableSelect
+              label={field.label}
+              multiple={false}
+              allowSelectAll={false}
+              options={normalizedOptions.map(option => ({ key: option.key, label: option.value }))}
+              value={currentKey ? [currentKey] : []}
               placeholder={
                 isDisabled && field.dependsOn
                   ? `Please select ${toTitleCase(field.dependsOn)} first`
-                  : field.label
+                  : `Search ${field.label.toLowerCase()}`
               }
-              isDisabled={!!isDisabled}
-              items={normalizedOptions}
-              selectedKey={currentKey}
-              inputValue={inputValue}
-              allowsCustomValue={false}
-              defaultFilter={(textValue, inputValue) =>
-                String(textValue || "").toLowerCase().includes(String(inputValue || "").toLowerCase())
-              }
-              classNames={{
-                base: "w-full",
-                listboxWrapper: "text-foreground",
-                popoverContent: "bg-content1 text-foreground",
+              disabled={!!isDisabled}
+              required={field.required}
+              onChange={(values) => {
+                handleInputChange({ target: { name: field.key, value: values[0] || "" } });
               }}
-              onSelectionChange={(key: any) => {
-                // Only update when the user has actually picked an item (key is non-null)
-                if (key != null) {
-                  const selected = normalizedOptions.find((item: any) => String(item.key) === String(key));
-                  setAutocompleteInput((prev) => ({
-                    ...prev,
-                    [field.key]: selected?.value || "",
-                  }));
-                  handleInputChange({
-                    target: {
-                      name: field.key,
-                      value: String(key),
-                    },
-                  });
-                } else {
-                  setAutocompleteInput((prev) => ({
-                    ...prev,
-                    [field.key]: "",
-                  }));
-                  handleInputChange({
-                    target: {
-                      name: field.key,
-                      value: "",
-                    },
-                  });
-                }
-              }}
-              onInputChange={(value) => {
-                setAutocompleteInput((prev) => ({
-                  ...prev,
-                  [field.key]: value,
-                }));
-                if (currentKey) {
-                  setFormData((prev) => ({
-                    ...prev,
-                    [field.key]: "",
-                  }));
-                }
-              }}
-            >
-              {(item: any) => (
-                <AutocompleteItem key={String(item.key)} textValue={String(item.value)} className="text-foreground">
-                  {item.value}
-                </AutocompleteItem>
-              )}
-            </Autocomplete>
+            />
             {field.key === "geoType" && (
               <p className="mt-1 text-[11px] text-default-500">
                 {formData.geoType === "INTERNATIONAL"
@@ -939,55 +883,19 @@ const AddForm: React.FC<AddFormProps> = ({
 
         return (
           <div className="w-full text-foreground">
-            <Select
-              aria-label={`Select ${field.label}`}
-              name={field.key}
-              label={`Select Multi ${field.label}`}
+            <SearchableSelect
+              label={field.label}
+              options={normalizedOptions.map(option => ({ key: option.key, label: option.value }))}
+              value={selectedValues}
               placeholder={
                 isDisabled && field.dependsOn
                   ? `Please select ${toTitleCase(field.dependsOn)} first`
-                  : field.label
+                  : `Search ${field.label.toLowerCase()}`
               }
-              className="w-full"
-              selectionMode="multiple"
-              isDisabled={!!isDisabled}
-              selectedKeys={selectedKeys}
-              classNames={{
-                trigger: "text-foreground",
-                value: "text-foreground",
-                popoverContent: "bg-content1 text-foreground",
-                listbox: "text-foreground",
-              }}
-              onSelectionChange={(keys) => {
-                const values = Array.from(keys as Set<Key>).map(String);
-                setFormData((prev) => ({
-                  ...prev,
-                  [field.key]: values,
-                }));
-              }}
-            >
-              {normalizedOptions.map((option) => (
-                <SelectItem key={String(option.key)} className="text-foreground">{option.value}</SelectItem>
-              ))}
-            </Select>
-
-            <div className="flex gap-2 mt-2 flex-wrap">
-              {selectedValues.map((item, index) => (
-                <Chip
-                  key={index}
-                  onClose={() => {
-                    const updated = selectedValues.filter((v) => v !== item);
-                    setFormData((prev) => ({
-                      ...prev,
-                      [field.key]: updated,
-                    }));
-                  }}
-                  variant="flat"
-                >
-                  {normalizedOptions.find((option) => option.key === item)?.value || item}
-                </Chip>
-              ))}
-            </div>
+              disabled={!!isDisabled}
+              required={field.required}
+              onChange={values => setFormData(prev => ({ ...prev, [field.key]: values }))}
+            />
           </div>
         );
       }
@@ -995,20 +903,10 @@ const AddForm: React.FC<AddFormProps> = ({
       case "multiselectValue":
         return renderMultiselectValueField(field);
 
-      case "file":
       case "image":
-        return (
-          <div>
-            <label className="block mb-2">{field.label}</label>
-            <input
-              type="file"
-              accept={field.accept || "image/*,application/pdf"}
-              onChange={(event) => setSelectedUploadFile(event.target.files?.[0] || null)}
-              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-obaol-500 file:px-3 file:py-2 file:font-semibold file:text-brand-abyssal"
-            />
-            <p className="mt-2 text-xs text-default-500" aria-live="polite">{selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : "Choose one image or PDF."}</p>
-          </div>
-        );
+        return <ImagePicker label={field.label} value={selectedUploadFile} preset={field.imagePreset || "product"} accept={field.accept} required={field.required} onChange={setSelectedUploadFile} />;
+      case "file":
+        return <FileDropzone label={field.label} file={selectedUploadFile} accept={field.accept || "image/*,application/pdf"} onChange={setSelectedUploadFile} />;
 
       default:
         return (

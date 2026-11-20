@@ -22,6 +22,7 @@ export type TableField = {
   values?: TableOption[];
   placeholder?: string;
   accept?: string;
+  imagePreset?: "avatar" | "logo" | "banner" | "product" | "signature";
   required?: boolean;
   emptyValue?: string;
   showWhen?: { key: string; equals: string | number | boolean | Array<string | number | boolean> };

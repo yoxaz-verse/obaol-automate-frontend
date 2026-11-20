@@ -37,6 +37,9 @@ import { useCompanyAccess } from "@/utils/companyAccess";
 import { uploadFormFile } from "@/utils/uploadFormFile";
 import { normalizeApiError } from "@/core/api/apiErrors";
 import AsyncActionButton from "@/components/ui/AsyncActionButton";
+import SearchableSelect from "@/components/ui/SearchableSelect";
+import ImagePicker from "@/components/ui/ImagePicker";
+import FileDropzone from "@/components/ui/FileDropzone";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -716,88 +719,22 @@ export default function EditModal({
           value: String(o?.value ?? o?.label ?? o?.name ?? o?._id ?? ""),
         }));
         const currentKey = formData[f.key] ? String(formData[f.key]) : null;
-        const currentLabel = currentKey
-          ? (normalizedOptions.find((o: any) => String(o.key) === currentKey)?.value ?? "")
-          : "";
-        const inputValue = autocompleteInput[f.key] ?? currentLabel;
-
         return (
-          // @ts-ignore
-          <Autocomplete
-            name={f.key}
-            className="w-full text-foreground"
-            label={`Select ${f.label}`}
+          <SearchableSelect
+            label={f.label}
+            multiple={false}
+            allowSelectAll={false}
+            options={normalizedOptions.map(option => ({ key: option.key, label: option.value }))}
+            value={currentKey ? [currentKey] : []}
             placeholder={
               isDisabled && f.dependsOn
                 ? `Please select ${toTitleCase(f.dependsOn)} first`
-                : f.label
+                : `Search ${f.label.toLowerCase()}`
             }
-            isDisabled={!!isDisabled}
-            items={normalizedOptions}
-            selectedKey={currentKey}
-            inputValue={inputValue}
-            allowsCustomValue={false}
-            defaultFilter={(textValue, inputValue) =>
-              String(textValue || "")
-                .toLowerCase()
-                .includes(String(inputValue || "").toLowerCase())
-            }
-            onSelectionChange={(key: any) =>
-              key != null
-                ? (() => {
-                  const selected = normalizedOptions.find((item: any) => String(item.key) === String(key));
-                  setAutocompleteInput((prev) => ({
-                    ...prev,
-                    [f.key]: selected?.value || "",
-                  }));
-                  handleInputChange({
-                    target: {
-                      name: f.key,
-                      value: String(key),
-                    },
-                  });
-                })()
-                : (() => {
-                  setAutocompleteInput((prev) => ({
-                    ...prev,
-                    [f.key]: "",
-                  }));
-                  handleInputChange({
-                    target: {
-                      name: f.key,
-                      value: "",
-                    },
-                  });
-                })()
-            }
-            onInputChange={(value) => {
-              setAutocompleteInput((prev) => ({
-                ...prev,
-                [f.key]: value,
-              }));
-              if (currentKey) {
-                setFormData((prev) => ({
-                  ...prev,
-                  [f.key]: "",
-                }));
-              }
-            }}
-            classNames={{
-              base: "w-full",
-              listboxWrapper: "text-foreground",
-              popoverContent: "bg-content1 text-foreground",
-            }}
-          >
-            {(item: any) => (
-              <AutocompleteItem
-                key={String(item.key)}
-                textValue={String(item.value)}
-                className="text-foreground"
-              >
-                {item.value}
-              </AutocompleteItem>
-            )}
-          </Autocomplete>
+            disabled={disabled || !!isDisabled}
+            required={f.required}
+            onChange={values => handleInputChange({ target: { name: f.key, value: values[0] || "" } })}
+          />
         );
       case "multiselect": {
         const multiOptions =
@@ -806,84 +743,12 @@ export default function EditModal({
             : f.dynamicValuesFn
               ? dynamicOptions[f.key] || []
               : f.values || [];
-        return (
-          <>
-            <Select
-              selectionMode="multiple"
-              isDisabled={disabled}
-              selectedKeys={new Set(formData[f.key] || [])}
-              onSelectionChange={(keys: any) =>
-                setFormData((p) => ({ ...p, [f.key]: Array.from(keys as Set<string>) }))
-              }
-              placeholder={`Select ${f.label}`}
-              classNames={{
-                trigger: "text-foreground",
-                value: "text-foreground",
-                popoverContent: "bg-content1 text-foreground",
-                listbox: "text-foreground",
-              }}
-            >
-              {multiOptions.map((opt: any) => (
-                <SelectItem key={opt.key} value={String(opt.key)} className="text-foreground">
-                  {opt.value}
-                </SelectItem>
-              ))}
-            </Select>
-            <div className="flex gap-2 mt-2 flex-wrap">
-              {(formData[f.key] || []).map((val: string) => {
-                const label = multiOptions.find((opt: any) => String(opt.key) === String(val))?.value || val;
-                return (
-                  <Chip
-                    isDisabled={disabled}
-                    key={val}
-                    onClose={() =>
-                      setFormData((p) => ({
-                        ...p,
-                        [f.key]: p[f.key].filter((x: string) => x !== val),
-                      }))
-                    }
-                    className="text-foreground"
-                  >
-                    {label}
-                  </Chip>
-                );
-              })}
-            </div>
-          </>
-        );
+        return <SearchableSelect label={f.label} options={multiOptions.map((option: any) => ({ key: String(option.key), label: String(option.value) }))} value={(formData[f.key] || []).map(String)} disabled={disabled} required={f.required} placeholder={`Search ${f.label.toLowerCase()}`} onChange={values => setFormData(current => ({ ...current, [f.key]: values }))} />;
       }
-      case "file":
       case "image":
-        return (
-          <div>
-            <label>{f.label}</label>
-            <input
-              type="file"
-              accept={f.accept || "image/*,application/pdf"}
-              disabled={disabled}
-              onChange={(event) => setSelectedUploadFile(event.target.files?.[0] || null)}
-              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-obaol-500 file:px-3 file:py-2 file:font-semibold file:text-brand-abyssal"
-            />
-            <p className="mt-2 text-xs text-default-500" aria-live="polite">{selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : "Choose a new file only if you want to replace the existing one."}</p>
-            {formData[f.key] && (
-              <div className="mt-2 text-foreground">
-                {/\.(pdf|PDF)$/.test(formData[f.key]) ? (
-                  <a href={formData[f.key]} target="_blank" rel="noopener">
-                    View PDF
-                  </a>
-                ) : (
-                  // @ts-ignore
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${formData[f.key]}`}
-                    width={100}
-                    height={100}
-                    alt="preview"
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        );
+        return <ImagePicker label={f.label} value={selectedUploadFile} existingUrl={formData[f.key] ? `${process.env.NEXT_PUBLIC_UPLOADS_URL || ""}${formData[f.key]}` : null} preset={f.imagePreset || "product"} accept={f.accept} disabled={disabled} required={f.required} onChange={setSelectedUploadFile} />;
+      case "file":
+        return <div className="space-y-2"><FileDropzone label={f.label} file={selectedUploadFile} accept={f.accept || "image/*,application/pdf"} disabled={disabled} onChange={setSelectedUploadFile} />{formData[f.key] ? <a className="text-sm font-semibold text-obaol-600" href={formData[f.key]} target="_blank" rel="noopener noreferrer">View current file</a> : null}</div>;
       default:
         return (
           <Input

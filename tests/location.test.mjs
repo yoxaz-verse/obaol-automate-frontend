@@ -59,6 +59,13 @@ test("shared location selector exposes search, address, and map loading feedback
   assert.match(source, /if \(countryCode\)/);
 });
 
+test("geocoding rejects zero coordinates and enforces requested countries", async () => {
+  const source = await readFile(new URL("../src/app/api/geocoding/route.ts", import.meta.url), "utf8");
+  assert.match(source, /latitude === 0 && longitude === 0/);
+  assert.match(source, /result\.countryCode !== requestedCountryCode/);
+  assert.match(source, /Choose a location within/);
+});
+
 test("manual trips submit structured origin and destination route points", async () => {
   const source = await readFile(new URL("../src/app/dashboard/inland-transportation/trips/page.tsx", import.meta.url), "utf8");
   assert.match(source, /MultiLocationSelector/);

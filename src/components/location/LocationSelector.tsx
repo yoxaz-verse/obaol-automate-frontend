@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Input, Spinner } from "@nextui-org/react";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import { FiMapPin, FiSearch } from "react-icons/fi";
+import { FiCrosshair, FiMapPin, FiSearch, FiX } from "react-icons/fi";
 import type { StructuredLocation } from "@/types/location";
 import { DEFAULT_INDIA_CENTER, DEFAULT_INDIA_ZOOM, isValidCoordinate, toStructuredLocation } from "@/types/location";
 import "leaflet/dist/leaflet.css";
@@ -18,6 +18,8 @@ type Props = {
   markerVariant?: "default" | "warehouse" | "lab" | "company" | "vehicle";
   countryCode?: string;
   label?: string;
+  mode?: "full" | "compact";
+  onClear?: () => void;
 };
 
 const icon = L.divIcon({
@@ -54,7 +56,7 @@ function MapSync({ value }: { value: StructuredLocation | null }) {
   return null;
 }
 
-export default function LocationSelector({ value, onChange, disabled = false, required = false, height = 360, countryCode, label = "Search address or place" }: Props) {
+export default function LocationSelector({ value, onChange, disabled = false, required = false, height = 360, countryCode, label = "Search address or place", mode = "full", onClear }: Props) {
   const normalized = useMemo(() => toStructuredLocation(value), [value]);
   const [query, setQuery] = useState(normalized?.address || normalized?.label || "");
   const [results, setResults] = useState<StructuredLocation[]>([]);
@@ -64,7 +66,13 @@ export default function LocationSelector({ value, onChange, disabled = false, re
   const [searchedQuery, setSearchedQuery] = useState("");
   const [error, setError] = useState("");
   const [mapError, setMapError] = useState("");
+  const [isLocating, setIsLocating] = useState(false);
   const selectionRef = useRef(false);
+
+  useEffect(() => {
+    if (selectionRef.current) return;
+    setQuery(normalized?.address || normalized?.label || "");
+  }, [normalized?.address, normalized?.label]);
 
   useEffect(() => {
     if (selectionRef.current) { selectionRef.current = false; setIsSearching(false); return; }
@@ -106,6 +114,16 @@ export default function LocationSelector({ value, onChange, disabled = false, re
       setMapError(""); setIsMapLoading(true); onChange(fallback); setError(cause?.message || "The pin was saved, but its address could not be resolved.");
     } finally { setIsResolvingAddress(false); }
   };
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) { setError("Current location is not supported by this browser."); return; }
+    setIsLocating(true); setError("");
+    navigator.geolocation.getCurrentPosition(
+      position => { setIsLocating(false); reverse(position.coords.latitude, position.coords.longitude); },
+      () => { setIsLocating(false); setError("Current location could not be accessed. Check the browser permission and try again."); },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  };
+  const clear = () => { setQuery(""); setResults([]); setError(""); setMapError(""); onClear?.(); };
 
   const center: [number, number] = normalized ? [normalized.latitude, normalized.longitude] : DEFAULT_INDIA_CENTER;
   const trimmedQuery = query.trim();
@@ -113,7 +131,7 @@ export default function LocationSelector({ value, onChange, disabled = false, re
   const status = isResolvingAddress ? "Finding address…" : isSearching ? "Searching locations…" : isMapLoading ? "Loading map…" : "";
   return <div className="space-y-3">
     <div className="relative z-[500]">
-      <Input label={label} value={query} onValueChange={setQuery} isDisabled={disabled} isRequired={required} startContent={<FiSearch />} endContent={isSearching || isResolvingAddress ? <Spinner size="sm" aria-label={isSearching ? "Searching locations" : "Finding address"} /> : null} description="Choose a suggestion or place the pin on the map." />
+      <Input label={label} value={query} onValueChange={setQuery} isDisabled={disabled} isRequired={required} startContent={<FiSearch />} endContent={isSearching || isResolvingAddress ? <Spinner size="sm" aria-label={isSearching ? "Searching locations" : "Finding address"} /> : query && onClear ? <button type="button" aria-label="Clear location" onClick={clear}><FiX /></button> : null} description="Choose a suggestion or place the pin on the map." />
       {results.length > 0 && <div className="absolute top-full mt-1 max-h-64 w-full overflow-auto rounded-2xl border border-divider bg-content1 p-1 shadow-2xl">
         {results.map((result, index) => <Button key={`${result.latitude}-${result.longitude}-${index}`} variant="light" className="h-auto w-full justify-start whitespace-normal px-3 py-3 text-left" startContent={<FiMapPin className="shrink-0" />} onPress={() => select(result)}>{result.label}</Button>)}
       </div>}
@@ -121,6 +139,7 @@ export default function LocationSelector({ value, onChange, disabled = false, re
     </div>
     <p className="sr-only" role="status" aria-live="polite">{status}</p>
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+    {!disabled && <div className="flex flex-wrap gap-2"><Button size="sm" variant="flat" startContent={<FiCrosshair />} isLoading={isLocating} onPress={useCurrentLocation}>Use current location</Button>{normalized && onClear ? <Button size="sm" variant="light" startContent={<FiX />} onPress={clear}>Clear pin</Button> : null}</div>}
     <div className="relative overflow-hidden rounded-2xl border border-divider" style={{ height }}>
       <MapContainer center={center} zoom={normalized ? 13 : DEFAULT_INDIA_ZOOM} scrollWheelZoom={!disabled} dragging={!disabled} attributionControl={false} style={{ height: "100%", width: "100%" }}>
         <MapSync value={normalized} /><MapEvents disabled={disabled} onPick={reverse} />
@@ -132,7 +151,7 @@ export default function LocationSelector({ value, onChange, disabled = false, re
       </div>}
     </div>
     {mapError && <p role="alert" className="text-sm text-warning-700">{mapError}</p>}
-    {normalized && <p className="text-xs text-default-500"><FiMapPin className="mr-1 inline" />{normalized.label} · {normalized.latitude.toFixed(5)}, {normalized.longitude.toFixed(5)}</p>}
+    {normalized && <p className="text-xs text-default-500"><FiMapPin className="mr-1 inline" />{normalized.label}{mode === "full" ? ` · ${normalized.latitude.toFixed(5)}, ${normalized.longitude.toFixed(5)}` : ""}</p>}
     <style jsx global>{`.shared-location-pin{background:transparent;border:0}.shared-location-pin__dot{width:34px;height:34px;border:5px solid white;border-radius:50% 50% 50% 0;background:#ff9f43;box-shadow:0 5px 18px rgba(0,0,0,.35);transform:rotate(-45deg)}`}</style>
   </div>;
 }

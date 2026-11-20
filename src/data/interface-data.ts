@@ -234,6 +234,7 @@ export interface FormField {
     parentValue: string
   ) => Promise<{ key: string; value: string }[]>; // optional async
   accept?: string; // For file inputs (e.g., "image/*")
+  imagePreset?: "avatar" | "logo" | "banner" | "product" | "signature";
   multiple?: boolean; // For file inputs
   required?: boolean; // For file inputs
   showWhen?: {

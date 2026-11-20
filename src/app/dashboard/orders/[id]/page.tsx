@@ -49,6 +49,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import AuthContext from "@/context/AuthContext";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import AppSelect from "@/components/ui/AppSelect";
+import FileDropzone from "@/components/ui/FileDropzone";
 import OrderStageTimeline from "@/components/dashboard/orders/OrderStageTimeline";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
@@ -2045,13 +2046,7 @@ export default function OrderDetailsPage() {
                 <ModalContent>
                     <ModalHeader className="text-sm font-black  tracking-tighter text-foreground"> {docActionRule ? `${docActionRule.docType} ENTRY` : "Compliance Entry"} </ModalHeader>
                     <ModalBody>
-                        {String(docActionRule?.actionType || "") === "UPLOAD" && (
-                            <label className="block rounded-xl border border-dashed border-divider p-4 text-xs font-bold text-foreground">
-                                <span className="mb-2 block">Carrier-issued original</span>
-                                <input type="file" accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" onChange={(event) => setDocActionFile(event.target.files?.[0] || null)} className="block w-full text-xs" />
-                                <span className="mt-2 block text-default-400">PDF, PNG, or JPEG up to 15 MB. The upload remains pending until verified.</span>
-                            </label>
-                        )}
+                        {String(docActionRule?.actionType || "") === "UPLOAD" && <FileDropzone label="Carrier-issued original" file={docActionFile} onChange={setDocActionFile} accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" maxSizeMb={15} required helperText="The upload remains pending until verified." />}
                         <div className="text-xs font-black text-obaol-500  tracking-widest mt-2">{docActionRule?.responsibleRole ? `PRIORITY: ${docActionRule.responsibleRole} AUTHORITY` : ""}</div>
                     </ModalBody>
                     <ModalFooter>

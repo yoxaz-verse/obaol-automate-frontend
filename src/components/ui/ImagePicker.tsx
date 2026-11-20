@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
 import { Button } from "@nextui-org/react";
 import { FiImage, FiTrash2, FiUploadCloud } from "react-icons/fi";
-import ImageCropDialog from "./ImageCropDialog";
+import dynamic from "next/dynamic";
 import type { ImagePresetName } from "./imagePresets";
+
+const ImageCropDialog = dynamic(() => import("./ImageCropDialog"), { ssr: false });
 
 type Props = {
   label: string;

@@ -4,13 +4,13 @@ import {
   Accordion,
   AccordionItem,
   Button,
-  Input,
   Spacer,
   Spinner,
 } from "@nextui-org/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler"; // Your API handler
 import { BulkAddProps } from "@/data/interface-data";
+import FileDropzone from "@/components/ui/FileDropzone";
 
 type SpreadsheetRow = Record<string, unknown>;
 
@@ -86,11 +86,6 @@ const BulkAdd: React.FC<BulkAddProps> = ({
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    setFile(selectedFile || null);
-  };
-
   const handleUpload = async () => {
     if (!file) {
       setStatusMessage("Please select a file before uploading."); //Translate
@@ -155,12 +150,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
           title={`Bulk Add ${currentTable}`} //Translate
         >
           <Spacer y={1} />
-          <Input
-            type="file"
-            accept=".csv, .xlsx, .xls"
-            onChange={handleFileChange}
-            className="w-[250px]"
-          />
+          <div className="w-[min(500px,80vw)]"><FileDropzone label={`Import ${currentTable}`} file={file} onChange={setFile} accept=".csv,.xlsx,.xls" maxSizeMb={15} required helperText="Choose a CSV or Excel workbook." /></div>
           <Spacer y={1} />
           <Button onClick={handleUpload} disabled={!file || isLoading}>
             {isLoading ? (

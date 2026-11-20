@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { Button, Checkbox, Chip, Input, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
-import { FiChevronDown, FiSearch } from "react-icons/fi";
+import { Button, Checkbox, Chip, Input, Popover, PopoverContent, PopoverTrigger, Spinner } from "@nextui-org/react";
+import { FiAlertCircle, FiChevronDown, FiRefreshCw, FiSearch } from "react-icons/fi";
 
-export type SearchableOption = { key: string; label: string; description?: string };
+export type SearchableOption = { key: string; label: string; description?: string; group?: string };
 
 export type SearchableSelectProps = {
   label: string;
@@ -19,6 +19,14 @@ export type SearchableSelectProps = {
   disabled?: boolean;
   emptyActionLabel?: string;
   onEmptyAction?: () => void;
+  loading?: boolean;
+  error?: string;
+  onRetry?: () => void;
+  onSearch?: (query: string) => void;
+  searchDebounceMs?: number;
+  searchValue?: string;
+  onSearchValueChange?: (query: string) => void;
+  maxVisibleOptions?: number;
 };
 
 export default function SearchableSelect({
@@ -34,16 +42,28 @@ export default function SearchableSelect({
   disabled,
   emptyActionLabel,
   onEmptyAction,
+  loading = false,
+  error,
+  onRetry,
+  onSearch,
+  searchDebounceMs = 300,
+  searchValue,
+  onSearchValueChange,
+  maxVisibleOptions = 200,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [internalSearch, setInternalSearch] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [menuWidth, setMenuWidth] = useState<number>();
+  const search = searchValue ?? internalSearch;
+  const setSearch = (next: string) => { if (searchValue === undefined) setInternalSearch(next); onSearchValueChange?.(next); };
 
   const filtered = useMemo(
     () => options.filter((option) => `${option.label} ${option.description || ""}`.toLowerCase().includes(search.trim().toLowerCase())),
     [options, search]
   );
+  const visibleOptions = filtered.slice(0, maxVisibleOptions);
   const selected = options.filter((option) => value.includes(option.key));
 
   const toggle = (key: string) => {
@@ -86,7 +106,15 @@ export default function SearchableSelect({
 
   useEffect(() => {
     if (!open) setSearch("");
+    else setActiveIndex(0);
+    // setSearch is intentionally a controlled/uncontrolled bridge.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+  useEffect(() => {
+    if (!open || !onSearch) return;
+    const timer = setTimeout(() => onSearch(search.trim()), searchDebounceMs);
+    return () => clearTimeout(timer);
+  }, [open, onSearch, search, searchDebounceMs]);
 
   return (
     <div ref={containerRef} className="w-full min-w-0 space-y-1.5">
@@ -177,16 +205,26 @@ export default function SearchableSelect({
                 </Button>
               </div>
             ) : null}
-            <div className="max-h-64 overflow-y-auto overscroll-contain py-1" role="listbox" aria-label={label} aria-multiselectable={multiple}>
-              {filtered.length ? (
-                filtered.map((option) => (
+            <div className="max-h-64 overflow-y-auto overscroll-contain py-1" role="listbox" aria-label={label} aria-multiselectable={multiple} aria-activedescendant={visibleOptions[activeIndex] ? `${label.replace(/\W+/g, "-").toLowerCase()}-${visibleOptions[activeIndex].key}` : undefined} tabIndex={0} onKeyDown={event => {
+              if (!visibleOptions.length) return;
+              if (event.key === "ArrowDown") { event.preventDefault(); setActiveIndex(index => Math.min(visibleOptions.length - 1, index + 1)); }
+              else if (event.key === "ArrowUp") { event.preventDefault(); setActiveIndex(index => Math.max(0, index - 1)); }
+              else if (event.key === "Home") { event.preventDefault(); setActiveIndex(0); }
+              else if (event.key === "End") { event.preventDefault(); setActiveIndex(visibleOptions.length - 1); }
+              else if (event.key === "Enter") { event.preventDefault(); toggle(visibleOptions[activeIndex].key); }
+              else if (event.key === "Escape") { event.preventDefault(); setOpen(false); }
+            }}>
+              {loading ? <div className="flex items-center justify-center gap-2 px-3 py-8 text-sm text-default-500"><Spinner size="sm" />Loading options…</div> : error ? <div role="alert" className="px-3 py-6 text-center text-sm text-danger"><FiAlertCircle className="mx-auto mb-2" /><p>{error}</p>{onRetry ? <Button className="mt-3" size="sm" variant="flat" startContent={<FiRefreshCw />} onPress={onRetry}>Retry</Button> : null}</div> : visibleOptions.length ? (
+                visibleOptions.map((option, index) => (
+                  <div key={option.key}>
+                  {option.group && (index === 0 || visibleOptions[index - 1]?.group !== option.group) ? <p className="px-2.5 pb-1 pt-3 text-[11px] font-bold uppercase tracking-wide text-default-400">{option.group}</p> : null}
                   <button
-                    key={option.key}
+                    id={`${label.replace(/\W+/g, "-").toLowerCase()}-${option.key}`}
                     type="button"
                     role="option"
                     aria-selected={value.includes(option.key)}
                     onClick={(event) => { event.stopPropagation(); toggle(option.key); }}
-                    className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-default-100 focus:bg-default-100 focus:outline-none transition-colors"
+                    className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-default-100 focus:bg-default-100 focus:outline-none transition-colors ${activeIndex === index ? "bg-default-100" : ""}`}
                   >
                     {multiple ? (
                       <Checkbox isSelected={value.includes(option.key)} isReadOnly className="pointer-events-none" aria-label={option.label} />
@@ -206,6 +244,7 @@ export default function SearchableSelect({
                       {option.description ? <span className="block truncate text-xs text-default-500">{option.description}</span> : null}
                     </span>
                   </button>
+                  </div>
                 ))
               ) : (
                 <div className="px-3 py-6 text-center text-sm text-default-500">

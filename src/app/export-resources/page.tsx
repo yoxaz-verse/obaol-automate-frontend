@@ -9,6 +9,7 @@ import {
   EXPORT_RESOURCES,
   type ExportResourceCategory,
 } from "@/data/export-resources";
+import AppCombobox from "@/components/ui/AppCombobox";
 
 const ALL_CATEGORIES = "All";
 
@@ -59,23 +60,7 @@ export default function ExportResourcesPage() {
               className="h-11 w-full rounded-xl border border-default-200 bg-content1 px-3 text-sm text-foreground outline-none focus:border-warning"
             />
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-default-600">
-              Category
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="h-11 w-full rounded-xl border border-default-200 bg-content1 px-3 text-sm text-foreground outline-none focus:border-warning"
-            >
-              <option value={ALL_CATEGORIES}>{ALL_CATEGORIES}</option>
-              {EXPORT_RESOURCE_CATEGORIES.map((item: ExportResourceCategory) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </div>
+          <AppCombobox label="Category" value={category} onChange={value => setCategory(value || ALL_CATEGORIES)} options={[{ key: ALL_CATEGORIES, label: ALL_CATEGORIES }, ...EXPORT_RESOURCE_CATEGORIES.map((item: ExportResourceCategory) => ({ key: item, label: item }))]} />
         </div>
 
         {filteredResources.length === 0 ? (

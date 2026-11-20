@@ -16,6 +16,7 @@ import {
 } from "@/utils/developerApi";
 import { clearDeveloperToken, getDeveloperToken } from "@/utils/developerSession";
 import SectionSkeleton from "@/components/ui/SectionSkeleton";
+import AppCombobox from "@/components/ui/AppCombobox";
 
 type DevKey = {
   id: string;
@@ -223,9 +224,7 @@ export default function DeveloperKeysPage() {
           <h2 className="text-lg font-medium text-default-900 dark:text-white">Create API Key</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <input value={label} onChange={(e) => setLabel(e.target.value)} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5" placeholder="Key label" />
-            <select value={preset} onChange={(e) => setPreset(e.target.value)} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5">
-              {Object.keys(presets).length === 0 ? <option value="automation_basic">automation_basic</option> : Object.keys(presets).map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <AppCombobox label="Permission preset" value={preset} onChange={value => setPreset(value || "automation_basic")} options={(Object.keys(presets).length ? Object.keys(presets) : ["automation_basic"]).map(value => ({ key: value, label: value.replaceAll("_", " ") }))} />
             <input type="number" min={10} max={5000} value={rateLimit} onChange={(e) => setRateLimit(Number(e.target.value || 120))} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5" placeholder="Rate limit/min" />
           </div>
           <div className="mt-4">
@@ -297,18 +296,7 @@ export default function DeveloperKeysPage() {
           </p>
 
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <select
-              value={connectorApiKeyId}
-              onChange={(e) => setConnectorApiKeyId(e.target.value)}
-              className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5"
-            >
-              <option value="">Select API Key</option>
-              {keys.filter((k) => k.is_active).map((k) => (
-                <option key={k.id} value={k.id}>
-                  {k.label} ({k.key_prefix}...)
-                </option>
-              ))}
-            </select>
+            <AppCombobox label="API key" value={connectorApiKeyId || null} onChange={value => setConnectorApiKeyId(value || "")} options={keys.filter(k => k.is_active).map(k => ({ key: k.id, label: k.label, description: `${k.key_prefix}…` }))} />
             <input
               value={connectorLabel}
               onChange={(e) => setConnectorLabel(e.target.value)}

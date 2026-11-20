@@ -6,11 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
 import { Button, Chip, Input } from "@nextui-org/react";
-import { FiCheckCircle, FiEdit3, FiKey, FiMail, FiShield, FiTrash2, FiUpload } from "react-icons/fi";
+import { FiCheckCircle, FiEdit3, FiKey, FiMail, FiShield, FiTrash2 } from "react-icons/fi";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
 import { deleteDataBody, getData, postData, postMultipart } from "@/core/api/apiHandler";
 import { baseUrl } from "@/core/api/axiosInstance";
+import ImagePicker from "@/components/ui/ImagePicker";
 
 type Signature = { id: string; ownerType: "USER" | "COMPANY"; signerName: string; signerDesignation: string; status: string; version: number; checksum: string; registeredAt: string; verifiedAt?: string; updatedAt: string; previewUrl: string };
 const message = (error: any, fallback: string) => {
@@ -76,7 +77,7 @@ export default function SignatureManagementPage() {
           {ownerType === "COMPANY" && company && <p className="rounded-xl db-inset p-3 text-sm">Shared for members of <strong>{company.name}</strong>.</p>}
           <Input label="Signature owner" labelPlacement="outside" value={signerName} onValueChange={setSignerName} placeholder="Full legal name" variant="bordered" isRequired /><Input label="Designation" labelPlacement="outside" value={designation} onValueChange={setDesignation} placeholder="Authorized signatory" variant="bordered" />
           {!storageConfigured && <div role="alert" className="rounded-xl border border-warning-400 bg-warning-50 p-3 text-sm text-warning-800">Private signature storage is not configured. An administrator must set the AWS S3 bucket and region before signatures can be uploaded.</div>}
-          <label className={`grid min-h-28 place-items-center rounded-2xl border border-dashed db-border-subtle p-4 text-center ${storageConfigured ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}><FiUpload size={24} /><span className="mt-2 text-sm font-semibold">{file?.name || "Choose transparent PNG"}</span><input className="sr-only" type="file" accept="image/png" disabled={!storageConfigured} onChange={event => setFile(event.target.files?.[0] || null)} /></label>
+          <ImagePicker label="Transparent signature" value={file} preset="signature" accept="image/png,image/jpeg" maxSizeMb={5} disabled={!storageConfigured} required onChange={setFile} helperText="Crop and position the signature on a transparent PNG canvas." />
           <Button color="warning" startContent={<FiEdit3 />} isLoading={busy === "upload"} isDisabled={!storageConfigured || !file || !signerName.trim()} onPress={upload}>Upload as pending</Button>
           {uploadStatus && <p role="status" className="rounded-xl border db-border-subtle p-3 text-sm">{uploadStatus}</p>}
           <p className="text-xs leading-5 db-muted">This is an authenticated visual signature, not a certified DSC or CCA-backed eSign.</p></div></DashboardPanel>

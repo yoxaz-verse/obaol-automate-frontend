@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Slider } from "@nextui-org/react";
 import { FiRotateCcw } from "react-icons/fi";
 import { IMAGE_PRESETS, extensionForMimeType, type ImagePresetName } from "./imagePresets";
@@ -29,6 +29,7 @@ export default function ImageCropDialog({ file, preset, isOpen, onCancel, onSave
   const [rotation, setRotation] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const drag = useRef<{ x: number; y: number; offsetX: number; offsetY: number } | null>(null);
 
   useEffect(() => {
     if (!file) { setSource(""); return; }
@@ -87,9 +88,14 @@ export default function ImageCropDialog({ file, preset, isOpen, onCancel, onSave
   };
 
   const reset = () => { setZoom(1); setOffsetX(0); setOffsetY(0); setRotation(0); };
-  return <Modal isOpen={isOpen} onClose={() => !busy && onCancel()} size="2xl" scrollBehavior="inside">
+  const dirty = zoom !== 1 || offsetX !== 0 || offsetY !== 0 || rotation !== 0;
+  const requestCancel = () => { if (!busy && (!dirty || window.confirm("Discard the image adjustments?"))) onCancel(); };
+  const startDrag = (event: PointerEvent<HTMLDivElement>) => { drag.current = { x: event.clientX, y: event.clientY, offsetX, offsetY }; event.currentTarget.setPointerCapture(event.pointerId); };
+  const moveDrag = (event: PointerEvent<HTMLDivElement>) => { if (!drag.current) return; const bounds = event.currentTarget.getBoundingClientRect(); setOffsetX(Math.max(-100, Math.min(100, drag.current.offsetX + ((event.clientX - drag.current.x) / bounds.width) * 200))); setOffsetY(Math.max(-100, Math.min(100, drag.current.offsetY + ((event.clientY - drag.current.y) / bounds.height) * 200))); };
+  const stopDrag = () => { drag.current = null; };
+  return <Modal isOpen={isOpen} onClose={requestCancel} size="2xl" scrollBehavior="inside">
     <ModalContent><ModalHeader>Crop and optimize image</ModalHeader><ModalBody className="gap-4">
-      <div className="mx-auto w-full overflow-hidden rounded-2xl bg-default-100" style={frameStyle}>
+      <div className="mx-auto w-full touch-none cursor-move overflow-hidden rounded-2xl bg-default-100" style={frameStyle} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag}>
         {source ? <img src={source} alt="Crop preview" className={`h-full w-full ${config.fit === "contain" ? "object-contain" : "object-cover"}`} style={{ transform: `translate(${offsetX / 2}%, ${offsetY / 2}%) scale(${zoom}) rotate(${rotation}deg)` }} /> : null}
       </div>
       <Slider label="Zoom" minValue={1} maxValue={3} step={0.05} value={zoom} onChange={value => setZoom(Number(value))} />
@@ -97,6 +103,6 @@ export default function ImageCropDialog({ file, preset, isOpen, onCancel, onSave
       <div className="flex flex-wrap items-center gap-2">{config.allowRotation ? <Button size="sm" variant="flat" onPress={() => setRotation(value => (value + 90) % 360)}>Rotate 90°</Button> : null}<Button size="sm" variant="light" startContent={<FiRotateCcw />} onPress={reset}>Reset</Button></div>
       <p className="text-xs text-default-500">Saved as {config.width} × {config.height} {config.mimeType.replace("image/", "").toUpperCase()}.</p>
       {error ? <p role="alert" className="text-sm text-danger">{error}</p> : null}
-    </ModalBody><ModalFooter><Button variant="light" isDisabled={busy} onPress={onCancel}>Cancel</Button><Button color="warning" isLoading={busy} onPress={save}>Use image</Button></ModalFooter></ModalContent>
+    </ModalBody><ModalFooter><Button variant="light" isDisabled={busy} onPress={requestCancel}>Cancel</Button><Button color="warning" isLoading={busy} onPress={save}>Use image</Button></ModalFooter></ModalContent>
   </Modal>;
 }

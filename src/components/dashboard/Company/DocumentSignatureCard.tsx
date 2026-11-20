@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Input, Spinner } from "@nextui-org/react";
 import { deleteData, getData, postData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
+import ImagePicker from "@/components/ui/ImagePicker";
 
 export default function DocumentSignatureCard({ endpoint, title = "Document signature", enabled = true }: { endpoint: string; title?: string; enabled?: boolean }) {
   const client = useQueryClient();
@@ -21,7 +22,7 @@ export default function DocumentSignatureCard({ endpoint, title = "Document sign
       <div className="grid min-h-32 place-items-center rounded-xl border border-dashed border-default-300 bg-[linear-gradient(45deg,#eee_25%,transparent_25%),linear-gradient(-45deg,#eee_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#eee_75%),linear-gradient(-45deg,transparent_75%,#eee_75%)] bg-[length:16px_16px]">
         {preview ? <img src={preview} alt="Signature preview" className="max-h-28 max-w-full object-contain p-3" /> : <span className="text-xs text-default-500">No signature configured</span>}
       </div>
-      <div className="space-y-3"><input aria-label="Upload transparent signature" type="file" accept="image/png,image/jpeg" onChange={event => setFile(event.target.files?.[0] || null)} className="block w-full text-sm" /><div className="grid gap-3 sm:grid-cols-2"><Input label="Authorized signer name" value={signerName} onValueChange={setSignerName} isRequired /><Input label="Designation" value={signerDesignation} onValueChange={setSignerDesignation} /></div><div className="flex flex-wrap gap-2"><Button color="primary" isLoading={save.isPending} isDisabled={!signerName.trim() || (!file && !query.data?.imageDataUrl)} onPress={() => save.mutate()}>Confirm and save</Button>{query.data?.imageDataUrl && <Button color="danger" variant="light" isLoading={remove.isPending} onPress={() => remove.mutate()}>Remove signature</Button>}</div></div>
+      <div className="space-y-3"><ImagePicker label="Signature image" value={file} preset="signature" accept="image/png,image/jpeg" maxSizeMb={5} onChange={setFile} helperText="The signature is contained on a transparent canvas and saved as PNG." /><div className="grid gap-3 sm:grid-cols-2"><Input label="Authorized signer name" value={signerName} onValueChange={setSignerName} isRequired /><Input label="Designation" value={signerDesignation} onValueChange={setSignerDesignation} /></div><div className="flex flex-wrap gap-2"><Button color="primary" isLoading={save.isPending} isDisabled={!signerName.trim() || (!file && !query.data?.imageDataUrl)} onPress={() => save.mutate()}>Confirm and save</Button>{query.data?.imageDataUrl && <Button color="danger" variant="light" isLoading={remove.isPending} onPress={() => remove.mutate()}>Remove signature</Button>}</div></div>
     </div>}
   </section>;
 }

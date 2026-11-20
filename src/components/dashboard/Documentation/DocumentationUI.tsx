@@ -1,13 +1,14 @@
 "use client";
 
-import type { ButtonHTMLAttributes, ChangeEvent, DragEvent, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import Link from "next/link";
 import {
   FiActivity, FiAlertCircle, FiCheckCircle, FiClock, FiFileText, FiGrid,
-  FiList, FiSearch, FiShare2, FiUploadCloud, FiX,
+  FiList, FiSearch, FiShare2, FiX,
 } from "react-icons/fi";
 import { DashboardPanel, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 import { DOCUMENT_CATEGORIES, DOCUMENT_LABELS } from "./documentCatalog";
+import SharedFileDropzone from "@/components/ui/FileDropzone";
 
 export type DocumentationView = "overview" | "library" | "create" | "requirements" | "recipients" | "configuration";
 export type LibraryDisplay = "table" | "cards";
@@ -91,13 +92,7 @@ export function SelectField({ label, value, onChange, children }: { label: strin
 }
 
 export function FileDropzone({ file, onFile }: { file: File | null; onFile: (file: File | null) => void }) {
-  const receive = (event: DragEvent<HTMLLabelElement>) => { event.preventDefault(); onFile(event.dataTransfer.files?.[0] || null); };
-  const choose = (event: ChangeEvent<HTMLInputElement>) => onFile(event.target.files?.[0] || null);
-  return <label onDragOver={event => event.preventDefault()} onDrop={receive} className="group block cursor-pointer rounded-2xl border-2 border-dashed border-[var(--db-border)] p-6 text-center outline-none transition hover:border-obaol-500 hover:bg-obaol-500/5 focus-within:border-obaol-500 focus-within:ring-2 focus-within:ring-obaol-500/20">
-    <input aria-label="Document file" className="sr-only" type="file" accept="application/pdf,image/png,image/jpeg" onChange={choose} />
-    <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-obaol-500/15 text-xl text-obaol-700 dark:text-obaol-300"><FiUploadCloud /></span>
-    {file ? <div className="mt-3"><p className="break-all text-sm font-bold">{file.name}</p><p className="mt-1 text-xs db-muted">{file.type || "Unknown type"} · {(file.size / 1024 / 1024).toFixed(2)} MB</p><button type="button" onClick={event => { event.preventDefault(); onFile(null); }} className="mt-2 text-xs font-bold text-danger">Remove file</button></div> : <div className="mt-3"><p className="text-sm font-bold">Drop a PDF, PNG, or JPEG here</p><p className="mt-1 text-xs db-muted">or click to browse · maximum 15 MB</p></div>}
-  </label>;
+  return <SharedFileDropzone label="Document file" file={file} onChange={onFile} accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" maxSizeMb={15} required helperText="PDF, PNG, or JPEG. Uploaded documents require extraction review." />;
 }
 
 export function ProgressTimeline({ status }: { status?: string }) {

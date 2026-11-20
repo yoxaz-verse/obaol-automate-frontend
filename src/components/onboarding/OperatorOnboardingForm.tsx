@@ -22,7 +22,7 @@ import { showToastMessage } from "@/utils/utils";
 import { accountRoutes } from "@/core/api/apiRoutes";
 import { getData, postData } from "@/core/api/apiHandler";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiUser, FiMail, FiLock, FiMapPin, FiGlobe, FiChevronRight, FiChevronLeft, FiCheck } from "react-icons/fi";
+import { FiUser, FiMail, FiLock, FiMapPin, FiGlobe, FiChevronRight, FiChevronLeft, FiCheck, FiEye, FiEyeOff, FiEdit3 } from "react-icons/fi";
 import {
   LOGIN_EMAIL_HELP,
   LoginEmailIndicator,
@@ -106,6 +106,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     district: "",
     languageKnown: [] as string[],
   });
+  const formRef = useRef<HTMLFormElement>(null);
 
   const draftLoadedRef = useRef(false);
   const DRAFT_KEY = useMemo(() => `onboarding_draft_operator_${user?.id || "anonymous"}`, [user?.id]);
@@ -128,8 +129,8 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
           ...(user?.email ? { email: user.email } : {}),
         }));
       }
-      if (parsed?.currentStep) setCurrentStep(parsed.currentStep);
-      if (parsed?.completedStep) setCompletedStep(parsed.completedStep);
+      if (parsed?.currentStep) setCurrentStep(Math.min(4, Math.max(1, Number(parsed.currentStep) || 1)));
+      if (parsed?.completedStep) setCompletedStep(Math.min(4, Math.max(0, Number(parsed.completedStep) || 0)));
     } catch {
       // ignore draft load errors
     } finally {
@@ -307,6 +308,10 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       setCurrentStep(prev => prev + 1);
     } else {
       setFormError(firstError);
+      window.setTimeout(() => {
+        const invalid = formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"], [data-invalid="true"] input, [data-invalid="true"] textarea, [data-invalid="true"] button');
+        invalid?.focus();
+      }, 0);
     }
   };
 
@@ -368,19 +373,17 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     if (isLoading) return;
     setFormError("");
 
-    const requiresIndianLocation = form.geoType !== "INTERNATIONAL";
-    const missingCountry = form.geoType === "INTERNATIONAL" && !form.country;
-    const missingState = requiresIndianLocation && !form.state;
-    const missingDistrict = requiresIndianLocation && !form.district;
-    if (!form.address || missingCountry || missingState || missingDistrict) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        address: !form.address ? "Full address is required." : "",
-        country: missingCountry ? "Country is required for international operators." : "",
-        state: missingState ? "State is required." : "",
-        district: missingDistrict ? "District is required." : "",
-      }));
-      setFormError("Please complete all required location fields.");
+    const validationByStep = [1, 2, 3].map((step) => ({ step, errors: getStepErrors(step) }));
+    const invalidStep = validationByStep.find(({ errors }) => Object.values(errors).some(Boolean));
+    if (invalidStep) {
+      const firstError = Object.values(invalidStep.errors).find(Boolean) || "Please complete all required fields.";
+      setFieldErrors(invalidStep.errors);
+      setFormError(firstError);
+      setCurrentStep(invalidStep.step);
+      window.setTimeout(() => {
+        const invalid = formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"], [data-invalid="true"] input, [data-invalid="true"] textarea, [data-invalid="true"] button');
+        invalid?.focus();
+      }, 0);
       return;
     }
     if (!isOnboarding && googleSignUp && !googleIdToken) {
@@ -461,32 +464,45 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
   };
 
 
-  const stepLabels = ["Profile", "Security", "Operational"];
+  const stepLabels = ["Personal details", "Account security", "Work location", "Review"];
   const stepPurposes = [
     "Confirm your contact details so we can verify your account.",
     "Secure your account and add a referral code if you have one.",
-    "Add your operating location so OBAOL can prepare the right workspace.",
+    "Add your location and languages so OBAOL can prepare relevant work.",
+    "Review your details before sending your profile for approval.",
   ];
+
+  const selectedCountry = countries.find((item: any) => String(item?._id) === String(form.country));
+  const selectedState = states.find((item: any) => String(item?._id) === String(form.state));
+  const selectedDistrict = districts.find((item: any) => String(item?._id) === String(form.district));
+  const selectedLanguageLabels = languages
+    .filter((item: any) => form.languageKnown.includes(String(item?._id)))
+    .map((item: any) => item.name);
+
+  const goToStep = (step: number) => {
+    setFormError("");
+    setCurrentStep(step);
+  };
 
   return (
     <AuthLayout
       title={stepLabels[currentStep - 1]}
       subtitle={stepPurposes[currentStep - 1]}
-      cardMaxWidthClass={isOnboarding ? "max-w-[980px]" : "max-w-[640px]"}
+      cardMaxWidthClass={isOnboarding ? "max-w-[1120px]" : "max-w-[720px]"}
       embedded={isOnboarding}
       onboarding
       leftPanel={{
         headline: "Operator",
         highlight: "ACCOUNT SETUP",
-        description: "Verify your identity and operating location before entering the workspace.",
+        description: "Set up your personal operator profile before entering the workspace.",
         guidanceSections: [
           {
             title: "Identity verification",
-            body: "Accurate contact details help protect operational tools and speed up review."
+            body: "Accurate contact details protect your account and help us complete review without unnecessary follow-up."
           },
           {
             title: "Workspace setup",
-            body: "Your location helps OBAOL prepare assignments and support context."
+            body: "Your location and languages help OBAOL prepare relevant assignments and support."
           }
         ],
         footer: "Progress saved automatically",
@@ -495,7 +511,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     >
       <OnboardingProgress currentStep={currentStep} labels={stepLabels} />
 
-      <form onSubmit={handleSubmit} className="onboarding-form operator-onboarding-form space-y-6">
+      <form ref={formRef} onSubmit={handleSubmit} className="onboarding-form operator-onboarding-form space-y-6">
         {!isOnboarding && (
           <div className="flex flex-col items-center gap-3">
             {googleClientId && !googleSignUp ? (
@@ -656,8 +672,8 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                     isInvalid={!!fieldErrors.password}
                     errorMessage={fieldErrors.password}
                     endContent={
-                      <Button size="sm" variant="light" isIconOnly onPress={() => setShowPassword((prev) => !prev)}>
-                        <FiGlobe className={showPassword ? "text-obaol-500" : "text-default-400"} />
+                      <Button size="sm" variant="light" isIconOnly aria-label={showPassword ? "Hide password" : "Show password"} onPress={() => setShowPassword((prev) => !prev)}>
+                        {showPassword ? <FiEyeOff className="text-obaol-600" /> : <FiEye className="text-default-400" />}
                       </Button>
                     }
                   />
@@ -711,13 +727,16 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                 errorMessage={fieldErrors.address}
               />
 
-              <div className="space-y-2">
-                <label className="text-xs text-default-500 font-medium">Operator Location Type</label>
-                <div className="flex gap-2">
+              <section className="onboarding-section-card space-y-3" aria-labelledby="operator-location-type">
+                <div>
+                  <h3 id="operator-location-type" className="text-sm font-bold text-slate-800 dark:text-slate-100">Where will you operate?</h3>
+                  <p className="mt-1 text-xs leading-5 text-default-500">Choose the geography that matches your primary working location.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <Button
-                    size="sm"
+                    className="min-h-11"
                     variant={form.geoType === "INDIAN" ? "solid" : "bordered"}
-                    className={form.geoType === "INDIAN" ? "bg-obaol-500 text-black" : "border-default-300 text-default-500"}
+                    color={form.geoType === "INDIAN" ? "warning" : "default"}
                     onPress={() => {
                       setForm((prev) => ({ ...prev, geoType: "INDIAN", country: "" }));
                       setFieldErrors((prev) => ({ ...prev, country: "" }));
@@ -726,9 +745,9 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                     Indian
                   </Button>
                   <Button
-                    size="sm"
+                    className="min-h-11"
                     variant={form.geoType === "INTERNATIONAL" ? "solid" : "bordered"}
-                    className={form.geoType === "INTERNATIONAL" ? "bg-obaol-500 text-black" : "border-default-300 text-default-500"}
+                    color={form.geoType === "INTERNATIONAL" ? "warning" : "default"}
                     onPress={() => {
                       setForm((prev) => ({ ...prev, geoType: "INTERNATIONAL", state: "", district: "" }));
                       setFieldErrors((prev) => ({ ...prev, state: "", district: "" }));
@@ -737,7 +756,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                     International
                   </Button>
                 </div>
-              </div>
+              </section>
 
               <div className="grid grid-cols-2 gap-3">
                 {form.geoType === "INTERNATIONAL" ? (
@@ -815,10 +834,10 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                 )}
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-1 h-4 bg-obaol-500 rounded-full shadow-[0_0_8px_rgba(207,152,60,0.4)]" />
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 italic">Linguistic Profile // Languages Known</label>
+              <section className="onboarding-section-card space-y-4" aria-labelledby="operator-languages">
+                <div>
+                  <h3 id="operator-languages" className="text-sm font-bold text-slate-800 dark:text-slate-100">Languages you can work in</h3>
+                  <p className="mt-1 text-xs leading-5 text-default-500">Optional. Select every language you are comfortable using for operational communication.</p>
                 </div>
                 
                 <div className="flex flex-wrap gap-3">
@@ -833,10 +852,10 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                       >
                         <Chip
                           variant="flat"
-                          className={`h-11 px-6 cursor-pointer transition-all duration-300 border-2 rounded-2xl
+                          className={`h-11 px-5 cursor-pointer transition-all duration-200 border rounded-xl
                             ${selected 
-                              ? "bg-obaol-500/20 border-obaol-500 text-obaol-500 shadow-[0_0_20px_rgba(207,152,60,0.15)]"
-                              : "bg-white/[0.03] border-white/5 text-default-400 hover:border-white/20"
+                              ? "bg-obaol-500/15 border-obaol-500 text-obaol-700 dark:text-obaol-300"
+                              : "bg-white border-default-200 text-default-600 hover:border-default-400 dark:bg-content1"
                             }`}
                           startContent={
                             <AnimatePresence mode="wait">
@@ -861,20 +880,61 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                             }));
                           }}
                         >
-                          <span className="text-[11px] font-black uppercase tracking-widest">{lang.name}</span>
+                          <span className="text-sm font-semibold">{lang.name}</span>
                         </Chip>
                         
-                        {selected && (
-                          <motion.div 
-                            layoutId={`glow-${lang._id}`}
-                            className="absolute inset-0 bg-obaol-500/10 blur-xl rounded-2xl -z-10"
-                          />
-                        )}
                       </motion.div>
                     );
                   })}
                 </div>
+              </section>
+            </motion.div>
+          )}
+
+          {currentStep === 4 && (
+            <motion.div
+              key="step4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-4"
+            >
+              <div className="onboarding-review-notice">
+                Check your operator profile below. You can return to any section before submitting it for approval.
               </div>
+              <section className="operator-review-card" aria-labelledby="operator-review-personal">
+                <div className="operator-review-card__header">
+                  <h3 id="operator-review-personal">Personal details</h3>
+                  <Button size="sm" variant="light" startContent={<FiEdit3 />} onPress={() => goToStep(1)}>Edit</Button>
+                </div>
+                <dl className="operator-review-grid">
+                  <div><dt>Full name</dt><dd>{form.name}</dd></div>
+                  <div><dt>Email</dt><dd>{form.email}</dd></div>
+                  <div><dt>Phone</dt><dd>{form.phone || `${form.phoneCountryCode} ${form.phoneNational}`}</dd></div>
+                </dl>
+              </section>
+              <section className="operator-review-card" aria-labelledby="operator-review-security">
+                <div className="operator-review-card__header">
+                  <h3 id="operator-review-security">Account security</h3>
+                  <Button size="sm" variant="light" startContent={<FiEdit3 />} onPress={() => goToStep(2)}>Edit</Button>
+                </div>
+                <dl className="operator-review-grid">
+                  <div><dt>Sign-in</dt><dd>{requiresPassword ? "Password protected" : "Google account"}</dd></div>
+                  <div><dt>Referral code</dt><dd>{form.referralCode || "Not provided"}</dd></div>
+                </dl>
+              </section>
+              <section className="operator-review-card" aria-labelledby="operator-review-location">
+                <div className="operator-review-card__header">
+                  <h3 id="operator-review-location">Work location</h3>
+                  <Button size="sm" variant="light" startContent={<FiEdit3 />} onPress={() => goToStep(3)}>Edit</Button>
+                </div>
+                <dl className="operator-review-grid">
+                  <div className="sm:col-span-2"><dt>Address</dt><dd>{form.address}</dd></div>
+                  <div><dt>Geography</dt><dd>{form.geoType === "INTERNATIONAL" ? "International" : "India"}</dd></div>
+                  <div><dt>Location</dt><dd>{form.geoType === "INTERNATIONAL" ? selectedCountry?.name : [selectedDistrict?.name, selectedState?.name].filter(Boolean).join(", ")}</dd></div>
+                  <div className="sm:col-span-2"><dt>Languages</dt><dd>{selectedLanguageLabels.length ? selectedLanguageLabels.join(", ") : "Not specified"}</dd></div>
+                </dl>
+              </section>
             </motion.div>
           )}
         </AnimatePresence>
@@ -908,12 +968,12 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                   : "bg-gradient-to-r from-obaol-500 to-amber-600 hover:shadow-none"
                 }`}
               isLoading={isLoading || isSubmittingSuccess}
-              onPress={() => (currentStep === 3 ? handleSubmit() : handleNext())}
-              endContent={isSubmittingSuccess ? <FiCheck /> : currentStep === 3 ? <FiCheck /> : <FiChevronRight />}
+              onPress={() => (currentStep === 4 ? handleSubmit() : handleNext())}
+              endContent={isSubmittingSuccess ? <FiCheck /> : currentStep === 4 ? <FiCheck /> : <FiChevronRight />}
             >
               {isSubmittingSuccess
                 ? "Request Received"
-                : currentStep === 3
+                : currentStep === 4
                   ? (isLoading ? "Syncing Profile..." : "Submit for Approval")
                   : "Continue Onboarding"}
             </Button>

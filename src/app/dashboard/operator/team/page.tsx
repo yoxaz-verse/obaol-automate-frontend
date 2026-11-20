@@ -9,6 +9,7 @@ import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import AdminOperatorPicker from "@/components/dashboard/operator/AdminOperatorPicker";
+import CompanyReferralShareCard from "@/components/referrals/CompanyReferralShareCard";
 
 type TeamRow = {
   operatorId: string;
@@ -313,6 +314,8 @@ export default function OperatorTeamPage() {
           Select an operator to view team data.
         </div>
       ) : null}
+
+      {!isAdmin ? <CompanyReferralShareCard /> : null}
 
       <Card className="border border-default-200/80">
         <CardBody className="gap-3">

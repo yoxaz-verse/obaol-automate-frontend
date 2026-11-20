@@ -161,12 +161,34 @@ test("onboarding uses concise step purposes and optional contextual guidance", (
   ]) assert.equal(associate.includes(purpose), true, `missing Associate purpose: ${purpose}`);
 
   assert.equal(operator.includes("Secure your account and add a referral code if you have one."), true);
-  assert.equal(operator.includes("Add your operating location so OBAOL can prepare the right workspace."), true);
+  assert.equal(operator.includes("Add your location and languages so OBAOL can prepare relevant work."), true);
   assert.equal(layout.includes('<details className="onboarding-mobile-guidance">'), true);
   assert.equal(layout.includes("!compact && !!leftPanel.guidanceSections?.length"), true);
   assert.equal(dashboardPage.includes("Complete your OBAOL setup"), false);
   assert.equal(associate.includes("Why this process matters"), false);
   assert.equal(operator.includes("Why this process matters"), false);
+});
+
+test("operator onboarding uses a four-stage task-oriented flow with review", () => {
+  const operator = read("../src/components/onboarding/OperatorOnboardingForm.tsx");
+  const styles = read("../src/app/globals.css");
+  for (const token of [
+    '["Personal details", "Account security", "Work location", "Review"]',
+    'currentStep === 4',
+    "Review your details before sending your profile for approval.",
+    "Where will you operate?",
+    "Languages you can work in",
+    "Check your operator profile below.",
+    "operator-review-card",
+    "goToStep(1)",
+    "goToStep(2)",
+    "goToStep(3)",
+    'postData("/auth/onboarding", { role: "Operator", ...payload })',
+  ]) assert.equal(operator.includes(token), true, `missing operator onboarding token: ${token}`);
+  assert.equal(styles.includes(".operator-review-grid"), true);
+  assert.equal(styles.includes("bottom: 0"), true);
+  assert.equal(operator.includes("Linguistic Profile // Languages Known"), false);
+  assert.equal(operator.includes('aria-label={showPassword ? "Hide password" : "Show password"}'), true);
 });
 
 test("authenticated onboarding locks the session login email without disabling it", () => {

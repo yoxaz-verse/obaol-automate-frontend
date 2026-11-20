@@ -47,6 +47,8 @@ test("phase two primitives expose validation, progress, async options, and touch
   assert.match(files, /matchesAccept/);
   assert.match(select, /onSearch/);
   assert.match(select, /Loading options/);
+  assert.match(select, /aria-activedescendant/);
+  assert.match(select, /maxVisibleOptions/);
   assert.match(cropper, /onPointerMove/);
   assert.match(cropper, /Discard the image adjustments/);
 });

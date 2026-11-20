@@ -8,6 +8,7 @@ import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashb
 import CompanyFunctionComponent from "./CompanyFunctionComponent";
 import { normalizePreviewFunctionSlug } from "@/utils/companyFunctionPreview";
 import { buildAssociateDashboardModel, getAssociateWorkspaceKind } from "./associateDashboardModel";
+import CompanyReferralShareCard from "@/components/referrals/CompanyReferralShareCard";
 
 type AssociateDashboardProps = {
   providedCapabilities: string[];
@@ -139,6 +140,8 @@ export default function AssociateDashboard({
           </div>
         </div>
       </section>
+
+      <CompanyReferralShareCard />
 
       <section aria-label="Dashboard perspective controls" className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">

@@ -96,7 +96,7 @@ export default function ImageCropDialog({ file, preset, isOpen, onCancel, onSave
   return <Modal isOpen={isOpen} onClose={requestCancel} size="2xl" scrollBehavior="inside">
     <ModalContent><ModalHeader>Crop and optimize image</ModalHeader><ModalBody className="gap-4">
       <div className="mx-auto w-full touch-none cursor-move overflow-hidden rounded-2xl bg-default-100" style={frameStyle} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag}>
-        {source ? <img src={source} alt="Crop preview" className={`h-full w-full ${config.fit === "contain" ? "object-contain" : "object-cover"}`} style={{ transform: `translate(${offsetX / 2}%, ${offsetY / 2}%) scale(${zoom}) rotate(${rotation}deg)` }} /> : null}
+        {source ? <>{/* eslint-disable-next-line @next/next/no-img-element -- local blob preview must reflect live canvas transforms */}<img src={source} alt="Crop preview" className={`h-full w-full ${config.fit === "contain" ? "object-contain" : "object-cover"}`} style={{ transform: `translate(${offsetX / 2}%, ${offsetY / 2}%) scale(${zoom}) rotate(${rotation}deg)` }} /></> : null}
       </div>
       <Slider label="Zoom" minValue={1} maxValue={3} step={0.05} value={zoom} onChange={value => setZoom(Number(value))} />
       <div className="grid gap-3 sm:grid-cols-2"><Slider label="Horizontal position" minValue={-100} maxValue={100} value={offsetX} onChange={value => setOffsetX(Number(value))} /><Slider label="Vertical position" minValue={-100} maxValue={100} value={offsetY} onChange={value => setOffsetY(Number(value))} /></div>

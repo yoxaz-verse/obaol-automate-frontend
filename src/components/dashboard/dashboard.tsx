@@ -30,6 +30,7 @@ import { getData } from "@/core/api/apiHandler";
 import { DEFAULT_STALE_TIME, extractList, useDashboardData } from "@/core/data";
 import { dashboardCopy } from "@/utils/dashboardCopy";
 import AssociateDashboard from "./AssociateDashboard";
+import CompanyReferralShareCard from "@/components/referrals/CompanyReferralShareCard";
 
 const GlobalSearch = dynamic(() => import("./GlobalSearch"), { ssr: false });
 const TrendChart = dynamic(() => import("./TrendChart"), {
@@ -600,6 +601,8 @@ const Dashboard: NextPage = () => {
 
     return (
       <>
+        <CompanyReferralShareCard />
+
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
           <InsightCard
             title="Pending Assigned Enquiries"

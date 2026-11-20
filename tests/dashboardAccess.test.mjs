@@ -144,11 +144,11 @@ test("Associate sidebar routes use the requested buying, account, and support gr
   assert.equal(getDashboardRoute("/dashboard/customer-support")?.taskGroup, "Support");
 });
 
-test("Associate desktop and mobile navigation share common and governed sidebar groups", () => {
+test("Associate desktop and mobile navigation share capability-family sidebar groups", () => {
   const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
   const desktop = readFileSync("src/components/dashboard/Sidebar.tsx", "utf8");
   const mobile = readFileSync("src/components/dashboard/TopBar.tsx", "utf8");
-  const labels = ["Home", "Seeking", "Providing", "Other Services", "Common"];
+  const labels = ["Home", "Important", "Services", "Common"];
   let previousIndex = -1;
   for (const label of labels) {
     const index = navigation.indexOf(`label: \"${label}\"`, previousIndex + 1);
@@ -159,7 +159,8 @@ test("Associate desktop and mobile navigation share common and governed sidebar 
   assert.match(navigation, /!selectedCapabilityLinks\.has\(path\)/);
   assert.match(navigation, /SIDEBAR_HOME_ROUTES\.filter/);
   assert.match(navigation, /SIDEBAR_UTILITY_ROUTES\.filter/);
-  assert.match(navigation, /links\("OTHER_SERVICES"\)/);
+  assert.match(navigation, /groupAssociateServiceLinks\(serviceLinks, providedCapabilities, soughtCapabilities\)/);
+  assert.match(readFileSync("src/utils/associateServiceFamilies.ts", "utf8"), /label: "Other Services"/);
   assert.match(readFileSync("src/utils/utils.tsx", "utf8"), /link: "\/dashboard\/documentation"/);
   for (const source of [desktop, mobile]) {
     assert.match(source, /user\?\.providedCapabilities \|\| \[\]/);

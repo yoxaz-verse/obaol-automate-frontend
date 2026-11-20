@@ -859,6 +859,7 @@ export const apiRoutes = {
   operatorHierarchy: operatorHierarchyRoutes,
   commissions: commissionRoutes,
   associateReferrals: {
+    companyLink: "/associate-referrals/company-link",
     dashboard: "/associate-referrals/me",
     companyDashboard: (companyId: string) => `/associate-referrals/company/${companyId}`,
     invitations: "/associate-referrals/invitations",

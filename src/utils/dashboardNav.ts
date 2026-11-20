@@ -14,6 +14,7 @@ import { getCapabilityActionLinks } from "@/utils/companyFunctionPreview";
 import type { ResolvedSidebarPage } from "@/types/sidebarGovernance";
 import { getGovernedRouteStatus, SIDEBAR_COMMON_ROUTES, SIDEBAR_HOME_ROUTES, SIDEBAR_UTILITY_ROUTES } from "@/utils/sidebarGovernance";
 import { DASHBOARD_ADMIN_WORKFLOW_GROUPS, type AdminWorkflowGroup } from "@/utils/adminSidebarGroups";
+import { groupAssociateServiceLinks } from "@/utils/associateServiceFamilies";
 
 export { DASHBOARD_ADMIN_WORKFLOW_GROUPS } from "@/utils/adminSidebarGroups";
 export type { AdminWorkflowGroup } from "@/utils/adminSidebarGroups";
@@ -47,7 +48,7 @@ export const isComingSoonDashboardNavigation = (
 export type DashboardNavSection = {
   label: DashboardSection | DashboardTaskGroup | "Home" | "Common" | "Important" | "Seeking" | "Providing" | "Other Services" | "Coming Soon" | "Business Workflows";
   links: string[];
-  groups?: Array<{ label: DashboardNavGroup | AdminWorkflowGroup; links: string[] }>;
+  groups?: Array<{ label: DashboardNavGroup | AdminWorkflowGroup | string; links: string[] }>;
 };
 
 const ASSOCIATE_EXECUTE_PATHS = [
@@ -118,12 +119,17 @@ export const getDashboardSidebarSections = (
       const links = (placement: "IMPORTANT" | "SEEKING" | "PROVIDING" | "OTHER_SERVICES") => visible
         .filter((row) => row.placement === placement)
         .map((row) => row.routePath);
+      const importantLinks = Array.from(new Set(links("IMPORTANT")));
+      const importantSet = new Set(importantLinks);
+      const serviceLinks = Array.from(new Set(visible
+        .filter((row) => row.placement !== "IMPORTANT")
+        .map((row) => row.routePath)))
+        .filter((path) => !importantSet.has(path));
+      const serviceGroups = groupAssociateServiceLinks(serviceLinks, providedCapabilities, soughtCapabilities);
       return [
         { label: "Home", links: SIDEBAR_HOME_ROUTES.filter((path) => optionMap.has(path)) },
-        { label: "Important", links: links("IMPORTANT") },
-        { label: "Seeking", links: links("SEEKING") },
-        { label: "Providing", links: links("PROVIDING") },
-        { label: "Other Services", links: links("OTHER_SERVICES") },
+        { label: "Important", links: importantLinks },
+        { label: "Services", links: serviceGroups.flatMap((group) => group.links), groups: serviceGroups },
         { label: "Common", links: SIDEBAR_UTILITY_ROUTES.filter((path) => optionMap.has(path)) },
       ].filter((section) => section.links.length > 0) as DashboardNavSection[];
     }

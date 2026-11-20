@@ -1,4 +1,4 @@
-import { fetchDependentOptions } from "../../../../utils/fetchDependentOptions";
+import { fetchActiveIncotermCodeOptions } from "../../../../utils/fetchDependentOptions";
 import type { TableSchema } from "../../types";
 
 export const paymentTermSchema = [
@@ -13,36 +13,13 @@ export const paymentTermSchema = [
     },
     {
       label: "Applicable Incoterms",
-      type: "text",
+      type: "multiselect",
       key: "applicableIncoterms",
       inForm: true,
       inEdit: true,
       inTable: true,
       placeholder: "EXW, FOB, CIF",
-    },
-    {
-      label: "Advance %",
-      type: "number",
-      key: "advancePercent",
-      inForm: true,
-      inEdit: true,
-      inTable: true,
-    },
-    {
-      label: "Balance %",
-      type: "number",
-      key: "balancePercent",
-      inForm: true,
-      inEdit: true,
-      inTable: true,
-    },
-    {
-      label: "Milestone",
-      type: "text",
-      key: "milestone",
-      inForm: true,
-      inEdit: true,
-      inTable: true,
+      dynamicValuesFn: fetchActiveIncotermCodeOptions,
     },
     {
       label: "Milestones",
@@ -53,9 +30,18 @@ export const paymentTermSchema = [
       inTable: false,
     },
     {
-      label: "Default",
-      type: "switch",
-      key: "isDefault",
+      label: "Default For Incoterms",
+      type: "multiselect",
+      key: "defaultForIncoterms",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      dynamicValuesFn: fetchActiveIncotermCodeOptions,
+    },
+    {
+      label: "Active",
+      type: "boolean",
+      key: "isActive",
       inForm: true,
       inEdit: true,
       inTable: true,

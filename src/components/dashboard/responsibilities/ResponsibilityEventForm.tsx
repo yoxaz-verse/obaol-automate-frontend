@@ -106,12 +106,12 @@ const ownerLabelByKey: Record<string, string> = {
 
 const tradeTermSelectClassNames = {
   base: "min-w-0 w-full max-w-full",
-  trigger: "min-h-16 h-auto w-full max-w-full items-center gap-2 rounded-xl border-default-300 bg-background/70 px-3 py-2.5 shadow-sm transition-colors hover:border-primary/40 sm:px-4",
-  innerWrapper: "min-w-0 items-start gap-0.5 overflow-hidden py-0.5",
-  label: "relative top-auto block max-w-full truncate font-bold text-[10px] leading-4 tracking-wide text-default-500",
-  value: "block max-w-full overflow-hidden text-sm leading-5 text-foreground",
+  trigger: "min-h-16 h-auto w-full max-w-full items-center gap-3 rounded-xl border-default-300 bg-background/70 py-3 pl-3 pr-11 shadow-sm transition-colors hover:border-primary/40 sm:pl-4 sm:pr-12",
+  innerWrapper: "min-w-0 items-start gap-1 overflow-visible py-0.5",
+  label: "relative top-auto block max-w-full whitespace-normal break-words font-bold text-[10px] leading-4 tracking-wide text-default-500",
+  value: "block max-w-full whitespace-normal break-words text-sm leading-5 text-foreground",
   mainWrapper: "min-w-0",
-  selectorIcon: "end-4 top-1/2 -translate-y-1/2",
+  selectorIcon: "end-4 top-1/2 shrink-0 -translate-y-1/2",
 };
 
 const ResponsiveDisclosure = ({
@@ -243,7 +243,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
     ? paymentTermOptions.filter((term: any) => {
         const allowed = Array.isArray(term?.applicableIncoterms) ? term.applicableIncoterms : [];
         if (!selectedIncotermCode) return true;
-        if (!allowed.length) return true;
+        if (!allowed.length) return false;
         return allowed.map((v: any) => String(v).toUpperCase()).includes(selectedIncotermCode);
       })
     : [];
@@ -281,7 +281,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-1 gap-3">
             <Select
               size="sm"
               label="Incoterm responsibilities"
@@ -294,17 +294,19 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               }}
               isDisabled={(!canEditResponsibilityPlan && !canEditTradeTermsWhenLocked) || (isReadOnlyAfterConversion && !canEditTradeTermsWhenLocked)}
               classNames={tradeTermSelectClassNames}
-              startContent={<LuAnchor size={16} className="text-primary/70" />}
+              startContent={<LuAnchor size={16} className="shrink-0 text-primary/70" />}
               renderValue={() => selectedIncoterm ? (
-                <span className="flex min-w-0 items-baseline gap-1.5 overflow-hidden">
+                <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5 whitespace-normal">
                   <span className="shrink-0 font-black text-foreground">{selectedIncoterm.code || "Incoterm"}</span>
-                  {selectedIncoterm.name && <span className="min-w-0 truncate text-default-600">— {selectedIncoterm.name}</span>}
+                  {selectedIncoterm.name && <span className="min-w-0 break-words text-default-600">— {selectedIncoterm.name}</span>}
                 </span>
               ) : <span className="text-default-400">Select an Incoterm</span>}
             >
               {incotermOptions.map((item: any) => (
                 <SelectItem key={item._id} value={item._id} textValue={[item.code, item.name].filter(Boolean).join(" — ")}>
-                  {[item.code, item.name].filter(Boolean).join(" // ")}
+                  <span className="whitespace-normal break-words">
+                    {[item.code, item.name].filter(Boolean).join(" — ")}
+                  </span>
                 </SelectItem>
               ))}
             </Select>
@@ -321,16 +323,16 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               }}
               isDisabled={(!canEditResponsibilityPlan && !canEditTradeTermsWhenLocked) || (isReadOnlyAfterConversion && !canEditTradeTermsWhenLocked)}
               classNames={tradeTermSelectClassNames}
-              startContent={<LuFileCheck size={16} className="text-success/70" />}
+              startContent={<LuFileCheck size={16} className="shrink-0 text-success/70" />}
               renderValue={() => selectedPaymentTerm ? (
-                <span className="block min-w-0 truncate font-semibold text-foreground">
+                <span className="block min-w-0 whitespace-normal break-words font-semibold text-foreground">
                   {selectedPaymentTerm.label || "Payment Term"}
                 </span>
               ) : <span className="text-default-400">Select payment terms</span>}
             >
-              {(filteredPaymentTerms.length > 0 ? filteredPaymentTerms : paymentTermOptions).map((item: any) => (
+              {filteredPaymentTerms.map((item: any) => (
                 <SelectItem key={item._id} value={item._id} textValue={item.label || "Payment Term"}>
-                  {item.label || "Payment Term"}
+                  <span className="whitespace-normal break-words">{item.label || "Payment Term"}</span>
                 </SelectItem>
               ))}
             </Select>

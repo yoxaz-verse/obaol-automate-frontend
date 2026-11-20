@@ -261,6 +261,14 @@ export default function EditModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (currentTable === "paymentTerm") {
+      const milestones = Array.isArray(formData.milestones) ? formData.milestones : [];
+      const total = milestones.reduce((sum: number, item: any) => sum + Number(item?.percent || 0), 0);
+      if (!milestones.length || Math.round(total * 100) / 100 !== 100 || milestones.some((item: any) => !String(item?.label || "").trim() || Number(item?.percent) <= 0 || !String(item?.triggerValue || "").trim())) {
+        toast.error("Add complete payment sections with positive percentages totaling 100%.");
+        return;
+      }
+    }
     const associateCompanyField = formFields.find((field) => field.key === "associateCompany");
     if (associateCompanyField && formData.associateCompany) {
       const options =
@@ -439,8 +447,17 @@ export default function EditModal({
   const addPaymentMilestone = (fieldKey: string) => {
     setFormData((prev) => {
       const next = Array.isArray(prev[fieldKey]) ? [...prev[fieldKey]] : [];
-      if (next.length >= 3) return prev;
       next.push({ label: "", percent: 0, triggerType: "DOC", triggerValue: "" });
+      return { ...prev, [fieldKey]: next };
+    });
+  };
+
+  const movePaymentMilestone = (fieldKey: string, index: number, direction: -1 | 1) => {
+    setFormData((prev) => {
+      const next = Array.isArray(prev[fieldKey]) ? [...prev[fieldKey]] : [];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
       return { ...prev, [fieldKey]: next };
     });
   };
@@ -504,6 +521,7 @@ export default function EditModal({
     switch (f.type) {
       case "paymentMilestones": {
         const milestones: any[] = Array.isArray(formData[f.key]) ? formData[f.key] : [];
+        const milestoneTotal = milestones.reduce((sum, item) => sum + Number(item?.percent || 0), 0);
         return (
           <div className="flex flex-col gap-3 w-full">
             <div className="flex items-center justify-between">
@@ -513,13 +531,15 @@ export default function EditModal({
                 type="button"
                 onClick={() => addPaymentMilestone(f.key)}
                 className="px-3 py-1 bg-obaol-500 text-white rounded"
-                isDisabled={milestones.length >= 3}
               >
                 + Add Segment
               </Button>
             </div>
+            <div className={`rounded-lg border px-3 py-2 text-sm font-semibold ${milestoneTotal === 100 ? "border-success-300 bg-success-50 text-success-700" : "border-warning-300 bg-warning-50 text-warning-700"}`}>
+              Allocated: {milestoneTotal}% · {milestoneTotal <= 100 ? `${100 - milestoneTotal}% remaining` : `${milestoneTotal - 100}% over`}
+            </div>
             {milestones.length === 0 && (
-              <p className="text-[11px] text-default-500">Add 1–3 segments that sum to 100%.</p>
+              <p className="text-[11px] text-default-500">Add payment sections that sum to 100%.</p>
             )}
             {milestones.map((milestone, index) => {
               const triggerType = String(milestone?.triggerType || "DOC");
@@ -568,15 +588,11 @@ export default function EditModal({
                     ))}
                   </Select>
                   <div className="md:col-span-4">
-                    <Button
-                      size="sm"
-                      type="button"
-                      onClick={() => removePaymentMilestone(f.key, index)}
-                      className="bg-red-500 text-white rounded"
-                      isDisabled={disabled}
-                    >
-                      Remove Segment
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" type="button" variant="flat" isDisabled={disabled || index === 0} onPress={() => movePaymentMilestone(f.key, index, -1)}>Move up</Button>
+                      <Button size="sm" type="button" variant="flat" isDisabled={disabled || index === milestones.length - 1} onPress={() => movePaymentMilestone(f.key, index, 1)}>Move down</Button>
+                      <Button size="sm" type="button" onClick={() => removePaymentMilestone(f.key, index)} className="bg-red-500 text-white rounded" isDisabled={disabled}>Remove Segment</Button>
+                    </div>
                   </div>
                 </div>
               );

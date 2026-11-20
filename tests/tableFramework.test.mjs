@@ -20,11 +20,25 @@ test("entity schema sources preserve the reviewed registry snapshot", () => {
   const files = fs.readdirSync(directory).filter((name) => name.endsWith(".ts")).sort();
   assert.deepEqual(files, entityNames.map((name) => `${name}.ts`).sort());
   const snapshot = files.map((name) => `${name}\n${fs.readFileSync(path.join(directory, name), "utf8")}`).join("\n");
-  assert.equal(crypto.createHash("sha256").update(snapshot).digest("hex"), "f32be6f9fea2cb6fa14f0fe99f18f08c3ae716ce18c208fadefd0d9b655bfcae");
+  assert.equal(crypto.createHash("sha256").update(snapshot).digest("hex"), "ed15c98acd53005ef11fd280cda528911c74ebf80a52e75c3477811143985e5b");
   for (const file of files) {
     const source = fs.readFileSync(path.join(directory, file), "utf8");
     assert.match(source, /satisfies TableSchema;/, `${file} must retain typed schema validation`);
   }
+});
+
+test("payment configuration exposes active controls, Incoterm mappings, and unlimited milestone editing", () => {
+  const paymentSchema = fs.readFileSync("src/features/table-framework/schemas/entities/paymentTerm.ts", "utf8");
+  const incotermSchema = fs.readFileSync("src/features/table-framework/schemas/entities/incoterm.ts", "utf8");
+  const addForm = fs.readFileSync("src/components/CurdTable/add-form.tsx", "utf8");
+  const editForm = fs.readFileSync("src/components/CurdTable/edit-model.tsx", "utf8");
+  assert.match(paymentSchema, /key: "applicableIncoterms"[\s\S]*type: "multiselect"|type: "multiselect"[\s\S]*key: "applicableIncoterms"/);
+  assert.match(paymentSchema, /key: "defaultForIncoterms"/);
+  assert.match(paymentSchema, /key: "isActive"/);
+  assert.match(incotermSchema, /key: "isActive"/);
+  assert.doesNotMatch(`${addForm}\n${editForm}`, /next\.length >= 3/);
+  assert.match(addForm, /Allocated:/);
+  assert.match(editForm, /movePaymentMilestone/);
 });
 
 test("compatibility facade retains the three public runtime exports", () => {

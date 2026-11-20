@@ -379,26 +379,30 @@ export default function EnquiryDetailsPage() {
         enabled: isValidEnquiryId,
     });
 
-    const incotermOptions = Array.isArray(incotermResponse?.data?.data?.data)
+    const rawIncotermOptions = Array.isArray(incotermResponse?.data?.data?.data)
         ? incotermResponse.data.data.data
         : Array.isArray(incotermResponse?.data?.data)
             ? incotermResponse.data.data
             : Array.isArray(incotermResponse?.data)
                 ? incotermResponse.data
                 : [];
-    const paymentTermOptions = Array.isArray(paymentTermResponse?.data?.data?.data)
+    const rawPaymentTermOptions = Array.isArray(paymentTermResponse?.data?.data?.data)
         ? paymentTermResponse.data.data.data
         : Array.isArray(paymentTermResponse?.data?.data)
             ? paymentTermResponse.data.data
             : Array.isArray(paymentTermResponse?.data)
                 ? paymentTermResponse.data
                 : [];
+    const persistedIncotermId = String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || "");
+    const persistedPaymentTermId = String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || "");
+    const incotermOptions = rawIncotermOptions.filter((item: any) => item?.isActive !== false || String(item?._id || item?.id) === persistedIncotermId);
+    const paymentTermOptions = rawPaymentTermOptions.filter((item: any) => item?.isActive !== false || String(item?._id || item?.id) === persistedPaymentTermId);
     const selectedRevisionIncoterm = incotermOptions.find((it: any) => String(it?._id || it?.id) === String(selectedIncotermId));
     const selectedRevisionIncotermCode = String(selectedRevisionIncoterm?.code || "").toUpperCase();
     const revisionPaymentTermOptions = paymentTermOptions.filter((term: any) => {
         const allowed = Array.isArray(term?.applicableIncoterms) ? term.applicableIncoterms : [];
         if (!selectedRevisionIncotermCode) return true;
-        if (!allowed.length) return true;
+        if (!allowed.length) return false;
         return allowed.map((v: any) => String(v).toUpperCase()).includes(selectedRevisionIncotermCode);
     });
     const parseMasterRows = (raw: any): any[] => {
@@ -439,16 +443,25 @@ export default function EnquiryDetailsPage() {
         const filteredTerms = paymentTermOptions.filter((term: any) => {
             const allowed = Array.isArray(term?.applicableIncoterms) ? term.applicableIncoterms : [];
             if (!incotermCode) return true;
-            if (!allowed.length) return true;
+            if (!allowed.length) return false;
             return allowed.map((v: any) => String(v).toUpperCase()).includes(incotermCode);
         });
-        const defaultTerm =
-            filteredTerms.find((term: any) => Boolean(term?.isDefault)) ||
-            paymentTermOptions.find((term: any) => Boolean(term?.isDefault)) ||
-            filteredTerms[0] ||
-            paymentTermOptions[0];
+        const defaultTerm = filteredTerms.find((term: any) =>
+            Array.isArray(term?.defaultForIncoterms) &&
+            term.defaultForIncoterms.map((value: any) => String(value).toUpperCase()).includes(incotermCode)
+        );
         if (defaultTerm?._id) setSelectedPaymentTermId(String(defaultTerm._id));
     }, [paymentTermOptions, selectedPaymentTermId, selectedIncotermId, incotermOptions]);
+    useEffect(() => {
+        if (!selectedPaymentTermId || selectedPaymentTermId === persistedPaymentTermId) return;
+        const selectedIncoterm = incotermOptions.find((item: any) => String(item?._id || item?.id) === String(selectedIncotermId));
+        const incotermCode = String(selectedIncoterm?.code || "").toUpperCase();
+        const selectedTerm = paymentTermOptions.find((item: any) => String(item?._id || item?.id) === String(selectedPaymentTermId));
+        const applicable = Array.isArray(selectedTerm?.applicableIncoterms) ? selectedTerm.applicableIncoterms.map((value: any) => String(value).toUpperCase()) : [];
+        if (!selectedTerm || selectedTerm?.isActive === false || (incotermCode && !applicable.includes(incotermCode))) {
+            setSelectedPaymentTermId("");
+        }
+    }, [selectedIncotermId, selectedPaymentTermId, persistedPaymentTermId, incotermOptions, paymentTermOptions]);
     useEffect(() => {
         setBuyerSpecification(enquirySpecificationValue);
     }, [enquirySpecificationValue]);

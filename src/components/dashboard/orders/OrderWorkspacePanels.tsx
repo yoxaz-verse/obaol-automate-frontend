@@ -89,6 +89,9 @@ export function OrderOverviewPanel({ order, snapshot }: { order: any; snapshot: 
 
 export function OrderPaymentsPanel({ milestones, incoterm, paymentTerm, canManage, busy, onStatus }: { milestones: any[]; incoterm: string; paymentTerm: string; canManage: boolean; busy: boolean; onStatus: (index: number, status: "DUE" | "PAID") => void }) {
   const paid = milestones.filter((item) => item.status === "PAID").reduce((sum, item) => sum + Number(item.percent || 0), 0);
+  const paymentAmount = (item: any) => Number.isFinite(Number(item?.amount))
+    ? new Intl.NumberFormat("en-IN", { style: "currency", currency: String(item?.currency || "INR"), maximumFractionDigits: 2 }).format(Number(item.amount))
+    : null;
   return (
     <section id="payments" aria-labelledby="order-payments-title" className="scroll-mt-40 rounded-3xl border border-divider bg-content1 p-6 md:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -102,7 +105,7 @@ export function OrderPaymentsPanel({ milestones, incoterm, paymentTerm, canManag
               <div className={`mt-0.5 rounded-full p-2 ${item.status === 'PAID' ? 'bg-success-500/15 text-success-600' : 'bg-warning-500/15 text-warning-600'}`}>{item.status === 'PAID' ? <FiCheck /> : <FiClock />}</div>
               <div><p className="font-black text-foreground">{item.label}</p><p className="mt-1 text-xs text-default-500">{item.dueAtStageKey ? `Due at ${String(item.dueAtStageKey).replaceAll('_', ' ')}` : item.dueAtDocType ? `Due after verified ${String(item.dueAtDocType).replaceAll('_', ' ')}` : 'Configured payment milestone'}</p></div>
             </div>
-            <div className="flex items-center justify-between gap-3 sm:justify-end"><span className="text-lg font-black">{Number(item.percent || 0)}%</span><Chip size="sm" color={item.status === 'PAID' ? 'success' : item.status === 'DUE' ? 'warning' : 'default'} variant="flat">{item.status || 'PENDING'}</Chip>{canManage && item.status === 'DUE' && <Button size="sm" color="success" variant="flat" isLoading={busy} onPress={() => onStatus(index, 'PAID')}>Mark paid</Button>}{canManage && item.status === 'PAID' && <Button size="sm" variant="light" isLoading={busy} onPress={() => onStatus(index, 'DUE')}>Reopen</Button>}</div>
+            <div className="flex items-center justify-between gap-3 sm:justify-end"><span className="text-right"><span className="block text-lg font-black">{Number(item.percent || 0)}%</span>{paymentAmount(item) && <span className="block text-xs font-semibold text-default-500">{paymentAmount(item)}</span>}</span><Chip size="sm" color={item.status === 'PAID' ? 'success' : item.status === 'DUE' ? 'warning' : 'default'} variant="flat">{item.status || 'PENDING'}</Chip>{canManage && item.status === 'DUE' && <Button size="sm" color="success" variant="flat" isLoading={busy} onPress={() => onStatus(index, 'PAID')}>Mark paid</Button>}{canManage && item.status === 'PAID' && <Button size="sm" variant="light" isLoading={busy} onPress={() => onStatus(index, 'DUE')}>Reopen</Button>}</div>
           </div>
         ))}
       </div>

@@ -270,3 +270,13 @@ const getOptions = async (
 };
 
 export { getOptions as fetchDependentOptions };
+
+export const fetchActiveIncotermCodeOptions = async () => {
+  const res = await getData(incotermRoutes.getAll, { activeOnly: true, limit: 100 });
+  return extractDependentOptionRows(res)
+    .map((item: any) => ({
+      key: String(item.code || "").toUpperCase(),
+      value: [item.code, item.name].filter(Boolean).join(" — ") || "Incoterm",
+    }))
+    .filter((item: any) => item.key);
+};

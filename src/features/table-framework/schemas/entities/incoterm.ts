@@ -29,6 +29,14 @@ export const incotermSchema = [
       inTable: true,
     },
     {
+      label: "Active",
+      type: "boolean",
+      key: "isActive",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
       label: "Created At",
       type: "dateTime",
       key: "createdAt",

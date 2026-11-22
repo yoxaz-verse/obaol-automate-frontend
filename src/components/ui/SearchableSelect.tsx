@@ -5,10 +5,13 @@ import { Button, Checkbox, Chip, Input, Popover, PopoverContent, PopoverTrigger,
 import { FiAlertCircle, FiChevronDown, FiRefreshCw, FiSearch } from "react-icons/fi";
 
 export type SearchableOption = { key: string; label: string; description?: string; group?: string };
+export type SearchableOptionPage = { options: SearchableOption[]; nextCursor?: string | null };
+export type SearchableOptionLoader = (query: string, cursor: string | null, signal: AbortSignal) => Promise<SearchableOptionPage>;
 
 export type SearchableSelectProps = {
   label: string;
-  options: SearchableOption[];
+  options?: SearchableOption[];
+  selectedOptions?: SearchableOption[];
   value: string[];
   onChange: (value: string[]) => void;
   multiple?: boolean;
@@ -27,11 +30,15 @@ export type SearchableSelectProps = {
   searchValue?: string;
   onSearchValueChange?: (query: string) => void;
   maxVisibleOptions?: number;
+  loadOptions?: SearchableOptionLoader;
+  onCreateOption?: (label: string) => Promise<SearchableOption>;
+  validateNewOption?: (label: string) => string | null;
 };
 
 export default function SearchableSelect({
   label,
-  options,
+  options = [],
+  selectedOptions = [],
   value,
   onChange,
   multiple = true,
@@ -50,21 +57,33 @@ export default function SearchableSelect({
   searchValue,
   onSearchValueChange,
   maxVisibleOptions = 200,
+  loadOptions,
+  onCreateOption,
+  validateNewOption,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
   const [internalSearch, setInternalSearch] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [menuWidth, setMenuWidth] = useState<number>();
+  const [remoteOptions, setRemoteOptions] = useState<SearchableOption[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [remoteLoading, setRemoteLoading] = useState(false);
+  const [remoteError, setRemoteError] = useState("");
+  const [creating, setCreating] = useState(false);
   const search = searchValue ?? internalSearch;
   const setSearch = (next: string) => { if (searchValue === undefined) setInternalSearch(next); onSearchValueChange?.(next); };
 
+  const availableOptions = useMemo(() => {
+    const merged = [...selectedOptions, ...(loadOptions ? remoteOptions : options)];
+    return Array.from(new Map(merged.map(option => [option.key, option])).values());
+  }, [loadOptions, options, remoteOptions, selectedOptions]);
   const filtered = useMemo(
-    () => options.filter((option) => `${option.label} ${option.description || ""}`.toLowerCase().includes(search.trim().toLowerCase())),
-    [options, search]
+    () => availableOptions.filter((option) => `${option.label} ${option.description || ""}`.toLowerCase().includes(search.trim().toLowerCase())),
+    [availableOptions, search]
   );
   const visibleOptions = filtered.slice(0, maxVisibleOptions);
-  const selected = options.filter((option) => value.includes(option.key));
+  const selected = availableOptions.filter((option) => value.includes(option.key));
 
   const toggle = (key: string) => {
     if (!multiple) {
@@ -115,6 +134,35 @@ export default function SearchableSelect({
     const timer = setTimeout(() => onSearch(search.trim()), searchDebounceMs);
     return () => clearTimeout(timer);
   }, [open, onSearch, search, searchDebounceMs]);
+  useEffect(() => {
+    if (!open || !loadOptions) return;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setRemoteLoading(true); setRemoteError("");
+      try {
+        const page = await loadOptions(search.trim(), null, controller.signal);
+        if (!controller.signal.aborted) { setRemoteOptions(page.options); setNextCursor(page.nextCursor || null); }
+      } catch (cause: any) {
+        if (!controller.signal.aborted) setRemoteError(cause?.message || "Options could not be loaded.");
+      } finally { if (!controller.signal.aborted) setRemoteLoading(false); }
+    }, searchDebounceMs);
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [loadOptions, open, search, searchDebounceMs]);
+  const loadMore = async () => {
+    if (!loadOptions || !nextCursor || remoteLoading) return;
+    const controller = new AbortController(); setRemoteLoading(true); setRemoteError("");
+    try { const page = await loadOptions(search.trim(), nextCursor, controller.signal); setRemoteOptions(current => [...current, ...page.options]); setNextCursor(page.nextCursor || null); }
+    catch (cause: any) { setRemoteError(cause?.message || "More options could not be loaded."); }
+    finally { setRemoteLoading(false); }
+  };
+  const createOption = async () => {
+    const label = search.trim(); if (!onCreateOption || !label) return;
+    const validation = validateNewOption?.(label); if (validation) { setRemoteError(validation); return; }
+    setCreating(true); setRemoteError("");
+    try { const option = await onCreateOption(label); setRemoteOptions(current => [option, ...current]); onChange(multiple ? [...value, option.key] : [option.key]); if (!multiple) setOpen(false); }
+    catch (cause: any) { setRemoteError(cause?.message || "The option could not be created."); }
+    finally { setCreating(false); }
+  };
 
   return (
     <div ref={containerRef} className="w-full min-w-0 space-y-1.5">
@@ -195,9 +243,9 @@ export default function SearchableSelect({
                 input: "text-xs",
               }}
             />
-            {multiple && allowSelectAll && options.length ? (
+            {multiple && allowSelectAll && availableOptions.length ? (
               <div className="mt-2 flex items-center justify-between border-b border-default-200 pb-2">
-                <Button size="sm" variant="light" onPress={() => onChange(options.map((option) => option.key))}>
+                <Button size="sm" variant="light" onPress={() => onChange(availableOptions.map((option) => option.key))}>
                   Select all
                 </Button>
                 <Button size="sm" variant="light" onPress={() => onChange([])}>
@@ -214,7 +262,7 @@ export default function SearchableSelect({
               else if (event.key === "Enter") { event.preventDefault(); toggle(visibleOptions[activeIndex].key); }
               else if (event.key === "Escape") { event.preventDefault(); setOpen(false); }
             }}>
-              {loading ? <div className="flex items-center justify-center gap-2 px-3 py-8 text-sm text-default-500"><Spinner size="sm" />Loading options…</div> : error ? <div role="alert" className="px-3 py-6 text-center text-sm text-danger"><FiAlertCircle className="mx-auto mb-2" /><p>{error}</p>{onRetry ? <Button className="mt-3" size="sm" variant="flat" startContent={<FiRefreshCw />} onPress={onRetry}>Retry</Button> : null}</div> : visibleOptions.length ? (
+              {loading || (remoteLoading && remoteOptions.length === 0) ? <div className="flex items-center justify-center gap-2 px-3 py-8 text-sm text-default-500"><Spinner size="sm" />Loading options…</div> : error || remoteError ? <div role="alert" className="px-3 py-6 text-center text-sm text-danger"><FiAlertCircle className="mx-auto mb-2" /><p>{error || remoteError}</p>{onRetry ? <Button className="mt-3" size="sm" variant="flat" startContent={<FiRefreshCw />} onPress={onRetry}>Retry</Button> : null}</div> : visibleOptions.length ? (
                 visibleOptions.map((option, index) => (
                   <div key={option.key}>
                   {option.group && (index === 0 || visibleOptions[index - 1]?.group !== option.group) ? <p className="px-2.5 pb-1 pt-3 text-[11px] font-bold uppercase tracking-wide text-default-400">{option.group}</p> : null}
@@ -249,7 +297,7 @@ export default function SearchableSelect({
               ) : (
                 <div className="px-3 py-6 text-center text-sm text-default-500">
                   <p>No matching options</p>
-                  {onEmptyAction ? (
+                  {onCreateOption && search.trim() ? <Button className="mt-3" size="sm" color="success" variant="flat" isLoading={creating} onPress={createOption}>Create “{search.trim()}”</Button> : onEmptyAction ? (
                     <Button
                       className="mt-3"
                       size="sm"
@@ -266,6 +314,7 @@ export default function SearchableSelect({
                 </div>
               )}
             </div>
+            {nextCursor ? <Button className="mt-1 w-full" size="sm" variant="light" isLoading={remoteLoading} onPress={loadMore}>Load more</Button> : null}
           </div>
         </PopoverContent>
       </Popover>

@@ -7,6 +7,7 @@ import { FiInfo } from "react-icons/fi";
 import { ACTION_LABELS, DEFAULT_SHORTCUTS, loadShortcuts, saveShortcuts } from "@/utils/shortcutConfig";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage } from "@/components/dashboard/DashboardUI";
+import AppCombobox from "@/components/ui/AppCombobox";
 
 export default function ShortcutsPage() {
   const { user } = useContext(AuthContext);
@@ -43,10 +44,13 @@ export default function ShortcutsPage() {
                       <span className="text-sm font-bold text-foreground">{label}</span>
                       <span className="text-[10px] font-black  tracking-[0.2em] text-default-400">Cmd/Ctrl + {key}</span>
                     </div>
-                    <select
+                    <div className="w-28">
+                    <AppCombobox
+                      label="Key"
                       value={key}
-                      onChange={(e) => {
-                        const next = { ...shortcutConfig, [action]: e.target.value.toUpperCase() };
+                      onChange={(value) => {
+                        if (!value) return;
+                        const next = { ...shortcutConfig, [action]: value.toUpperCase() };
                         const values = Object.values(next);
                         const hasDuplicate = values.some((v, idx) => values.indexOf(v) !== idx);
                         if (hasDuplicate) {
@@ -57,12 +61,9 @@ export default function ShortcutsPage() {
                         setShortcutConfig(next);
                         saveShortcuts(next as any);
                       }}
-                      className="rounded-xl border border-default-200/60 bg-content1/60 px-3 py-2 text-xs font-black  tracking-widest"
-                    >
-                      {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => (
-                        <option key={letter} value={letter}>{letter}</option>
-                      ))}
-                    </select>
+                      options={"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(letter => ({ key: letter, label: letter }))}
+                    />
+                    </div>
                   </div>
                 );
               })}

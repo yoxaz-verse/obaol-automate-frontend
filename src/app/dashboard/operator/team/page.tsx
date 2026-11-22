@@ -10,6 +10,7 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import AdminOperatorPicker from "@/components/dashboard/operator/AdminOperatorPicker";
 import CompanyReferralShareCard from "@/components/referrals/CompanyReferralShareCard";
+import AppCombobox from "@/components/ui/AppCombobox";
 
 type TeamRow = {
   operatorId: string;
@@ -396,24 +397,7 @@ export default function OperatorTeamPage() {
               className="max-w-xl"
             />
             <div className="flex items-center gap-3">
-              <label className="text-xs text-default-500 flex items-center gap-2">
-                Rows
-                <select
-                  value={String(pageSize)}
-                  onChange={(event) => {
-                    const nextSize = Number(event.target.value || 10);
-                    setPageSize(nextSize);
-                    setPage(1);
-                  }}
-                  className="h-9 rounded-lg border border-default-300 bg-content1 px-2 text-sm text-foreground"
-                >
-                  {[10, 20, 30, 50].map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="w-28"><AppCombobox label="Rows" value={String(pageSize)} options={[10, 20, 30, 50].map(size => ({ key: String(size), label: String(size) }))} onChange={value => { setPageSize(Number(value || 10)); setPage(1); }} /></div>
             </div>
           </div>
 

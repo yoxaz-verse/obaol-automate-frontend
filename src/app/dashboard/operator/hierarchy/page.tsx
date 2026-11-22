@@ -9,6 +9,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { AnimatePresence, motion } from "framer-motion";
+import AppCombobox from "@/components/ui/AppCombobox";
 
 type OperatorBasic = {
   operatorId: string;
@@ -758,18 +759,7 @@ export default function OperatorHierarchyPage() {
         {isAdmin && (
           <div className="min-w-[280px]">
             <p className="text-[10px] font-black  tracking-widest text-default-400 mb-2 ml-1">Network Inspector</p>
-            <select
-              value={selectedOperatorId}
-              onChange={(event) => setSelectedOperatorId(String(event.target.value || ""))}
-              className="w-full h-12 rounded-[1rem] border border-divider bg-content1/50 backdrop-blur-md px-4 text-xs font-black  tracking-wider text-foreground hover:border-primary-500/50 transition-colors cursor-pointer outline-none"
-            >
-              {operatorOptions.length === 0 ? <option value="">No operators found</option> : null}
-              {operatorOptions.map((option: any) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
+            <AppCombobox label="Network inspector" value={selectedOperatorId || null} onChange={value => setSelectedOperatorId(value || "")} options={operatorOptions.map((option: any) => ({ key: String(option.id), label: String(option.name) }))} helperText={operatorOptions.length ? undefined : "No operators found"} />
           </div>
         )}
       </header>

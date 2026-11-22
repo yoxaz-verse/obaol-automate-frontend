@@ -53,6 +53,20 @@ test("phase two primitives expose validation, progress, async options, and touch
   assert.match(cropper, /Discard the image adjustments/);
 });
 
+test("phase four selectors support cancellable pagination, creation, and API adapters", () => {
+  const select = read("src/components/ui/SearchableSelect.tsx");
+  const adapters = read("src/components/ui/optionAdapters.ts");
+  assert.match(select, /SearchableOptionLoader/);
+  assert.match(select, /new AbortController\(\)/);
+  assert.match(select, /nextCursor/);
+  assert.match(select, /Load more/);
+  assert.match(select, /onCreateOption/);
+  assert.match(select, /validateNewOption/);
+  assert.match(adapters, /adaptKeyValueOptions/);
+  assert.match(adapters, /adaptIdNameOptions/);
+  assert.match(adapters, /adaptOptions/);
+});
+
 test("phase two workflows use shared upload and selection controls", () => {
   assert.match(read("src/app/dashboard/inland-transportation/trips/[id]/page.tsx"), /AppCombobox[\s\S]*FileDropzone/);
   assert.match(read("src/app/dashboard/settings/signature-management/page.tsx"), /ImagePicker/);
@@ -74,19 +88,10 @@ test("native select compatibility is explicit and cannot expand", async () => {
   const actual = output.trim().split("\n").sort();
   const allowed = [
     "src/app/dashboard/documentation/[id]/page.tsx",
-    "src/app/dashboard/freight-forwarding/customs/page.tsx",
     "src/app/dashboard/freight-forwarding/finance/page.tsx",
-    "src/app/dashboard/freight-forwarding/shipments/new/page.tsx",
-    "src/app/dashboard/operator/hierarchy/page.tsx",
-    "src/app/dashboard/operator/team/page.tsx",
-    "src/app/dashboard/packaging/execution/page.tsx",
-    "src/app/dashboard/shortcuts/page.tsx",
-    "src/components/dashboard/Catalog/currency-selector.tsx",
     "src/components/dashboard/Documentation/DocumentCreator.tsx",
     "src/components/dashboard/Documentation/DocumentationUI.tsx",
-    "src/components/dashboard/LanguageSwitcher.tsx",
     "src/components/packaging/PackagingUnitEditor.tsx",
-    "src/features/catalog/rates/enquiry/EnquiryFields.tsx",
   ].sort();
   assert.deepEqual(actual, allowed);
 });

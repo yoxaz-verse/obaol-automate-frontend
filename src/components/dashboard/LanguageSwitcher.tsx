@@ -6,6 +6,8 @@ import { languages, normalizeLanguageCode } from "@/data/languages";
 import { clearLanguageCookies, getLanguageCookie, setLanguageCookies } from "@/utils/languageCookie";
 import { showToastMessage } from "@/utils/utils";
 import { useSoundEffect } from "@/context/SoundContext";
+import AppSelect from "@/components/ui/AppSelect";
+import { SelectItem } from "@nextui-org/react";
 
 export const LanguageSwitcher = () => {
   const [currentLang, setCurrentLang] = useState("en");
@@ -123,30 +125,13 @@ export const LanguageSwitcher = () => {
     <div className="flex items-center gap-2 notranslate" translate="no">
       <div className="relative group notranslate" translate="no">
         <LuLanguages className="absolute left-3 top-1/2 -translate-y-1/2 text-obaol-500 w-4 h-4 z-10 pointer-events-none" />
-        <select
-          className={`notranslate appearance-none ${pendingLang ? 'w-[100px]' : 'w-[135px]'} h-9 cursor-pointer rounded-xl border db-border-subtle bg-default-100 pl-8 pr-5 text-[11px] font-semibold text-foreground outline-none ring-0 transition-all hover:border-obaol-500/40 hover:bg-default-200 focus:border-obaol-500/55 focus:ring-0`}
-          value={pendingLang ?? currentLang}
-          disabled={isSwitching}
-          onChange={(e) => handleSelectChange(String(e.target.value || "en"))}
-          aria-label="Select Language"
-          translate="no"
-        >
+        <AppSelect aria-label="Select Language" selectedKeys={[pendingLang ?? currentLang]} isDisabled={isSwitching} onSelectionChange={keys => handleSelectChange(String(Array.from(keys)[0] || "en"))} className={`notranslate ${pendingLang ? "w-[100px]" : "w-[135px]"}`} classNames={{ trigger: "!min-h-9 h-9 bg-default-100 pl-8 pr-2 text-[11px]", value: "text-[11px]" }}>
           {languages.map((lang) => (
-            <option
-              key={lang.code}
-              value={lang.code}
-              className="notranslate text-base font-medium text-foreground bg-content1 py-2"
-              translate="no"
-            >
+            <SelectItem key={lang.code} className="notranslate text-base font-medium text-foreground bg-content1 py-2">
               {lang.flag} {lang.name}
-            </option>
+            </SelectItem>
           ))}
-        </select>
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-default-400 group-hover:text-default-600 transition-colors">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
+        </AppSelect>
       </div>
 
       {/* Confirm button — only shows when a pending change is staged */}

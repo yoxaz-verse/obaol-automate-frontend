@@ -8,6 +8,7 @@ import AuthContext from "@/context/AuthContext";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
+import { useOperatorCompanyCapabilities } from "@/hooks/useOperatorCompanyCapabilities";
 
 export default function GlobalSearch() {
   const [query, setQuery] = useState("");
@@ -17,6 +18,7 @@ export default function GlobalSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useContext(AuthContext);
   const governance = useSidebarGovernance();
+  const operatorCapabilities = useOperatorCompanyCapabilities();
   const governedPages = governance.isAssociate ? governance.resolved : undefined;
   const capabilities = [...(user?.providedCapabilities || []), ...(user?.soughtCapabilities || [])];
 
@@ -34,6 +36,7 @@ export default function GlobalSearch() {
       user?.providedCapabilities || [],
       user?.soughtCapabilities || [],
       governedPages,
+      operatorCapabilities.isOperatorFamily ? operatorCapabilities.summary : undefined,
     ).flatMap((section) => section.links.map((path) => roleFilteredOptions.find((option) => option.link === path)).filter(Boolean)) as typeof roleFilteredOptions
     : roleFilteredOptions;
   const filteredOptions = accessibleOptions.filter((option) =>

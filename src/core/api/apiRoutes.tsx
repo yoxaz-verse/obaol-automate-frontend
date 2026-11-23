@@ -580,6 +580,7 @@ export const operatorHierarchyRoutes = {
   leadership: (operatorId: string) => `/operators/leadership/${operatorId}`,
   team: (operatorId: string) => `/operators/team/${operatorId}`,
   overview: (operatorId: string) => `/operators/${operatorId}/overview`,
+  capabilities: (operatorId: string) => `/operators/${operatorId}/capabilities`,
   referralRegenerate: (operatorId: string) => `/operators/referral/regenerate/${operatorId}`,
 };
 

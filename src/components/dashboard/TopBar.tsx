@@ -31,6 +31,7 @@ import { notificationRoutes } from "@/core/api/apiRoutes";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSoundEffect } from "@/context/SoundContext";
 import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
+import { useOperatorCompanyCapabilities } from "@/hooks/useOperatorCompanyCapabilities";
 import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
 import UserAvatar from "@/components/profile/UserAvatar";
 
@@ -181,6 +182,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   }, [isMobileMenuOpen]);
 
   // Filter options based on the user's role
+  const operatorCapabilities = useOperatorCompanyCapabilities();
   const filteredOptions = getRoleFilteredSidebarOptions(
     sidebarOptions as any[],
     String(role || ""),
@@ -197,6 +199,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     user?.providedCapabilities || [],
     user?.soughtCapabilities || [],
     governedPages,
+    operatorCapabilities.isOperatorFamily ? operatorCapabilities.summary : undefined,
   );
   const activeMobileNavigationGroup = mobileSections
     .flatMap((section) => section.groups || [])

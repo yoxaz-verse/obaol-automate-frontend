@@ -24,6 +24,7 @@ import { DashboardNavigationProvider, useDashboardNavigation } from "@/context/D
 import DashboardNavigationProgress from "@/components/dashboard/DashboardNavigationProgress";
 import DashboardContentReady from "@/components/dashboard/DashboardContentReady";
 import DashboardPerformanceObserver from "@/components/dashboard/DashboardPerformanceObserver";
+import { OperatorCompanyCapabilitiesProvider } from "@/hooks/useOperatorCompanyCapabilities";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -252,7 +253,9 @@ export default function DashboardClientLayout({
     <AuthenticatedProviders>
       <DashboardNavigationProvider>
         <SidebarGovernanceProvider>
-          <DashboardLayoutContent>{children}</DashboardLayoutContent>
+          <OperatorCompanyCapabilitiesProvider>
+            <DashboardLayoutContent>{children}</DashboardLayoutContent>
+          </OperatorCompanyCapabilitiesProvider>
         </SidebarGovernanceProvider>
       </DashboardNavigationProvider>
     </AuthenticatedProviders>

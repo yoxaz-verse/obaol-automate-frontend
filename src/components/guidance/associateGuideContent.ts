@@ -210,7 +210,7 @@ export const associateGuideTopics: AssociateGuideTopic[] = [
   })),
 ];
 
-const buyerSignals = ["buyer", "buying", "sourcing", "procurement", "importing-to-india"];
+const buyerSignals = ["buyer", "buying", "procurement", "importing-to-india"];
 const sellerSignals = ["seller", "selling", "supplier", "exporting-from-india", "manufacturer", "processor"];
 const serviceSignals = ["warehouse-storage", "testing", "logistics", "insurance", "finance", "service-provider"];
 

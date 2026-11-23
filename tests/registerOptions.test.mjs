@@ -21,7 +21,7 @@ const sampleOptions = {
 
 test("registration options allow slow production responses", () => {
   assert.equal(REGISTER_OPTIONS_TIMEOUT_MS, 30_000);
-  assert.equal(COMPANY_FUNCTION_TAXONOMY_VERSION, 3);
+  assert.equal(COMPANY_FUNCTION_TAXONOMY_VERSION, 4);
   assert.equal(COMPANY_FUNCTION_TAXONOMY_COUNT, 12);
 });
 

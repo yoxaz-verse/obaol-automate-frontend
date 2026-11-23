@@ -74,9 +74,9 @@ export const ASSOCIATE_SERVICE_FAMILIES: readonly AssociateServiceFamily[] = [
     routes: ["/dashboard/insurance-partners", "/dashboard/insurance-partners/my", "/dashboard/insurance-partners/requests"],
   },
   {
-    capability: "sourcing",
-    label: "Sourcing & Procurement",
-    routes: ["/dashboard/marketplace", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/requirements"],
+    capability: "agritech-companies",
+    label: "Agritech Companies",
+    routes: ["/dashboard/execution-enquiries", "/dashboard/company", "/dashboard/requirements"],
   },
   {
     capability: "buyer",

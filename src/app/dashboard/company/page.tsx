@@ -32,7 +32,7 @@ import { getCapabilityActions } from "@/utils/companyFunctionPreview";
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
-  "buyer", "seller", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk", "insurance-risk",
+  "buyer", "seller", "agritech-companies", "packaging", "testing", "warehouse-storage", "finance-risk", "insurance-risk",
   "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics",
 ]);
 

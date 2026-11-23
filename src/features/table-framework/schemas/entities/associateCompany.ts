@@ -4,7 +4,7 @@ import type { TableSchema } from "../../types";
 const COMPANY_CAPABILITY_OPTIONS = [
   { key: "buyer", value: "Buyer" },
   { key: "seller", value: "Seller" },
-  { key: "sourcing", value: "Sourcing" },
+  { key: "agritech-companies", value: "Agritech Companies" },
   { key: "packaging", value: "Packaging" },
   { key: "testing", value: "Quality Testing & Labs" },
   { key: "warehouse-storage", value: "Warehouse / Storage" },

@@ -468,7 +468,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
   const provided = user?.providedCapabilities || [];
   const sought = user?.soughtCapabilities || [];
   const capabilities = Array.from(new Set([...provided, ...sought]));
-  const hasBuying = provided.includes("buyer") || sought.includes("seller") || capabilities.includes("sourcing");
+  const hasBuying = provided.includes("buyer") || sought.includes("seller");
   const hasSelling = provided.includes("seller") || sought.includes("buyer");
   const inferredRole: RoleView = roleLower === "operator" || roleLower === "team"
     ? "operator"

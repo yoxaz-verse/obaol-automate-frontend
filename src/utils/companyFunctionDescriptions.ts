@@ -11,9 +11,9 @@ export const COMPANY_FUNCTION_PERSPECTIVE_COPY: Record<string, PerspectiveCopy> 
     provided: "We sell or supply commodities and products.",
     sought: "We want to connect with sellers or suppliers.",
   },
-  sourcing: {
-    provided: "We source suitable products and suppliers for businesses.",
-    sought: "We need help finding suitable products or suppliers.",
+  "agritech-companies": {
+    provided: "We provide agricultural technology or data-enabled trade services.",
+    sought: "We need agricultural technology or data-enabled trade services.",
   },
   packaging: {
     provided: "We provide packaging, labeling, or packing services.",

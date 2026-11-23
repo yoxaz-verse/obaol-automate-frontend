@@ -75,7 +75,7 @@ type GstinVerificationResult = {
 const MAIN_CATEGORY_SLUGS = new Set([
   "buyer",
   "seller",
-  "sourcing",
+  "agritech-companies",
   "packaging",
   "testing",
   "warehouse-storage",
@@ -607,6 +607,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       return String(a?.name || "").localeCompare(String(b?.name || ""));
     });
   }, [companyFunctions]);
+  const functionsForKind = (kind: "provided" | "sought") => groupedCompanyFunctions.filter((fn: any) =>
+    (Array.isArray(fn?.availableIn) ? fn.availableIn : ["provided", "sought"]).includes(kind)
+  );
   const companyFunctionNameById = useMemo(() => {
     const map = new Map<string, string>();
     groupedCompanyFunctions.forEach((fn: any) => {
@@ -615,6 +618,24 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     });
     return map;
   }, [groupedCompanyFunctions]);
+
+  useEffect(() => {
+    if (!groupedCompanyFunctions.length) return;
+    const providedAllowed = new Set(functionsForKind("provided").map((fn: any) => String(fn?._id || "")));
+    const soughtAllowed = new Set(functionsForKind("sought").map((fn: any) => String(fn?._id || "")));
+    setFormData((prev) => {
+      const providedFunctionIds = prev.providedFunctionIds.filter((id) => providedAllowed.has(id));
+      const soughtFunctionIds = prev.soughtFunctionIds.filter((id) => soughtAllowed.has(id));
+      if (providedFunctionIds.length === prev.providedFunctionIds.length && soughtFunctionIds.length === prev.soughtFunctionIds.length) return prev;
+      return {
+        ...prev,
+        providedFunctionIds,
+        soughtFunctionIds,
+        providedFunctionPriorities: reconcileCompanyFunctionPriorities(providedFunctionIds, prev.providedFunctionPriorities),
+        soughtFunctionPriorities: reconcileCompanyFunctionPriorities(soughtFunctionIds, prev.soughtFunctionPriorities),
+      };
+    });
+  }, [groupedCompanyFunctions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!legacyDraftNeedsRoleSwap || !groupedCompanyFunctions.length) return;
@@ -691,7 +712,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     const icons: Record<string, React.ReactNode> = {
       buyer: <LuShoppingBag />,
       seller: <LuStore />,
-      sourcing: <LuPackageSearch />,
+      "agritech-companies": <LuSearchCheck />,
       packaging: <LuBoxes />,
       testing: <LuMicroscope />,
       "warehouse-storage": <LuWarehouse />,
@@ -725,7 +746,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             : "Choose the products, services, or partnerships your company wants to find."}
         </p>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {groupedCompanyFunctions.map((fn: any) => {
+          {functionsForKind(kind).map((fn: any) => {
             const fnId = String(fn?._id || "");
             const selected = ids.includes(fnId);
             const disabled = !selected && ids.length >= 6;

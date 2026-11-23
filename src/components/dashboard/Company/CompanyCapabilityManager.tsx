@@ -11,7 +11,7 @@ import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPrior
 import { showToastMessage } from "@/utils/utils";
 
 const MAIN_CATEGORY_SLUGS = new Set([
-  "buyer", "seller", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk", "insurance-risk",
+  "buyer", "seller", "agritech-companies", "packaging", "testing", "warehouse-storage", "finance-risk", "insurance-risk",
   "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics",
 ]);
 
@@ -60,6 +60,9 @@ export default function CompanyCapabilityManager({ companyId, company, interestD
   const options = useMemo(() => (Array.isArray(optionsQuery.data?.companyFunctions) ? optionsQuery.data.companyFunctions : [])
     .filter((item: any) => MAIN_CATEGORY_SLUGS.has(String(item?.slug || "")))
     .sort((a: any, b: any) => Number(a?.orderIndex || 0) - Number(b?.orderIndex || 0)), [optionsQuery.data]);
+  const optionsForKind = (kind: "provided" | "sought") => options.filter((item: any) =>
+    (Array.isArray(item?.availableIn) ? item.availableIn : ["provided", "sought"]).includes(kind)
+  );
   const byId = useMemo(() => new Map(options.map((item: any) => [String(item._id), item])), [options]);
   const bySlug = useMemo(() => new Map(options.map((item: any) => [String(item.slug).toLowerCase(), String(item._id)])), [options]);
   const idsFromSlugs = (values: unknown) => (Array.isArray(values) ? values : [])
@@ -82,10 +85,14 @@ export default function CompanyCapabilityManager({ companyId, company, interestD
 
   useEffect(() => {
     if (!open) return;
-    setProvidedIds(activeProvidedIds);
-    setSoughtIds(activeSoughtIds);
-    setProvidedPriorities(reconcileCompanyFunctionPriorities(activeProvidedIds, activeProvidedPriorities));
-    setSoughtPriorities(reconcileCompanyFunctionPriorities(activeSoughtIds, activeSoughtPriorities));
+    const providedAllowed = new Set(optionsForKind("provided").map((item: any) => String(item._id)));
+    const soughtAllowed = new Set(optionsForKind("sought").map((item: any) => String(item._id)));
+    const nextProvided = activeProvidedIds.filter((id: string) => providedAllowed.has(id));
+    const nextSought = activeSoughtIds.filter((id: string) => soughtAllowed.has(id));
+    setProvidedIds(nextProvided);
+    setSoughtIds(nextSought);
+    setProvidedPriorities(reconcileCompanyFunctionPriorities(nextProvided, activeProvidedPriorities));
+    setSoughtPriorities(reconcileCompanyFunctionPriorities(nextSought, activeSoughtPriorities));
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = async () => {
@@ -171,7 +178,7 @@ export default function CompanyCapabilityManager({ companyId, company, interestD
     return <section className="rounded-xl border border-divider p-3">
       <div className="mb-2 flex items-center justify-between"><p className="text-xs font-bold">{kind === "provided" ? "Provides" : "Seeking"}</p><span className="text-[10px] text-default-400">{ids.length}/6</span></div>
       <div className="grid grid-cols-2 gap-2">
-        {options.map((option: any) => {
+        {optionsForKind(kind).map((option: any) => {
           const id = String(option._id);
           const selected = ids.includes(id);
           const priority = priorities.indexOf(id);

@@ -25,10 +25,10 @@ type Props = {
 };
 
 const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
-  "sourcing": [
-    { label: "Enquiries", href: "/dashboard/enquiries" },
-    { label: "Trade Listings", href: "/dashboard/marketplace" },
-    { label: "My Trade Listings", href: "/dashboard/product" },
+  "agritech-companies": [
+    { label: "Execution", href: "/dashboard/execution-enquiries" },
+    { label: "Requirements", href: "/dashboard/requirements" },
+    { label: "Company Profile", href: "/dashboard/company" },
   ],
   "packaging": [
     { label: "Execution", href: "/dashboard/execution-enquiries" },

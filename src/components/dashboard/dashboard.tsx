@@ -62,7 +62,7 @@ const Dashboard: NextPage = () => {
     return providedCapabilities.length ? "provided" : "sought";
   });
   const companyCapabilities = Array.from(new Set([...providedCapabilities, ...soughtCapabilities]));
-  const hasBuyingCapability = providedCapabilities.includes("buyer") || soughtCapabilities.includes("seller") || companyCapabilities.includes("sourcing");
+  const hasBuyingCapability = providedCapabilities.includes("buyer") || soughtCapabilities.includes("seller");
   const hasSellingCapability = providedCapabilities.includes("seller") || soughtCapabilities.includes("buyer");
   const isBuyingMode = isAssociate && hasBuyingCapability;
   const isSellingMode = isAssociate && hasSellingCapability;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@nextui-org/react";
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip } from "@nextui-org/react";
 import { FiCamera, FiTrash2, FiUpload, FiX } from "react-icons/fi";
 import instance from "@/core/api/axiosInstance";
 import { deleteData } from "@/core/api/apiHandler";
@@ -110,7 +110,7 @@ export default function ProfilePictureManager({ name, pictureUrl, onChanged }: P
         </div>
 
         {/* State-driven actions in this place */}
-        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:justify-start">
+        <div className="flex items-center justify-center gap-2">
           {selected ? (
             /* Preview state (new image selected, unsaved) */
             <>
@@ -136,28 +136,34 @@ export default function ProfilePictureManager({ name, pictureUrl, onChanged }: P
               </Button>
             </>
           ) : hasPicture ? (
-            /* Has existing picture state */
-            <>
-              <Button
-                size="sm"
-                variant="flat"
-                startContent={<FiCamera />}
-                onPress={() => setIsModalOpen(true)}
-                className="h-7 px-2.5 text-xs font-semibold"
-              >
-                Change picture
-              </Button>
-              <Button
-                size="sm"
-                color="danger"
-                variant="light"
-                startContent={<FiTrash2 />}
-                onPress={() => setConfirmRemove(true)}
-                className="h-7 px-2 text-xs font-semibold"
-              >
-                Remove picture
-              </Button>
-            </>
+            /* Has existing picture state: sleek action buttons with tooltips */
+            <div className="flex items-center gap-2">
+              <Tooltip content="Change picture" placement="bottom">
+                <Button
+                  size="sm"
+                  variant="flat"
+                  isIconOnly
+                  aria-label="Change picture"
+                  onPress={() => setIsModalOpen(true)}
+                  className="h-8 w-8 rounded-xl border db-border-subtle bg-default-100/80 hover:border-obaol-500/50 hover:bg-obaol-500/10 hover:text-obaol-600 dark:bg-default-50/10 transition-all shadow-none"
+                >
+                  <FiCamera size={15} />
+                </Button>
+              </Tooltip>
+              <Tooltip color="danger" content="Remove picture" placement="bottom">
+                <Button
+                  size="sm"
+                  color="danger"
+                  variant="flat"
+                  isIconOnly
+                  aria-label="Remove picture"
+                  onPress={() => setConfirmRemove(true)}
+                  className="h-8 w-8 rounded-xl border border-danger-200/50 bg-danger-500/10 text-danger-600 hover:bg-danger-500/20 dark:border-danger-800/40 dark:text-danger-400 transition-all shadow-none"
+                >
+                  <FiTrash2 size={15} />
+                </Button>
+              </Tooltip>
+            </div>
           ) : (
             /* Empty state (no picture) */
             <Button
@@ -166,7 +172,7 @@ export default function ProfilePictureManager({ name, pictureUrl, onChanged }: P
               variant="flat"
               startContent={<FiCamera />}
               onPress={() => setIsModalOpen(true)}
-              className="h-7 px-2.5 text-xs font-semibold"
+              className="h-8 px-3 text-xs font-semibold"
             >
               Upload picture
             </Button>

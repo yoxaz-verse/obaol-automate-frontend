@@ -46,10 +46,10 @@ export const buildAssociateDashboardModel = ({
   const capabilities = new Set([...provided, ...sought]);
   const activeCapabilities = perspective === "provided" ? provided : perspective === "sought" ? sought : capabilities;
   const showBuying = perspective === "provided"
-    ? provided.has("buyer") || provided.has("sourcing")
+    ? provided.has("buyer")
     : perspective === "sought"
       ? sought.has("seller")
-      : provided.has("buyer") || sought.has("seller") || capabilities.has("sourcing");
+      : provided.has("buyer") || sought.has("seller");
   const showSelling = perspective === "provided"
     ? provided.has("seller")
     : perspective === "sought"

@@ -51,6 +51,33 @@ export type DashboardNavSection = {
   groups?: Array<{ label: DashboardNavGroup | AdminWorkflowGroup | string; links: string[] }>;
 };
 
+const BUSINESS_WORKFLOW_SECTIONS = new Set<DashboardSection>([
+  "Trade",
+  "Products",
+  "Services",
+  "Insurance",
+  "Warehouse",
+]);
+
+const buildAvailableWorkflowGroups = (
+  availableLinks: Set<string>,
+  workflowLinks: string[],
+) => {
+  const assigned = new Set<string>();
+  const groups = DASHBOARD_ADMIN_WORKFLOW_GROUPS
+    .map((group) => ({
+      ...group,
+      links: group.links.filter((path) => {
+        if (!availableLinks.has(path) || assigned.has(path)) return false;
+        assigned.add(path);
+        return true;
+      }),
+    }))
+    .filter((group) => group.links.length > 0);
+  const otherLinks = workflowLinks.filter((path) => availableLinks.has(path) && !assigned.has(path));
+  return otherLinks.length > 0 ? [...groups, { label: "Other Services", links: otherLinks }] : groups;
+};
+
 const ASSOCIATE_EXECUTE_PATHS = [
   "/dashboard/enquiries",
   "/dashboard/sample-requests",
@@ -217,6 +244,37 @@ export const getDashboardSidebarSections = (
     ].filter((section) => section.links.length > 0) as DashboardNavSection[];
   }
 
+  if (normalizedRole === "operator" || normalizedRole === "team") {
+    const availableLinks = new Set(filteredOptions.map((option) => option.link));
+    const linksForSection = (section: DashboardSection) => accessibleRoutes
+      .filter((route) => route.section === section && optionMap.has(route.path))
+      .map((route) => route.path);
+    const workflowLinks = accessibleRoutes
+      .filter((route) => BUSINESS_WORKFLOW_SECTIONS.has(route.section) && optionMap.has(route.path))
+      .map((route) => route.path);
+    const workflowGroups = buildAvailableWorkflowGroups(availableLinks, workflowLinks);
+    const operationalRoutes = accessibleRoutes
+      .filter((route) => route.section === "Operations/Admin" && optionMap.has(route.path));
+    const organizationLinks = linksForSection("Organization")
+      .filter((path) => !workflowLinks.includes(path));
+
+    return [
+      { label: "Overview", links: linksForSection("Overview") },
+      {
+        label: "Business Workflows",
+        links: workflowGroups.flatMap((group) => group.links),
+        groups: workflowGroups,
+      },
+      { label: "Documentation", links: linksForSection("Documentation") },
+      {
+        label: "Operations/Admin",
+        links: operationalRoutes.map((route) => route.path),
+        groups: getDashboardAdminGroups(operationalRoutes),
+      },
+      { label: "Organization", links: organizationLinks },
+    ].filter((section) => section.links.length > 0) as DashboardNavSection[];
+  }
+
   const sectionOrder: DashboardSection[] = [
     "Overview",
     "Trade",
@@ -266,7 +324,7 @@ export const getDashboardBottomNavigation = ({
       ? "/dashboard/bidding/my"
       : provided.has("seller")
         ? "/dashboard/product"
-      : provided.has("buyer") || sought.has("seller") || normalized.has("sourcing")
+      : provided.has("buyer") || sought.has("seller")
         ? "/dashboard/marketplace"
         : "/dashboard/execution-enquiries";
     const preferred = ["/dashboard", priorityPath, "/dashboard/enquiries", "/dashboard/orders"];

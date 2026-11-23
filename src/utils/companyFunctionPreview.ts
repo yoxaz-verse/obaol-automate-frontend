@@ -30,10 +30,9 @@ export const COMPANY_FUNCTION_PREVIEW_DEFINITIONS: CompanyFunctionPreviewDefinit
     { label: "Manage enquiries", href: "/dashboard/enquiries", description: "Respond to buyer interest and continue to confirmed orders." },
     { label: "Track orders", href: "/dashboard/orders", description: "Follow confirmed sales through their lifecycle." },
   ] },
-  { slug: "sourcing", name: "Sourcing", description: "Find suitable products and suppliers using the existing marketplace and enquiry tools.", actions: [
-    { label: "Browse trade listings", href: "/dashboard/marketplace", description: "Review current product and supply listings.", primary: true },
-    { label: "Manage enquiries", href: "/dashboard/enquiries", description: "Capture requirements and follow up with suppliers." },
-    { label: "Track orders", href: "/dashboard/orders", description: "Follow sourced products after confirmation." },
+  { slug: "agritech-companies", name: "Agritech Companies", description: "Contribute technology or data-enabled services to agricultural commodity execution.", actions: [
+    { label: "Execution requests", href: "/dashboard/execution-enquiries", description: "Review aligned technology and trade-enablement requirements.", primary: true },
+    { label: "Company profile", href: "/dashboard/company", description: "Maintain your company profile and declared agritech capability." },
   ] },
   { slug: "packaging", name: "Packaging", description: "Coordinate packaging requirements through active requests, orders, and documents.", actions: [
     { label: "Packaging Services", href: "/dashboard/packaging", description: "Find providers or create a sealed packaging requirement.", primary: true },

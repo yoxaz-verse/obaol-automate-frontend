@@ -106,7 +106,7 @@ test("associate onboarding captures independent provided and sought capability p
   assert.equal(form.includes("Select 1–6 in each section"), true);
   assert.equal(form.includes('href="/dashboard/company"'), true);
   assert.equal(form.includes("getCompanyFunctionPerspectiveDescription(fn?.slug, kind, fn?.description)"), true);
-  for (const slug of ["buyer", "seller", "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk", "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics"]) {
+  for (const slug of ["buyer", "seller", "agritech-companies", "packaging", "testing", "warehouse-storage", "finance-risk", "importing-to-india", "exporting-from-india", "freight-forwarding", "inland-logistics"]) {
     assert.equal(descriptions.includes(`${slug}:`) || descriptions.includes(`${JSON.stringify(slug)}:`), true, `missing perspective copy for ${slug}`);
   }
   assert.equal(descriptions.includes('provided: "We purchase commodities or products from suppliers."'), true);

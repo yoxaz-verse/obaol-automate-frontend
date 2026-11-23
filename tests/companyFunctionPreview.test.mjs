@@ -12,12 +12,12 @@ import { getDashboardRoute } from "../src/utils/dashboardAccess.ts";
 import { readFileSync } from "node:fs";
 
 test("preview contains the complete canonical taxonomy once", () => {
-  assert.equal(COMPANY_FUNCTION_PREVIEW_DEFINITIONS.length, 11);
+  assert.equal(COMPANY_FUNCTION_PREVIEW_DEFINITIONS.length, 12);
   assert.deepEqual(
     COMPANY_FUNCTION_PREVIEW_DEFINITIONS.map(({ slug }) => slug),
     CANONICAL_COMPANY_FUNCTION_SLUGS
   );
-  assert.equal(new Set(CANONICAL_COMPANY_FUNCTION_SLUGS).size, 11);
+  assert.equal(new Set(CANONICAL_COMPANY_FUNCTION_SLUGS).size, 12);
 });
 
 test("legacy buying and selling rows do not duplicate canonical buyer and seller", () => {
@@ -50,7 +50,7 @@ test("sought trade capabilities use the counterparty workflow", () => {
 });
 
 test("capability action links preserve selection order, invert sought roles, and deduplicate within a group", () => {
-  const providing = getCapabilityActionLinks(["buyer", "sourcing", "buyer"], "provided");
+  const providing = getCapabilityActionLinks(["buyer", "agritech-companies", "buyer"], "provided");
   const seeking = getCapabilityActionLinks(["buyer"], "sought");
   assert.equal(providing[0], "/dashboard/marketplace");
   assert.equal(providing.filter((path) => path === "/dashboard/marketplace").length, 1);
@@ -59,6 +59,7 @@ test("capability action links preserve selection order, invert sought roles, and
 });
 
 test("selected service capabilities expose their specific destinations", () => {
+  assert.ok(getCapabilityActionLinks(["agritech-companies"], "provided").includes("/dashboard/execution-enquiries"));
   assert.ok(getCapabilityActionLinks(["testing"], "provided").includes("/dashboard/quality-labs"));
   assert.ok(getCapabilityActionLinks(["warehouse-storage"], "provided").includes("/dashboard/warehouse-rent"));
   assert.ok(getCapabilityActionLinks(["importing-to-india"], "provided").includes("/dashboard/imports"));

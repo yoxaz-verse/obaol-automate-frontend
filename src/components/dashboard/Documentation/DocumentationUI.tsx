@@ -1,6 +1,6 @@
 "use client";
 
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { Children, isValidElement, type ButtonHTMLAttributes, type ReactNode } from "react";
 import Link from "next/link";
 import {
   FiActivity, FiAlertCircle, FiCheckCircle, FiClock, FiFileText, FiGrid,
@@ -9,6 +9,7 @@ import {
 import { DashboardPanel, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 import { DOCUMENT_CATEGORIES, DOCUMENT_LABELS } from "./documentCatalog";
 import SharedFileDropzone from "@/components/ui/FileDropzone";
+import AppCombobox from "@/components/ui/AppCombobox";
 
 export type DocumentationView = "overview" | "library" | "create" | "requirements" | "recipients" | "configuration";
 export type LibraryDisplay = "table" | "cards";
@@ -88,7 +89,15 @@ export function ViewToggle({ value, onChange }: { value: LibraryDisplay; onChang
 }
 
 export function SelectField({ label, value, onChange, children }: { label: string; value: string; onChange: (value: string) => void; children: ReactNode }) {
-  return <label className="min-w-0"><span className="mb-1 block text-[11px] font-bold tracking-wide db-muted">{label}</span><select aria-label={label} value={value} onChange={event => onChange(event.target.value)} className="doc-field px-3">{children}</select></label>;
+  const options: Array<{ key: string; label: string; group?: string }> = [];
+  const collect = (nodes: ReactNode, group?: string) => Children.forEach(nodes, node => {
+    if (!isValidElement(node)) return;
+    const props = node.props as { value?: unknown; children?: ReactNode; label?: string };
+    if (node.type === "optgroup") collect(props.children, props.label);
+    else if (node.type === "option") options.push({ key: String(props.value ?? node.key ?? props.children ?? ""), label: String(props.children ?? props.value ?? ""), group });
+  });
+  collect(children);
+  return <div className="min-w-0"><AppCombobox label={label} value={value || null} onChange={next => onChange(next || "")} options={options} /></div>;
 }
 
 export function FileDropzone({ file, onFile }: { file: File | null; onFile: (file: File | null) => void }) {

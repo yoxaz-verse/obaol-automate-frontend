@@ -8,6 +8,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
 import AuthContext from "@/context/AuthContext";
 import { featureFlags } from "@/config/featureFlags";
+import DesktopUpdateSettings from "@/components/desktop/DesktopUpdateSettings";
 
 const settingsLinks = [
   {
@@ -89,6 +90,8 @@ export default function SettingsPage() {
         title="Settings"
         description="Manage your account preferences and personalize your OBAOL workspace."
       />
+
+      <DesktopUpdateSettings />
 
       <DashboardPanel className="overflow-hidden">
         <div className="flex items-start gap-4 border-b db-border-subtle px-5 py-5 sm:px-6">

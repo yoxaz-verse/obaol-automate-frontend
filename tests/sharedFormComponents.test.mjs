@@ -81,19 +81,12 @@ test("public and developer selectors use the shared combobox", () => {
   assert.doesNotMatch(keys, /<select/);
 });
 
-test("native select compatibility is explicit and cannot expand", async () => {
-  const { execFileSync } = await import("node:child_process");
+test("native selects are prohibited in application source", async () => {
+  const { spawnSync } = await import("node:child_process");
   const root = new URL("..", import.meta.url);
-  const output = execFileSync("rg", ["-l", "<select", "src", "-g", "*.tsx", "-g", "*.ts"], { cwd: root, encoding: "utf8" });
-  const actual = output.trim().split("\n").sort();
-  const allowed = [
-    "src/app/dashboard/documentation/[id]/page.tsx",
-    "src/app/dashboard/freight-forwarding/finance/page.tsx",
-    "src/components/dashboard/Documentation/DocumentCreator.tsx",
-    "src/components/dashboard/Documentation/DocumentationUI.tsx",
-    "src/components/packaging/PackagingUnitEditor.tsx",
-  ].sort();
-  assert.deepEqual(actual, allowed);
+  const result = spawnSync("rg", ["-l", "<select", "src", "-g", "*.tsx", "-g", "*.ts"], { cwd: root, encoding: "utf8" });
+  assert.ok(result.status === 0 || result.status === 1, result.stderr);
+  assert.equal(result.stdout.trim(), "");
 });
 
 test("public detail locations support coordinates and address-only fallback", () => {

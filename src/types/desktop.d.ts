@@ -18,6 +18,9 @@ declare global {
       checkForUpdates?: () => Promise<DesktopUpdateStatus>;
       downloadUpdate?: () => Promise<DesktopUpdateStatus>;
       installUpdate?: () => Promise<DesktopUpdateStatus>;
+      getAutoUpdatePreference?: () => Promise<boolean>;
+      setAutoUpdatePreference?: (enabled: boolean) => Promise<boolean>;
+      onAutoUpdatePreferenceChanged?: (listener: (enabled: boolean) => void) => () => void;
       onUpdateStatus?: (listener: (status: DesktopUpdateStatus) => void) => () => void;
     }>;
   }

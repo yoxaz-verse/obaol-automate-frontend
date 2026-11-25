@@ -15,7 +15,6 @@ import type { ResolvedSidebarPage } from "@/types/sidebarGovernance";
 import { getGovernedRouteStatus, SIDEBAR_COMMON_ROUTES, SIDEBAR_HOME_ROUTES, SIDEBAR_UTILITY_ROUTES } from "@/utils/sidebarGovernance";
 import { DASHBOARD_ADMIN_WORKFLOW_GROUPS, type AdminWorkflowGroup } from "@/utils/adminSidebarGroups";
 import { groupAssociateServiceLinks } from "@/utils/associateServiceFamilies";
-import { filterOperatorWorkflowGroups, type OperatorCapabilitySummary } from "@/utils/operatorNavigationCapabilities";
 
 export { DASHBOARD_ADMIN_WORKFLOW_GROUPS } from "@/utils/adminSidebarGroups";
 export type { AdminWorkflowGroup } from "@/utils/adminSidebarGroups";
@@ -133,7 +132,6 @@ export const getDashboardSidebarSections = (
   providedCapabilities: string[] = [],
   soughtCapabilities: string[] = [],
   governedPages?: ResolvedSidebarPage[],
-  operatorCapabilitySummary?: OperatorCapabilitySummary,
 ): DashboardNavSection[] => {
   const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
   const accessibleRoutes = getAccessibleDashboardRoutes({
@@ -254,10 +252,7 @@ export const getDashboardSidebarSections = (
     const workflowLinks = accessibleRoutes
       .filter((route) => BUSINESS_WORKFLOW_SECTIONS.has(route.section) && optionMap.has(route.path))
       .map((route) => route.path);
-    const workflowGroups = filterOperatorWorkflowGroups(
-      buildAvailableWorkflowGroups(availableLinks, workflowLinks),
-      operatorCapabilitySummary || { companyCount: 0, providedCapabilities: [], soughtCapabilities: [], eligibility: {} },
-    );
+    const workflowGroups = buildAvailableWorkflowGroups(availableLinks, workflowLinks);
     const operationalRoutes = accessibleRoutes
       .filter((route) => route.section === "Operations/Admin" && optionMap.has(route.path));
     const organizationLinks = linksForSection("Organization")

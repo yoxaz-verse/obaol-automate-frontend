@@ -18,7 +18,6 @@ import { useSidebarGovernance } from "@/hooks/useSidebarGovernance";
 import { useDashboardNavigation } from "@/context/DashboardNavigationContext";
 import { importReservationsQueryOptions, importsQueryOptions } from "@/core/data/useImports";
 import { warmDashboardRoute } from "@/core/navigation/dashboardRouteWarmup";
-import { useOperatorCompanyCapabilities } from "@/hooks/useOperatorCompanyCapabilities";
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -33,7 +32,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const queryClient = useQueryClient();
     const [openNavigationGroup, setOpenNavigationGroup] = useState<string | null>(null);
     const governance = useSidebarGovernance();
-    const operatorCapabilities = useOperatorCompanyCapabilities();
     const governedPages = governance.isAssociate ? governance.resolved : undefined;
 
     const filteredOptions = React.useMemo(() => getRoleFilteredSidebarOptions(
@@ -54,8 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         user?.providedCapabilities || [],
         user?.soughtCapabilities || [],
         governedPages,
-        operatorCapabilities.isOperatorFamily ? operatorCapabilities.summary : undefined,
-    ), [capabilities, filteredOptions, governedPages, operatorCapabilities.isOperatorFamily, operatorCapabilities.summary, user?.providedCapabilities, user?.role, user?.soughtCapabilities]);
+    ), [capabilities, filteredOptions, governedPages, user?.providedCapabilities, user?.role, user?.soughtCapabilities]);
     type NavigationRow = { kind: "group" | "section"; label: string; links: string[] };
     const navigationRows = sidebarSections.flatMap<NavigationRow>((section) => section.groups
         ? section.groups.map((group) => ({

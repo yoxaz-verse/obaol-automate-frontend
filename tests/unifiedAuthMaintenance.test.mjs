@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   AUTH_SERVICE_UPGRADE_MESSAGE,
   normalizeAuthError,
+  safeDashboardReturnTo,
 } from "../src/utils/unifiedAuth.ts";
 
 const maintenanceStatus = {
@@ -53,4 +54,12 @@ test("unified auth renders maintenance as an accessible amber status", () => {
   assert.match(source, /border-amber-300 bg-amber-50/);
   assert.match(source, /<FiTool/);
   assert.match(source, /role=\{status\?\.tone === "error" \? "alert" : "status"\}/);
+});
+
+test("post-auth return paths are restricted to the dashboard", () => {
+  assert.equal(safeDashboardReturnTo("/dashboard"), "/dashboard");
+  assert.equal(safeDashboardReturnTo("/dashboard/operator/team?tab=active"), "/dashboard/operator/team?tab=active");
+  assert.equal(safeDashboardReturnTo("https://example.com"), "");
+  assert.equal(safeDashboardReturnTo("//example.com/dashboard"), "");
+  assert.equal(safeDashboardReturnTo("/auth"), "");
 });

@@ -53,6 +53,13 @@ export const authDestination = (user: any) => {
   return "/dashboard";
 };
 
+export const safeDashboardReturnTo = (value: unknown) => {
+  const path = String(value || "").trim();
+  return path === "/dashboard" || path.startsWith("/dashboard/") || path.startsWith("/dashboard?")
+    ? path
+    : "";
+};
+
 export const formatAuthCountdown = (milliseconds: number) => {
   const total = Math.max(0, Math.ceil(milliseconds / 1000));
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;

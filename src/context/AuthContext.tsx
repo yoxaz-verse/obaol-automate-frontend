@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useEffect, useCallback } from "react";
+import React, { createContext, useState, ReactNode, useEffect, useCallback, useRef } from "react";
 import { postData, getData } from "@/core/api/apiHandler";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -109,6 +109,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const router = useRouter();
   const queryClient = useQueryClient();
   const sessionQuery = useSessionQuery();
+  const handledInvalidSessionRef = useRef(false);
 
   const verifySession = useCallback(
     () => getData("/verify-token", {}, { cacheMode: "bypass" }),
@@ -140,6 +141,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     const payload = sessionQuery.data?.data;
     if (payload?.success && payload?.user) {
+      handledInvalidSessionRef.current = false;
       setAuth({
         isAuthenticated: true,
         user: payload.user,
@@ -148,14 +150,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       return;
     }
 
-    if (sessionQuery.isError || payload?.success === false) {
-      setAuth({
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-      });
+    if (!handledInvalidSessionRef.current) {
+      handledInvalidSessionRef.current = true;
+      const returnTo = typeof window !== "undefined"
+        ? `${window.location.pathname}${window.location.search}`
+        : "/dashboard";
+      if (!returnTo.startsWith("/dashboard")) {
+        setAuth({ isAuthenticated: false, user: null, loading: false });
+        return;
+      }
+      const params = new URLSearchParams({ view: "signin" });
+      params.set("returnTo", returnTo);
+      clearLocalSession(`/auth?${params.toString()}`);
     }
-  }, [sessionQuery.data, sessionQuery.isError, sessionQuery.isLoading]);
+  }, [clearLocalSession, sessionQuery.data, sessionQuery.isLoading]);
 
   // Function to handle login
   const login = async (data: LoginData) => {

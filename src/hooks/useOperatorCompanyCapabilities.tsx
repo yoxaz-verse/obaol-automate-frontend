@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { operatorHierarchyRoutes } from "@/core/api/apiRoutes";
-import { EMPTY_OPERATOR_CAPABILITY_SUMMARY, type OperatorCapabilitySummary } from "@/utils/operatorNavigationCapabilities";
+import { EMPTY_OPERATOR_CAPABILITY_SUMMARY, normalizeOperatorCapabilitySummary, type OperatorCapabilitySummary } from "@/utils/operatorNavigationCapabilities";
 
 type Value = {
   isOperatorFamily: boolean;
@@ -23,7 +23,9 @@ export const OperatorCompanyCapabilitiesProvider = ({ children }: { children: Re
   const isOperatorFamily = role === "operator" || role === "team";
   const query = useQuery({
     queryKey: ["operator-company-capabilities", user?.id],
-    queryFn: async () => (await getData(operatorHierarchyRoutes.capabilities(String(user?.id)))).data.data as OperatorCapabilitySummary,
+    queryFn: async () => normalizeOperatorCapabilitySummary(
+      (await getData(operatorHierarchyRoutes.capabilities(String(user?.id)))).data?.data,
+    ),
     enabled: isOperatorFamily && Boolean(user?.id),
     staleTime: 60_000,
     retry: 1,
@@ -32,7 +34,7 @@ export const OperatorCompanyCapabilitiesProvider = ({ children }: { children: Re
     isOperatorFamily,
     isLoading: query.isLoading,
     isError: query.isError,
-    summary: query.data || EMPTY_OPERATOR_CAPABILITY_SUMMARY,
+    summary: normalizeOperatorCapabilitySummary(query.data || EMPTY_OPERATOR_CAPABILITY_SUMMARY),
     refresh: query.refetch,
   }), [isOperatorFamily, query.data, query.isError, query.isLoading, query.refetch]);
   return <Context.Provider value={value}>{children}</Context.Provider>;

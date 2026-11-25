@@ -25,6 +25,7 @@ import DashboardNavigationProgress from "@/components/dashboard/DashboardNavigat
 import DashboardContentReady from "@/components/dashboard/DashboardContentReady";
 import DashboardPerformanceObserver from "@/components/dashboard/DashboardPerformanceObserver";
 import { OperatorCompanyCapabilitiesProvider } from "@/hooks/useOperatorCompanyCapabilities";
+import DashboardShellErrorBoundary from "@/components/dashboard/DashboardShellErrorBoundary";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -250,14 +251,16 @@ export default function DashboardClientLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthenticatedProviders>
-      <DashboardNavigationProvider>
-        <SidebarGovernanceProvider>
-          <OperatorCompanyCapabilitiesProvider>
-            <DashboardLayoutContent>{children}</DashboardLayoutContent>
-          </OperatorCompanyCapabilitiesProvider>
-        </SidebarGovernanceProvider>
-      </DashboardNavigationProvider>
-    </AuthenticatedProviders>
+    <DashboardShellErrorBoundary>
+      <AuthenticatedProviders>
+        <DashboardNavigationProvider>
+          <SidebarGovernanceProvider>
+            <OperatorCompanyCapabilitiesProvider>
+              <DashboardLayoutContent>{children}</DashboardLayoutContent>
+            </OperatorCompanyCapabilitiesProvider>
+          </SidebarGovernanceProvider>
+        </DashboardNavigationProvider>
+      </AuthenticatedProviders>
+    </DashboardShellErrorBoundary>
   );
 }

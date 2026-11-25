@@ -168,11 +168,12 @@ test("Associate desktop and mobile navigation share capability-family sidebar gr
   }
 });
 
-test("Operator and Team navigation use filtered workflow accordions", () => {
+test("Operator and Team navigation always uses complete role-authorized workflow accordions", () => {
   const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
   assert.match(navigation, /normalizedRole === "operator" \|\| normalizedRole === "team"/);
   assert.match(navigation, /label: "Business Workflows"/);
   assert.match(navigation, /buildAvailableWorkflowGroups\(availableLinks, workflowLinks\)/);
+  assert.doesNotMatch(navigation, /filterOperatorWorkflowGroups/);
   assert.match(navigation, /label: "Other Services"/);
   assert.match(navigation, /groups: getDashboardAdminGroups\(operationalRoutes\)/);
 });

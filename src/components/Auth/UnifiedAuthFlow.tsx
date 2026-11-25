@@ -8,19 +8,19 @@ import { FiArrowLeft, FiCheck, FiEye, FiEyeOff, FiKey, FiLoader, FiMail, FiPhone
 import AuthContext from "@/context/AuthContext";
 import { postData } from "@/core/api/apiHandler";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
-import { AuthMode, AuthStatus, PublicAuthRole, authDestination, formatAuthCountdown, isValidEmail, normalizeAuthError } from "@/utils/unifiedAuth";
+import { AuthMode, AuthStatus, PublicAuthRole, authDestination, formatAuthCountdown, isValidEmail, normalizeAuthError, safeDashboardReturnTo } from "@/utils/unifiedAuth";
 import AuthLayout from "./AuthLayout";
 import { isObaolMobileShell } from "@/utils/mobileAuthBridge";
 
 type Stage = "email" | "methods" | "otp";
 type PostAuthPhase = "idle" | "verifying" | "redirecting" | "delayed";
-type Props = { initialMode?: AuthMode; initialRole?: PublicAuthRole; prefill?: string; intent?: string };
+type Props = { initialMode?: AuthMode; initialRole?: PublicAuthRole; prefill?: string; intent?: string; returnTo?: string };
 
 const fieldClass = "h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-brand-abyssal outline-none transition focus:border-obaol-500 focus:ring-2 focus:ring-obaol-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/15 dark:bg-white/[0.04] dark:text-brand-palladian";
 const primaryClass = "inline-flex h-12 w-full items-center justify-center rounded-xl bg-gradient-to-r from-obaol-400 to-obaol-600 px-5 text-sm font-black text-obaol-950 shadow-lg shadow-obaol-500/15 transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 disabled:cursor-not-allowed disabled:opacity-55";
 const secondaryClass = "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-800 transition hover:border-obaol-500/60 hover:bg-obaol-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 disabled:opacity-55 dark:border-white/15 dark:bg-white/[0.03] dark:text-white dark:hover:bg-white/[0.07]";
 
-export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = "Associate", prefill = "", intent = "" }: Props) {
+export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = "Associate", prefill = "", intent = "", returnTo = "" }: Props) {
   const router = useRouter();
   const { isAuthenticated, loading: sessionLoading, user, refreshUser } = useContext(AuthContext);
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -56,7 +56,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   const isBusy = Boolean(busy) || postAuthPhase !== "idle";
 
   const finishAuthentication = useCallback(async (next?: string) => {
-    const destination = next || "/dashboard";
+    const destination = safeDashboardReturnTo(returnTo) || next || "/dashboard";
     setRedirectDestination(destination);
     setPostAuthPhase("redirecting");
     try {
@@ -72,17 +72,17 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       setPostAuthPhase("idle");
       throw error;
     }
-  }, [refreshUser, router]);
+  }, [refreshUser, returnTo, router]);
 
   useEffect(() => {
     if (!sessionLoading && isAuthenticated && user && postAuthPhase === "idle") {
-      const destination = authDestination(user);
+      const destination = safeDashboardReturnTo(returnTo) || authDestination(user);
       setRedirectDestination(destination);
       setPostAuthPhase("redirecting");
       router.replace(destination);
       router.refresh();
     }
-  }, [isAuthenticated, postAuthPhase, router, sessionLoading, user]);
+  }, [isAuthenticated, postAuthPhase, returnTo, router, sessionLoading, user]);
 
   useEffect(() => {
     if (postAuthPhase !== "redirecting") return;

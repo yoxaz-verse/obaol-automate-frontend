@@ -91,6 +91,18 @@ test("document upload collects and submits governed metadata", () => {
   assert.match(workspace, /upload\.isError \? "danger" : "success"/);
 });
 
+test("operators receive an assigned-company documentation workspace", () => {
+  const workspace = read("src/app/dashboard/documentation/page.tsx");
+  const detail = read("src/app/dashboard/documentation/[id]/page.tsx");
+  const routes = read("src/core/api/apiRoutes.tsx");
+  assert.match(workspace, /isOperator = role === "operator" \|\| role === "team"/);
+  assert.match(workspace, /apiRoutes\.tradeDocuments\.companies/);
+  assert.match(workspace, /All assigned companies/);
+  assert.match(workspace, /actualIsAdmin \|\| !isAssociate/);
+  assert.match(detail, /\["associate", "operator", "team"\]\.includes\(role\)/);
+  assert.match(routes, /TRADE_DOCUMENT}\/companies/);
+});
+
 test("continue preserves workflow state and preview failures remain actionable", () => {
   const workspace = read("src/app/dashboard/documentation/page.tsx");
   const detail = read("src/app/dashboard/documentation/[id]/page.tsx");

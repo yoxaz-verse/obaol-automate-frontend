@@ -23,7 +23,7 @@ import { sidebarOptions } from "@/utils/utils";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import { isDashboardRouteActive } from "@/utils/dashboardAccess";
 import Image from "next/image";
-import { FiBell, FiChevronDown, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut } from "react-icons/fi";
+import { FiBell, FiChevronDown, FiRefreshCw, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut } from "react-icons/fi";
 import NotificationPanel from "./NotificationPanel";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
@@ -391,6 +391,16 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
         ) : (
           <>
             <div className="flex items-center db-subtle border db-border-subtle rounded-2xl p-1 gap-1">
+              <button
+                type="button"
+                aria-label="Reload dashboard"
+                title="Reload dashboard"
+                onClick={() => window.location.reload()}
+                className="relative flex h-9 w-9 items-center justify-center rounded-xl text-default-500 transition-all duration-300 hover:db-inset hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500"
+              >
+                <FiRefreshCw aria-hidden="true" size={17} />
+              </button>
+              <div className="mx-1 h-4 w-px bg-default-300/50 dark:bg-white/10" />
               <button
                 type="button"
                 role="switch"

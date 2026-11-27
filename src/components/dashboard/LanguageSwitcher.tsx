@@ -124,11 +124,39 @@ export const LanguageSwitcher = () => {
     // notranslate + translate="no" stops ALL translation engines from touching this element
     <div className="flex items-center gap-2 notranslate" translate="no">
       <div className="relative group notranslate" translate="no">
-        <LuLanguages className="absolute left-3 top-1/2 -translate-y-1/2 text-obaol-500 w-4 h-4 z-10 pointer-events-none" />
-        <AppSelect aria-label="Select Language" selectedKeys={[pendingLang ?? currentLang]} isDisabled={isSwitching} onSelectionChange={keys => handleSelectChange(String(Array.from(keys)[0] || "en"))} className={`notranslate ${pendingLang ? "w-[100px]" : "w-[135px]"}`} classNames={{ trigger: "!min-h-9 h-9 bg-default-100 pl-8 pr-2 text-[11px]", value: "text-[11px]" }}>
+        <AppSelect
+          aria-label="Select Language"
+          selectedKeys={new Set([pendingLang ?? currentLang])}
+          isDisabled={isSwitching}
+          onSelectionChange={(keys) => handleSelectChange(String(Array.from(keys as Set<string>)[0] || "en"))}
+          className={`notranslate ${pendingLang ? "w-[100px]" : "w-[145px]"}`}
+          startContent={<LuLanguages className="text-obaol-500 w-3.5 h-3.5 shrink-0" />}
+          classNames={{
+            trigger: "!min-h-9 h-9 bg-default-100/90 dark:bg-default-50/10 border border-default-200/60 dark:border-white/10 hover:border-obaol-500/40 px-2.5",
+            value: "text-xs font-semibold text-foreground",
+            innerWrapper: "gap-1.5",
+          }}
+          renderValue={(items) => {
+            const code = (items[0]?.key as string) || pendingLang || currentLang || "en";
+            const selected = languages.find((l) => l.code === code) || languages[0];
+            return (
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground truncate notranslate" translate="no">
+                <span className="text-xs leading-none">{selected.flag}</span>
+                <span className="truncate">{selected.name}</span>
+              </span>
+            );
+          }}
+        >
           {languages.map((lang) => (
-            <SelectItem key={lang.code} className="notranslate text-base font-medium text-foreground bg-content1 py-2">
-              {lang.flag} {lang.name}
+            <SelectItem
+              key={lang.code}
+              textValue={`${lang.flag} ${lang.name}`}
+              className="notranslate text-xs font-medium text-foreground bg-content1 py-2"
+            >
+              <span className="flex items-center gap-2">
+                <span>{lang.flag}</span>
+                <span>{lang.name}</span>
+              </span>
             </SelectItem>
           ))}
         </AppSelect>

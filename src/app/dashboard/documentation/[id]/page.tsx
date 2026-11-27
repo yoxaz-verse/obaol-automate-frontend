@@ -27,7 +27,7 @@ const expiryOptions = [7, 14, 30, 60, 90].map(days => ({ key: String(days), labe
 
 export default function DocumentationDetail() {
   const { id } = useParams(), router = useRouter(), client = useQueryClient(), { user } = useContext(AuthContext);
-  const key = String(id || ""), role = String(user?.role || "").toLowerCase(), canOwn = role === "associate", canConvert = canOwn || role === "admin", canVerify = ["admin", "operator", "team"].includes(role);
+  const key = String(id || ""), role = String(user?.role || "").toLowerCase(), canOwn = ["associate", "operator", "team"].includes(role), canConvert = canOwn || role === "admin", canVerify = ["admin", "operator", "team"].includes(role);
   const [tab, setTab] = useState<Tab>("preview"), [error, setError] = useState(""), [notice, setNotice] = useState(""), [busyAction, setBusyAction] = useState<string | null>(null), [issueOpen, setIssueOpen] = useState(false), [shareOpen, setShareOpen] = useState(false), [emailOpen, setEmailOpen] = useState(false), [whatsappOpen, setWhatsappOpen] = useState(false), [decisionOpen, setDecisionOpen] = useState(false), [conversionRule, setConversionRule] = useState<any>(null);
   const query = useQuery({ queryKey: ["documentation-document", key], queryFn: async () => (await getData(apiRoutes.tradeDocuments.getOne(key))).data.data, enabled: Boolean(key) });
   const revisions = useQuery({ queryKey: ["documentation-revisions", key], queryFn: async () => (await getData(`${apiRoutes.tradeDocuments.getOne(key)}/revisions`)).data.data || [], enabled: Boolean(key) && canOwn });

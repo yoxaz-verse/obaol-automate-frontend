@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { LuScan, LuTruck, LuShieldCheck, LuNetwork } from "react-icons/lu";
+import { LuRefreshCw, LuScan, LuTruck, LuShieldCheck, LuNetwork } from "react-icons/lu";
 
 type BrandedLoaderProps = {
   fullScreen?: boolean;
@@ -11,6 +11,7 @@ type BrandedLoaderProps = {
   variant?: "default" | "compact";
   size?: "sm" | "md" | "lg";
   message?: string;
+  showReload?: boolean;
 };
 
 type LoadingStage = {
@@ -33,6 +34,7 @@ export default function BrandedLoader({
   variant = "default",
   size = "md",
   message = "Loading your workspace",
+  showReload = false,
 }: BrandedLoaderProps) {
   const sizeMap = {
     sm: { frame: "w-[120px] h-[120px]", logo: 32, iconSize: 18 },
@@ -187,6 +189,17 @@ export default function BrandedLoader({
         <span className="mt-6 text-[8px] font-black text-default-400/50 tracking-[0.4em] italic">
           OBAOL workspace
         </span>
+
+        {showReload && (
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-6 inline-flex min-h-10 items-center gap-2 rounded-xl border border-obaol-500/30 bg-obaol-500/10 px-4 py-2 text-xs font-bold text-obaol-800 transition-colors hover:bg-obaol-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 dark:text-obaol-200"
+          >
+            <LuRefreshCw aria-hidden="true" size={15} />
+            Reload dashboard
+          </button>
+        )}
       </div>
     </div>
   );

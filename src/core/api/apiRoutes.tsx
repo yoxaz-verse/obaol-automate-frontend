@@ -88,6 +88,17 @@ export const accountRoutes = {
   operatorRegisterOptions: "/auth/operator/register/options",
 };
 
+export const companyGovernanceRoutes = {
+  members: "/company-governance/members",
+  invite: "/company-governance/members/invitations",
+  invitation: (id: string) => `/company-governance/members/invitations/${id}`,
+  member: (id: string) => `/company-governance/members/${id}`,
+  transfer: "/company-governance/supervisor-transfer",
+  branding: "/company-governance/branding",
+  inspectInvite: (token: string) => `/company-governance/invitations/${token}`,
+  acceptInvite: (token: string) => `/company-governance/invitations/${token}/accept`,
+};
+
 // Helper function to generate standard CRUD routes
 const createCRUDRoutes = (basePath: string) => ({
   getAll: `${basePath}`,
@@ -639,6 +650,7 @@ export const apiRoutes = {
   statusHistory: statusHistoryRoutes,
   associate: associateRoutes,
   associateCompany: associateCompanyRoutes,
+  companyGovernance: companyGovernanceRoutes,
   labProfiles: labProfileRoutes,
   category: categoryRoutes,
   subCategory: subCategoryRoutes,
@@ -715,6 +727,7 @@ export const apiRoutes = {
     whatsapp: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/whatsapp`,
     whatsappDeliveries: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/whatsapp-deliveries`,
     summary: `${BASE_PATHS.TRADE_DOCUMENT}/summary`,
+    companies: `${BASE_PATHS.TRADE_DOCUMENT}/companies`,
     readiness: `${BASE_PATHS.TRADE_DOCUMENT}/readiness`,
     upload: `${BASE_PATHS.TRADE_DOCUMENT}/upload`,
     extraction: (jobId: string) => `${BASE_PATHS.TRADE_DOCUMENT}/extractions/${jobId}`,

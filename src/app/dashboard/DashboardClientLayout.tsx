@@ -193,7 +193,7 @@ function DashboardLayoutContent({
   if (!isMounted || loading) {
     return (
       <section className="db-bg min-h-screen">
-        <BrandedLoader fullScreen message="Loading your workspace" variant="compact" />
+        <BrandedLoader fullScreen showReload message="Loading your workspace" variant="compact" />
       </section>
     );
   }

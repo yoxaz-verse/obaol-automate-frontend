@@ -19,7 +19,7 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
-import { getData, postData, putData } from "@/core/api/apiHandler";
+import { deleteData, getData, patchData, postData, postMultipart, putData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractList } from "@/core/data/queryUtils";
 import { showToastMessage } from "@/utils/utils";
@@ -29,6 +29,7 @@ import { CompanyMetricCard, CompanyProfileReadiness } from "@/components/dashboa
 import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPriorities";
 import { getCompanyFunctionPerspectiveDescription } from "@/utils/companyFunctionDescriptions";
 import { getCapabilityActions } from "@/utils/companyFunctionPreview";
+import ImagePicker from "@/components/ui/ImagePicker";
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
@@ -107,6 +108,16 @@ export default function CompanyWorkspacePage() {
     syncing: boolean;
   } | null>(null);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("STAFF");
+  const [editingMember, setEditingMember] = useState<any>(null);
+  const [editingRole, setEditingRole] = useState("STAFF");
+  const [isBrandingOpen, setIsBrandingOpen] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [removeLogo, setRemoveLogo] = useState(false);
+  const [removeBanner, setRemoveBanner] = useState(false);
 
   const companyQuery = useQuery({
     queryKey: ["company-workspace-company", associateCompanyId],
@@ -120,18 +131,49 @@ export default function CompanyWorkspacePage() {
   const membersQuery = useQuery({
     queryKey: ["company-workspace-members", associateCompanyId],
     queryFn: async () => {
-      const response = await getData(apiRoutes.associate.getAll, {
-        associateCompany: associateCompanyId,
-        page: 1,
-        limit: 250,
-        sort: "createdAt:desc",
-      });
-      const payload = response?.data?.data;
-      if (Array.isArray(payload?.data)) return payload.data;
-      if (Array.isArray(payload)) return payload;
-      return [];
+      const response = await getData(apiRoutes.companyGovernance.members);
+      return response?.data?.data || { members: [], invitations: [] };
     },
     enabled: isAssociate && Boolean(associateCompanyId),
+  });
+
+  const refreshGovernance = () => {
+    queryClient.invalidateQueries({ queryKey: ["company-workspace-members", associateCompanyId] });
+    queryClient.invalidateQueries({ queryKey: ["company-workspace-company", associateCompanyId] });
+  };
+  const inviteMutation = useMutation({
+    mutationFn: () => postData(apiRoutes.companyGovernance.invite, { email: inviteEmail.trim(), companyRole: inviteRole }),
+    onSuccess: () => { setIsInviteModalOpen(false); setInviteEmail(""); setInviteRole("STAFF"); refreshGovernance(); showToastMessage({ type: "success", message: "Company invitation sent." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not send invitation." }),
+  });
+  const memberMutation = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: any }) => patchData(apiRoutes.companyGovernance.member(id), body),
+    onSuccess: () => { setEditingMember(null); refreshGovernance(); refreshUser(); showToastMessage({ type: "success", message: "Company member updated." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not update member." }),
+  });
+  const cancelInviteMutation = useMutation({
+    mutationFn: (id: string) => deleteData(apiRoutes.companyGovernance.invitation(id)),
+    onSuccess: () => { refreshGovernance(); showToastMessage({ type: "success", message: "Invitation cancelled." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not cancel invitation." }),
+  });
+  const transferMutation = useMutation({
+    mutationFn: (memberId: string) => postData(apiRoutes.companyGovernance.transfer, { memberId }),
+    onSuccess: () => { refreshGovernance(); refreshUser(); showToastMessage({ type: "success", message: "Company supervision transferred." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not transfer supervision." }),
+  });
+  const brandingMutation = useMutation({
+    mutationFn: async () => {
+      if (removeLogo) await patchData(apiRoutes.companyGovernance.branding, { field: "logo" });
+      if (removeBanner) await patchData(apiRoutes.companyGovernance.branding, { field: "banner" });
+      for (const [field, file] of [["logo", logoFile], ["banner", bannerFile]] as const) {
+        if (!file) continue;
+        const form = new FormData(); form.append("file", file);
+        const uploaded = await postMultipart("/upload", form);
+        await patchData(apiRoutes.companyGovernance.branding, { field, fileId: uploaded?.data?.data?.fileId });
+      }
+    },
+    onSuccess: () => { setIsBrandingOpen(false); setLogoFile(null); setBannerFile(null); setRemoveLogo(false); setRemoveBanner(false); refreshGovernance(); showToastMessage({ type: "success", message: "Company branding updated." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not update company branding." }),
   });
 
   const reportsQuery = useQuery({
@@ -344,7 +386,8 @@ export default function CompanyWorkspacePage() {
   const company = companyQuery.data;
   const previewUrl = getCompanyPreviewUrl(company);
   const isWebsiteLive = Boolean((company as any)?.isWebsiteLive);
-  const members = useMemo(() => (Array.isArray(membersQuery.data) ? membersQuery.data : []), [membersQuery.data]);
+  const members = useMemo(() => (Array.isArray(membersQuery.data?.members) ? membersQuery.data.members : []), [membersQuery.data]);
+  const pendingInvitations = useMemo(() => (Array.isArray(membersQuery.data?.invitations) ? membersQuery.data.invitations : []), [membersQuery.data]);
   const reports = useMemo(() => (Array.isArray(reportsQuery.data) ? reportsQuery.data : []), [reportsQuery.data]);
   const obaolConfig = obaolConfigQuery.data;
   const obaolCompanyId = String(obaolConfig?.companyId || "");
@@ -494,6 +537,9 @@ export default function CompanyWorkspacePage() {
 
   const supervisorId = String(company?.supervisor?._id || company?.supervisor || "");
   const isSupervisor = Boolean(user?.id && supervisorId && user?.id === supervisorId);
+  const companyRole = String(user?.companyRole || (isSupervisor ? "SUPERVISOR" : "STAFF"));
+  const canManageMembers = Boolean(user?.companyPermissions?.includes("company:members") || isSupervisor);
+  const canManageBranding = Boolean(user?.companyPermissions?.includes("company:branding") || isSupervisor);
   const stats = companyStatsQuery.data?.meta || {};
   const teamPerformance = Array.isArray(companyStatsQuery.data?.team) ? companyStatsQuery.data.team : [];
   const enquiryCount = teamPerformance.reduce((sum: number, item: any) => sum + Number(item?.performance?.enquiriesHandled || 0), 0);
@@ -852,7 +898,7 @@ export default function CompanyWorkspacePage() {
                     <Chip color={String(company?.registrationStatus || "").toUpperCase() === "APPROVED" ? "success" : "warning"} variant="flat" size="sm">
                       {String(company?.registrationStatus || "PENDING_REVIEW").replace(/_/g, " ")}
                     </Chip>
-                    {isSupervisor ? <Chip color="warning" variant="flat" size="sm">Supervisor</Chip> : null}
+                    <Chip color="warning" variant="flat" size="sm">{companyRole.charAt(0) + companyRole.slice(1).toLowerCase()}</Chip>
                   </div>
                   <p className="mt-2 max-w-2xl text-sm text-default-500">{company?.description || company?.aboutUs || "Add a company description to help your team and trading partners understand the business."}</p>
                   <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-default-500">
@@ -867,6 +913,7 @@ export default function CompanyWorkspacePage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {previewUrl ? <Button color="warning" variant="flat" endContent={<LuArrowUpRight />} onPress={() => window.open(previewUrl, "_blank", "noopener,noreferrer")}>{isWebsiteLive ? "View Website" : "Preview Website"}</Button> : null}
+                {canManageBranding ? <Button color="warning" variant="bordered" onPress={() => setIsBrandingOpen(true)}>Logo &amp; branding</Button> : null}
                 <Button variant="flat" onPress={() => router.push("/dashboard/settings")}>Company Settings</Button>
               </div>
             </div>
@@ -1002,9 +1049,10 @@ export default function CompanyWorkspacePage() {
       </div>
 
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold text-foreground">Company Members</h2>
-          <p className="text-sm text-default-600">Report member issues for admin review. Direct delete is disabled.</p>
+        <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+          <div><h2 className="text-xl font-semibold text-foreground">Company Members</h2>
+          <p className="text-sm text-default-600">Company roles control workspace access. Deactivation preserves historical records.</p></div>
+          {canManageMembers ? <Button color="warning" startContent={<LuPlus />} onPress={() => setIsInviteModalOpen(true)}>Invite member</Button> : null}
         </div>
         {membersQuery.isLoading ? (
           <div className="flex items-center justify-center py-8">
@@ -1021,6 +1069,7 @@ export default function CompanyWorkspacePage() {
                 <tr>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Name</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Designation</th>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Company role</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Email</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Phone</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Status</th>
@@ -1037,6 +1086,7 @@ export default function CompanyWorkspacePage() {
                     >
                       <td className="px-3 py-2"><div className="flex items-center gap-2"><span>{member?.name || "-"}</span>{String(member?._id || "") === supervisorId ? <Chip size="sm" color="warning" variant="flat">Supervisor</Chip> : null}</div></td>
                       <td className="px-3 py-2 text-default-600">{member?.designationName || member?.designation?.name || "Associate"}</td>
+                      <td className="px-3 py-2"><Chip size="sm" variant="flat" color={member?.companyRole === "SUPERVISOR" ? "warning" : member?.companyRole === "MANAGER" ? "secondary" : "default"}>{String(member?.companyRole || "STAFF")}</Chip></td>
                       <td className="px-3 py-2 text-default-600">{member?.email || "-"}</td>
                       <td className="px-3 py-2 text-default-600">{member?.phone || "-"}</td>
                       <td className="px-3 py-2">
@@ -1045,15 +1095,11 @@ export default function CompanyWorkspacePage() {
                         </Chip>
                       </td>
                       <td className="px-3 py-2 text-right">
-                        <Button
-                          size="sm"
-                          color="warning"
-                          variant="flat"
-                          isDisabled={isSelf}
-                          onPress={() => setSelectedMember(member)}
-                        >
-                          {isSelf ? "Self" : "Report Member"}
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          {canManageMembers && !isSelf && member?.companyRole !== "SUPERVISOR" ? <Button size="sm" color="warning" variant="flat" onPress={() => { setEditingMember(member); setEditingRole(String(member?.companyRole || "STAFF")); }}>Manage</Button> : null}
+                          {isSupervisor && member?.companyRole === "MANAGER" && member?.isActive ? <Button size="sm" color="secondary" variant="flat" isLoading={transferMutation.isPending} onPress={() => { if (window.confirm(`Transfer company supervision to ${member.name}? You will become a Manager.`)) transferMutation.mutate(member._id); }}>Make supervisor</Button> : null}
+                          {!isSelf ? <Button size="sm" variant="light" onPress={() => setSelectedMember(member)}>Report</Button> : <span className="text-xs text-default-400">You</span>}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -1062,6 +1108,7 @@ export default function CompanyWorkspacePage() {
             </table>
           </div>
         )}
+        {pendingInvitations.length ? <div className="mt-6 border-t border-default-200 pt-4"><h3 className="font-semibold">Pending invitations</h3><div className="mt-3 space-y-2">{pendingInvitations.map((invite: any) => <div key={invite._id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-default-100 p-3 text-sm"><div><b>{invite.email}</b><span className="ml-2 text-default-500">{invite.intendedRole} · expires {formatDate(invite.expiresAt)}</span></div>{canManageMembers ? <Button size="sm" color="danger" variant="light" isLoading={cancelInviteMutation.isPending} onPress={() => cancelInviteMutation.mutate(invite._id)}>Cancel</Button> : null}</div>)}</div></div> : null}
       </div>
 
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
@@ -1237,6 +1284,33 @@ export default function CompanyWorkspacePage() {
             </Button>
           </ModalFooter>
         </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
+        <ModalContent><ModalHeader>Invite company member</ModalHeader><ModalBody className="space-y-4">
+          <Input type="email" label="Work email" value={inviteEmail} onValueChange={setInviteEmail} />
+          <Select label="Company role" selectedKeys={[inviteRole]} onSelectionChange={(keys) => setInviteRole(String(Array.from(keys)[0] || "STAFF"))}>
+            {isSupervisor ? <SelectItem key="MANAGER">Manager — profile, branding, operations, and Staff/Viewer management</SelectItem> : null}
+            <SelectItem key="STAFF">Staff — operational access</SelectItem>
+            <SelectItem key="VIEWER">Viewer — read-only access</SelectItem>
+          </Select>
+        </ModalBody><ModalFooter><Button variant="light" onPress={() => setIsInviteModalOpen(false)}>Cancel</Button><Button color="warning" isLoading={inviteMutation.isPending} isDisabled={!inviteEmail.trim()} onPress={() => inviteMutation.mutate()}>Send invitation</Button></ModalFooter></ModalContent>
+      </Modal>
+
+      <Modal isOpen={Boolean(editingMember)} onOpenChange={(open) => !open && setEditingMember(null)}>
+        <ModalContent><ModalHeader>Manage {editingMember?.name || "member"}</ModalHeader><ModalBody className="space-y-4">
+          <Select label="Company role" selectedKeys={[editingRole]} onSelectionChange={(keys) => setEditingRole(String(Array.from(keys)[0] || "STAFF"))}>
+            {isSupervisor ? <SelectItem key="MANAGER">Manager</SelectItem> : null}<SelectItem key="STAFF">Staff</SelectItem><SelectItem key="VIEWER">Viewer</SelectItem>
+          </Select>
+          <div className="rounded-xl bg-default-100 p-3 text-sm text-default-600">Deactivating a member immediately blocks login while preserving their company history.</div>
+        </ModalBody><ModalFooter className="justify-between"><Button color={editingMember?.isActive ? "danger" : "success"} variant="flat" isLoading={memberMutation.isPending} onPress={() => memberMutation.mutate({ id: editingMember._id, body: { isActive: !editingMember.isActive } })}>{editingMember?.isActive ? "Deactivate" : "Reactivate"}</Button><div className="flex gap-2"><Button variant="light" onPress={() => setEditingMember(null)}>Cancel</Button><Button color="warning" isLoading={memberMutation.isPending} onPress={() => memberMutation.mutate({ id: editingMember._id, body: { companyRole: editingRole } })}>Save role</Button></div></ModalFooter></ModalContent>
+      </Modal>
+
+      <Modal isOpen={isBrandingOpen} onOpenChange={setIsBrandingOpen} size="2xl">
+        <ModalContent><ModalHeader>Company logo and branding</ModalHeader><ModalBody className="grid gap-5 md:grid-cols-2">
+          <ImagePicker label="Company logo" preset="logo" maxSizeMb={5} value={logoFile} existingUrl={removeLogo ? "" : company?.logo} onChange={(file) => { setLogoFile(file); if (file) setRemoveLogo(false); }} onRemove={() => setRemoveLogo(true)} helperText="Shown in the company header, profile, and documents." />
+          <ImagePicker label="Company banner" preset="banner" maxSizeMb={8} value={bannerFile} existingUrl={removeBanner ? "" : company?.banner} onChange={(file) => { setBannerFile(file); if (file) setRemoveBanner(false); }} onRemove={() => setRemoveBanner(true)} helperText="Shown across company identity surfaces." />
+        </ModalBody><ModalFooter><Button variant="light" onPress={() => setIsBrandingOpen(false)}>Cancel</Button><Button color="warning" isLoading={brandingMutation.isPending} isDisabled={!logoFile && !bannerFile && !removeLogo && !removeBanner} onPress={() => brandingMutation.mutate()}>Save branding</Button></ModalFooter></ModalContent>
       </Modal>
 
       <Modal

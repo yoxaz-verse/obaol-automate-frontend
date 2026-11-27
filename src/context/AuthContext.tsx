@@ -32,6 +32,8 @@ export interface User {
   role: string;
   profilePictureUrl?: string | null;
   associateCompanyId?: string | null;
+  companyRole?: "SUPERVISOR" | "MANAGER" | "STAFF" | "VIEWER" | null;
+  companyPermissions?: string[];
   companyCapabilitiesConfigured?: boolean;
   providedCapabilities?: string[];
   soughtCapabilities?: string[];

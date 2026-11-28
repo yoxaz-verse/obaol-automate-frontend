@@ -322,8 +322,8 @@ export default function UnifiedAuthFlow({ initialRole = "Associate", prefill = "
 
   return (
     <AuthLayout
-      title={stage === "email" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue to OBAOL") : stage === "methods" ? "Welcome back" : stage === "role" ? "Choose your account type" : mode === "signup" ? "Verify your email" : "Verify your identity"}
-      subtitle={stage === "email" ? "Enter your email and we’ll guide you to the right next step." : stage === "methods" ? "Sign in securely to open your workspace." : stage === "role" ? "Tell us how you want to use OBAOL before onboarding." : mode === "signup" ? "Confirm your email to begin onboarding." : "Confirm your email to continue."}
+      title={stage === "email" ? (isDesktopApp ? "Sign in or create your OBAOL Desktop account" : "Sign in or create your OBAOL account") : stage === "methods" ? "Welcome back" : stage === "role" ? "Choose your account type" : mode === "signup" ? "Verify your email" : "Verify your identity"}
+      subtitle={stage === "email" ? "Enter your email to sign in or start a new account." : stage === "methods" ? "Sign in securely to open your workspace." : stage === "role" ? "Tell us how you want to use OBAOL before onboarding." : mode === "signup" ? "Confirm your email to begin onboarding." : "Confirm your email to continue."}
       cardMaxWidthClass="max-w-[500px]"
       stableContentTop
       leftPanel={{ headline: "OBAOL", highlight: "FROM DISCOVERY TO EXECUTION", description: "Discover commodities, connect with verified trade partners, and manage orders, documents, and execution in one workspace.", points: ["Discover verified opportunities", "Coordinate documents and orders", "Track execution in one workspace"] }}
@@ -349,7 +349,7 @@ export default function UnifiedAuthFlow({ initialRole = "Associate", prefill = "
           </div>
         ) : (
           <>
-        <div data-testid="auth-status-region" aria-live="polite" aria-atomic="true" role={status?.tone === "error" ? "alert" : "status"} className={status ? `relative min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : status.tone === "maintenance" ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}` : "min-h-12"}>
+        {status && <div data-testid="auth-status-region" aria-live="polite" aria-atomic="true" role={status.tone === "error" ? "alert" : "status"} className={`relative min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : status.tone === "maintenance" ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}`}>
           {status?.tone === "maintenance" ? (
             <span className="flex items-start gap-2.5">
               <FiTool className="mt-0.5 shrink-0" aria-hidden />
@@ -361,7 +361,7 @@ export default function UnifiedAuthFlow({ initialRole = "Associate", prefill = "
               <FiX aria-hidden />
             </button>
           )}
-        </div>
+        </div>}
 
         {stage === "email" && (
           <form onSubmit={continueFromEmail} className="space-y-4" data-testid="auth-form">
@@ -369,7 +369,7 @@ export default function UnifiedAuthFlow({ initialRole = "Associate", prefill = "
               <label htmlFor={emailId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">Email address</label>
               <input ref={emailRef} id={emailId} className={fieldClass} type="email" value={email} autoComplete="email webauthn" placeholder="name@example.com" disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
             </div>
-            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || !isValidEmail(email)} type="submit">{busy === "identify" ? "Checking…" : isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely"}</button>
+            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || !isValidEmail(email)} type="submit">{busy === "identify" ? "Checking…" : "Continue with email"}</button>
             <div className="relative py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 lg:py-1"><span className="relative z-10 lg:bg-white lg:px-3 lg:dark:bg-content1">or</span><span className="absolute left-0 top-1/2 hidden h-px w-full bg-slate-200 dark:bg-white/10 lg:block" /></div>
             <div className="min-h-[52px] lg:rounded-xl lg:border lg:border-slate-200 lg:p-1.5 lg:dark:border-white/10">
               {googleClientId ? <><div id={googleContainerId} data-testid="google-auth-button" className="mx-auto flex min-h-10 w-full max-w-[340px] justify-center overflow-hidden rounded-full" />{!googleReady && !googleError && <div className="mx-auto h-10 max-w-[340px] animate-pulse rounded-full bg-slate-100 dark:bg-white/[0.05]" />}</> : <p className="py-3 text-center text-xs text-slate-500">Google sign-in is not configured.</p>}

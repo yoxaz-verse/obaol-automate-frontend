@@ -58,9 +58,9 @@ export default function WhyObaolPremiumLogic() {
                         </ul>
                     </div>
 
-                    <div className="p-10 rounded-[3rem] bg-orange-500 text-white relative overflow-hidden group shadow-2xl shadow-orange-500/20 border border-orange-400">
+                    <div className="p-10 rounded-[3rem] bg-orange-500 !text-white relative overflow-hidden group shadow-2xl shadow-orange-500/20 border border-orange-400 [&_:is(h1,h2,h3,h4)]:!text-white">
                         <div className="absolute top-0 right-0 p-8 text-6xl font-black text-white/10 italic">OOS</div>
-                        <h3 className="text-xl font-bold text-white/60 mb-10 uppercase tracking-widest">OBAOL Execution Layer</h3>
+                        <h3 className="text-xl font-bold !text-white/80 mb-10 uppercase tracking-widest">OBAOL Execution Layer</h3>
                         <ul className="space-y-6">
                             {[
                                 "Begins after trade intent is established",
@@ -130,30 +130,30 @@ export default function WhyObaolPremiumLogic() {
 
             {/* SECTION 3: SYSTEM LEVEL SHIFT */}
             <section className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-                <div className="p-12 md:p-24 rounded-[5rem] bg-foreground text-background dark:bg-brand-blue shadow-2xl relative overflow-hidden group">
+                <div className="p-12 md:p-24 rounded-[3.5rem] md:rounded-[5rem] bg-foreground !text-white dark:bg-brand-blue shadow-2xl relative overflow-hidden group [&_:is(h1,h2,h3,h4)]:!text-white">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-orange-500/5 blur-[150px] rounded-full pointer-events-none public-decoration" />
 
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                         <div className="space-y-10">
                             <div className="space-y-6">
-                                <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-none">A System-Level <br /> <span className="text-orange-500 italic underline decoration-orange-500/30 underline-offset-8">Shift</span>.</h2>
-                                <p className="text-white/50 text-xl font-medium leading-relaxed pr-8">
-                                    OBAOL is not another platform to manage. It is a **transaction discipline** applied as an institutional layer to your existing trade.
+                                <h2 className="text-4xl md:text-6xl font-black !text-white tracking-tight leading-none">A System-Level <br /> <span className="text-orange-500 italic underline decoration-orange-500/30 underline-offset-8">Shift</span>.</h2>
+                                <p className="!text-white/70 text-xl font-medium leading-relaxed pr-8">
+                                    OBAOL is not another platform to manage. It is a <strong className="!text-white font-bold">transaction discipline</strong> applied as an institutional layer to your existing trade.
                                 </p>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {["Predictable Outcomes", "Assessed Risk", "Success-Linked", "Closure-Focused"].map((badge, i) => (
-                                    <div key={i} className="px-6 py-4 rounded-3xl bg-white/5 border border-white/10 text-white font-black uppercase text-xs tracking-widest text-center shadow-inner public-surface-card">
+                                    <div key={i} className="px-6 py-4 rounded-2xl bg-white/10 border border-white/15 !text-white font-black text-xs tracking-widest text-center shadow-inner backdrop-blur-md">
                                         {badge}
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="space-y-8 p-10 md:p-14 rounded-[4rem] bg-white/[0.03] border border-white/10 backdrop-blur-xl">
-                            <h3 className="text-2xl font-black text-white mb-6">Selective Participation</h3>
-                            <p className="text-white/60 text-lg leading-relaxed font-medium mb-10">
-                                We don&apos;t create activity. We create <span className="text-white underline decoration-orange-500 decoration-2">completed transactions</span>. OBAOL only engages where:
+                        <div className="space-y-8 p-10 md:p-14 rounded-[3rem] md:rounded-[4rem] bg-white/[0.04] border border-white/15 backdrop-blur-xl">
+                            <h3 className="text-2xl font-black !text-white mb-6">Selective Participation</h3>
+                            <p className="!text-white/70 text-lg leading-relaxed font-medium mb-10">
+                                We don&apos;t create activity. We create <span className="!text-white font-semibold underline decoration-orange-500 decoration-2">completed transactions</span>. OBAOL only engages where:
                             </p>
                             <div className="space-y-6">
                                 {[
@@ -164,8 +164,8 @@ export default function WhyObaolPremiumLogic() {
                                     <div key={i} className="flex gap-4 group">
                                         <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 group-hover:scale-150 transition-transform" />
                                         <div>
-                                            <div className="font-bold text-white uppercase text-xs tracking-widest mb-1">{item.title}</div>
-                                            <div className="text-white/40 text-sm leading-relaxed font-medium">{item.label}</div>
+                                            <div className="font-bold !text-white text-xs tracking-widest mb-1">{item.title}</div>
+                                            <div className="!text-white/60 text-sm leading-relaxed font-medium">{item.label}</div>
                                         </div>
                                     </div>
                                 ))}

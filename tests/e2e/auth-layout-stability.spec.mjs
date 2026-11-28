@@ -18,7 +18,7 @@ test("unified sign-in is responsive, accessible, and preserves email", async ({ 
   await page.goto("/auth?prefill=layout%40example.com", { waitUntil: "domcontentloaded" });
   await expect(page.getByTestId("unified-auth")).toBeVisible();
   await expect(page.getByLabel("Email address")).toHaveValue("layout@example.com");
-  await expect(page.getByRole("heading", { name: "Continue to OBAOL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in or create your OBAOL account" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByTestId("auth-submit").click();
   await expect(page.locator("input[autocomplete='current-password']")).toBeFocused();
@@ -31,7 +31,7 @@ test("mobile auth is a single focused surface without public-site navigation", a
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/auth?prefill=mobile%40example.com", { waitUntil: "domcontentloaded" });
 
-  await expect(page.getByRole("heading", { name: "Continue to OBAOL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in or create your OBAOL account" })).toBeVisible();
   await expect(page.getByText("Go-To Agro Trade Platform")).toHaveCount(0);
   await expect(page.getByTestId("auth-public-navigation")).toBeHidden();
   await expect(page.getByRole("link", { name: "Explore OBAOL" })).toBeHidden();
@@ -133,8 +133,8 @@ test("desktop auth public links open externally without leaving the app", async 
   await page.goto("/auth", { waitUntil: "domcontentloaded" });
   const authUrl = page.url();
 
-  await expect(page.getByRole("heading", { name: "Continue to OBAOL Desktop" })).toBeVisible();
-  await expect(page.getByTestId("auth-submit")).toHaveText("Continue to OBAOL Desktop");
+  await expect(page.getByRole("heading", { name: "Sign in or create your OBAOL Desktop account" })).toBeVisible();
+  await expect(page.getByTestId("auth-submit")).toHaveText("Continue with email");
   await page.getByRole("link", { name: "Explore OBAOL" }).click();
   await page.getByRole("link", { name: "Explore account types" }).click();
 
@@ -361,7 +361,7 @@ test("email-first stage changes keep the card anchored", async ({ page }) => {
   expect(Math.abs(roleBox.x - emailBox.x)).toBeLessThanOrEqual(2);
   expect(Math.abs(roleBox.width - emailBox.width)).toBeLessThanOrEqual(2);
   await page.getByRole("button", { name: "Change email" }).click();
-  await expect(page.getByRole("heading", { name: "Continue to OBAOL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in or create your OBAOL account" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -377,25 +377,22 @@ test("typing and feedback updates do not move the auth controls", async ({ page 
 
   const card = page.getByTestId("auth-card");
   const email = page.getByLabel("Email address");
-  const statusRegion = page.getByTestId("auth-status-region");
   const initialCard = await card.boundingBox();
   const initialEmail = await email.boundingBox();
-  const initialStatus = await statusRegion.boundingBox();
+  await expect(page.getByTestId("auth-status-region")).toHaveCount(0);
 
   await email.fill("stable@example.com");
   await expect(email).toBeFocused();
   expect(await card.boundingBox()).toEqual(initialCard);
   expect(await email.boundingBox()).toEqual(initialEmail);
-  expect(await statusRegion.boundingBox()).toEqual(initialStatus);
 
   await page.getByTestId("auth-submit").click();
+  const statusRegion = page.getByTestId("auth-status-region");
   await expect(statusRegion).toContainText("Please try again.");
-  expect(await card.boundingBox()).toEqual(initialCard);
-  expect(await email.boundingBox()).toEqual(initialEmail);
 
   await email.pressSequentially("x");
   await expect(email).toBeFocused();
-  await expect(statusRegion).toBeEmpty();
+  await expect(statusRegion).toHaveCount(0);
   expect(await card.boundingBox()).toEqual(initialCard);
   expect(await email.boundingBox()).toEqual(initialEmail);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

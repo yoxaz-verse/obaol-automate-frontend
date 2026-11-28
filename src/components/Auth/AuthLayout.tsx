@@ -274,7 +274,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     <div className="absolute right-0 top-0 -mr-20 -mt-20 hidden h-40 w-40 rounded-full bg-obaol-500/10 opacity-0 blur-[80px] transition-opacity duration-1000 group-hover:opacity-100 lg:block" />
 
                                     {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
-                                    <div className={`relative mb-4 lg:mb-5 ${stableContentTop ? "lg:min-h-[5rem]" : ""}`}>
+                                    <div className="relative mb-4">
                                         <h1 className="text-2xl font-bold leading-none tracking-tight text-brand-abyssal dark:text-foreground lg:text-3xl">
                                             {title}
                                         </h1>

@@ -53,7 +53,8 @@ test("unified auth renders maintenance as an accessible amber status", () => {
   assert.match(source, /status\.tone === "maintenance"/);
   assert.match(source, /border-amber-300 bg-amber-50/);
   assert.match(source, /<FiTool/);
-  assert.match(source, /role=\{status\?\.tone === "error" \? "alert" : "status"\}/);
+  assert.match(source, /status && <div data-testid="auth-status-region"/);
+  assert.match(source, /role=\{status\.tone === "error" \? "alert" : "status"\}/);
 });
 
 test("post-auth return paths are restricted to the dashboard", () => {

@@ -30,6 +30,7 @@ import { reconcileCompanyFunctionPriorities } from "@/utils/companyFunctionPrior
 import { getCompanyFunctionPerspectiveDescription } from "@/utils/companyFunctionDescriptions";
 import { getCapabilityActions } from "@/utils/companyFunctionPreview";
 import ImagePicker from "@/components/ui/ImagePicker";
+import TradeScoreCard from "@/components/trade-score/TradeScoreCard";
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
@@ -670,6 +671,7 @@ export default function CompanyWorkspacePage() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-6">
+      {isAssociate && associateCompanyId && <TradeScoreCard />}
       {canViewObaolConfig && (
         <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
           <div className="mb-4 flex flex-col gap-2">

@@ -4,7 +4,7 @@ import { FormEvent, MouseEvent, useCallback, useContext, useEffect, useId, useRe
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
-import { FiArrowLeft, FiCheck, FiEye, FiEyeOff, FiKey, FiLoader, FiMail, FiPhone, FiRefreshCw, FiShield, FiTool, FiUser, FiUsers, FiX } from "react-icons/fi";
+import { FiArrowLeft, FiCheck, FiEye, FiEyeOff, FiKey, FiLoader, FiMail, FiRefreshCw, FiShield, FiTool, FiUser, FiUsers, FiX } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { postData } from "@/core/api/apiHandler";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
@@ -26,8 +26,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [stage, setStage] = useState<Stage>("email");
   const [email, setEmail] = useState(prefill.trim());
-  const [phone, setPhone] = useState("+91");
-  const [otpMethod, setOtpMethod] = useState<"email" | "whatsapp">("email");
+  const [otpMethod] = useState<"email">("email");
   const [role, setRole] = useState<PublicAuthRole>(initialRole);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -156,10 +155,6 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       setStatus({ tone: "error", message: mode === "signin" ? "Enter a valid email address or international mobile number." : "Enter a valid email address." });
       return;
     }
-    if (mode === "signup" && role === "Operator" && !/^\+[1-9]\d{7,14}$/.test(phone.replace(/[\s()-]/g, ""))) {
-      setStatus({ tone: "error", message: "Enter your WhatsApp number with country code." });
-      return;
-    }
     setStatus(null);
     if (mode === "signin") {
       setStage("methods");
@@ -167,8 +162,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
     }
     setBusy("signup");
     try {
-      await postData("/auth/onboarding/start", { email: email.trim().toLowerCase(), ...(role === "Operator" ? { phone: phone.replace(/[\s()-]/g, "") } : {}), role });
-      setOtpMethod("email");
+      await postData("/auth/onboarding/start", { email: email.trim().toLowerCase(), role });
       beginOtpWindow();
       setStatus({ tone: "info", message: "If this email is eligible, a verification code has been sent." });
     } catch (error: any) {
@@ -197,15 +191,14 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
     }
   };
 
-  const sendLoginOtp = async (method: "email" | "whatsapp") => {
+  const sendLoginOtp = async () => {
     if (isBusy) return;
     setBusy("send-otp");
     setStatus(null);
     try {
-      setOtpMethod(method);
-      await postData("/verification/send-otp-existing", { method, identifier: email.trim().toLowerCase() });
+      await postData("/verification/send-otp-existing", { method: "email", identifier: email.trim().toLowerCase() });
       beginOtpWindow();
-      setStatus({ tone: "info", message: `If this account is eligible, a code has been sent by ${method === "email" ? "email" : "WhatsApp"}.` });
+      setStatus({ tone: "info", message: "If this account is eligible, a code has been sent by email." });
     } catch (error) {
       showError(error);
     } finally {
@@ -238,15 +231,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       const response = mode === "signin"
         ? await postData("/verification/verify-otp-existing", { code: otp, method: otpMethod, identifier: email.trim().toLowerCase(), rememberMe })
         : await postData("/verification/verify-otp", { code: otp, method: otpMethod });
-      if (mode === "signup" && role === "Operator" && otpMethod === "email" && !response.data?.verification?.fullyVerified) {
-        setPostAuthPhase("idle");
-        setOtpMethod("whatsapp");
-        await postData("/verification/send-otp", { method: "whatsapp" });
-        beginOtpWindow();
-        setStatus({ tone: "success", message: "Email verified. We sent the next code to your WhatsApp number." });
-        return;
-      }
-      setStatus({ tone: "success", message: mode === "signin" ? "Signed in. Opening your workspace…" : role === "Associate" ? "Email verified. Opening onboarding…" : "Email and WhatsApp verified. Opening onboarding…" });
+      setStatus({ tone: "success", message: mode === "signin" ? "Signed in. Opening your workspace…" : "Email verified. Opening onboarding…" });
       await finishAuthentication(response.data?.next || (mode === "signup" ? "/dashboard/onboarding" : undefined));
     } catch (error) {
       setPostAuthPhase("idle");
@@ -284,17 +269,9 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       const result = await postData("/auth/google", {
         idToken: response.credential,
         intent: current.mode === "signup" ? "register" : "login",
-        ...(current.mode === "signup" ? { role: current.role, ...(current.role === "Operator" ? { phone: phone.replace(/[\s()-]/g, "") } : {}) } : {}),
+        ...(current.mode === "signup" ? { role: current.role } : {}),
         rememberMe: current.rememberMe,
       });
-      if (current.mode === "signup" && current.role === "Operator") {
-        setPostAuthPhase("idle");
-        setOtpMethod("whatsapp");
-        await postData("/verification/send-otp", { method: "whatsapp" });
-        beginOtpWindow();
-        setStatus({ tone: "info", message: "Google verified your email. Enter the code sent to your WhatsApp number." });
-        return;
-      }
       await finishAuthentication(result.data?.next);
     } catch (error: any) {
       setPostAuthPhase("idle");
@@ -303,7 +280,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
     } finally {
       setBusy("");
     }
-  }, [finishAuthentication, phone, redirectExistingAccountToSignIn]);
+  }, [finishAuthentication, redirectExistingAccountToSignIn]);
 
   useEffect(() => {
     if (!googleClientId || stage !== "email") return;
@@ -395,8 +372,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
               <label htmlFor={emailId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">{mode === "signin" ? "Email or mobile number" : "Email address"}</label>
               <input ref={emailRef} id={emailId} className={fieldClass} type="text" value={email} autoComplete="username webauthn" placeholder="name@example.com" disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
             </div>
-            {mode === "signup" && role === "Operator" && <div><label className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">WhatsApp mobile number</label><input className={fieldClass} type="tel" value={phone} autoComplete="tel" inputMode="tel" placeholder="Include country code" disabled={isBusy} onChange={(event) => { setPhone(event.target.value); setStatus(null); }} required /></div>}
-            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || (mode === "signup" && !isValidEmail(email))} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely") : role === "Associate" ? "Verify email" : "Verify email and WhatsApp"}</button>
+            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || (mode === "signup" && !isValidEmail(email))} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely") : "Verify email"}</button>
             <div className="relative py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 lg:py-1"><span className="relative z-10 lg:bg-white lg:px-3 lg:dark:bg-content1">or</span><span className="absolute left-0 top-1/2 hidden h-px w-full bg-slate-200 dark:bg-white/10 lg:block" /></div>
             <div className="min-h-[52px] lg:rounded-xl lg:border lg:border-slate-200 lg:p-1.5 lg:dark:border-white/10">
               {googleClientId ? <><div id={googleContainerId} data-testid="google-auth-button" className="mx-auto flex min-h-10 w-full max-w-[340px] justify-center overflow-hidden rounded-full" />{!googleReady && !googleError && <div className="mx-auto h-10 max-w-[340px] animate-pulse rounded-full bg-slate-100 dark:bg-white/[0.05]" />}</> : <p className="py-3 text-center text-xs text-slate-500">Google sign-in is not configured.</p>}
@@ -423,7 +399,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
               </div>
               <button className={primaryClass} disabled={isBusy || !password} type="submit">{busy === "password" ? "Signing in…" : "Sign in with password"}</button>
             </form>
-            <div className="grid gap-2 sm:grid-cols-2"><button className={secondaryClass} type="button" disabled={isBusy} onClick={() => sendLoginOtp("email")}><FiMail /> Email code</button><button className={secondaryClass} type="button" disabled={isBusy} onClick={() => sendLoginOtp("whatsapp")}><FiPhone /> WhatsApp code</button></div>
+            <button className={secondaryClass} type="button" disabled={isBusy} onClick={sendLoginOtp}><FiMail /> Email code</button>
             {passkeySupported && <button data-testid="passkey-signin" className={secondaryClass} type="button" disabled={isBusy} onClick={passkeySignIn}><FiKey /> Sign in with passkey</button>}
             <p className="flex items-start gap-2 text-xs leading-5 text-slate-500"><FiShield className="mt-1 shrink-0" /> For privacy, OBAOL does not reveal whether an email is registered until identity is verified.</p>
           </div>
@@ -432,7 +408,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
         {stage === "otp" && (
           <form onSubmit={verifyOtp} className="space-y-4">
             <button type="button" onClick={() => { setStage(mode === "signin" ? "methods" : "email"); setStatus(null); }} className="inline-flex items-center gap-2 text-xs font-bold text-obaol-700 dark:text-obaol-300"><FiArrowLeft /> Back</button>
-            <div><label htmlFor={otpId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">Six-digit {otpMethod === "email" ? "email" : "WhatsApp"} code</label><input id={otpId} className={`${fieldClass} text-center text-xl font-black tracking-[0.45em]`} type="text" inputMode="numeric" autoComplete="one-time-code" autoFocus value={otp} maxLength={6} placeholder="000000" onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} /></div>
+            <div><label htmlFor={otpId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">Six-digit email code</label><input id={otpId} className={`${fieldClass} text-center text-xl font-black tracking-[0.45em]`} type="text" inputMode="numeric" autoComplete="one-time-code" autoFocus value={otp} maxLength={6} placeholder="000000" onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} /></div>
             <div className="flex min-h-8 items-center justify-between gap-3 text-xs text-slate-500"><span>{otpRemaining > 0 ? `Expires in ${formatAuthCountdown(otpRemaining)}` : "Code expired"}</span><button type="button" disabled={resendRemaining > 0 || isBusy} onClick={resendOtp} className="font-bold text-obaol-700 disabled:text-slate-400 dark:text-obaol-300">{resendRemaining > 0 ? `Resend in ${formatAuthCountdown(resendRemaining)}` : "Resend code"}</button></div>
             <button className={primaryClass} disabled={isBusy || otp.length !== 6 || otpRemaining <= 0} type="submit">{busy === "verify-otp" ? "Verifying…" : <span className="inline-flex items-center gap-2"><FiCheck /> Verify and continue</span>}</button>
           </form>

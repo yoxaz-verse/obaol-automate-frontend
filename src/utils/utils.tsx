@@ -43,6 +43,7 @@ import {
   LuUsersRound,
   LuWarehouse,
   LuWorkflow,
+  LuGauge,
 } from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
 import { TbBuildingWarehouse, TbArrowsUpDown, TbReceiptTax, TbBuildingBank, TbReportMoney, TbFileDollar, TbShieldDollar } from "react-icons/tb";
@@ -339,6 +340,11 @@ export const sidebarOptions = [
     name: "Sidebar Governance",
     icon: <LuPanelLeft />,
     link: "/dashboard/sidebar-governance",
+  },
+  {
+    name: "Trade Score",
+    icon: <LuGauge />,
+    link: "/dashboard/trade-score",
   },
   {
     name: "Essentials", //Translate

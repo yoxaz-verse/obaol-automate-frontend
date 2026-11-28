@@ -166,6 +166,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/catalog-requests", label: "Catalog Requests", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: false, searchable: true },
   { path: "/dashboard/reports", label: "Reports", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/rate-interest", label: "Rate Interest", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/trade-score", label: "Trade Score", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true, description: "Configure company scoring and trading eligibility." },
   { path: "/dashboard/sidebar-governance", label: "Sidebar Governance", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/payments", label: "Payment Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/documentation-rules", label: "Documentation Rules", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },

@@ -11,6 +11,7 @@ import Title from "@/components/titles";
 import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 import PublicRateList from "@/components/public/PublicRateList";
 import LocationPreviewMap from "@/components/location/LocationPreviewMap";
+import TradeScoreCard from "@/components/trade-score/TradeScoreCard";
 
 const CompanyProfilePage: NextPage = () => {
     const params = useParams();
@@ -94,6 +95,7 @@ const CompanyProfilePage: NextPage = () => {
                         )}
                     </CardBody>
                 </Card>
+                <div className="mb-8"><TradeScoreCard companyId={companyId} publicView /></div>
                 <LocationPreviewMap value={company.location && typeof company.location === "object" ? company.location : null} address={typeof company.location === "string" ? company.location : company.address} externalOnly />
 
                 <Divider className="my-6" />

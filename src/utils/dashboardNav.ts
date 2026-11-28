@@ -46,7 +46,7 @@ export const isComingSoonDashboardNavigation = (
 };
 
 export type DashboardNavSection = {
-  label: DashboardSection | DashboardTaskGroup | "Home" | "Common" | "Important" | "Seeking" | "Providing" | "Other Services" | "Coming Soon" | "Business Workflows";
+  label: DashboardSection | DashboardTaskGroup | "Home" | "Common" | "Quick Access" | "Seeking" | "Providing" | "Other Services" | "Coming Soon" | "Business Workflows";
   links: string[];
   groups?: Array<{ label: DashboardNavGroup | AdminWorkflowGroup | string; links: string[] }>;
 };
@@ -155,7 +155,7 @@ export const getDashboardSidebarSections = (
       const serviceGroups = groupAssociateServiceLinks(serviceLinks, providedCapabilities, soughtCapabilities);
       return [
         { label: "Home", links: SIDEBAR_HOME_ROUTES.filter((path) => optionMap.has(path)) },
-        { label: "Important", links: importantLinks },
+        { label: "Quick Access", links: importantLinks },
         { label: "Services", links: serviceGroups.flatMap((group) => group.links), groups: serviceGroups },
         { label: "Common", links: SIDEBAR_UTILITY_ROUTES.filter((path) => optionMap.has(path)) },
       ].filter((section) => section.links.length > 0) as DashboardNavSection[];

@@ -13,11 +13,12 @@ test("associate WhatsApp integration is dormant by default", () => {
   assert.match(access, /settings\/whatsapp[\s\S]*roles: featureFlags\.associateWhatsappIntegration \? \["admin", "associate"\] : \["admin"\]/);
 });
 
-test("associate signup and profile use email-only verification while dormant", () => {
+test("signup and profile use email-only verification while WhatsApp auth is dormant", () => {
   const auth = read("src/components/Auth/UnifiedAuthFlow.tsx");
   const profile = read("src/app/dashboard/profile/page.tsx");
-  assert.match(auth, /role === "Operator" && <div><label[^>]*>WhatsApp mobile number/);
-  assert.match(auth, /role === "Associate" \? "Verify email"/);
+  assert.doesNotMatch(auth, /WhatsApp mobile number/);
+  assert.match(auth, /: "Verify email"/);
+  assert.doesNotMatch(auth, /sendLoginOtp\("whatsapp"\)/);
   assert.match(profile, /Number\(emailVerified\) \* 100/);
   assert.match(profile, /featureFlags\.associateWhatsappIntegration/);
 });
@@ -25,7 +26,7 @@ test("associate signup and profile use email-only verification while dormant", (
 test("authentication hints do not suggest phone numbers", () => {
   const auth = read("src/components/Auth/UnifiedAuthFlow.tsx");
   assert.match(auth, /placeholder="name@example\.com"/);
-  assert.match(auth, /placeholder="Include country code"/);
+  assert.doesNotMatch(auth, /placeholder="Include country code"/);
   assert.doesNotMatch(auth, /\+919876543210/);
 });
 

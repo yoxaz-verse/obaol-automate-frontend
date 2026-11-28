@@ -148,7 +148,7 @@ test("Associate desktop and mobile navigation share capability-family sidebar gr
   const navigation = readFileSync("src/utils/dashboardNav.ts", "utf8");
   const desktop = readFileSync("src/components/dashboard/Sidebar.tsx", "utf8");
   const mobile = readFileSync("src/components/dashboard/TopBar.tsx", "utf8");
-  const labels = ["Home", "Important", "Services", "Common"];
+  const labels = ["Home", "Quick Access", "Services", "Common"];
   let previousIndex = -1;
   for (const label of labels) {
     const index = navigation.indexOf(`label: \"${label}\"`, previousIndex + 1);

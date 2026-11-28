@@ -12,7 +12,7 @@ import { AuthMode, AuthStatus, PublicAuthRole, authDestination, formatAuthCountd
 import AuthLayout from "./AuthLayout";
 import { isObaolMobileShell } from "@/utils/mobileAuthBridge";
 
-type Stage = "email" | "methods" | "otp";
+type Stage = "email" | "methods" | "role" | "otp";
 type PostAuthPhase = "idle" | "verifying" | "redirecting" | "delayed";
 type Props = { initialMode?: AuthMode; initialRole?: PublicAuthRole; prefill?: string; intent?: string; returnTo?: string };
 
@@ -20,10 +20,10 @@ const fieldClass = "h-12 w-full rounded-xl border border-slate-300 bg-white px-4
 const primaryClass = "inline-flex h-12 w-full items-center justify-center rounded-xl bg-gradient-to-r from-obaol-400 to-obaol-600 px-5 text-sm font-black text-obaol-950 shadow-lg shadow-obaol-500/15 transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 disabled:cursor-not-allowed disabled:opacity-55";
 const secondaryClass = "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-800 transition hover:border-obaol-500/60 hover:bg-obaol-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-obaol-500 disabled:opacity-55 dark:border-white/15 dark:bg-white/[0.03] dark:text-white dark:hover:bg-white/[0.07]";
 
-export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = "Associate", prefill = "", intent = "", returnTo = "" }: Props) {
+export default function UnifiedAuthFlow({ initialRole = "Associate", prefill = "", intent = "", returnTo = "" }: Props) {
   const router = useRouter();
   const { isAuthenticated, loading: sessionLoading, user, refreshUser } = useContext(AuthContext);
-  const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [mode, setMode] = useState<AuthMode>("signin");
   const [stage, setStage] = useState<Stage>("email");
   const [email, setEmail] = useState(prefill.trim());
   const [otpMethod] = useState<"email">("email");
@@ -40,6 +40,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
   const [passkeySupported, setPasskeySupported] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
   const [googleError, setGoogleError] = useState("");
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState("");
   const [isDesktopApp, setIsDesktopApp] = useState(false);
   const [postAuthPhase, setPostAuthPhase] = useState<PostAuthPhase>("idle");
   const [redirectDestination, setRedirectDestination] = useState("/dashboard");
@@ -119,7 +120,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
   const redirectExistingAccountToSignIn = useCallback((accountEmail = authStateRef.current.email) => {
     setMode("signin");
-    setStage("email");
+    setStage("methods");
     setPassword("");
     setOtp("");
     const params = new URLSearchParams({ mode: "signin", prefill: accountEmail.trim().toLowerCase(), reason: "account-exists" });
@@ -128,43 +129,55 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
     setStatus({
       tone: "info",
       code: "ACCOUNT_EXISTS",
-      message: "An account already exists for this email. Please sign in instead.",
+      message: "An account already exists for this email. Sign in to continue.",
     });
   }, [intent]);
-
-  const switchMode = (nextMode: AuthMode) => {
-    if (nextMode === mode) return;
-    setMode(nextMode);
-    setStage("email");
-    setPassword("");
-    setOtp("");
-    setStatus(null);
-    const params = new URLSearchParams();
-    params.set("mode", nextMode === "signup" ? "signup" : "signin");
-    if (nextMode === "signup") params.set("role", role.toLowerCase());
-    if (email) params.set("prefill", email);
-    if (intent) params.set("intent", intent);
-    window.history.replaceState(window.history.state, "", `/auth?${params.toString()}`);
-  };
 
   const continueFromEmail = async (event: FormEvent) => {
     event.preventDefault();
     if (isBusy) return;
-    const validIdentifier = isValidEmail(email) || /^\+?[1-9]\d{7,14}$/.test(email.replace(/[\s()-]/g, ""));
-    if ((mode === "signup" && !isValidEmail(email)) || (mode === "signin" && !validIdentifier)) {
-      setStatus({ tone: "error", message: mode === "signin" ? "Enter a valid email address or international mobile number." : "Enter a valid email address." });
+    if (!isValidEmail(email)) {
+      setStatus({ tone: "error", message: "Enter a valid email address." });
       return;
     }
     setStatus(null);
-    if (mode === "signin") {
-      setStage("methods");
-      return;
-    }
-    setBusy("signup");
+    setBusy("identify");
     try {
+      const response = await postData("/auth/identify", { email: email.trim().toLowerCase() });
+      const next = String(response.data?.next || "");
+      if (next === "SIGN_IN") {
+        setMode("signin");
+        setStage("methods");
+      } else if (next === "RESUME_ONBOARDING") {
+        setMode("signin");
+        await postData("/verification/send-otp-existing", { method: "email", identifier: email.trim().toLowerCase() });
+        beginOtpWindow();
+        setStatus({ tone: "info", message: "Enter the email code to resume your onboarding." });
+      } else {
+        setMode("signup");
+        setStage("role");
+      }
+    } catch (error: any) {
+      showError(error);
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const startNewAccount = async () => {
+    if (isBusy) return;
+    setBusy("signup");
+    setStatus(null);
+    try {
+      if (pendingGoogleCredential) {
+        const result = await postData("/auth/google", { idToken: pendingGoogleCredential, intent: "register", role, rememberMe });
+        setPendingGoogleCredential("");
+        await finishAuthentication(result.data?.next || "/dashboard/onboarding");
+        return;
+      }
       await postData("/auth/onboarding/start", { email: email.trim().toLowerCase(), role });
       beginOtpWindow();
-      setStatus({ tone: "info", message: "If this email is eligible, a verification code has been sent." });
+      setStatus({ tone: "info", message: "A verification code has been sent to your email." });
     } catch (error: any) {
       if (error?.response?.data?.code === "ACCOUNT_EXISTS") redirectExistingAccountToSignIn();
       else showError(error);
@@ -275,7 +288,13 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
       await finishAuthentication(result.data?.next);
     } catch (error: any) {
       setPostAuthPhase("idle");
-      if (current.mode === "signup" && error?.response?.data?.code === "ACCOUNT_EXISTS") redirectExistingAccountToSignIn(current.email);
+      if (current.mode === "signin" && Number(error?.response?.status) === 404) {
+        setPendingGoogleCredential(response.credential);
+        setMode("signup");
+        setEmail(String(error?.response?.data?.email || current.email));
+        setStage("role");
+        setStatus({ tone: "info", message: "Choose the account type you want to create." });
+      } else if (current.mode === "signup" && error?.response?.data?.code === "ACCOUNT_EXISTS") redirectExistingAccountToSignIn(current.email);
       else showError(error);
     } finally {
       setBusy("");
@@ -303,8 +322,8 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
   return (
     <AuthLayout
-      title={mode === "signin" ? (isDesktopApp ? "Sign in to OBAOL Desktop" : "Sign in to OBAOL") : "Welcome to OBAOL"}
-      subtitle={mode === "signin" ? (isDesktopApp ? "Sign in to open your secure desktop workspace." : "Access your Associate or Operator workspace.") : "Verify your email, choose your account type, and complete onboarding."}
+      title={stage === "email" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue to OBAOL") : stage === "methods" ? "Welcome back" : stage === "role" ? "Choose your account type" : mode === "signup" ? "Verify your email" : "Verify your identity"}
+      subtitle={stage === "email" ? "Enter your email and we’ll guide you to the right next step." : stage === "methods" ? "Sign in securely to open your workspace." : stage === "role" ? "Tell us how you want to use OBAOL before onboarding." : mode === "signup" ? "Confirm your email to begin onboarding." : "Confirm your email to continue."}
       cardMaxWidthClass="max-w-[500px]"
       stableContentTop
       leftPanel={{ headline: "OBAOL", highlight: "FROM DISCOVERY TO EXECUTION", description: "Discover commodities, connect with verified trade partners, and manage orders, documents, and execution in one workspace.", points: ["Discover verified opportunities", "Coordinate documents and orders", "Track execution in one workspace"] }}
@@ -330,14 +349,6 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
           </div>
         ) : (
           <>
-        <div className="grid grid-cols-2 border-b border-slate-200 dark:border-white/10 lg:rounded-xl lg:border-0 lg:bg-slate-100 lg:p-1 lg:dark:bg-white/[0.05]" aria-label="Authentication mode">
-          {(["signin", "signup"] as AuthMode[]).map((item) => (
-            <button key={item} type="button" onClick={() => switchMode(item)} aria-pressed={mode === item} className={`h-11 border-b-2 text-xs font-black transition lg:h-10 lg:rounded-lg lg:border-b-0 ${mode === item ? "border-obaol-500 text-brand-abyssal dark:text-brand-palladian lg:bg-white lg:shadow-sm lg:dark:bg-obaol-500 lg:dark:text-obaol-950" : "border-transparent text-slate-500 dark:text-white/55"}`}>
-              {item === "signin" ? "Sign in" : "Create account"}
-            </button>
-          ))}
-        </div>
-
         <div data-testid="auth-status-region" aria-live="polite" aria-atomic="true" role={status?.tone === "error" ? "alert" : "status"} className={status ? `relative min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${status.tone === "error" ? "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300" : status.tone === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300" : status.tone === "maintenance" ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200" : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200"}` : "min-h-12"}>
           {status?.tone === "maintenance" ? (
             <span className="flex items-start gap-2.5">
@@ -354,31 +365,37 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
 
         {stage === "email" && (
           <form onSubmit={continueFromEmail} className="space-y-4" data-testid="auth-form">
-            {mode === "signup" && (
-              <fieldset>
-                <legend className="mb-2 text-xs font-black uppercase tracking-wider text-slate-600 dark:text-white/65">Account type</legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {(["Associate", "Operator"] as PublicAuthRole[]).map((item) => (
-                    <label key={item} className={`flex min-h-20 cursor-pointer items-center gap-3 rounded-xl border p-3 transition ${role === item ? "border-obaol-500 bg-obaol-50 ring-2 ring-obaol-500/15 dark:bg-obaol-500/10" : "border-slate-300 dark:border-white/15"}`}>
-                      <input className="sr-only" type="radio" name="role" value={item} checked={role === item} onChange={() => setRole(item)} />
-                      {item === "Associate" ? <FiUsers aria-hidden /> : <FiUser aria-hidden />}
-                      <span><b className="block text-sm">{item}</b><small className="text-[10px] text-slate-500 dark:text-white/50">{item === "Associate" ? "Company or trade business" : "Approved execution specialist"}</small></span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            )}
             <div>
-              <label htmlFor={emailId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">{mode === "signin" ? "Email or mobile number" : "Email address"}</label>
-              <input ref={emailRef} id={emailId} className={fieldClass} type="text" value={email} autoComplete="username webauthn" placeholder="name@example.com" disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
+              <label htmlFor={emailId} className="mb-2 block text-xs font-bold text-slate-700 dark:text-white/70">Email address</label>
+              <input ref={emailRef} id={emailId} className={fieldClass} type="email" value={email} autoComplete="email webauthn" placeholder="name@example.com" disabled={isBusy} onChange={(event) => { setEmail(event.target.value); setStatus(null); }} required />
             </div>
-            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || (mode === "signup" && !isValidEmail(email))} type="submit">{busy === "signup" ? "Sending code…" : mode === "signin" ? (isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely") : "Verify email"}</button>
+            <button data-testid="auth-submit" className={primaryClass} disabled={isBusy || !isValidEmail(email)} type="submit">{busy === "identify" ? "Checking…" : isDesktopApp ? "Continue to OBAOL Desktop" : "Continue securely"}</button>
             <div className="relative py-0.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 lg:py-1"><span className="relative z-10 lg:bg-white lg:px-3 lg:dark:bg-content1">or</span><span className="absolute left-0 top-1/2 hidden h-px w-full bg-slate-200 dark:bg-white/10 lg:block" /></div>
             <div className="min-h-[52px] lg:rounded-xl lg:border lg:border-slate-200 lg:p-1.5 lg:dark:border-white/10">
               {googleClientId ? <><div id={googleContainerId} data-testid="google-auth-button" className="mx-auto flex min-h-10 w-full max-w-[340px] justify-center overflow-hidden rounded-full" />{!googleReady && !googleError && <div className="mx-auto h-10 max-w-[340px] animate-pulse rounded-full bg-slate-100 dark:bg-white/[0.05]" />}</> : <p className="py-3 text-center text-xs text-slate-500">Google sign-in is not configured.</p>}
               {googleError && <p className="py-2 text-center text-xs text-red-600">{googleError}</p>}
             </div>
           </form>
+        )}
+
+        {stage === "role" && (
+          <div className="space-y-4" data-testid="account-type-step">
+            <button type="button" onClick={() => { setStage("email"); setMode("signin"); setPendingGoogleCredential(""); setStatus(null); }} className="inline-flex items-center gap-2 text-xs font-bold text-obaol-700 dark:text-obaol-300"><FiArrowLeft /> Change email</button>
+            {email && <div className="rounded-xl border border-slate-200 px-4 py-3 dark:border-white/10"><span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Creating an account for</span><span className="block truncate text-sm font-bold">{email}</span></div>}
+            <fieldset>
+              <legend className="mb-2 text-xs font-black uppercase tracking-wider text-slate-600 dark:text-white/65">Account type</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {(["Associate", "Operator"] as PublicAuthRole[]).map((item) => (
+                  <label key={item} className={`flex min-h-24 cursor-pointer items-center gap-3 rounded-xl border p-3 transition ${role === item ? "border-obaol-500 bg-obaol-50 ring-2 ring-obaol-500/15 dark:bg-obaol-500/10" : "border-slate-300 dark:border-white/15"}`}>
+                    <input className="sr-only" type="radio" name="role" value={item} checked={role === item} onChange={() => setRole(item)} />
+                    {item === "Associate" ? <FiUsers aria-hidden /> : <FiUser aria-hidden />}
+                    <span><b className="block text-sm">{item}</b><small className="text-[10px] leading-4 text-slate-500 dark:text-white/50">{item === "Associate" ? "Company or trade business" : "Approved execution specialist"}</small></span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <button className={primaryClass} type="button" disabled={isBusy} onClick={startNewAccount}>{busy === "signup" ? "Preparing onboarding…" : "Continue to verification"}</button>
+          </div>
         )}
 
         {stage === "methods" && (
@@ -401,7 +418,7 @@ export default function UnifiedAuthFlow({ initialMode = "signin", initialRole = 
             </form>
             <button className={secondaryClass} type="button" disabled={isBusy} onClick={sendLoginOtp}><FiMail /> Email code</button>
             {passkeySupported && <button data-testid="passkey-signin" className={secondaryClass} type="button" disabled={isBusy} onClick={passkeySignIn}><FiKey /> Sign in with passkey</button>}
-            <p className="flex items-start gap-2 text-xs leading-5 text-slate-500"><FiShield className="mt-1 shrink-0" /> For privacy, OBAOL does not reveal whether an email is registered until identity is verified.</p>
+            <p className="flex items-start gap-2 text-xs leading-5 text-slate-500"><FiShield className="mt-1 shrink-0" /> Your sign-in is protected with encrypted credentials and rate limiting.</p>
           </div>
         )}
 

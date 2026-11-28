@@ -7,26 +7,31 @@ test.beforeEach(async ({ page }) => {
     body: JSON.stringify({ success: false }),
   }));
   await page.route("https://accounts.google.com/gsi/client", (route) => route.abort());
+  await page.route(/\/auth\/identify$/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ success: true, next: "SIGN_IN" }),
+  }));
 });
 
 test("unified sign-in is responsive, accessible, and preserves email", async ({ page }) => {
   await page.goto("/auth?prefill=layout%40example.com", { waitUntil: "domcontentloaded" });
   await expect(page.getByTestId("unified-auth")).toBeVisible();
   await expect(page.getByLabel("Email address")).toHaveValue("layout@example.com");
-  await expect(page.getByRole("button", { name: "Sign in" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: "Continue to OBAOL" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByTestId("auth-submit").click();
   await expect(page.locator("input[autocomplete='current-password']")).toBeFocused();
-  await expect(page.getByRole("button", { name: "Sign in with email code" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Email code" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Forgot password?" })).toBeVisible();
-  await expect(page.getByText(/does not reveal whether an email is registered/i)).toBeVisible();
+  await expect(page.getByText(/protected with encrypted credentials/i)).toBeVisible();
 });
 
 test("mobile auth is a single focused surface without public-site navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/auth?prefill=mobile%40example.com", { waitUntil: "domcontentloaded" });
 
-  await expect(page.getByRole("heading", { name: "Sign in to OBAOL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Continue to OBAOL" })).toBeVisible();
   await expect(page.getByText("Go-To Agro Trade Platform")).toHaveCount(0);
   await expect(page.getByTestId("auth-public-navigation")).toBeHidden();
   await expect(page.getByRole("link", { name: "Explore OBAOL" })).toBeHidden();
@@ -57,18 +62,11 @@ test("mobile auth is a single focused surface without public-site navigation", a
     expect(googleSurface.width).toBeLessThanOrEqual(340);
   }
 
-  const signIn = page.getByRole("button", { name: "Sign in" });
-  const createAccount = page.getByRole("button", { name: "Create account" });
-  for (const control of [signIn, createAccount, page.getByTestId("auth-submit")]) {
+  for (const control of [page.getByTestId("auth-submit")]) {
     const box = await control.boundingBox();
     expect(box.height).toBeGreaterThanOrEqual(44);
   }
 
-  await createAccount.click();
-  await expect(createAccount).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("heading", { name: "Welcome to OBAOL" })).toBeVisible();
-  await signIn.click();
-  await expect(signIn).toHaveAttribute("aria-pressed", "true");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -135,7 +133,7 @@ test("desktop auth public links open externally without leaving the app", async 
   await page.goto("/auth", { waitUntil: "domcontentloaded" });
   const authUrl = page.url();
 
-  await expect(page.getByRole("heading", { name: "Sign in to OBAOL Desktop" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Continue to OBAOL Desktop" })).toBeVisible();
   await expect(page.getByTestId("auth-submit")).toHaveText("Continue to OBAOL Desktop");
   await page.getByRole("link", { name: "Explore OBAOL" }).click();
   await page.getByRole("link", { name: "Explore account types" }).click();
@@ -217,7 +215,7 @@ test("OTP sign-in uses a neutral response and reveals no account role", async ({
   await page.goto("/auth");
   await page.getByLabel("Email address").fill("private@example.com");
   await page.getByTestId("auth-submit").click();
-  await page.getByRole("button", { name: "Sign in with email code" }).click();
+  await page.getByRole("button", { name: "Email code" }).click();
   await expect(page.getByLabel("Six-digit email code")).toBeVisible();
   await expect(page.getByText("If this email is eligible, a verification code has been sent.")).toBeVisible();
 });
@@ -250,7 +248,7 @@ test("successful OTP sign-in replaces the form and offers recovery when navigati
   await page.goto("/auth");
   await page.getByLabel("Email address").fill("member@example.com");
   await page.getByTestId("auth-submit").click();
-  await page.getByRole("button", { name: "Sign in with email code" }).click();
+  await page.getByRole("button", { name: "Email code" }).click();
   await page.getByLabel("Six-digit email code").fill("671906");
   await page.getByRole("button", { name: "Verify and continue" }).click();
 
@@ -284,7 +282,7 @@ test("failed post-auth session refresh restores the OTP form with an actionable 
   await page.goto("/auth");
   await page.getByLabel("Email address").fill("member@example.com");
   await page.getByTestId("auth-submit").click();
-  await page.getByRole("button", { name: "Sign in with email code" }).click();
+  await page.getByRole("button", { name: "Email code" }).click();
   await page.getByLabel("Six-digit email code").fill("671906");
   await page.getByRole("button", { name: "Verify and continue" }).click();
 
@@ -294,42 +292,27 @@ test("failed post-auth session refresh restores the OTP form with an actionable 
 });
 
 test("signup chooses an account type and cannot continue before OTP verification", async ({ page }) => {
+  await page.route(/\/auth\/identify$/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, next: "SELECT_ROLE" }) }));
   await page.route(/\/auth\/onboarding\/start$/, async (route) => {
     expect(route.request().postDataJSON()).toEqual({ email: "new.operator@example.com", role: "Operator" });
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, message: "If this email is eligible, a verification code has been sent." }) });
   });
   await page.goto("/auth?mode=signup&role=operator&intent=SERVICE");
   await page.getByLabel("Email address").fill("new.operator@example.com");
-  await page.getByRole("button", { name: "Verify email" }).click();
+  await page.getByTestId("auth-submit").click();
+  await page.getByText("Operator", { exact: true }).click();
+  await page.getByRole("button", { name: "Continue to verification" }).click();
   await expect(page.getByLabel("Six-digit email code")).toBeVisible();
   await expect(page.getByRole("button", { name: "Verify and continue" })).toBeDisabled();
 });
 
-test("existing-email signup switches to sign-in without opening OTP verification", async ({ page }) => {
-  await page.route(/\/auth\/onboarding\/start$/, async (route) => {
-    expect(route.request().postDataJSON()).toEqual({ email: "existing@example.com", role: "Associate" });
-    await route.fulfill({
-      status: 409,
-      contentType: "application/json",
-      body: JSON.stringify({
-        success: false,
-        code: "ACCOUNT_EXISTS",
-        message: "An account already exists for this email. Please sign in.",
-      }),
-    });
-  });
-
+test("existing email proceeds directly to sign-in methods", async ({ page }) => {
   await page.goto("/auth?mode=signup&role=associate");
   await page.getByLabel("Email address").fill("existing@example.com");
-  await page.getByRole("button", { name: "Verify email" }).click();
-
-  await expect(page.getByRole("button", { name: "Sign in" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByLabel("Email address")).toHaveValue("existing@example.com");
-  await expect(page.getByText("An account already exists for this email. Please sign in instead.")).toBeVisible();
+  await page.getByTestId("auth-submit").click();
+  await expect(page.getByText("existing@example.com")).toBeVisible();
+  await expect(page.locator("input[autocomplete='current-password']")).toBeVisible();
   await expect(page.getByLabel("Six-digit email code")).toHaveCount(0);
-  await expect(page).toHaveURL(/mode=signin.*prefill=existing(?:%40|@)example(?:\.|%2E)com.*reason=account-exists/);
-  await page.getByLabel("Dismiss account notice").click();
-  await expect(page.getByText("An account already exists for this email. Please sign in instead.")).toHaveCount(0);
 });
 
 test("password sign-in uses the unified role-free endpoint", async ({ page }) => {
@@ -363,49 +346,29 @@ test("reduced-motion users get a static auth presentation", async ({ page }) => 
   await expect(page.locator("[data-testid='auth-layout'] .h-1.w-1")).toHaveCount(0);
 });
 
-test("switching authentication modes keeps the card anchored", async ({ page }) => {
+test("email-first stage changes keep the card anchored", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route(/\/auth\/identify$/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, next: "SELECT_ROLE" }) }));
   await page.goto("/auth?mode=signin&prefill=layout%40example.com&intent=SERVICE", { waitUntil: "domcontentloaded" });
 
   const card = page.getByTestId("auth-card");
-  const signInBox = await card.boundingBox();
-  expect(signInBox).not.toBeNull();
-
-  const createAccount = page.getByRole("button", { name: "Create account" });
-  await createAccount.click();
-  await expect(createAccount).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("heading", { name: "Welcome to OBAOL" })).toBeVisible();
-  await expect(page).toHaveURL(/\/auth\?mode=signup&role=associate&prefill=layout(?:%40|@)example(?:\.|%2E)com&intent=SERVICE/);
-  const signUpBox = await card.boundingBox();
-  expect(signUpBox).not.toBeNull();
-  expect(Math.abs(signUpBox.y - signInBox.y)).toBeLessThanOrEqual(2);
-  expect(Math.abs(signUpBox.x - signInBox.x)).toBeLessThanOrEqual(2);
-  expect(Math.abs(signUpBox.width - signInBox.width)).toBeLessThanOrEqual(2);
-
-  const signIn = page.getByRole("button", { name: "Sign in" });
-  await signIn.click();
-  await expect(signIn).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("heading", { name: "Sign in to OBAOL" })).toBeVisible();
-  await expect(page).toHaveURL(/\/auth\?mode=signin&prefill=layout(?:%40|@)example(?:\.|%2E)com&intent=SERVICE/);
-  const returnedBox = await card.boundingBox();
-  expect(returnedBox).not.toBeNull();
-  expect(Math.abs(returnedBox.y - signInBox.y)).toBeLessThanOrEqual(2);
-
-  for (let index = 0; index < 3; index += 1) {
-    await createAccount.click();
-    await signIn.click();
-  }
-  const repeatedBox = await card.boundingBox();
-  expect(repeatedBox).not.toBeNull();
-  expect(Math.abs(repeatedBox.y - signInBox.y)).toBeLessThanOrEqual(2);
+  const emailBox = await card.boundingBox();
+  await page.getByTestId("auth-submit").click();
+  await expect(page.getByRole("heading", { name: "Choose your account type" })).toBeVisible();
+  const roleBox = await card.boundingBox();
+  expect(roleBox).not.toBeNull();
+  expect(Math.abs(roleBox.x - emailBox.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(roleBox.width - emailBox.width)).toBeLessThanOrEqual(2);
+  await page.getByRole("button", { name: "Change email" }).click();
+  await expect(page.getByRole("heading", { name: "Continue to OBAOL" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test("typing and feedback updates do not move the auth controls", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.route(/\/auth\/onboarding\/start$/, (route) => route.fulfill({
+  await page.route(/\/auth\/identify$/, (route) => route.fulfill({
     status: 500,
     contentType: "application/json",
     body: JSON.stringify({ success: false, message: "Please try again." }),
@@ -425,7 +388,7 @@ test("typing and feedback updates do not move the auth controls", async ({ page 
   expect(await email.boundingBox()).toEqual(initialEmail);
   expect(await statusRegion.boundingBox()).toEqual(initialStatus);
 
-  await page.getByRole("button", { name: "Verify email" }).click();
+  await page.getByTestId("auth-submit").click();
   await expect(statusRegion).toContainText("Please try again.");
   expect(await card.boundingBox()).toEqual(initialCard);
   expect(await email.boundingBox()).toEqual(initialEmail);

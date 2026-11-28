@@ -97,6 +97,10 @@ export const companyGovernanceRoutes = {
   branding: "/company-governance/branding",
   inspectInvite: (token: string) => `/company-governance/invitations/${token}`,
   acceptInvite: (token: string) => `/company-governance/invitations/${token}/accept`,
+  myMembershipRequest: "/company-governance/membership-request/mine",
+  cancelMembershipRequest: (id: string) => `/company-governance/membership-request/mine/${id}`,
+  membershipRequests: "/company-governance/membership-requests",
+  reviewMembershipRequest: (id: string) => `/company-governance/membership-requests/${id}`,
 };
 
 // Helper function to generate standard CRUD routes
@@ -505,6 +509,8 @@ export const approvalRoutes = {
   companyAction: "/approvals/companies",
   operatorsList: "/approvals/operators",
   operatorAction: "/approvals/operators",
+  companyMembershipsList: "/approvals/company-memberships",
+  companyMembershipAction: (id: string) => `/approvals/company-memberships/${id}`,
   catalogList: (entityType: string) => `/approvals/catalog/${entityType}`,
   catalogAction: (entityType: string, id: string) => `/approvals/catalog/${entityType}/${id}`,
   catalogEdit: (entityType: string, id: string) => `/approvals/catalog/${entityType}/${id}/edit`,

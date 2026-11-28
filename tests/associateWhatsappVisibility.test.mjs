@@ -13,11 +13,13 @@ test("associate WhatsApp integration is dormant by default", () => {
   assert.match(access, /settings\/whatsapp[\s\S]*roles: featureFlags\.associateWhatsappIntegration \? \["admin", "associate"\] : \["admin"\]/);
 });
 
-test("signup and profile use email-only verification while WhatsApp auth is dormant", () => {
+test("email-first authentication and profile use email-only verification while WhatsApp auth is dormant", () => {
   const auth = read("src/components/Auth/UnifiedAuthFlow.tsx");
   const profile = read("src/app/dashboard/profile/page.tsx");
   assert.doesNotMatch(auth, /WhatsApp mobile number/);
-  assert.match(auth, /: "Verify email"/);
+  assert.match(auth, /type="email"/);
+  assert.match(auth, /\/auth\/identify/);
+  assert.match(auth, /A verification code has been sent to your email/);
   assert.doesNotMatch(auth, /sendLoginOtp\("whatsapp"\)/);
   assert.match(profile, /Number\(emailVerified\) \* 100/);
   assert.match(profile, /featureFlags\.associateWhatsappIntegration/);

@@ -119,6 +119,7 @@ export default function CompanyWorkspacePage() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [removeLogo, setRemoveLogo] = useState(false);
   const [removeBanner, setRemoveBanner] = useState(false);
+  const [requestedCompanyId, setRequestedCompanyId] = useState("");
 
   const companyQuery = useQuery({
     queryKey: ["company-workspace-company", associateCompanyId],
@@ -136,6 +137,40 @@ export default function CompanyWorkspacePage() {
       return response?.data?.data || { members: [], invitations: [] };
     },
     enabled: isAssociate && Boolean(associateCompanyId),
+  });
+
+  const myMembershipRequestQuery = useQuery({
+    queryKey: ["my-company-membership-request", user?.id],
+    queryFn: async () => (await getData(apiRoutes.companyGovernance.myMembershipRequest))?.data?.data || null,
+    enabled: isAssociate,
+  });
+  const requestableCompaniesQuery = useQuery({
+    queryKey: ["requestable-companies"],
+    queryFn: async () => extractList((await getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 500, registrationStatus: "APPROVED", sort: "name:asc" }))?.data),
+    enabled: isAssociate && !associateCompanyId,
+  });
+
+  const membershipRequestsQuery = useQuery({
+    queryKey: ["company-membership-requests", associateCompanyId],
+    queryFn: async () => (await getData(apiRoutes.companyGovernance.membershipRequests, { status: "PENDING" }))?.data?.data || [],
+    enabled: isAssociate && Boolean(associateCompanyId) && Boolean(user?.companyPermissions?.includes("company:members")),
+  });
+
+  const reviewMembershipMutation = useMutation({
+    mutationFn: ({ id, action }: { id: string; action: "APPROVE" | "REJECT" }) => patchData(apiRoutes.companyGovernance.reviewMembershipRequest(id), { action }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["company-membership-requests"] }); refreshGovernance(); showToastMessage({ type: "success", message: "Membership request reviewed." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not review membership request." }),
+  });
+
+  const cancelMembershipMutation = useMutation({
+    mutationFn: (id: string) => deleteData(apiRoutes.companyGovernance.cancelMembershipRequest(id)),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["my-company-membership-request"] }); showToastMessage({ type: "success", message: "Company request cancelled." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not cancel company request." }),
+  });
+  const createMembershipMutation = useMutation({
+    mutationFn: () => postData(apiRoutes.companyGovernance.myMembershipRequest, { companyId: requestedCompanyId }),
+    onSuccess: () => { setRequestedCompanyId(""); queryClient.invalidateQueries({ queryKey: ["my-company-membership-request"] }); showToastMessage({ type: "success", message: "Company allocation requested." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not request company allocation." }),
   });
 
   const refreshGovernance = () => {
@@ -660,10 +695,19 @@ export default function CompanyWorkspacePage() {
   }
 
   if (isAssociate && !associateCompanyId && !canViewObaolConfig) {
+    const request = myMembershipRequestQuery.data;
     return (
-      <div className="w-full p-6">
-        <div className="rounded-xl border border-default-200 bg-content1 p-6 text-default-700">
-          No company is linked to your associate account yet.
+      <div className="w-full p-6 md:p-10">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-default-200 bg-content1 p-6 md:p-8">
+          <h1 className="text-2xl font-black">Company allocation</h1>
+          {myMembershipRequestQuery.isLoading ? <div className="py-8 text-center"><Spinner /></div> : request ? <div className="mt-5 space-y-4">
+            <div className="rounded-xl bg-default-100 p-4"><p className="text-sm text-default-500">Requested company</p><p className="mt-1 text-lg font-bold">{request.companyId?.name || "Selected company"}</p></div>
+            <div className="flex flex-wrap items-center gap-3"><Chip color={request.status === "APPROVED" || request.status === "ALLOCATED" ? "success" : request.status === "REJECTED" || request.status === "CANCELLED" ? "danger" : "warning"} variant="flat">{request.status}</Chip><span className="text-sm text-default-500">Requested {formatDate(request.createdAt)}</span></div>
+            <p className="text-sm text-default-600">You can use general Associate features after account approval. Company data and actions remain unavailable until a Supervisor, Manager, or OBAOL Admin approves this allocation.</p>
+            {request.reviewNotes ? <p className="rounded-xl border border-default-200 p-3 text-sm"><b>Review note:</b> {request.reviewNotes}</p> : null}
+            {request.status === "PENDING" ? <Button color="danger" variant="flat" isLoading={cancelMembershipMutation.isPending} onPress={() => cancelMembershipMutation.mutate(request._id)}>Cancel request</Button> : null}
+          </div> : <p className="mt-4 text-default-600">No company is linked to your associate account. You can continue using general Associate features.</p>}
+          {!request || ["REJECTED", "CANCELLED"].includes(request.status) ? <div className="mt-6 border-t border-default-200 pt-5"><h2 className="font-bold">Request another company</h2><div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end"><Select className="flex-1" label="Approved company" placeholder="Choose a company" selectedKeys={requestedCompanyId ? [requestedCompanyId] : []} onSelectionChange={(keys) => setRequestedCompanyId(String(Array.from(keys)[0] || ""))} isLoading={requestableCompaniesQuery.isLoading}>{(requestableCompaniesQuery.data || []).map((company: any) => <SelectItem key={String(company._id)}>{company.name}</SelectItem>)}</Select><Button color="warning" isDisabled={!requestedCompanyId} isLoading={createMembershipMutation.isPending} onPress={() => createMembershipMutation.mutate()}>Request allocation</Button></div></div> : null}
         </div>
       </div>
     );
@@ -1111,6 +1155,7 @@ export default function CompanyWorkspacePage() {
           </div>
         )}
         {pendingInvitations.length ? <div className="mt-6 border-t border-default-200 pt-4"><h3 className="font-semibold">Pending invitations</h3><div className="mt-3 space-y-2">{pendingInvitations.map((invite: any) => <div key={invite._id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-default-100 p-3 text-sm"><div><b>{invite.email}</b><span className="ml-2 text-default-500">{invite.intendedRole} · expires {formatDate(invite.expiresAt)}</span></div>{canManageMembers ? <Button size="sm" color="danger" variant="light" isLoading={cancelInviteMutation.isPending} onPress={() => cancelInviteMutation.mutate(invite._id)}>Cancel</Button> : null}</div>)}</div></div> : null}
+        {canManageMembers ? <div className="mt-6 border-t border-default-200 pt-4"><h3 className="font-semibold">Membership requests</h3>{membershipRequestsQuery.isLoading ? <div className="py-5 text-center"><Spinner size="sm" /></div> : !(membershipRequestsQuery.data || []).length ? <p className="mt-2 text-sm text-default-500">No pending requests.</p> : <div className="mt-3 space-y-2">{(membershipRequestsQuery.data || []).map((request: any) => <div key={request._id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-default-100 p-3"><div><b>{request.requesterId?.name || "Associate"}</b><p className="text-sm text-default-500">{request.requesterId?.email} · requested {formatDate(request.createdAt)}</p></div><div className="flex gap-2"><Button size="sm" color="success" isLoading={reviewMembershipMutation.isPending} onPress={() => reviewMembershipMutation.mutate({ id: request._id, action: "APPROVE" })}>Approve as Staff</Button><Button size="sm" color="danger" variant="flat" isLoading={reviewMembershipMutation.isPending} onPress={() => reviewMembershipMutation.mutate({ id: request._id, action: "REJECT" })}>Reject</Button></div></div>)}</div>}</div> : null}
       </div>
 
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">

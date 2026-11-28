@@ -538,13 +538,27 @@ function OnboardingApprovalQueue() {
   );
 }
 
-type Workflow = "onboarding" | "capabilities" | "labs" | "catalog" | "services";
+function CompanyMembershipApprovalQueue() {
+  const client = useQueryClient();
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const query = useQuery({ queryKey: ["admin-company-memberships", "PENDING"], queryFn: async () => (await getData(apiRoutes.approvals.companyMembershipsList, { status: "PENDING" }))?.data?.data || [] });
+  const review = useMutation({
+    mutationFn: ({ id, action }: { id: string; action: "APPROVE" | "REJECT" }) => patchData(apiRoutes.approvals.companyMembershipAction(id), { action, notes: notes[id] || "" }),
+    onSuccess: () => { client.invalidateQueries({ queryKey: ["admin-company-memberships"] }); client.invalidateQueries({ queryKey: ["approval-summary", "memberships"] }); showToastMessage({ type: "success", message: "Company allocation request reviewed." }); },
+    onError: (error: any) => showToastMessage({ type: "error", message: error?.response?.data?.message || "Could not review company allocation." }),
+  });
+  if (query.isLoading) return <div className="grid min-h-40 place-items-center"><Spinner color="warning" /></div>;
+  if (!(query.data || []).length) return <div className="p-10 text-center text-default-500">No pending company allocation requests.</div>;
+  return <div className="space-y-4">{query.data.map((row: any) => <div key={row._id} className="rounded-2xl border border-default-200 p-5"><div className="flex flex-col justify-between gap-4 md:flex-row"><div><p className="text-lg font-black">{row.requesterId?.name || "Associate"}</p><p className="text-sm text-default-500">{row.requesterId?.email} → <b>{row.companyId?.name || "Company"}</b></p><p className="mt-1 text-xs text-default-400">Account: {row.requesterId?.registrationStatus || "PENDING_REVIEW"} · Requested {formatDate(row.createdAt)}</p></div><Chip color="warning" variant="flat">STAFF requested</Chip></div><Textarea className="mt-4" label="Review notes (optional)" value={notes[row._id] || ""} onValueChange={(value) => setNotes((current) => ({ ...current, [row._id]: value }))} /><div className="mt-4 flex justify-end gap-2"><Button color="danger" variant="flat" isLoading={review.isPending} onPress={() => review.mutate({ id: row._id, action: "REJECT" })}>Reject</Button><Button color="success" isLoading={review.isPending} onPress={() => review.mutate({ id: row._id, action: "APPROVE" })}>Approve as Staff</Button></div></div>)}</div>;
+}
+
+type Workflow = "onboarding" | "memberships" | "capabilities" | "labs" | "catalog" | "services";
 
 export default function ApprovalsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const requested = String(searchParams.get("workflow") || "onboarding") as Workflow;
-  const workflow: Workflow = ["onboarding", "capabilities", "labs", "catalog", "services"].includes(requested) ? requested : "onboarding";
+  const workflow: Workflow = ["onboarding", "memberships", "capabilities", "labs", "catalog", "services"].includes(requested) ? requested : "onboarding";
   useEffect(() => { patchData(apiRoutes.notifications.markSectionRead("approvals"), {}).catch(() => undefined); }, []);
   const onboardingCounts = [
     useQuery(approvalCountOptions("associates", apiRoutes.approvals.associatesList)),
@@ -553,6 +567,7 @@ export default function ApprovalsPage() {
   ];
   const count = (route: string, params?: Record<string, any>) => async () => { const response = await getData(route, { ...params, limit: 1 }); return Number(response?.data?.meta?.total ?? response?.data?.data?.length ?? 0); };
   const capabilityCount = useQuery({ queryKey: ["approval-summary", "capabilities"], queryFn: count(apiRoutes.companyCapabilityChangeRequests.list, { status: "PENDING_REVIEW" }), staleTime: 30000 });
+  const membershipCount = useQuery({ queryKey: ["approval-summary", "memberships"], queryFn: count(apiRoutes.approvals.companyMembershipsList, { status: "PENDING" }), staleTime: 30000 });
   const labCount = useQuery({ queryKey: ["approval-summary", "labs"], queryFn: async () => {
     const [profiles, taxonomy] = await Promise.all([getData(apiRoutes.labProfiles.approvals, { status: "PENDING_REVIEW" }), getData(apiRoutes.labProfiles.taxonomyAdmin, { status: "REQUESTED" })]);
     return (profiles?.data?.data?.length || 0) + (taxonomy?.data?.data?.length || 0);
@@ -572,6 +587,7 @@ export default function ApprovalsPage() {
   const onboardingTotal = onboardingCounts.reduce((sum, item) => sum + Number(item.data || 0), 0);
   const items: Array<{ key: Workflow; title: string; description: string; count: number; icon: any }> = [
     { key: "onboarding", title: "Onboarding", description: "Registration and entity authorization", count: onboardingTotal, icon: LuUserCheck },
+    { key: "memberships", title: "Company Allocation", description: "Approve requested company memberships", count: Number(membershipCount.data || 0), icon: LuBuilding2 },
     { key: "capabilities", title: "Company Capabilities", description: "Provided and sought category changes", count: Number(capabilityCount.data || 0), icon: LuSparkles },
     { key: "labs", title: "Lab & Taxonomy", description: "Lab profiles, credentials, and taxonomy", count: Number(labCount.data || 0), icon: LuFlaskConical },
     { key: "catalog", title: "Catalog", description: "Category, product, and variant publication reviews", count: Number(catalogCount.data || 0), icon: LuLayers3 },
@@ -584,9 +600,9 @@ export default function ApprovalsPage() {
       <h1 className="mt-2 text-3xl font-black text-foreground">Approvals</h1>
       <p className="mt-2 max-w-3xl text-sm text-default-500">Review registration, capability, laboratory, catalog, packaging, finance, insurance, freight, and agritech publication requests.</p>
     </header>
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{items.map((item) => { const Icon = item.icon; const active = workflow === item.key; return <button key={item.key} type="button" onClick={() => router.replace(`/dashboard/approvals?workflow=${item.key}`)} className={`rounded-2xl border p-4 text-left transition ${active ? "border-warning-500 bg-warning-50 shadow-sm dark:bg-warning-900/10" : "border-default-200 bg-content1 hover:border-warning-300"}`}><div className="flex items-start justify-between gap-3"><span className={`rounded-xl p-2 ${active ? "bg-warning-500 text-white" : "bg-default-100 text-default-600"}`}><Icon size={20} /></span><Chip size="sm" color={item.count ? "warning" : "default"} variant="flat">{item.count} pending</Chip></div><h2 className="mt-4 font-bold">{item.title}</h2><p className="mt-1 text-xs text-default-500">{item.description}</p></button>; })}</div>
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">{items.map((item) => { const Icon = item.icon; const active = workflow === item.key; return <button key={item.key} type="button" onClick={() => router.replace(`/dashboard/approvals?workflow=${item.key}`)} className={`rounded-2xl border p-4 text-left transition ${active ? "border-warning-500 bg-warning-50 shadow-sm dark:bg-warning-900/10" : "border-default-200 bg-content1 hover:border-warning-300"}`}><div className="flex items-start justify-between gap-3"><span className={`rounded-xl p-2 ${active ? "bg-warning-500 text-white" : "bg-default-100 text-default-600"}`}><Icon size={20} /></span><Chip size="sm" color={item.count ? "warning" : "default"} variant="flat">{item.count} pending</Chip></div><h2 className="mt-4 font-bold">{item.title}</h2><p className="mt-1 text-xs text-default-500">{item.description}</p></button>; })}</div>
     <section className="rounded-3xl border border-default-200 bg-content1/70 p-4 md:p-6">
-      {workflow === "onboarding" ? <OnboardingApprovalQueue /> : workflow === "capabilities" ? <CompanyCapabilityApprovalQueue /> : workflow === "labs" ? <LabApprovalQueues /> : workflow === "services" ? <ServiceProfileApprovalQueues /> : <CatalogServiceApprovalQueues />}
+      {workflow === "onboarding" ? <OnboardingApprovalQueue /> : workflow === "memberships" ? <CompanyMembershipApprovalQueue /> : workflow === "capabilities" ? <CompanyCapabilityApprovalQueue /> : workflow === "labs" ? <LabApprovalQueues /> : workflow === "services" ? <ServiceProfileApprovalQueues /> : <CatalogServiceApprovalQueues />}
     </section>
   </main>;
 }

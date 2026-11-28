@@ -186,6 +186,13 @@ export default function EditModal({
       if (f.type === "multiselect" && Array.isArray(val)) {
         clone[f.key] = val.map((x: any) => x._id || x);
       }
+      const isWebsite =
+        f.type === "url" ||
+        f.type === "link" ||
+        (/website/i.test(f.key) && ["text", "url", "link", ""].includes(String(f.type || "").toLowerCase()));
+      if (isWebsite && !val) {
+        clone[f.key] = "https://";
+      }
     });
 
     setFormData(clone);
@@ -332,6 +339,16 @@ export default function EditModal({
     formFields.forEach((field) => {
       if (field.showWhen && !isFieldVisible(field, basePayload)) {
         delete payload[field.key];
+      }
+      const isWebsite =
+        field.type === "url" ||
+        field.type === "link" ||
+        (/website/i.test(field.key) && ["text", "url", "link", ""].includes(String(field.type || "").toLowerCase()));
+      if (isWebsite && payload[field.key] !== undefined) {
+        const trimmed = String(payload[field.key] || "").trim();
+        if (trimmed === "https://" || trimmed === "http://" || trimmed === "https:" || trimmed === "http:") {
+          payload[field.key] = "";
+        }
       }
     });
     mutation.mutate(payload);
@@ -489,6 +506,11 @@ export default function EditModal({
       f.type === "phone" ||
       (/phone/i.test(f.key) && ["number", "text", "tel", "phone"].includes(String(f.type || "").toLowerCase()));
 
+    const isWebsiteLikeField =
+      f.type === "url" ||
+      f.type === "link" ||
+      (/website/i.test(f.key) && ["text", "url", "link", ""].includes(String(f.type || "").toLowerCase()));
+
     if (isPhoneLikeField) {
       const countryCodeKey = `${f.key}CountryCode`;
       const nationalKey = `${f.key}National`;
@@ -514,6 +536,24 @@ export default function EditModal({
               [nationalKey]: next.national,
             }))
           }
+        />
+      );
+    }
+
+    if (isWebsiteLikeField) {
+      const currentValue = formData[f.key] !== undefined ? formData[f.key] : "https://";
+      return (
+        <Input
+          name={f.key}
+          type="url"
+          label={f.label}
+          placeholder="https://"
+          value={currentValue}
+          onChange={(e) => {
+            const val = e.target.value;
+            setFormData((prev) => ({ ...prev, [f.key]: val }));
+          }}
+          isDisabled={disabled}
         />
       );
     }

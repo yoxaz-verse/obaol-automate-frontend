@@ -1,6 +1,6 @@
 "use client";
 
-import { LuUser, LuPlus, LuLayoutDashboard, LuUsers, LuBuilding, LuActivity, LuCheck, LuChevronUp, LuChevronDown, LuMapPin, LuMail, LuPhone, LuPackage, LuClipboardList, LuArrowUpRight } from "react-icons/lu";
+import { LuUser, LuPlus, LuLayoutDashboard, LuUsers, LuBuilding, LuActivity, LuCheck, LuChevronUp, LuChevronDown, LuMapPin, LuMail, LuPhone, LuGlobe, LuPackage, LuClipboardList, LuArrowUpRight } from "react-icons/lu";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -950,6 +950,13 @@ export default function CompanyWorkspacePage() {
                   <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-default-500">
                     <span className="inline-flex items-center gap-1.5"><LuMail />{company?.email || "Email not added"}</span>
                     <span className="inline-flex items-center gap-1.5"><LuPhone />{company?.phone || "Phone not added"}</span>
+                    {company?.website ? (
+                      <a href={company.website.startsWith("http") ? company.website : `https://${company.website}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-obaol-600 hover:underline">
+                        <LuGlobe />{company.website}
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5"><LuGlobe />Website not added</span>
+                    )}
                     <span className="inline-flex items-center gap-1.5"><LuMapPin />{company?.address || company?.location?.label || "Location not added"}</span>
                     <span className="inline-flex items-center gap-1.5"><LuBuilding />Verified company profile</span>
                     <span>Joined {formatDate(company?.createdAt)}</span>

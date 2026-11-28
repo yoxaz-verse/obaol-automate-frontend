@@ -308,6 +308,15 @@ const AddForm: React.FC<AddFormProps> = ({
           return;
         }
       }
+      formFields.forEach((field) => {
+        if (isWebsiteLikeField(field) && uploadFormData[field.key] !== undefined) {
+          const raw = uploadFormData[field.key];
+          const trimmed = String(raw || "").trim();
+          if (trimmed === "https://" || trimmed === "http://" || trimmed === "https:" || trimmed === "http:") {
+            uploadFormData[field.key] = "";
+          }
+        }
+      });
       // Proceed with form submission
       addItem.mutate(uploadFormData);
     } catch (error: unknown) {
@@ -402,7 +411,10 @@ const AddForm: React.FC<AddFormProps> = ({
   ): string[] => {
     const missing: string[] = [];
     fields.forEach((field) => {
-      if (field.required && (!data[field.key] || data[field.key] === "")) {
+      const val = data[field.key];
+      const isWebsite = isWebsiteLikeField(field);
+      const isWebsiteEmpty = isWebsite && (!val || val === "https://" || val === "http://");
+      if (field.required && (!val || val === "" || isWebsiteEmpty)) {
         missing.push(field.label || field.key); // Add missing field's label
       }
     });
@@ -582,6 +594,11 @@ const AddForm: React.FC<AddFormProps> = ({
     field.type === "phone" ||
     (/phone/i.test(field.key) && ["number", "text", "tel", "phone"].includes(String(field.type || "").toLowerCase()));
 
+  const isWebsiteLikeField = (field: FormField) =>
+    field.type === "url" ||
+    field.type === "link" ||
+    (/website/i.test(field.key) && ["text", "url", "link", ""].includes(String(field.type || "").toLowerCase()));
+
   const getPhoneMetaKeys = (baseKey: string) => ({
     countryCodeKey: `${baseKey}CountryCode`,
     nationalKey: `${baseKey}National`,
@@ -610,6 +627,25 @@ const AddForm: React.FC<AddFormProps> = ({
               [countryCodeKey]: next.countryCode,
               [nationalKey]: next.national,
             }));
+          }}
+        />
+      );
+    }
+
+    if (isWebsiteLikeField(field)) {
+      const currentValue = formData[field.key] !== undefined ? formData[field.key] : "https://";
+      return (
+        <Input
+          aria-label={`Enter ${field.label}`}
+          name={field.key}
+          type="url"
+          label={field.label}
+          placeholder="https://"
+          className="w-full"
+          value={currentValue}
+          onChange={(e) => {
+            const val = e.target.value;
+            setFormData((prev) => ({ ...prev, [field.key]: val }));
           }}
         />
       );

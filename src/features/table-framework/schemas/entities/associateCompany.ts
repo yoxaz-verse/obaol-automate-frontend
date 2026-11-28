@@ -56,6 +56,15 @@ export const associateCompanySchema = [
       required: true,
     },
     {
+      label: "Website",
+      type: "link",
+      key: "website",
+      filterType: "text",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
       label: "Jurisdiction",
       type: "select",
       filterType: "select",

@@ -20,7 +20,7 @@ test("entity schema sources preserve the reviewed registry snapshot", () => {
   const files = fs.readdirSync(directory).filter((name) => name.endsWith(".ts")).sort();
   assert.deepEqual(files, entityNames.map((name) => `${name}.ts`).sort());
   const snapshot = files.map((name) => `${name}\n${fs.readFileSync(path.join(directory, name), "utf8")}`).join("\n");
-  assert.equal(crypto.createHash("sha256").update(snapshot).digest("hex"), "ed15c98acd53005ef11fd280cda528911c74ebf80a52e75c3477811143985e5b");
+  assert.equal(crypto.createHash("sha256").update(snapshot).digest("hex"), "8bd779240395d52cb6e1fca8f4bf04edcca858f7e0cb8b04e84f57fd1b59d6d5");
   for (const file of files) {
     const source = fs.readFileSync(path.join(directory, file), "utf8");
     assert.match(source, /satisfies TableSchema;/, `${file} must retain typed schema validation`);

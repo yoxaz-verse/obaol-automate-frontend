@@ -1427,8 +1427,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  className="grid grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-2"
                 >
+                  <div className="onboarding-section-heading md:col-span-2">
+                    <span>01</span>
+                    <div><h3>Identity</h3><p>Confirm the account holder and locked login email.</p></div>
+                  </div>
                   <Input
                     type="text"
                     label="Full Name"
@@ -1444,7 +1448,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     startContent={<IoPerson className="text-default-400" />}
                     classNames={{ inputWrapper: "rounded-xl border-default-200" }}
                   />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1">
                     <Input
                       type="email"
                       label="Email Address"
@@ -1470,13 +1474,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                         description: "text-xs leading-5 text-default-500",
                       }}
                     />
-                    {errors.email && (
-                      <span className="text-xs font-semibold text-danger-500 pl-1">
-                        {errors.email}
-                      </span>
-                    )}
                   </div>
-                  <div className="md:col-span-2">
+                  <div className="onboarding-section-heading mt-2 md:col-span-2">
+                    <span>02</span>
+                    <div><h3>Contact details</h3><p>Add the numbers your company can use to reach you.</p></div>
+                  </div>
+                  <div>
                     <div data-onboarding-phone-label className="mb-1.5 px-1">
                       Primary Phone Number<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
                     </div>
@@ -1498,7 +1501,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     </div>
                     {errors.phone ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phone}</p> : null}
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
                     <div data-onboarding-phone-label className="mb-1.5 px-1">
                       Secondary Phone (Optional)
                     </div>
@@ -1520,7 +1523,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     {errors.phoneSecondary ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phoneSecondary}</p> : null}
                   </div>
                   {requiresPassword && (
-                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div className="contents">
+                      <div className="onboarding-section-heading mt-2 md:col-span-2">
+                        <span>03</span>
+                        <div><h3>Account security</h3><p>Create a strong password for future sign-ins.</p></div>
+                      </div>
                       <div>
                         <Input
                           type={showPassword ? "text" : "password"}
@@ -1575,7 +1582,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     </div>
                   )}
 
-                  <div className="md:col-span-2 pt-2">
+                  <div className="onboarding-section-heading mt-2 md:col-span-2">
+                    <span>{requiresPassword ? "04" : "03"}</span>
+                    <div><h3>Final details</h3><p>Add an optional referral and accept the platform terms.</p></div>
+                  </div>
+
+                  <div className="md:col-span-2">
                     <ReferralCodeField value={formData.referralCode} onChange={(value) => setField("referralCode", value)} label="Referral code" />
                   </div>
 

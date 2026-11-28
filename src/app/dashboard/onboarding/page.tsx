@@ -13,7 +13,7 @@ export default function DashboardOnboardingPage() {
   if (loading) return null;
 
   return (
-    <div className="w-full max-w-[1280px] mx-auto">
+    <div className="w-full max-w-[1360px] mx-auto pb-10">
       {isAssociate ? (
         <AssociateOnboardingForm mode="onboarding" />
       ) : isOperator ? (

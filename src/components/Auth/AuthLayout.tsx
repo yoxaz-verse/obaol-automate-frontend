@@ -169,16 +169,17 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
         return (
             <div data-auth-embedded className="w-full text-foreground">
                 {topContent && <div className="mb-4">{topContent}</div>}
-                <div className={leftPanel ? "mx-auto grid w-full max-w-[1120px] items-start gap-4 lg:grid-cols-[240px_minmax(0,1fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
+                <div className={leftPanel ? "onboarding-embedded-grid mx-auto grid w-full items-start" : `w-full ${cardMaxWidthClass} mx-auto`}>
                     {leftPanel && (
-                        <div className="order-2 hidden rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-brand-blue lg:sticky lg:top-4 lg:order-1 lg:block">
+                        <aside className="onboarding-guidance-panel order-2 hidden lg:sticky lg:order-1 lg:block">
                             <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact />
-                        </div>
+                        </aside>
                     )}
-                    <div data-auth-form-card className={`min-w-0 rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-content1 sm:p-6 ${leftPanel ? "order-1 lg:order-2" : ""}`}>
+                    <main data-auth-form-card className={`onboarding-workspace-card min-w-0 ${leftPanel ? "order-1 lg:order-2" : ""}`}>
                         {onboarding && leftPanel && <MobileOnboardingGuidance leftPanel={leftPanel} />}
-                        <div className="mb-6 flex flex-col text-left sm:mb-7">
-                            <h2 className="mb-1 text-2xl font-bold tracking-tight text-brand-abyssal dark:text-foreground sm:text-3xl">
+                        <div className="onboarding-workspace-header flex flex-col text-left">
+                            <span className="onboarding-workspace-eyebrow">Account setup</span>
+                            <h2 className="text-2xl font-bold tracking-tight text-brand-abyssal dark:text-foreground sm:text-[1.75rem]">
                                 {title}
                             </h2>
                             {subtitle && (
@@ -190,7 +191,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                         <div className="space-y-4">
                             {children}
                         </div>
-                    </div>
+                    </main>
                 </div>
             </div>
         );

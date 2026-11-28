@@ -1278,6 +1278,33 @@ html {
 
 .dark .onboarding-section-card { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.025); }
 
+.onboarding-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+}
+
+.onboarding-section-heading:first-child { border-top: 0; padding-top: 0; }
+.onboarding-section-heading > span {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
+  place-items: center;
+  border-radius: .55rem;
+  background: rgba(210, 118, 48, .12);
+  color: var(--brand-truffle);
+  font-size: .6875rem;
+  font-weight: 800;
+}
+.onboarding-section-heading h3 { color: #1e293b; font-size: .9375rem; font-weight: 750; line-height: 1.2rem; }
+.onboarding-section-heading p { margin-top: .15rem; color: #64748b; font-size: .75rem; line-height: 1.1rem; }
+.dark .onboarding-section-heading { border-color: rgba(255,255,255,.1); }
+.dark .onboarding-section-heading h3 { color: #f1f5f9; }
+.dark .onboarding-section-heading p { color: #94a3b8; }
+
 .onboarding-intro-card {
   border: 1px solid #e2e8f0;
   border-left: 3px solid var(--brand-flame);
@@ -1323,6 +1350,43 @@ html {
 .onboarding-mobile-guidance[open] summary svg { transform: rotate(180deg); }
 .onboarding-mobile-guidance > p, .onboarding-mobile-guidance > ul { margin: 0; padding: 0 .75rem .75rem; font-size: .8125rem; line-height: 1.3rem; }
 .onboarding-mobile-guidance ul { display: grid; gap: .5rem; padding-left: 1.75rem; }
+
+.onboarding-embedded-grid {
+  max-width: 74rem;
+  gap: 1rem;
+}
+
+.onboarding-guidance-panel {
+  top: 1rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: linear-gradient(155deg, rgba(255,255,255,.98), rgba(248,250,252,.92));
+  padding: 1.25rem;
+  box-shadow: 0 12px 35px rgba(15,23,42,.05);
+}
+
+.dark .onboarding-guidance-panel {
+  border-color: rgba(255,255,255,.1);
+  background: linear-gradient(155deg, rgba(31,45,61,.98), rgba(20,31,44,.96));
+}
+
+.onboarding-workspace-card {
+  width: 100%;
+  max-width: 55rem;
+  margin-inline: auto;
+  border: 1px solid #dce3ec;
+  border-radius: 1rem;
+  background: rgba(255,255,255,.98);
+  padding: 1.25rem;
+  box-shadow: 0 16px 42px rgba(15,23,42,.055);
+}
+
+.dark .onboarding-workspace-card { border-color: rgba(255,255,255,.1); background: hsl(var(--nextui-content1)); }
+.onboarding-workspace-header { margin-bottom: 1.1rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
+.dark .onboarding-workspace-header { border-color: rgba(255,255,255,.1); }
+.onboarding-workspace-header p { margin-top: .25rem; line-height: 1.35rem; }
+.onboarding-workspace-eyebrow { margin-bottom: .3rem; color: var(--brand-truffle); font-size: .6875rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 
 .onboarding-capability-note,
 .onboarding-review-notice {
@@ -1374,7 +1438,16 @@ html {
 .dark .operator-review-grid dt { color: #94a3b8; }
 .dark .operator-review-grid dd { color: #e2e8f0; }
 
-[data-auth-embedded] [data-auth-form-card] { max-width: 54rem; width: 100%; }
+[data-auth-embedded] [data-auth-form-card] { width: 100%; }
+
+@media (min-width: 640px) {
+  .onboarding-workspace-card { padding: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+  .onboarding-embedded-grid { grid-template-columns: 13.5rem minmax(0, 1fr); }
+  .onboarding-mobile-guidance { display: none; }
+}
 
 @media (max-width: 639px) {
   .onboarding-form { --onboarding-control-height: 3rem; }
@@ -1388,6 +1461,9 @@ html {
   .onboarding-referral { align-items: stretch; flex-direction: column; }
   .onboarding-referral__field { width: 100%; flex-basis: auto; }
   .onboarding-section-card { padding: .875rem; }
+  .onboarding-workspace-card { border-radius: .875rem; padding: 1rem; box-shadow: none; }
+  .onboarding-workspace-header { margin-bottom: .9rem; }
+  .onboarding-section-heading { padding-top: .875rem; }
   .operator-review-grid { grid-template-columns: 1fr; gap: .875rem; }
   .operator-review-grid .sm\:col-span-2 { grid-column: auto; }
   [data-onboarding-actions] {

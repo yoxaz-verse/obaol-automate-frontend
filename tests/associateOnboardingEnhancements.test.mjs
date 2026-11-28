@@ -169,6 +169,25 @@ test("onboarding uses concise step purposes and optional contextual guidance", (
   assert.equal(operator.includes("Why this process matters"), false);
 });
 
+test("onboarding uses the compact shared workspace and grouped Associate profile fields", () => {
+  const associate = read("../src/components/onboarding/AssociateOnboardingForm.tsx");
+  const layout = read("../src/components/Auth/AuthLayout.tsx");
+  const shared = read("../src/components/onboarding/OnboardingUI.tsx");
+  const styles = read("../src/app/globals.css");
+
+  for (const token of ["onboarding-embedded-grid", "onboarding-guidance-panel", "onboarding-workspace-card", "onboarding-workspace-header"]) {
+    assert.equal(layout.includes(token), true, `missing compact shell token: ${token}`);
+    assert.equal(styles.includes(`.${token}`), true, `missing compact shell style: ${token}`);
+  }
+  for (const section of ["Identity", "Contact details", "Account security", "Final details"]) {
+    assert.equal(associate.includes(`<h3>${section}</h3>`), true, `missing Associate section: ${section}`);
+  }
+  assert.equal(associate.includes('className="grid grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-2"'), true);
+  assert.equal(shared.includes('role="progressbar"'), true);
+  assert.equal(styles.includes("@media (min-width: 1024px)"), true);
+  assert.equal(styles.includes(".onboarding-mobile-guidance { display: none; }"), true);
+});
+
 test("operator onboarding uses a four-stage task-oriented flow with review", () => {
   const operator = read("../src/components/onboarding/OperatorOnboardingForm.tsx");
   const styles = read("../src/app/globals.css");

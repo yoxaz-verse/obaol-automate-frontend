@@ -31,7 +31,7 @@ export function OnboardingProgress({
         <span>Step {currentStep} of {labels.length}</span>
         <strong>{labels[currentStep - 1]}</strong>
       </div>
-      <div className="onboarding-progress__track" aria-hidden="true">
+      <div className="onboarding-progress__track" role="progressbar" aria-label="Onboarding completion" aria-valuemin={1} aria-valuemax={labels.length} aria-valuenow={currentStep}>
         <span style={{ width: `${progress}%` }} />
       </div>
       <ol className="onboarding-progress__steps">
